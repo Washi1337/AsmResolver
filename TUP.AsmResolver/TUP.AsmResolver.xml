@@ -1,0 +1,2904 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TUP.AsmResolver</name>
+    </assembly>
+    <members>
+        <member name="T:TUP.AsmResolver.ASM.x86Assembler">
+            <summary>
+            A class that is able to edit 32-bit assembly instructions to a <see cref="T:TUP.AsmResolver.Win32Assembly"/>.  UNDER CONSTRUCTION
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Assembler.Replace(TUP.AsmResolver.ASM.x86Instruction,TUP.AsmResolver.ASM.x86Instruction)">
+            <summary>
+            Replaces an instruction with a new instruction.
+            </summary>
+            <param name="targetInstruction">The instruction to replace.</param>
+            <param name="newInstruction">The new instruction.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Assembler.Replace(TUP.AsmResolver.ASM.x86Instruction,TUP.AsmResolver.ASM.x86Instruction,System.Boolean)">
+            <summary>
+            Replaces an instruction with a new instruction.
+            </summary>
+            <param name="targetInstruction">The instruction to replace.</param>
+            <param name="newInstruction">The new instruction.</param>
+            <param name="overwriteWhenLarger">A boolean indicating whenever the new instruction is larger, it should overwrite the following instructions.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Assembler.CalculateSpaceNeeded(TUP.AsmResolver.ASM.x86Instruction,TUP.AsmResolver.ASM.x86Instruction)">
+            <summary>
+            Calculates and returns the size in bytes needed when replacing an instruction.
+            </summary>
+            <param name="targetInstruction">The instruction to be replaced.</param>
+            <param name="newInstruction">The new instruction.</param>
+            <returns></returns>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.x86Disassembler">
+            <summary>
+            Disassembler for Win32 Assemblies. Pre-Pre-Pre Alpha version :D. UNDER CONSTRUCTION
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Disassembler.#ctor(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Creates a new instance of a disassembler.
+            </summary>
+            <param name="assembly">The assembly to be disassembled.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Disassembler.Disassemble(System.Int64,System.Int64)">
+            <summary>
+            Disassembles bytes to a collection of assembly instructions.
+            </summary>
+            <param name="rawStartOffset">The starting offset</param>
+            <param name="length">The length. This value is overwritten when the last instruction's bounds are outside of the bounds.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Disassembler.DisassembleNextInstruction">
+            <summary>
+            Disassembles the next instruction at the current offset.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86Disassembler.CurrentOffset">
+            <summary>
+            Gets or sets a value indicating the current byte offset of the disassembler.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.DataDirectory">
+            <summary>
+            Represents a data directory in the executable.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.DataDirectory.HeaderOffset">
+            <summary>
+            Gets the offset the data directory is located.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.DataDirectory.TargetOffset">
+            <summary>
+            Gets the offset the data directory is pointing at.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.DataDirectory.Size">
+            <summary>
+            Gets the size of the data directory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.DataDirectory.Section">
+            <summary>
+            Gets the section the data directory is pointing at.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.DataDirectory.Name">
+            <summary>
+            Gets the name of the data directory.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.DataDirectoryName">
+            <summary>
+            An enumeration that represents all possible data directory names in the Optional Header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ICacheProvider">
+            <summary>
+            An object that saves data temporarily.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ICacheProvider.ClearCache">
+            <summary>
+            Clears the cached values.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NameDemangler">
+            <summary>
+            Demangles imported or exported method names. Under construction
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.OffsetConverter">
+            <summary>
+            A class that is able to calculate different kinds of offsets.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.OffsetConverter.#ctor(TUP.AsmResolver.Section)">
+            <summary>
+            Creates a new instance of an offset converter.
+            </summary>
+            <param name="targetSection"></param>
+        </member>
+        <member name="M:TUP.AsmResolver.OffsetConverter.RvaToVa(System.UInt32)">
+            <summary>
+            Transforms a relative virtual address to a virtual address.
+            </summary>
+            <param name="rva">The relative virtual address to convert.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.OffsetConverter.VaToRva(System.UInt64)">
+            <summary>
+            Transforms a virtual address to a relative virtual address.
+            </summary>
+            <param name="va">The virtual address to convert.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.OffsetConverter.RvaToFileOffset(System.UInt32)">
+            <summary>
+            Transforms a relative virtual address to a physical file offset.
+            </summary>
+            <param name="rva">The relative virtual address to convert.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.OffsetConverter.FileOffsetToRva(System.UInt32)">
+            <summary>
+            Transforms a physical file offset to a relative virtual address.
+            </summary>
+            <param name="fileoffset">The physical file offset to convert.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.OffsetConverter.FileOffsetToVa(System.UInt32)">
+            <summary>
+            Transforms a physical file offset to a virtual address.
+            </summary>
+            <param name="fileoffset">The physical file offset to convert.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.OffsetConverter.VaToFileOffset(System.UInt64)">
+            <summary>
+            Transforms a virtual address to a physical file offset.
+            </summary>
+            <param name="va">The virtual address to convert.</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.OffsetConverter.TargetSection">
+            <summary>
+            Gets the target section.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ReadingArguments">
+            <summary>
+            Specifies reading arguments that are being used to read a win32 assembly.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ReadingArguments.OnlyManaged">
+            <summary>
+            Indicates that only managed data and the vital headers will be read from the assembly.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ReadingArguments.IgnoreDataDirectoryAmount">
+            <summary>
+            Indicates that the standard amount of data directories will be used instead of the amount specified in the Optional Header
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver">
+            <summary>
+            A class that is able to look up members or strings by its metadata token.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver.ResolveMember(System.Int32)">
+            <summary>
+            Resolves a member by its metadata token.
+            </summary>
+            <param name="metadataToken">The token of the member to look up.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver.ResolveString(System.Int32)">
+            <summary>
+            Resolves a string value by its metadata token.
+            </summary>
+            <param name="metadataToken">The token of the string value to look up.</param>
+            <returns></returns>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.Specialized.TypeSystem">
+            <summary>
+            A class containing all element types.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.Offset">
+            <summary>
+            Represents an offset to a value or structure in an assembly, containing the raw, virtual and relative virtual address.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.#ctor(System.UInt32,System.UInt32,System.UInt64,TUP.AsmResolver.ASM.OperandType)">
+            <summary>
+            Creates a new instance of an offset.
+            </summary>
+            <param name="offset">The raw offset.</param>
+            <param name="rva">The virtual address that is relative to a section.</param>
+            <param name="va">The virtual address.</param>
+            <param name="offsettype">The type of offset.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.FromFileOffset(System.UInt32,TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Creates an instance of an offset by specifying a raw offset. 
+            </summary>
+            <param name="rawoffset">The file offset.</param>
+            <param name="assembly">The assembly containing the offset.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.FromVa(System.UInt64,TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Creates an instance of an offset by specifying a virtual address.
+            </summary>
+            <param name="va">The virtual address.</param>
+            <param name="assembly">The assembly containing the offset.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.FromRva(System.UInt32,TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Creates an instance of an offset by specifying a virtual address that is relative to a section.
+            </summary>
+            <param name="rva">The relative virtual address.</param>
+            <param name="assembly">The assembly containing the offset.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.ToString">
+            <summary>
+            Returns a string representation of the offset value.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.ToString(System.Boolean)">
+            <summary>
+            Returns a string representation of the offset value.
+            </summary>
+            <param name="virtualString">A boolean indicating that the offset will be returned as a virtual offset.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.ToInstruction(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Converts the offset to an instruction.
+            </summary>
+            <param name="assembly">The assembly that contains the offset</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.ToAsciiStringPtr(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Converts the offset to an Ascii String pointer.
+            </summary>     
+            <param name="assembly">The assembly that contains the offset</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.ToAsciiString(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Converts the offset to an Ascii string.
+            </summary>     
+            <param name="assembly">The assembly that contains the offset</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Offset.ToMethod(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Converts the offset to an imported or exported method/
+            </summary>     
+            <param name="assembly">The assembly that contains the offset</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.Offset.OffsetType">
+            <summary>
+            Gets the way the offset is being used.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Offset.FileOffset">
+            <summary>
+            Gets the file offset.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Offset.Rva">
+            <summary>
+            Gets the virtual offset that is relative to a section.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Offset.Va">
+            <summary>
+            Gets the virtual offset.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.x86OpCodes">
+            <summary>
+            Provides a list of field representations of the 32-bit assembly opcodes for reading and writing instructions. NOTE: NOT ALL INSTRUCTIONS ARE ADDED YET.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.x86OperandType">
+            <summary>
+            An enumeration that represents all supported operand types of x86 assembly instructions.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.None">
+            <summary>
+            The instruction doesn't have any operands.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Byte">
+            <summary>
+            The instruction has got a single byte operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Word">
+            <summary>
+            The instruction has got a single word operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Dword">
+            <summary>
+            The instruction has got a single dword operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.DwordPtr">
+            <summary>
+            The instruction has got a single dword pointer operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Fword">
+            <summary>
+            The instruction has got a single fword operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.FwordPtr">
+            <summary>
+            The instruction has got a single fword pointer operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Qword">
+            <summary>
+            The instruction has got a single qword operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.WordAndByte">
+            <summary>
+            The instruction has got a word and byte operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Register">
+            <summary>
+            The instruction has got a single register operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterPointer">
+            <summary>
+            The instruction has got a single register pointer operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterAndByte">
+            <summary>
+            The instruction has got a register and byte operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterAndDword">
+            <summary>
+            The instruction has got a register and dword operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterOffset">
+            <summary>
+            The instruction has got a register and offset operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Multiple32Register">
+            <summary>
+            The instruction has got multiple 32 bit registers
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Multiple16Register">
+            <summary>
+            The instruction has got multiple 16 bit registers
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Multiple32Or8Register">
+            <summary>
+            The instruction has got a pair of 32 bit, 8 bit, or 32 and 8 bit registers.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterLeaRegister">
+            <summary>
+            The instruction has got a register and a LEA register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.InstructionAddress">
+            <summary>
+            The instruction has got an instruction address operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.ShortInstructionAddress">
+            <summary>
+            The instruction has got a short instruction address operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Instruction">
+            <summary>
+            The instruction is a prefix to another instruction.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.x86Register">
+            <summary>
+            Describes the register(s) an <see cref="T:TUP.AsmResolver.ASM.x86OpCode"/> use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.EAX">
+            <summary>
+            Accumulator 32-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.EBX">
+            <summary>
+            Base 32-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.ECX">
+            <summary>
+            Counter 32-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.EDX">
+            <summary>
+            Data 32-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.ESP">
+            <summary>
+            Stack pointer 32-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.EBP">
+            <summary>
+            Stack Base pointer 32-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.ESI">
+            <summary>
+            Source index 32-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.EDI">
+            <summary>
+            Destination pointer 32-bit Register. 
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.AX">
+            <summary>
+            Accumulator 16-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.BX">
+            <summary>
+            Base 16-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.CX">
+            <summary>
+            Counter 16-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.DX">
+            <summary>
+            Data 16-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.AL">
+            <summary>
+            Accumulator low 8-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.BL">
+            <summary>
+            Base low 8-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.CL">
+            <summary>
+            Counter low 8-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.DL">
+            <summary>
+            Data low 8-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.AH">
+            <summary>
+            Accumulator high 8-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.BH">
+            <summary>
+            Base high 8-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.CH">
+            <summary>
+            Counter high 8-bit Register.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86Register.DH">
+            <summary>
+            Data high 8-bit Register.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.Operand">
+            <summary>
+            Represents an operand of an assembly instruction.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.Operand.#ctor(System.Object)">
+            <summary>
+            Creates a new instance of an assembly operand.
+            </summary>
+            <param name="value">The value that's being used.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.Operand.#ctor(System.Object,TUP.AsmResolver.ASM.OperandType)">
+            <summary>
+            Creates a new instance of an assembly operand.
+            </summary>
+            <param name="value">The value that's being used.</param>
+            <param name="type">The way the value is being used.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.Operand.#ctor(System.Object,TUP.AsmResolver.ASM.OperandType,System.Int32)">
+            <summary>
+            Creates a new instance of an operand with an extra addition value.
+            </summary>
+            <param name="value">The value that's being used.</param>
+            <param name="type">The way the value is being used.</param>
+            <param name="addition">An addition to the value</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.Operand.ToString">
+            <summary>
+            Returns the string representation of the operand.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.Operand.ToString(System.Boolean)">
+            <summary>
+            Returns the string representation of the operand.
+            </summary>
+            <param name="virtualString">Indicates that the string value will be the virtual representation of the instruction.</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.Operand.Value">
+            <summary>
+            The value that's being used in the operand.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.Operand.ValueType">
+            <summary>
+            The way the value is being used.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.Operand.Addition">
+            <summary>
+            The addition to the value.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.OperandType">
+            <summary>
+            Value indicating the operand value type.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.Exceptions.ResolveException">
+            <summary>
+            Represents an exception that is occured when a resolving process has failed.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.Exceptions.ResolveException.#ctor(System.String)">
+            <summary>
+            Initializes a new ResolveException with a specific message.
+            </summary>
+            <param name="message">The message of the exception.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Exceptions.ResolveException.#ctor(System.Exception)">
+            <summary>
+            Initializes a new ResolveException with a specific inner exception.
+            </summary>
+            <param name="inner">The inner exception of the exception.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Exceptions.ResolveException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new ResolveException with a specific message and inner exception.
+            </summary>
+            <param name="message">The message of the exception.</param>
+            <param name="inner">The inner exception of the exception.</param>
+        </member>
+        <member name="T:TUP.AsmResolver.IHeader">
+            <summary>
+            Represents a header of a portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IHeader.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of the header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IHeader.RawOffset">
+            <summary>
+            Gets the raw file offset of the header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.IMethod">
+            <summary>
+            Represents a method that is used in native portable executables.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IMethod.Name">
+            <summary>
+            Gets the name of the method.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IMethod.FullName">
+            <summary>
+            Gets the full name of the method, including the Declaring Library and the Name.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IMethod.LibraryName">
+            <summary>
+            Gets the declaring library's name.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IMethod.Ordinal">
+            <summary>
+            Gets the ordinal of the method.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IMethod.RVA">
+            <summary>
+            Gets the Relative Virtual Address of the method.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.InstructionCollection">
+            <summary>
+            A collection of Assembly Instructions with extra functions.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.GetInstructionByOffset(System.Int64)">
+            <summary>
+            Gets the assembly instruction in the application by its offset.
+            </summary>
+            <param name="TargetOffset">The Offset of the instruction go get.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.GetInstructionIndexByOffset(System.Int64)">
+            <summary>
+            Gets the assembly instruction index by its offset
+            </summary>
+            <param name="TargetOffset">The Offset of the instruction go get.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.GetInstructionByVirtualOffset(System.UInt64)">
+            <summary>
+            Gets the assembly instruction in the application by its virtual offset.
+            </summary>
+            <param name="TargetOffset">The Offset of the instruction go get.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.GetInstructionIndexByVirtualOffset(System.UInt64)">
+            <summary>
+            Gets the assembly instruction in the application by its virtual offset.
+            </summary>
+            <param name="TargetOffset">The Offset of the instruction go get.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.Last">
+            <summary>
+            Gets the last instruction of the collection.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.First">
+            <summary>
+            Gets the first instruction of the collection.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.Add(TUP.AsmResolver.ASM.x86Instruction)">
+            <summary>
+            Adds an instruction to the Assembly Instruction Collection.
+            </summary>
+            <param name="instruction">The instruction to add.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.Insert(System.Int32,TUP.AsmResolver.ASM.x86Instruction)">
+            <summary>
+            Inserts at the specified index an instruction into the collection.
+            </summary>
+            <param name="index">The zero-based index at which value should be inserted.</param>
+            <param name="instruction">The instruction to insert into the collection.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.IndexOf(TUP.AsmResolver.ASM.x86Instruction)">
+            <summary>
+            Gets the index of a given instruction.
+            </summary>
+            <param name="instruction">The instruction to get the index from.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.InstructionCollection.GetAsmCode">
+            <summary>
+            Returns the instruction list in string format.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.InstructionCollection.Item(System.Int32)">
+            <summary>
+            Gets or sets the instruction at the specific index.
+            </summary>
+            <param name="Index">The index of the instruction to get or set.</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.InstructionCollection.IsReadOnly">
+            <summary>
+            Gets a value indicating whether the Collection is read-only.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.InstructionCollection.IsFixedSize">
+            <summary>
+            Gets a value indicating whether the System.Collections.IList has a fixed size.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.BlobHeap">
+            <summary>
+            Represents the blob heap stream containing various values of many metadata members.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.Heap">
+            <summary>
+            Represents a heap from a metadata stream.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.MetaDataStream">
+            <summary>
+            Represents a metadata stream of a .NET application.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataStream.HeaderOffset">
+            <summary>
+            Gets the offset of the header of the metadata.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataStream.StreamOffset">
+            <summary>
+            Gets the actual file offset of the stream.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataStream.StreamSize">
+            <summary>
+            Gets the length of bytes of the stream
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataStream.Contents">
+            <summary>
+            Gets the contents in byte array format.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataStream.Name">
+            <summary>
+            Gets the name of the metadata stream.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.BlobHeap.GetBlob(System.UInt32)">
+            <summary>
+            Gets the blob value by it's signature/index.
+            </summary>
+            <param name="index">The index or signature to get the blob value from.</param>
+            <returns></returns>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.MetaDataHeader">
+            <summary>
+            Represents a MetaData Header from a .NET Header of a .NET application.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataHeader.VersionString">
+            <summary>
+            Gets the version string of the metadata.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataHeader.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of the header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataHeader.RawOffset">
+            <summary>
+            Gets the raw file offset of the header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.MetaDataRow">
+            <summary>
+            Represents a metadata row containing the raw values of a member.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.MetaDataRow.GenerateBytes">
+            <summary>
+            Serializes the metadata row into a byte array.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataRow.Offset">
+            <summary>
+            Gets the raw offset of the metadata row.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataRow.Parts">
+            <summary>
+            Gets the parts in array format.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.MetaDataTable">
+            <summary>
+            Represents a table located in the metadata table heap.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.MetaDataTable.IsLarge(System.Int32)">
+            <summary>
+            Returns true when this table can be seen as a large table by specifying the bits to be encoded in an index value to a member in the table.
+            </summary>
+            <param name="bitsToEncode">The amount of bits that are being encoded in an index.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.MetaDataTable.ToString">
+            <summary>
+            Returns a string representation of the Metadata Table.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.MetaDataTable.ApplyChanges">
+            <summary>
+            Applies all made changes to the members.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.MetaDataTable.Dispose">
+            <summary>
+            Clears every temporary data stored in the members.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataTable.Type">
+            <summary>
+            Gets the type of members located in the metadata table.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataTable.AmountOfRows">
+            <summary>
+            Gets the amount of rows that are available in the table.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataTable.Members">
+            <summary>
+            Gets an array of all members available in the table.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.MetaDataTableType">
+            <summary>
+            An enumeration containing all supported metadata tables.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.MZHeader">
+            <summary>
+            Represents the MZ header of a portable executable file
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.MZHeader.MaxStopMessageLength">
+            <summary>
+            The maximum length the stop message can have.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.MZHeader.FromAssembly(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Gets the Portable Executeable's MZ header by specifing the assembly.
+            </summary>
+            <param name="assembly">The assembly to read the mz header</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.MZHeader.PagesInFile">
+            <summary>
+            Gets the amount of pages in the executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.MZHeader.NTHeaderOffset">
+            <summary>
+            Gets the offset of the NT header that is specified in the MZ header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.MZHeader.RelocationTableOffset">
+            <summary>
+            Gets the offset of the relocation table that is specified in the MZ header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.MZHeader.StopMessage">
+            <summary>
+            Gets or sets the string that will be displayed when the program cannot be run in DOS mode. Default is: "This program cannot be run in DOS mode."
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.MZHeader.RawOffset">
+            <summary>
+            Gets the raw file offset of the header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.MZHeader.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of the MZ header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ExecutableFlags">
+            <summary>
+            Flags that describes a portable executable file.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.RelocationsStripped">
+            <summary>
+            Indicates that the file does not contain base relocations and must therefore be loaded at its preferred base address. 
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.ExecutableFile">
+            <summary>
+            Indicates that the image file is valid and can be run. 
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.LineNumbersStripped">
+            <summary>
+            COFF line numbers have been removed.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.LocalSymsStripped">
+            <summary>
+            COFF symbol table entries for local symbols have been removed. 
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.AggressiveWSTrim">
+            <summary>
+            Obsolete. Aggressively trim working set. 
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.LargeAddressAware">
+            <summary>
+            Application can handle bigger than 2 GB addresses.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.Machine16Bit">
+            <summary>
+            This flag is reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.BytesReversedLO">
+            <summary>
+            Little endian: the least significant bit (LSB) precedes the most significant bit (MSB) in memory. 
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.Machine32Bit">
+            <summary>
+            Machine is based on a 32-bit-word architecture.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.DebuggingInfoStripped">
+            <summary>
+            Debugging information is removed from the image file.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.RemovableRunFromSwap">
+            <summary>
+            If the image is on removable media, fully load it and copy it to the swap file.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.NetRunFromSwap">
+            <summary>
+            If the image is on network media, fully load it and copy it to the swap file.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.System">
+            <summary>
+            The image file is a system file, not a user program.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.DynamicLoadedLibraryFile">
+            <summary>
+            The File is a DLL Library.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.UpSystemOnly">
+            <summary>
+            The file should be run only on a uniprocessor machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ExecutableFlags.BytesReversedHI">
+            <summary>
+            Big endian: the MSB precedes the LSB in memory. This flag is deprecated and should be zero.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.LibraryFlags">
+            <summary>
+            Flags that describes a dynamic loaded library file.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.LibraryFlags.DynamicBase">
+            <summary>
+            Specifies that the DLL can be relocated at load time.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.LibraryFlags.ForceIntegrity">
+            <summary>
+            Specifies that the Code Integrity checks are enforced.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.LibraryFlags.NXCompatible">
+            <summary>
+            Specifies that the image is NX compatible.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.LibraryFlags.NoIsolation">
+            <summary>
+            Specifies that it's isolation aware, but do not isolate the image.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.LibraryFlags.NoSEH">
+            <summary>
+            Specifies that it does not use structured exception handling (SEH). No SE handler may be called in this image.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.LibraryFlags.NoBind">
+            <summary>
+            Specifies that the image is not bindable.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.LibraryFlags.WDMDriver">
+            <summary>
+            Specifies that the image uses WDM model.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.LibraryFlags.TerminalServerAware">
+            <summary>
+            Specifies that the image is Terminal Server aware.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.FileHeader">
+            <summary>
+            Represents the file header of a loaded <see cref="T:TUP.AsmResolver.Win32Assembly"/>. This header contains common information about the Portable Executable.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.FileHeader.FromAssembly(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Gets the Portable Executeable's file header by specifing the assembly.
+            </summary>
+            <param name="assembly">The assembly to read the mz header</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.FileHeader.Machine">
+            <summary>
+            Gets or sets the machine representation of the loaded portable executable.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.FileHeader.AmountOfSections">
+            <summary>
+            Gets the amount of sections that is available in the PE.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.FileHeader.CompilingDate">
+            <summary>
+            Gets the compiling date of the PE.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.FileHeader.OptionalHeaderSize">
+            <summary>
+            Gets the size of the Optional Header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.FileHeader.ExecutableFlags">
+            <summary>
+            Gets or sets the flags of the loaded portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.FileHeader.RawOffset">
+            <summary>
+            Gets the raw file offset of the header,
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.FileHeader.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of the MZ header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ImageSignature">
+            <summary>
+            Represents the type of a signature of a portable executable file.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ImageSignature.DOS">
+            <summary>
+            Indicates that the image is a DOS signature, containing a MZ header.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ImageSignature.OS2">
+            <summary>
+            Indicates that the image is a OS/2 signature, containing a NE header.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ImageSignature.OS2_LE">
+            <summary>
+            Indicates that the image is a OS/2 LE signature, containing a LE header.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ImageSignature.OS2_LX">
+            <summary>
+            Indicates that the image is a OS/2 LX signature, containing a LX header.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ImageSignature.VXD">
+            <summary>
+            Indicates that the image is a VXD signature, containing a LE header.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ImageSignature.NT">
+            <summary>
+            Indicates that the image is a NT signature, containing a NT or PE header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.Machine">
+            <summary>
+            Represents the type of the CPU of a portable executable file.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.AnyCPU">
+            <summary>
+            The image is assumed to be applicable to any machine type.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.I860">
+            <summary>
+            The image is asseumed to be applicable to an Intel 860 machine or later.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.I386">
+            <summary>
+            The image is asseumed to be applicable to an Intel 386 machine or later and compatible processors.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.R3000">
+            <summary>
+            The image is asseumed to be applicable to a MIPS little-endian, 0540 big-endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.R4000">
+            <summary>
+            The image is asseumed to be applicable to a MIPS little endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.R10000">
+            <summary>
+            The image is asseumed to be applicable to a MIPS little-endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.WCEMIPSV2">
+            <summary>
+            The image is asseumed to be applicable to a MIPS little-endian WCE v2 machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.ALPHA">
+            <summary>
+            The image is asseumed to be applicable to an Alpha AXP machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.SH3">
+            <summary>
+            The image is asseumed to be applicable to a Hitachi SH3 little-endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.SH3DSP">
+            <summary>
+            The image is asseumed to be applicable to a Hitachi SH3DSP machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.SH3E">
+            <summary>
+            The image is asseumed to be applicable to a Hitachi SH3E little-endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.SH4">
+            <summary>
+            The image is asseumed to be applicable to a Hitachi SH4 little-endian machine
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.SH5">
+            <summary>
+            The image is asseumed to be applicable to a Hitachi SH5 machine
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.ARM">
+            <summary>
+            The image is asseumed to be applicable to an ARM little endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.THUMB">
+            <summary>
+            No information is available about this machine yet.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.ARMV7">
+            <summary>
+            The image is asseumed to be applicable to an ARM v7 little endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.AM33">
+            <summary>
+            The image is asseumed to be applicable to a Matsushita AM33 machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.POWERPC">
+            <summary>
+            The image is asseumed to be applicable to a Power PC, little endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.POWERPCFP">
+            <summary>
+            The image is asseumed to be applicable to a Power PC FP, little endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.POWERPCBE">
+            <summary>
+            The image is asseumed to be applicable to a Power PC, big endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.IA64">
+            <summary>
+            The image is asseumed to be applicable to an Intel IA64 machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.MIPS16">
+            <summary>
+            The image is asseumed to be applicable to a MIPS16  machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.ALPHA64">
+            <summary>
+            The image is asseumed to be applicable to a Alpha AXP 64-bit machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.MIPSFPU">
+            <summary>
+            The image is asseumed to be applicable to a MIPS with FPU machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.MIPSFPU16">
+            <summary>
+            The image is asseumed to be applicable to a MIPS16 with FPU machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.TRICORE">
+            <summary>
+            The image is asseumed to be applicable to a TRICORE machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.CEF">
+            <summary>
+            No information is available about this machine yet.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.EBC">
+            <summary>
+            The image is asseumed to be applicable to a machine that supports EFI byte code.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.AMD64">
+            <summary>
+            The image is asseumed to be applicable to a 64 bit machine
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.M32R">
+            <summary>
+            The image is asseumed to be applicable to a Mitsubishi M32R little endian machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.CEE">
+            <summary>
+            No information is available about this machine yet.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.SPARC">
+            <summary>
+            The image is asseumed to be applicable to a SPARC machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.DEC_Alpha_AXP">
+            <summary>
+            The image is asseumed to be applicable to a DEC Alpha AXP machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.M68K">
+            <summary>
+            The image is asseumed to be applicable to a Motorola 68000 series machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Machine.TAHOE">
+            <summary>
+            The image is asseumed to be applicable to an Intel EM machine.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.IOptionalHeader">
+            <summary>
+            Represents the optional header of a protable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.MinimumOSVersion">
+            <summary>
+            Gets the minium operating system version the portable executable requires.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.MinimumSubSystemVersion">
+            <summary>
+            Gets the minium sub system version the portable executable requires.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.LinkerVersion">
+            <summary>
+            Gets the linker version
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.Entrypoint">
+            <summary>
+            Gets or setsthe entrypoint address of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.HeaderSize">
+            <summary>
+            Gets the header size of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.ImageBase">
+            <summary>
+            Gets the image base (base offset) of the portable executable file. 
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.BaseOfCode">
+            <summary>
+            Gets the virtual base offset of the code section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.SizeOfCode">
+            <summary>
+            Gets the size of the code section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.BaseOfData">
+            <summary>
+            Gets the virtual base offset of the data section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.FileOffset">
+            <summary>
+            Gets the file offset of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.SubSystem">
+            <summary>
+            Gets the sub system representation the portable executable file runs in.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.LibraryFlags">
+            <summary>
+            Gets the Dynamic Loaded Library Flags of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.IOptionalHeader.Is32Bit">
+            <summary>
+            Indicates whether the optional header is 32 bit or not.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.NETHeader">
+            <summary>
+            Represents a .NET header from an application. This header is only available if the assembly is written in a .NET language.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.NETHeader.FromAssembly(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Gets the Portable Executeable's NT header by specifing the assembly.
+            </summary>
+            <param name="assembly">The assembly to read the nt header</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.NETHeader.HasStream(System.String)">
+            <summary>
+            Returns true when a stream specified by its name is present in the assembly.
+            </summary>
+            <param name="name">The name of the stream.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.NETHeader.Dispose">
+            <summary>
+            Frees all heaps and streams that are being used.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.TokenResolver">
+            <summary>
+            Gets a metadata token resolver to lookup members by its metadata token.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.TypeSystem">
+            <summary>
+            Gets the type system class that holds all element types.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.EntryPointToken">
+            <summary>
+            Gets the EntryPoint Token of the loaded .NET application.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.Flags">
+            <summary>
+            Gets or sets the Flags of this .NET header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.MetaDataHeader">
+            <summary>
+            Gets the header of the MetaData.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.MetaDataStreams">
+            <summary>
+            Gets the metadata streams in an array.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.TablesHeap">
+            <summary>
+            Gets the tables heap of the .net application.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.StringsHeap">
+            <summary>
+            Gets the strings heap of the .net application.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.UserStringsHeap">
+            <summary>
+            Gets the user specified strings heap of the .net application.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.BlobHeap">
+            <summary>
+            Gets the blob heap of the .net application.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.GuidHeap">
+            <summary>
+            Gets the GUID heap of the .net application.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of the header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.RawOffset">
+            <summary>
+            Gets the raw file offset of the header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.NETHeader.IsValid">
+            <summary>
+            Gets a value indicating the .NET header is valid.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.NETHeaderFlags">
+            <summary>
+            Represents the characteristics of a .NET header.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.NETHeaderFlags.ILOnly">
+            <summary>
+            The file contains only managed IL code.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.NETHeaderFlags.Bit32Required">
+            <summary>
+            The application requires a 32 bit machine.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.NETHeaderFlags.ILLibrary">
+            <summary>
+            The application is a dll coded in IL code.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.NETHeaderFlags.StrongNameSigned">
+            <summary>
+            The application is signed.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.NETHeaderFlags.NativeEntryPoint">
+            <summary>
+            The application has a native entry point
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.NETHeaderFlags.TrackDebugData">
+            <summary>
+            The application contains debug data.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.StringsHeap">
+            <summary>
+            A heap that holds all string values of all members in the tables heap.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.StringsHeap.GetStringByOffset(System.UInt32)">
+            <summary>
+            Gets the string by its offset.
+            </summary>
+            <param name="offset">The offset of the string.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.StringsHeap.Dispose">
+            <summary>
+            Frees all the streams used in this heap.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NET.UserStringsHeap">
+            <summary>
+            A heap that holds all user specified strings in method bodies.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.UserStringsHeap.GetStringByOffset(System.UInt32)">
+            <summary>
+            Gets a string by its offset.
+            </summary>
+            <param name="offset">The offset of the string.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.UserStringsHeap.Dispose">
+            <summary>
+            Frees all the streams that are being used in this heap.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.OptionalHeader32">
+            <summary>
+            Represents a 32-bit optional header of a <see cref="T:TUP.AsmResolver.Win32Assembly"/>.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.OptionalHeader32.FromAssembly(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Gets the 32 bit optional header by specifing a 32 bit assembly.
+            </summary>
+            <param name="assembly">The assembly to read the optional header</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.LinkerVersion">
+            <summary>
+            Gets the linker version
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.MinimumOSVersion">
+            <summary>
+            Gets the minium operating system version the portable executable requires.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.MinimumSubSystemVersion">
+            <summary>
+            Gets the minium sub system version the portable executable requires.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.Entrypoint">
+            <summary>
+            Gets or sets the entrypoint address of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.HeaderSize">
+            <summary>
+            Gets the header size of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.ImageBase">
+            <summary>
+            Gets the image base (base offset) of the portable executable file. 
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.BaseOfCode">
+            <summary>
+            Gets the base offset of the code section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.SizeOfCode">
+            <summary>
+            Gets the size of the code section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.BaseOfData">
+            <summary>
+            Gets the base offset of the data section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.FileOffset">
+            <summary>
+            Gets the file offset of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.FileAlignment">
+            <summary>
+            Gets the file alignment of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.SubSystem">
+            <summary>
+            Gets or sets the sub system representation the portable executable file runs in.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.Is32Bit">
+            <summary>
+            Returns true if the header file is 32-bit.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.LibraryFlags">
+            <summary>
+            Gets the Dynamic Loaded Library Flags of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.RawOffset">
+            <summary>
+            Gets the raw file offset of the header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader32.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of the MZ header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.OptionalHeader64">
+            <summary>
+            Represents a 64-bit optional header of a <see cref="T:TUP.AsmResolver.Win32Assembly"/>.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.OptionalHeader64.FromAssembly(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Gets the 64 bit optional header by specifing a 64 bit assembly.
+            </summary>
+            <param name="assembly">The assembly to read the optional header</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.LinkerVersion">
+            <summary>
+            Gets the linker version
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.MinimumOSVersion">
+            <summary>
+            Gets the minium operating system version the portable executable requires.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.MinimumSubSystemVersion">
+            <summary>
+            Gets the minium sub system version the portable executable requires.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.Entrypoint">
+            <summary>
+            Gets the entrypoint address of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.HeaderSize">
+            <summary>
+            Gets the header size of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.ImageBase">
+            <summary>
+            Gets the image base (base offset) of the portable executable file. 
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.BaseOfCode">
+            <summary>
+            Gets the base offset of the code section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.SizeOfCode">
+            <summary>
+            Gets the size of the code section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.BaseOfData">
+            <summary>
+            Gets the base offset of the data section of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.FileOffset">
+            <summary>
+            Gets the file offset of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.FileAlignment">
+            <summary>
+            Gets the file alignment of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.SubSystem">
+            <summary>
+            Gets the sub system representation the portable executable file runs in.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.Is32Bit">
+            <summary>
+            Returns true if the header file is 32-bit.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.LibraryFlags">
+            <summary>
+            Gets the Dynamic Loaded Library Flags of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.RawOffset">
+            <summary>
+            Gets the raw file offset of the header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.OptionalHeader64.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of the MZ header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.PE.PeImage">
+            <summary>
+            A class to read from and write to an executable image.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.PE.Structures.IMAGE_IMPORT_DESCRIPTOR.Characteristics">
+            <summary>
+            CSharp doesnt really support unions, but they can be emulated by a field offset 0
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ResourceDataEntry">
+            <summary>
+            Represents a data entry of a resource directory entry.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ResourceDirectory">
+            <summary>
+            Represents a directory of resources inside a Portable Executable.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.ParentEntry">
+            <summary>
+            Gets the parent directory entry of the directory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.ChildEntries">
+            <summary>
+            Gets the child directory entries of the directory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.Characteristics">
+            <summary>
+            Gets a value indicating the characteristics of the directory. This value is ignored.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.TimeStamp">
+            <summary>
+            Gets a value indicating the time stamp of the directory. This value is ignored.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.MayorVersion">
+            <summary>
+            Gets the mayor version number. This value is ignored
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.MinorVersion">
+            <summary>
+            Gets the minor version number. This value is ignored
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.NumberOfNamedEntries">
+            <summary>
+            Gets a value indicating the amount of named directory entries.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.NumberOfIdEntries">
+            <summary>
+            Gets a value indicating the amount of directory entries that holds an Id number.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectory.IsRootDirectory">
+            <summary>
+            Gets a value indicating the directory is the root directory of the entire resource data directory.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ResourceDirectoryEntry">
+            <summary>
+            Represents a directory entry in the resource directory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectoryEntry.NameID">
+            <summary>
+            Gets the native name ID of the directory entry.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectoryEntry.Type">
+            <summary>
+            Gets the resource type of the directory entry.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectoryEntry.Name">
+            <summary>
+            Gets the name of the directory entry.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectoryEntry.OffsetToData">
+            <summary>
+            Gets the offset to the contents of this directoy entry. This offset is relative to the resource directory offset.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectoryEntry.Directory">
+            <summary>
+            Gets the directory (if available) that the directory entry is pointing to.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectoryEntry.DataEntry">
+            <summary>
+            Gets the data entry (if available) that the directory entry is pointing to.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDirectoryEntry.IsEntryToData">
+            <summary>
+            Gets a value indicating the directory entry is pointing to a data entry instead of a directory.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ResourceDirectoryType">
+            <summary>
+            Represents the type of a <see cref="T:TUP.AsmResolver.ResourceDirectory"/>.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Cursor">
+            <summary>
+            Specifies that the directory contains cursor files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Bitmap">
+            <summary>
+            Specifies that the directory contains bitmap files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Icon">
+            <summary>
+            Specifies that the directory contains icon files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Menu">
+            <summary>
+            Specifies that the directory contains cursor files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Dialog">
+            <summary>
+            Specifies that the directory contains cursor files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.String">
+            <summary>
+            Specifies that the directory contains string table files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.FontDirectory">
+            <summary>
+            Specifies that the directory contains font directory files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Font">
+            <summary>
+            Specifies that the directory contains font files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Accelerator">
+            <summary>
+            Specifies that the directory contains accelerator files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.RCData">
+            <summary>
+            Specifies that the directory contains RC data files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.MessageTable">
+            <summary>
+            Specifies that the directory contains message table files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.GroupCursor">
+            <summary>
+            Specifies that the directory contains cursor group files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.GroupIcon">
+            <summary>
+            Specifies that the directory contains icon group files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Version">
+            <summary>
+            Specifies that the directory contains version files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.DialogInclude">
+            <summary>
+            Specifies that the directory contains dialog include resource files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.PlugPlay">
+            <summary>
+            Specifies that the directory contains Plug-n-Play resource files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.VXD">
+            <summary>
+            Specifies that the directory contains VXD resource files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.AniCursor">
+            <summary>
+            Specifies that the directory contains animated cursor files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.AniIcon">
+            <summary>
+            Specifies that the directory contains animated icon files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.HTML">
+            <summary>
+            Specifies that the directory contains Hyper Text Markup Language (HTML) files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.Manifest">
+            <summary>
+            Specifies that the directory contains manifest files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ResourceDirectoryType.CustomNamed">
+            <summary>
+            Specifies that the directory contains other type of files.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.SectionFlags">
+            <summary>
+            The flags that describes a section of a portable executable.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.TypeDsect">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.TypeNoLoad">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.TypeGroup">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.TypeNoPadded">
+            <summary>
+            The section should not be padded to the next boundary. This flag is obsolete and is replaced by Align1Bytes. This is valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.TypeCopy">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.ContentCode">
+            <summary>
+            The section contains executable code.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.ContentInitializedData">
+            <summary>
+            The section contains initialized data.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.ContentUninitializedData">
+            <summary>
+            The section contains uninitialized data.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.LinkOther">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.LinkInfo">
+            <summary>
+            The section contains comments or other information. The .drectve section has this type. This is valid for object files only.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.TypeOver">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.LinkRemove">
+            <summary>
+            The section will not become part of the image. This is valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.LinkComDat">
+            <summary>
+            The section contains COMDAT data. For more information, see section 5.5.6, COMDAT Sections (Object Only). This is valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.NoDeferSpecExceptions">
+            <summary>
+            Reset speculative exceptions handling bits in the TLB entries for this section.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.RelativeGP">
+            <summary>
+            The section contains data referenced through the global pointer (GP).
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemPurgeable">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Memory16Bit">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryLocked">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryPreload">
+            <summary>
+            Reserved for future use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align1Bytes">
+            <summary>
+            Align data on a 1-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align2Bytes">
+            <summary>
+            Align data on a 2-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align4Bytes">
+            <summary>
+            Align data on a 4-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align8Bytes">
+            <summary>
+            Align data on an 8-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align16Bytes">
+            <summary>
+            Align data on a 16-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align32Bytes">
+            <summary>
+            Align data on a 32-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align64Bytes">
+            <summary>
+            Align data on a 64-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align128Bytes">
+            <summary>
+            Align data on a 128-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align256Bytes">
+            <summary>
+            Align data on a 256-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align512Bytes">
+            <summary>
+            Align data on a 512-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align1024Bytes">
+            <summary>
+            Align data on a 1024-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align2048Bytes">
+            <summary>
+            Align data on a 2048-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align4096Bytes">
+            <summary>
+            Align data on a 4096-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.Align8192Bytes">
+            <summary>
+            Align data on an 8192-byte boundary. Valid only for object files.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.LinkExtendedRelocationOverflow">
+            <summary>
+            The section contains extended relocations.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryDiscardable">
+            <summary>
+            The section can be discarded as needed.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryNotCached">
+            <summary>
+            The section cannot be cached.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryNotPaged">
+            <summary>
+            The section is not pageable.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryShared">
+            <summary>
+            The section can be shared in memory.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryExecute">
+            <summary>
+            The section can be executed as code.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryRead">
+            <summary>
+            The section can be read.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SectionFlags.MemoryWrite">
+            <summary>
+            The section can be written.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ImportMethod">
+            <summary>
+            Represents a procedure or method that is inside a library or other portable executable file and is used by the PE file who imported this method.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.LibraryReference">
+            <summary>
+            Represents a library reference containing imported methods that the corresponding portable executable uses.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.LibraryReference.Resolve(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Resolves the asembly by checking the directory of the assembly, the system directories and the current directory.
+            </summary>
+            <param name="parentAssembly">The parent assembly to search from. You can fill in a null value, but it can influent the result.</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.LibraryReference.LibraryName">
+            <summary>
+            Gets the name of the library.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.LibraryReference.ImportMethods">
+            <summary>
+            Gets a list of methods the corresponding portable executable uses.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.x86Instruction">
+            <summary>
+            Represents a 32-bit assembly instruction.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.Win32Assembly,TUP.AsmResolver.ASM.x86OpCode)">
+            <summary>
+            Creates an instance of a x86 instruction without an operand.
+            </summary>
+            <param name="assembly">The parent assembly.</param>
+            <param name="opcode">The opcode to use.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.Win32Assembly,TUP.AsmResolver.ASM.x86OpCode,TUP.AsmResolver.ASM.Operand)">
+            <summary>
+            Creates an instance of a x86 instruction with a single operand.
+            </summary>
+            <param name="assembly">The parent assembly.</param>
+            <param name="opcode">The opcode to use.</param>
+            <param name="operand">The operand to use.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.Win32Assembly,TUP.AsmResolver.ASM.x86OpCode,TUP.AsmResolver.ASM.Operand,TUP.AsmResolver.ASM.Operand)">
+            <summary>
+            Creates an instance of a x86 instruction with two operands.
+            </summary>
+            <param name="assembly">The parent assembly.</param>
+            <param name="opcode">The opcode to use.</param>
+            <param name="operand1">The first operand to use.</param>
+            <param name="operand2">The second operand to use.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.ToAsmString">
+            <summary>
+            Returns a raw string representation of the instruction.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.ToAsmString(System.Boolean)">
+            <summary>
+            Returns a string representation of the instruction.
+            </summary>
+            <param name="virtualString">A boolean value that indicates all offsets and operands should be in virtual format.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.ToString">
+            <summary>
+            Returns a readable assembly instruction, containing the offset, opcode and operand.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86Instruction.OpCode">
+            <summary>
+            Gets the opcode of the assembly instruction.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86Instruction.Operand1">
+            <summary>
+            Gets the first operand (if available) of the assembly instruction.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86Instruction.Operand2">
+            <summary>
+            Gets the second operand (if available) of the assembly instruction.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86Instruction.OperandBytes">
+            <summary>
+            Gets the operand bytes of the assembly instruction.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86Instruction.Offset">
+            <summary>
+            Gets the offset of the instruction.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86Instruction.Size">
+            <summary>
+            Gets the size in bytes of the instruction.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ASM.x86OpCode">
+            <summary>
+            Represents a 32-bit assembly opcode of an instruction.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86OpCode.ToString">
+            <summary>
+            Returns the opcode string.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86OpCode.IsBasedOn(TUP.AsmResolver.ASM.x86OpCode)">
+            <summary>
+            Returns a boolean value if the current opcode is based on the given opcode.
+            </summary>
+            <param name="code">The Opcode to compare with.</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86OpCode.Name">
+            <summary>
+            Gets the assembly opcode name.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86OpCode.OpCodeBytes">
+            <summary>
+            Gets the opcode bytes of the current opcode.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86OpCode.OperandLength">
+            <summary>
+            Gets a value indicating the operand size.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ASM.x86OpCode.OperandType">
+            <summary>
+            Gets the corresponding operand type.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.Exceptions.InvalidInstructionException">
+            <summary>
+            Occures when an invalid instruction is detected or tried to be processed.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.Exceptions.InvalidInstructionException.#ctor(System.String)">
+            <summary>
+            Creates a new instance of the InvalidInstructionException.
+            </summary>
+            <param name="message">The message of the error.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Exceptions.InvalidInstructionException.#ctor(System.String,System.Byte[],TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Creates a new instance of the InvalidInstructionException.
+            </summary>
+            <param name="message">The message of the error.</param>
+            <param name="bytes">The corresponding bytes.</param>
+            <param name="assembly">The assembly where the error occured.</param>
+        </member>
+        <member name="P:TUP.AsmResolver.Exceptions.InvalidInstructionException.Bytes">
+            <summary>
+            Gets the corresponding bytes.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Exceptions.InvalidInstructionException.Assembly">
+            <summary>
+            Gets the corresponding assembly representation.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.Exceptions.InvalidOpCodeException">
+            <summary>
+            Occures when an invalid opcode is detected or tried to be processed.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.Exceptions.InvalidOpCodeException.#ctor(System.String)">
+            <summary>
+            Creates a new instance of the InvalidOpCodeException.
+            </summary>
+            <param name="message">The message of the error.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Exceptions.InvalidOpCodeException.#ctor(System.String,System.Byte[],TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Creates a new instance of the InvalidOpCodeException.
+            </summary>
+            <param name="message">The message of the error.</param>
+            <param name="bytes">The corresponding bytes.</param>
+            <param name="assembly">The assembly where the error occured.</param>
+        </member>
+        <member name="P:TUP.AsmResolver.Exceptions.InvalidOpCodeException.Bytes">
+            <summary>
+            Gets the corresponding bytes.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Exceptions.InvalidOpCodeException.Assembly">
+            <summary>
+            Gets the corresponding assembly representation.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ExportMethod">
+            <summary>
+            Represents a procedure or method that is inside a portable executable file and can be used by other PE files.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ExportMethod.ToString">
+            <summary>
+            Returns the string representation of the exportable method.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.ExportMethod.Name">
+            <summary>
+            Gets the name of the method.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ExportMethod.LibraryName">
+            <summary>
+            Gets the name of the declaring library of the method.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ExportMethod.FullName">
+            <summary>
+            Gets the full name of the method, including the declaring library and method name.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ExportMethod.RVA">
+            <summary>
+            Gets the Relative Virtual Address of the method.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ExportMethod.Ordinal">
+            <summary>
+            Gets the ordinal of the method.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.Section">
+            <summary>
+            Represents a section of a portable executable.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.Section.MaxSectionNameLength">
+            <summary>
+            The maximum length a section name can have.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetBytes">
+            <summary>
+            Gets the raw bytes of the section.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetBytes(System.Int32,System.Int32)">
+            <summary>
+            Gets the raw bytes of the section given by an offset and size
+            </summary>
+            <param name="offset"></param>
+            <param name="size"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.Disassemble">
+            <summary>
+            Disassembles the section to 32 bit assembly instructions.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.Disassemble(System.UInt32)">
+            <summary>
+            Disassembles the section from the start with the given length.
+            </summary>
+            <param name="bytelength">The amount of bytes to read.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.Disassemble(System.UInt32,System.UInt32)">
+            <summary>
+            Disassembles the section from the given start offset and the given length.
+            </summary>
+            <param name="startoffset">The offset to start reading.</param>
+            <param name="bytelength">The amount of bytes to read.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.RVAToFileOffset(System.UInt32)">
+            <summary>
+            Converts a relative virtual address to a file offset
+            </summary>
+            <param name="rva"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.ContainsRva(System.UInt32)">
+            <summary>
+            Returns true if the specified virtual offset is located in the current section.
+            </summary>
+            <param name="Rva">The rva to check.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.ContainsRawOffset(System.UInt32)">
+            <summary>
+            Returns true if the specified raw offset is located in the current section.
+            </summary>
+            <param name="rawoffset">The raw offset to check.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetSectionByName(TUP.AsmResolver.Win32Assembly,System.String)">
+            <summary>
+            Gets the section of an assembly by it's name.
+            </summary>
+            <param name="assembly">The assembly to search in.</param>
+            <param name="sectionname">The section name to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetSectionByName(TUP.AsmResolver.Section[],System.String)">
+            <summary>
+            Gets the section of a list of sections by it's name.
+            </summary>
+            <param name="sections">The section list to search in.</param>
+            <param name="sectionname">The section name to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetSectionByFileOffset(TUP.AsmResolver.Win32Assembly,System.UInt32)">
+            <summary>
+            Gets the section of an assembly by it's raw offset.
+            </summary>
+            <param name="assembly">The assembly to search in.</param>
+            <param name="rawoffset">The raw offset to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetSectionByFileOffset(TUP.AsmResolver.Section[],System.UInt32)">
+            <summary>
+            Gets the section of a list of sections by it's raw offset
+            </summary>
+            <param name="sections">The section list to search in.</param>
+            <param name="rawoffset">The raw offset to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetSectionByRva(TUP.AsmResolver.Win32Assembly,System.UInt32)">
+            <summary>
+            Gets the section of an assembly by it's virtual offset.
+            </summary>
+            <param name="assembly">The assembly to search in.</param>
+            <param name="va">The virtual offset to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetSectionByRva(TUP.AsmResolver.Section[],System.UInt32)">
+            <summary>
+            Gets the section of a list of sections by it's virtual offset
+            </summary>
+            <param name="sections">The section list to search in.</param>
+            <param name="virtualoffset">The virtual offset to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetFirstSectionByFlag(TUP.AsmResolver.Win32Assembly,TUP.AsmResolver.SectionFlags)">
+            <summary>
+            Gets the first section of an assembly that contains the specified flag
+            </summary>
+            <param name="assembly">The assembly to search in.</param>
+            <param name="characteristics">The flag to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetFirstSectionByFlag(TUP.AsmResolver.Section[],TUP.AsmResolver.SectionFlags)">
+            <summary>
+            Gets the first section of a list of sections that contains the specified flag
+            </summary>
+            <param name="sections">The section list to search in.</param>
+            <param name="characteristics">The flag to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetLastSectionByFlag(TUP.AsmResolver.Win32Assembly,TUP.AsmResolver.SectionFlags)">
+            <summary>
+            Gets the last section of an assembly that contains the specified flag
+            </summary>
+            <param name="assembly">The assembly to search in.</param>
+            <param name="characteristics">The flag to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.Section.GetLastSectionByFlag(TUP.AsmResolver.Section[],TUP.AsmResolver.SectionFlags)">
+            <summary>
+            Gets the last section of a list of sections that contains the specified flag
+            </summary>
+            <param name="sections">The section list to search in.</param>
+            <param name="characteristics">The flag to search for.</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.RawHeaderOffset">
+            <summary>
+            Gets the raw offset of the section header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.Flags">
+            <summary>
+            Gets or sets the flags that describes the section.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.Name">
+            <summary>
+            Gets or sets the name of the section.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.RawOffset">
+            <summary>
+            Gets the raw offset of the section.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.RawSize">
+            <summary>
+            Gets the raw size of the section.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.RVA">
+            <summary>
+            Gets the virtual offset of the section.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.VirtualSize">
+            <summary>
+            Gets the virtual size of the section.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.CanExecute">
+            <summary>
+            Gets the value indicating whether the section contents can be executed in memory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.CanWrite">
+             <summary>
+            Gets the value indicating whether the section can be written in memory.
+             </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.CanRead">
+            <summary>
+            Gets the value indicating whether the section can be read in memory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.CanShared">
+            <summary>
+            Gets the value indicating whether the section can be shared in memory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.ContainsCode">
+            <summary>
+            Gets the value indicating whether the section contains executable code.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Section.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of this NT header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.SubSystem">
+            <summary>
+            The Windows subsystem that will be invoked to run the executable.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.Unknown">
+            <summary>
+            The subsystem is unknown.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.Native">
+            <summary>
+            Doesn't require a subsystem.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.WindowsGraphicalUI">
+            <summary>
+            Runs in the Windows GUI subsystem.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.WindowsConsoleUI">
+            <summary>
+            Runs in the Windows character (console) subsystem.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.OS2ConsoleUI">
+            <summary>
+            Runs in the OS/2 character (console) subsystem (OS/2 1.x apps only).
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.POSIXConsoleUI">
+            <summary>
+            Runs in the Posix character (console) subsystem.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.NativeWindows">
+            <summary>
+            Runs as a native Win9x driver.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.WindowsCEGUI">
+            <summary>
+            Runs in the Windows Embedded Compact GUI subsystem.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.EFIApplication">
+            <summary>
+            Runs as an Extensible Firmware Interface (EFI) application
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.EFIBootServiceDriver">
+            <summary>
+            Runs as an Extensible Firmware Interface (EFI) driver with boot services
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.EFIRuntimeDriver">
+            <summary>
+            Runs as an Extensible Firmware Interface (EFI) driver with run-time services
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.EFIRom">
+            <summary>
+            Runs as an Extensible Firmware Interface (EFI) ROM image
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.Xbox">
+            <summary>
+            Runs in the Xbox subsystem
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.SubSystem.WindowsBootApplication">
+            <summary>
+            Runs in the Windows boot subsystem.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.Win32Assembly">
+            <summary>
+            Reprensents a Win32 Assembly decompiled in 32-bit assembly code.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.Win32Assembly.LoadFile(System.String,TUP.AsmResolver.ReadingArguments)">
+            <summary>
+            Loads an assembly from a specific file.
+            </summary>
+            <param name="file">The file to read.</param>
+            <returns></returns>
+            <exception cref="T:System.BadImageFormatException"></exception>
+        </member>
+        <member name="M:TUP.AsmResolver.Win32Assembly.Save(System.String)">
+            <summary>
+            Saves the assembly to the harddisk to a specific path.
+            </summary>
+            <param name="path">The path to save the assembly.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Win32Assembly.Dispose">
+            <summary>
+            Closes streams and cleans up the Win32Assembly.
+            </summary>
+        </member>
+        <member name="E:TUP.AsmResolver.Win32Assembly.ReadingFinished">
+            <summary>
+            This event is raised when the asynchronised instructions loading process is finished.
+            </summary>
+        </member>
+        <member name="E:TUP.AsmResolver.Win32Assembly.ReadingProcessChanged">
+            <summary>
+            This event is raised when the asynchronised instructions loading process' progress is changed.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.Assembler">
+            <summary>
+            Gets the assembly code processor which can write assembly instructions.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.Path">
+            <summary>
+            Gets the location of the loaded assembly.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.CurrentByteOffset">
+            <summary>
+            Gets the current byte offset to read.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.LibraryImports">
+            <summary>
+            Gets the imported methods of the Win32 Assembly
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.LibraryExports">
+            <summary>
+            Gets the exports of the Win32 Assembly
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.NTHeader">
+            <summary>
+            Gets the NT header representation of the loaded portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.MZHeader">
+            <summary>
+            Gets the MZ header representation of the loaded portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.NETHeader">
+            <summary>
+            Gets the .NET header (if available) of the loaded portable executable file. 
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.RootResourceDirectory">
+            <summary>
+            Gets the root resource directory containing all the resources stored in the assembly.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.Disassembler">
+            <summary>
+            Gets the disassembler of this Win32 Assembly.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.Image">
+            <summary>
+            Gets the raw PE image
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.Win32Assembly.ReadingProcessChangedEventHandler">
+            <summary>
+            A special event handler for the <see cref="E:TUP.AsmResolver.Win32Assembly.ReadingProcessChanged"/> event.
+            </summary>
+            <param name="sender">The object who send the event.</param>
+            <param name="e">The event args of the event.</param>
+        </member>
+        <member name="T:TUP.AsmResolver.Win32Assembly.ReadingFinishedEventHandler">
+            <summary>
+            A special event handler for the <see cref="E:TUP.AsmResolver.Win32Assembly.ReadingFinished"/> event.
+            </summary>
+            <param name="sender">The object who send the event.</param>
+            <param name="e">The event args of the event.</param>
+        </member>
+        <member name="T:TUP.AsmResolver.ReadingFinishedEventArgs">
+            <summary>
+            Provides data for the <see cref="E:TUP.AsmResolver.Win32Assembly.ReadingFinished"/> event.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ReadingFinishedEventArgs.#ctor(TUP.AsmResolver.ASM.InstructionCollection)">
+            <summary>
+            Creates a new instance of the ReadingFinishedEventArgs containing the parsed instructions.
+            </summary>
+            <param name="instructions">The instructions the assembly has read.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ReadingFinishedEventArgs.#ctor(System.Exception)">
+            <summary>
+            Creates a new instance of the ReadingFinishedEventArgs containing error data.
+            </summary>
+            <param name="ex">The error that occured.</param>
+        </member>
+        <member name="P:TUP.AsmResolver.ReadingFinishedEventArgs.Instructions">
+            <summary>
+            The Instructions that are read from the file. This value is null when the Error property is not null.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ReadingFinishedEventArgs.Error">
+            <summary>
+            The error that had occured. This value is null when the Instructions property is not null.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.ReadingProcessChangedEventArgs">
+            <summary>
+            Provides data for the <see cref="E:TUP.AsmResolver.Win32Assembly.ReadingProcessChanged"/> event.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ReadingProcessChangedEventArgs.#ctor(System.Int64,System.Int32,TUP.AsmResolver.ASM.x86Instruction)">
+            <summary>
+            Creates a new instance of the ReadingProcessChangedEventArgs containing information about the new instruction and offset.
+            </summary>
+            <param name="totallength">The total lenght of the bytes.</param>
+            <param name="currentoffset">The current offset of the bytes.</param>
+            <param name="NewInstruction">The new instruction that is read from the bytes.</param>
+        </member>
+        <member name="P:TUP.AsmResolver.ReadingProcessChangedEventArgs.NewInstruction">
+            <summary>
+            The new instruction that is read from the bytes.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ReadingProcessChangedEventArgs.CurrentOffset">
+            <summary>
+            The current offset of the bytes.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ReadingProcessChangedEventArgs.TotalLength">
+            <summary>
+            The total lenght of the bytes of the corresponding <see cref="T:TUP.AsmResolver.Win32Assembly"/>.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.NTHeader">
+            <summary>
+            Represents the header of a Portable Executeable file
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NTHeader.FromAssembly(TUP.AsmResolver.Win32Assembly)">
+            <summary>
+            Gets the Portable Executeable's NT header by specifing the assembly.
+            </summary>
+            <param name="assembly">The assembly to read the nt header</param>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.NTHeader.FilePath">
+            <summary>
+            Gets the file destination the header is located in.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NTHeader.FileHeader">
+            <summary>
+            Gets the File Header representation of the NT Header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NTHeader.OptionalHeader">
+            <summary>
+            Gets the Optional Header representation of the NT Header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NTHeader.Signature">
+            <summary>
+            Gets the image signature of the portable executable.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NTHeader.IsManagedAssembly">
+            <summary>
+            Returns true if the loaded pe file is managed and uses a .NET Runtime.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.NTHeader.Sections">
+            <summary>
+            Gets the sections of the portable executable file.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NTHeader.ParentAssembly">
+            <summary>
+            Gets the parent assembly container of the NT header.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NTHeader.RawOffset">
+            <summary>
+            Gets the raw file offset of the header.
+            </summary>
+        </member>
+    </members>
+</doc>

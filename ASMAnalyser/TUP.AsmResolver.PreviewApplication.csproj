@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{12AF1140-A1F7-4D90-84B8-4BD5E9E5CF18}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TUP.AsmResolver.PreviewApplication</RootNamespace>
+    <AssemblyName>PreviewApplication</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Be.Windows.Forms.HexBox">
+      <HintPath>..\..\..\Be.Windows.Forms.HexBox.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AboutDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutDlg.Designer.cs">
+      <DependentUpon>AboutDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ComboBoxDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComboBoxDlg.Designer.cs">
+      <DependentUpon>ComboBoxDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DependencyWalkerDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DependencyWalkerDlg.Designer.cs">
+      <DependentUpon>DependencyWalkerDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DisassembleDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DisassembleDlg.Designer.cs">
+      <DependentUpon>DisassembleDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FlagItem.cs" />
+    <Compile Include="FlagsDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FlagsDlg.Designer.cs">
+      <DependentUpon>FlagsDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HexDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HexDlg.Designer.cs">
+      <DependentUpon>HexDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Inputbox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Inputbox.Designer.cs">
+      <DependentUpon>Inputbox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ListDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ListDlg.Designer.cs">
+      <DependentUpon>ListDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MethodBodyDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MethodBodyDlg.Designer.cs">
+      <DependentUpon>MethodBodyDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NetHeaderDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NetHeaderDlg.Designer.cs">
+      <DependentUpon>NetHeaderDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NumberDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NumberDlg.Designer.cs">
+      <DependentUpon>NumberDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PE Information.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PE Information.Designer.cs">
+      <DependentUpon>PE Information.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PropertyDlg.Designer.cs">
+      <DependentUpon>PropertyDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ResourcesDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ResourcesDlg.Designer.cs">
+      <DependentUpon>ResourcesDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RowEditorDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RowEditorDlg.Designer.cs">
+      <DependentUpon>RowEditorDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TablesDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TablesDlg.Designer.cs">
+      <DependentUpon>TablesDlg.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="AboutDlg.resx">
+      <DependentUpon>AboutDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComboBoxDlg.resx">
+      <DependentUpon>ComboBoxDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DependencyWalkerDlg.resx">
+      <DependentUpon>DependencyWalkerDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DisassembleDlg.resx">
+      <DependentUpon>DisassembleDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FlagsDlg.resx">
+      <DependentUpon>FlagsDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HexDlg.resx">
+      <DependentUpon>HexDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Inputbox.resx">
+      <DependentUpon>Inputbox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ListDlg.resx">
+      <DependentUpon>ListDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MethodBodyDlg.resx">
+      <DependentUpon>MethodBodyDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NetHeaderDlg.resx">
+      <DependentUpon>NetHeaderDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NumberDlg.resx">
+      <DependentUpon>NumberDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PE Information.resx">
+      <DependentUpon>PE Information.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="PropertyDlg.resx">
+      <DependentUpon>PropertyDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourcesDlg.resx">
+      <DependentUpon>ResourcesDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RowEditorDlg.resx">
+      <DependentUpon>RowEditorDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TablesDlg.resx">
+      <DependentUpon>TablesDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TUP.AsmResolver\TUP.AsmResolver.csproj">
+      <Project>{B1C33316-7181-4C94-A6D4-7C66CA02808D}</Project>
+      <Name>TUP.AsmResolver</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mime_txt.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\1333744267_settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\picture.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\memory.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\dll.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

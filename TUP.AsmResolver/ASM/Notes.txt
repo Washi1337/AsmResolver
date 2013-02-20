@@ -1,0 +1,5 @@
+﻿--- ASM folder Notes ---
+
+The classes in this directory are not finished yet. The disassembler can output wrong instructions resulting a
+wrong disassembly. This is due to the fact that I haven't add support for every opcode and all different kinds
+of operand types (There are a lot of them).
