@@ -459,9 +459,9 @@ namespace TUP.AsmResolver.PE
      
             };
             MetaDataRow row = ReadRow(parts);
-            tableheap.netheader.blobheap.stream.Seek(Convert.ToUInt32(row.parts[2]), SeekOrigin.Begin);
-            tableheap.netheader.blobheap.reader.ReadByte();
-            byte sigtype = tableheap.netheader.blobheap.reader.ReadByte();
+            tableheap.netheader.blobheap.mainStream.Seek(Convert.ToUInt32(row.parts[2]), SeekOrigin.Begin);
+            tableheap.netheader.blobheap.mainReader.ReadByte();
+            byte sigtype = tableheap.netheader.blobheap.mainReader.ReadByte();
             //IMemberSignature sig = tableheap.netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(row.parts[2]));
             if (sigtype == 0x6)
                 return new FieldReference() { tablereader = this, netheader = tableheap.netheader, metadatarow = row };

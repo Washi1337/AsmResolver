@@ -12,15 +12,17 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class BlobHeap : Heap
     {
-        internal MemoryStream stream;
-        internal BinaryReader reader;
+        // TODO: Read blobs at multiple times -> read blob and use new binary reader?
+        
+        internal MemoryStream mainStream;
+        internal BinaryReader mainReader;
         IGenericParametersProvider provider;
 
         internal BlobHeap(MetaDataStream stream)
             : base(stream)
         {
-            this.stream = new MemoryStream(Contents);
-            this.reader = new BinaryReader(this.stream);
+            this.mainStream = new MemoryStream(Contents);
+            this.mainReader = new BinaryReader(this.mainStream);
             
         }
 
@@ -38,209 +40,253 @@ namespace TUP.AsmResolver.NET
         public byte[] GetBlob(uint index)
         {
 
-            stream.Seek(index, SeekOrigin.Begin);
-            byte length = reader.ReadByte();
+            mainStream.Seek(index, SeekOrigin.Begin);
+            int length = ReadCompressedInt32(mainReader);
 
-            byte[] bytes = reader.ReadBytes(length);
+            byte[] bytes = mainReader.ReadBytes(length);
 
             return bytes;
             
         }
+        public BinaryReader GetBlobReader(uint index)
+        {
+            mainStream.Seek(index, SeekOrigin.Begin);
+            uint length = ReadCompressedUInt32(mainReader);
+            MemoryStream newStream = new MemoryStream(mainReader.ReadBytes((int)length));
+            newStream.Seek(0, SeekOrigin.Begin);
+            BinaryReader reader = new BinaryReader(newStream);
+            return reader;
+        }
         public IMemberSignature ReadMemberRefSignature(uint sig, IGenericParametersProvider provider)
         {
-            stream.Seek(sig, SeekOrigin.Begin);
-            uint length = ReadCompressedUInt32();
-
-            byte flag = reader.ReadByte();
-
-            if (flag == 0x6)
+            IMemberSignature signature = null;
+            using (BinaryReader reader = GetBlobReader(sig))
             {
-                FieldSignature signature = new FieldSignature();
-                signature.ReturnType = ReadTypeReference((ElementType)reader.ReadByte(), null);
-                return signature;
-            }
-            else
-            {
-                MethodSignature signature = new MethodSignature();
 
-                if ((flag & 0x20) != 0)
-                {
-                    signature.HasThis = true;
-                    flag = (byte)(flag & -33);
-                }
-                if ((flag & 0x40) != 0)
-                {
-                    signature.ExplicitThis = true;
-                    flag = (byte)(flag & -65);
-                }
-                if ((flag & 0x10) != 0)
-                {
-                    uint genericsig = ReadCompressedUInt32();
-                }
-                signature.CallingConvention = (MethodCallingConvention)flag;
+                byte flag = reader.ReadByte();
 
-                //if ((flag & 0x10) != 0x0)
-                //{
-                //    uint num2 = ReadCompressedUInt32();
-                //
-                //    List<GenericParameter> generics = new List<GenericParameter>();
-                //    for (int i = 0; i < num2; i++)
-                //    {
-                //    }
-                //    
-                //}
-
-                uint num3 = ReadCompressedUInt32();
-                signature.ReturnType = ReadTypeReference((ElementType)ReadCompressedUInt32(), provider);//ReadTypeSignature((uint)stream.Position);
-                if (num3 != 0)
+                if (flag == 0x6)
                 {
-                    ParameterReference[] parameters = new ParameterReference[num3];
-                    for (int i = 0; i < num3; i++)
+                    FieldSignature fieldsignature = new FieldSignature();
+                    fieldsignature.ReturnType = ReadTypeReference(reader, (ElementType)reader.ReadByte(), null);
+                    signature = fieldsignature;
+                }
+                else
+                {
+                    MethodSignature methodsignature = new MethodSignature();
+
+                    if ((flag & 0x20) != 0)
                     {
-                        parameters[i] = new ParameterReference() { ParameterType = ReadTypeReference((ElementType)ReadCompressedUInt32(), provider) };
+                        methodsignature.HasThis = true;
+                        flag = (byte)(flag & -33);
                     }
-                    signature.Parameters = parameters;
+                    if ((flag & 0x40) != 0)
+                    {
+                        methodsignature.ExplicitThis = true;
+                        flag = (byte)(flag & -65);
+                    }
+                    if ((flag & 0x10) != 0)
+                    {
+                        uint genericsig = ReadCompressedUInt32(reader);
+                    }
+                    methodsignature.CallingConvention = (MethodCallingConvention)flag;
+
+                    //if ((flag & 0x10) != 0x0)
+                    //{
+                    //    uint num2 = ReadCompressedUInt32();
+                    //
+                    //    List<GenericParameter> generics = new List<GenericParameter>();
+                    //    for (int i = 0; i < num2; i++)
+                    //    {
+                    //    }
+                    //    
+                    //}
+
+                    uint num3 = ReadCompressedUInt32(reader);
+                    methodsignature.ReturnType = ReadTypeReference(reader, (ElementType)ReadCompressedUInt32(reader), provider);//ReadTypeSignature((uint)stream.Position);
+                    if (num3 != 0)
+                    {
+                        ParameterReference[] parameters = new ParameterReference[num3];
+                        for (int i = 0; i < num3; i++)
+                        {
+                            parameters[i] = new ParameterReference() { ParameterType = ReadTypeReference(reader, (ElementType)ReadCompressedUInt32(reader), provider) };
+                        }
+                        methodsignature.Parameters = parameters;
+                    }
+                    signature = methodsignature;
+
                 }
-
-
-                return signature;
             }
+            return signature;
         }
         public PropertySignature ReadPropertySignature(uint signature)
         {
-            stream.Seek(signature, SeekOrigin.Begin);
-            uint length = ReadCompressedUInt32();
+            PropertySignature propertySig = null;
+            using (BinaryReader reader = GetBlobReader(signature))
+            {
 
-            byte flag = reader.ReadByte();
+                byte flag = reader.ReadByte();
 
-            if ((flag & 8) == 0)
-                throw new ArgumentException("Signature doesn't refer to a valid property signature.");
+                if ((flag & 8) == 0)
+                    throw new ArgumentException("Signature doesn't refer to a valid property signature.");
 
-            PropertySignature propertySig = new PropertySignature();
-            propertySig.HasThis = (flag & 0x20) != 0;
-            ReadCompressedUInt32();
-            propertySig.ReturnType = ReadTypeReference((ElementType)reader.ReadByte(), null);
+                propertySig = new PropertySignature();
+                propertySig.HasThis = (flag & 0x20) != 0;
+                ReadCompressedUInt32(reader);
+                propertySig.ReturnType = ReadTypeReference(reader, (ElementType)reader.ReadByte(), null);
+            }
             return propertySig;
         }
         public VariableDefinition[] ReadVariableSignature(uint signature, MethodDefinition parentMethod)
         {
-            stream.Seek(signature, SeekOrigin.Begin);
-            uint length = ReadCompressedUInt32();
-            byte local_sig = reader.ReadByte();
+            VariableDefinition[] variables = null;
+            using (BinaryReader reader = GetBlobReader(signature))
+            {
 
-            if (local_sig != 0x7)
-                throw new ArgumentException("Signature doesn't refer to a valid local variable signature");
+                byte local_sig = reader.ReadByte();
 
-            uint count = ReadCompressedUInt32();
+                if (local_sig != 0x7)
+                    throw new ArgumentException("Signature doesn't refer to a valid local variable signature");
 
-            if (count == 0)
-                return null;
-            
-            VariableDefinition[] variables = new VariableDefinition[count];
+                uint count = ReadCompressedUInt32(reader);
 
-            for (int i = 0; i < count; i++)
-                variables[i] = new VariableDefinition(i, ReadTypeReference((ElementType)reader.ReadByte(), parentMethod));
+                if (count == 0)
+                    return null;
 
+                variables = new VariableDefinition[count];
+
+                for (int i = 0; i < count; i++)
+                    variables[i] = new VariableDefinition(i, ReadTypeReference(reader, (ElementType)reader.ReadByte(), parentMethod));
+            }
             return variables;
         }
         public TypeReference ReadTypeSignature(uint signature)
         {
-            stream.Seek(signature, SeekOrigin.Begin);
-            uint length = ReadCompressedUInt32();
-            return ReadTypeReference((ElementType)ReadCompressedUInt32(), provider);
+            TypeReference typeRef = null;
+            using (BinaryReader reader = GetBlobReader(signature))
+            {
+                typeRef= ReadTypeReference(reader, (ElementType)ReadCompressedUInt32(reader), provider);
+            }
+            return typeRef;
         }
         public TypeReference ReadTypeSignature(uint signature, IGenericParametersProvider provider)
         {
             this.provider = provider;
-            stream.Seek(signature, SeekOrigin.Begin);
-            uint length = ReadCompressedUInt32();
-            return ReadTypeReference((ElementType)ReadCompressedUInt32(), this.provider);
-            
+            TypeReference typeRef = null;
+            using (BinaryReader reader = GetBlobReader(signature))
+            {
+                typeRef=  ReadTypeReference(reader, (ElementType)ReadCompressedUInt32(reader), this.provider);
+            }
+
+            return typeRef;
         }
         public TypeReference[] ReadGenericParametersSignature(uint signature, IGenericParametersProvider provider)
         {
-            stream.Seek(signature, SeekOrigin.Begin);
-            uint length = ReadCompressedUInt32();
             List<TypeReference> types = new List<TypeReference>();
-            this.provider = provider;
-            if (reader.ReadByte() == 0xa)
+            using (BinaryReader reader = GetBlobReader(signature))
             {
-                uint count = ReadCompressedUInt32();
-                for (int i = 0; i < count; i++)
-                    types.Add(ReadTypeReference((ElementType)reader.ReadByte(),provider));
+                
+                this.provider = provider;
+                if (reader.ReadByte() == 0xa)
+                {
+                    uint count = ReadCompressedUInt32(reader);
+                    for (int i = 0; i < count; i++)
+                        types.Add(ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider));
+                }
+                this.provider = null;
             }
-            this.provider = null;
             return types.ToArray();
         }
         public object ReadConstantValue(ElementType type, uint signature)
         {
-            stream.Seek(signature, SeekOrigin.Begin);
-
-            int length = reader.ReadByte();
-
-            switch (type)
+            object value = null;
+            using (BinaryReader reader = GetBlobReader(signature))
             {
-                case ElementType.Boolean:
-                    return reader.ReadByte() == 1;
-                case ElementType.Char:
-                    return (char)reader.ReadUInt16();
-                case ElementType.String:
-                    if ((length & 1) == 1)
-                        length--;
-                    return Encoding.Unicode.GetString(reader.ReadBytes(length));
-                case ElementType.I1:
-                    return reader.ReadSByte();
-                case  ElementType.I2:
-                    return reader.ReadInt16();
-                case ElementType.I4:
-                    return reader.ReadInt32();
-                case ElementType.I8:
-                    return reader.ReadInt64();
-                case ElementType.U1:
-                    return reader.ReadByte();
-                case ElementType.U2:
-                    return reader.ReadUInt16();
-                case ElementType.U4:
-                    return reader.ReadUInt32();
-                case ElementType.U8:
-                    return reader.ReadUInt64();
-                case ElementType.R4:
-                    return reader.ReadSingle();
-                case ElementType.R8:
-                    return reader.ReadDouble();
-                default:
-                    throw new ArgumentException("Invalid constant type", "type");
+
+                switch (type)
+                {
+                    case ElementType.Boolean:
+                        value = reader.ReadByte() == 1;
+                        break;
+                    case ElementType.Char:
+                        value = (char)reader.ReadUInt16();
+                        break;
+                    case ElementType.String:
+                        value = Encoding.Unicode.GetString(reader.ReadBytes((int)reader.BaseStream.Length));
+                        break;
+                    case ElementType.I1:
+                        value =  reader.ReadSByte();
+                        break;
+                    case ElementType.I2:
+                        value =  reader.ReadInt16();
+                        break;
+                    case ElementType.I4:
+                        value =  reader.ReadInt32();
+                        break;
+                    case ElementType.I8:
+                        value =  reader.ReadInt64();
+                        break;
+                    case ElementType.U1:
+                        value =  reader.ReadByte();
+                        break;
+                    case ElementType.U2:
+                        value =  reader.ReadUInt16();
+                        break;
+                    case ElementType.U4:
+                        value =  reader.ReadUInt32();
+                        break;
+                    case ElementType.U8:
+                        value =  reader.ReadUInt64();
+                        break;
+                    case ElementType.R4:
+                        value =  reader.ReadSingle();
+                        break;
+                    case ElementType.R8:
+                        value =  reader.ReadDouble();
+                        break;
+                    default:
+                        throw new ArgumentException("Invalid constant type", "type");
+                }
             }
+            return value;
         }
         public CustomAttributeSignature ReadCustomAttributeSignature(CustomAttribute parent, uint signature)
         {
-            stream.Seek(signature, SeekOrigin.Begin);
-            uint length = ReadCompressedUInt32();
+            CustomAttributeSignature customAttrSig = null;
+            using (BinaryReader reader = GetBlobReader(signature))
+            {
+                ushort sign = reader.ReadUInt16();
+                if (sign != 0x0001)
+                    throw new ArgumentException("Signature doesn't refer to a valid Custom Attribute signature");
 
-            ushort sign = reader.ReadUInt16();
-            if (sign != 0x0001)
-                throw new ArgumentException("Signature doesn't refer to a valid Custom Attribute signature");
 
-            
-            int fixedArgCount = 0;
+                int fixedArgCount = 0;
 
-            if (parent.Constructor.Signature != null && parent.Constructor.Signature.Parameters != null)
-                fixedArgCount = parent.Constructor.Signature.Parameters.Length;
 
-            CustomAttributeArgument[] fixedArgs = new CustomAttributeArgument[fixedArgCount];
 
-            for (int i = 0; i < fixedArgCount; i++)
-                fixedArgs[i] = new CustomAttributeArgument(ReadArgumentValue(parent.Constructor.Signature.Parameters[i].ParameterType));
+                if (parent.Constructor.Signature != null && parent.Constructor.Signature.Parameters != null)
+                    fixedArgCount = parent.Constructor.Signature.Parameters.Length;
 
-            int namedArgCount = 0;
-            CustomAttributeArgument[] namedArgs = new CustomAttributeArgument[namedArgCount];
+                CustomAttributeArgument[] fixedArgs = new CustomAttributeArgument[fixedArgCount];
 
-            return new CustomAttributeSignature(fixedArgs, namedArgs);
+
+                for (int i = 0; i < fixedArgCount; i++)
+                {
+                    fixedArgs[i] = new CustomAttributeArgument(ReadArgumentValue(reader,parent.Constructor.Signature.Parameters[i].ParameterType));
+
+                }
+
+                int namedArgCount = 0;
+                CustomAttributeArgument[] namedArgs = new CustomAttributeArgument[namedArgCount];
+
+                customAttrSig = new CustomAttributeSignature(fixedArgs, namedArgs);
+            }
+            return customAttrSig;
         }
 
 
 
-        internal TypeReference ReadTypeReference(ElementType type, IGenericParametersProvider provider)
+        internal TypeReference ReadTypeReference(BinaryReader reader, ElementType type, IGenericParametersProvider provider)
         {
             switch (type)
             {
@@ -281,9 +327,9 @@ namespace TUP.AsmResolver.NET
                 case ElementType.Boolean:
                     return netheader.TypeSystem.Boolean;
                 case ElementType.Ptr:
-                    return new PointerType(ReadTypeReference((ElementType)reader.ReadByte(), provider));
+                    return new PointerType(ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider));
                 case ElementType.MVar:
-                    uint token = ReadCompressedUInt32();
+                    uint token = ReadCompressedUInt32(reader);
                     if (provider != null && provider.GenericParameters != null && provider.GenericParameters.Length > token)
                         return provider.GenericParameters[token];
                     else
@@ -291,7 +337,7 @@ namespace TUP.AsmResolver.NET
 
 
                 case ElementType.Var:
-                    token =ReadCompressedUInt32();
+                    token =ReadCompressedUInt32(reader);
                     if (provider != null && provider is MemberReference)
                     {
                         var member = provider as MemberReference;
@@ -307,26 +353,26 @@ namespace TUP.AsmResolver.NET
                     break;
                 case ElementType.Array:
 
-                    return ReadArrayType();
+                    return ReadArrayType(reader);
 
 
                 case ElementType.SzArray:
-                    return new ArrayType(ReadTypeReference((ElementType)reader.ReadByte(), provider));
+                    return new ArrayType(ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider));
                 case ElementType.Class:
-                    return (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32());
+                    return (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32(reader));
                 case ElementType.ValueType:
-                    TypeReference typeRef = (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32());
+                    TypeReference typeRef = (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32(reader));
                     typeRef.IsValueType = true;
                     return typeRef;
                 case ElementType.ByRef:
-                    return new ByReferenceType(ReadTypeReference((ElementType)reader.ReadByte(), provider));
+                    return new ByReferenceType(ReadTypeReference(reader, (ElementType)reader.ReadByte(), provider));
                 case ElementType.Pinned:
-                    return new PinnedType(ReadTypeReference((ElementType)reader.ReadByte(), provider));
+                    return new PinnedType(ReadTypeReference(reader, (ElementType)reader.ReadByte(), provider));
                 case ElementType.GenericInst:
                     bool flag = reader.ReadByte() == 0x11;
-                    TypeReference reference2 = ReadTypeToken();
+                    TypeReference reference2 = ReadTypeToken(reader);
                     GenericInstanceType instance = new GenericInstanceType(reference2);
-                    this.ReadGenericInstanceSignature(reference2, instance);
+                     this.ReadGenericInstanceSignature(reader,reference2, instance);
                     if (flag)
                     {
                         instance.IsValueType = true;
@@ -337,36 +383,36 @@ namespace TUP.AsmResolver.NET
             return new TypeReference() { name = type.ToString(), @namespace = "" , netheader = this.netheader};
 
         }
-        private void ReadGenericInstanceSignature(IGenericParametersProvider provider, GenericInstanceType type)
+        private void ReadGenericInstanceSignature(BinaryReader reader, IGenericParametersProvider provider, GenericInstanceType type)
         {
-            uint number = ReadCompressedUInt32();
+            uint number = ReadCompressedUInt32(reader);
 
             //provider.GenericParameters = new GenericParameter[number];
             type.GenericArguments = new TypeReference[number];
 
             for (int i = 0; i < number; i++)
-                type.GenericArguments[i] = ReadTypeReference((ElementType)reader.ReadByte(), provider);
+                type.GenericArguments[i] = ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider);
 
 
         }
 
-        private TypeReference ReadTypeToken()
+        private TypeReference ReadTypeToken(BinaryReader reader)
         {
-            return (TypeReference)netheader.tableheap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32());
+            return (TypeReference)netheader.tableheap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32(reader));
         }
-        private ArrayType ReadArrayType()
+        private ArrayType ReadArrayType(BinaryReader reader)
         {
-            TypeReference arrayType = ReadTypeReference((ElementType)reader.ReadByte(), provider);
-            uint rank = ReadCompressedUInt32();
-            uint[] upperbounds = new uint[ReadCompressedUInt32()];
+            TypeReference arrayType = ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider);
+            uint rank = ReadCompressedUInt32(reader);
+            uint[] upperbounds = new uint[ReadCompressedUInt32(reader)];
 
             for (int i = 0; i < upperbounds.Length; i++)
-                upperbounds[i] = ReadCompressedUInt32();
+                upperbounds[i] = ReadCompressedUInt32(reader);
 
-            int[] lowerbounds = new int[ReadCompressedUInt32()];
+            int[] lowerbounds = new int[ReadCompressedUInt32(reader)];
 
             for (int i = 0; i < lowerbounds.Length; i++)
-                lowerbounds[i] = ReadCompressedInt32();
+                lowerbounds[i] = ReadCompressedInt32(reader);
 
 
             ArrayDimension[] dimensions = new ArrayDimension[rank];
@@ -397,21 +443,21 @@ namespace TUP.AsmResolver.NET
 
 
 
-        private object ReadArgumentValue(TypeReference paramType)
-        {  
+        private object ReadArgumentValue(BinaryReader reader, TypeReference paramType)
+        {
             if (!paramType.IsArray || !(paramType as ArrayType).IsVector)
-                return ReadElement(paramType);
+                return ReadElement(reader,paramType);
             
            // throw new NotImplementedException("Array constructor values are not supported yet.");
-            
+
             ushort elementcount = reader.ReadUInt16();
             object[] elements = new object[elementcount];
             for (int i = 0; i < elementcount; i++)
-                elements[i] = ReadElement((paramType as ArrayType).OriginalType);
+                elements[i] = ReadElement(reader,(paramType as ArrayType).OriginalType);
 
             return elements;
         }
-        private object ReadElement(TypeReference paramType)
+        private object ReadElement(BinaryReader reader, TypeReference paramType)
         {
             switch (paramType.elementType)
             {
@@ -437,7 +483,7 @@ namespace TUP.AsmResolver.NET
                     return reader.ReadDouble();
                 case ElementType.Type:
                 case ElementType.String:
-                    uint size = ReadCompressedUInt32();
+                    uint size = ReadCompressedUInt32(reader);
                     if (size == 0xFF)
                         return string.Empty;
                     byte[] rawdata = reader.ReadBytes((int)size);
@@ -455,8 +501,8 @@ namespace TUP.AsmResolver.NET
 
 
 
-
-        private uint ReadCompressedUInt32()
+       
+        private uint ReadCompressedUInt32(BinaryReader reader)
         {
            // stream.Seek(index, SeekOrigin.Begin);
             byte num = reader.ReadByte();
@@ -470,34 +516,20 @@ namespace TUP.AsmResolver.NET
             }
             return (uint)(((((num & -193) << 0x18) | (reader.ReadByte() << 0x10)) | (reader.ReadByte() << 8)) | reader.ReadByte());
         }
-        public int ReadCompressedInt32()
+
+        public int ReadCompressedInt32(BinaryReader reader)
         {
-            int num = (int)(this.ReadCompressedUInt32() >> 1);
-            if ((num & 1) == 0)
-            {
-                return num;
-            }
-            if (num < 0x40)
-            {
-                return (num - 0x40);
-            }
-            if (num < 0x2000)
-            {
-                return (num - 0x2000);
-            }
-            if (num < 0x10000000)
-            {
-                return (num - 0x10000000);
-            }
-            return (num - 0x20000000);
+            int value = (int)this.ReadCompressedUInt32(reader);
+            return (((value & 1) != 0) ? -(value >> 1) : (value >> 1));
+
         }
 
         public override void Dispose()
         {
-            reader.BaseStream.Close();
-            reader.BaseStream.Dispose();
-            reader.Close();
-            reader.Dispose();
+            mainReader.BaseStream.Close();
+            mainReader.BaseStream.Dispose();
+            mainReader.Close();
+            mainReader.Dispose();
         }
     }
 }

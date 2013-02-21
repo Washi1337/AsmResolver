@@ -23,5 +23,10 @@ namespace TUP.AsmResolver.NET.Specialized
         public string Name { get; internal set; }
         public object Value { get; internal set; }
 
+        public override string ToString()
+        {
+            return Name + " = " + (Value != null ? Value.ToString() : "null");
+        }
+
     }
 }
