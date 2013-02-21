@@ -34,7 +34,7 @@ namespace TUP.AsmResolver.PE
             this.stream = stream;
             reader = new BinaryReader(new MemoryStream(stream.Contents));
             tableheap = new TablesHeap();
-            tableheap.header = CommonAPIs.FromBinaryReader<Structures.METADATA_TABLE_HEADER>(reader);
+            tableheap.header = ASMGlobals.ReadStructureFromReader<Structures.METADATA_TABLE_HEADER>(reader);
             tableheap.reader = stream.reader;
             tableheap.offset = stream.offset;
             tableheap.size = stream.size;

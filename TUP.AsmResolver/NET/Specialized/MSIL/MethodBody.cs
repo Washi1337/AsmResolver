@@ -109,8 +109,8 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 
         public MSILInstruction[] Disassemble()
         {
-            using (MSILDisassembler disassembler = new MSILDisassembler(this))
-            { return disassembler.Disassemble(); }
+            MSILDisassembler disassembler = new MSILDisassembler(this);
+            return disassembler.Disassemble();
         }
 
         public MethodBodySection[] ExtraSections

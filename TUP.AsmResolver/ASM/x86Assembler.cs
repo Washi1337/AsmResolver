@@ -66,7 +66,12 @@ namespace TUP.AsmResolver.ASM
         {
             return CalculateSpaceNeeded(targetInstruction, newInstruction.Size);
         }
-
+        /// <summary>
+        /// Calculates and returns the size in bytes needed when replacing an instruction
+        /// </summary>
+        /// <param name="targetInstruction">The instruction to be replaced.</param>
+        /// <param name="newSize">The new instruction's size.</param>
+        /// <returns></returns>
         public int CalculateSpaceNeeded(x86Instruction targetInstruction, int newSize)
         {
             if (newSize <= targetInstruction.Size)

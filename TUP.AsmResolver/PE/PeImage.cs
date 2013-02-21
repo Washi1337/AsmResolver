@@ -126,14 +126,23 @@ namespace TUP.AsmResolver.PE
         }
         public T ReadStructure<T>()
         {
-            byte[] bytes = reader.ReadBytes(Marshal.SizeOf(default(T)));
-            return CommonAPIs.FromBytes<T>(bytes);
+            return ReadStructure<T>(Position);
         }
         public T ReadStructure<T>(long offset)
         {
             SetOffset(offset);
-            Stream stream = ReadStream(Marshal.SizeOf(default(T)));
-            return CommonAPIs.FromStream<T>(stream);
+            try
+            {
+                byte[] bytes = reader.ReadBytes(Marshal.SizeOf(typeof(T)));
+                GCHandle handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+                T theStructure = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+                handle.Free();
+                return theStructure;
+            }
+            catch
+            {
+                return default(T);
+            }
         }
 
         public byte[] ReadBytes(long offset, int length)
@@ -175,6 +184,27 @@ namespace TUP.AsmResolver.PE
             return outputStream;
             
 
+        }
+
+        public string ReadZeroTerminatedString(uint offset)
+        {
+            return ReadByteTerminatedString(offset, 0);
+        }
+        public string ReadByteTerminatedString(uint offset, byte stopByte)
+        {
+            SetOffset(offset);
+            byte lastByte = 0;
+            do
+            {
+                lastByte = ReadByte();
+
+            } while (lastByte != 0);
+
+            int endoffset = (int)Position - 1;
+
+            SetOffset(offset);
+
+            return System.Text.Encoding.ASCII.GetString(ReadBytes(endoffset - (int)offset));
         }
 
         public string ReadASCIIString(long offset)

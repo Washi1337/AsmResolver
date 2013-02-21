@@ -8,7 +8,7 @@ using System.Reflection.Emit;
 
 namespace TUP.AsmResolver.NET.Specialized.MSIL
 {
-    public class MSILDisassembler : IDisposable 
+    public class MSILDisassembler  
     {
         PE.PeImage image;
         uint ilOffset;
@@ -73,114 +73,6 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 
             return new MSILInstruction(currentOffset, opcode, rawoperand, operand);
 
-            //int indexToCheck = 0;
-            //byte opcodebyte = reader.ReadByte();
-            //
-            //if (opcodebyte == 0xFE)
-            //{
-            //    indexToCheck = 1;
-            //    opcodebyte = reader.ReadByte();
-            //}
-            //
-            //foreach (MSILOpCode opcode in opcodes)
-            //{
-            //    if (opcode.Bytes.Length == indexToCheck+1 && opcode.Bytes[indexToCheck] == opcodebyte)
-            //    {
-            //        int metadata;
-            //        object operand = null; 
-            //        switch (opcode.OperandType)
-            //        {
-            //            case OperandType.Argument:
-            //                metadata = reader.ReadInt32();
-            //                operand = GetParameter(metadata);
-            //                break;
-            //            case OperandType.ShortArgument:
-            //                metadata = reader.ReadByte();
-            //                operand = GetParameter(metadata);
-            //                break;
-            //                
-            //            case OperandType.Float32:
-            //
-            //                operand = reader.ReadSingle();
-            //                break;
-            //            case OperandType.Float64:
-            //                operand = reader.ReadDouble();
-            //                break;
-            //            case OperandType.InstructionTable:
-            //                int length = reader.ReadInt32();
-            //                int[] offsets = new int[length];
-            //                int nextOffset = currentOffset + (length * 4) + opcode.Bytes.Length + 4;
-            //                for (int i = 0; i < length; i++)
-            //                    offsets[i] = (reader.ReadInt32() + nextOffset);
-            //                operand = offsets;
-            //                break;
-            //
-            //            case OperandType.InstructionTarget:
-            //                operand = reader.ReadInt32() + currentOffset + opcode.Bytes.Length + sizeof(int);
-            //                break;
-            //
-            //            case OperandType.ShortInstructionTarget:
-            //                operand = reader.ReadSByte() + currentOffset + opcode.Bytes.Length + sizeof(byte);
-            //                break;
-            //                
-            //            case OperandType.Int8:
-            //                operand = reader.ReadByte();
-            //                break;
-            //            case OperandType.Int32:
-            //                operand = reader.ReadInt32();
-            //                break;
-            //            case OperandType.Int64:
-            //                operand = reader.ReadInt64();
-            //                break;
-            //            case OperandType.Token:
-            //            case OperandType.Field:
-            //            case OperandType.Method:
-            //            case OperandType.Type:
-            //                metadata = reader.ReadInt32();
-            //                try
-            //                {
-            //                    operand = tokenresolver.ResolveMember(metadata);
-            //
-            //                    if ((operand is TypeSpecification) && (operand as TypeSpecification).OriginalType is GenericParamReference)
-            //                    {
-            //                        GenericParamReference paramRef = (operand as TypeSpecification).OriginalType as GenericParamReference;
-            //                        if (paramRef.IsMethodVar)
-            //                        {
-            //                            if (MethodBody.Method.GenericParameters != null && MethodBody.Method.GenericParameters.Length > 0)
-            //                                operand = MethodBody.Method.GenericParameters[paramRef.Index];
-            //                        }
-            //                        else
-            //                        {
-            //                            if (MethodBody.Method.DeclaringType.GenericParameters != null && MethodBody.Method.DeclaringType.GenericParameters.Length > 0)
-            //                                operand = MethodBody.Method.DeclaringType.GenericParameters[paramRef.Index];
-            //                        }
-            //                    }
-            //                }
-            //                catch (Exception ex) { operand = new TypeReference() { name = "TOKEN:" + metadata.ToString("X8") }; }
-            //                break;
-            //
-            //            case OperandType.ShortVariable:
-            //                operand = GetVariable(reader.ReadByte());
-            //                break;
-            //            case OperandType.Variable:
-            //                operand = GetVariable(reader.ReadInt32());
-            //                break;
-            //            case OperandType.Signature:
-            //                operand = reader.ReadInt32();
-            //                break;
-            //            case OperandType.String:
-            //                operand = tokenresolver.ResolveString(reader.ReadInt32());
-            //                break;
-            //            
-            //        }
-            //
-            //        return new MSILInstruction(currentOffset, opcode, operand);
-            //
-            //    }
-            //
-            //}
-
-            //return new MSILInstruction(currentOffset, MSILOpCodes.Nop, null);
         }
         public int CurrentOffset
         {
@@ -283,7 +175,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                         return ASMGlobals.ByteToSByte(rawoperand[0]) + instructionOffset + opcode.Bytes.Length + sizeof(byte);
 
                     case OperandType.Int8:
-                        return rawoperand[0];
+                        return ASMGlobals.ByteToSByte(rawoperand[0]);
                     case OperandType.Int32:
                         return BitConverter.ToInt32(rawoperand, 0);
                     case OperandType.Int64:
@@ -323,8 +215,6 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                         return BitConverter.ToInt32(rawoperand, 0);
                     case OperandType.String:
                         return tokenresolver.ResolveString(BitConverter.ToInt32(rawoperand, 0));
-                        break;
-
                 }
             }
             catch { }
@@ -374,9 +264,5 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             return null;
         }
 
-        public void Dispose()
-        {
-            opcodes = null;
-        }
     }
 }

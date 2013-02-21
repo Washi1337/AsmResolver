@@ -62,7 +62,7 @@ namespace TUP.AsmResolver.PE
                     image.SetOffset(functionnameordinaloffset);
                     uint functionNameOrdinal = image.reader.ReadUInt32();
 
-                    string name = ASMGlobals.GetStringByOffset(image, (int)offsetConverter.RvaToFileOffset(functionNameRVA), (byte)0x0);
+                    string name = image.ReadZeroTerminatedString(offsetConverter.RvaToFileOffset(functionNameRVA));
 
                     exports.Add(new ExportMethod(libraryname, name, functionRVA, i + exportDirectory.Base));
 
@@ -128,8 +128,7 @@ namespace TUP.AsmResolver.PE
         private string ReadLibraryName(Structures.IMAGE_IMPORT_DESCRIPTOR rawImportDir)
         {
             uint nameoffset = offsetConverter.RvaToFileOffset(rawImportDir.NameRVA);
-            image.SetOffset(nameoffset);
-            return ReadZeroTerminatedString();
+            return image.ReadZeroTerminatedString(nameoffset);
            
 
         }
@@ -190,25 +189,10 @@ namespace TUP.AsmResolver.PE
             {
                 image.SetOffset(offsetConverter.RvaToFileOffset(ofunction));
                 hint = image.reader.ReadUInt16();
-                return ReadZeroTerminatedString();
+                return image.ReadZeroTerminatedString((uint)image.Position);
             }
         }
-        private string ReadZeroTerminatedString()
-        {
-            uint nameoffset = (uint)image.Position;
-            byte lastByte = 0;
-            do
-            {
-                lastByte = image.ReadByte();
-
-            } while (lastByte != 0);
-
-            int endoffset = (int)image.Position - 1;
-
-            image.SetOffset(nameoffset);
-
-            return System.Text.Encoding.ASCII.GetString(image.ReadBytes(endoffset - (int)nameoffset));
-        }
+    
        // private void LoadImports()
        // {
        //    

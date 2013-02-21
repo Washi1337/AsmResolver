@@ -153,8 +153,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public ulong ToAsciiStringPtr(Win32Assembly assembly)
         {
-            uint s = (uint)ASMGlobals.Floor(Va - assembly.ntheader.OptionalHeader.ImageBase, 4);
-            Section targetsection = Section.GetSectionByRva(assembly, (uint)(Va - assembly.ntheader.OptionalHeader.ImageBase - s));
+
+            Section targetsection = Section.GetSectionByRva(assembly, Rva);
             ulong stroffset = Va - assembly.ntheader.OptionalHeader.ImageBase - targetsection.RVA + targetsection.RawOffset;
            // if (stroffset < 0)
            //     throw new ArgumentException("The target offset is not a valid offset to a string");
@@ -167,7 +167,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public string ToAsciiString(Win32Assembly assembly)
         {
-            return ASMGlobals.GetStringByOffset(assembly.peImage, (int)this.ToAsciiStringPtr(assembly));
+            return assembly.peImage.ReadZeroTerminatedString((uint)this.ToAsciiStringPtr(assembly));
         }
        /// <summary>
        /// Converts the offset to an imported or exported method/

@@ -69,7 +69,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return ASMGlobals.GetStringByOffset(assembly.peImage, 0x4E, 0x0D);
+                return assembly.peImage.ReadByteTerminatedString(0x4E, 0x0D);
             }
             set
             {

@@ -32,6 +32,14 @@
             <param name="newInstruction">The new instruction.</param>
             <returns></returns>
         </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Assembler.CalculateSpaceNeeded(TUP.AsmResolver.ASM.x86Instruction,System.Int32)">
+            <summary>
+            Calculates and returns the size in bytes needed when replacing an instruction
+            </summary>
+            <param name="targetInstruction">The instruction to be replaced.</param>
+            <param name="newSize">The new instruction's size.</param>
+            <returns></returns>
+        </member>
         <member name="T:TUP.AsmResolver.ASM.x86Disassembler">
             <summary>
             Disassembler for Win32 Assemblies. Pre-Pre-Pre Alpha version :D. UNDER CONSTRUCTION
@@ -1749,6 +1757,45 @@
         <member name="T:TUP.AsmResolver.ResourceDataEntry">
             <summary>
             Represents a data entry of a resource directory entry.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.ResourceDataEntry.GetStream">
+            <summary>
+            Reads the data as a stream with a buffer size of 4096 bytes.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ResourceDataEntry.GetStream(System.Int32)">
+            <summary>
+            Reads the data as a stream with a specified buffer size.
+            </summary>
+            <param name="buffersize">The buffer size to be used to read the data.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.ResourceDataEntry.GetContents">
+            <summary>
+            Reads the data and returns it in byte array format.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDataEntry.ParentEntry">
+            <summary>
+            Gets the parent directory entry of the data entry.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDataEntry.OffsetToData">
+            <summary>
+            Gets the offset to the contents of this data entry. This offset is relative to the resource directory offset.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDataEntry.Size">
+            <summary>
+            Gets the size in bytes of the data contents.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.ResourceDataEntry.CodePage">
+            <summary>
+            Gets the code page of the data entry.
             </summary>
         </member>
         <member name="T:TUP.AsmResolver.ResourceDirectory">

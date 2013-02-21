@@ -181,7 +181,6 @@
     <Compile Include="PE\NETTableReader.cs" />
     <Compile Include="PE\PeImage.cs" />
     <Compile Include="PE\ResourcesReader.cs" />
-    <Compile Include="PE\CommonAPIs.cs" />
     <Compile Include="PE\Structures.cs" />
     <Compile Include="ResourceDataEntry.cs" />
     <Compile Include="ResourceDirectory.cs" />
