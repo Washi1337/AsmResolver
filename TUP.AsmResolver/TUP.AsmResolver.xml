@@ -2223,11 +2223,12 @@
             Represents a library reference containing imported methods that the corresponding portable executable uses.
             </summary>
         </member>
-        <member name="M:TUP.AsmResolver.LibraryReference.Resolve(TUP.AsmResolver.Win32Assembly)">
+        <member name="M:TUP.AsmResolver.LibraryReference.Resolve(TUP.AsmResolver.Win32Assembly,System.Boolean)">
             <summary>
             Resolves the asembly by checking the directory of the assembly, the system directories and the current directory.
             </summary>
             <param name="parentAssembly">The parent assembly to search from. You can fill in a null value, but it can influent the result.</param>
+            <param name="disableWOW64Redirection">Disables WOW64 layer redirections to get access 64 bit directories. Default value is true.</param>
             <returns></returns>
         </member>
         <member name="P:TUP.AsmResolver.LibraryReference.LibraryName">

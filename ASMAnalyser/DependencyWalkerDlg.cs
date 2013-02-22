@@ -70,7 +70,7 @@ namespace TUP.AsmResolver.PreviewApplication
                         Win32Assembly resolvedassembly ;
                         if (tag.assembly == null)
                         {
-                            resolvedassembly = reference.Resolve(assembly);
+                            resolvedassembly = reference.Resolve(assembly, true);
 
                             e.Node.Tag = new AssemblyReference() { assembly = resolvedassembly };
                         }

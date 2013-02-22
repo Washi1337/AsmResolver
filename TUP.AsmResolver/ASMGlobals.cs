@@ -10,6 +10,10 @@ namespace TUP.AsmResolver
     class ASMGlobals
     {
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool Wow64EnableWow64FsRedirection(bool Wow64FsEnableRedirection);
+
+
         internal static T ReadStructureFromReader<T>(BinaryReader reader)
         {
             try

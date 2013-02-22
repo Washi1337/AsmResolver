@@ -12,7 +12,6 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class BlobHeap : Heap
     {
-        // TODO: Read blobs at multiple times -> read blob and use new binary reader?
         
         internal MemoryStream mainStream;
         internal BinaryReader mainReader;

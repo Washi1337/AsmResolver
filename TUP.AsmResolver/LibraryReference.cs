@@ -51,45 +51,62 @@ namespace TUP.AsmResolver
         /// Resolves the asembly by checking the directory of the assembly, the system directories and the current directory.
         /// </summary>
         /// <param name="parentAssembly">The parent assembly to search from. You can fill in a null value, but it can influent the result.</param>
+        /// <param name="disableWOW64Redirection">Disables WOW64 layer redirections to get access 64 bit directories. Default value is true.</param>
         /// <returns></returns>
-        public Win32Assembly Resolve(Win32Assembly parentAssembly)
+        public Win32Assembly Resolve(Win32Assembly parentAssembly, bool disableWOW64Redirection = true)
         {
-            string actualpath = "";
-            if (parentAssembly != null)
-            {
-                string path = parentAssembly.path.Substring(0, parentAssembly.path.LastIndexOf("\\"));
-                if (File.Exists(path + "\\" + LibraryName))
-                {
-                    actualpath = path + "\\" + LibraryName;
-                    goto things;
-                }
-            }
-            if (parentAssembly.ntheader.OptionalHeader.Is32Bit)
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) + "\\" + LibraryName))
-                    actualpath = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) + "\\" + LibraryName;
-            else
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\" + LibraryName))
-                    actualpath = Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\" + LibraryName;
-
-
-            if (actualpath == "" & File.Exists(Environment.CurrentDirectory + "\\" + LibraryName))
-                actualpath = Environment.CurrentDirectory + "\\" + LibraryName;
-
-            things:
-            if (actualpath == "")
-                throw new Exceptions.ResolveException(new FileNotFoundException("The target application can not be found."));
-
             Win32Assembly assembly;
-
+            if (disableWOW64Redirection)
+                ASMGlobals.Wow64EnableWow64FsRedirection(false);
             try
             {
-                assembly = Win32Assembly.LoadFile(actualpath);
-            }
-            catch (Exception ex)
-            {
-                throw new Exceptions.ResolveException(ex);
-            }
+                string actualpath = "";
+                if (parentAssembly != null)
+                {
+                    string path = parentAssembly.path.Substring(0, parentAssembly.path.LastIndexOf("\\"));
+                    if (File.Exists(path + "\\" + LibraryName))
+                    {
+                        actualpath = path + "\\" + LibraryName;
+                        goto things;
+                    }
+                }
+                if (parentAssembly.ntheader.OptionalHeader.Is32Bit)
+                {
+                    if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) + "\\" + LibraryName))
+                        actualpath = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) + "\\" + LibraryName;
+                }
+                else if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\" + LibraryName))
+                        actualpath = Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\" + LibraryName;
 
+
+                if (actualpath == "" & File.Exists(Environment.CurrentDirectory + "\\" + LibraryName))
+                    actualpath = Environment.CurrentDirectory + "\\" + LibraryName;
+
+            things:
+                if (actualpath == "")
+                    throw new Exceptions.ResolveException(new FileNotFoundException("The target application can not be found."));
+
+
+                try
+                {
+                    assembly = Win32Assembly.LoadFile(actualpath);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exceptions.ResolveException(ex);
+                }
+            }
+            catch
+            {
+                if (disableWOW64Redirection)
+                    ASMGlobals.Wow64EnableWow64FsRedirection(true);
+                throw;
+            }
+            finally
+            {
+                if (disableWOW64Redirection)
+                    ASMGlobals.Wow64EnableWow64FsRedirection(true);
+            }
             return assembly;
        
         }

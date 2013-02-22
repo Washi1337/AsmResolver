@@ -136,22 +136,24 @@ namespace TUP.AsmResolver.PE
         private ImportMethod[] ReadImportMethods(Structures.IMAGE_IMPORT_DESCRIPTOR rawImportDir)
         {
             List<ImportMethod> methods = new List<ImportMethod>();
-         
 
             int currentIndex = 0;
             uint baseoffset = offsetConverter.RvaToFileOffset(rawImportDir.OriginalFirstThunk);
+            uint baseft= offsetConverter.RvaToFileOffset(rawImportDir.FirstThunk);
             while (true)
             {
+                
                 uint methodOffset = 0;
+                uint rvaOffset = 0;
 
                 ulong ofunction = ReadFunctionValue(baseoffset, currentIndex, out methodOffset);
 
                 if (ofunction == 0)
                     break;
 
-                ulong rva = rawImportDir.FirstThunk + (ulong)(currentIndex * (header.OptionalHeader.Is32Bit ? sizeof(uint) : sizeof(ulong)));
+                ulong rva = ReadFunctionValue(baseft, currentIndex, out rvaOffset);
                 ushort hint = 0;
-                string name = ReadFunctionName((uint)ofunction, out hint);
+                string name = ReadFunctionName(ofunction, out hint);
 
 
                 methods.Add(new ImportMethod((uint)ofunction, (uint)rva, hint, name));
@@ -178,8 +180,14 @@ namespace TUP.AsmResolver.PE
                 return image.reader.ReadUInt32();
             }
         }
-        private string ReadFunctionName(uint ofunction, out ushort hint)
+        private string ReadFunctionName(ulong ofunction, out ushort hint)
         {
+            if (ofunction >> 63 == 1)
+            {
+                hint = (ushort)(ofunction - (0x8 << 64));
+                return string.Empty;
+
+            }
             if (ofunction >> 31 == 1)
             {
                 hint = (ushort)(ofunction - 0x80000000);
@@ -187,7 +195,7 @@ namespace TUP.AsmResolver.PE
             }
             else
             {
-                image.SetOffset(offsetConverter.RvaToFileOffset(ofunction));
+                image.SetOffset(offsetConverter.RvaToFileOffset((uint)ofunction));
                 hint = image.reader.ReadUInt16();
                 return image.ReadZeroTerminatedString((uint)image.Position);
             }
