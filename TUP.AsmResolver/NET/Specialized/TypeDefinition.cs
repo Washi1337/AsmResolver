@@ -16,6 +16,7 @@ namespace TUP.AsmResolver.NET.Specialized
         private TypeDefinition decltype = null;
         private GenericParameter[] genericparams = null;
         private string name = string.Empty;
+        private string fullname = string.Empty;
         private string @namespace = string.Empty;
         private TypeReference baseType = null;
 
@@ -31,6 +32,32 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (name == string.Empty)
                     name = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]));
                 return name;
+            }
+        }
+        public override string FullName
+        {
+            get
+            {
+                if (fullname == string.Empty)
+                {
+                    
+                    StringBuilder builder = new StringBuilder();
+                    TypeReference last = this;
+                    TypeReference declaringType = this.DeclaringType;
+                    while (declaringType != null)
+                    {
+                        if (!declaringType.IsDefinition)
+                            break;
+                        builder.Insert(0, declaringType.Name + "/");
+                        last = declaringType;
+                        declaringType = ((TypeDefinition)declaringType).DeclaringType;
+                    }
+                    builder.Insert(0, last.Namespace + ".");
+                    builder.Append(this.Name);
+                    fullname = builder.ToString();
+                    builder.Clear();
+                }
+                return fullname;
             }
         }
 
@@ -310,7 +337,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override string ToString()
         {
-            return Namespace == "" ? Name : Namespace + "." + Name ;
+            return FullName;
         }
 
         public bool IsBasedOn(TypeReference typeRef)

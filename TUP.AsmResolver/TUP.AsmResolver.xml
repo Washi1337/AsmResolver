@@ -875,12 +875,22 @@
         </member>
         <member name="P:TUP.AsmResolver.NET.MetaDataTable.AmountOfRows">
             <summary>
-            Gets the amount of rows that are available in the table.
+            Gets or sets the amount of rows that are available in the table.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.NET.MetaDataTable.Members">
             <summary>
             Gets an array of all members available in the table.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataTable.TablesHeap">
+            <summary>
+            Gets the parent tables heap.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.MetaDataTable.TableOffset">
+            <summary>
+            Gets the offset to the first member of the table.
             </summary>
         </member>
         <member name="T:TUP.AsmResolver.NET.MetaDataTableType">

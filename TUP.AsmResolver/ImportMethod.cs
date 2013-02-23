@@ -11,9 +11,10 @@ namespace TUP.AsmResolver
     public class ImportMethod : IMethod
     {
 
-        public ImportMethod( uint ofunction, uint rva, ushort hint, string name)
+        public ImportMethod( uint ofunction, uint ft, uint rva, ushort hint, string name)
         {
-            this.Value = ofunction;
+            this.OriginalThunkValue = ofunction;
+            this.ThunkValue = ft;
             this.RVA = rva;
             this.Ordinal = hint;
             this.Name = name;
@@ -52,7 +53,12 @@ namespace TUP.AsmResolver
             get;
             private set;
         }
-        public uint Value
+        public uint OriginalThunkValue
+        {
+            get;
+            private set;
+        }
+        public uint ThunkValue
         {
             get;
             private set;

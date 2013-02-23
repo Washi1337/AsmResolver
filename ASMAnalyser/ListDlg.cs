@@ -31,7 +31,7 @@ namespace TUP.AsmResolver.PreviewApplication
             if (c1)
             {
                 Inputbox input = new Inputbox();
-                input.Text = "Edit thunkname " + dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+                input.Text = "Edit name " + dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
                 input.textBox1.MaxLength = Section.MaxSectionNameLength;
                 input.textBox1.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
                 if (input.ShowDialog() == System.Windows.Forms.DialogResult.OK)

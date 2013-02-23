@@ -18,6 +18,15 @@ namespace TUP.AsmResolver.NET.Specialized
             this.netheader = netheader;
         }
 
+        public object ResolveToken(int metadataToken)
+        {
+            byte rowIndex = (byte)(metadataToken >> 0x18);
+            if (rowIndex == 0x70)
+                return ResolveString(metadataToken);
+            else
+                return ResolveMember(metadataToken);
+        }
+
         /// <summary>
         /// Resolves a member by its metadata token.
         /// </summary>

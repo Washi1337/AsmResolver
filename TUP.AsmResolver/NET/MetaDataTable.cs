@@ -10,11 +10,14 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class MetaDataTable : IDisposable 
     {
-        internal MetaDataTable()
+
+        internal MetaDataTable(TablesHeap tableHeap)
         {
+            TablesHeap = tableHeap;
             members = new List<MetaDataMember>();
         }
-        internal int amountofrows;
+        internal int rowAmount;
+        internal long rowAmountOffset;
         internal List<MetaDataMember> members;
         internal MetaDataTableType type;
         /// <summary>
@@ -26,12 +29,18 @@ namespace TUP.AsmResolver.NET
             internal set { type = value; }
         }
         /// <summary>
-        /// Gets the amount of rows that are available in the table.
+        /// Gets or sets the amount of rows that are available in the table.
         /// </summary>
         public int AmountOfRows
         {
-            get { return amountofrows; }
-            internal set { amountofrows = value; }
+            get { return rowAmount; }
+            set
+            {
+                var image = TablesHeap.netheader.assembly.peImage;
+                image.SetOffset(rowAmountOffset);
+                image.writer.Write(rowAmount);
+                rowAmount = value;
+            }
         }
         /// <summary>
         /// Gets an array of all members available in the table.
@@ -40,6 +49,23 @@ namespace TUP.AsmResolver.NET
         {
             get { return members.ToArray(); }
         }
+        /// <summary>
+        /// Gets the parent tables heap.
+        /// </summary>
+        public TablesHeap TablesHeap 
+        { 
+            get;
+            private set;
+        }
+        /// <summary>
+        /// Gets the offset to the first member of the table.
+        /// </summary>
+        public uint TableOffset
+        {
+            get;
+            internal set;
+        }
+
         /// <summary>
         /// Returns true when this table can be seen as a large table by specifying the bits to be encoded in an index value to a member in the table.
         /// </summary>
@@ -50,7 +76,7 @@ namespace TUP.AsmResolver.NET
             if (bitsToEncode < 0)
                 throw new ArgumentException("Cannot have a negative amount of bits.");
             ushort maxamount = (ushort)((ushort)0xFFFF >> (ushort)bitsToEncode);
-            bool isbigger = amountofrows > maxamount ;
+            bool isbigger = rowAmount > maxamount ;
             return isbigger;
         }
         /// <summary>
@@ -59,7 +85,7 @@ namespace TUP.AsmResolver.NET
         /// <returns></returns>
         public override string ToString()
         {
-            return "Type: " + type.ToString() + ", Rows: " + amountofrows.ToString();
+            return "Type: " + type.ToString() + ", Rows: " + rowAmount.ToString();
         }
         /// <summary>
         /// Applies all made changes to the members.
@@ -77,5 +103,7 @@ namespace TUP.AsmResolver.NET
             foreach (var member in members)
                 member.Dispose();
         }
+
+        
     }
 }

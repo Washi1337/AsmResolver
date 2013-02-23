@@ -64,6 +64,7 @@
     <Compile Include="NET\Specialized\FileAttributes.cs" />
     <Compile Include="NET\Specialized\FileReference.cs" />
     <Compile Include="NET\Specialized\GenericInstanceType.cs" />
+    <Compile Include="NET\Specialized\GenericParamConstraint.cs" />
     <Compile Include="NET\Specialized\GenericParamReference.cs" />
     <Compile Include="NET\Specialized\IStreamProvider.cs" />
     <Compile Include="NET\Specialized\MSIL\MSILAssembler.cs" />

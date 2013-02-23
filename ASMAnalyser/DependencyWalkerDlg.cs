@@ -208,7 +208,7 @@ namespace TUP.AsmResolver.PreviewApplication
                             cell.Value = "0x" + ((long)meth.RVA).ToString("x8").ToUpper();
                             row.Cells.Add(cell);
                             cell = new DataGridViewTextBoxCell();
-                            cell.Value = "0x" + ((long)meth.Value).ToString("x8").ToUpper();
+                            cell.Value = "0x" + ((long)meth.OriginalThunkValue).ToString("x8").ToUpper();
                             row.Cells.Add(cell);
 
                             rows.Add(row);

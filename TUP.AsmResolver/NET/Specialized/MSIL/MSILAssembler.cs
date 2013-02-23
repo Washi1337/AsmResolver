@@ -42,7 +42,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 throw new ArgumentException("The size of the new instruction is bigger than the target instruction.", "newInstruction");
 
             newInstruction.Offset = targetInstruction.Offset;
-            newInstruction.GenerateBytes();
+            GenerateOperandBytes(newInstruction);
 
             if (!suppressInvalidReferences && newInstruction.Operand is MetaDataMember)
             {
@@ -88,6 +88,80 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 currentOffset += currentInstruction.Size;
             }
             return sizeNeeded;
+        }
+
+
+        internal void GenerateOperandBytes(MSILInstruction instruction)
+        {
+            if (instruction.OperandBytes == null)
+            {
+                switch (instruction.OpCode.OperandType)
+                {
+                    case OperandType.Argument:
+                        if (instruction.Operand is ParameterDefinition)
+                            instruction.OperandBytes = BitConverter.GetBytes((instruction.Operand as ParameterDefinition).Sequence);
+                        break;
+                    case OperandType.ShortArgument:
+                        if (instruction.Operand is ParameterDefinition)
+                            instruction.OperandBytes = BitConverter.GetBytes((byte)(instruction.Operand as ParameterDefinition).Sequence);
+                        break;
+                    case OperandType.Variable:
+                        if (instruction.Operand is VariableDefinition)
+                            instruction.OperandBytes = BitConverter.GetBytes((ushort)(instruction.Operand as VariableDefinition).Index);
+                        break;
+                    case OperandType.ShortVariable:
+                        if (instruction.Operand is VariableDefinition)
+                            instruction.OperandBytes = BitConverter.GetBytes((byte)(instruction.Operand as VariableDefinition).Index);
+                        break;
+                    case OperandType.Field:
+                    case OperandType.Token:
+                    case OperandType.Method:
+                    case OperandType.Type:
+                        // TODO: importing metadata members into tablesheap
+                        if (instruction.Operand is MetaDataMember)
+                            instruction.OperandBytes = BitConverter.GetBytes((instruction.Operand as MetaDataMember).metadatatoken);
+                        break;
+                    case OperandType.Float32:
+                        if (instruction.Operand is float)
+                            instruction.OperandBytes = BitConverter.GetBytes((float)instruction.Operand);
+                        break;
+                    case OperandType.Float64:
+                        if (instruction.Operand is double)
+                            instruction.OperandBytes = BitConverter.GetBytes((double)instruction.Operand);
+                        break;
+                    case OperandType.Int8:
+                        if (instruction.Operand is sbyte)
+                            instruction.OperandBytes = new byte[] { byte.Parse(((byte)instruction.Operand).ToString("x2"), System.Globalization.NumberStyles.HexNumber) };
+                        break;
+                    case OperandType.Signature:
+                    case OperandType.Int32:
+                        if (instruction.Operand is int)
+                            instruction.OperandBytes = BitConverter.GetBytes((int)instruction.Operand);
+                        break;
+                    case OperandType.Int64:
+                        if (instruction.Operand is long)
+                            instruction.OperandBytes = BitConverter.GetBytes((long)instruction.Operand);
+                        break;
+                    case OperandType.InstructionTarget:
+                        //BitConverter.ToInt32(rawoperand,0) + instructionOffset + opcode.Bytes.Length + sizeof(int);
+                        if (instruction.Operand is MSILInstruction)
+                            instruction.OperandBytes = BitConverter.GetBytes((instruction.Operand as MSILInstruction).Offset - sizeof(int) - instruction.OpCode.Bytes.Length - instruction.Offset);
+                        break;
+                    case OperandType.ShortInstructionTarget:
+                        if (instruction.Operand is MSILInstruction)
+                            instruction.OperandBytes = new byte[] { byte.Parse(((sbyte)(instruction.Operand as MSILInstruction).Offset - sizeof(sbyte) - instruction.OpCode.Bytes.Length - instruction.Offset).ToString("x2"), System.Globalization.NumberStyles.HexNumber) };
+                        break;
+                    case OperandType.String:
+                        //TODO: importing strings into stringsheap
+                        
+                    case OperandType.Phi:
+                    case OperandType.InstructionTable:
+                        throw new NotSupportedException();
+
+                }
+                if (instruction.OperandBytes == null && instruction.Operand != null)
+                    throw new ArgumentException("Operand must match with the opcode's operand type (" + instruction.OpCode.OperandType.ToString() + ")");
+            }
         }
     }
 }

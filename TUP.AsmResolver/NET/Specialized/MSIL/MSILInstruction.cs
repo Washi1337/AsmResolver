@@ -29,6 +29,11 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             return instruction;
         }
 
+        public static MSILInstruction Create(MSILOpCode opcode, int metadataToken, NETHeader netHeader)
+        {
+            return new MSILInstruction() { OpCode = opcode, OperandBytes = BitConverter.GetBytes(metadataToken), Operand = netHeader.TokenResolver.ResolveToken(metadataToken) };
+        }
+
         public MSILInstruction Next { get; internal set; }
         public MSILInstruction Previous { get; internal set; }
 
@@ -104,77 +109,6 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 default:
                     return Operand == null ? "" : Operand.ToString();
 
-            }
-        }
-
-        internal void GenerateBytes()
-        {
-            if (OperandBytes == null)
-            {
-                switch (OpCode.OperandType)
-                {
-                    case OperandType.Argument:
-                        if (Operand is ParameterDefinition)
-                            OperandBytes = BitConverter.GetBytes((Operand as ParameterDefinition).Sequence);
-                        break;
-                    case OperandType.ShortArgument:
-                        if (Operand is ParameterDefinition)
-                            OperandBytes = BitConverter.GetBytes((byte)(Operand as ParameterDefinition).Sequence);
-                        break;
-                    case OperandType.Variable:
-                        if (Operand is VariableDefinition)
-                            OperandBytes = BitConverter.GetBytes((ushort)(Operand as VariableDefinition).Index);
-                        break;
-                    case OperandType.ShortVariable:
-                        if (Operand is VariableDefinition)
-                            OperandBytes = BitConverter.GetBytes((byte)(Operand as VariableDefinition).Index);
-                        break;
-                    case OperandType.Field:
-                    case OperandType.Token:
-                    case OperandType.Method:
-                    case OperandType.Type:
-                        if (Operand is MetaDataMember)
-                            OperandBytes = BitConverter.GetBytes((Operand as MetaDataMember).metadatatoken);
-                        break;
-                    case OperandType.Float32:
-                        if (Operand is float)
-                            OperandBytes = BitConverter.GetBytes((float)Operand);
-                        break;
-                    case OperandType.Float64:
-                        if (Operand is double)
-                            OperandBytes = BitConverter.GetBytes((double)Operand);
-                        break;
-                    case OperandType.Int8:
-                        if (Operand is sbyte)
-                            OperandBytes = new byte[] { byte.Parse(((byte)Operand).ToString("x2"), System.Globalization.NumberStyles.HexNumber) };
-                        break;
-                    case OperandType.Signature:
-                    case OperandType.Int32:
-                        if (Operand is int)
-                            OperandBytes = BitConverter.GetBytes((int)Operand);
-                        break;
-                    case OperandType.Int64:
-                        if (Operand is long)
-                            OperandBytes = BitConverter.GetBytes((long)Operand);
-                        break;
-                    case OperandType.Phi:
-                        throw new NotSupportedException();
-                    case OperandType.InstructionTarget:
-                        //BitConverter.ToInt32(rawoperand,0) + instructionOffset + opcode.Bytes.Length + sizeof(int);
-                        if (Operand is MSILInstruction)
-                            OperandBytes = BitConverter.GetBytes((Operand as MSILInstruction).Offset - sizeof(int) - this.OpCode.Bytes.Length - this.Offset);
-                        break;
-                    case OperandType.ShortInstructionTarget:
-                        if (Operand is MSILInstruction)
-                            OperandBytes = new byte[] { byte.Parse(((sbyte)(Operand as MSILInstruction).Offset - sizeof(sbyte) - this.OpCode.Bytes.Length - this.Offset).ToString("x2"), System.Globalization.NumberStyles.HexNumber) };
-                        break;
-                    case OperandType.String:
-                    case OperandType.InstructionTable:
-                        throw new NotSupportedException();
-
-                }
-                if (OperandBytes == null && Operand != null)
-                    throw new ArgumentException("Operand must match with the opcode's operand type (" + OpCode.OperandType.ToString() + ")");
             }
         }
 

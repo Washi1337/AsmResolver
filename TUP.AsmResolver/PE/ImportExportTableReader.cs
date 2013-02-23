@@ -144,19 +144,19 @@ namespace TUP.AsmResolver.PE
             {
                 
                 uint methodOffset = 0;
-                uint rvaOffset = 0;
+                uint ftOffset = 0;
 
                 ulong ofunction = ReadFunctionValue(baseoffset, currentIndex, out methodOffset);
 
                 if (ofunction == 0)
                     break;
 
-                ulong rva = ReadFunctionValue(baseft, currentIndex, out rvaOffset);
+                ulong ft = ReadFunctionValue(baseft, currentIndex, out ftOffset);
                 ushort hint = 0;
                 string name = ReadFunctionName(ofunction, out hint);
 
-
-                methods.Add(new ImportMethod((uint)ofunction, (uint)rva, hint, name));
+                uint rva = (uint)(rawImportDir.FirstThunk + (currentIndex *(header.OptionalHeader.Is32Bit ? sizeof(uint) : sizeof(ulong))));
+                methods.Add(new ImportMethod((uint)ofunction, (uint)ft, rva , hint, name));
                 
                 //advance to next function value
                 image.SetOffset(methodOffset + (header.OptionalHeader.Is32Bit ? sizeof(uint) : sizeof(ulong)));

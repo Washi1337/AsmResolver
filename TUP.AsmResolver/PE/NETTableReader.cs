@@ -42,7 +42,7 @@ namespace TUP.AsmResolver.PE
             tableheap.streamoffset = stream.streamoffset;
             tableheap.headeroffset = stream.headeroffset;
             tableheap.netheader = stream.netheader;
-
+            
 
 
             for (int i = 0; i < 45; i++)
@@ -55,13 +55,14 @@ namespace TUP.AsmResolver.PE
            // ReadTables();
 
         }
-        internal MetaDataTable CreateTable(MetaDataTableType type, int amountofrows)
+        internal MetaDataTable CreateTable(MetaDataTableType type, int rowAmount, long rowAmountOffset)
         {
             //customattribute[permission]?
 
-            MetaDataTable table = new MetaDataTable();
+            MetaDataTable table = new MetaDataTable(tableheap);
             table.Type = type;
-            table.AmountOfRows = amountofrows;
+            table.rowAmount = rowAmount;
+            table.rowAmountOffset = rowAmountOffset;
             switch (type)
             {
                 case MetaDataTableType.Assembly:
@@ -173,7 +174,8 @@ namespace TUP.AsmResolver.PE
                     
                 if (tableheap.HasTable((MetaDataTableType)i))
                 {
-                    tableheap.tables[i] = (CreateTable((MetaDataTableType)i, reader.ReadInt32()));
+                    long offset = reader.BaseStream.Position + stream.StreamOffset;
+                    tableheap.tables[i] = (CreateTable((MetaDataTableType)i, reader.ReadInt32(), offset));
                 }
             }
 
@@ -208,6 +210,7 @@ namespace TUP.AsmResolver.PE
             {
                 if (table != null)
                 {
+                    table.TableOffset = (uint)(stream.StreamOffset + reader.BaseStream.Position);
                     for (int i = 0; i < table.AmountOfRows; i++)
                     {
                         switch (table.Type)
@@ -317,6 +320,10 @@ namespace TUP.AsmResolver.PE
                             case MetaDataTableType.GenericParam:
                                 table.members.Add(ReadGenericParam());
                                 break;
+                            case MetaDataTableType.GenericParamConstraint:
+                                table.members.Add(ReadGenericParamConstraint());
+                                break;
+                                
                         }
                         if (table.members.Count > 0)
                         {
@@ -755,7 +762,14 @@ namespace TUP.AsmResolver.PE
             return new GenericParameter() { tablereader = this, netheader = tableheap.netheader, metadatarow = ReadRow(parts) };
 
         }
+        internal GenericParamConstraint ReadGenericParamConstraint()
+        {
+            byte[] parts = new byte[] { 
+                GetDefaultIndex(MetaDataTableType.GenericParam),
+                GetDefaultIndex(TypeDefOrRef),};
+            return new GenericParamConstraint() { tablereader = this, netheader = tableheap.netheader, metadatarow = ReadRow(parts) };
 
+        }
         internal int ConstructMetaDataToken(MetaDataTableType type, int index)
         {
             int token = ((int)type);

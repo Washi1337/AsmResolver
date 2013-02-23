@@ -37,22 +37,57 @@ namespace TUP.AsmResolver.NET
         public byte MajorVersion
         {
             get { return header.MajorVersion; }
+            set
+            {
+                PeImage image = stream.netheader.assembly.peImage;
+                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][1]);
+                image.writer.Write(value);
+                header.MajorVersion = value;
+            }
         }
         public byte MinorVersion
         {
             get { return header.MinorVersion; }
+            set
+            {
+                PeImage image = stream.netheader.assembly.peImage;
+                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][2]);
+                image.writer.Write(value);
+                header.MinorVersion = value;
+            }
         }
         public byte HeapOffsetSizes
         {
             get { return header.HeapOffsetSizes; }
+            set
+            {
+                PeImage image = stream.netheader.assembly.peImage;
+                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][3]);
+                image.writer.Write(value);
+                header.HeapOffsetSizes = value;
+            }
         }
         public ulong MaskSorted
         {
             get { return header.MaskSorted; }
+            set
+            {
+                PeImage image = stream.netheader.assembly.peImage;
+                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][6]);
+                image.writer.Write(value);
+                header.MaskSorted = value;
+            }
         }
         public ulong MaskValid
         {
             get { return header.MaskValid; }
+            set
+            {
+                PeImage image = stream.netheader.assembly.peImage;
+                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][5]);
+                image.writer.Write(value);
+                header.MaskValid = value;
+            }
         }
         
         public MetaDataTable[] Tables

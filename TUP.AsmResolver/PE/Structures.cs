@@ -21,6 +21,7 @@ namespace TUP.AsmResolver.PE
             Structures.InitializeDataOffsetsFor(typeof(Structures.METADATA_HEADER_1));
             Structures.InitializeDataOffsetsFor(typeof(Structures.METADATA_HEADER_2));
             Structures.InitializeDataOffsetsFor(typeof(Structures.METADATA_STREAM_HEADER));
+            Structures.InitializeDataOffsetsFor(typeof(Structures.METADATA_TABLE_HEADER));
             Structures.InitializeDataOffsetsFor(typeof(Structures.IMAGE_RESOURCE_DATA_ENTRY));
             Structures.InitializeDataOffsetsFor(typeof(Structures.IMAGE_RESOURCE_DIRECTORY));
             Structures.InitializeDataOffsetsFor(typeof(Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY));

@@ -28,7 +28,7 @@ namespace TUP.AsmResolver.NET
             {
                 int endresult = 0;
                 foreach (MetaDataTable table in tables)
-                    endresult += table.amountofrows;
+                    endresult += table.rowAmount;
 
                 return endresult;
             }
