@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using TUP.AsmResolver.NET;
 using TUP.AsmResolver.NET.Specialized;
 
-namespace TUP.AsmResolver.PE
+namespace TUP.AsmResolver.PE.Readers
 {
     internal class NETTableReader : IDisposable
     {

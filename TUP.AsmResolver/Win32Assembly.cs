@@ -13,6 +13,9 @@ using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using TUP.AsmResolver.NET;
+using TUP.AsmResolver.PE.Readers;
+using TUP.AsmResolver.PE.Writers;
+
 namespace TUP.AsmResolver
 {
     /// <summary>
@@ -104,7 +107,7 @@ namespace TUP.AsmResolver
             }
         }
 
-        public ReadingArguments ReadingArguments { get; private set; }
+        public ReadingParameters ReadingArguments { get; private set; }
         /// <summary>
         /// Gets the location of the loaded assembly.
         /// </summary>
@@ -202,7 +205,7 @@ namespace TUP.AsmResolver
 
         public static Win32Assembly LoadFile(string file)
         {
-            return LoadFile(file, new ReadingArguments());
+            return LoadFile(file, new ReadingParameters());
         }
         /// <summary>
         /// Loads an assembly from a specific file.
@@ -210,13 +213,11 @@ namespace TUP.AsmResolver
         /// <param name="file">The file to read.</param>
         /// <returns></returns>
         /// <exception cref="System.BadImageFormatException"></exception>
-        public static Win32Assembly LoadFile(string file, ReadingArguments arguments)
+        public static Win32Assembly LoadFile(string file, ReadingParameters arguments)
         {
-            
+
             try
             {
-                
-
                 Win32Assembly a = new Win32Assembly();
 
 
@@ -228,7 +229,7 @@ namespace TUP.AsmResolver
                 a.ntheader = NTHeader.FromAssembly(a);
                 a.mzheader = MZHeader.FromAssembly(a);
                 a.headerreader.LoadData(arguments.IgnoreDataDirectoryAmount);
-                
+
 
                 if (!arguments.OnlyManaged)
                 {
@@ -237,17 +238,19 @@ namespace TUP.AsmResolver
                     a.importexporttablereader = new ImportExportTableReader(a.ntheader);
                     a.resourcesreader = new ResourcesReader(a.ntheader);
                 }
-               
+
 
                 a.netheader = NETHeader.FromAssembly(a);
                 a.peImage.SetOffset(a.ntheader.OptionalHeader.HeaderSize);
 
                 return a;
-                
-                
+
+
             }
             catch (Exception ex)
             {
+                if (ex is AccessViolationException || ex is FileNotFoundException)
+                    throw;
                 throw new BadImageFormatException("The file is not a valid Portable Executable File.", ex);
             }
            
@@ -255,13 +258,37 @@ namespace TUP.AsmResolver
         }
 
         /// <summary>
-        /// Saves the assembly to the harddisk to a specific path.
+        /// Saves the assembly's image to the harddisk to a specific path. Added or removed members might not be saved.
         /// </summary>
         /// <param name="path">The path to save the assembly.</param>
-        public void Save(string path)
+        public void QuickSave(string path)
         {
             File.WriteAllBytes(path, peImage.stream.ToArray());
         }
+        /// <summary>
+        /// Rebuilds the assembly and saves it to the specified file path.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="writingParameters"></param>
+        public void Rebuild(string path, WritingParameters writingParameters)
+        {
+            using (FileStream fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            {
+                Rebuild(fileStream, writingParameters);
+                fileStream.Flush();
+            }
+        }
+        /// <summary>
+        /// Rebuilds the assembly and writes it to the specified stream.
+        /// </summary>
+        /// <param name="outputStream"></param>
+        /// <param name="writingParameters"></param>
+        public void Rebuild(Stream outputStream, WritingParameters writingParameters)
+        {
+            PEWriter writer = new PEWriter(this, writingParameters);
+            writer.WriteExecutable(outputStream);
+        }
+
         /// <summary>
         /// Closes streams and cleans up the Win32Assembly.
         /// </summary>
@@ -278,10 +305,6 @@ namespace TUP.AsmResolver
                 netheader.Dispose();
                 
         }
-
-
-
-        
 
 
         #endregion

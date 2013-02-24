@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TUP.AsmResolver.PE;
+using TUP.AsmResolver.PE.Readers;
 using TUP.AsmResolver.NET.Specialized;
 namespace TUP.AsmResolver.NET
 {
     /// <summary>
     /// Represents a .NET header from an application. This header is only available if the assembly is written in a .NET language.
     /// </summary>
-    public class NETHeader : IHeader , IDisposable 
+    public class NETHeader : IHeader , IDisposable , IDataDirectoryProvider
     {
         
         internal Win32Assembly assembly;
@@ -42,14 +43,14 @@ namespace TUP.AsmResolver.NET
         }
 
 
-
-        public DataDirectory MetaDataDirectory { get; internal set; }
-        public DataDirectory ResourcesDirectory { get; internal set; }
-        public DataDirectory StrongNameDirectory { get; internal set; }
-        public DataDirectory CodeManagerDirectory { get; internal set; }
-        public DataDirectory VTableFixupsDirectory { get; internal set; }
-        public DataDirectory ExportAddressesDirectory { get; internal set; }
-        public DataDirectory ManagedNativeHeaderDirectory { get; internal set; }
+        public DataDirectory[] DataDirectories { get; internal set; }
+        public DataDirectory MetaDataDirectory { get { return DataDirectories[0]; } }
+        public DataDirectory ResourcesDirectory { get { return DataDirectories[1]; } }
+        public DataDirectory StrongNameDirectory { get { return DataDirectories[2]; } }
+        public DataDirectory CodeManagerDirectory { get { return DataDirectories[3]; } }
+        public DataDirectory VTableFixupsDirectory { get { return DataDirectories[4]; } }
+        public DataDirectory ExportAddressesDirectory { get { return DataDirectories[5]; } }
+        public DataDirectory ManagedNativeHeaderDirectory { get { return DataDirectories[6]; } }
 
 
 

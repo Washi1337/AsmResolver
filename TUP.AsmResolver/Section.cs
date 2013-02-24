@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using TUP.AsmResolver.PE;
+using TUP.AsmResolver.PE.Readers;
 using TUP.AsmResolver.ASM;
 
 namespace TUP.AsmResolver
@@ -13,7 +14,7 @@ namespace TUP.AsmResolver
     /// </summary>
     public class Section
     {
-        internal Section(PE.PeHeaderReader reader,
+        internal Section(PeHeaderReader reader,
             uint headeroffset, 
             string name,
             uint roffset,
@@ -47,7 +48,7 @@ namespace TUP.AsmResolver
         uint vsize;
         uint flags;
         uint headeroffset;
-        PE.PeHeaderReader headerreader;
+        PeHeaderReader headerreader;
         Win32Assembly assembly;
         string Root = "IMAGE_SECTION_HEADER";
         #endregion
@@ -208,7 +209,7 @@ namespace TUP.AsmResolver
         /// <param name="offset"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public byte[] GetBytes(int offset, int size)
+        public byte[] GetBytes(uint offset, int size)
         {
             return assembly.Image.ReadBytes(offset, size);
         }

@@ -75,6 +75,12 @@
             Represents a data directory in the executable.
             </summary>
         </member>
+        <member name="M:TUP.AsmResolver.DataDirectory.GetBytes">
+            <summary>
+            Gets the contents of the data directory.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:TUP.AsmResolver.DataDirectory.HeaderOffset">
             <summary>
             Gets the offset the data directory is located.
@@ -178,17 +184,17 @@
             Gets the target section.
             </summary>
         </member>
-        <member name="T:TUP.AsmResolver.ReadingArguments">
+        <member name="T:TUP.AsmResolver.ReadingParameters">
             <summary>
             Specifies reading arguments that are being used to read a win32 assembly.
             </summary>
         </member>
-        <member name="P:TUP.AsmResolver.ReadingArguments.OnlyManaged">
+        <member name="P:TUP.AsmResolver.ReadingParameters.OnlyManaged">
             <summary>
             Indicates that only managed data and the vital headers will be read from the assembly.
             </summary>
         </member>
-        <member name="P:TUP.AsmResolver.ReadingArguments.IgnoreDataDirectoryAmount">
+        <member name="P:TUP.AsmResolver.ReadingParameters.IgnoreDataDirectoryAmount">
             <summary>
             Indicates that the standard amount of data directories will be used instead of the amount specified in the Optional Header
             </summary>
@@ -1759,11 +1765,6 @@
             A class to read from and write to an executable image.
             </summary>
         </member>
-        <member name="F:TUP.AsmResolver.PE.Structures.IMAGE_IMPORT_DESCRIPTOR.Characteristics">
-            <summary>
-            CSharp doesnt really support unions, but they can be emulated by a field offset 0
-            </summary>
-        </member>
         <member name="T:TUP.AsmResolver.ResourceDataEntry">
             <summary>
             Represents a data entry of a resource directory entry.
@@ -2480,7 +2481,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.Section.GetBytes(System.Int32,System.Int32)">
+        <member name="M:TUP.AsmResolver.Section.GetBytes(System.UInt32,System.Int32)">
             <summary>
             Gets the raw bytes of the section given by an offset and size
             </summary>
@@ -2752,7 +2753,7 @@
             Reprensents a Win32 Assembly decompiled in 32-bit assembly code.
             </summary>
         </member>
-        <member name="M:TUP.AsmResolver.Win32Assembly.LoadFile(System.String,TUP.AsmResolver.ReadingArguments)">
+        <member name="M:TUP.AsmResolver.Win32Assembly.LoadFile(System.String,TUP.AsmResolver.ReadingParameters)">
             <summary>
             Loads an assembly from a specific file.
             </summary>
@@ -2760,11 +2761,25 @@
             <returns></returns>
             <exception cref="T:System.BadImageFormatException"></exception>
         </member>
-        <member name="M:TUP.AsmResolver.Win32Assembly.Save(System.String)">
+        <member name="M:TUP.AsmResolver.Win32Assembly.QuickSave(System.String)">
             <summary>
-            Saves the assembly to the harddisk to a specific path.
+            Saves the assembly's image to the harddisk to a specific path. Added or removed members might not be saved.
             </summary>
             <param name="path">The path to save the assembly.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.Win32Assembly.Rebuild(System.String,TUP.AsmResolver.WritingParameters)">
+            <summary>
+            Rebuilds the assembly and saves it to the specified file path.
+            </summary>
+            <param name="path"></param>
+            <param name="writingParameters"></param>
+        </member>
+        <member name="M:TUP.AsmResolver.Win32Assembly.Rebuild(System.IO.Stream,TUP.AsmResolver.WritingParameters)">
+            <summary>
+            Rebuilds the assembly and writes it to the specified stream.
+            </summary>
+            <param name="outputStream"></param>
+            <param name="writingParameters"></param>
         </member>
         <member name="M:TUP.AsmResolver.Win32Assembly.Dispose">
             <summary>
@@ -2956,6 +2971,36 @@
         <member name="P:TUP.AsmResolver.NTHeader.RawOffset">
             <summary>
             Gets the raw file offset of the header.
+            </summary>
+        </member>
+        <member name="T:TUP.AsmResolver.WritingParameters">
+            <summary>
+            Specifies arguments for rebuilding an application.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.WritingParameters.#ctor">
+            <summary>
+            Creates a new instance of the WritingParameters, and sets the arguments to their default values.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.WritingParameters.RebuildResources">
+            <summary>
+            Indicates the writer should rebuild the resources directory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.WritingParameters.RebuildImportExportTables">
+            <summary>
+            Indicates the writer should rebuild the import and export tables.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.WritingParameters.RebuildNETHeaders">
+            <summary>
+            Indicates the writer should rebuild the .NET directory.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.WritingParameters.BuildAsManagedApp">
+            <summary>
+            Indicates the writer should rebuild the application as it would be a managed application.
             </summary>
         </member>
     </members>

@@ -7,7 +7,7 @@ using System.Security;
 using System.IO;
 using System.Drawing;
 
-namespace TUP.AsmResolver.PE
+namespace TUP.AsmResolver.PE.Readers
 {
     internal class ResourcesReader
     {
@@ -25,8 +25,11 @@ namespace TUP.AsmResolver.PE
 
         internal void ReadRootDirectory()
         {
-            image.SetOffset(resourceDirectory.TargetOffset.FileOffset);
-            rootDirectory = ReadDirectory(null);
+            if (resourceDirectory.TargetOffset.FileOffset != 0)
+            {
+                image.SetOffset(resourceDirectory.TargetOffset.FileOffset);
+                rootDirectory = ReadDirectory(null);
+            }
         }
 
         internal ResourceDirectoryEntry ReadDirectoryEntry()

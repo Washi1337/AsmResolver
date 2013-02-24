@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Reflection;
 
-namespace TUP.AsmResolver.PE
+namespace TUP.AsmResolver.PE.Readers
 {
 
     internal class PeHeaderReader
@@ -130,7 +130,7 @@ namespace TUP.AsmResolver.PE
             {
                 uint byteoffset = (uint)image.stream.Position;
                 Structures.IMAGE_SECTION_HEADER section = image.ReadStructure<Structures.IMAGE_SECTION_HEADER>();
-                Section s = new Section(this, byteoffset, section.Name, section.PointerToRawData, section.SizeOfRawData, section.VirtualAddress, section.Misc.VirtualSize, section.Characteristics);
+                Section s = new Section(this, byteoffset, section.Name, section.PointerToRawData, section.SizeOfRawData, section.VirtualAddress, section.VirtualSize, section.Characteristics);
                 sections.Add(s);
             }
         }

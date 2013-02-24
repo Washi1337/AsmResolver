@@ -15,7 +15,7 @@ namespace TUP.AsmResolver
         PeImage image;
         uint offset;
         uint targetOffset;
-        Structures.IMAGE_RESOURCE_DATA_ENTRY rawDataEntry;
+        internal Structures.IMAGE_RESOURCE_DATA_ENTRY rawDataEntry;
 
         internal ResourceDataEntry(PeImage image, uint offset, ResourceDirectoryEntry parentEntry, Structures.IMAGE_RESOURCE_DATA_ENTRY rawDataEntry)
         {

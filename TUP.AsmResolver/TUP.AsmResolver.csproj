@@ -56,6 +56,7 @@
     <Compile Include="DataDirectory.cs" />
     <Compile Include="DataDirectoryName.cs" />
     <Compile Include="ICacheProvider.cs" />
+    <Compile Include="IDataDirectoryProvider.cs" />
     <Compile Include="NameDemangler.cs" />
     <Compile Include="NET\Specialized\ArrayDimension.cs" />
     <Compile Include="NET\Specialized\CustomAttributeArgument.cs" />
@@ -69,7 +70,14 @@
     <Compile Include="NET\Specialized\IStreamProvider.cs" />
     <Compile Include="NET\Specialized\MSIL\MSILAssembler.cs" />
     <Compile Include="OffsetConverter.cs" />
-    <Compile Include="ReadingArguments.cs" />
+    <Compile Include="PE\Writers\ResourceWriter.cs" />
+    <Compile Include="PE\Writers\SectionWriter.cs" />
+    <Compile Include="PE\Writers\DataDirectoryWriter.cs" />
+    <Compile Include="PE\Writers\IWriterTask.cs" />
+    <Compile Include="PE\Writers\PEHeaderWriter.cs" />
+    <Compile Include="PE\Writers\PEWriter.cs" />
+    <Compile Include="PE\Writers\PEStructureFixer.cs" />
+    <Compile Include="ReadingParameters.cs" />
     <Compile Include="NET\MetaDataTableGroup.cs" />
     <Compile Include="NET\Specialized\ArrayType.cs" />
     <Compile Include="NET\Specialized\AssemblyAttributes.cs" />
@@ -177,18 +185,18 @@
     <Compile Include="NET\UserStringsHeap.cs" />
     <Compile Include="OptionalHeader32.cs" />
     <Compile Include="OptionalHeader64.cs" />
-    <Compile Include="PE\NETHeaderReader.cs" />
-    <Compile Include="PE\NETMethodReader.cs" />
-    <Compile Include="PE\NETTableReader.cs" />
+    <Compile Include="PE\Readers\NETHeaderReader.cs" />
+    <Compile Include="PE\Readers\NETMethodReader.cs" />
+    <Compile Include="PE\Readers\NETTableReader.cs" />
     <Compile Include="PE\PeImage.cs" />
-    <Compile Include="PE\ResourcesReader.cs" />
+    <Compile Include="PE\Readers\ResourcesReader.cs" />
     <Compile Include="PE\Structures.cs" />
     <Compile Include="ResourceDataEntry.cs" />
     <Compile Include="ResourceDirectory.cs" />
     <Compile Include="ResourceDirectoryEntry.cs" />
     <Compile Include="ResourceDirectoryType.cs" />
     <Compile Include="SectionFlags.cs" />
-    <Compile Include="PE\ImportExportTableReader.cs" />
+    <Compile Include="PE\Readers\ImportExportTableReader.cs" />
     <Compile Include="ImportMethod.cs" />
     <Compile Include="LibraryReference.cs" />
     <Compile Include="ASM\x86Instruction.cs" />
@@ -196,13 +204,14 @@
     <Compile Include="Exceptions\InvalidInstructionException.cs" />
     <Compile Include="Exceptions\InvalidOpCodeException.cs" />
     <Compile Include="ExportMethod.cs" />
-    <Compile Include="PE\PEHeaderReader.cs" />
+    <Compile Include="PE\Readers\PEHeaderReader.cs" />
     <Compile Include="Section.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SubSystem.cs" />
     <Compile Include="NET\TableHeap.cs" />
     <Compile Include="Win32Assembly.cs" />
     <Compile Include="NTHeader.cs" />
+    <Compile Include="WritingParameters.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ASM\Notes.txt" />

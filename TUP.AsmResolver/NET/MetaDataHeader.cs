@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TUP.AsmResolver.PE;
+using TUP.AsmResolver.PE.Readers;
 
 namespace TUP.AsmResolver.NET
 {

@@ -5,7 +5,7 @@ using System.Security;
 using System.IO;
 
 
-namespace TUP.AsmResolver.PE
+namespace TUP.AsmResolver.PE.Readers
 {
     internal unsafe class ImportExportTableReader
     {

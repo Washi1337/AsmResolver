@@ -8,7 +8,7 @@ namespace TUP.AsmResolver
     /// <summary>
     /// Specifies reading arguments that are being used to read a win32 assembly.
     /// </summary>
-    public class ReadingArguments
+    public class ReadingParameters
     {
         internal Win32Assembly assembly;
         private bool onlyManaged;

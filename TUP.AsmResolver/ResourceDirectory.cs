@@ -11,7 +11,7 @@ namespace TUP.AsmResolver
     public class ResourceDirectory
     {
         PeImage image;
-        Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory;
+        internal Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory;
         uint offset;
         internal ResourceDirectory(PeImage image, uint offset, ResourceDirectoryEntry parentEntry, ResourceDirectoryEntry[] childEntries, PE.Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory)
         {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using TUP.AsmResolver.PE;
+using TUP.AsmResolver.PE.Readers;
 
 namespace TUP.AsmResolver
 {  

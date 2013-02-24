@@ -51,28 +51,7 @@ namespace TUP.AsmResolver.PE
 
         }
 
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct LOADED_IMAGE
-        {
-            public IntPtr moduleName;
-            public IntPtr hFile;
-            public IntPtr MappedAddress;
-            public IntPtr FileHeader;
-            public IntPtr lastRvaSection;
-            public UInt32 numbOfSections;
-            public IntPtr firstRvaSection;
-            public UInt32 charachteristics;
-            public ushort systemImage;
-            public ushort dosImage;
-            public ushort readOnly;
-            public ushort version;
-            public IntPtr links_1;  // these two comprise the LIST_ENTRY
-            public IntPtr links_2;
-            public UInt32 sizeOfImage;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_COR20_HEADER
         {
             public uint cb;
@@ -92,7 +71,7 @@ namespace TUP.AsmResolver.PE
 
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct METADATA_HEADER_1
         {
             public uint Signature;
@@ -101,20 +80,20 @@ namespace TUP.AsmResolver.PE
             public uint Reserved;
             public uint VersionLength;
         }
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct METADATA_HEADER_2
         {
             public ushort Flags;
             public ushort NumberOfStreams;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct METADATA_STREAM_HEADER
         {
             public uint Offset;
             public uint Size;
         }
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct METADATA_TABLE_HEADER
         {
             public uint Reserved1;
@@ -125,12 +104,6 @@ namespace TUP.AsmResolver.PE
             public ulong MaskValid;
             public ulong MaskSorted;
         }
-        [StructLayout(LayoutKind.Sequential)]
-        public struct METADATA_TABLE_ITEMS_HEADER
-        {
-            
-        }
-
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_DATA_DIRECTORY
         {
@@ -138,7 +111,7 @@ namespace TUP.AsmResolver.PE
             public uint Size;
         }
 
-
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_RESOURCE_DIRECTORY
         {
             public uint Characteristics;
@@ -150,22 +123,15 @@ namespace TUP.AsmResolver.PE
             /*  IMAGE_RESOURCE_DIRECTORY_ENTRY DirectoryEntries[]; */
         }
 
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_RESOURCE_DIRECTORY_ENTRY
         {
             public uint Name;
             public uint OffsetToData;
 
         }
-        public struct IMAGE_RESOURCE_DIR_STRING_U
-        {
 
-            public ushort Length;        // Number of Unicode characters in string
-
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1)]
-            public string NameString; // Length Unicode characters
-
-        }
-
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_RESOURCE_DATA_ENTRY
         {
             public uint OffsetToData;
@@ -174,99 +140,7 @@ namespace TUP.AsmResolver.PE
             public uint Reserved;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct IMAGE_VXD_HEADER
-        {
-            ushort e32_magic;
-            byte e32_border;
-            byte e32_ushorter;
-            uint e32_level;
-            ushort e32_cpu;
-            ushort e32_os;
-            uint e32_ver;
-            uint e32_mflags;
-            uint e32_mpages;
-            uint e32_startobj;
-            uint e32_eip;
-            uint e32_stackobj;
-            uint e32_esp;
-            uint e32_pagesize;
-            uint e32_lastpagesize;
-            uint e32_fixupsize;
-            uint e32_fixupsum;
-            uint e32_ldrsize;
-            uint e32_ldrsum;
-            uint e32_objtab;
-            uint e32_objcnt;
-            uint e32_objmap;
-            uint e32_itermap;
-            uint e32_rsrctab;
-            uint e32_rsrccnt;
-            uint e32_restab;
-            uint e32_enttab;
-            uint e32_dirtab;
-            uint e32_dircnt;
-            uint e32_fpagetab;
-            uint e32_frectab;
-            uint e32_impmod;
-            uint e32_impmodcnt;
-            uint e32_impproc;
-            uint e32_pagesum;
-            uint e32_datapage;
-            uint e32_preload;
-            uint e32_nrestab;
-            uint e32_cbnrestab;
-            uint e32_nressum;
-            uint e32_autodata;
-            uint e32_debuginfo;
-            uint e32_debuglen;
-            uint e32_instpreload;
-            uint e32_instdemand;
-            uint e32_heapsize;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-            byte e32_res3;
-            uint e32_winresoff;
-            uint e32_winreslen;
-            ushort e32_devid;
-            ushort e32_ddkver;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct IMAGE_OS2_HEADER
-        {
-            ushort ne_magic;             /* 00 NE signature 'NE' */
-            byte ne_ver;               /* 02 Linker version number */
-            byte ne_rev;               /* 03 Linker revision number */
-            ushort ne_enttab;            /* 04 Offset to entry table relative to NE */
-            ushort ne_cbenttab;          /* 06 Length of entry table in bytes */
-            long ne_crc;               /* 08 Checksum */
-            ushort ne_flags;             /* 0c Flags about segments in this file */
-            ushort ne_autodata;          /* 0e Automatic data segment number */
-            ushort ne_heap;              /* 10 Initial size of local heap */
-            ushort ne_stack;             /* 12 Initial size of stack */
-            uint ne_csip;              /* 14 Initial CS:IP */
-            uint ne_sssp;              /* 18 Initial SS:SP */
-            ushort ne_cseg;              /* 1c # of entries in segment table */
-            ushort ne_cmod;              /* 1e # of entries in module reference tab. */
-            ushort ne_cbnrestab;         /* 20 Length of nonresident-name table     */
-            ushort ne_segtab;            /* 22 Offset to segment table */
-            ushort ne_rsrctab;           /* 24 Offset to resource table */
-            ushort ne_restab;            /* 26 Offset to resident-name table */
-            ushort ne_modtab;            /* 28 Offset to module reference table */
-            ushort ne_imptab;            /* 2a Offset to imported name table */
-            uint ne_nrestab;           /* 2c Offset to nonresident-name table */
-            ushort ne_cmovent;           /* 30 # of movable entry points */
-            ushort ne_align;             /* 32 Logical sector alignment shift count */
-            ushort ne_cres;              /* 34 # of resource segments */
-            byte ne_exetyp;            /* 36 Flags indicating target OS */
-            byte ne_flagsothers;       /* 37 Additional information flags */
-            ushort ne_pretthunks;        /* 38 Offset to return thunks */
-            ushort ne_psegrefbytes;      /* 3a Offset to segment ref. bytes */
-            ushort ne_swaparea;          /* 3c Reserved by Microsoft */
-            ushort ne_expver;            /* 3e Expected Windows version number */
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_DOS_HEADER
         {
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
@@ -303,7 +177,7 @@ namespace TUP.AsmResolver.PE
             }
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_OPTIONAL_HEADER32
         {
             public UInt16 Magic;                                   //0
@@ -338,7 +212,7 @@ namespace TUP.AsmResolver.PE
             public UInt32 NumberOfRvaAndSizes;                     //92
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_OPTIONAL_HEADER64
         {
             public UInt16 Magic;                                   //0
@@ -384,21 +258,14 @@ namespace TUP.AsmResolver.PE
             public UInt16 Characteristics;
         }
 
-        [StructLayout(LayoutKind.Explicit)]
-        public struct Misc
-        {
-            [FieldOffset(0)]
-            public UInt32 PhysicalAddress;
-            [FieldOffset(0)]
-            public UInt32 VirtualSize;
-        }
+
 
         [StructLayout(LayoutKind.Sequential)]
         public struct IMAGE_SECTION_HEADER
         {
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 8)]
             public string Name;
-            public Misc Misc;
+            public UInt32 VirtualSize;
             public UInt32 VirtualAddress;
             public UInt32 SizeOfRawData;
             public UInt32 PointerToRawData;
@@ -409,41 +276,18 @@ namespace TUP.AsmResolver.PE
             public UInt32 Characteristics;
         }
 
-
-        [StructLayout(LayoutKind.Explicit)]
-        public unsafe struct IMAGE_IMPORT_BY_NAME
-        {
-            [FieldOffset(0)]
-            public ushort Hint;
-            [FieldOffset(2)]
-            public fixed char Name[1];
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_IMPORT_DESCRIPTOR
         {
-            #region union
-            /// <summary>
-            /// CSharp doesnt really support unions, but they can be emulated by a field offset 0
-            /// </summary>
 
-            [FieldOffset(0)]
-            public uint Characteristics;            // 0 for terminating null import descriptor
-            [FieldOffset(0)]
             public uint OriginalFirstThunk;         // RVA to original unbound IAT (PIMAGE_THUNK_DATA)
-            #endregion
-
-            [FieldOffset(4)]
             public uint TimeDateStamp;
-            [FieldOffset(8)]
             public uint ForwarderChain;
-            [FieldOffset(12)]
             public uint NameRVA;
-            [FieldOffset(16)]
             public uint FirstThunk;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct IMAGE_EXPORT_DIRECTORY
         {
             public uint Characteristics;
@@ -459,17 +303,5 @@ namespace TUP.AsmResolver.PE
             public uint AddressOfNameOrdinals;  // RVA from base of image
         }
 
-        [StructLayout(LayoutKind.Explicit)]
-        public struct THUNK_DATA
-        {
-            [FieldOffset(0)]
-            public uint ForwarderString;      // PBYTE 
-            [FieldOffset(0)]
-            public uint Function;             // PDWORD
-            [FieldOffset(0)]
-            public uint Ordinal;
-            [FieldOffset(0)]
-            public uint AddressOfData;        // PIMAGE_IMPORT_BY_NAME
-        }
     }
 }

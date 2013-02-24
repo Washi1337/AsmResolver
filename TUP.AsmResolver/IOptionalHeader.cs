@@ -8,7 +8,7 @@ namespace TUP.AsmResolver
     /// <summary>
     /// Represents the optional header of a protable executable file.
     /// </summary>
-    public interface IOptionalHeader : IHeader
+    public interface IOptionalHeader : IHeader, IDataDirectoryProvider
     {
         /// <summary>
         /// Gets the minium operating system version the portable executable requires.

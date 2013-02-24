@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Reflection;
 using TUP.AsmResolver.PE;
+using TUP.AsmResolver.PE.Readers;
 
 namespace TUP.AsmResolver
 {

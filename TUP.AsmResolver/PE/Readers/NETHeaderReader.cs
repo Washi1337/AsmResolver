@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.IO;
 using TUP.AsmResolver.NET;
-namespace TUP.AsmResolver.PE
+namespace TUP.AsmResolver.PE.Readers
 {
     internal unsafe class NETHeaderReader
     {
@@ -77,14 +77,15 @@ namespace TUP.AsmResolver.PE
 
         void ConstructDirectories()
         {
-
-            header.assembly.netheader.MetaDataDirectory = new DataDirectory(offsetConverter.TargetSection, 0, netheader.MetaData.RVA, netheader.MetaData.Size);
-            header.assembly.netheader.ResourcesDirectory = new DataDirectory(offsetConverter.TargetSection, 0, netheader.Resources.RVA, netheader.Resources.Size);
-            header.assembly.netheader.StrongNameDirectory = new DataDirectory(offsetConverter.TargetSection, 0, netheader.StrongNameSignature.RVA, netheader.StrongNameSignature.Size);
-            header.assembly.netheader.CodeManagerDirectory = new DataDirectory(offsetConverter.TargetSection, 0, netheader.CodeManagerTable.RVA, netheader.CodeManagerTable.Size);
-            header.assembly.netheader.VTableFixupsDirectory = new DataDirectory(offsetConverter.TargetSection, 0, netheader.VTableFixups.RVA, netheader.VTableFixups.Size);
-            header.assembly.netheader.ExportAddressesDirectory = new DataDirectory(offsetConverter.TargetSection, 0, netheader.CodeManagerTable.RVA, netheader.CodeManagerTable.Size);
-            header.assembly.netheader.ManagedNativeHeaderDirectory = new DataDirectory(offsetConverter.TargetSection, 0, netheader.ManagedNativeHeader.RVA, netheader.ManagedNativeHeader.Size);
+            header.assembly.netheader.DataDirectories = new DataDirectory[] {
+             new DataDirectory(DataDirectoryName.NETMetadata, offsetConverter.TargetSection, 0, netheader.MetaData.RVA, netheader.MetaData.Size),
+             new DataDirectory(DataDirectoryName.NETResource, offsetConverter.TargetSection, 0, netheader.Resources.RVA, netheader.Resources.Size),
+             new DataDirectory(DataDirectoryName.NETStrongName, offsetConverter.TargetSection, 0, netheader.StrongNameSignature.RVA, netheader.StrongNameSignature.Size),
+             new DataDirectory(DataDirectoryName.NETCodeManager, offsetConverter.TargetSection, 0, netheader.CodeManagerTable.RVA, netheader.CodeManagerTable.Size),
+             new DataDirectory(DataDirectoryName.NETVTableFixups, offsetConverter.TargetSection, 0, netheader.VTableFixups.RVA, netheader.VTableFixups.Size),
+             new DataDirectory(DataDirectoryName.NETExport, offsetConverter.TargetSection, 0, netheader.ExportAddressTableJumps.RVA, netheader.ExportAddressTableJumps.Size),
+             new DataDirectory(DataDirectoryName.NETNativeHeader, offsetConverter.TargetSection, 0, netheader.ManagedNativeHeader.RVA, netheader.ManagedNativeHeader.Size),
+            };
 
        }
         

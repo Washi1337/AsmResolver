@@ -13,7 +13,7 @@ namespace TUP.AsmResolver
     {
         PeImage image;
         uint offset;
-        Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY rawEntry;
+        internal Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY rawEntry;
         string customName;
         
         internal ResourceDirectoryEntry(PeImage image, uint offset, Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY rawEntry, string customName)

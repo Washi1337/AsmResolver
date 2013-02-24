@@ -11,10 +11,12 @@ To use AsmResolver in Visual Studio, simply add the library to your references.
 Structure
 =========
 
-The library consist of the following namespaces, each with a special purpose:
+The library consists of the following namespaces, each with a special purpose:
 
 * TUP.AsmResolver. 
   * PE
+     * Readers
+	 * Writers
   * ASM
   * NET
      * Specialized
@@ -26,7 +28,16 @@ The library consist of the following namespaces, each with a special purpose:
 This is the main namespace containing classes that represent the standard structures of the executable, such as headers and resources. The *Win32Assembly* class is the main class which represent an entire executable. From here, you will load the file and access headers, properties and methods.
 
 **TUP.AsmResolver.PE**  
-This is a namespace containing mostly internal classes. This is a part that mostly reads data directly from the assembly itself, such as raw structures. The only class that's actually public is the *PeImage* class, which can be compared to a stream. It is able to read and write bytes, structures and data types.
+The PE namespace is the "core" of AsmResolver. It contains classes that are reading or writing directly to the assembly. The *PeImage* class is the only public class and is comparable to a stream. 
+
+**TUP.AsmResolver.PE.Readers**  
+This namespace contains all classes that have something to do with reading the raw structure of the PE. All these classes are internal.
+
+**TUP.AsmResolver.PE.Writers**  
+This namespace contains all classes that have something to do with writing a new executable. These clsses are being used for rebuilding the application. All these classes are internal.
+
+**TUP.AsmResolver.PE**  
+This is a namespace containing mostly internal classes. This is a part that mostly reads and writes data directly from/to the assembly, such as raw structures. The only class that's actually public is the *PeImage* class, which can be compared to a stream. It is able to read and write bytes, structures and data types.
 
 **TUP.AsmResolver.ASM**  
 In this namespace you will find classes that work with the x86 assembly instruction set. You can use the assembler and disassembler to read and write x86 instructions with the help of the *x86Instruction* and *x86OpCodes* class. This namespace is far from done and needs a lot of work. Don't expect perfect outputs.

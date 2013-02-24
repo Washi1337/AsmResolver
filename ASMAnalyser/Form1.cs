@@ -166,7 +166,7 @@ namespace TUP.AsmResolver.PreviewApplication
             listView1.Items.Clear();
 
             Wow64EnableWow64FsRedirection(false);
-            loadedAssembly = Win32Assembly.LoadFile(file, new ReadingArguments() { IgnoreDataDirectoryAmount = true });
+            loadedAssembly = Win32Assembly.LoadFile(file, new ReadingParameters() { IgnoreDataDirectoryAmount = true });
             Wow64EnableWow64FsRedirection(true);
             
             Text = "TUP.AsmResolver Preview Application - [" + Path.GetFileName(loadedAssembly.Path) + "]";
@@ -199,9 +199,30 @@ namespace TUP.AsmResolver.PreviewApplication
             SaveFileDialog sfd = new SaveFileDialog();
             if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                loadedAssembly.Save(sfd.FileName);
+                loadedAssembly.QuickSave(sfd.FileName);
             }
             
+        }
+        private void rebuildToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                try
+                {
+                    loadedAssembly.Rebuild(sfd.FileName, new WritingParameters()
+                    {
+                        RebuildResources = true,
+                        BuildAsManagedApp = false,
+                        RebuildImportExportTables = false,
+                        RebuildNETHeaders = false
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Rebuilding Failed. " + ex.ToString());
+                }
+            }
         }
 
 
@@ -483,15 +504,15 @@ namespace TUP.AsmResolver.PreviewApplication
 
         private void listView1_KeyUp(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
-            {
-                case Keys.Enter:
-                    followToolStripMenuItem.PerformClick();
-                    break;
-                case Keys.Space:
-                    editToolStripMenuItem2.PerformClick();
-                    break;
-            }
+            //switch (e.KeyCode)
+            //{
+            //    case Keys.Enter:
+            //        followToolStripMenuItem.PerformClick();
+            //        break;
+            //    case Keys.Space:
+            //        editToolStripMenuItem2.PerformClick();
+            //        break;
+            //}
         }
 
         private void dependencyWalkerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -555,6 +576,8 @@ namespace TUP.AsmResolver.PreviewApplication
                 listView1.Items.Insert(itemIndex, CreateListViewItem(loadedAssembly.Disassembler.DisassembleNextInstruction()));
             }
         }
+
+
 
 
 

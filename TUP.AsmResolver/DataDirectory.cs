@@ -17,9 +17,7 @@ namespace TUP.AsmResolver
                 this.name = name;
                 if (rva == 0)
                 {
-                    offset = 0;
                     targetOffset = new Offset(0, 0, 0, ASM.OperandType.Normal);
-                    size = 0;
                 }
                 else
                 {
@@ -34,11 +32,16 @@ namespace TUP.AsmResolver
             {
             }
         }
-        internal DataDirectory(Section targetSection, uint headerOffset, uint rva, uint size)
+        internal DataDirectory(DataDirectoryName name, Section targetSection, uint headerOffset, uint rva, uint size)
         {
+            this.name = name;
             this.headerOffset = headerOffset;
             this.size = size;
-            if (rva != 0)
+            if (rva == 0)
+            {
+                targetOffset = new Offset(0, 0, 0, ASM.OperandType.Normal);
+            }
+            else
             {
                 OffsetConverter converter = new OffsetConverter(targetSection);
                 this.targetOffset = Offset.FromRva(rva, targetSection.ParentAssembly);
@@ -85,6 +88,17 @@ namespace TUP.AsmResolver
         public DataDirectoryName Name
         {
             get { return name; }
+        }
+        /// <summary>
+        /// Gets the contents of the data directory.
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetBytes()
+        {
+            if (Section == null)
+                return null;
+
+            return Section.GetBytes(TargetOffset.FileOffset, (int)Size);
         }
     }
 }

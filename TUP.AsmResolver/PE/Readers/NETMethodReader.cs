@@ -5,7 +5,7 @@ using System.Text;
 using TUP.AsmResolver.NET.Specialized;
 using TUP.AsmResolver.NET.Specialized.MSIL;
 
-namespace TUP.AsmResolver.PE
+namespace TUP.AsmResolver.PE.Readers
 {
     internal class NETMethodReader
     {

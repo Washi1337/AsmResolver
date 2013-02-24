@@ -198,7 +198,7 @@ namespace TUP.AsmResolver.PE
             {
                 lastByte = ReadByte();
 
-            } while (lastByte != 0);
+            } while (lastByte != stopByte);
 
             int endoffset = (int)Position - 1;
 

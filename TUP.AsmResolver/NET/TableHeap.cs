@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Collections;
 using TUP.AsmResolver.PE;
+using TUP.AsmResolver.PE.Readers;
 using TUP.AsmResolver.NET.Specialized;
 namespace TUP.AsmResolver.NET
 {
