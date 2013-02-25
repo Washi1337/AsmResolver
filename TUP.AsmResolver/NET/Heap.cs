@@ -18,9 +18,8 @@ namespace TUP.AsmResolver.NET
         {
             name = stream.name;
             netheader = stream.netheader;
-            offset = stream.offset;
-            size = stream.size;
-            streamoffset = stream.streamoffset;
+            streamHeader = stream.streamHeader;
+            headeroffset = stream.headeroffset;
             reader = stream.reader;
             indexsize = 2;
         }

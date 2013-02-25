@@ -48,8 +48,9 @@ namespace TUP.AsmResolver.PE.Writers
             switch (directory.Name)
             {
                 case DataDirectoryName.Export:
+                    return !Writer.Parameters.RebuildExportTable;
                 case DataDirectoryName.Import:
-                    return !Writer.Parameters.RebuildImportExportTables;
+                    return !Writer.Parameters.RebuildImportTable;
                 case DataDirectoryName.Resource:
                     return !Writer.Parameters.RebuildResources;
                 case DataDirectoryName.Clr:
@@ -61,5 +62,7 @@ namespace TUP.AsmResolver.PE.Writers
                     return true;
             }
         }
+
+
     }
 }

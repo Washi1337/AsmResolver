@@ -70,6 +70,8 @@
     <Compile Include="NET\Specialized\IStreamProvider.cs" />
     <Compile Include="NET\Specialized\MSIL\MSILAssembler.cs" />
     <Compile Include="OffsetConverter.cs" />
+    <Compile Include="PE\Writers\ImportExportWriter.cs" />
+    <Compile Include="PE\Writers\ManagedDataWriter.cs" />
     <Compile Include="PE\Writers\ResourceWriter.cs" />
     <Compile Include="PE\Writers\SectionWriter.cs" />
     <Compile Include="PE\Writers\DataDirectoryWriter.cs" />

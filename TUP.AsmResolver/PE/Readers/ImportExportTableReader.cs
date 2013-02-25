@@ -23,6 +23,7 @@ namespace TUP.AsmResolver.PE.Readers
         PeImage image;
         DataDirectory importDataDir;
         OffsetConverter offsetConverter;
+        internal Structures.IMAGE_EXPORT_DIRECTORY exportDirectory;
 
         public ImportExportTableReader(NTHeader header)
         {
@@ -46,8 +47,8 @@ namespace TUP.AsmResolver.PE.Readers
 
                 image.SetOffset(exportdatadir.TargetOffset.FileOffset);
 
-                Structures.IMAGE_EXPORT_DIRECTORY exportDirectory = image.ReadStructure<Structures.IMAGE_EXPORT_DIRECTORY>();
-
+                exportDirectory = image.ReadStructure<Structures.IMAGE_EXPORT_DIRECTORY>();
+                
                 OffsetConverter offsetConverter = new OffsetConverter(exportdatadir.Section);
                 uint functionoffset = offsetConverter.RvaToFileOffset(exportDirectory.AddressOfFunctions);
                 uint functionnameoffset = offsetConverter.RvaToFileOffset(exportDirectory.AddressOfNames);
@@ -64,7 +65,7 @@ namespace TUP.AsmResolver.PE.Readers
 
                     string name = image.ReadZeroTerminatedString(offsetConverter.RvaToFileOffset(functionNameRVA));
 
-                    exports.Add(new ExportMethod(libraryname, name, functionRVA, i + exportDirectory.Base));
+                    exports.Add(new ExportMethod(libraryname, name, functionNameRVA, functionRVA, (ushort)(i + exportDirectory.Base)));
 
                     functionoffset += 4;
                     functionnameoffset += 4;

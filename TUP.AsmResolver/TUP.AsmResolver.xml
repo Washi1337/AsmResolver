@@ -2988,9 +2988,14 @@
             Indicates the writer should rebuild the resources directory.
             </summary>
         </member>
-        <member name="P:TUP.AsmResolver.WritingParameters.RebuildImportExportTables">
+        <member name="P:TUP.AsmResolver.WritingParameters.RebuildExportTable">
             <summary>
-            Indicates the writer should rebuild the import and export tables.
+            Indicates the writer should rebuild the export tables.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.WritingParameters.RebuildImportTable">
+            <summary>
+            Indicates the writer should rebuild the import tables.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.WritingParameters.RebuildNETHeaders">

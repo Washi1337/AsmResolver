@@ -41,7 +41,7 @@ namespace TUP.AsmResolver.NET
             set
             {
                 PeImage image = stream.netheader.assembly.peImage;
-                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][1]);
+                image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][1]);
                 image.writer.Write(value);
                 header.MajorVersion = value;
             }
@@ -52,7 +52,7 @@ namespace TUP.AsmResolver.NET
             set
             {
                 PeImage image = stream.netheader.assembly.peImage;
-                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][2]);
+                image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][2]);
                 image.writer.Write(value);
                 header.MinorVersion = value;
             }
@@ -63,7 +63,7 @@ namespace TUP.AsmResolver.NET
             set
             {
                 PeImage image = stream.netheader.assembly.peImage;
-                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][3]);
+                image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][3]);
                 image.writer.Write(value);
                 header.HeapOffsetSizes = value;
             }
@@ -74,7 +74,7 @@ namespace TUP.AsmResolver.NET
             set
             {
                 PeImage image = stream.netheader.assembly.peImage;
-                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][6]);
+                image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][6]);
                 image.writer.Write(value);
                 header.MaskSorted = value;
             }
@@ -85,7 +85,7 @@ namespace TUP.AsmResolver.NET
             set
             {
                 PeImage image = stream.netheader.assembly.peImage;
-                image.SetOffset(streamoffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][5]);
+                image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][5]);
                 image.writer.Write(value);
                 header.MaskValid = value;
             }

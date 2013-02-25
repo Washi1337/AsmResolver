@@ -302,6 +302,7 @@ namespace TUP.AsmResolver.PE
             public uint AddressOfNames;         // RVA from base of image
             public uint AddressOfNameOrdinals;  // RVA from base of image
         }
+        
 
     }
 }

@@ -214,8 +214,9 @@ namespace TUP.AsmResolver.PreviewApplication
                     {
                         RebuildResources = true,
                         BuildAsManagedApp = false,
-                        RebuildImportExportTables = false,
-                        RebuildNETHeaders = false
+                        RebuildExportTable = false,
+                        RebuildImportTable = true,
+                        RebuildNETHeaders = true
                     });
                 }
                 catch (Exception ex)

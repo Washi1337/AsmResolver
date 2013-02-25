@@ -10,18 +10,19 @@ namespace TUP.AsmResolver
     /// </summary>
     public struct ExportMethod : IMethod 
     {
-        internal ExportMethod(string lib, string name, uint rva, uint ordinal)
+        internal ExportMethod(string lib, string name, uint nameRva, uint rva, ushort ordinal)
         {
             this.lib = lib;
             this.name = name;
+            this.nameRva = nameRva;
             this.rva = rva;
             this.ordinal = ordinal;
         }
-        private string lib;
-        private string name;
-        
-        private uint rva;
-        private uint ordinal;
+        internal string lib;
+        internal string name;
+        internal uint nameRva;
+        internal uint rva;
+        internal ushort ordinal;
 
         /// <summary>
         /// Gets the name of the method.
@@ -54,7 +55,7 @@ namespace TUP.AsmResolver
         /// <summary>
         /// Gets the ordinal of the method.
         /// </summary>
-        public uint Ordinal
+        public ushort Ordinal
         {
             get { return ordinal; }
         }

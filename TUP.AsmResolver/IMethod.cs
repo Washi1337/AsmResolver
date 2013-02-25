@@ -25,7 +25,7 @@ namespace TUP.AsmResolver
         /// <summary>
         /// Gets the ordinal of the method.
         /// </summary>
-        uint Ordinal { get; }
+        ushort Ordinal { get; }
         /// <summary>
         /// Gets the Relative Virtual Address of the method.
         /// </summary>

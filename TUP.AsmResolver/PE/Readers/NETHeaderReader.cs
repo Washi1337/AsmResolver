@@ -139,14 +139,14 @@ namespace TUP.AsmResolver.PE.Readers
                     add += 8;
             
 
-                metadatastreams.Add(new MetaDataStream(header.assembly.netheader, this, (int)offset, (int)streamheader.Offset, (int)streamheader.Size, name));
+                metadatastreams.Add(new MetaDataStream(header.assembly.netheader, this, (int)offset, streamheader, name));
 
                 if (i == metadataheader2.NumberOfStreams -1)
                     metadataheaderlastoffset = (uint)offset + 16;
 
             }
-            for (int i = 0; i < metadataheader2.NumberOfStreams; i++)
-                metadatastreams[i].streamoffset = (int)metadatafileoffset + metadatastreams[i].offset;
+           //for (int i = 0; i < metadataheader2.NumberOfStreams; i++)
+           //    metadatastreams[i]. = metadatafileoffset + metadatastreams[i].StreamOffset;
 
            //for (int i = 0; i < metadataheader2.NumberOfStreams; i++)
            //{

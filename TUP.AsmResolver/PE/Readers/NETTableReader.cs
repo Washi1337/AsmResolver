@@ -36,10 +36,8 @@ namespace TUP.AsmResolver.PE.Readers
             tableheap = new TablesHeap();
             tableheap.header = ASMGlobals.ReadStructureFromReader<Structures.METADATA_TABLE_HEADER>(reader);
             tableheap.reader = stream.reader;
-            tableheap.offset = stream.offset;
-            tableheap.size = stream.size;
+            tableheap.streamHeader = stream.streamHeader;
             tableheap.stream = stream;
-            tableheap.streamoffset = stream.streamoffset;
             tableheap.headeroffset = stream.headeroffset;
             tableheap.netheader = stream.netheader;
             
@@ -360,7 +358,7 @@ namespace TUP.AsmResolver.PE.Readers
             MetaDataRow row = new MetaDataRow();
             row.parts = new object[parts.Length];
 
-            row.offset = (uint)(reader.BaseStream.Position + stream.streamoffset);
+            row.offset = (uint)(reader.BaseStream.Position + stream.StreamOffset);
             
             for (int i = 0; i< parts.Length;i++)
             {

@@ -22,7 +22,9 @@ namespace TUP.AsmResolver.PE.Writers
                 new PEHeaderWriter(this),       // Write vital pe headers
                 new SectionWriter(this),        // Temp solution to make exe working. Need to be removed once all rebuilding is done, or maybe just write the code section(s).
                 new DataDirectoryWriter(this),  // Rewrite data directories that don't need to be rebuilded.
+                new ImportExportWriter(this),   // Rewrite exports and imports if specified.
                 new ResourceWriter(this),       // Rewrite resources if specified.
+                new ManagedDataWriter(this),    // Rewrite managed data if specified.
             };
 
 

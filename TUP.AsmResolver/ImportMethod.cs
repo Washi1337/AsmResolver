@@ -42,7 +42,7 @@ namespace TUP.AsmResolver
             get { return (ParentLibrary != null ? ParentLibrary.LibraryName : string.Empty); }
         }
 
-        public uint Ordinal
+        public ushort Ordinal
         {
             get;
             private set;

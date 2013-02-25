@@ -13,7 +13,7 @@ namespace TUP.AsmResolver
     {
         PeImage image;
         uint offset;
-        Structures.IMAGE_IMPORT_DESCRIPTOR rawDescriptor;
+        internal Structures.IMAGE_IMPORT_DESCRIPTOR rawDescriptor;
         internal LibraryReference(PeImage image, uint offset, Structures.IMAGE_IMPORT_DESCRIPTOR rawDescriptor, string libraryName, ImportMethod[] importMethods)
         {
             this.image = image;

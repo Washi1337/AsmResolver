@@ -16,7 +16,8 @@ namespace TUP.AsmResolver
         public WritingParameters()
         {
             RebuildResources = true;
-            RebuildImportExportTables = true;
+            RebuildExportTable = true;
+            RebuildImportTable = true;
             RebuildNETHeaders = true;
             BuildAsManagedApp = false;
         }
@@ -25,9 +26,13 @@ namespace TUP.AsmResolver
         /// </summary>
         public bool RebuildResources { get; set; }
         /// <summary>
-        /// Indicates the writer should rebuild the import and export tables.
+        /// Indicates the writer should rebuild the export tables.
         /// </summary>
-        public bool RebuildImportExportTables { get; set; }
+        public bool RebuildExportTable { get; set; }
+        /// <summary>
+        /// Indicates the writer should rebuild the import tables.
+        /// </summary>
+        public bool RebuildImportTable { get; set; }
         /// <summary>
         /// Indicates the writer should rebuild the .NET directory.
         /// </summary>

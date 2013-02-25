@@ -14,47 +14,48 @@ namespace TUP.AsmResolver.NET
         internal MetaDataStream()
         { }
 
-        internal MetaDataStream(NETHeader netheader, NETHeaderReader reader, int headeroffset, int offset, int size,  string name)
+        internal MetaDataStream(NETHeader netheader, NETHeaderReader reader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
         {
             this.headeroffset = headeroffset;
             this.netheader = netheader;
-            this.offset = offset;
-            this.size = size;
+            this.streamHeader = rawHeader;
             this.reader = reader;
             this.name = name;
         }
-        internal int offset, size,streamoffset , headeroffset;
+
+        internal int headeroffset;
         internal string name;
         internal NETHeaderReader reader;
         internal NETHeader netheader;
-        
+        internal Structures.METADATA_STREAM_HEADER streamHeader;
+
         /// <summary>
         /// Gets the offset of the header of the metadata.
         /// </summary>
         public int HeaderOffset
         {
-            get { return offset; }
+            get { return headeroffset; }
         }
         /// <summary>
         /// Gets the actual file offset of the stream.
         /// </summary>
-        public int StreamOffset
+        public uint StreamOffset
         {
-            get { return streamoffset; }
+            get { return streamHeader.Offset + (uint)netheader.MetaDataHeader.RawOffset; }
         }
         /// <summary>
         /// Gets the length of bytes of the stream
         /// </summary>
-        public int StreamSize
+        public uint StreamSize
         {
-            get { return size; }
+            get { return streamHeader.Size ; }
         }
         /// <summary>
         /// Gets the contents in byte array format.
         /// </summary>
         public byte[] Contents
         {
-            get { return reader.header.assembly.peImage.ReadBytes(streamoffset, size); }
+            get { return reader.header.assembly.peImage.ReadBytes(StreamOffset, (int)StreamSize); }
         }
         /// <summary>
         /// Gets the name of the metadata stream.

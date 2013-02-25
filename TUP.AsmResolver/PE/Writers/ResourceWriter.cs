@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.PE.Writers
 {
-    internal class ResourceWriter : IWriterTask 
+    internal class ResourceWriter : IWriterTask
     {
         DataDirectory resourceDirectory;
 
@@ -21,7 +21,7 @@ namespace TUP.AsmResolver.PE.Writers
             get;
             private set;
         }
-        
+
         public void RunProcedure()
         {
             if (Writer.Parameters.RebuildResources && resourceDirectory.TargetOffset.FileOffset != 0)
@@ -36,7 +36,8 @@ namespace TUP.AsmResolver.PE.Writers
                 WriteDataEntry(entry.DataEntry);
             else
                 WriteDirectory(entry.Directory);
-        }
+        } 
+
         private void WriteDirectory(ResourceDirectory directory)
         {
             Writer.WriteStructure<Structures.IMAGE_RESOURCE_DIRECTORY>(directory.rawDirectory);
@@ -61,5 +62,8 @@ namespace TUP.AsmResolver.PE.Writers
             Writer.MoveToOffset(targetOffset);
             Writer.BinWriter.Write(entry.GetContents());
         }
+
+
+
     }
 }

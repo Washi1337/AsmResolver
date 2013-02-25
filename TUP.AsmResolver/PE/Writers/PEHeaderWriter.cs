@@ -35,6 +35,7 @@ namespace TUP.AsmResolver.PE.Writers
 
         private void WriteNTHeaders()
         {
+            Writer.MoveToOffset((uint)Writer.OriginalAssembly.MZHeader.NTHeaderOffset);
             Writer.BinWriter.Write((uint)Writer.OriginalAssembly.NTHeader.Signature);
             WriteFileHeader();
             WriteOptionalHeader();
