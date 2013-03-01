@@ -10,8 +10,8 @@ namespace TUP.AsmResolver.NET.Specialized
         internal ElementType elementType = ElementType.None;
 
         internal MetaDataMember resolutionScope;
-        internal string name;
-        internal string @namespace;
+        internal string name = string.Empty;
+        internal string @namespace = string.Empty;
         public override TypeReference DeclaringType
         {
             get { return null; }

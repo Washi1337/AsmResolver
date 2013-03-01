@@ -53,7 +53,7 @@ namespace TUP.AsmResolver.PE.Readers
 
             // Read in the DLL or EXE and get the timestamp
 
-            assembly.ntheader.Initialize(this);
+            assembly.ntHeader.Initialize(this);
             CheckDosHeader();
 
             dosHeader = image.ReadStructure<Structures.IMAGE_DOS_HEADER>();
@@ -141,7 +141,7 @@ namespace TUP.AsmResolver.PE.Readers
             var values = rawdatadirs.Values.ToArray();
             for (int i = 0;i < rawdatadirs.Count-1;i++)
             {
-                DataDirectory datadir = new DataDirectory((DataDirectoryName)i, sections.ToArray(), keys[i], values[i].RVA,values[i].Size);
+                DataDirectory datadir = new DataDirectory((DataDirectoryName)i, sections.ToArray(), keys[i], values[i]);
                 datadirectories.Add(datadir);
             }
 
@@ -154,7 +154,7 @@ namespace TUP.AsmResolver.PE.Readers
 
         public bool ManagedDataAvailable
         {
-            get { return datadirectories[(int)DataDirectoryName.Clr].size > 0; }
+            get { return datadirectories[(int)DataDirectoryName.Clr].Size > 0; }
         }
 
         // Gets if the file header is 32 bit or not

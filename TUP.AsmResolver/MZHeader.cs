@@ -33,7 +33,7 @@ namespace TUP.AsmResolver
         public ushort PagesInFile
         {
             get
-            { return assembly.headerreader.dosHeader.e_cp; }
+            { return assembly.headerReader.dosHeader.e_cp; }
         }
         /// <summary>
         /// Gets the offset of the NT header that is specified in the MZ header.
@@ -42,7 +42,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembly.headerreader.dosHeader.e_lfanew;
+                return assembly.headerReader.dosHeader.e_lfanew;
             }
         }
         /// <summary>
@@ -52,7 +52,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembly.headerreader.dosHeader.e_lfarlc;
+                return assembly.headerReader.dosHeader.e_lfarlc;
             }
 
         }

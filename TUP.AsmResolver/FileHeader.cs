@@ -14,7 +14,9 @@ namespace TUP.AsmResolver
     public class FileHeader : IHeader
     {
 
-        readonly string Root = "IMAGE_FILE_HEADER";
+        internal Win32Assembly assembly;
+        internal PeHeaderReader header;
+
         /// <summary>
         /// Gets or sets the machine representation of the loaded portable executable.
         /// </summary>
@@ -33,6 +35,7 @@ namespace TUP.AsmResolver
                 header.fileHeader.Machine = (UInt16)value;
             }
         }
+
         /// <summary>
         /// Gets the amount of sections that is available in the PE.
         /// </summary>
@@ -43,6 +46,7 @@ namespace TUP.AsmResolver
                 return header.fileHeader.NumberOfSections;
             }
         }
+
         /// <summary>
         /// Gets the compiling date of the PE.
         /// </summary>
@@ -82,12 +86,11 @@ namespace TUP.AsmResolver
             }
         }
 
-        internal Win32Assembly assembly;
-        internal PeHeaderReader header;
 
         internal FileHeader()
         {
         }
+
         /// <summary>
         /// Gets the Portable Executeable's file header by specifing the assembly.
         /// </summary>
@@ -97,7 +100,7 @@ namespace TUP.AsmResolver
         {
             FileHeader a = new FileHeader();
             a.assembly = assembly;
-            a.header = assembly.headerreader;
+            a.header = assembly.headerReader;
             return a;
         }
 

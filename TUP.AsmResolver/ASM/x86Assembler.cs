@@ -19,7 +19,7 @@ namespace TUP.AsmResolver.ASM
         {
             this.image = assembly.peImage;
             disassembler = assembly.disassembler;
-            offsetConverter = new OffsetConverter(Section.GetSectionByRva(assembly, assembly.ntheader.OptionalHeader.BaseOfCode));
+            offsetConverter = new OffsetConverter(Section.GetSectionByRva(assembly, assembly.ntHeader.OptionalHeader.BaseOfCode));
         }
         /// <summary>
         /// Replaces an instruction with a new instruction.

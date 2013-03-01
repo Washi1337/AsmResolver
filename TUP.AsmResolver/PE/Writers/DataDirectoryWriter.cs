@@ -21,7 +21,7 @@ namespace TUP.AsmResolver.PE.Writers
         public void RunProcedure()
         {
             WriteDirectories(Writer.OriginalAssembly.NTHeader.OptionalHeader.DataDirectories);
-            
+
         }
 
         private void WriteDirectories(DataDirectory[] directories)

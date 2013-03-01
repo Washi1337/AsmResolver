@@ -32,7 +32,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (originaltype == null)
-                    originaltype = netheader.blobheap.ReadTypeSignature(Signature, this);
+                    originaltype = netheader.BlobHeap.ReadTypeSignature(Signature, this);
                 return originaltype;
             }
             internal set { originaltype = value; }

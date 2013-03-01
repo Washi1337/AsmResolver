@@ -17,11 +17,11 @@ namespace TUP.AsmResolver.NET
         internal NETHeaderReader reader;
         internal uint flags;
         internal uint entryPointToken;
-        internal StringsHeap stringsheap;
-        internal UserStringsHeap usheap;
-        internal TablesHeap tableheap;
-        internal BlobHeap blobheap;
-        internal GuidHeap guidheap;
+        StringsHeap stringsheap;
+        UserStringsHeap usheap;
+        TablesHeap tableheap;
+        BlobHeap blobheap;
+        GuidHeap guidheap;
         internal TypeSystem typeSystem;
         MetaDataHeader metadata;
 
@@ -68,11 +68,11 @@ namespace TUP.AsmResolver.NET
             NETHeader header = new NETHeader();
             
             header.assembly = assembly;
-            header.reader = new NETHeaderReader(assembly.ntheader, header);
+            header.reader = new NETHeaderReader(assembly.ntHeader, header);
             header.metadata = new MetaDataHeader(header.reader);
             header.reader.LoadData();
-            header.flags = header.reader.netheader.Flags;
-            header.entryPointToken = header.reader.netheader.EntryPointToken;
+            header.flags = header.reader.netHeader.Flags;
+            header.entryPointToken = header.reader.netHeader.EntryPointToken;
             header.TokenResolver = new MetaDataTokenResolver(header);
             return header;
             
@@ -124,8 +124,7 @@ namespace TUP.AsmResolver.NET
             {
                 if (tableheap == null)
                 {
-                    tableheap = TablesHeap.FromStream(MetaDataStreams.First(t => t.name == "#~" || t.name == "#-"));
-                    tableheap.tablereader.ReadTables();
+                    tableheap = (TablesHeap)MetaDataStreams.First(t => t.name == "#~" || t.name == "#-");
                 }
 
                 return tableheap;
@@ -139,7 +138,7 @@ namespace TUP.AsmResolver.NET
             get
             {
                 if (stringsheap == null)
-                    stringsheap = StringsHeap.FromStream(MetaDataStreams.First(t => t.name == "#Strings"));
+                    stringsheap = (StringsHeap)MetaDataStreams.First(t => t.name == "#Strings");
                 return stringsheap;
             }
         }
@@ -151,7 +150,7 @@ namespace TUP.AsmResolver.NET
             get
             {
                 if (usheap == null)
-                    usheap = UserStringsHeap.FromStream(MetaDataStreams.First(t => t.name == "#US"));
+                    usheap = (UserStringsHeap)MetaDataStreams.First(t => t.name == "#US");
                 return usheap;
             }
         }
@@ -163,7 +162,7 @@ namespace TUP.AsmResolver.NET
             get
             { 
                 if (blobheap == null)
-                    blobheap = BlobHeap.FromStream(MetaDataStreams.First(t => t.name == "#Blob")); 
+                    blobheap = (BlobHeap)MetaDataStreams.First(t => t.name == "#Blob"); 
                 return blobheap;
             }
         }
@@ -175,7 +174,7 @@ namespace TUP.AsmResolver.NET
             get
             {
                 if (guidheap == null)
-                    guidheap = GuidHeap.FromStream(MetaDataStreams.First(t => t.name == "#GUID"));
+                    guidheap = (GuidHeap)MetaDataStreams.First(t => t.name == "#GUID");
                 return guidheap;
             }
         }
@@ -197,7 +196,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                return reader.netheaderoffset;
+                return reader.netHeaderOffset;
             }
         }
 

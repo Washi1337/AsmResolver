@@ -102,7 +102,7 @@ namespace TUP.AsmResolver
             NTHeader a = new NTHeader();
             a.assembly = assembly;
             a.file = assembly.path;
-            a.header = assembly.headerreader;
+            a.header = assembly.headerReader;
 
             a.fheader = FileHeader.FromAssembly(assembly);
             

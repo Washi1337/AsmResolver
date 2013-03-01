@@ -25,7 +25,7 @@ namespace TUP.AsmResolver.PE.Readers
         MethodBody methodbody;
         internal NETMethodReader(PeImage peImage, MethodBody methodbody)
         {
-            tokenResolver = new MetaDataTokenResolver(peImage.assembly.netheader);
+            tokenResolver = new MetaDataTokenResolver(peImage.assembly.netHeader);
             this.peImage = peImage;
             this.rva = methodbody.Method.RVA;
             this.methodbody = methodbody;
@@ -54,7 +54,7 @@ namespace TUP.AsmResolver.PE.Readers
 
             var sig = (StandAloneSignature)tokenResolver.ResolveMember(methodbody.LocalVarSig);
 
-            vars = methodbody.Method.netheader.blobheap.ReadVariableSignature(sig.Signature, methodbody.Method);
+            vars = methodbody.Method.netheader.BlobHeap.ReadVariableSignature(sig.Signature, methodbody.Method);
 
         }
 

@@ -11,7 +11,6 @@ namespace TUP.AsmResolver.PE.Readers
 {
     internal class NETTableReader : IDisposable
     {
-        MetaDataStream stream;
         BinaryReader reader;
         internal TablesHeap tableheap;
 
@@ -29,18 +28,11 @@ namespace TUP.AsmResolver.PE.Readers
         internal MetaDataTableGroup ResolutionScope;
         internal MetaDataTableGroup TypeOrMethod;
 
-        internal NETTableReader(MetaDataStream stream)
+        internal NETTableReader(TablesHeap tablesheap)
         {
-            this.stream = stream;
-            reader = new BinaryReader(new MemoryStream(stream.Contents));
-            tableheap = new TablesHeap();
-            tableheap.header = ASMGlobals.ReadStructureFromReader<Structures.METADATA_TABLE_HEADER>(reader);
-            tableheap.reader = stream.reader;
-            tableheap.streamHeader = stream.streamHeader;
-            tableheap.stream = stream;
-            tableheap.headeroffset = stream.headeroffset;
-            tableheap.netheader = stream.netheader;
-            
+            reader = new BinaryReader(new MemoryStream(tablesheap.Contents));
+            tablesheap.header = ASMGlobals.ReadStructureFromReader<Structures.METADATA_TABLE_HEADER>(reader);
+            this.tableheap = tablesheap;
 
 
             for (int i = 0; i < 45; i++)
@@ -172,7 +164,7 @@ namespace TUP.AsmResolver.PE.Readers
                     
                 if (tableheap.HasTable((MetaDataTableType)i))
                 {
-                    long offset = reader.BaseStream.Position + stream.StreamOffset;
+                    long offset = reader.BaseStream.Position + tableheap.StreamOffset;
                     tableheap.tables[i] = (CreateTable((MetaDataTableType)i, reader.ReadInt32(), offset));
                 }
             }
@@ -208,7 +200,7 @@ namespace TUP.AsmResolver.PE.Readers
             {
                 if (table != null)
                 {
-                    table.TableOffset = (uint)(stream.StreamOffset + reader.BaseStream.Position);
+                    table.TableOffset = (uint)(tableheap.StreamOffset + reader.BaseStream.Position);
                     for (int i = 0; i < table.AmountOfRows; i++)
                     {
                         switch (table.Type)
@@ -227,6 +219,9 @@ namespace TUP.AsmResolver.PE.Readers
                                 break;
                             case MetaDataTableType.Method:
                                 table.members.Add(ReadMethodDef());
+                                break;
+                            case MetaDataTableType.ParamPtr:
+                                table.members.Add(ReadParamPtr());
                                 break;
                             case MetaDataTableType.Param:
                                 table.members.Add(ReadParamDef());
@@ -358,7 +353,7 @@ namespace TUP.AsmResolver.PE.Readers
             MetaDataRow row = new MetaDataRow();
             row.parts = new object[parts.Length];
 
-            row.offset = (uint)(reader.BaseStream.Position + stream.StreamOffset);
+            row.offset = (uint)(reader.BaseStream.Position + tableheap.StreamOffset);
             
             for (int i = 0; i< parts.Length;i++)
             {
@@ -433,6 +428,14 @@ namespace TUP.AsmResolver.PE.Readers
 
             return new MethodDefinition() { tablereader = this, netheader = tableheap.netheader, metadatarow = ReadRow(parts) };
         }
+        internal ParamPtr ReadParamPtr()
+        {
+            byte[] parts = new byte[]
+            {
+                 tableheap.netheader.BlobHeap.indexsize
+            };
+            return new ParamPtr() { tablereader = this, netheader = tableheap.netheader, metadatarow = ReadRow(parts) };
+        }
         internal ParameterDefinition ReadParamDef()
         {
             byte[] parts = new byte[] { 
@@ -464,9 +467,9 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
             MetaDataRow row = ReadRow(parts);
-            tableheap.netheader.blobheap.mainStream.Seek(Convert.ToUInt32(row.parts[2]), SeekOrigin.Begin);
-            tableheap.netheader.blobheap.mainReader.ReadByte();
-            byte sigtype = tableheap.netheader.blobheap.mainReader.ReadByte();
+            tableheap.netheader.BlobHeap.mainStream.Seek(Convert.ToUInt32(row.parts[2]), SeekOrigin.Begin);
+            tableheap.netheader.BlobHeap.mainReader.ReadByte();
+            byte sigtype = tableheap.netheader.BlobHeap.mainReader.ReadByte();
             //IMemberSignature sig = tableheap.netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(row.parts[2]));
             if (sigtype == 0x6)
                 return new FieldReference() { tablereader = this, netheader = tableheap.netheader, metadatarow = row };

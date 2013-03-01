@@ -45,7 +45,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     int relativetoken = this.metadatatoken - (6 << 0x18);
 
                     TypeDefinition lasttypeDef = null;
-                    foreach (var member in netheader.tableheap.GetTable( MetaDataTableType.TypeDef).members)
+                    foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).members)
                     {
 
                         TypeDefinition typeDef = ((TypeDefinition)member);
@@ -82,10 +82,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-
                 if (signature != null)
                     return signature;
-                signature = (MethodSignature)netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[4]),this);
+                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[4]),this);
                 return signature;
                 //return Convert.ToUInt32(metadatarow.parts[4]); 
             }
@@ -134,7 +133,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get {
                 if (this.paramdefs != null)
                     return this.paramdefs;
-                if (netheader.tableheap.HasTable(MetaDataTableType.Param))
+                if (netheader.TablesHeap.HasTable(MetaDataTableType.Param))
                 {
                     int paramlist = Convert.ToInt32(metadatarow.parts[5]);
 
@@ -144,7 +143,7 @@ namespace TUP.AsmResolver.NET.Specialized
                         nextparamlist = Convert.ToInt32(netheader.TokenResolver.ResolveMember(this.MetaDataToken + 1).metadatarow.parts[5]);
 
 
-                    MetaDataTable paramTable = netheader.tableheap.GetTable( MetaDataTableType.Param);
+                    MetaDataTable paramTable = netheader.TablesHeap.GetTable(MetaDataTableType.Param);
                     int length = -1;
                     if (nextparamlist != -1)
                         length = nextparamlist - paramlist;
@@ -175,9 +174,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (semantics == null && netheader.tableheap.HasTable(MetaDataTableType.MethodSemantics))
+                if (semantics == null && netheader.TablesHeap.HasTable(MetaDataTableType.MethodSemantics))
                 {
-                    foreach (MetaDataMember member in netheader.tableheap.GetTable( MetaDataTableType.MethodSemantics).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).members)
                         if (((MethodSemantics)member).Method.metadatatoken == this.metadatatoken)
                         {
                             semantics = (MethodSemantics)member;

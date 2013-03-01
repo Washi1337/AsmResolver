@@ -208,8 +208,11 @@ namespace TUP.AsmResolver.PreviewApplication
             SaveFileDialog sfd = new SaveFileDialog();
             if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                uint offset = loadedAssembly.NETHeader.UserStringsHeap.GetStringOffset("TUP");
+                //offset = loadedAssembly.NETHeader.UserStringsHeap.GetStringOffset("ASFVCXZDSF");
                 try
                 {
+                    
                     loadedAssembly.Rebuild(sfd.FileName, new WritingParameters()
                     {
                         RebuildResources = true,
@@ -394,6 +397,7 @@ namespace TUP.AsmResolver.PreviewApplication
             }
             catch(Exception ex)
             {
+                MessageBox.Show("Failed to follow instruction. " + ex.Message);
             }
         }
 

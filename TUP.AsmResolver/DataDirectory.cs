@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TUP.AsmResolver.PE;
 
 namespace TUP.AsmResolver
 {
@@ -10,47 +11,43 @@ namespace TUP.AsmResolver
     /// </summary>
     public class DataDirectory
     {
-        internal DataDirectory(DataDirectoryName name, Section[] assemblySections, uint offset, uint rva, uint size)
+        internal DataDirectory(DataDirectoryName name, Section[] assemblySections, uint offset, Structures.IMAGE_DATA_DIRECTORY rawDataDir)
         {
-            try
+            
+            this.rawDataDir = rawDataDir;
+            this.name = name;
+            if (rawDataDir.RVA == 0)
             {
-                this.name = name;
-                if (rva == 0)
-                {
-                    targetOffset = new Offset(0, 0, 0, ASM.OperandType.Normal);
-                }
-                else
-                {
-                    this.headerOffset = offset;
+                targetOffset = new Offset(0, 0, 0, ASM.OperandType.Normal);
+            }
+            else
+            {
+                this.headerOffset = offset;
 
-                    targetSection = Section.GetSectionByRva(assemblySections, rva);
-                    this.size = size;
-                    this.targetOffset = Offset.FromRva(rva, assemblySections[0].ParentAssembly);
-                }
+                targetSection = Section.GetSectionByRva(assemblySections, rawDataDir.RVA);
+                this.targetOffset = Offset.FromRva(rawDataDir.RVA, assemblySections[0].ParentAssembly);
             }
-            catch (Exception ex)
-            {
-            }
+            
         }
-        internal DataDirectory(DataDirectoryName name, Section targetSection, uint headerOffset, uint rva, uint size)
+        internal DataDirectory(DataDirectoryName name, Section targetSection, uint headerOffset, Structures.IMAGE_DATA_DIRECTORY rawDataDir)
         {
             this.name = name;
             this.headerOffset = headerOffset;
-            this.size = size;
-            if (rva == 0)
+            this.rawDataDir = rawDataDir;
+            if (rawDataDir.RVA == 0)
             {
                 targetOffset = new Offset(0, 0, 0, ASM.OperandType.Normal);
             }
             else
             {
                 OffsetConverter converter = new OffsetConverter(targetSection);
-                this.targetOffset = Offset.FromRva(rva, targetSection.ParentAssembly);
+                this.targetOffset = Offset.FromRva(rawDataDir.RVA, targetSection.ParentAssembly);
                 this.targetSection = targetSection;
             }
         }
         internal uint headerOffset;
         internal Offset targetOffset;
-        internal uint size;
+        internal Structures.IMAGE_DATA_DIRECTORY rawDataDir;
         internal Section targetSection;
         internal DataDirectoryName name;
 
@@ -67,13 +64,19 @@ namespace TUP.AsmResolver
         public Offset TargetOffset
         {
             get { return targetOffset; }
+            set
+            {
+                rawDataDir.RVA = value.Rva;
+                targetOffset = value;
+            }
         }
         /// <summary>
         /// Gets the size of the data directory.
         /// </summary>
         public uint Size
         {
-            get { return size; }
+            get { return rawDataDir.Size; }
+            set { rawDataDir.Size = value; }
         }
         /// <summary>
         /// Gets the section the data directory is pointing at.

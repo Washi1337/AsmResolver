@@ -50,7 +50,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public string Culture
         {
-            get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[8])); }
+            get
+            { 
+                if (culture == null)
+                    culture = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[8]));
+                return culture;
+            }
         }
 
         public override string ToString()

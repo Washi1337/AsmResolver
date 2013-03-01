@@ -35,7 +35,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public ulong RvaToVa(uint rva)
         {
-            return rva + TargetSection.ParentAssembly.ntheader.OptionalHeader.ImageBase;
+            return rva + TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase;
         }
         /// <summary>
         /// Transforms a virtual address to a relative virtual address.
@@ -44,7 +44,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public uint VaToRva(ulong va)
         {
-            return (uint)(va - TargetSection.ParentAssembly.ntheader.OptionalHeader.ImageBase);
+            return (uint)(va - TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase);
         }
         /// <summary>
         /// Transforms a relative virtual address to a physical file offset.
@@ -71,7 +71,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public ulong FileOffsetToVa(uint fileoffset)
         {
-            return fileoffset - TargetSection.RawOffset + TargetSection.RVA + TargetSection.ParentAssembly.ntheader.OptionalHeader.ImageBase;
+            return fileoffset - TargetSection.RawOffset + TargetSection.RVA + TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase;
         }
         /// <summary>
         /// Transforms a virtual address to a physical file offset.
@@ -80,7 +80,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public uint VaToFileOffset(ulong va)
         {
-            return ((uint)(va - TargetSection.ParentAssembly.ntheader.OptionalHeader.ImageBase)) - TargetSection.RVA + TargetSection.RawOffset;
+            return ((uint)(va - TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase)) - TargetSection.RVA + TargetSection.RawOffset;
         }
     }
 }

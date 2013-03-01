@@ -9,25 +9,23 @@ namespace TUP.AsmResolver.NET
     /// <summary>
     /// Represents a metadata stream of a .NET application.
     /// </summary>
-    public class MetaDataStream 
+    public abstract class MetaDataStream : IDisposable
     {
-        internal MetaDataStream()
-        { }
 
-        internal MetaDataStream(NETHeader netheader, NETHeaderReader reader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
+        internal MetaDataStream(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
         {
             this.headeroffset = headeroffset;
             this.netheader = netheader;
             this.streamHeader = rawHeader;
-            this.reader = reader;
             this.name = name;
+            this.indexsize = 2;
         }
 
         internal int headeroffset;
         internal string name;
-        internal NETHeaderReader reader;
         internal NETHeader netheader;
         internal Structures.METADATA_STREAM_HEADER streamHeader;
+        internal byte[] contents; 
 
         /// <summary>
         /// Gets the offset of the header of the metadata.
@@ -55,7 +53,12 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public byte[] Contents
         {
-            get { return reader.header.assembly.peImage.ReadBytes(StreamOffset, (int)StreamSize); }
+            get
+            {
+                if (contents == null)
+                    contents = netheader.assembly.peImage.ReadBytes(StreamOffset, (int)StreamSize);
+                return contents;
+            }
         }
         /// <summary>
         /// Gets the name of the metadata stream.
@@ -66,28 +69,41 @@ namespace TUP.AsmResolver.NET
             set
             {
                 name = value;
-                reader.header.assembly.peImage.Write((int)headeroffset + 8, name, Encoding.ASCII);
+                netheader.assembly.peImage.Write((int)headeroffset + 8, name, Encoding.ASCII);
             }
         }
-        public Heap ToHeap()
-        {
-            switch (name)
-            {
-                case "#~":
-                case "#-":
-                    return netheader.TablesHeap;
-                case "#Strings":
-                    return netheader.StringsHeap;
-                case "#US":
-                    return netheader.UserStringsHeap;
-                case "#GUID":
-                    return netheader.GuidHeap;
-                case "#Blob":
-                    return netheader.BlobHeap ;
-                default:
-                    throw new ArgumentException("Metadatastream is not recognized as a valid heap.");
-            }
+        //public MetaDataStream  ToHeap()
+        //{
+        //    switch (name)
+        //    {
+        //        case "#~":
+        //        case "#-":
+        //            return netheader.TablesHeap;
+        //        case "#Strings":
+        //            return netheader.StringsHeap;
+        //        case "#US":
+        //            return netheader.UserStringsHeap;
+        //        case "#GUID":
+        //            return netheader.GuidHeap;
+        //        case "#Blob":
+        //            return netheader.BlobHeap ;
+        //        default:
+        //            throw new ArgumentException("Metadatastream is not recognized as a valid heap.");
+        //    }
+        //
+        //}       
 
+        internal byte indexsize;
+        public byte IndexSize
+        {
+            get { return indexsize; }
         }
+
+        internal abstract void Reconstruct();
+
+        internal abstract void Initialize();
+
+        public abstract void Dispose();
+
     }
 }

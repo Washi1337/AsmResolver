@@ -23,7 +23,7 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public string VersionString
         {
-            get { return reader.metadataversionstring; }
+            get { return reader.metadataVersionString; }
         }
 
 
@@ -44,7 +44,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                return reader.metadatafileoffset;
+                return reader.metadataFileOffset;
             }
         }
 

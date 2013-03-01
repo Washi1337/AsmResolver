@@ -50,7 +50,6 @@ namespace TUP.AsmResolver
         uint headeroffset;
         PeHeaderReader headerreader;
         Win32Assembly assembly;
-        string Root = "IMAGE_SECTION_HEADER";
         #endregion
 
         #region Properties
@@ -311,7 +310,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public static Section GetSectionByFileOffset(Win32Assembly assembly, uint rawoffset)
         {
-            return GetSectionByFileOffset(assembly.ntheader.Sections, rawoffset);
+            return GetSectionByFileOffset(assembly.ntHeader.Sections, rawoffset);
         }
         /// <summary>
         /// Gets the section of a list of sections by it's raw offset
@@ -336,7 +335,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public static Section GetSectionByRva(Win32Assembly assembly, uint va)
         {
-            return GetSectionByRva(assembly.ntheader.Sections, va);
+            return GetSectionByRva(assembly.ntHeader.Sections, va);
         }
         /// <summary>
         /// Gets the section of a list of sections by it's virtual offset
@@ -361,7 +360,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public static Section GetFirstSectionByFlag(Win32Assembly assembly, SectionFlags characteristics)
         {
-            return GetFirstSectionByFlag(assembly.ntheader.Sections, characteristics);
+            return GetFirstSectionByFlag(assembly.ntHeader.Sections, characteristics);
         }
         /// <summary>
         /// Gets the first section of a list of sections that contains the specified flag
@@ -386,7 +385,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public static Section GetLastSectionByFlag(Win32Assembly assembly, SectionFlags characteristics)
         {
-            return GetLastSectionByFlag(assembly.ntheader.Sections, characteristics);
+            return GetLastSectionByFlag(assembly.ntHeader.Sections, characteristics);
         }
         /// <summary>
         /// Gets the last section of a list of sections that contains the specified flag

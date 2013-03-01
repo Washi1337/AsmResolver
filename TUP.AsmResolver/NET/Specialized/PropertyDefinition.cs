@@ -45,7 +45,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (getmethod == null)
                 {
-                    foreach (MetaDataMember member in netheader.tableheap.GetTable(MetaDataTableType.MethodSemantics).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
                         if (semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Getter ) == MethodSemanticsAttributes.Getter)
@@ -64,7 +64,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (setmethod == null)
                 {
-                    foreach (MetaDataMember member in netheader.tableheap.GetTable(MetaDataTableType.MethodSemantics).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
                         if (semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Setter) == MethodSemanticsAttributes.Setter)

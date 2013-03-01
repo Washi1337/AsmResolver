@@ -1,0 +1,2 @@
+﻿These classes are not finished yet and therefore adding or removing members, strings, blobs or any kind of data 
+won't be processed properly yet. 

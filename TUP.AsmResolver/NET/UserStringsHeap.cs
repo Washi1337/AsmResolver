@@ -3,27 +3,86 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using TUP.AsmResolver.PE;
 
 namespace TUP.AsmResolver.NET
 {
     /// <summary>
     /// A heap that holds all user specified strings in method bodies.
     /// </summary>
-    public class UserStringsHeap : Heap
+    public class UserStringsHeap : MetaDataStream
     {
-        internal UserStringsHeap(MetaDataStream stream)
-            : base(stream)
+        uint newEntryOffset = 0;
+        bool hasReadAllStrings = false;
+        SortedDictionary<uint, string> readStrings = new SortedDictionary<uint, string>();
+        MemoryStream stream;
+        BinaryReader binaryreader;
+
+        internal UserStringsHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
+            : base(netheader, headeroffset, rawHeader, name)
+        {
+            stream = new MemoryStream(Contents);
+            binaryreader = new BinaryReader(stream);
+        }
+
+        internal override void Initialize()
         {
         }
 
-        Dictionary<uint, string> readStrings = new Dictionary<uint, string>();
-        BinaryReader binaryreader;
-
-        public static UserStringsHeap FromStream(MetaDataStream stream)
+        internal override void Reconstruct()
         {
-            UserStringsHeap heap = new UserStringsHeap(stream);
-            heap.binaryreader = new BinaryReader(new MemoryStream(heap.Contents));
-            return heap;
+            MemoryStream newStream = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(newStream);
+            writer.Write((byte)0);
+            ReadAllStrings();
+            foreach (var readString in readStrings)
+            {
+                byte[] bytes = Encoding.Unicode.GetBytes(readString.Value);
+                NETGlobals.WriteCompressedUInt32(writer, (uint)bytes.Length + 1); // length + terminator length
+                writer.Write(bytes); // data
+                writer.Write((byte)0); // terminator
+            }
+            binaryreader.Dispose();
+            stream.Dispose();
+            stream = newStream;
+            binaryreader = new BinaryReader(newStream);
+            this.streamHeader.Size = (uint)newStream.Length;
+            this.contents = newStream.ToArray();
+        }
+
+        internal void ReadAllStrings()
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+
+            while (stream.Position + 1 < stream.Length)
+            {
+                // TODO: write string.empty strings..
+
+                bool alreadyExisted = readStrings.ContainsKey((uint)stream.Position + 1);
+                string value = GetStringByOffset((uint)stream.Position + 1);
+
+
+                int length = value.Length * 2;
+                if (length == 0)
+                    stream.Seek(1, SeekOrigin.Current);
+                if (alreadyExisted)
+                    stream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length) + 1, SeekOrigin.Current);
+
+            }
+
+            hasReadAllStrings = true;
+            newEntryOffset = (uint)stream.Length;
+        }
+
+        /// <summary>
+        /// Frees all the streams that are being used in this heap.
+        /// </summary>
+        public override void Dispose()
+        {
+            binaryreader.BaseStream.Close();
+            binaryreader.BaseStream.Dispose();
+            binaryreader.Close();
+            binaryreader.Dispose();
         }
 
         /// <summary>
@@ -37,11 +96,14 @@ namespace TUP.AsmResolver.NET
             if (readStrings.TryGetValue(offset, out stringValue))
                 return stringValue;
 
-            binaryreader.BaseStream.Seek(offset, SeekOrigin.Begin);
+            stream.Seek(offset, SeekOrigin.Begin);
 
-            uint length = (uint)(ReadCompressedUInt32() & -2);
-            if (length < 0x1)
+            uint length = (uint)(NETGlobals.ReadCompressedUInt32(binaryreader) & -2);
+            if (length == 0)
+            {
+                readStrings.Add(offset, string.Empty);
                 return string.Empty;
+            }
             
             char[] chars = new char[length / 2];
 
@@ -52,33 +114,27 @@ namespace TUP.AsmResolver.NET
             stringValue = new string(chars);
             readStrings.Add(offset, stringValue);
             return stringValue;
-
-
         }
 
-        private uint ReadCompressedUInt32()
-        {
-            // stream.Seek(index, SeekOrigin.Begin);
-            byte num = binaryreader.ReadByte();
-            if ((num & 0x80) == 0)
-            {
-                return num;
-            }
-            if ((num & 0x40) == 0)
-            {
-                return (uint)(((num & -129) << 8) | binaryreader.ReadByte());
-            }
-            return (uint)(((((num & -193) << 0x18) | (binaryreader.ReadByte() << 0x10)) | (binaryreader.ReadByte() << 8)) | binaryreader.ReadByte());
-        }
         /// <summary>
-        /// Frees all the streams that are being used in this heap.
+        /// Gets an offset of a string value. If it is not present in the strings heap, it will add it.
         /// </summary>
-        public override void Dispose()
+        /// <param name="value">The string value to get the offset from.</param>
+        /// <returns></returns>
+        public uint GetStringOffset(string value)
         {
-            binaryreader.BaseStream.Close();
-            binaryreader.BaseStream.Dispose();
-            binaryreader.Close();
-            binaryreader.Dispose();
+            if (!hasReadAllStrings)
+                ReadAllStrings();
+
+            if (readStrings.ContainsValue(value))
+                return readStrings.First(rs => rs.Value == value).Key;
+
+            uint offset = newEntryOffset;
+            readStrings.Add(offset, value);
+            newEntryOffset += (uint)(value.Length + 1);
+            return offset;
         }
+
+
     }
 }

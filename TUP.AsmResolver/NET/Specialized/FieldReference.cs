@@ -51,7 +51,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (signature != null)
                     return signature;
-                signature = (FieldSignature)netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]),null);
+                signature = (FieldSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), null);
                 return signature;
             }
         }

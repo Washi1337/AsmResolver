@@ -24,7 +24,7 @@ namespace TUP.AsmResolver
             this.ParentEntry = parentEntry;
             this.rawDataEntry = rawDataEntry;
 
-            Section resourceSection = Section.GetSectionByRva(image.assembly, image.assembly.ntheader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.Rva);
+            Section resourceSection = Section.GetSectionByRva(image.assembly, image.assembly.ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.Rva);
             targetOffset = OffsetToData - resourceSection.RVA + resourceSection.RawOffset;
         }
         /// <summary>

@@ -70,7 +70,7 @@ namespace TUP.AsmResolver
                         goto things;
                     }
                 }
-                if (parentAssembly.ntheader.OptionalHeader.Is32Bit)
+                if (parentAssembly.ntHeader.OptionalHeader.Is32Bit)
                 {
                     if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) + "\\" + LibraryName))
                         actualpath = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) + "\\" + LibraryName;

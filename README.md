@@ -34,10 +34,7 @@ The PE namespace is the "core" of AsmResolver. It contains classes that are read
 This namespace contains all classes that have something to do with reading the raw structure of the PE. All these classes are internal.
 
 **TUP.AsmResolver.PE.Writers**  
-This namespace contains all classes that have something to do with writing a new executable. These clsses are being used for rebuilding the application. All these classes are internal.
-
-**TUP.AsmResolver.PE**  
-This is a namespace containing mostly internal classes. This is a part that mostly reads and writes data directly from/to the assembly, such as raw structures. The only class that's actually public is the *PeImage* class, which can be compared to a stream. It is able to read and write bytes, structures and data types.
+This namespace contains all classes that have something to do with writing a new executable. These classes are being used for rebuilding the application. All these classes are internal and are in pre-pre-pre-alpha stage and need a lot of work.
 
 **TUP.AsmResolver.ASM**  
 In this namespace you will find classes that work with the x86 assembly instruction set. You can use the assembler and disassembler to read and write x86 instructions with the help of the *x86Instruction* and *x86OpCodes* class. This namespace is far from done and needs a lot of work. Don't expect perfect outputs.

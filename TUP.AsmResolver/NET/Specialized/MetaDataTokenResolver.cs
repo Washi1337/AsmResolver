@@ -39,7 +39,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
             MetaDataTableType tabletype = (MetaDataTableType)(metadataToken >> 0x18);
 
-            if (!netheader.tableheap.HasTable(tabletype))
+            if (!netheader.TablesHeap.HasTable(tabletype))
                 throw new ArgumentException("Table is not present in tables heap.");
 
             int subtraction = ((int)tabletype) * 0x1000000;

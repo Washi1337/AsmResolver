@@ -205,7 +205,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                             }
                             return operand;
                         }
-                        catch (Exception ex) { return new TypeReference() { name = "TOKEN:" + metadata.ToString("X8") }; }
+                        catch { return new TypeReference() { name = "TOKEN:" + metadata.ToString("X8") }; }
 
                     case OperandType.ShortVariable:
                         return GetVariable(ASMGlobals.ByteToSByte(rawoperand[0]));

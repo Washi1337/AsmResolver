@@ -68,8 +68,6 @@ namespace TUP.AsmResolver
 
         uint NumberOfRvaAndSizes { get; set; }
 
-        DataDirectory[] DataDirectories { get; }
-
         
     }
 }

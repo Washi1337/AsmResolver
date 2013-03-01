@@ -5,7 +5,7 @@ using System.Text;
 using TUP.AsmResolver.NET;
 namespace TUP.AsmResolver.PE.Writers
 {
-    internal class ManagedDataWriter : IWriterTask 
+    internal class ManagedDataWriter : IWriterTask , IReconstructionTask
     {
         DataDirectory clrDirectory;
         DataDirectory metadataDirectory;
@@ -20,13 +20,37 @@ namespace TUP.AsmResolver.PE.Writers
             get;
             private set;
         }
-        
+
+        public void Reconstruct()
+        {
+            //TODO: Rebuild heaps.
+
+            uint streamOffset = Writer.OriginalAssembly.NETHeader.MetaDataStreams[0].streamHeader.Offset;
+            Writer.OriginalAssembly.NETHeader.reader.netHeader.MetaData.Size = streamOffset;
+            DataDirectory dataDir = Writer.OriginalAssembly.NETHeader.MetaDataDirectory;
+            dataDir.rawDataDir.Size = streamOffset;
+            foreach (MetaDataStream stream in Writer.OriginalAssembly.NETHeader.MetaDataStreams)
+            {
+                // rebuild stream.
+                stream.Reconstruct();
+                // reset offset to prevent overwriting of expanded streams.
+                stream.streamHeader.Offset = streamOffset;
+                // calculate next stream offset.
+                streamOffset += stream.StreamSize;
+                // increase total md dir size
+                Writer.OriginalAssembly.NETHeader.reader.netHeader.MetaData.Size += stream.StreamSize;
+                dataDir.rawDataDir.Size += stream.StreamSize;
+            }
+
+            
+        }
+
         public void RunProcedure()
         {
             if (clrDirectory.TargetOffset.FileOffset != 0)
             {
                 Writer.MoveToOffset(clrDirectory.TargetOffset.FileOffset);
-                Writer.WriteStructure<Structures.IMAGE_COR20_HEADER>(Writer.OriginalAssembly.NETHeader.reader.netheader);
+                Writer.WriteStructure<Structures.IMAGE_COR20_HEADER>(Writer.OriginalAssembly.NETHeader.reader.netHeader);
                 metadataDirectory = Writer.OriginalAssembly.NETHeader.MetaDataDirectory;
                 WriteMetaDataHeader();
                 WriteStreamHeaders();
@@ -37,10 +61,10 @@ namespace TUP.AsmResolver.PE.Writers
         private void WriteMetaDataHeader()
         {
             Writer.MoveToOffset(metadataDirectory.TargetOffset.FileOffset);
-            Writer.WriteStructure<Structures.METADATA_HEADER_1>(Writer.OriginalAssembly.NETHeader.reader.metadataheader1);
+            Writer.WriteStructure<Structures.METADATA_HEADER_1>(Writer.OriginalAssembly.NETHeader.reader.metadataHeader1);
             byte[] versionBytes = Encoding.ASCII.GetBytes(Writer.OriginalAssembly.NETHeader.MetaDataHeader.VersionString);
             Writer.BinWriter.Write(versionBytes);
-            Writer.WriteStructure<Structures.METADATA_HEADER_2>(Writer.OriginalAssembly.NETHeader.reader.metadataheader2);
+            Writer.WriteStructure<Structures.METADATA_HEADER_2>(Writer.OriginalAssembly.NETHeader.reader.metadataHeader2);
         }
 
         private void WriteStreamHeaders()
@@ -55,7 +79,6 @@ namespace TUP.AsmResolver.PE.Writers
 
         private void WriteStreams()
         {
-            //TODO: Rebuild heaps.
             foreach (MetaDataStream stream in Writer.OriginalAssembly.NETHeader.MetaDataStreams)
             {
                 Writer.MoveToOffset(stream.StreamOffset);
@@ -68,5 +91,6 @@ namespace TUP.AsmResolver.PE.Writers
             align--;
             Writer.BinWriter.Write(new byte[(((int)Writer.OutputStream.Position + align) & ~align) - (int)Writer.OutputStream.Position]);
         }
+
     }
 }

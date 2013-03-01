@@ -5,31 +5,82 @@ using System.Text;
 using System.IO;
 using TUP.AsmResolver.NET.Specialized;
 using TUP.AsmResolver.NET.Specialized.MSIL;
+using TUP.AsmResolver.PE;
 namespace TUP.AsmResolver.NET
 {
     /// <summary>
     /// Represents the blob heap stream containing various values of many metadata members.
     /// </summary>
-    public class BlobHeap : Heap
+    public class BlobHeap : MetaDataStream
     {
         
         internal MemoryStream mainStream;
         internal BinaryReader mainReader;
+        internal Dictionary<uint, byte[]> readBlobs = new Dictionary<uint, byte[]>();
+
         IGenericParametersProvider provider;
 
-        internal BlobHeap(MetaDataStream stream)
-            : base(stream)
+        //MetaDataStream stream)
+            //: base(stream)
+        internal BlobHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
+            : base(netheader, headeroffset, rawHeader, name)
         {
             this.mainStream = new MemoryStream(Contents);
             this.mainReader = new BinaryReader(this.mainStream);
-            
         }
 
-        public static BlobHeap FromStream(MetaDataStream stream)
+
+        internal override void Initialize()
         {
-            BlobHeap heap = new BlobHeap(stream);
-            return heap;
         }
+
+        internal override void Reconstruct()
+        {
+            MemoryStream newStream = new MemoryStream();
+            BinaryWriter writer = new BinaryWriter(newStream);
+            writer.Write((byte)0);
+            ReadAllBlobs();
+
+            foreach (var blob in readBlobs)
+            {
+                NETGlobals.WriteCompressedUInt32(writer, (uint)blob.Value.Length);
+                writer.Write(blob.Value);
+            }
+
+            mainStream.Dispose();
+            mainReader.Dispose();
+            mainStream = newStream;
+            mainReader = new BinaryReader(newStream);
+            this.contents = newStream.ToArray();
+            this.streamHeader.Size = (uint)newStream.Length;
+        }
+
+        internal void ReadAllBlobs()
+        {
+            mainStream.Seek(1, SeekOrigin.Begin);
+            while (mainStream.Position < mainStream.Length)
+            {
+                bool alreadyExisted = readBlobs.ContainsKey((uint)mainStream.Position);
+                byte[] value = GetBlob((uint)mainStream.Position);
+
+                int length = value.Length;
+                if (length == 0)
+                    break;
+                if (alreadyExisted)
+                    mainStream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length), SeekOrigin.Current);
+
+            }
+        }
+
+        public override void Dispose()
+        {
+            mainReader.BaseStream.Close();
+            mainReader.BaseStream.Dispose();
+            mainReader.Close();
+            mainReader.Dispose();
+        }
+
+
 
         /// <summary>
         /// Gets the blob value by it's signature/index.
@@ -38,24 +89,39 @@ namespace TUP.AsmResolver.NET
         /// <returns></returns>
         public byte[] GetBlob(uint index)
         {
+            byte[] bytes = null;
+            if (readBlobs.TryGetValue(index, out bytes))
+                return bytes;
 
             mainStream.Seek(index, SeekOrigin.Begin);
-            int length = ReadCompressedInt32(mainReader);
+            int length = (int)NETGlobals.ReadCompressedUInt32(mainReader);
 
-            byte[] bytes = mainReader.ReadBytes(length);
-
+            bytes = mainReader.ReadBytes(length);
+            readBlobs.Add(index, bytes);
             return bytes;
             
         }
+        /// <summary>
+        /// Gets the blob value by it's signature/index and creates a binary reader.
+        /// </summary>
+        /// <param name="index">The index or signature to get the blob value from.</param>
+        /// <returns></returns>
         public BinaryReader GetBlobReader(uint index)
         {
-            mainStream.Seek(index, SeekOrigin.Begin);
-            uint length = ReadCompressedUInt32(mainReader);
-            MemoryStream newStream = new MemoryStream(mainReader.ReadBytes((int)length));
+            byte[] bytes = null;
+            if (!readBlobs.TryGetValue(index, out bytes))
+            {
+                mainStream.Seek(index, SeekOrigin.Begin);
+                uint length = NETGlobals.ReadCompressedUInt32(mainReader);
+                bytes = mainReader.ReadBytes((int)length);
+            }
+
+            MemoryStream newStream = new MemoryStream(bytes);
             newStream.Seek(0, SeekOrigin.Begin);
             BinaryReader reader = new BinaryReader(newStream);
             return reader;
         }
+
         public IMemberSignature ReadMemberRefSignature(uint sig, IGenericParametersProvider provider)
         {
             IMemberSignature signature = null;
@@ -86,7 +152,7 @@ namespace TUP.AsmResolver.NET
                     }
                     if ((flag & 0x10) != 0)
                     {
-                        uint genericsig = ReadCompressedUInt32(reader);
+                        uint genericsig = NETGlobals.ReadCompressedUInt32(reader);
                     }
                     methodsignature.CallingConvention = (MethodCallingConvention)flag;
 
@@ -101,14 +167,14 @@ namespace TUP.AsmResolver.NET
                     //    
                     //}
 
-                    uint num3 = ReadCompressedUInt32(reader);
-                    methodsignature.ReturnType = ReadTypeReference(reader, (ElementType)ReadCompressedUInt32(reader), provider);//ReadTypeSignature((uint)stream.Position);
+                    uint num3 = NETGlobals.ReadCompressedUInt32(reader);
+                    methodsignature.ReturnType = ReadTypeReference(reader, (ElementType)NETGlobals.ReadCompressedUInt32(reader), provider);//ReadTypeSignature((uint)stream.Position);
                     if (num3 != 0)
                     {
                         ParameterReference[] parameters = new ParameterReference[num3];
                         for (int i = 0; i < num3; i++)
                         {
-                            parameters[i] = new ParameterReference() { ParameterType = ReadTypeReference(reader, (ElementType)ReadCompressedUInt32(reader), provider) };
+                            parameters[i] = new ParameterReference() { ParameterType = ReadTypeReference(reader, (ElementType)NETGlobals.ReadCompressedUInt32(reader), provider) };
                         }
                         methodsignature.Parameters = parameters;
                     }
@@ -131,7 +197,7 @@ namespace TUP.AsmResolver.NET
 
                 propertySig = new PropertySignature();
                 propertySig.HasThis = (flag & 0x20) != 0;
-                ReadCompressedUInt32(reader);
+                NETGlobals.ReadCompressedUInt32(reader);
                 propertySig.ReturnType = ReadTypeReference(reader, (ElementType)reader.ReadByte(), null);
             }
             return propertySig;
@@ -147,7 +213,7 @@ namespace TUP.AsmResolver.NET
                 if (local_sig != 0x7)
                     throw new ArgumentException("Signature doesn't refer to a valid local variable signature");
 
-                uint count = ReadCompressedUInt32(reader);
+                uint count = NETGlobals.ReadCompressedUInt32(reader);
 
                 if (count == 0)
                     return null;
@@ -164,7 +230,7 @@ namespace TUP.AsmResolver.NET
             TypeReference typeRef = null;
             using (BinaryReader reader = GetBlobReader(signature))
             {
-                typeRef= ReadTypeReference(reader, (ElementType)ReadCompressedUInt32(reader), provider);
+                typeRef = ReadTypeReference(reader, (ElementType)NETGlobals.ReadCompressedUInt32(reader), provider);
             }
             return typeRef;
         }
@@ -174,7 +240,7 @@ namespace TUP.AsmResolver.NET
             TypeReference typeRef = null;
             using (BinaryReader reader = GetBlobReader(signature))
             {
-                typeRef=  ReadTypeReference(reader, (ElementType)ReadCompressedUInt32(reader), this.provider);
+                typeRef = ReadTypeReference(reader, (ElementType)NETGlobals.ReadCompressedUInt32(reader), this.provider);
             }
 
             return typeRef;
@@ -188,7 +254,7 @@ namespace TUP.AsmResolver.NET
                 this.provider = provider;
                 if (reader.ReadByte() == 0xa)
                 {
-                    uint count = ReadCompressedUInt32(reader);
+                    uint count = NETGlobals.ReadCompressedUInt32(reader);
                     for (int i = 0; i < count; i++)
                         types.Add(ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider));
                 }
@@ -328,7 +394,7 @@ namespace TUP.AsmResolver.NET
                 case ElementType.Ptr:
                     return new PointerType(ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider));
                 case ElementType.MVar:
-                    uint token = ReadCompressedUInt32(reader);
+                    uint token = NETGlobals.ReadCompressedUInt32(reader);
                     if (provider != null && provider.GenericParameters != null && provider.GenericParameters.Length > token)
                         return provider.GenericParameters[token];
                     else
@@ -336,7 +402,7 @@ namespace TUP.AsmResolver.NET
 
 
                 case ElementType.Var:
-                    token =ReadCompressedUInt32(reader);
+                    token = NETGlobals.ReadCompressedUInt32(reader);
                     if (provider != null && provider is MemberReference)
                     {
                         var member = provider as MemberReference;
@@ -349,18 +415,14 @@ namespace TUP.AsmResolver.NET
                     }   
                     return new GenericParamReference((int)token, new TypeReference() { name = "Var", elementType = ElementType.Var, @namespace = "", netheader = this.netheader });
 
-                    break;
                 case ElementType.Array:
-
                     return ReadArrayType(reader);
-
-
                 case ElementType.SzArray:
                     return new ArrayType(ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider));
                 case ElementType.Class:
-                    return (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32(reader));
+                    return (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
                 case ElementType.ValueType:
-                    TypeReference typeRef = (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32(reader));
+                    TypeReference typeRef = (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
                     typeRef.IsValueType = true;
                     return typeRef;
                 case ElementType.ByRef:
@@ -384,7 +446,7 @@ namespace TUP.AsmResolver.NET
         }
         private void ReadGenericInstanceSignature(BinaryReader reader, IGenericParametersProvider provider, GenericInstanceType type)
         {
-            uint number = ReadCompressedUInt32(reader);
+            uint number = NETGlobals.ReadCompressedUInt32(reader);
 
             //provider.GenericParameters = new GenericParameter[number];
             type.GenericArguments = new TypeReference[number];
@@ -397,21 +459,21 @@ namespace TUP.AsmResolver.NET
 
         private TypeReference ReadTypeToken(BinaryReader reader)
         {
-            return (TypeReference)netheader.tableheap.tablereader.TypeDefOrRef.GetMember((int)ReadCompressedUInt32(reader));
+            return (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
         }
         private ArrayType ReadArrayType(BinaryReader reader)
         {
             TypeReference arrayType = ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider);
-            uint rank = ReadCompressedUInt32(reader);
-            uint[] upperbounds = new uint[ReadCompressedUInt32(reader)];
+            uint rank = NETGlobals.ReadCompressedUInt32(reader);
+            uint[] upperbounds = new uint[NETGlobals.ReadCompressedUInt32(reader)];
 
             for (int i = 0; i < upperbounds.Length; i++)
-                upperbounds[i] = ReadCompressedUInt32(reader);
+                upperbounds[i] = NETGlobals.ReadCompressedUInt32(reader);
 
-            int[] lowerbounds = new int[ReadCompressedUInt32(reader)];
+            int[] lowerbounds = new int[NETGlobals.ReadCompressedUInt32(reader)];
 
             for (int i = 0; i < lowerbounds.Length; i++)
-                lowerbounds[i] = ReadCompressedInt32(reader);
+                lowerbounds[i] = NETGlobals.ReadCompressedInt32(reader);
 
 
             ArrayDimension[] dimensions = new ArrayDimension[rank];
@@ -482,7 +544,7 @@ namespace TUP.AsmResolver.NET
                     return reader.ReadDouble();
                 case ElementType.Type:
                 case ElementType.String:
-                    uint size = ReadCompressedUInt32(reader);
+                    uint size = NETGlobals.ReadCompressedUInt32(reader);
                     if (size == 0xFF)
                         return string.Empty;
                     byte[] rawdata = reader.ReadBytes((int)size);
@@ -500,35 +562,7 @@ namespace TUP.AsmResolver.NET
 
 
 
-       
-        private uint ReadCompressedUInt32(BinaryReader reader)
-        {
-           // stream.Seek(index, SeekOrigin.Begin);
-            byte num = reader.ReadByte();
-            if ((num & 0x80) == 0)
-            {
-                return num;
-            }
-            if ((num & 0x40) == 0)
-            {
-                return (uint)(((num & -129) << 8) | reader.ReadByte());
-            }
-            return (uint)(((((num & -193) << 0x18) | (reader.ReadByte() << 0x10)) | (reader.ReadByte() << 8)) | reader.ReadByte());
-        }
 
-        public int ReadCompressedInt32(BinaryReader reader)
-        {
-            int value = (int)this.ReadCompressedUInt32(reader);
-            return (((value & 1) != 0) ? -(value >> 1) : (value >> 1));
 
-        }
-
-        public override void Dispose()
-        {
-            mainReader.BaseStream.Close();
-            mainReader.BaseStream.Dispose();
-            mainReader.Close();
-            mainReader.Dispose();
-        }
     }
 }

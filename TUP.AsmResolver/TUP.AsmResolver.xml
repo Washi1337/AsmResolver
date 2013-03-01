@@ -763,11 +763,6 @@
             Represents the blob heap stream containing various values of many metadata members.
             </summary>
         </member>
-        <member name="T:TUP.AsmResolver.NET.Heap">
-            <summary>
-            Represents a heap from a metadata stream.
-            </summary>
-        </member>
         <member name="T:TUP.AsmResolver.NET.MetaDataStream">
             <summary>
             Represents a metadata stream of a .NET application.
@@ -801,6 +796,13 @@
         <member name="M:TUP.AsmResolver.NET.BlobHeap.GetBlob(System.UInt32)">
             <summary>
             Gets the blob value by it's signature/index.
+            </summary>
+            <param name="index">The index or signature to get the blob value from.</param>
+            <returns></returns>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.BlobHeap.GetBlobReader(System.UInt32)">
+            <summary>
+            Gets the blob value by it's signature/index and creates a binary reader.
             </summary>
             <param name="index">The index or signature to get the blob value from.</param>
             <returns></returns>
@@ -1547,6 +1549,11 @@
             A heap that holds all string values of all members in the tables heap.
             </summary>
         </member>
+        <member name="M:TUP.AsmResolver.NET.StringsHeap.Dispose">
+            <summary>
+            Frees all the streams used in this heap.
+            </summary>
+        </member>
         <member name="M:TUP.AsmResolver.NET.StringsHeap.GetStringByOffset(System.UInt32)">
             <summary>
             Gets the string by its offset.
@@ -1554,14 +1561,21 @@
             <param name="offset">The offset of the string.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.NET.StringsHeap.Dispose">
+        <member name="M:TUP.AsmResolver.NET.StringsHeap.GetStringOffset(System.String)">
             <summary>
-            Frees all the streams used in this heap.
+            Gets an offset of a string value. If it is not present in the strings heap, it will add it.
             </summary>
+            <param name="value">The string value to get the offset from.</param>
+            <returns></returns>
         </member>
         <member name="T:TUP.AsmResolver.NET.UserStringsHeap">
             <summary>
             A heap that holds all user specified strings in method bodies.
+            </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.UserStringsHeap.Dispose">
+            <summary>
+            Frees all the streams that are being used in this heap.
             </summary>
         </member>
         <member name="M:TUP.AsmResolver.NET.UserStringsHeap.GetStringByOffset(System.UInt32)">
@@ -1571,10 +1585,12 @@
             <param name="offset">The offset of the string.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.NET.UserStringsHeap.Dispose">
+        <member name="M:TUP.AsmResolver.NET.UserStringsHeap.GetStringOffset(System.String)">
             <summary>
-            Frees all the streams that are being used in this heap.
+            Gets an offset of a string value. If it is not present in the strings heap, it will add it.
             </summary>
+            <param name="value">The string value to get the offset from.</param>
+            <returns></returns>
         </member>
         <member name="T:TUP.AsmResolver.OptionalHeader32">
             <summary>
@@ -2753,11 +2769,20 @@
             Reprensents a Win32 Assembly decompiled in 32-bit assembly code.
             </summary>
         </member>
-        <member name="M:TUP.AsmResolver.Win32Assembly.LoadFile(System.String,TUP.AsmResolver.ReadingParameters)">
+        <member name="M:TUP.AsmResolver.Win32Assembly.LoadFile(System.String)">
             <summary>
             Loads an assembly from a specific file.
             </summary>
             <param name="file">The file to read.</param>
+            <returns></returns>
+            <exception cref="T:System.BadImageFormatException"></exception>
+        </member>
+        <member name="M:TUP.AsmResolver.Win32Assembly.LoadFile(System.String,TUP.AsmResolver.ReadingParameters)">
+            <summary>
+            Loads an assembly from a specific file using the specific reading parameters.
+            </summary>
+            <param name="file">The file to read.</param>
+            <param name="arguments">The reading parameters to use.</param>
             <returns></returns>
             <exception cref="T:System.BadImageFormatException"></exception>
         </member>
@@ -2799,6 +2824,11 @@
         <member name="P:TUP.AsmResolver.Win32Assembly.Assembler">
             <summary>
             Gets the assembly code processor which can write assembly instructions.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.Win32Assembly.ReadingArguments">
+            <summary>
+            Gets the reading arguments that are being used to open the application.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.Win32Assembly.Path">

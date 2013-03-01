@@ -21,7 +21,7 @@ namespace TUP.AsmResolver.PreviewApplication
         {
             InitializeComponent();
 
-            tableheap = (TablesHeap)stream.ToHeap();
+            tableheap = (TablesHeap)stream;
             hexBox1.ByteProvider = new DynamicByteProvider(stream.Contents);
            // foreach (MetaDataMember member in tableheap.Tables.First(t => t.Type == MetaDataTableType.ManifestResource).Members)
            //     treeView1.Nodes.Add(CreateTreeNode(member));

@@ -17,7 +17,7 @@ namespace TUP.AsmResolver
         {
             
         }        
-        readonly string Root = "IMAGE_OPTIONAL_HEADER32";
+
         /// <summary>
         /// Gets the 32 bit optional header by specifing a 32 bit assembly.
         /// </summary>
@@ -27,11 +27,13 @@ namespace TUP.AsmResolver
         {
             OptionalHeader32 a = new OptionalHeader32();
             a.assembly = assembly;
-            a.header = assembly.headerreader;
+            a.header = assembly.headerReader;
             return a;
         }
+
         internal Win32Assembly assembly;
         internal PeHeaderReader header;
+
         /// <summary>
         /// Gets the linker version
         /// </summary>
@@ -42,6 +44,7 @@ namespace TUP.AsmResolver
                 return new Version(header.optionalHeader32.MajorLinkerVersion, header.optionalHeader32.MinorLinkerVersion);
             }
         }
+
         /// <summary>
         /// Gets the minium operating system version the portable executable requires.
         /// </summary>
@@ -54,6 +57,7 @@ namespace TUP.AsmResolver
            
             }
         }
+
         /// <summary>
         /// Gets the minium sub system version the portable executable requires.
         /// </summary>
@@ -66,6 +70,7 @@ namespace TUP.AsmResolver
        
             }
         }
+
         /// <summary>
         /// Gets or sets the entrypoint address of the portable executable file.
         /// </summary>
@@ -82,6 +87,7 @@ namespace TUP.AsmResolver
                 assembly.peImage.Write(targetoffset, value);
             }
         }
+
         /// <summary>
         /// Gets the header size of the portable executable file.
         /// </summary>
@@ -93,7 +99,6 @@ namespace TUP.AsmResolver
                 
             }
         }
-
 
         /// <summary>
         /// Gets the image base (base offset) of the portable executable file. 
@@ -107,6 +112,7 @@ namespace TUP.AsmResolver
                 
             }
         }
+
         /// <summary>
         /// Gets the base offset of the code section of the portable executable file.
         /// </summary>
@@ -118,6 +124,7 @@ namespace TUP.AsmResolver
                 
             }
         }
+
         /// <summary>
         /// Gets the size of the code section of the portable executable file.
         /// </summary>
@@ -128,6 +135,7 @@ namespace TUP.AsmResolver
                 return header.optionalHeader32.SizeOfCode;
             }
         }
+
         /// <summary>
         /// Gets the base offset of the data section of the portable executable file.
         /// </summary>
@@ -151,7 +159,7 @@ namespace TUP.AsmResolver
                     return 0;
                 Section targetsection = null;
 
-                foreach (Section section in assembly.ntheader.Sections)
+                foreach (Section section in assembly.ntHeader.Sections)
                 {
                     if (section.ContainsRva(Entrypoint))
                     {
@@ -177,6 +185,7 @@ namespace TUP.AsmResolver
             }
 
         }
+
         /// <summary>
         /// Gets or sets the sub system representation the portable executable file runs in.
         /// </summary>
@@ -198,6 +207,7 @@ namespace TUP.AsmResolver
                 header.optionalHeader32.Subsystem = sys;
             }
         }
+
         /// <summary>
         /// Returns true if the header file is 32-bit.
         /// </summary>
@@ -205,6 +215,7 @@ namespace TUP.AsmResolver
         {
             get { return true; }
         }
+
         /// <summary>
         /// Gets the Dynamic Loaded Library Flags of the portable executable file.
         /// </summary>
@@ -232,6 +243,7 @@ namespace TUP.AsmResolver
                 return header.optionalheaderoffset;
             }
         }
+
         /// <summary>
         /// Gets the parent assembly container of the MZ header.
         /// </summary>
@@ -242,9 +254,6 @@ namespace TUP.AsmResolver
                 return assembly;
             }
         }
-
-
-
 
         public uint NumberOfRvaAndSizes
         {
@@ -259,8 +268,7 @@ namespace TUP.AsmResolver
                 header.optionalHeader32.NumberOfRvaAndSizes = value;
             }
         }
-
-
+        
         public DataDirectory[] DataDirectories
         {
             get { return header.datadirectories.ToArray(); }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.PE.Writers
 {
-    internal class ImportExportWriter : IWriterTask
+    internal class ImportExportWriter : IWriterTask , IReconstructionTask
     {
         DataDirectory exportDirectory;
         DataDirectory importDirectory;
@@ -24,6 +24,12 @@ namespace TUP.AsmResolver.PE.Writers
             private set;
         }
 
+        public void Reconstruct()
+        {
+            // TODO: Fix positions of names, ofts, fts etc.
+            
+        }
+
         public void RunProcedure()
         {
             if (Writer.Parameters.RebuildExportTable)
@@ -39,7 +45,7 @@ namespace TUP.AsmResolver.PE.Writers
                 OffsetConverter converter = new OffsetConverter(exportDirectory.Section);
 
                 Writer.MoveToOffset(exportDirectory.TargetOffset.FileOffset);
-                var exportDirHeader = Writer.OriginalAssembly.importexporttablereader.exportDirectory;
+                var exportDirHeader = Writer.OriginalAssembly.importExportTableReader.exportDirectory;
                 Writer.WriteStructure<Structures.IMAGE_EXPORT_DIRECTORY>(exportDirHeader);
 
                 uint functionOffset = converter.RvaToFileOffset(exportDirHeader.AddressOfFunctions);
@@ -126,6 +132,6 @@ namespace TUP.AsmResolver.PE.Writers
             }
         }
 
-        
+
     }
 }

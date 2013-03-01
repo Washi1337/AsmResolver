@@ -7,7 +7,6 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class FieldDefinition : FieldReference
     {
-        TypeReference fieldType;
         Constant constant;
         TypeDefinition declaringType;
 
@@ -23,7 +22,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (declaringType == null)
                 {
-                    foreach (var member in netheader.tableheap.GetTable(MetaDataTableType.TypeDef).members)
+                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).members)
                     {
                         TypeDefinition typeDef = member as TypeDefinition;
                         if (typeDef.Fields != null)
@@ -45,7 +44,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (constant == null && Attributes.HasFlag(FieldAttributes.Literal) && netheader.TablesHeap.HasTable(MetaDataTableType.Constant))
-                    foreach (var member in netheader.tableheap.GetTable( MetaDataTableType.Constant).members)
+                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.Constant).members)
                     {
                         Constant c = (Constant)member;
                         if (c.Parent != null && c.Parent.metadatatoken == this.metadatatoken)

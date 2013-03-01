@@ -8,7 +8,6 @@ namespace TUP.AsmResolver.NET.Specialized
     public class MethodReference : MemberReference, IGenericParametersProvider
     {
         internal MethodSignature signature = null;
-        GenericParameter[] genericparams = null;
         TypeReference declaringType = null;
         string name = null;
 
@@ -36,7 +35,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (signature != null)
                     return signature;
-                signature = (MethodSignature)netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]),this);
+                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), this);
                 return signature;
                 //return Convert.ToUInt32(metadatarow.parts[2]); 
             }
@@ -81,7 +80,6 @@ namespace TUP.AsmResolver.NET.Specialized
         public override void ClearCache()
         {
             signature = null;
-            genericparams = null;
             declaringType = null;
             name = null;
         }

@@ -15,9 +15,9 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (parent == null)
                 {
-                    MetaDataTable table = netheader.tableheap.GetTable(MetaDataTableType.TypeDef);
+                    MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
                     int index = Convert.ToInt32(metadatarow.parts[0]) - 1;
-                    if (index > 0 || index < table.members.Count)
+                    if (index > 0 && index < table.members.Count)
                         parent = table.members[index] as TypeDefinition;
                 }
                 return parent;
@@ -37,7 +37,7 @@ namespace TUP.AsmResolver.NET.Specialized
                         nextpropertylist = Convert.ToInt32(netheader.TokenResolver.ResolveMember(this.MetaDataToken + 1).metadatarow.parts[1]);
 
 
-                    MetaDataTable propertyTable = netheader.tableheap.GetTable( MetaDataTableType.Property);
+                    MetaDataTable propertyTable = netheader.TablesHeap.GetTable(MetaDataTableType.Property);
                     int length = -1;
                     if (nextpropertylist != -1)
                         length = nextpropertylist - propertylist;

@@ -16,9 +16,9 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (parent == null)
                 {
-                    MetaDataTable table = netheader.tableheap.GetTable(MetaDataTableType.TypeDef);
+                    MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
                     int index = Convert.ToInt32(metadatarow.parts[0]) - 1;
-                    if (index > 0 || index < table.members.Count)
+                    if (index > 0 && index < table.members.Count)
                         parent = table.members[index] as TypeDefinition;
                 }
                 return parent;
@@ -38,7 +38,7 @@ namespace TUP.AsmResolver.NET.Specialized
                         nexteventlist = Convert.ToInt32(netheader.TokenResolver.ResolveMember(this.MetaDataToken + 1).metadatarow.parts[1]);
 
 
-                    MetaDataTable eventTable = netheader.tableheap.GetTable(MetaDataTableType.Event);
+                    MetaDataTable eventTable = netheader.TablesHeap.GetTable(MetaDataTableType.Event);
                     int length = -1;
                     if (nexteventlist != -1)
                         length = nexteventlist - eventlist;

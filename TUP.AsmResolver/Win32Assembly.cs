@@ -30,7 +30,8 @@ namespace TUP.AsmResolver
         /// </summary>
         /// <param name="sender">The object who send the event.</param>
         /// <param name="e">The event args of the event.</param>
-        public delegate void ReadingProcessChangedEventHandler(object sender, ReadingProcessChangedEventArgs  e);
+        public delegate void ReadingProcessChangedEventHandler(object sender, ReadingProcessChangedEventArgs e);
+
         /// <summary>
         /// A special event handler for the <see cref="TUP.AsmResolver.Win32Assembly.ReadingFinished"/> event.
         /// </summary>
@@ -52,42 +53,41 @@ namespace TUP.AsmResolver
             
             ReadingFinishedEventHandler handler = ReadingFinished;
             if (handler != null)
-                synchroniser.Send(raiseReadingFinished, e);
+                synchroniser.Send(RaiseReadingFinished, e);
         }
+
         private void OnReadingProcessChanged(ReadingProcessChangedEventArgs e)
         {
             ReadingProcessChangedEventHandler handler = ReadingProcessChanged;
             if (handler != null)
-                synchroniser.Send(raiseReadingProcessChanged, e);
+                synchroniser.Send(RaiseReadingProcessChanged, e);
 
         }
 
-        void raiseReadingProcessChanged(object e)
+        void RaiseReadingProcessChanged(object e)
         {
             ReadingProcessChanged(this, (ReadingProcessChangedEventArgs)e);
         }
-        void raiseReadingFinished(object e)
+
+        void RaiseReadingFinished(object e)
         {
             ReadingFinished(this, (ReadingFinishedEventArgs)e);
         }
+
         #endregion
 
         #region Variables
-        //BinaryReader reader;
-
         private readonly SynchronizationContext synchroniser = SynchronizationContext.Current;
         internal PeImage peImage;
-        internal bool particularmode = false;
         internal string path;
-        internal NTHeader ntheader;
-        internal MZHeader mzheader;
-        internal NETHeader netheader;
-        internal PeHeaderReader headerreader;
+        internal NTHeader ntHeader;
+        internal MZHeader mzHeader;
+        internal NETHeader netHeader;
+        internal PeHeaderReader headerReader;
         internal x86Assembler assembler;
-        internal Thread readingthread;
-        internal ImportExportTableReader importexporttablereader;
-        internal ResourcesReader resourcesreader;
         internal x86Disassembler disassembler;
+        internal ImportExportTableReader importExportTableReader;
+        internal ResourcesReader resourcesReader;
         #endregion
     
         #region Properties
@@ -101,13 +101,13 @@ namespace TUP.AsmResolver
             {
                 return assembler;
             }
-            internal set
-            {
-                assembler = value;
-            }
         }
 
+        /// <summary>
+        /// Gets the reading arguments that are being used to open the application.
+        /// </summary>
         public ReadingParameters ReadingArguments { get; private set; }
+
         /// <summary>
         /// Gets the location of the loaded assembly.
         /// </summary>
@@ -135,9 +135,10 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return importexporttablereader.Imports;
+                return importExportTableReader.Imports;
             }
         }
+
         /// <summary>
         /// Gets the exports of the Win32 Assembly
         /// </summary>
@@ -145,7 +146,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return importexporttablereader.Exports;
+                return importExportTableReader.Exports;
             }
         }
 
@@ -154,8 +155,9 @@ namespace TUP.AsmResolver
         /// </summary>
         public NTHeader NTHeader
         {
-            get { return ntheader; }
+            get { return ntHeader; }
         }
+
         /// <summary>
         /// Gets the MZ header representation of the loaded portable executable file.
         /// </summary>
@@ -163,15 +165,16 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return mzheader;
+                return mzHeader;
             }
         }
+
         /// <summary>
         /// Gets the .NET header (if available) of the loaded portable executable file. 
         /// </summary>
         public NETHeader NETHeader
         {
-            get { return netheader; }
+            get { return netHeader; }
         }
 
         /// <summary>
@@ -179,10 +182,9 @@ namespace TUP.AsmResolver
         /// </summary>
         public ResourceDirectory RootResourceDirectory
         {
-            get { return resourcesreader.rootDirectory; }
+            get { return resourcesReader.rootDirectory; }
         }
-
-
+        
         /// <summary>
         /// Gets the disassembler of this Win32 Assembly.
         /// </summary>
@@ -203,14 +205,22 @@ namespace TUP.AsmResolver
 
         #region Public Methods
 
-        public static Win32Assembly LoadFile(string file)
-        {
-            return LoadFile(file, new ReadingParameters());
-        }
         /// <summary>
         /// Loads an assembly from a specific file.
         /// </summary>
         /// <param name="file">The file to read.</param>
+        /// <returns></returns>
+        /// <exception cref="System.BadImageFormatException"></exception>
+        public static Win32Assembly LoadFile(string file)
+        {
+            return LoadFile(file, new ReadingParameters());
+        }
+
+        /// <summary>
+        /// Loads an assembly from a specific file using the specific reading parameters.
+        /// </summary>
+        /// <param name="file">The file to read.</param>
+        /// <param name="arguments">The reading parameters to use.</param>
         /// <returns></returns>
         /// <exception cref="System.BadImageFormatException"></exception>
         public static Win32Assembly LoadFile(string file, ReadingParameters arguments)
@@ -225,23 +235,23 @@ namespace TUP.AsmResolver
                 a.ReadingArguments = arguments;
                 a.peImage = PeImage.LoadFromAssembly(a);
 
-                a.headerreader = PeHeaderReader.FromAssembly(a);
-                a.ntheader = NTHeader.FromAssembly(a);
-                a.mzheader = MZHeader.FromAssembly(a);
-                a.headerreader.LoadData(arguments.IgnoreDataDirectoryAmount);
+                a.headerReader = PeHeaderReader.FromAssembly(a);
+                a.ntHeader = NTHeader.FromAssembly(a);
+                a.mzHeader = MZHeader.FromAssembly(a);
+                a.headerReader.LoadData(arguments.IgnoreDataDirectoryAmount);
 
 
                 if (!arguments.OnlyManaged)
                 {
                     a.disassembler = new x86Disassembler(a);
-                    a.Assembler = new x86Assembler(a);
-                    a.importexporttablereader = new ImportExportTableReader(a.ntheader);
-                    a.resourcesreader = new ResourcesReader(a.ntheader);
+                    a.assembler = new x86Assembler(a);
+                    a.importExportTableReader = new ImportExportTableReader(a.ntHeader);
+                    a.resourcesReader = new ResourcesReader(a.ntHeader);
                 }
 
 
-                a.netheader = NETHeader.FromAssembly(a);
-                a.peImage.SetOffset(a.ntheader.OptionalHeader.HeaderSize);
+                a.netHeader = NETHeader.FromAssembly(a);
+                a.peImage.SetOffset(a.ntHeader.OptionalHeader.HeaderSize);
 
                 return a;
 
@@ -265,6 +275,7 @@ namespace TUP.AsmResolver
         {
             File.WriteAllBytes(path, peImage.stream.ToArray());
         }
+
         /// <summary>
         /// Rebuilds the assembly and saves it to the specified file path.
         /// </summary>
@@ -278,6 +289,7 @@ namespace TUP.AsmResolver
                 fileStream.Flush();
             }
         }
+
         /// <summary>
         /// Rebuilds the assembly and writes it to the specified stream.
         /// </summary>
@@ -297,15 +309,13 @@ namespace TUP.AsmResolver
            
             path = null;
             assembler = null;
-            readingthread = null;
 
             peImage.Dispose();
             
-            if (netheader != null)
-                netheader.Dispose();
+            if (netHeader != null)
+                netHeader.Dispose();
                 
         }
-
 
         #endregion
 

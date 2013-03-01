@@ -37,45 +37,38 @@ namespace TUP.AsmResolver.PE.Readers
         {
             // TODO: Unnamed exports (detect exports with only an ordinal).
 
-            try
+            string libraryname = header.assembly.path.Substring(header.assembly.path.LastIndexOf('\\') + 1);
+            DataDirectory exportdatadir = header.OptionalHeader.DataDirectories[(int)DataDirectoryName.Export];
+
+            if (exportdatadir.targetOffset.FileOffset == 0)
+                return;
+
+            image.SetOffset(exportdatadir.TargetOffset.FileOffset);
+
+            exportDirectory = image.ReadStructure<Structures.IMAGE_EXPORT_DIRECTORY>();
+            
+            OffsetConverter offsetConverter = new OffsetConverter(exportdatadir.Section);
+            uint functionoffset = offsetConverter.RvaToFileOffset(exportDirectory.AddressOfFunctions);
+            uint functionnameoffset = offsetConverter.RvaToFileOffset(exportDirectory.AddressOfNames);
+            uint functionnameordinaloffset = offsetConverter.RvaToFileOffset(exportDirectory.AddressOfNameOrdinals);
+
+            for (uint i = 0; i < exportDirectory.NumberOfFunctions; i++)
             {
-                string libraryname = header.assembly.path.Substring(header.assembly.path.LastIndexOf('\\') + 1);
-                DataDirectory exportdatadir = header.OptionalHeader.DataDirectories[(int)DataDirectoryName.Export];
+                image.SetOffset(functionoffset);
+                uint functionRVA = image.reader.ReadUInt32();
+                image.SetOffset(functionnameoffset);
+                uint functionNameRVA = image.reader.ReadUInt32();
+                image.SetOffset(functionnameordinaloffset);
+                uint functionNameOrdinal = image.reader.ReadUInt32();
 
-                if (exportdatadir.targetOffset.FileOffset == 0)
-                    return;
+                string name = image.ReadZeroTerminatedString(offsetConverter.RvaToFileOffset(functionNameRVA));
 
-                image.SetOffset(exportdatadir.TargetOffset.FileOffset);
+                exports.Add(new ExportMethod(libraryname, name, functionNameRVA, functionRVA, (ushort)(i + exportDirectory.Base)));
 
-                exportDirectory = image.ReadStructure<Structures.IMAGE_EXPORT_DIRECTORY>();
-                
-                OffsetConverter offsetConverter = new OffsetConverter(exportdatadir.Section);
-                uint functionoffset = offsetConverter.RvaToFileOffset(exportDirectory.AddressOfFunctions);
-                uint functionnameoffset = offsetConverter.RvaToFileOffset(exportDirectory.AddressOfNames);
-                uint functionnameordinaloffset = offsetConverter.RvaToFileOffset(exportDirectory.AddressOfNameOrdinals);
+                functionoffset += 4;
+                functionnameoffset += 4;
+                functionnameordinaloffset += 4;
 
-                for (uint i = 0; i < exportDirectory.NumberOfFunctions; i++)
-                {
-                    image.SetOffset(functionoffset);
-                    uint functionRVA = image.reader.ReadUInt32();
-                    image.SetOffset(functionnameoffset);
-                    uint functionNameRVA = image.reader.ReadUInt32();
-                    image.SetOffset(functionnameordinaloffset);
-                    uint functionNameOrdinal = image.reader.ReadUInt32();
-
-                    string name = image.ReadZeroTerminatedString(offsetConverter.RvaToFileOffset(functionNameRVA));
-
-                    exports.Add(new ExportMethod(libraryname, name, functionNameRVA, functionRVA, (ushort)(i + exportDirectory.Base)));
-
-                    functionoffset += 4;
-                    functionnameoffset += 4;
-                    functionnameordinaloffset += 4;
-
-                }
-            }
-            catch(Exception ex)
-            {
-                
             }
 
         }

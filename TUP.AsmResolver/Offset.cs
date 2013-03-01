@@ -155,7 +155,7 @@ namespace TUP.AsmResolver
         {
 
             Section targetsection = Section.GetSectionByRva(assembly, Rva);
-            ulong stroffset = Va - assembly.ntheader.OptionalHeader.ImageBase - targetsection.RVA + targetsection.RawOffset;
+            ulong stroffset = Va - assembly.ntHeader.OptionalHeader.ImageBase - targetsection.RVA + targetsection.RawOffset;
            // if (stroffset < 0)
            //     throw new ArgumentException("The target offset is not a valid offset to a string");
             return stroffset;
@@ -179,12 +179,12 @@ namespace TUP.AsmResolver
             foreach (LibraryReference lib in assembly.LibraryImports)
                 foreach (ImportMethod method in lib.ImportMethods)
                 {
-                    if (method.RVA + assembly.ntheader.OptionalHeader.ImageBase == Va)
+                    if (method.RVA + assembly.ntHeader.OptionalHeader.ImageBase == Va)
                         return method;
                 }
             foreach (ExportMethod method in assembly.LibraryExports)
             {
-                if (Va == method.RVA + assembly.ntheader.OptionalHeader.ImageBase)
+                if (Va == method.RVA + assembly.ntHeader.OptionalHeader.ImageBase)
                     return method;
             }
 
