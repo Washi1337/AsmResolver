@@ -105,6 +105,23 @@ namespace AsmResolver
             }
         }
 
+        private void rebuildToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Assembly files (*.exe; *.dll)|*.exe;*.dll";
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                try
+                {
+                    GetCurrentAssembly().Rebuild(sfd.FileName, new WritingParameters());
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -162,6 +179,28 @@ namespace AsmResolver
                 foreach (string file in ((string[])e.Data.GetData(System.Windows.Forms.DataFormats.FileDrop)))
                     OpenFile(file);
         }
+
+        private void openToolStripButton_Click(object sender, EventArgs e)
+        {
+            openToolStripMenuItem.PerformClick();
+        }
+
+        private void saveToolStripButton_Click(object sender, EventArgs e)
+        {
+            saveToolStripButton.PerformClick();
+        }
+
+        private void sourceCodeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://www.github.com/TheUnknownProgrammer/AsmResolver");
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Program and library created by TheUnknownProgrammer", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+
 
     }
 }

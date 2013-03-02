@@ -18,6 +18,7 @@ namespace AsmResolver
         PropertyGrid propertyGrid;
         DataGridView dataGridView;
         MetaDataMember currentMember;
+        ToolStripMenuItem disassembleItem;
 
         public TablesControl()
         {
@@ -72,6 +73,13 @@ namespace AsmResolver
                 ReadOnly = true,
             }
             );
+            disassembleItem = new ToolStripMenuItem("Disassemble Method");
+            disassembleItem.Click += disassembleItem_Click;
+            ContextMenuStrip menuStrip = new System.Windows.Forms.ContextMenuStrip();
+            menuStrip.Items.Add(disassembleItem);
+
+            tablesTree.ContextMenuStrip = menuStrip;
+
             dataGridView.CellEndEdit += dataGridView_CellEndEdit;
             mdRowTab.Controls.Add(dataGridView);
             propertyTab.Controls.Add(propertyGrid);
@@ -80,6 +88,25 @@ namespace AsmResolver
             tabControl.TabPages.Add(propertyTab);
             mainSplitter.Panel2.Controls.Add(tabControl);
             this.Controls.Add(mainSplitter);
+        }
+
+        void disassembleItem_Click(object sender, EventArgs e)
+        {
+            if (tablesTree.SelectedNode != null && tablesTree.SelectedNode.Tag != null)
+            {
+                MethodDefinition member = tablesTree.SelectedNode.Tag as MethodDefinition;
+                if (member != null && member.HasBody)
+                {
+                    try
+                    {
+                        new MethodDlg(member.Body).ShowDialog();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
 
         void dataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
@@ -136,8 +163,6 @@ namespace AsmResolver
             }
             catch { node.Text = index.ToString(); }
             index++;
-
-
             node.Tag = member;
             return node;
         }
