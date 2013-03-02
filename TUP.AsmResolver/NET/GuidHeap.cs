@@ -27,8 +27,7 @@ namespace TUP.AsmResolver.NET
             Guid guid;
             if (readGuids.TryGetValue(offset, out guid))
                 return guid;
-            offset--;
-            stream.Seek(offset, SeekOrigin.Begin);
+            stream.Seek(offset - 1, SeekOrigin.Begin);
             guid = new Guid(binaryreader.ReadBytes(16));
             readGuids.Add(offset, guid);
             return guid;
@@ -54,11 +53,21 @@ namespace TUP.AsmResolver.NET
 
         internal override void Reconstruct()
         {
-            
+            ReadAllGuids();
+
         }
 
         internal void ReadAllGuids()
         {
+            stream.Seek(1, SeekOrigin.Begin);
+            while (stream.Position < stream.Length)
+            {
+                bool alreadyExists = readGuids.ContainsKey((uint)stream.Position);
+                GetGuidByOffset((uint)stream.Position);
+                if (alreadyExists)
+                    stream.Seek(16, SeekOrigin.Current);
+            }
+
             newEntryOffset = (uint)stream.Length;
             hasReadAllGuids = true;
         }

@@ -17,10 +17,11 @@ namespace TUP.AsmResolver
         /// <param name="targetSection"></param>
         public OffsetConverter(Section targetSection)
         {
-            if (targetSection == null)
-                throw new ArgumentNullException();
             TargetSection = targetSection;
-
+        }
+        public OffsetConverter(Win32Assembly assembly)
+        {
+            TargetSection = new Section(assembly, 0, null, 0, 0, 0, 0, 0);
         }
 
         /// <summary>

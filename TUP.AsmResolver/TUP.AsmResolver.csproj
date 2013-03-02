@@ -220,6 +220,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ASM\Notes.txt" />
+    <Content Include="PE\Writers\Notes.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

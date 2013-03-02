@@ -2836,11 +2836,6 @@
             Gets the location of the loaded assembly.
             </summary>
         </member>
-        <member name="P:TUP.AsmResolver.Win32Assembly.CurrentByteOffset">
-            <summary>
-            Gets the current byte offset to read.
-            </summary>
-        </member>
         <member name="P:TUP.AsmResolver.Win32Assembly.LibraryImports">
             <summary>
             Gets the imported methods of the Win32 Assembly

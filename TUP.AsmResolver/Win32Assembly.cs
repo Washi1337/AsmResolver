@@ -120,15 +120,6 @@ namespace TUP.AsmResolver
         }
 
         /// <summary>
-        /// Gets the current byte offset to read.
-        /// </summary>
-        public int CurrentByteOffset
-        {
-            get { return (int)peImage.stream.Position; }
-            set { peImage.SetOffset(value); }
-        }
-
-        /// <summary>
         /// Gets the imported methods of the Win32 Assembly
         /// </summary>
         public List<LibraryReference> LibraryImports

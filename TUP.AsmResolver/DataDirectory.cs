@@ -25,7 +25,10 @@ namespace TUP.AsmResolver
                 this.headerOffset = offset;
 
                 targetSection = Section.GetSectionByRva(assemblySections, rawDataDir.RVA);
-                this.targetOffset = Offset.FromRva(rawDataDir.RVA, assemblySections[0].ParentAssembly);
+                if (targetSection == null)
+                    this.TargetOffset = new Offset(0, rawDataDir.RVA, 0, ASM.OperandType.Normal);
+                else
+                    this.targetOffset = Offset.FromRva(rawDataDir.RVA, assemblySections[0].ParentAssembly);
             }
             
         }

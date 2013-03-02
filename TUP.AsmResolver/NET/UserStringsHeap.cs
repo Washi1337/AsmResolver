@@ -54,6 +54,7 @@ namespace TUP.AsmResolver.NET
         {
             stream.Seek(0, SeekOrigin.Begin);
 
+            uint lastPosition = (uint)stream.Position;
             while (stream.Position + 1 < stream.Length)
             {
                 // TODO: write string.empty strings..
@@ -63,11 +64,12 @@ namespace TUP.AsmResolver.NET
 
 
                 int length = value.Length * 2;
-                if (length == 0)
+                if (length == 0 && lastPosition == (uint)stream.Position)
                     stream.Seek(1, SeekOrigin.Current);
                 if (alreadyExisted)
                     stream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length) + 1, SeekOrigin.Current);
 
+                lastPosition = (uint)stream.Position;
             }
 
             hasReadAllStrings = true;

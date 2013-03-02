@@ -8,7 +8,7 @@ namespace TUP.AsmResolver
     /// <summary>
     /// Represents a procedure or method that is inside a portable executable file and can be used by other PE files.
     /// </summary>
-    public struct ExportMethod : IMethod 
+    public class ExportMethod : IMethod 
     {
         internal ExportMethod(string lib, string name, uint nameRva, uint rva, ushort ordinal)
         {

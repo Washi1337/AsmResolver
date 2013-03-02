@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TUP.AsmResolver")]
-[assembly: AssemblyDescription("Win32 Assembly Decompiler Library for .net applications")]
+[assembly: AssemblyTitle("AsmResolver")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("TheUnknownProgrammer")]
-[assembly: AssemblyProduct("TUP.AsmResolver")]
-[assembly: AssemblyCopyright("Copyright © TheUnknownProgrammer 2013")]
+[assembly: AssemblyCompany("Hewlett-Packard")]
+[assembly: AssemblyProduct("AsmResolver")]
+[assembly: AssemblyCopyright("Copyright © Hewlett-Packard 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0c618c8c-3538-4dd5-b46e-c67aa9b97c8b")]
+[assembly: Guid("c922fef0-5c40-4816-a2f4-4f8a1cfc83a4")]
 
 // Version information for an assembly consists of the following four values:
 //

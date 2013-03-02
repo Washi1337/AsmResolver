@@ -14,7 +14,7 @@ namespace TUP.AsmResolver
     /// </summary>
     public class Section
     {
-        internal Section(PeHeaderReader reader,
+        internal Section(Win32Assembly assembly,
             uint headeroffset, 
             string name,
             uint roffset,
@@ -30,8 +30,7 @@ namespace TUP.AsmResolver
             this.vsize = vsize;
             this.flags = flags;
             this.headeroffset = headeroffset;
-            this.headerreader = reader;
-            assembly = reader.assembly;
+            this.assembly = assembly;
         }
 
         #region Variables
@@ -48,7 +47,6 @@ namespace TUP.AsmResolver
         uint vsize;
         uint flags;
         uint headeroffset;
-        PeHeaderReader headerreader;
         Win32Assembly assembly;
         #endregion
 
