@@ -12,8 +12,8 @@ namespace TUP.AsmResolver.PE.Readers
         internal byte signature;
         internal short fatsig;
         internal short maxstack;
-        internal int codesize;
-        internal int localvarsig;
+        internal uint codesize;
+        internal uint localvarsig;
         internal VariableDefinition[] vars;
         internal MethodBodySection[] sections;
 
@@ -42,8 +42,8 @@ namespace TUP.AsmResolver.PE.Readers
 
             fatsig = BitConverter.ToInt16(peImage.ReadBytes(2),0);
             maxstack = BitConverter.ToInt16(peImage.ReadBytes(2),0);
-            codesize = BitConverter.ToInt32(peImage.ReadBytes(4),0);
-            localvarsig = BitConverter.ToInt32(peImage.ReadBytes(4), 0); 
+            codesize = BitConverter.ToUInt32(peImage.ReadBytes(4),0);
+            localvarsig = BitConverter.ToUInt32(peImage.ReadBytes(4), 0); 
 
         }
 
@@ -110,7 +110,7 @@ namespace TUP.AsmResolver.PE.Readers
                         peImage.ReadByte());
 
                 if (handler.Type == ExceptionHandlerType.Catch)
-                    handler.CatchType = (TypeReference)methodbody.Method.netheader.TokenResolver.ResolveMember(BitConverter.ToInt32(peImage.ReadBytes(4), 0));
+                    handler.CatchType = (TypeReference)methodbody.Method.netheader.TokenResolver.ResolveMember(BitConverter.ToUInt32(peImage.ReadBytes(4), 0));
                 else if (handler.Type == ExceptionHandlerType.Filter)
                     handler.FilterStart = BitConverter.ToInt32(peImage.ReadBytes(4), 0);
                 else
@@ -138,7 +138,7 @@ namespace TUP.AsmResolver.PE.Readers
                 if (handler.Type == ExceptionHandlerType.Catch)
                     try
                     {
-                        handler.CatchType = (TypeReference)methodbody.Method.netheader.TokenResolver.ResolveMember(BitConverter.ToInt32(peImage.ReadBytes(4), 0));
+                        handler.CatchType = (TypeReference)methodbody.Method.netheader.TokenResolver.ResolveMember(BitConverter.ToUInt32(peImage.ReadBytes(4), 0));
                     }
                     catch { handler.CatchType = methodbody.Method.netheader.TypeSystem.Object; }
                     

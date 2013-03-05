@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using TUP.AsmResolver.PE;
@@ -9,7 +10,7 @@ namespace TUP.AsmResolver.NET
     /// <summary>
     /// Represents a metadata stream of a .NET application.
     /// </summary>
-    public abstract class MetaDataStream : IDisposable
+    public abstract class MetaDataStream : IDisposable, ICacheProvider
     {
 
         internal MetaDataStream(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
@@ -19,13 +20,23 @@ namespace TUP.AsmResolver.NET
             this.streamHeader = rawHeader;
             this.name = name;
             this.indexsize = 2;
+
+            byte[] contents = netheader.assembly.peImage.ReadBytes(StreamOffset, (int)StreamSize);
+            mainStream = new MemoryStream();
+            binReader = new BinaryReader(mainStream);
+            binWriter = new BinaryWriter(mainStream);
+            mainStream.Write(contents, 0, contents.Length);
+            mainStream.Seek(0, SeekOrigin.Begin);
         }
 
         internal int headeroffset;
         internal string name;
         internal NETHeader netheader;
         internal Structures.METADATA_STREAM_HEADER streamHeader;
-        internal byte[] contents; 
+        internal byte indexsize;
+        internal MemoryStream mainStream;
+        internal BinaryReader binReader;
+        internal BinaryWriter binWriter;
 
         /// <summary>
         /// Gets the offset of the header of the metadata.
@@ -55,9 +66,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                if (contents == null)
-                    contents = netheader.assembly.peImage.ReadBytes(StreamOffset, (int)StreamSize);
-                return contents;
+                return mainStream.ToArray();
             }
         }
         /// <summary>
@@ -72,38 +81,39 @@ namespace TUP.AsmResolver.NET
                 netheader.assembly.peImage.Write((int)headeroffset + 8, name, Encoding.ASCII);
             }
         }
-        //public MetaDataStream  ToHeap()
-        //{
-        //    switch (name)
-        //    {
-        //        case "#~":
-        //        case "#-":
-        //            return netheader.TablesHeap;
-        //        case "#Strings":
-        //            return netheader.StringsHeap;
-        //        case "#US":
-        //            return netheader.UserStringsHeap;
-        //        case "#GUID":
-        //            return netheader.GuidHeap;
-        //        case "#Blob":
-        //            return netheader.BlobHeap ;
-        //        default:
-        //            throw new ArgumentException("Metadatastream is not recognized as a valid heap.");
-        //    }
-        //
-        //}       
-
-        internal byte indexsize;
+    
         public byte IndexSize
         {
             get { return indexsize; }
         }
 
-        internal abstract void Reconstruct();
+        public NETHeader NETHeader
+        {
+            get { return netheader; }
+        }
 
         internal abstract void Initialize();
 
-        public abstract void Dispose();
+        public virtual void Dispose()
+        {
+            binReader.Dispose();
+            binWriter.Dispose();
+            mainStream.Dispose();
+            ClearCache();
+        }
+
+        public abstract void ClearCache();
+
+        internal virtual void MakeEmpty()
+        {
+            // used for rebuilding to remove all unused data.
+
+            Dispose();
+            streamHeader.Size = 0;
+            mainStream = new MemoryStream();
+            binReader = new BinaryReader(mainStream);
+            binWriter = new BinaryWriter(mainStream);
+        }
 
     }
 }

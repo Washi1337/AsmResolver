@@ -36,11 +36,9 @@ namespace TUP.AsmResolver.PE
                 
             }
 
-            writer = new BinaryWriter(stream);
-            reader = new BinaryReader(stream);
         }
 
-        private void WriteToMemoryStream(Stream sourceStream)
+        internal void WriteToMemoryStream(Stream sourceStream)
         {
             this.stream = new MemoryStream();
             byte[] buffer = new byte[0x1000];
@@ -53,6 +51,9 @@ namespace TUP.AsmResolver.PE
             } while (byteLength != 0);
 
             this.stream.Position = 0;
+
+            writer = new BinaryWriter(stream);
+            reader = new BinaryReader(stream);
 
         }
 

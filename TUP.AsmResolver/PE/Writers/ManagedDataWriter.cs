@@ -23,25 +23,31 @@ namespace TUP.AsmResolver.PE.Writers
 
         public void Reconstruct()
         {
-            //TODO: Rebuild heaps.
-
-            uint streamOffset = Writer.OriginalAssembly.NETHeader.MetaDataStreams[0].streamHeader.Offset;
-            Writer.OriginalAssembly.NETHeader.reader.netHeader.MetaData.Size = streamOffset;
-            DataDirectory dataDir = Writer.OriginalAssembly.NETHeader.MetaDataDirectory;
-            dataDir.rawDataDir.Size = streamOffset;
-            foreach (MetaDataStream stream in Writer.OriginalAssembly.NETHeader.MetaDataStreams)
+            if (Writer.OriginalAssembly.ntHeader.IsManagedAssembly)
             {
-                // rebuild stream.
-                stream.Reconstruct();
-                // reset offset to prevent overwriting of expanded streams.
-                stream.streamHeader.Offset = streamOffset;
-                // calculate next stream offset.
-                streamOffset += stream.StreamSize;
-                // increase total md dir size
-                Writer.OriginalAssembly.NETHeader.reader.netHeader.MetaData.Size += stream.StreamSize;
-                dataDir.rawDataDir.Size += stream.StreamSize;
-            }
+                NETHeader netHeader = Writer.OriginalAssembly.NETHeader;
 
+                uint streamOffset = netHeader.MetaDataStreams[0].streamHeader.Offset;
+                netHeader.reader.netHeader.MetaData.Size = streamOffset;
+                DataDirectory dataDir = netHeader.MetaDataDirectory;
+                dataDir.rawDataDir.Size = streamOffset;
+
+                // reconstruct blob (temporary solution, will be removed once blobs are being re-serialized).
+                netHeader.BlobHeap.Reconstruct();
+                // rebuild tables heap and update all other heaps.
+                netHeader.TablesHeap.Reconstruct();
+
+                foreach (MetaDataStream stream in netHeader.MetaDataStreams)
+                {
+                    // reset offset to prevent overwriting of expanded streams.
+                    stream.streamHeader.Offset = streamOffset;
+                    // calculate next stream offset.
+                    streamOffset += stream.StreamSize;
+                    // increase total md dir size
+                    Writer.OriginalAssembly.NETHeader.reader.netHeader.MetaData.Size += stream.StreamSize;
+                    dataDir.rawDataDir.Size += stream.StreamSize;
+                }
+            }
             
         }
 

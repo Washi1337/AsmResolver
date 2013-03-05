@@ -43,7 +43,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         }
         public MSILInstruction[] Disassemble()
         {
-            return Disassemble(0, MethodBody.CodeSize);
+            return Disassemble(0, (int)MethodBody.CodeSize);
         }
         public MSILInstruction[] Disassemble(int startoffset, int length)
         {
@@ -184,7 +184,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                     case OperandType.Field:
                     case OperandType.Method:
                     case OperandType.Type:
-                        int metadata = BitConverter.ToInt32(rawoperand, 0);
+                        uint metadata = BitConverter.ToUInt32(rawoperand, 0);
                         try
                         {
                             object operand = tokenresolver.ResolveMember(metadata);
@@ -214,7 +214,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                     case OperandType.Signature:
                         return BitConverter.ToInt32(rawoperand, 0);
                     case OperandType.String:
-                        return tokenresolver.ResolveString(BitConverter.ToInt32(rawoperand, 0));
+                        return tokenresolver.ResolveString(BitConverter.ToUInt32(rawoperand, 0));
                 }
             }
             catch { }

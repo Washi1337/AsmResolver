@@ -5,7 +5,7 @@ using System.Text;
 using TUP.AsmResolver.NET.Specialized;
 namespace TUP.AsmResolver.NET
 {
-    internal struct MetaDataTableGroup
+    public struct MetaDataTableGroup
     {
         internal MetaDataTable[] tables;
         internal int bits;
@@ -22,47 +22,71 @@ namespace TUP.AsmResolver.NET
             this.bits = bits;
         }
 
-        internal int TotalCount
+        public bool IsLarge
+        {
+            get
+            {
+                return TotalCount > 0xffff;
+            }
+        }
+
+        public int TotalCount
         {
             get
             {
                 int endresult = 0;
                 foreach (MetaDataTable table in tables)
-                    endresult += table.rowAmount;
+                    if (table != null)
+                        endresult += table.rowAmount;
 
                 return endresult;
             }
         }
 
-        internal bool TryGetMember(int token, out MetaDataMember member)
+        public bool TryGetMember(int codedIndex, out MetaDataMember member)
         {
             try
             {
-                member = GetMember(token);
+                member = GetMember(codedIndex);
                 return true;
             }
             catch { member = null; return false; }
         }
 
-        internal MetaDataMember GetMember(int token)
+        public MetaDataMember GetMember(int codedIndex)
         {
-            if (token == 0)
+            if (codedIndex == 0)
                 throw new ArgumentException("Cannot resolve a member from a zero metadata token", "token");
 
             int tableindex = 0;
             for (int i = tables.Length-1; i > 0 ;i--)
-                if ((token & i) == i)
+                if ((codedIndex & i) == i)
                 {
                     tableindex = i;
                     break;
                 }
 
-            int rowindex = token >> bits;
+            int rowindex = codedIndex >> bits;
 
             if (rowindex == 0)
                 throw new ArgumentException("Cannot resolve a member from a zero metadata token", "token");
 
             return tables[tableindex].members[rowindex - 1];
+        }
+
+        public uint GetCodedIndex(MetaDataMember member)
+        {
+            if (member == null)
+                return 0;
+
+            MetaDataTable table = tables.FirstOrDefault(t => t != null && t.Type == member.Table);
+            if (table == null)
+                throw new ArgumentException("Member does not belong to the metadata table group.");
+
+            uint rowIndex = ((uint)(member.metadatatoken - ((uint)table.Type << 24)));
+            uint tableIndex = (uint)Array.IndexOf(tables, table);
+
+            return (rowIndex << bits) | tableIndex;
         }
     }
 }

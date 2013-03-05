@@ -22,6 +22,15 @@ namespace AsmResolver
             this.disassembler = new MSILDisassembler(body);
             this.Text = "Method Body of " + body.Method.MetaDataToken.ToString("X8");
 
+            try
+            {
+                this.Text += " (" + body.Method.ToString() + ")";
+            }
+            catch
+            {
+                this.Text += " (method.ToString() failed)";
+            }
+
             MSILInstruction[] instructions = disassembler.Disassemble();
             foreach (MSILInstruction instruction in instructions)
             {

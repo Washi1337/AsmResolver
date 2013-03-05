@@ -18,7 +18,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (parent != null || tablereader.HasConstant.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out parent))
+                if (parent != null || netheader.TablesHeap.HasConstant.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out parent))
                     return parent;
                 
                 return null;

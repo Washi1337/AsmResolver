@@ -49,6 +49,7 @@ namespace TUP.AsmResolver.PE.Writers
             BinWriter = new BinaryWriter(outputStream);
             foreach (IWriterTask task in Tasks)
                 task.RunProcedure();
+
         }
 
         internal void MoveToOffset(uint fileOffset)
@@ -63,15 +64,7 @@ namespace TUP.AsmResolver.PE.Writers
 
         internal void WriteStructure<T>(T structure) where T : struct
         {
-
-            int rawSize = Marshal.SizeOf(typeof(T));
-            IntPtr buffer = Marshal.AllocHGlobal(rawSize);
-            Marshal.StructureToPtr(structure, buffer, false);
-            byte[] rawDatas = new byte[rawSize];
-            Marshal.Copy(buffer, rawDatas, 0, rawSize);
-            Marshal.FreeHGlobal(buffer);
-            BinWriter.Write(rawDatas);
-    
+            ASMGlobals.WriteStructureToWriter<T>(BinWriter, structure);
         }
         internal void WritePaddingZeros(uint endoffset)
         {

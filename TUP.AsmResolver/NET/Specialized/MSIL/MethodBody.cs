@@ -42,14 +42,14 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             }
         }
 
-        public int CodeSize
+        public uint CodeSize
         {
             get
             {
                 if (IsFat)
                     return reader.codesize;
                 else
-                    return reader.signature >> 2;
+                    return (uint)(reader.signature >> 2);
             }
             
         }
@@ -65,7 +65,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             }
         }
 
-        public int LocalVarSig
+        public uint LocalVarSig
         {
             get
             {

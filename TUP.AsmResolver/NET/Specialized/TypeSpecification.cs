@@ -76,7 +76,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public uint Signature
         {
             get {
-                if (HasMetaDataRow)
+                if (HasImage)
                     return Convert.ToUInt32(metadatarow.parts[0]);
                 else
                     return 0;

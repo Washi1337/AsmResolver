@@ -24,7 +24,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get 
             {
                 if (owner == null && Convert.ToUInt16(metadatarow.parts[2]) != 0)
-                    tablereader.TypeOrMethod.TryGetMember(Convert.ToUInt16(metadatarow.parts[2]), out owner);
+                    netheader.TablesHeap.TypeOrMethod.TryGetMember(Convert.ToUInt16(metadatarow.parts[2]), out owner);
                 return owner;
             }
         }

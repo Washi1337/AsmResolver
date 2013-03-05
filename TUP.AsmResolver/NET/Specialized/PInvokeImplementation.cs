@@ -20,7 +20,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (member == null)
-                    member = tablereader.MemberForwarded.GetMember(Convert.ToInt32(metadatarow.parts[1]));
+                    member = netheader.TablesHeap.MemberForwarded.GetMember(Convert.ToInt32(metadatarow.parts[1]));
                 return member;
             }
         }

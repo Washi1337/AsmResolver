@@ -6,7 +6,9 @@ using System.IO;
 using System.Collections;
 using TUP.AsmResolver.PE;
 using TUP.AsmResolver.PE.Readers;
+using TUP.AsmResolver.PE.Writers;
 using TUP.AsmResolver.NET.Specialized;
+
 namespace TUP.AsmResolver.NET
 {
     public class TablesHeap : MetaDataStream
@@ -30,9 +32,20 @@ namespace TUP.AsmResolver.NET
             reader.ReadTables();
         }
 
-        internal override void Reconstruct()
+        internal void Reconstruct()
         {
+            foreach (MetaDataStream stream in netheader.MetaDataStreams)
+                stream.ClearCache();
 
+            NETTableReconstructor reconstructor = new NETTableReconstructor(this);
+
+            // Rebuild all tables and update heaps
+            reconstructor.Reconstruct();
+        }
+
+        internal override void MakeEmpty()
+        {
+            base.Dispose();
         }
 
         public override void Dispose()
@@ -42,9 +55,15 @@ namespace TUP.AsmResolver.NET
                     table.Dispose();
 
             Array.Clear(tables, 0, tables.Length);
-            tables = null;
 
             tablereader.Dispose();
+            ClearCache();
+            base.Dispose();
+        }
+
+        public override void ClearCache()
+        {
+
         }
 
         public byte MajorVersion
@@ -131,11 +150,43 @@ namespace TUP.AsmResolver.NET
 
         public MetaDataTable GetTable(MetaDataTableType type)
         {
+            return GetTable(type, false);
+        }
+
+        public MetaDataTable GetTable(MetaDataTableType type, bool addIfNotPresent)
+        {
             if (!HasTable(type))
-                return null;
+            {
+                if (addIfNotPresent)
+                    AddTable(type);
+                else
+                    return null;
+            }
             return tables.FirstOrDefault(t => t != null && t.type == type);
         }
 
+        public void AddTable(MetaDataTableType type)
+        {
+            MetaDataTable table = new MetaDataTable(this);
+            table.type = type;
+            tables[(int)type] = table;
+            MaskValid |= ((ulong)1 << (int)type);
+        }
+
+
+        public MetaDataTableGroup TypeDefOrRef;
+        public MetaDataTableGroup HasConstant;
+        public MetaDataTableGroup HasCustomAttribute;
+        public MetaDataTableGroup HasFieldMarshall;
+        public MetaDataTableGroup HasDeclSecurity;
+        public MetaDataTableGroup MemberRefParent;
+        public MetaDataTableGroup HasSemantics;
+        public MetaDataTableGroup MethodDefOrRef;
+        public MetaDataTableGroup MemberForwarded;
+        public MetaDataTableGroup Implementation;
+        public MetaDataTableGroup CustomAttributeType;
+        public MetaDataTableGroup ResolutionScope;
+        public MetaDataTableGroup TypeOrMethod;
 
     }
 }

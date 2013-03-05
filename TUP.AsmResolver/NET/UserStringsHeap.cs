@@ -15,65 +15,61 @@ namespace TUP.AsmResolver.NET
         uint newEntryOffset = 0;
         bool hasReadAllStrings = false;
         SortedDictionary<uint, string> readStrings = new SortedDictionary<uint, string>();
-        MemoryStream stream;
-        BinaryReader binaryreader;
 
         internal UserStringsHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
             : base(netheader, headeroffset, rawHeader, name)
         {
-            stream = new MemoryStream(Contents);
-            binaryreader = new BinaryReader(stream);
         }
 
         internal override void Initialize()
         {
         }
 
-        internal override void Reconstruct()
-        {
-            MemoryStream newStream = new MemoryStream();
-            BinaryWriter writer = new BinaryWriter(newStream);
-            writer.Write((byte)0);
-            ReadAllStrings();
-            foreach (var readString in readStrings)
-            {
-                byte[] bytes = Encoding.Unicode.GetBytes(readString.Value);
-                NETGlobals.WriteCompressedUInt32(writer, (uint)bytes.Length + 1); // length + terminator length
-                writer.Write(bytes); // data
-                writer.Write((byte)0); // terminator
-            }
-            binaryreader.Dispose();
-            stream.Dispose();
-            stream = newStream;
-            binaryreader = new BinaryReader(newStream);
-            this.streamHeader.Size = (uint)newStream.Length;
-            this.contents = newStream.ToArray();
-        }
+        //internal override void Reconstruct()
+        //{
+        //    MemoryStream newStream = new MemoryStream();
+        //    BinaryWriter writer = new BinaryWriter(newStream);
+        //    writer.Write((byte)0);
+        //    ReadAllStrings();
+        //    foreach (var readString in readStrings)
+        //    {
+        //        byte[] bytes = Encoding.Unicode.GetBytes(readString.Value);
+        //        NETGlobals.WriteCompressedUInt32(writer, (uint)bytes.Length + 1); // length + terminator length
+        //        writer.Write(bytes); // data
+        //        writer.Write((byte)0); // terminator
+        //    }
+        //    binaryreader.Dispose();
+        //    stream.Dispose();
+        //    stream = newStream;
+        //    binaryreader = new BinaryReader(newStream);
+        //    this.streamHeader.Size = (uint)newStream.Length;
+        //    this.contents = newStream.ToArray();
+        //}
 
         internal void ReadAllStrings()
         {
-            stream.Seek(0, SeekOrigin.Begin);
+            mainStream.Seek(0, SeekOrigin.Begin);
 
-            uint lastPosition = (uint)stream.Position;
-            while (stream.Position + 1 < stream.Length)
+            uint lastPosition = (uint)mainStream.Position;
+            while (mainStream.Position + 1 < mainStream.Length)
             {
                 // TODO: write string.empty strings..
 
-                bool alreadyExisted = readStrings.ContainsKey((uint)stream.Position + 1);
-                string value = GetStringByOffset((uint)stream.Position + 1);
+                bool alreadyExisted = readStrings.ContainsKey((uint)mainStream.Position + 1);
+                string value = GetStringByOffset((uint)mainStream.Position + 1);
 
 
                 int length = value.Length * 2;
-                if (length == 0 && lastPosition == (uint)stream.Position)
-                    stream.Seek(1, SeekOrigin.Current);
+                if (length == 0 && lastPosition == (uint)mainStream.Position)
+                    mainStream.Seek(1, SeekOrigin.Current);
                 if (alreadyExisted)
-                    stream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length) + 1, SeekOrigin.Current);
+                    mainStream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length) + 1, SeekOrigin.Current);
 
-                lastPosition = (uint)stream.Position;
+                lastPosition = (uint)mainStream.Position;
             }
 
             hasReadAllStrings = true;
-            newEntryOffset = (uint)stream.Length;
+            newEntryOffset = (uint)mainStream.Length;
         }
 
         /// <summary>
@@ -81,10 +77,16 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public override void Dispose()
         {
-            binaryreader.BaseStream.Close();
-            binaryreader.BaseStream.Dispose();
-            binaryreader.Close();
-            binaryreader.Dispose();
+            binReader.BaseStream.Close();
+            binReader.BaseStream.Dispose();
+            binReader.Close();
+            binReader.Dispose();
+        }
+
+        public override void ClearCache()
+        {
+            readStrings.Clear();
+            hasReadAllStrings = false;
         }
 
         /// <summary>
@@ -98,9 +100,9 @@ namespace TUP.AsmResolver.NET
             if (readStrings.TryGetValue(offset, out stringValue))
                 return stringValue;
 
-            stream.Seek(offset, SeekOrigin.Begin);
+            mainStream.Seek(offset, SeekOrigin.Begin);
 
-            uint length = (uint)(NETGlobals.ReadCompressedUInt32(binaryreader) & -2);
+            uint length = (uint)(NETGlobals.ReadCompressedUInt32(binReader) & -2);
             if (length == 0)
             {
                 readStrings.Add(offset, string.Empty);
@@ -110,7 +112,7 @@ namespace TUP.AsmResolver.NET
             char[] chars = new char[length / 2];
 
             for (int i = 0; i < length; i += 2)
-                chars[i / 2] = (char)binaryreader.ReadInt16();
+                chars[i / 2] = (char)binReader.ReadInt16();
             
 
             stringValue = new string(chars);
@@ -132,11 +134,14 @@ namespace TUP.AsmResolver.NET
                 return readStrings.First(rs => rs.Value == value).Key;
 
             uint offset = newEntryOffset;
-            readStrings.Add(offset, value);
+            mainStream.Seek(offset, SeekOrigin.Begin);
+            binWriter.Write(Encoding.Unicode.GetBytes(value));
             newEntryOffset += (uint)(value.Length + 1);
+            readStrings.Add(offset, value);
+
+            streamHeader.Size = (uint)mainStream.Length;
+
             return offset;
         }
-
-
     }
 }

@@ -35,6 +35,17 @@ namespace TUP.AsmResolver
             }
         }
 
+        internal static void WriteStructureToWriter<T>(BinaryWriter writer, T structure) where T : struct
+        {
+            int rawSize = Marshal.SizeOf(typeof(T));
+            IntPtr buffer = Marshal.AllocHGlobal(rawSize);
+            Marshal.StructureToPtr(structure, buffer, false);
+            byte[] rawDatas = new byte[rawSize];
+            Marshal.Copy(buffer, rawDatas, 0, rawSize);
+            Marshal.FreeHGlobal(buffer);
+            writer.Write(rawDatas);
+        }
+
 
         internal static byte[] MergeBytes(byte[] bytearray1, byte[] bytearray2)
         {

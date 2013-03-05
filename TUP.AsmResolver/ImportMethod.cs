@@ -45,7 +45,7 @@ namespace TUP.AsmResolver
         public ushort Ordinal
         {
             get;
-            private set;
+            internal set;
         }
 
         public uint RVA
@@ -56,12 +56,12 @@ namespace TUP.AsmResolver
         public uint OriginalThunkValue
         {
             get;
-            private set;
+            internal set;
         }
         public uint ThunkValue
         {
             get;
-            private set;
+            internal set;
         }
     }
 }

@@ -8,13 +8,12 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public abstract class MetaDataMember : IDisposable , ICacheProvider
     {
-        internal NETTableReader tablereader;
-        internal int metadatatoken;
+        internal uint metadatatoken;
         internal MetaDataRow metadatarow;
-
+        internal MetaDataTableType table;
         internal NETHeader netheader;
-        
-        public int MetaDataToken
+
+        public uint MetaDataToken
         {
             get { return metadatatoken; }
         }
@@ -27,25 +26,30 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get { return netheader; }
         }
+        public MetaDataTableType Table
+        {
+            get { return table; }
+        }
+
         public object ProcessPartType(int partindex, object value)
         {
             return Convert.ChangeType(value, metadatarow.parts[partindex].GetType());
         }
-        public bool HasMetaDataRow
+        public bool HasImage
         {
-            get { return metadatarow != null; }
+            get { return netheader != null; }
         }
 
         public void ApplyChanges()
         {
-            if (HasMetaDataRow)
+            if (HasImage && metadatarow.offset != 0)
             {
                 byte[] generatedBytes = metadatarow.GenerateBytes();
                 netheader.ParentAssembly.peImage.Write((int)metadatarow.offset, generatedBytes);
 
             }
-            else
-                throw new ArgumentException("Cannot apply changes to a member without a metadata row.");
+           // else
+           //     throw new ArgumentException("Cannot apply changes to a member without a metadata row.");
         }
 
         public void Dispose()

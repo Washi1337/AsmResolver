@@ -34,7 +34,7 @@ namespace TUP.AsmResolver
         {
             if (rawoffset == 0)
                 return new Offset(0, 0, 0, ASM.OperandType.Normal);
-            OffsetConverter offsetconverter = new OffsetConverter(Section.GetSectionByFileOffset(assembly, rawoffset));
+            OffsetConverter offsetconverter = CreateConverter(assembly, rawoffset, 1);
             return new Offset(rawoffset, offsetconverter.FileOffsetToRva(rawoffset), offsetconverter.FileOffsetToVa(rawoffset), ASM.OperandType.Normal);
         }
         /// <summary>
@@ -47,7 +47,7 @@ namespace TUP.AsmResolver
         {
             if (va == 0)
                 return new Offset(0, 0, 0, ASM.OperandType.Normal);
-            OffsetConverter offsetconverter = new OffsetConverter(Section.GetSectionByRva(assembly, (uint)(va - assembly.NTHeader.OptionalHeader.ImageBase)));
+            OffsetConverter offsetconverter = CreateConverter(assembly, va, 3);
             return new Offset(offsetconverter.VaToFileOffset(va), offsetconverter.VaToRva(va), va, ASM.OperandType.Normal);
         }
         /// <summary>
@@ -60,9 +60,32 @@ namespace TUP.AsmResolver
         {
             if (rva == 0)
                 return new Offset(0, 0, 0, ASM.OperandType.Normal);
-            OffsetConverter offsetconverter = new OffsetConverter(Section.GetSectionByRva(assembly, rva));
+            OffsetConverter offsetconverter = CreateConverter(assembly, rva, 2);
             return new Offset(offsetconverter.RvaToFileOffset(rva), rva, offsetconverter.RvaToVa(rva), ASM.OperandType.Normal);
        
+        }
+
+        private static OffsetConverter CreateConverter(Win32Assembly assembly, ulong offset, int type)
+        {
+            OffsetConverter converter;
+            
+            switch (type)
+            {
+                case 2:
+                    converter = new OffsetConverter(Section.GetSectionByRva(assembly, (uint)offset));
+                    break;
+                case 3:
+                    converter = new OffsetConverter(Section.GetSectionByRva(assembly, (uint)(offset - assembly.ntHeader.OptionalHeader.ImageBase)));
+                    break;
+
+                default: // case 1:
+                    converter = new OffsetConverter(Section.GetSectionByFileOffset(assembly, (uint)offset));
+                    break;
+            }
+            if (converter.TargetSection == null)
+                converter = new OffsetConverter(assembly);
+
+            return converter;
         }
 
         /// <summary>

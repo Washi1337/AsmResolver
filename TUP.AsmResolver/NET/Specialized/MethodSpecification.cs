@@ -23,7 +23,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (originalmethod == null)
-                    originalmethod = (MethodReference)tablereader.MethodDefOrRef.GetMember(Convert.ToInt32(metadatarow.parts[0]));
+                    originalmethod = (MethodReference)netheader.TablesHeap.MethodDefOrRef.GetMember(Convert.ToInt32(metadatarow.parts[0]));
                 return originalmethod;
                 //if ( == 0)
                 //    return null;

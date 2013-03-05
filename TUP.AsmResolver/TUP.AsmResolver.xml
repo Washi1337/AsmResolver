@@ -204,14 +204,14 @@
             A class that is able to look up members or strings by its metadata token.
             </summary>
         </member>
-        <member name="M:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver.ResolveMember(System.Int32)">
+        <member name="M:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver.ResolveMember(System.UInt32)">
             <summary>
             Resolves a member by its metadata token.
             </summary>
             <param name="metadataToken">The token of the member to look up.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver.ResolveString(System.Int32)">
+        <member name="M:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver.ResolveString(System.UInt32)">
             <summary>
             Resolves a string value by its metadata token.
             </summary>

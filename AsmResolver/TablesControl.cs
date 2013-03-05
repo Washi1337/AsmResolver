@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -19,6 +18,9 @@ namespace AsmResolver
         DataGridView dataGridView;
         MetaDataMember currentMember;
         ToolStripMenuItem disassembleItem;
+        ToolStripMenuItem addTableItem;
+        ToolStripMenuItem addMemberItem;
+        TablesHeap currentTablesHeap;
 
         public TablesControl()
         {
@@ -75,8 +77,18 @@ namespace AsmResolver
             );
             disassembleItem = new ToolStripMenuItem("Disassemble Method");
             disassembleItem.Click += disassembleItem_Click;
+            addTableItem = new ToolStripMenuItem("Add Table");
+            addTableItem.Click += addTableItem_Click;
+            addMemberItem = new ToolStripMenuItem("Add Member");
+            addMemberItem.Click += addMemberItem_Click;
+
             ContextMenuStrip menuStrip = new System.Windows.Forms.ContextMenuStrip();
-            menuStrip.Items.Add(disassembleItem);
+            menuStrip.Items.AddRange(new ToolStripMenuItem[]
+            {
+                disassembleItem,
+                addTableItem,
+                addMemberItem,
+            });
 
             tablesTree.ContextMenuStrip = menuStrip;
 
@@ -88,6 +100,38 @@ namespace AsmResolver
             tabControl.TabPages.Add(propertyTab);
             mainSplitter.Panel2.Controls.Add(tabControl);
             this.Controls.Add(mainSplitter);
+        }
+
+        private void addMemberItem_Click(object sender, EventArgs e)
+        {
+            MethodDefinition methodDef = new MethodDefinition();
+            methodDef.MetaDataRow = new MetaDataRow(new object[] { (uint)0, (uint)0, (uint)0, (uint)currentTablesHeap.NETHeader.StringsHeap.GetStringOffset("BITCH"), (uint)0, (uint)0 });
+         
+            methodDef.Attributes = MethodAttributes.Public | MethodAttributes.Static;
+            methodDef.ImplementationAttributes = MethodImplAttributes.IL | MethodImplAttributes.Managed;
+            
+            currentTablesHeap.GetTable(MetaDataTableType.Method, true).AddMember(methodDef);
+            //List<object> tablesLeft = new List<object>();
+            //for (int i = 0; i < 45; i++)
+            //    tablesLeft.Add((MetaDataTableType)i);
+            //ComboboxDlg dlg = new ComboboxDlg("Select table to add.", "Add table", tablesLeft.ToArray());
+            //if (dlg.ShowDialog() == DialogResult.OK)
+            //{
+            //    currentTablesHeap.GetTable((MetaDataTableType)dlg.SelectedObject).AddMember((MetaDataMember)Activator.cr;
+            //}
+        }
+
+        void addTableItem_Click(object sender, EventArgs e)
+        {
+            List<object> tablesLeft = new List<object>();
+            for (int i =0;i < 45; i++)
+                if (!currentTablesHeap.HasTable((MetaDataTableType)i))
+                    tablesLeft.Add((MetaDataTableType)i);
+            ComboBoxDlg dlg = new ComboBoxDlg("Select table to add.", "Add table", tablesLeft.ToArray());
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                currentTablesHeap.AddTable((MetaDataTableType)dlg.SelectedObject);
+            }
         }
 
         void disassembleItem_Click(object sender, EventArgs e)
@@ -141,6 +185,7 @@ namespace AsmResolver
 
         public void SetTablesHeap(TablesHeap tablesHeap)
         {
+            this.currentTablesHeap = tablesHeap;
             tablesTree.Nodes.Clear();
             foreach (MetaDataTable table in tablesHeap.Tables)
             {
@@ -154,6 +199,7 @@ namespace AsmResolver
                 }
             }
         }    
+
         private TreeNode CreateTreeNode(MetaDataMember member)
         {
             TreeNode node = new TreeNode();

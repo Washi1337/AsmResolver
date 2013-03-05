@@ -13,11 +13,9 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class BlobHeap : MetaDataStream
     {
-        
-        internal MemoryStream mainStream;
-        internal BinaryReader mainReader;
-        internal Dictionary<uint, byte[]> readBlobs = new Dictionary<uint, byte[]>();
 
+        internal SortedDictionary<uint, byte[]> readBlobs = new SortedDictionary<uint, byte[]>();
+        
         IGenericParametersProvider provider;
 
         //MetaDataStream stream)
@@ -25,8 +23,6 @@ namespace TUP.AsmResolver.NET
         internal BlobHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
             : base(netheader, headeroffset, rawHeader, name)
         {
-            this.mainStream = new MemoryStream(Contents);
-            this.mainReader = new BinaryReader(this.mainStream);
         }
 
 
@@ -34,24 +30,27 @@ namespace TUP.AsmResolver.NET
         {
         }
 
-        internal override void Reconstruct()
+        internal void Reconstruct()
         {
+            // will be removed once blobs are being serialized.
+
             MemoryStream newStream = new MemoryStream();
             BinaryWriter writer = new BinaryWriter(newStream);
             writer.Write((byte)0);
             ReadAllBlobs();
-
+        
             foreach (var blob in readBlobs)
             {
                 NETGlobals.WriteCompressedUInt32(writer, (uint)blob.Value.Length);
                 writer.Write(blob.Value);
             }
-
+        
             mainStream.Dispose();
-            mainReader.Dispose();
+            binReader.Dispose();
+            binWriter.Dispose();
             mainStream = newStream;
-            mainReader = new BinaryReader(newStream);
-            this.contents = newStream.ToArray();
+            binReader = new BinaryReader(newStream);
+            binWriter = new BinaryWriter(newStream);
             this.streamHeader.Size = (uint)newStream.Length;
         }
 
@@ -74,13 +73,14 @@ namespace TUP.AsmResolver.NET
 
         public override void Dispose()
         {
-            mainReader.BaseStream.Close();
-            mainReader.BaseStream.Dispose();
-            mainReader.Close();
-            mainReader.Dispose();
+            ClearCache();
+            base.Dispose();
         }
 
-
+        public override void ClearCache()
+        {
+            readBlobs.Clear();
+        }
 
         /// <summary>
         /// Gets the blob value by it's signature/index.
@@ -94,13 +94,14 @@ namespace TUP.AsmResolver.NET
                 return bytes;
 
             mainStream.Seek(index, SeekOrigin.Begin);
-            int length = (int)NETGlobals.ReadCompressedUInt32(mainReader);
+            int length = (int)NETGlobals.ReadCompressedUInt32(binReader);
 
-            bytes = mainReader.ReadBytes(length);
+            bytes = binReader.ReadBytes(length);
             readBlobs.Add(index, bytes);
             return bytes;
             
         }
+
         /// <summary>
         /// Gets the blob value by it's signature/index and creates a binary reader.
         /// </summary>
@@ -112,14 +113,29 @@ namespace TUP.AsmResolver.NET
             if (!readBlobs.TryGetValue(index, out bytes))
             {
                 mainStream.Seek(index, SeekOrigin.Begin);
-                uint length = NETGlobals.ReadCompressedUInt32(mainReader);
-                bytes = mainReader.ReadBytes((int)length);
+                uint length = NETGlobals.ReadCompressedUInt32(binReader);
+                bytes = binReader.ReadBytes((int)length);
             }
 
             MemoryStream newStream = new MemoryStream(bytes);
             newStream.Seek(0, SeekOrigin.Begin);
             BinaryReader reader = new BinaryReader(newStream);
             return reader;
+        }
+
+        public uint GetBlobIndex(byte[] blobValue)
+        {
+            ReadAllBlobs();
+
+            if (readBlobs.ContainsValue(blobValue))
+                return readBlobs.FirstOrDefault(b => b.Value == blobValue).Key;
+
+            mainStream.Seek(0, SeekOrigin.End);
+            uint index = (uint)mainStream.Position;
+            NETGlobals.WriteCompressedUInt32(binWriter, (uint)blobValue.Length);
+            binWriter.Write(blobValue);
+            readBlobs.Add(index, blobValue);
+            return index;
         }
 
         public IMemberSignature ReadMemberRefSignature(uint sig, IGenericParametersProvider provider)
@@ -184,6 +200,7 @@ namespace TUP.AsmResolver.NET
             }
             return signature;
         }
+        
         public PropertySignature ReadPropertySignature(uint signature)
         {
             PropertySignature propertySig = null;
@@ -202,6 +219,7 @@ namespace TUP.AsmResolver.NET
             }
             return propertySig;
         }
+        
         public VariableDefinition[] ReadVariableSignature(uint signature, MethodDefinition parentMethod)
         {
             VariableDefinition[] variables = null;
@@ -225,6 +243,7 @@ namespace TUP.AsmResolver.NET
             }
             return variables;
         }
+        
         public TypeReference ReadTypeSignature(uint signature)
         {
             TypeReference typeRef = null;
@@ -234,6 +253,7 @@ namespace TUP.AsmResolver.NET
             }
             return typeRef;
         }
+        
         public TypeReference ReadTypeSignature(uint signature, IGenericParametersProvider provider)
         {
             this.provider = provider;
@@ -245,6 +265,7 @@ namespace TUP.AsmResolver.NET
 
             return typeRef;
         }
+        
         public TypeReference[] ReadGenericParametersSignature(uint signature, IGenericParametersProvider provider)
         {
             List<TypeReference> types = new List<TypeReference>();
@@ -262,6 +283,7 @@ namespace TUP.AsmResolver.NET
             }
             return types.ToArray();
         }
+        
         public object ReadConstantValue(ElementType type, uint signature)
         {
             object value = null;
@@ -315,6 +337,7 @@ namespace TUP.AsmResolver.NET
             }
             return value;
         }
+       
         public CustomAttributeSignature ReadCustomAttributeSignature(CustomAttribute parent, uint signature)
         {
             CustomAttributeSignature customAttrSig = null;
@@ -348,8 +371,6 @@ namespace TUP.AsmResolver.NET
             }
             return customAttrSig;
         }
-
-
 
         internal TypeReference ReadTypeReference(BinaryReader reader, ElementType type, IGenericParametersProvider provider)
         {
@@ -420,9 +441,9 @@ namespace TUP.AsmResolver.NET
                 case ElementType.SzArray:
                     return new ArrayType(ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider));
                 case ElementType.Class:
-                    return (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
+                    return (TypeReference)netheader.TablesHeap.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
                 case ElementType.ValueType:
-                    TypeReference typeRef = (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
+                    TypeReference typeRef = (TypeReference)netheader.TablesHeap.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
                     typeRef.IsValueType = true;
                     return typeRef;
                 case ElementType.ByRef:
@@ -444,6 +465,7 @@ namespace TUP.AsmResolver.NET
             return new TypeReference() { name = type.ToString(), @namespace = "" , netheader = this.netheader};
 
         }
+        
         private void ReadGenericInstanceSignature(BinaryReader reader, IGenericParametersProvider provider, GenericInstanceType type)
         {
             uint number = NETGlobals.ReadCompressedUInt32(reader);
@@ -459,8 +481,9 @@ namespace TUP.AsmResolver.NET
 
         private TypeReference ReadTypeToken(BinaryReader reader)
         {
-            return (TypeReference)netheader.TablesHeap.tablereader.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
+            return (TypeReference)netheader.TablesHeap.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
         }
+       
         private ArrayType ReadArrayType(BinaryReader reader)
         {
             TypeReference arrayType = ReadTypeReference(reader,(ElementType)reader.ReadByte(), provider);
@@ -501,9 +524,7 @@ namespace TUP.AsmResolver.NET
             return new ArrayType(arrayType, (int)rank, dimensions);
 
         }
-
-
-
+                
         private object ReadArgumentValue(BinaryReader reader, TypeReference paramType)
         {
             if (!paramType.IsArray || !(paramType as ArrayType).IsVector)
@@ -518,6 +539,7 @@ namespace TUP.AsmResolver.NET
 
             return elements;
         }
+        
         private object ReadElement(BinaryReader reader, TypeReference paramType)
         {
             switch (paramType.elementType)
@@ -559,9 +581,6 @@ namespace TUP.AsmResolver.NET
             }
             return null;
         }
-
-
-
 
 
     }

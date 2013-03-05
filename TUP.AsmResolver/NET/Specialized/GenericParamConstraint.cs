@@ -31,7 +31,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (constraint == null)
                 {
                     MetaDataMember member;
-                    if (netheader.TablesHeap.tablereader.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out member))
+                    if (netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out member))
                         constraint = member as TypeReference;
                 }
                 return constraint;

@@ -14,7 +14,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (parent == null)
                 {
-                    tablereader.HasFieldMarshall.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out parent);
+                    netheader.TablesHeap.HasFieldMarshall.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out parent);
                 }
                 return parent;
                 

@@ -18,7 +18,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (implementation == null)
-                    implementation = netheader.TablesHeap.tablereader.Implementation.GetMember(Convert.ToInt32(metadatarow.parts[4]));
+                    implementation = netheader.TablesHeap.Implementation.GetMember(Convert.ToInt32(metadatarow.parts[4]));
                 return implementation;
             }
         }

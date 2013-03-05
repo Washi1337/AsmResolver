@@ -17,7 +17,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (parent == null)
-                    parent = tablereader.HasDeclSecurity.GetMember(Convert.ToInt32(metadatarow.parts[1]));
+                    parent = netheader.TablesHeap.HasDeclSecurity.GetMember(Convert.ToInt32(metadatarow.parts[1]));
                 return parent;
             }
         }

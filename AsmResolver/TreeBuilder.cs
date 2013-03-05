@@ -29,12 +29,12 @@ namespace AsmResolver
                 CreateArrayNode("Sections", assembly.NTHeader.Sections),
                 CreateArrayNode("Export Directory", assembly.LibraryExports.ToArray()),
                 CreateArrayNode("Import Directory", assembly.LibraryImports.ToArray(), (obj) => { return ((LibraryReference)obj).LibraryName; }).AddForEachNode((tag) => { return ((LibraryReference)tag.Object).ImportMethods; }, (obj) => { return ((ImportMethod)obj).Name;}),
-                CreateNode("Resource Directory", assembly.RootResourceDirectory),
+                CreateNode("Resource Directory", assembly.RootResourceDirectory, TreeNodeType.ResourcesTree),
 
-                CreateNode(".NET Directory", assembly.NETHeader, ()=> { return assembly.NTHeader.IsManagedAssembly; }).AddSubNodes(new TreeNode[] {
+                CreateNode(".NET Directory", assembly.NETHeader, (netHeader)=> { return assembly.NTHeader.IsManagedAssembly; }).AddSubNodes(new TreeNode[] {
                     CreateNode("MetaData Header", assembly.NETHeader.MetaDataHeader), 
-                    CreateArrayNode("MetaData Streams", assembly.NETHeader.MetaDataStreams, (obj) => { return ((MetaDataStream)obj).Name; }).MakeOtherType((obj) => { return obj is TablesHeap;}, TreeNodeType.TablesTree),
-                  
+                    CreateArrayNode("MetaData Streams", assembly.NETHeader.MetaDataStreams, (obj) => { return ((MetaDataStream)obj).Name; }).AddForEachNode((tag) => { return (tag.Object is TablesHeap ? tag.Object : null); } , (obj) => { return "Tables";}, TreeNodeType.TablesTree)
+
                 }), 
                 CreateNode("Hex Editor", new DynamicFileByteProvider(assembly.Image.Stream), TreeNodeType.HexBox),
                 CreateNode("Disassembler", assembly.Disassembler, TreeNodeType.Disassembler),
@@ -48,7 +48,7 @@ namespace AsmResolver
         {
             return CreateNode(name, value, TreeNodeType.PropertyGrid);
         }
-        private static TreeNode CreateNode(string name, object value, Func<bool> condition)
+        private static TreeNode CreateNode(string name, object value, Func<object, bool> condition)
         {
             return CreateNode(name, value, TreeNodeType.PropertyGrid, condition);
         }
@@ -56,10 +56,10 @@ namespace AsmResolver
         {
             return new TreeNode(name) { Tag = new TreeNodeTag() { Object = value, Type = type } };
         }
-        private static TreeNode CreateNode(string name, object value, TreeNodeType type, Func<bool> condition)
+        private static TreeNode CreateNode(string name, object value, TreeNodeType type, Func<object, bool> condition)
         {
             TreeNode node = new TreeNode(name);
-            if (condition())
+            if (condition(value))
                 node.Tag = new TreeNodeTag() { Object = value, Type = type };
             return node;
         }
@@ -125,13 +125,20 @@ namespace AsmResolver
 
         public static TreeNode AddForEachNode(this TreeNode parent, Func<TreeNodeTag, object> valuesToAdd, Func<object, string> toStringFunc)
         {
+            return AddForEachNode(parent, valuesToAdd, toStringFunc, TreeNodeType.PropertyGrid);
+        }
+
+        public static TreeNode AddForEachNode(this TreeNode parent, Func<TreeNodeTag, object> valuesToAdd, Func<object, string> toStringFunc, TreeNodeType type)
+        {
             foreach (TreeNode node in parent.Nodes)
             {
                 object rawValue = valuesToAdd((TreeNodeTag)node.Tag);
+                if (rawValue == null)
+                    continue;
                 if (rawValue is Array)
-                    node.AddSubNodes((object[])rawValue, toStringFunc);
+                    node.AddSubNodes((object[])rawValue, toStringFunc).MakeOtherType((o) => { return true; } , type);
                 else
-                    node.AddSubNodes(new object[] { rawValue }, toStringFunc);
+                    node.AddSubNodes(new object[] { rawValue }, toStringFunc).MakeOtherType((o) => { return true; }, type);
 
             }
             return parent;

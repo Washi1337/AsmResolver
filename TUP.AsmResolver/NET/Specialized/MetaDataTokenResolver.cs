@@ -18,7 +18,7 @@ namespace TUP.AsmResolver.NET.Specialized
             this.netheader = netheader;
         }
 
-        public object ResolveToken(int metadataToken)
+        public object ResolveToken(uint metadataToken)
         {
             byte rowIndex = (byte)(metadataToken >> 0x18);
             if (rowIndex == 0x70)
@@ -32,7 +32,7 @@ namespace TUP.AsmResolver.NET.Specialized
         /// </summary>
         /// <param name="metadataToken">The token of the member to look up.</param>
         /// <returns></returns>
-        public MetaDataMember ResolveMember(int metadataToken)
+        public MetaDataMember ResolveMember(uint metadataToken)
         {
             if (metadataToken == 0)
                 throw new ArgumentException("Cannot resolve a member from a zero metadata token", "metadataToken");
@@ -42,19 +42,19 @@ namespace TUP.AsmResolver.NET.Specialized
             if (!netheader.TablesHeap.HasTable(tabletype))
                 throw new ArgumentException("Table is not present in tables heap.");
 
-            int subtraction = ((int)tabletype) * 0x1000000;
-            int rowindex = metadataToken - subtraction;
-            return netheader.TablesHeap.GetTable( tabletype).members[rowindex - 1];
+            uint subtraction = ((uint)tabletype) * 0x1000000;
+            uint rowindex = metadataToken - subtraction;
+            return netheader.TablesHeap.GetTable( tabletype).members[(int)rowindex - 1];
         }
         /// <summary>
         /// Resolves a string value by its metadata token.
         /// </summary>
         /// <param name="metadataToken">The token of the string value to look up.</param>
         /// <returns></returns>
-        public string ResolveString(int metadataToken)
+        public string ResolveString(uint metadataToken)
         {
-            int actualindex = metadataToken - 0x70000000;
-            return netheader.UserStringsHeap.GetStringByOffset((uint)actualindex);
+            uint actualindex = metadataToken - 0x70000000;
+            return netheader.UserStringsHeap.GetStringByOffset(actualindex);
             
         }
 

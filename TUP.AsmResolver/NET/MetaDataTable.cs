@@ -20,6 +20,7 @@ namespace TUP.AsmResolver.NET
         internal long rowAmountOffset;
         internal List<MetaDataMember> members;
         internal MetaDataTableType type;
+        
         /// <summary>
         /// Gets the type of members located in the metadata table.
         /// </summary>
@@ -28,6 +29,7 @@ namespace TUP.AsmResolver.NET
             get { return type; }
             internal set { type = value; }
         }
+       
         /// <summary>
         /// Gets or sets the amount of rows that are available in the table.
         /// </summary>
@@ -42,6 +44,7 @@ namespace TUP.AsmResolver.NET
                 rowAmount = value;
             }
         }
+       
         /// <summary>
         /// Gets an array of all members available in the table.
         /// </summary>
@@ -49,6 +52,7 @@ namespace TUP.AsmResolver.NET
         {
             get { return members.ToArray(); }
         }
+       
         /// <summary>
         /// Gets the parent tables heap.
         /// </summary>
@@ -57,6 +61,7 @@ namespace TUP.AsmResolver.NET
             get;
             private set;
         }
+       
         /// <summary>
         /// Gets the offset to the first member of the table.
         /// </summary>
@@ -64,6 +69,15 @@ namespace TUP.AsmResolver.NET
         {
             get;
             internal set;
+        }
+
+        public void AddMember(MetaDataMember member)
+        {
+            member.metadatatoken = (uint)(((uint)type << 24) + Members.Length + 1);
+            member.MetaDataRow.offset = 0;
+            rowAmount++;
+            member.netheader = TablesHeap.netheader;
+            members.Add(member);
         }
 
         /// <summary>
@@ -79,6 +93,7 @@ namespace TUP.AsmResolver.NET
             bool isbigger = rowAmount > maxamount ;
             return isbigger;
         }
+       
         /// <summary>
         /// Returns a string representation of the Metadata Table.
         /// </summary>
@@ -87,6 +102,7 @@ namespace TUP.AsmResolver.NET
         {
             return "Type: " + type.ToString() + ", Rows: " + rowAmount.ToString();
         }
+        
         /// <summary>
         /// Applies all made changes to the members.
         /// </summary>
@@ -95,6 +111,7 @@ namespace TUP.AsmResolver.NET
             foreach (MetaDataMember member in members)
                 member.ApplyChanges();
         }
+       
         /// <summary>
         /// Clears every temporary data stored in the members.
         /// </summary>

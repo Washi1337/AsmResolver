@@ -31,7 +31,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (association == null)
-                    association = tablereader.HasSemantics.GetMember(Convert.ToInt32(metadatarow.parts[2]));
+                    association = netheader.TablesHeap.HasSemantics.GetMember(Convert.ToInt32(metadatarow.parts[2]));
                 return association;
             }
         }

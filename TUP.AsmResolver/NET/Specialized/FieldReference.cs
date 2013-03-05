@@ -16,7 +16,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (declaringType == null)
-                    declaringType = (TypeReference)tablereader.MemberRefParent.GetMember(Convert.ToInt32(metadatarow.parts[0]));
+                    declaringType = (TypeReference)netheader.TablesHeap.MemberRefParent.GetMember(Convert.ToInt32(metadatarow.parts[0]));
                 return declaringType;
             }
 

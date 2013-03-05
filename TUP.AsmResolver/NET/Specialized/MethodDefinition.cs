@@ -42,7 +42,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 
                 if (declaringtype == null)
                 {
-                    int relativetoken = this.metadatatoken - (6 << 0x18);
+                    uint relativetoken = this.metadatatoken - (6 << 0x18);
 
                     TypeDefinition lasttypeDef = null;
                     foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).members)

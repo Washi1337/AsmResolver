@@ -29,7 +29,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             return instruction;
         }
 
-        public static MSILInstruction Create(MSILOpCode opcode, int metadataToken, NETHeader netHeader)
+        public static MSILInstruction Create(MSILOpCode opcode, uint metadataToken, NETHeader netHeader)
         {
             return new MSILInstruction() { OpCode = opcode, OperandBytes = BitConverter.GetBytes(metadataToken), Operand = netHeader.TokenResolver.ResolveToken(metadataToken) };
         }
