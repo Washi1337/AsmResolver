@@ -35,9 +35,9 @@ namespace TUP.AsmResolver
             }
         }
 
-        internal static void WriteStructureToWriter<T>(BinaryWriter writer, T structure) where T : struct
+        internal static void WriteStructureToWriter(BinaryWriter writer, object structure)
         {
-            int rawSize = Marshal.SizeOf(typeof(T));
+            int rawSize = Marshal.SizeOf(structure);
             IntPtr buffer = Marshal.AllocHGlobal(rawSize);
             Marshal.StructureToPtr(structure, buffer, false);
             byte[] rawDatas = new byte[rawSize];
@@ -46,6 +46,22 @@ namespace TUP.AsmResolver
             writer.Write(rawDatas);
         }
 
+        internal static bool IsEmptyStructure(object structure)
+        {
+            byte[] serializedStructure;
+            using (MemoryStream stream =new MemoryStream())
+            {
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                WriteStructureToWriter(writer,structure);
+                serializedStructure = stream.ToArray();
+            }
+            }
+            foreach (byte b in serializedStructure)
+                if (b != 0)
+                    return false;
+            return true;
+        }
 
         internal static byte[] MergeBytes(byte[] bytearray1, byte[] bytearray2)
         {

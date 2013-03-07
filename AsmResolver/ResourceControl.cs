@@ -69,12 +69,14 @@ namespace AsmResolver
         }
         private void PopulateDirectory(TreeNode parentNode, ResourceDirectory directory)
         {
-            for (int i = 0; i < directory.ChildEntries.Length; i++)
+            if (directory.ChildEntries != null)
             {
-                TreeNode node = new TreeNode("Resource Directory Entry - ID:" + directory.ChildEntries[i].Name);
-                node.Tag = directory.ChildEntries[i];
-                PopulateDirectoryEntry(node, directory.ChildEntries[i]);
-                parentNode.Nodes.Add(node);
+                for (int i = 0; i < directory.ChildEntries.Length; i++)
+                {
+                    TreeNode node = new TreeNode("Resource Directory Entry - ID:" + directory.ChildEntries[i].Name);
+                    node.Tag = directory.ChildEntries[i];
+                    parentNode.Nodes.Add(node);
+                }
             }
         }
 
@@ -98,6 +100,13 @@ namespace AsmResolver
         void resourcesTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
             propertyGrid.SelectedObject = e.Node.Tag;
+            if (e.Node.Nodes.Count == 0)
+            {
+                if (e.Node.Tag is ResourceDirectory)
+                    PopulateDirectory(e.Node, e.Node.Tag as ResourceDirectory);
+                if (e.Node.Tag is ResourceDirectoryEntry)
+                    PopulateDirectoryEntry(e.Node, e.Node.Tag as ResourceDirectoryEntry);
+            }
             if (e.Node.Tag is ResourceDataEntry)
             {
                 try

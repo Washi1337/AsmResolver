@@ -23,9 +23,14 @@ namespace AsmResolver
 
         private void OpenFile(string file)
         {
+            OpenFile(file, new ReadingParameters());
+        }
+
+        private void OpenFile(string file, ReadingParameters parameters)
+        {
             try
             {
-                Win32Assembly assembly = Win32Assembly.LoadFile(file);
+                Win32Assembly assembly = Win32Assembly.LoadFile(file, parameters);
                 treeView1.Nodes.Add(TreeBuilder.ConstructAssemblyNode(assembly));
             }
             catch (Exception ex)
@@ -34,14 +39,24 @@ namespace AsmResolver
             }
         }
 
-        private Win32Assembly GetCurrentAssembly()
+        private TreeNode GetRootNode()
         {
             TreeNode node = treeView1.SelectedNode;
             if (node == null)
                 return null;
-            while (node.Parent != null)
-                node = node.Parent;
+            while (true)
+            {
+                if (node.Parent == null)
+                    return node;
+                else
+                    node = node.Parent;
+            }
+            
 
+        }
+        private Win32Assembly GetCurrentAssembly()
+        {
+            TreeNode node = GetRootNode();
             if (node.Tag is TreeNodeTag)
                 return ((TreeNodeTag)node.Tag).Object as Win32Assembly;
             return null;
@@ -84,7 +99,14 @@ namespace AsmResolver
             ofd.Filter = "Assembly files (*.exe; *.dll)|*.exe;*.dll";
             if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                OpenFile(ofd.FileName);
+                if (((ToolStripMenuItem)sender).Name == openToolStripMenuItem.Name)
+                    OpenFile(ofd.FileName);
+                else
+                {
+                    ReadingParameterDlg rdlg = new ReadingParameterDlg();
+                    if (rdlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        OpenFile(ofd.FileName, rdlg.Parameters);
+                }
             }
         }
 
@@ -198,6 +220,26 @@ namespace AsmResolver
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Program and library created by TheUnknownProgrammer", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void disassembleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeView1.SelectedNode != null)
+            {
+                TreeNodeTag tag = treeView1.SelectedNode.Tag as TreeNodeTag;
+                if (tag.Object is Section)
+                {
+                    TreeNode root = GetRootNode();
+                    foreach (TreeNode node in root.Nodes)
+                        if (node.Tag != null && ((TreeNodeTag)node.Tag).Type == TreeNodeType.Disassembler)
+                        {
+                            node.EnsureVisible();
+                            treeView1.SelectedNode = node;
+                            disassemblerControl1.DisassembleSection(tag.Object as Section);
+                            break;
+                        }
+                }
+            }
         }
 
 

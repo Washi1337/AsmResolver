@@ -20,7 +20,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (resolutionScope != null || !HasImage)
+                if (resolutionScope != null || !HasSavedMetaDataRow)
                     return resolutionScope;
 
                 netheader.TablesHeap.ResolutionScope.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out resolutionScope);
@@ -40,7 +40,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (HasImage)
+                if (HasSavedMetaDataRow)
                     @namespace = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]));
                 return @namespace;
             }

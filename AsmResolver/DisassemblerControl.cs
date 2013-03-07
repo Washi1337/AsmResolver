@@ -14,6 +14,7 @@ namespace AsmResolver
 {
     public class DisassemblerControl : Control
     {
+        List<ListViewItem> items = new List<ListViewItem>();
         uint startOffset = 0;
         uint endOffset = 0;
         Win32Assembly assembly;
@@ -137,10 +138,7 @@ namespace AsmResolver
             }
             progressBar.Value = 0;
             progressBar.Show();
-            disassemblyView.Items.Clear();
-            ListViewItem[] items = await Disassemble();
-            progressBar.Hide();
-            disassemblyView.Items.AddRange(items);
+            new Action(Disassemble).BeginInvoke(DisassembleCallBack, null);
         }
 
         async void analyseButton_Click(object sender, EventArgs e)
@@ -148,9 +146,9 @@ namespace AsmResolver
             await Analyse(disassemblyView.Items);
         }
 
-        async Task<ListViewItem[]> Disassemble()
+        void Disassemble()
         {
-            List<ListViewItem> items = new List<ListViewItem>();
+            items.Clear();
             x86disassembler.CurrentOffset = startOffset;
             try
             {
@@ -173,6 +171,15 @@ namespace AsmResolver
                         item.SubItems[2].BackColor = Color.Yellow;
 
                     items.Add(item);
+
+                    //Invoke(new Action(() =>
+                    //{
+                    //    double currentValue = x86disassembler.CurrentOffset - startOffset;
+                    //    double max = endOffset - startOffset;
+                    //
+                    //    progressBar.Value = (int)(currentValue / max * 100);
+                    //
+                    //}));
                 }
             }
             catch (Exception ex)
@@ -185,7 +192,16 @@ namespace AsmResolver
                     ex.ToString(),
                 }));
             }
-            return items.ToArray();
+
+        }
+
+        void DisassembleCallBack(IAsyncResult ar)
+        {
+            Invoke(new Action(() => {
+                progressBar.Hide();
+                disassemblyView.Items.Clear();
+                disassemblyView.Items.AddRange(items.ToArray());
+            }));
         }
 
         async Task Analyse(ListView.ListViewItemCollection items)
@@ -217,5 +233,12 @@ namespace AsmResolver
             x86disassembler = assembly.Disassembler;
         }
 
+        public void DisassembleSection(Section section)
+        {
+            SetAssembly(section.ParentAssembly);
+            offsetBox.Text = section.RawOffset.ToString("X8");
+            sizeBox.Text = (section.RawSize > 0x500) ? 0x500.ToString("X8") : section.RawSize.ToString("X8");
+            
+        }
     }
 }

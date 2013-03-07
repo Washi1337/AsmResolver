@@ -23,9 +23,9 @@ namespace TUP.AsmResolver
         /// </summary>
         Version LinkerVersion { get; }
         /// <summary>
-        /// Gets or setsthe entrypoint address of the portable executable file.
+        /// Gets or sets the entrypoint address of the portable executable file.
         /// </summary>
-        uint Entrypoint { get; set; }
+        Offset Entrypoint { get; set; }
         /// <summary>
         /// Gets the header size of the portable executable file.
         /// </summary>
@@ -46,10 +46,6 @@ namespace TUP.AsmResolver
         /// Gets the virtual base offset of the data section of the portable executable file.
         /// </summary>
         uint BaseOfData { get; }
-        /// <summary>
-        /// Gets the file offset of the portable executable file.
-        /// </summary>
-        uint FileOffset { get; }
 
         /// <summary>
         /// Gets the sub system representation the portable executable file runs in.

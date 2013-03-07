@@ -28,13 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openWithParametersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rebuildToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +54,8 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
-            this.rebuildToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.disassembleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.disassemblerControl1 = new AsmResolver.DisassemblerControl();
             this.hexBoxControl1 = new AsmResolver.HexBoxControl();
             this.tablesControl1 = new AsmResolver.TablesControl();
@@ -62,6 +66,7 @@
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -81,6 +86,7 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newToolStripMenuItem,
             this.openToolStripMenuItem,
+            this.openWithParametersToolStripMenuItem,
             this.toolStripSeparator,
             this.saveToolStripMenuItem,
             this.rebuildToolStripMenuItem,
@@ -97,7 +103,7 @@
             this.newToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.newToolStripMenuItem.Text = "&New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
@@ -107,14 +113,21 @@
             this.openToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            // 
+            // openWithParametersToolStripMenuItem
+            // 
+            this.openWithParametersToolStripMenuItem.Name = "openWithParametersToolStripMenuItem";
+            this.openWithParametersToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.openWithParametersToolStripMenuItem.Text = "Open with Parameters";
+            this.openWithParametersToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(175, 6);
+            this.toolStripSeparator.Size = new System.Drawing.Size(188, 6);
             // 
             // saveToolStripMenuItem
             // 
@@ -122,19 +135,26 @@
             this.saveToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            // 
+            // rebuildToolStripMenuItem
+            // 
+            this.rebuildToolStripMenuItem.Name = "rebuildToolStripMenuItem";
+            this.rebuildToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.rebuildToolStripMenuItem.Text = "Rebuild (Pre-Alpha)";
+            this.rebuildToolStripMenuItem.Click += new System.EventHandler(this.rebuildToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(175, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(188, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -258,6 +278,7 @@
             // treeView1
             // 
             this.treeView1.AllowDrop = true;
+            this.treeView1.ContextMenuStrip = this.contextMenuStrip1;
             this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeView1.Location = new System.Drawing.Point(0, 0);
             this.treeView1.Name = "treeView1";
@@ -276,12 +297,19 @@
             this.propertyGrid1.TabIndex = 0;
             this.propertyGrid1.Visible = false;
             // 
-            // rebuildToolStripMenuItem
+            // contextMenuStrip1
             // 
-            this.rebuildToolStripMenuItem.Name = "rebuildToolStripMenuItem";
-            this.rebuildToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
-            this.rebuildToolStripMenuItem.Text = "Rebuild (Pre-Alpha)";
-            this.rebuildToolStripMenuItem.Click += new System.EventHandler(this.rebuildToolStripMenuItem_Click);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.disassembleToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(140, 26);
+            // 
+            // disassembleToolStripMenuItem
+            // 
+            this.disassembleToolStripMenuItem.Name = "disassembleToolStripMenuItem";
+            this.disassembleToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.disassembleToolStripMenuItem.Text = "Disassemble";
+            this.disassembleToolStripMenuItem.Click += new System.EventHandler(this.disassembleToolStripMenuItem_Click);
             // 
             // disassemblerControl1
             // 
@@ -339,6 +367,7 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -373,6 +402,9 @@
         private HexBoxControl hexBoxControl1;
         private DisassemblerControl disassemblerControl1;
         private System.Windows.Forms.ToolStripMenuItem rebuildToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openWithParametersToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem disassembleToolStripMenuItem;
     }
 }
 

@@ -95,7 +95,7 @@ namespace TUP.AsmResolver.PE.Writers
         internal void WriteTablesHeapHeader()
         {
             stream.Seek(0, SeekOrigin.Begin);
-            ASMGlobals.WriteStructureToWriter<Structures.METADATA_TABLE_HEADER>(writer, tablesHeap.header);
+            ASMGlobals.WriteStructureToWriter(writer, tablesHeap.header);
         }
 
         internal void WriteMetaDataRows()

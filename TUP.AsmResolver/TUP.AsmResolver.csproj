@@ -72,6 +72,7 @@
     <Compile Include="NET\Specialized\MSIL\MSILAssembler.cs" />
     <Compile Include="NET\Specialized\ParamPtr.cs" />
     <Compile Include="OffsetConverter.cs" />
+    <Compile Include="PE\Writers\ICalculationTask.cs" />
     <Compile Include="PE\Writers\ImportExportWriter.cs" />
     <Compile Include="PE\Writers\IReconstructionTask.cs" />
     <Compile Include="PE\Writers\ManagedDataWriter.cs" />

@@ -27,14 +27,12 @@ namespace TUP.AsmResolver.PE.Readers
         {
             if (resourceDirectory.TargetOffset.FileOffset != 0)
             {
-                image.SetOffset(resourceDirectory.TargetOffset.FileOffset);
-                rootDirectory = ReadDirectory(null);
+                rootDirectory = ReadDirectory(resourceDirectory.TargetOffset.FileOffset, null);
             }
         }
 
-        internal ResourceDirectoryEntry ReadDirectoryEntry()
+        internal ResourceDirectoryEntry ReadDirectoryEntry(uint offset)
         {
-            uint offset = (uint)image.Position;
             var rawEntry = image.ReadStructure<Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY>();
             string customName = string.Empty;
             ResourceDirectoryEntry resourceEntry = new ResourceDirectoryEntry(image, offset, rawEntry, customName); 
@@ -42,24 +40,31 @@ namespace TUP.AsmResolver.PE.Readers
             return resourceEntry;
         }
 
-        internal ResourceDirectory ReadDirectory(ResourceDirectoryEntry entry)
+        internal ResourceDirectory ReadDirectory(uint offset, ResourceDirectoryEntry entry)
         {
-            uint offset = (uint)image.Position;
-            var rawDirectory = image.ReadStructure<Structures.IMAGE_RESOURCE_DIRECTORY>();
-            
-            return new ResourceDirectory(image, offset, entry, ReadChildEntries(rawDirectory.NumberOfIdEntries +  rawDirectory.NumberOfNamedEntries), rawDirectory);
+            if (image.TrySetOffset(offset))
+            {
+                var rawDirectory = image.ReadStructure<Structures.IMAGE_RESOURCE_DIRECTORY>();
+
+                return new ResourceDirectory(image, offset, this, entry, rawDirectory);
+            }
+            return null;
         }
-        internal ResourceDirectoryEntry[] ReadChildEntries(int count)
+        internal ResourceDirectoryEntry[] ReadChildEntries(uint offset, int count)
         {
-            ResourceDirectoryEntry[] entries = ConstructChildEntries(count);
-            FillChildEntries(ref entries);
-            return entries;
+            if (image.TrySetOffset(offset))
+            {
+                ResourceDirectoryEntry[] entries = ConstructChildEntries(count);
+                FillChildEntries(ref entries);
+                return entries;
+            }
+            return null;
         }
         internal ResourceDirectoryEntry[] ConstructChildEntries(int count)
         {
             ResourceDirectoryEntry[] entries = new ResourceDirectoryEntry[count];
             for (int i = 0; i < count; i++)
-                entries[i] = ReadDirectoryEntry();
+                entries[i] = ReadDirectoryEntry((uint)image.Position);
             return entries;
         }
         internal void FillChildEntries(ref ResourceDirectoryEntry[] entries)
@@ -69,19 +74,16 @@ namespace TUP.AsmResolver.PE.Readers
 
                 if (!entries[i].IsEntryToData)
                 {
-                    image.SetOffset(resourceDirectory.TargetOffset.FileOffset + entries[i].OffsetToData - 0x80000000);
-                    entries[i].Directory = ReadDirectory(entries[i]);
+                    entries[i].Directory = ReadDirectory(resourceDirectory.TargetOffset.FileOffset + entries[i].OffsetToData - 0x80000000, entries[i]);
                 }
                 else
                 {
-                    image.SetOffset(resourceDirectory.TargetOffset.FileOffset + entries[i].OffsetToData);
-                    entries[i].DataEntry = ReadDataEntry(entries[i]);
+                    entries[i].DataEntry = ReadDataEntry(resourceDirectory.TargetOffset.FileOffset + entries[i].OffsetToData, entries[i]);
                 }
             }
         }
-        internal ResourceDataEntry ReadDataEntry(ResourceDirectoryEntry entry)
+        internal ResourceDataEntry ReadDataEntry(uint offset, ResourceDirectoryEntry entry)
         {
-            uint offset = (uint)image.Position;
             var rawDataEntry = image.ReadStructure<Structures.IMAGE_RESOURCE_DATA_ENTRY>();
             return new ResourceDataEntry(image, offset, entry, rawDataEntry);
         }

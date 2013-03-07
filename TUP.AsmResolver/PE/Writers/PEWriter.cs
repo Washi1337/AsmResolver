@@ -37,6 +37,10 @@ namespace TUP.AsmResolver.PE.Writers
         internal Stream OutputStream { get; private set; }
         internal BinaryWriter BinWriter { get; private set; }
 
+        internal IWriterTask GetTask(Type type)
+        {
+            return Tasks.First(t => t.GetType() == type);
+        }
 
         internal void WriteExecutable(Stream outputStream)
         {
@@ -64,7 +68,7 @@ namespace TUP.AsmResolver.PE.Writers
 
         internal void WriteStructure<T>(T structure) where T : struct
         {
-            ASMGlobals.WriteStructureToWriter<T>(BinWriter, structure);
+            ASMGlobals.WriteStructureToWriter(BinWriter, structure);
         }
         internal void WritePaddingZeros(uint endoffset)
         {

@@ -75,6 +75,12 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyGridHexConverters.cs" />
+    <Compile Include="ReadingParameterDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReadingParameterDlg.Designer.cs">
+      <DependentUpon>ReadingParameterDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="ResourceControl.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -102,6 +108,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="ReadingParameterDlg.resx">
+      <DependentUpon>ReadingParameterDlg.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

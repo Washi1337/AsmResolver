@@ -40,9 +40,14 @@ namespace TUP.AsmResolver.NET.Specialized
             get { return netheader != null; }
         }
 
+        public bool HasSavedMetaDataRow
+        {
+            get { return HasImage && metadatarow != null; }
+        }
+
         public void ApplyChanges()
         {
-            if (HasImage && metadatarow.offset != 0)
+            if (HasSavedMetaDataRow && metadatarow.offset != 0)
             {
                 byte[] generatedBytes = metadatarow.GenerateBytes();
                 netheader.ParentAssembly.peImage.Write((int)metadatarow.offset, generatedBytes);

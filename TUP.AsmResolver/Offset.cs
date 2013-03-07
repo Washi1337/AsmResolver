@@ -126,21 +126,24 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public override string ToString()
         {
-            return ToString(true);
+            return ToString("o");
         }
         /// <summary>
         /// Returns a string representation of the offset value.
         /// </summary>
-        /// <param name="virtualString">A boolean indicating that the offset will be returned as a virtual offset.</param>
         /// <returns></returns>
-        public string ToString(bool virtualString)
+        public string ToString(string format)
         {
             ulong returningOffset;
 
-            if (virtualString)
+            if (format == "v")
                 returningOffset = Va;
-            else
+            else if (format == "r")
+                returningOffset = Rva;
+            else if (format == "o")
                 returningOffset = FileOffset;
+            else
+                throw new ArgumentException("Format can be either v (va), r (rva), or o (offset).");
 
             switch (OffsetType)
             {

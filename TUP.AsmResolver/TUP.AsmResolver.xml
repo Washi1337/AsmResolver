@@ -267,11 +267,10 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.Offset.ToString(System.Boolean)">
+        <member name="M:TUP.AsmResolver.Offset.ToString(System.String)">
             <summary>
             Returns a string representation of the offset value.
             </summary>
-            <param name="virtualString">A boolean indicating that the offset will be returned as a virtual offset.</param>
             <returns></returns>
         </member>
         <member name="M:TUP.AsmResolver.Offset.ToInstruction(TUP.AsmResolver.Win32Assembly)">
@@ -1367,7 +1366,7 @@
         </member>
         <member name="P:TUP.AsmResolver.IOptionalHeader.Entrypoint">
             <summary>
-            Gets or setsthe entrypoint address of the portable executable file.
+            Gets or sets the entrypoint address of the portable executable file.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.IOptionalHeader.HeaderSize">
@@ -1393,11 +1392,6 @@
         <member name="P:TUP.AsmResolver.IOptionalHeader.BaseOfData">
             <summary>
             Gets the virtual base offset of the data section of the portable executable file.
-            </summary>
-        </member>
-        <member name="P:TUP.AsmResolver.IOptionalHeader.FileOffset">
-            <summary>
-            Gets the file offset of the portable executable file.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.IOptionalHeader.SubSystem">
@@ -1649,11 +1643,6 @@
             Gets the base offset of the data section of the portable executable file.
             </summary>
         </member>
-        <member name="P:TUP.AsmResolver.OptionalHeader32.FileOffset">
-            <summary>
-            Gets the file offset of the portable executable file.
-            </summary>
-        </member>
         <member name="P:TUP.AsmResolver.OptionalHeader32.FileAlignment">
             <summary>
             Gets the file alignment of the portable executable file.
@@ -1713,7 +1702,7 @@
         </member>
         <member name="P:TUP.AsmResolver.OptionalHeader64.Entrypoint">
             <summary>
-            Gets the entrypoint address of the portable executable file.
+            Gets or sets the entrypoint address of the portable executable file.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.OptionalHeader64.HeaderSize">
@@ -1739,11 +1728,6 @@
         <member name="P:TUP.AsmResolver.OptionalHeader64.BaseOfData">
             <summary>
             Gets the base offset of the data section of the portable executable file.
-            </summary>
-        </member>
-        <member name="P:TUP.AsmResolver.OptionalHeader64.FileOffset">
-            <summary>
-            Gets the file offset of the portable executable file.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.OptionalHeader64.FileAlignment">

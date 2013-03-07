@@ -36,6 +36,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public ulong RvaToVa(uint rva)
         {
+            if (rva == 0)
+                return 0;
             return rva + TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase;
         }
         /// <summary>
@@ -45,6 +47,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public uint VaToRva(ulong va)
         {
+            if (va == 0)
+                return 0;
             return (uint)(va - TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase);
         }
         /// <summary>
@@ -54,6 +58,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public uint RvaToFileOffset(uint rva)
         {
+            if (rva == 0)
+                return 0;
             return rva - TargetSection.RVA + TargetSection.RawOffset;
         }        
         /// <summary>
@@ -63,6 +69,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public uint FileOffsetToRva(uint fileoffset)
         {
+            if (fileoffset == 0)
+                return 0;
             return fileoffset - TargetSection.RawOffset + TargetSection.RVA;
         }
         /// <summary>
@@ -72,6 +80,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public ulong FileOffsetToVa(uint fileoffset)
         {
+            if (fileoffset == 0)
+                return 0;
             return fileoffset - TargetSection.RawOffset + TargetSection.RVA + TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase;
         }
         /// <summary>
@@ -81,6 +91,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public uint VaToFileOffset(ulong va)
         {
+            if (va == 0)
+                return 0;
             return ((uint)(va - TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase)) - TargetSection.RVA + TargetSection.RawOffset;
         }
     }

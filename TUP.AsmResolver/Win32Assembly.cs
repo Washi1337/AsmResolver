@@ -126,7 +126,9 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return importExportTableReader.Imports;
+                if (importExportTableReader != null)
+                    return importExportTableReader.Imports;
+                return new List<LibraryReference>();
             }
         }
 
@@ -137,7 +139,9 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return importExportTableReader.Exports;
+                if (importExportTableReader != null)
+                    return importExportTableReader.Exports;
+                return new List<ExportMethod>();
             }
         }
 
@@ -173,7 +177,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public ResourceDirectory RootResourceDirectory
         {
-            get { return resourcesReader.rootDirectory; }
+            get
+            {
+                if (resourcesReader != null)
+                    return resourcesReader.rootDirectory;
+                return null;
+            }
         }
         
         /// <summary>

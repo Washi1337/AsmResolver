@@ -197,11 +197,16 @@ namespace TUP.AsmResolver.PE
             byte lastByte = 0;
             do
             {
+                if (stream.Position >= stream.Length)
+                    break;
                 lastByte = ReadByte();
 
             } while (lastByte != stopByte);
 
             int endoffset = (int)Position - 1;
+
+            if (endoffset <= offset)
+                return string.Empty;
 
             SetOffset(offset);
 
@@ -231,6 +236,20 @@ namespace TUP.AsmResolver.PE
             stream.Seek(offset, SeekOrigin.Begin);
         }
 
+        public bool TrySetOffset(long offset)
+        {
+            try
+            {
+                if (offset < 0 || offset > stream.Length)
+                    return false;
+                stream.Seek(offset, SeekOrigin.Begin);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
 
         #endregion

@@ -83,8 +83,10 @@ namespace TUP.AsmResolver.PE.Readers
                 image.SetOffset(importDataDir.TargetOffset.FileOffset);
                 
                 LibraryReference libraryRef = null;
+                
                 while (true)
                 {
+
                     libraryRef = ReadLibraryImport();
 
                     if (libraryRef == null)
@@ -95,7 +97,7 @@ namespace TUP.AsmResolver.PE.Readers
                             method.ParentLibrary = libraryRef;
                         imports.Add(libraryRef);
                     }
-                } 
+                }
             }
 
         }
@@ -105,7 +107,7 @@ namespace TUP.AsmResolver.PE.Readers
             uint importDirOffset = (uint)image.Position;
             var rawImportDir = image.ReadStructure<Structures.IMAGE_IMPORT_DESCRIPTOR>();
 
-            if (rawImportDir.OriginalFirstThunk == 0)
+            if (ASMGlobals.IsEmptyStructure(rawImportDir)) 
                 return null;
 
             string libName = ReadLibraryName(rawImportDir);
@@ -134,6 +136,7 @@ namespace TUP.AsmResolver.PE.Readers
             int currentIndex = 0;
             uint baseoffset = offsetConverter.RvaToFileOffset(rawImportDir.OriginalFirstThunk);
             uint baseft= offsetConverter.RvaToFileOffset(rawImportDir.FirstThunk);
+
             while (true)
             {
                 
@@ -141,11 +144,11 @@ namespace TUP.AsmResolver.PE.Readers
                 uint ftOffset = 0;
 
                 ulong ofunction = ReadFunctionValue(baseoffset, currentIndex, out methodOffset);
+                ulong ft = ReadFunctionValue(baseft, currentIndex, out ftOffset);
 
-                if (ofunction == 0)
+                if (ofunction == 0 && ft == 0)
                     break;
 
-                ulong ft = ReadFunctionValue(baseft, currentIndex, out ftOffset);
                 ushort hint = 0;
                 string name = ReadFunctionName(ofunction, out hint);
 
@@ -161,6 +164,12 @@ namespace TUP.AsmResolver.PE.Readers
 
         private ulong ReadFunctionValue(uint baseOffset, int currentIndex, out uint offset)
         {
+            if (baseOffset == 0)
+            {
+                offset = 0;
+                return 0;
+            }
+
             if (!header.OptionalHeader.Is32Bit)
             {
                 image.SetOffset(baseOffset + (currentIndex * sizeof(ulong)));
@@ -189,9 +198,13 @@ namespace TUP.AsmResolver.PE.Readers
             }
             else
             {
-                image.SetOffset(offsetConverter.RvaToFileOffset((uint)ofunction));
-                hint = image.reader.ReadUInt16();
-                return image.ReadZeroTerminatedString((uint)image.Position);
+                if (ofunction > 0 && image.TrySetOffset(offsetConverter.RvaToFileOffset((uint)ofunction)))
+                {
+                    hint = image.reader.ReadUInt16();
+                    return image.ReadZeroTerminatedString((uint)image.Position);
+                }
+                hint = 0;
+                return string.Empty;
             }
         }
     

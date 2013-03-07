@@ -183,7 +183,7 @@ namespace TUP.AsmResolver.ASM
         {
             //if (code.Name.ToLower().StartsWith("add %operand%"))
                 //System.Diagnostics.Debugger.Break();
-            return Offset.ToString(false) + ": " + ToAsmString(false);
+            return Offset.ToString("o") + ": " + ToAsmString(false);
         }
 
         private void GenerateBytes()

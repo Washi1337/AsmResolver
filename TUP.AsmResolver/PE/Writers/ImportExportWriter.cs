@@ -6,7 +6,7 @@ using System.IO;
 
 namespace TUP.AsmResolver.PE.Writers
 {
-    internal unsafe class ImportExportWriter : IWriterTask , IReconstructionTask
+    internal unsafe class ImportExportWriter : IWriterTask , IReconstructionTask, ICalculationTask
     {
         DataDirectory exportDirectory;
         DataDirectory importDirectory;
@@ -29,6 +29,18 @@ namespace TUP.AsmResolver.PE.Writers
         }
 
 
+        public uint NewSize
+        {
+            get;
+            private set;
+        }
+
+        public void CalculateOffsetsAndSizes()
+        {
+            importLibraries = Writer.OriginalAssembly.LibraryImports.ToArray();
+            NewSize = (uint)(sizeof(Structures.IMAGE_IMPORT_DESCRIPTOR) * (importLibraries.Length + 1)); // descriptor count + clear terminator.
+            importDirectory.rawDataDir.Size = NewSize;
+        }
 
         public void Reconstruct()
         {
@@ -42,7 +54,7 @@ namespace TUP.AsmResolver.PE.Writers
         {
             // TODO...
         }
-
+        
         private void RebuildImports()
         {   
             // Might not working correctly since I haven't tested it that much.
@@ -69,8 +81,8 @@ namespace TUP.AsmResolver.PE.Writers
              *                                  correct starting offset.
              */
 
-            importLibraries = Writer.OriginalAssembly.LibraryImports.ToArray();
-            uint sizeOfLibDescriptors = (uint)(sizeof(Structures.IMAGE_IMPORT_DESCRIPTOR) * (importLibraries.Length + 1)); // descriptor count + clear terminator.
+
+            uint sizeOfLibDescriptors = NewSize;
 
             uint[] libraryNameOffsets;
             uint sizeOfLibNames = CalculateLibraryNamesSize(out libraryNameOffsets);

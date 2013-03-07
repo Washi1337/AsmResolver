@@ -105,7 +105,7 @@ namespace AsmResolver
         private void addMemberItem_Click(object sender, EventArgs e)
         {
             MethodDefinition methodDef = new MethodDefinition();
-            methodDef.MetaDataRow = new MetaDataRow(new object[] { (uint)0, (uint)0, (uint)0, (uint)currentTablesHeap.NETHeader.StringsHeap.GetStringOffset("BITCH"), (uint)0, (uint)0 });
+            methodDef.MetaDataRow = new MetaDataRow(new object[] { (uint)0, (uint)0, (uint)0, (uint)currentTablesHeap.NETHeader.StringsHeap.GetStringOffset("test"), (uint)0, (uint)0 });
          
             methodDef.Attributes = MethodAttributes.Public | MethodAttributes.Static;
             methodDef.ImplementationAttributes = MethodImplAttributes.IL | MethodImplAttributes.Managed;

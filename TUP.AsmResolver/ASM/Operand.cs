@@ -128,7 +128,17 @@ namespace TUP.AsmResolver.ASM
             if (Value is ulong)
                 return ((ulong)Value).ToString("X16");
             if (Value is Offset)
-                return ((Offset)Value).ToString(virtualString);
+            {
+                Offset offset = ((Offset)Value);
+                string format = "v";
+                if (!virtualString){
+                    if (offset.OffsetType == OperandType.Normal)
+                        format = "o";
+                    else
+                        format = "r";
+                }
+                return offset.ToString(format);
+            }
             if (Value is x86Instruction)
                 return ((x86Instruction)Value).ToAsmString(virtualString);
             return Value.ToString();

@@ -12,7 +12,8 @@ namespace TUP.AsmResolver
     /// Represents a 32-bit optional header of a <see cref="TUP.AsmResolver.Win32Assembly"/>.
     /// </summary>
     public class OptionalHeader32 : IOptionalHeader, IHeader
-    {        
+    {
+        
         internal OptionalHeader32()
         {
             
@@ -33,6 +34,7 @@ namespace TUP.AsmResolver
 
         internal Win32Assembly assembly;
         internal PeHeaderReader header;
+        Offset entrypoint;
 
         /// <summary>
         /// Gets the linker version
@@ -74,17 +76,20 @@ namespace TUP.AsmResolver
         /// <summary>
         /// Gets or sets the entrypoint address of the portable executable file.
         /// </summary>
-        public uint Entrypoint
+        public Offset Entrypoint
         {
             get
             {
-                 return header.optionalHeader32.AddressOfEntryPoint;
+                if (entrypoint == null)
+                    entrypoint = Offset.FromRva(header.optionalHeader32.AddressOfEntryPoint, assembly);
+                return entrypoint;
             }
             set
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][6];
-                header.optionalHeader32.AddressOfEntryPoint = value;
-                assembly.peImage.Write(targetoffset, value);
+                header.optionalHeader32.AddressOfEntryPoint = value.Rva;
+                entrypoint = value;
+                assembly.peImage.Write(targetoffset, value.Rva);
             }
         }
 
@@ -145,31 +150,6 @@ namespace TUP.AsmResolver
             {
                     return header.optionalHeader32.BaseOfData;
                 
-            }
-        }
-
-        /// <summary>
-        /// Gets the file offset of the portable executable file.
-        /// </summary>
-        public uint FileOffset
-        {
-            get
-            {
-                if (Entrypoint == 0)
-                    return 0;
-                Section targetsection = null;
-
-                foreach (Section section in assembly.ntHeader.Sections)
-                {
-                    if (section.ContainsRva(Entrypoint))
-                    {
-                        targetsection = section;
-                        break;
-                    }
-                }
-               //  = Section.GetSectionByVirtualOffset(header.sections.ToArray(), x);
-                
-                return Entrypoint - targetsection.RVA  + targetsection.RawOffset;
             }
         }
 

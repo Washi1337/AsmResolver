@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using TUP.AsmResolver.PE;
+using TUP.AsmResolver.PE.Readers;
 namespace TUP.AsmResolver
 {
     /// <summary>
@@ -13,14 +15,18 @@ namespace TUP.AsmResolver
         PeImage image;
         internal Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory;
         uint offset;
-        internal ResourceDirectory(PeImage image, uint offset, ResourceDirectoryEntry parentEntry, ResourceDirectoryEntry[] childEntries, PE.Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory)
+        ResourceDirectoryEntry[] childEntries;
+        ResourcesReader reader;
+
+        internal ResourceDirectory(PeImage image, uint offset, ResourcesReader reader, ResourceDirectoryEntry parentEntry, PE.Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory)
         {
             this.image = image;
             this.ParentEntry = parentEntry;
-            this.ChildEntries = childEntries;
             this.offset = offset;
             this.rawDirectory = rawDirectory;
+            this.reader = reader;
         }
+
 
         /// <summary>
         /// Gets the parent directory entry of the directory.
@@ -35,8 +41,17 @@ namespace TUP.AsmResolver
         /// </summary>
         public ResourceDirectoryEntry[] ChildEntries
         {
-            get;
-            private set;
+            get
+            {
+                if (childEntries == null)
+                {
+                    childEntries = reader.ReadChildEntries(offset + (uint)Marshal.SizeOf(rawDirectory), rawDirectory.NumberOfIdEntries + rawDirectory.NumberOfNamedEntries);
+                    if (childEntries == null)
+                        childEntries = new ResourceDirectoryEntry[0];
+                }
+                
+                return childEntries;
+            }
         }
 
         /// <summary>

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.PE.Writers
 {
-    internal class PEHeaderWriter : IWriterTask
+    internal class PEHeaderWriter : IWriterTask , ICalculationTask
     {
         internal PEHeaderWriter(PEWriter writer)
         {
@@ -18,11 +18,21 @@ namespace TUP.AsmResolver.PE.Writers
             private set;
         }
 
-        public void RunProcedure()
+        public uint NewSize
+        {
+            get;
+            private set;
+        }
+
+        public void CalculateOffsetsAndSizes()
         {
             if (Writer.OriginalAssembly.NTHeader.IsManagedAssembly)
                 ReorderDataDirectories(Writer.OriginalAssembly.NETHeader.DataDirectories);
             ReorderDataDirectories(Writer.OriginalAssembly.NTHeader.OptionalHeader.DataDirectories);
+        }
+
+        public void RunProcedure()
+        {
 
             WriteMZHeader();
             WriteNTHeaders();
