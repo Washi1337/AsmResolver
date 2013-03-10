@@ -39,18 +39,23 @@ namespace TUP.AsmResolver
         /// <summary>
         /// Gets the amount of sections that is available in the PE.
         /// </summary>
-        public uint AmountOfSections
+        public ushort AmountOfSections
         {
             get
             {
                 return header.fileHeader.NumberOfSections;
+            }
+            set
+            {
+                header.fileHeader.NumberOfSections = value;
+                assembly.Image.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][1], value);
             }
         }
 
         /// <summary>
         /// Gets the compiling date of the PE.
         /// </summary>
-        public DateTime CompilingDate
+        public DateTime TimeStampDate
         {
             get
             {
@@ -61,11 +66,16 @@ namespace TUP.AsmResolver
         /// <summary>
         /// Gets the size of the Optional Header.
         /// </summary>
-        public uint OptionalHeaderSize
+        public ushort OptionalHeaderSize
         {
             get
             {
                 return header.fileHeader.SizeOfOptionalHeader;
+            }
+            set
+            {
+                header.fileHeader.SizeOfOptionalHeader = value;
+                assembly.Image.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][5], value);
             }
         }
 

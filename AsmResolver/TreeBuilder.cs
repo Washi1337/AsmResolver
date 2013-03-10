@@ -34,7 +34,7 @@ namespace AsmResolver
 
                 CreateNode(".NET Directory", assembly.NETHeader, (netHeader)=> { return assembly.NTHeader.IsManagedAssembly; }).AddSubNodes(new TreeNode[] {
                     CreateNode("MetaData Header", assembly.NETHeader.MetaDataHeader), 
-                    CreateArrayNode("MetaData Streams", assembly.NETHeader.MetaDataStreams, (obj) => { return ((MetaDataStream)obj).Name; }).AddForEachNode((tag) => { return (tag.Object is TablesHeap ? tag.Object : null); } , (obj) => { return "Tables";}, TreeNodeType.TablesTree)
+                    CreateArrayNode("MetaData Streams", assembly.NETHeader.MetaDataStreams.ToArray(), (obj) => { return ((MetaDataStream)obj).Name; }).AddForEachNode((tag) => { return (tag.Object is TablesHeap ? tag.Object : null); } , (obj) => { return "Tables";}, TreeNodeType.TablesTree)
 
                 }), 
                 CreateNode("Hex Editor", new DynamicFileByteProvider(assembly.Image.Stream), TreeNodeType.HexBox),

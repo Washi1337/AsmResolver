@@ -5,7 +5,7 @@ using System.Text;
 using TUP.AsmResolver.NET;
 namespace TUP.AsmResolver.PE.Writers
 {
-    internal class ManagedDataWriter : IWriterTask , IReconstructionTask
+    internal class ManagedDataWriter : IWriterTask , IReconstructionTask , ICalculationTask
     {
         DataDirectory clrDirectory;
         DataDirectory metadataDirectory;
@@ -21,7 +21,13 @@ namespace TUP.AsmResolver.PE.Writers
             private set;
         }
 
-        public void Reconstruct()
+        public uint NewSize
+        {
+            get;
+            private set;
+        }
+
+        public void CalculateOffsetsAndSizes()
         {
             if (Writer.OriginalAssembly.ntHeader.IsManagedAssembly)
             {
@@ -47,7 +53,12 @@ namespace TUP.AsmResolver.PE.Writers
                     Writer.OriginalAssembly.NETHeader.reader.netHeader.MetaData.Size += stream.StreamSize;
                     dataDir.rawDataDir.Size += stream.StreamSize;
                 }
+                NewSize = dataDir.rawDataDir.Size;
             }
+        }
+
+        public void Reconstruct()
+        {
             
         }
 

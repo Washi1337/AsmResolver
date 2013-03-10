@@ -14,21 +14,13 @@ namespace TUP.AsmResolver
     /// </summary>
     public class Section
     {
+        Structures.IMAGE_SECTION_HEADER rawHeader;
+
         internal Section(Win32Assembly assembly,
             uint headeroffset, 
-            string name,
-            uint roffset,
-            uint rsize,
-            uint voffset,
-            uint vsize,
-            uint flags)
+            Structures.IMAGE_SECTION_HEADER rawHeader)
         {
-            this.name = name;
-            this.roffset = roffset;
-            this.rsize = rsize;
-            this.voffset = voffset;
-            this.vsize = vsize;
-            this.flags = flags;
+            this.rawHeader = rawHeader;
             this.headeroffset = headeroffset;
             this.assembly = assembly;
         }
@@ -39,13 +31,6 @@ namespace TUP.AsmResolver
         /// </summary>
         public const int MaxSectionNameLength = 8;
 
-        
-        string name;
-        uint roffset;
-        uint rsize;
-        uint voffset;
-        uint vsize;
-        uint flags;
         uint headeroffset;
         Win32Assembly assembly;
         #endregion
@@ -67,12 +52,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public SectionFlags Flags
         {
-            get { return (SectionFlags)flags; }
+            get { return (SectionFlags)rawHeader.Characteristics; }
             set
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][9];
-                flags = (uint)value;
-                assembly.peImage.Write(targetoffset, flags);
+                rawHeader.Characteristics = (uint)value;
+                assembly.peImage.Write(targetoffset, rawHeader.Characteristics);
             }
         }
         /// <summary>
@@ -80,7 +65,7 @@ namespace TUP.AsmResolver
         /// </summary>
         public string Name
         {
-            get { return name; }
+            get { return rawHeader.Name; }
             set
             {
                 if (value.Length > MaxSectionNameLength)
@@ -96,7 +81,7 @@ namespace TUP.AsmResolver
                 assembly.peImage.Write(targetoffset, bytes.ToArray());
                 // assembly.contents.RemoveRange((int)headeroffset, MaxSectionNameLength);
                 // assembly.contents.InsertRange((int)headeroffset, bytes);
-                name = value;
+                rawHeader.Name = value;
             }
         }
         /// <summary>
@@ -104,28 +89,48 @@ namespace TUP.AsmResolver
         /// </summary>
         public uint RawOffset
         {
-            get { return roffset; }
+            get { return rawHeader.PointerToRawData; }
+            set
+            {
+                rawHeader.PointerToRawData = value;
+                assembly.peImage.Write((int)headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][4], value);
+            }
         }
         /// <summary>
         /// Gets the raw size of the section.
         /// </summary>
         public uint RawSize
         {
-            get { return rsize; }
+            get { return rawHeader.SizeOfRawData; }
+            set
+            {
+                rawHeader.SizeOfRawData = value;
+                assembly.peImage.Write((int)headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][3], value);
+            }
         }
         /// <summary>
         /// Gets the virtual offset of the section.
         /// </summary>
         public uint RVA
         {
-            get { return voffset; }
+            get { return rawHeader.VirtualAddress; }
+            set
+            {
+                rawHeader.VirtualAddress = value;
+                assembly.peImage.Write((int)headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][2], value);
+            }
         }
         /// <summary>
         /// Gets the virtual size of the section.
         /// </summary>
         public uint VirtualSize
         {
-            get { return vsize; }
+            get { return rawHeader.VirtualSize; }
+            set
+            {
+                rawHeader.VirtualSize = value;
+                assembly.peImage.Write((int)headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][1], value);
+            }
         }
         /// <summary>
         /// Gets the value indicating whether the section contents can be executed in memory.
@@ -258,8 +263,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public bool ContainsRva(uint Rva)
         {
-            int endoffset = (int)( this.voffset + this.vsize);
-            return ((Rva >= voffset) & (Rva <= endoffset));
+            int endoffset = (int)( this.RVA + this.VirtualSize);
+            return ((Rva >= this.RVA) & (Rva <= endoffset));
         }
         /// <summary>
         /// Returns true if the specified raw offset is located in the current section.
@@ -268,7 +273,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public bool ContainsRawOffset(uint rawoffset)
         {
-            return ((rawoffset >= this.roffset) & (rawoffset < (this.roffset + this.rsize)));
+            return ((rawoffset >= this.RawOffset) & (rawoffset < (this.RawOffset + this.RawSize)));
         }
 
         

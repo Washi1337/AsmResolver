@@ -130,7 +130,7 @@ namespace TUP.AsmResolver.PE.Readers
             {
                 uint byteoffset = (uint)image.stream.Position;
                 Structures.IMAGE_SECTION_HEADER section = image.ReadStructure<Structures.IMAGE_SECTION_HEADER>();
-                Section s = new Section(assembly, byteoffset, section.Name, section.PointerToRawData, section.SizeOfRawData, section.VirtualAddress, section.VirtualSize, section.Characteristics);
+                Section s = new Section(assembly, byteoffset, section);
                 sections.Add(s);
             }
         }

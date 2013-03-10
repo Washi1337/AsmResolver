@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TUP.AsmResolver.PE;
 
 namespace TUP.AsmResolver
 {
@@ -21,7 +22,7 @@ namespace TUP.AsmResolver
         }
         public OffsetConverter(Win32Assembly assembly)
         {
-            TargetSection = new Section(assembly, 0, null, 0, 0, 0, 0, 0);
+            TargetSection = new Section(assembly, 0, default(Structures.IMAGE_SECTION_HEADER));
         }
 
         /// <summary>

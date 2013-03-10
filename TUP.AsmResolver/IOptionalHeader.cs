@@ -13,15 +13,15 @@ namespace TUP.AsmResolver
         /// <summary>
         /// Gets the minium operating system version the portable executable requires.
         /// </summary>
-        Version MinimumOSVersion { get; }
+        Version MinimumOSVersion { get; set;  }
         /// <summary>
         /// Gets the minium sub system version the portable executable requires.
         /// </summary>
-        Version MinimumSubSystemVersion { get; }
+        Version MinimumSubSystemVersion { get; set; }
         /// <summary>
         /// Gets the linker version
         /// </summary>
-        Version LinkerVersion { get; }
+        Version LinkerVersion { get; set; }
         /// <summary>
         /// Gets or sets the entrypoint address of the portable executable file.
         /// </summary>
@@ -29,23 +29,23 @@ namespace TUP.AsmResolver
         /// <summary>
         /// Gets the header size of the portable executable file.
         /// </summary>
-        uint HeaderSize { get; }
+        uint HeaderSize { get; set; }
         /// <summary>
         /// Gets the image base (base offset) of the portable executable file. 
         /// </summary>
-        ulong ImageBase { get; }
+        ulong ImageBase { get; set; }
         /// <summary>
         /// Gets the virtual base offset of the code section of the portable executable file.
         /// </summary>
-        uint BaseOfCode { get; }
+        uint BaseOfCode { get; set; }
         /// <summary>
         /// Gets the size of the code section of the portable executable file.
         /// </summary>
-        uint SizeOfCode { get; }
+        uint SizeOfCode { get; set; }
         /// <summary>
         /// Gets the virtual base offset of the data section of the portable executable file.
         /// </summary>
-        uint BaseOfData { get; }
+        uint BaseOfData { get; set; }
 
         /// <summary>
         /// Gets the sub system representation the portable executable file runs in.

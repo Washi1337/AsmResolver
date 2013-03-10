@@ -15,6 +15,8 @@ namespace TUP.AsmResolver.PE.Writers
         MemoryStream stream;
         BinaryWriter writer;
 
+        StringsHeap newStringsHeap;
+
         internal NETTableReconstructor(TablesHeap tablesHeap)
         {
             this.tablesHeap = tablesHeap;
@@ -22,16 +24,24 @@ namespace TUP.AsmResolver.PE.Writers
             stream = new MemoryStream();
             writer = new BinaryWriter(stream);
             stream.Seek(0, SeekOrigin.Begin);
+
         }
 
 
         public void Reconstruct()
         {
+            newStringsHeap = new StringsHeap(netHeader, netHeader.StringsHeap.headeroffset, new Structures.METADATA_STREAM_HEADER(), "#Strings");
+            newStringsHeap.binWriter.Write((byte)0);
+
             RemoveEmptyTables();
             WriteMetaDataTablessHeaders();
             WriteMetaDataRows();
             UpdateHeapOffsetSizes();
             WriteTablesHeapHeader();
+
+            netHeader.ClearCache();
+            int stringsHeapIndex = netHeader.MetaDataStreams.FindIndex(s => s is StringsHeap);
+            netHeader.MetaDataStreams[stringsHeapIndex] = newStringsHeap;
 
             tablesHeap.MakeEmpty();
             tablesHeap.mainStream = stream;
@@ -263,7 +273,7 @@ namespace TUP.AsmResolver.PE.Writers
             object[] parts = new object[]
             {
                 (ushort)0,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(moduleDef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(moduleDef.Name)),
                 GetHeapOffset(netHeader.GuidHeap, netHeader.GuidHeap.GetGuidOffset(moduleDef.Mvid)),
                 GetHeapOffset(netHeader.GuidHeap, 0),
                 GetHeapOffset(netHeader.GuidHeap, 0),
@@ -277,8 +287,8 @@ namespace TUP.AsmResolver.PE.Writers
             object[] parts = new object[]
             {
                 GetCodedIndex(tablesHeap.ResolutionScope, typeRef.ResolutionScope),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(typeRef.Name)),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(typeRef.Namespace)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeRef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeRef.Namespace)),
             };
             typeRef.MetaDataRow = new MetaDataRow(parts);
             writer.Write(typeRef.MetaDataRow.GenerateBytes());
@@ -289,8 +299,8 @@ namespace TUP.AsmResolver.PE.Writers
             object[] parts = new object[]
             {
                 (uint)typeDef.Attributes,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(typeDef.Name)),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(typeDef.Namespace)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeDef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeDef.Namespace)),
                 GetCodedIndex(tablesHeap.TypeDefOrRef, typeDef.BaseType),
                 ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Field), typeDef.FieldList),
                 ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Method), typeDef.MethodList),
@@ -304,7 +314,7 @@ namespace TUP.AsmResolver.PE.Writers
             object[] parts = new object[]
             {
                 (ushort)fieldDef.Attributes,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(fieldDef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(fieldDef.Name)),
                 GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(fieldDef.metadatarow.parts[2])), // TODO: Serialize signatures.
 
             };
@@ -319,7 +329,7 @@ namespace TUP.AsmResolver.PE.Writers
                 (uint)methodDef.RVA,
                 (ushort)methodDef.ImplementationAttributes,
                 (ushort)methodDef.Attributes,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(methodDef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(methodDef.Name)),
                 GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(methodDef.metadatarow.parts[4])), // TODO: Serialize signatures.
                 ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Param), Convert.ToUInt32(methodDef.metadatarow.parts[5])),
             };
@@ -344,7 +354,7 @@ namespace TUP.AsmResolver.PE.Writers
             {
                 (ushort)paramDef.Attributes,
                 paramDef.Sequence,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(paramDef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(paramDef.Name)),
             };
             paramDef.MetaDataRow = new MetaDataRow(parts);
             writer.Write(paramDef.MetaDataRow.GenerateBytes());
@@ -366,7 +376,7 @@ namespace TUP.AsmResolver.PE.Writers
             object[] parts = new object[] 
             {
                 GetCodedIndex(tablesHeap.MemberRefParent, memberRef.DeclaringType),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(memberRef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(memberRef.Name)),
                 GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(memberRef.MetaDataRow.Parts[2])), // TODO: Serialize signatures.
             };
             memberRef.MetaDataRow = new MetaDataRow(parts);
@@ -470,7 +480,7 @@ namespace TUP.AsmResolver.PE.Writers
             object[] parts = new object[]
             {
                 (ushort)eventDef.Attributes,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(eventDef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(eventDef.Name)),
                 GetCodedIndex(tablesHeap.TypeDefOrRef, eventDef.EventType),
             };
             eventDef.MetaDataRow = new MetaDataRow(parts);
@@ -493,7 +503,7 @@ namespace TUP.AsmResolver.PE.Writers
             object[] parts = new object[]
             {
                 (ushort)propertyDef.Attributes,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(propertyDef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(propertyDef.Name)),
                 GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(propertyDef.MetaDataRow.parts[2])), // TODO: Serialize signatures.
             };
             propertyDef.MetaDataRow = new MetaDataRow(parts);
@@ -528,7 +538,7 @@ namespace TUP.AsmResolver.PE.Writers
         {
             object[] parts = new object[]
             {
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(moduleRef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(moduleRef.Name)),
             };
             moduleRef.MetaDataRow = new MetaDataRow(parts);
             writer.Write(moduleRef.MetaDataRow.GenerateBytes());
@@ -561,7 +571,7 @@ namespace TUP.AsmResolver.PE.Writers
             {
                 (ushort)implementation.Attributes,
                 GetCodedIndex(tablesHeap.MemberForwarded, implementation.Member),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(implementation.Entrypoint)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(implementation.Entrypoint)),
                 GetMemberIndex(implementation.ImportScope),
             };
             implementation.MetaDataRow = new MetaDataRow(parts);
@@ -590,8 +600,8 @@ namespace TUP.AsmResolver.PE.Writers
                 (ushort)asmDef.Version.Revision,
                 (uint)asmDef.Attributes,
                 GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmDef.MetaDataRow.parts[6])), // TODO: Serialize signatures.
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(asmDef.Name)),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(asmDef.Culture)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmDef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmDef.Culture)),
             };
             asmDef.MetaDataRow = new MetaDataRow(parts);
             writer.Write(asmDef.MetaDataRow.GenerateBytes());
@@ -607,8 +617,8 @@ namespace TUP.AsmResolver.PE.Writers
                 (ushort)asmRef.Version.Revision,
                 (uint)asmRef.Attributes,
                 GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmRef.MetaDataRow.parts[5])), // TODO: Serialize signatures.
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(asmRef.Name)),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(asmRef.Culture)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmRef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmRef.Culture)),
                 GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmRef.MetaDataRow.parts[8])), // TODO: Serialize signatures.
                 
             };
@@ -621,7 +631,7 @@ namespace TUP.AsmResolver.PE.Writers
             object[] parts = new object[]
             {
                 (uint)fileRef.Flags,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(fileRef.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(fileRef.Name)),
                 GetHeapOffset(netHeader.BlobHeap, fileRef.Hash), // TODO: Serialize signatures.
             };
             fileRef.MetaDataRow = new MetaDataRow(parts);
@@ -634,8 +644,8 @@ namespace TUP.AsmResolver.PE.Writers
             {
                 (uint)type.Attributes,
                 type.TypeID,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(type.TypeName)),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(type.TypeNamespace)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(type.TypeName)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(type.TypeNamespace)),
                 GetCodedIndex(tablesHeap.Implementation, type.Implementation),
             };
             type.MetaDataRow = new MetaDataRow(parts);
@@ -648,7 +658,7 @@ namespace TUP.AsmResolver.PE.Writers
             {
                 resource.Offset,
                 (uint)resource.Attributes,
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(resource.Name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(resource.Name)),
                 GetCodedIndex(tablesHeap.Implementation, resource.Implementation),
             };
             resource.MetaDataRow = new MetaDataRow(parts);
@@ -694,7 +704,7 @@ namespace TUP.AsmResolver.PE.Writers
                 genericParameter.Index,
                 (ushort)genericParameter.GenericAttributes,
                 GetCodedIndex(tablesHeap.TypeOrMethod, genericParameter.Owner),
-                GetHeapOffset(netHeader.StringsHeap, netHeader.StringsHeap.GetStringOffset(genericParameter.name)),
+                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(genericParameter.name)),
             };
             genericParameter.MetaDataRow = new MetaDataRow(parts);
             writer.Write(genericParameter.MetaDataRow.GenerateBytes());

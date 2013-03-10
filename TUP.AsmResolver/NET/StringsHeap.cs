@@ -120,7 +120,7 @@ namespace TUP.AsmResolver.NET
                 return readStrings.First(rs => rs.Value == value).Key;
 
             uint offset = (uint)mainStream.Length;
-            mainStream.Seek(0, SeekOrigin.End);
+            mainStream.Seek(offset, SeekOrigin.Begin);
             binWriter.Write(Encoding.UTF8.GetBytes(value)); // data
             binWriter.Write((byte)0); // terminator
 

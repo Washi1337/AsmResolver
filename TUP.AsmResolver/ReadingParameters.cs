@@ -11,8 +11,16 @@ namespace TUP.AsmResolver
     public class ReadingParameters
     {
         internal Win32Assembly assembly;
-        private bool onlyManaged;
-        private bool ignoreDataDirectoryAmount;
+        private bool onlyManaged, ignoreDataDirectoryAmount;
+
+        /// <summary>
+        /// Creates a new instance of the ReadingParameters, and sets the arguments to their default values.
+        /// </summary>
+        public ReadingParameters()
+        {
+            onlyManaged = false;
+            ignoreDataDirectoryAmount = false;
+        }
 
         /// <summary>
         /// Indicates that only managed data and the vital headers will be read from the assembly.
@@ -23,7 +31,7 @@ namespace TUP.AsmResolver
             set
             {
                 if (assembly != null)
-                    throw new InvalidOperationException("Cannot edit properties when reading arguments are already used.");
+                    ThrowInvalidOperation();
                 onlyManaged = value;
             }
         }
@@ -36,9 +44,14 @@ namespace TUP.AsmResolver
             set
             {
                 if (assembly != null)
-                    throw new InvalidOperationException("Cannot edit properties when reading arguments are already used.");
+                    ThrowInvalidOperation();
                 ignoreDataDirectoryAmount = value;
             }
+        }
+
+        private void ThrowInvalidOperation()
+        {
+            throw new InvalidOperationException("Cannot edit properties when reading arguments are already used.");
         }
     }
 }

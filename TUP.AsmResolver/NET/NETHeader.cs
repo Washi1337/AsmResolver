@@ -10,7 +10,7 @@ namespace TUP.AsmResolver.NET
     /// <summary>
     /// Represents a .NET header from an application. This header is only available if the assembly is written in a .NET language.
     /// </summary>
-    public class NETHeader : IHeader , IDisposable , IDataDirectoryProvider
+    public class NETHeader : IHeader , IDisposable , IDataDirectoryProvider, ICacheProvider
     {
         
         internal Win32Assembly assembly;
@@ -86,6 +86,7 @@ namespace TUP.AsmResolver.NET
         {
             get { return entryPointToken; }
         }
+
         /// <summary>
         /// Gets or sets the Flags of this .NET header.
         /// </summary>
@@ -99,6 +100,7 @@ namespace TUP.AsmResolver.NET
                 flags = (uint)value;
             }
         }
+
         /// <summary>
         /// Gets the header of the MetaData.
         /// </summary>
@@ -106,14 +108,14 @@ namespace TUP.AsmResolver.NET
         {
             get { return metadata; }
         }
+
         /// <summary>
         /// Gets the metadata streams in an array.
         /// </summary>
-        public MetaDataStream[] MetaDataStreams
+        public List<MetaDataStream> MetaDataStreams
         {
-            get { return reader.metadatastreams.ToArray(); }
+            get { return reader.metadatastreams; }
         }
-
 
         /// <summary>
         /// Gets the tables heap of the .net application.
@@ -130,6 +132,7 @@ namespace TUP.AsmResolver.NET
                 return tableheap;
             }
         }
+
         /// <summary>
         /// Gets the strings heap of the .net application.
         /// </summary>
@@ -142,6 +145,7 @@ namespace TUP.AsmResolver.NET
                 return stringsheap;
             }
         }
+
         /// <summary>
         /// Gets the user specified strings heap of the .net application.
         /// </summary>
@@ -154,6 +158,7 @@ namespace TUP.AsmResolver.NET
                 return usheap;
             }
         }
+
         /// <summary>
         /// Gets the blob heap of the .net application.
         /// </summary>
@@ -166,6 +171,7 @@ namespace TUP.AsmResolver.NET
                 return blobheap;
             }
         }
+
         /// <summary>
         /// Gets the GUID heap of the .net application.
         /// </summary>
@@ -189,6 +195,7 @@ namespace TUP.AsmResolver.NET
                 return assembly;
             }
         }
+
         /// <summary>
         /// Gets the raw file offset of the header.
         /// </summary>
@@ -207,7 +214,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                if (MetaDataStreams == null || MetaDataStreams.Length == 0)
+                if (MetaDataStreams == null || MetaDataStreams.Count == 0)
                     return false;
                 if (!HasStream("#~") && !HasStream("#-"))
                     return false;
@@ -225,7 +232,7 @@ namespace TUP.AsmResolver.NET
         /// <returns></returns>
         public bool HasStream(string name)
         {
-            if (MetaDataStreams == null || MetaDataStreams.Length == 0)
+            if (MetaDataStreams == null || MetaDataStreams.Count == 0)
                 return false;
             return (MetaDataStreams.FirstOrDefault(s => s.name == name) != null);
         }
@@ -246,6 +253,16 @@ namespace TUP.AsmResolver.NET
             if (tableheap != null)
                 tableheap.Dispose();
 
+        }
+
+        public void ClearCache()
+        {
+            tableheap = null;
+            stringsheap = null;
+            usheap = null;
+            blobheap = null;
+            guidheap = null;
+            
         }
     }
 }

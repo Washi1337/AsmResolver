@@ -189,6 +189,11 @@
             Specifies reading arguments that are being used to read a win32 assembly.
             </summary>
         </member>
+        <member name="M:TUP.AsmResolver.ReadingParameters.#ctor">
+            <summary>
+            Creates a new instance of the ReadingParameters, and sets the arguments to their default values.
+            </summary>
+        </member>
         <member name="P:TUP.AsmResolver.ReadingParameters.OnlyManaged">
             <summary>
             Indicates that only managed data and the vital headers will be read from the assembly.
@@ -1104,7 +1109,7 @@
             Gets the amount of sections that is available in the PE.
             </summary>
         </member>
-        <member name="P:TUP.AsmResolver.FileHeader.CompilingDate">
+        <member name="P:TUP.AsmResolver.FileHeader.TimeStampDate">
             <summary>
             Gets the compiling date of the PE.
             </summary>

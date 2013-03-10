@@ -44,6 +44,12 @@ namespace TUP.AsmResolver
             {
                 return new Version(header.optionalHeader64.MajorLinkerVersion, header.optionalHeader64.MinorLinkerVersion);
             }
+            set
+            {
+                header.optionalHeader32.MajorLinkerVersion = (byte)value.Major;
+                header.optionalHeader32.MinorLinkerVersion = (byte)value.Minor;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][1], new byte[] { (byte)value.Major, (byte)value.Minor });
+            }
         }
 
         /// <summary>
@@ -55,6 +61,12 @@ namespace TUP.AsmResolver
             {
                     return new Version(header.optionalHeader64.MajorOperatingSystemVersion, header.optionalHeader64.MinorOperatingSystemVersion);
             }
+            set
+            {
+                header.optionalHeader32.MajorOperatingSystemVersion = (byte)value.Major;
+                header.optionalHeader32.MinorOperatingSystemVersion = (byte)value.Minor;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][12], new byte[] { (byte)value.Major, (byte)value.Minor });
+            }
         }
 
         /// <summary>
@@ -65,7 +77,13 @@ namespace TUP.AsmResolver
             get
             {
                     return new Version(header.optionalHeader64.MajorSubsystemVersion, header.optionalHeader64.MinorSubsystemVersion);
-                
+
+            }
+            set
+            {
+                header.optionalHeader32.MajorSubsystemVersion = (byte)value.Major;
+                header.optionalHeader32.MinorSubsystemVersion = (byte)value.Minor;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][16], new byte[] { (byte)value.Major, (byte)value.Minor });
             }
         }
 
@@ -97,7 +115,12 @@ namespace TUP.AsmResolver
             get
             {
                     return header.optionalHeader64.SizeOfHeaders;
-                
+
+            }
+            set
+            {
+                header.optionalHeader32.SizeOfHeaders = value;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][20], value);
             }
         }
 
@@ -109,7 +132,12 @@ namespace TUP.AsmResolver
             get
             {
                     return header.optionalHeader64.ImageBase;
-                
+
+            }
+            set
+            {
+                header.optionalHeader32.ImageBase = (uint)value;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][9], (uint)value);
             }
         }
 
@@ -121,7 +149,12 @@ namespace TUP.AsmResolver
             get
             {
                     return header.optionalHeader64.BaseOfCode;
-                
+
+            }
+            set
+            {
+                header.optionalHeader32.BaseOfCode = value;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][7], value);
             }
         }
 
@@ -134,6 +167,11 @@ namespace TUP.AsmResolver
             {
                 return header.optionalHeader64.SizeOfCode;
             }
+            set
+            {
+                header.optionalHeader32.SizeOfCode = value;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][19], value);
+            }
         }
 
         /// <summary>
@@ -144,7 +182,12 @@ namespace TUP.AsmResolver
             get
             {
                     return 0;
-                
+
+            }
+            set
+            {
+                header.optionalHeader32.BaseOfData = value;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][8], value);
             }
         }
 
@@ -156,7 +199,12 @@ namespace TUP.AsmResolver
             get
             {
                     return header.optionalHeader64.FileAlignment;
-                
+
+            }
+            set
+            {
+                header.optionalHeader32.FileAlignment = value;
+                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][11], value);
             }
 
         }

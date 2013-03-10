@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Design;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -54,6 +55,7 @@ namespace AsmResolver
             
 
         }
+
         private Win32Assembly GetCurrentAssembly()
         {
             TreeNode node = GetRootNode();
@@ -74,9 +76,11 @@ namespace AsmResolver
                 TypeDescriptionProvider hexProvider = (TypeDescriptionProvider)Activator.CreateInstance(typeof(IntToHexTypeDescriptionProvider<>).MakeGenericType(new Type[] { t }), new object[] { m_OriginalProvider }); ;
                 TypeDescriptor.AddProvider(hexProvider, t);
             }
+
+
+            TypeDescriptor.AddAttributes(typeof(Offset), new EditorAttribute(typeof(OffsetUIEditor), typeof(UITypeEditor)));
         }
-
-
+        
         private void MainForm_Load(object sender, EventArgs e)
         {
             propertyGrid1.Dock = DockStyle.Fill;
@@ -209,7 +213,7 @@ namespace AsmResolver
 
         private void saveToolStripButton_Click(object sender, EventArgs e)
         {
-            saveToolStripButton.PerformClick();
+            saveToolStripMenuItem.PerformClick();
         }
 
         private void sourceCodeToolStripMenuItem_Click(object sender, EventArgs e)
