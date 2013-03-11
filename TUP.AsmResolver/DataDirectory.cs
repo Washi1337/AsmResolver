@@ -18,7 +18,7 @@ namespace TUP.AsmResolver
             this.name = name;
             if (rawDataDir.RVA == 0)
             {
-                targetOffset = new Offset(0, 0, 0, ASM.OperandType.Normal);
+                targetOffset = new Offset(0, 0, 0);
             }
             else
             {
@@ -26,7 +26,7 @@ namespace TUP.AsmResolver
 
                 targetSection = Section.GetSectionByRva(assemblySections, rawDataDir.RVA);
                 if (targetSection == null)
-                    this.TargetOffset = new Offset(0, rawDataDir.RVA, 0, ASM.OperandType.Normal);
+                    this.TargetOffset = new Offset(0, rawDataDir.RVA, 0);
                 else
                     this.targetOffset = Offset.FromRva(rawDataDir.RVA, assemblySections[0].ParentAssembly);
             }
@@ -39,7 +39,7 @@ namespace TUP.AsmResolver
             this.rawDataDir = rawDataDir;
             if (rawDataDir.RVA == 0)
             {
-                targetOffset = new Offset(0, 0, 0, ASM.OperandType.Normal);
+                targetOffset = new Offset(0, 0, 0);
             }
             else
             {

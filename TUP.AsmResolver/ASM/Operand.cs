@@ -132,10 +132,10 @@ namespace TUP.AsmResolver.ASM
                 Offset offset = ((Offset)Value);
                 string format = "v";
                 if (!virtualString){
-                    if (offset.OffsetType == OperandType.Normal)
+                    if (this.ValueType == OperandType.Normal)
                         format = "o";
                     else
-                        format = "r";
+                        format = "v";
                 }
                 return offset.ToString(format);
             }

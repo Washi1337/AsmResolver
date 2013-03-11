@@ -152,8 +152,13 @@ namespace AsmResolver
             x86disassembler.CurrentOffset = startOffset;
             try
             {
+                uint lastOffset = 0;
                 while (x86disassembler.CurrentOffset < endOffset)
                 {
+                    if (lastOffset == x86disassembler.CurrentOffset)
+                        System.Diagnostics.Debugger.Break();
+                    lastOffset = x86disassembler.CurrentOffset;
+
                     x86Instruction instruction = x86disassembler.DisassembleNextInstruction();
                
                     
@@ -172,14 +177,14 @@ namespace AsmResolver
 
                     items.Add(item);
 
-                    //Invoke(new Action(() =>
-                    //{
-                    //    double currentValue = x86disassembler.CurrentOffset - startOffset;
-                    //    double max = endOffset - startOffset;
-                    //
-                    //    progressBar.Value = (int)(currentValue / max * 100);
-                    //
-                    //}));
+                    Invoke(new Action(() =>
+                    {
+                        double currentValue = x86disassembler.CurrentOffset - startOffset;
+                        double max = endOffset - startOffset;
+                    
+                        progressBar.Value = (int)(currentValue / max * 100);
+                    
+                    }));
                 }
             }
             catch (Exception ex)

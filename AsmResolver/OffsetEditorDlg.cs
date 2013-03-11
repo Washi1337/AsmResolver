@@ -112,7 +112,7 @@ namespace AsmResolver
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                textBox3.Text = "00000000";
+                textBox3.Text = "0000000000000000";
             }
         }
 

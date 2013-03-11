@@ -17,20 +17,20 @@ namespace TUP.AsmResolver.ASM
 
         public static readonly x86OpCode Unknown                   = new x86OpCode("DB", null, 0, x86OperandType.None);
 
-        public static readonly x86OpCode Add_32Ptr_8              = new x86OpCode("ADD", new byte[] { 0x0, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Add_32Ptr_32              = new x86OpCode("ADD", new byte[] { 0x1, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
-        public static readonly x86OpCode Add_8_32Ptr              = new x86OpCode("ADD", new byte[] { 0x2, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Add_32_32Ptr              = new x86OpCode("ADD", new byte[] { 0x3, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Add_r32Ptr_r8             = new x86OpCode("ADD", new byte[] { 0x0, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Add_r32Ptr_r32            = new x86OpCode("ADD", new byte[] { 0x1, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Add_r8_r32Ptr             = new x86OpCode("ADD", new byte[] { 0x2, 0x0 }, 0, x86OperandType.Multiple32Or8Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode Add_r32_r32Ptr            = new x86OpCode("ADD", new byte[] { 0x3, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         public static readonly x86OpCode Add_Al_Byte               = new x86OpCode("ADD AL,", new byte[] { 0x4 }, 1, x86OperandType.Byte);
         public static readonly x86OpCode Add_Eax_Dword             = new x86OpCode("ADD EAX,", new byte[] { 0x5 }, 4, x86OperandType.Dword);
 
         public static readonly x86OpCode Push_Es                   = new x86OpCode("PUSH ES", new byte[] { 0x6 }, 0, x86OperandType.None);
         public static readonly x86OpCode Pop_Es                    = new x86OpCode("POP ES", new byte[] { 0x7 }, 0, x86OperandType.None);
 
-        public static readonly x86OpCode Or_32Ptr_8               = new x86OpCode("OR", new byte[] { 0x8, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Or_32Ptr_32               = new x86OpCode("OR", new byte[] { 0x9, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
-        public static readonly x86OpCode Or_8_32Ptr                = new x86OpCode("OR", new byte[] { 0xA, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Or_32_32Ptr               = new x86OpCode("OR", new byte[] { 0xB, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Or_r32Ptr_r8              = new x86OpCode("OR", new byte[] { 0x8, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Or_r32Ptr_r32             = new x86OpCode("OR", new byte[] { 0x9, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Or_r8_r32Ptr              = new x86OpCode("OR", new byte[] { 0xA, 0x0 }, 0, x86OperandType.Multiple32Or8Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode Or_r32_r32Ptr             = new x86OpCode("OR", new byte[] { 0xB, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         public static readonly x86OpCode Or_Al_Byte                = new x86OpCode("OR AL,", new byte[] { 0xC }, 1, x86OperandType.Byte);
         public static readonly x86OpCode Or_Eax_Dword              = new x86OpCode("OR EAX,", new byte[] { 0xD }, 4, x86OperandType.Dword);
 
@@ -38,30 +38,30 @@ namespace TUP.AsmResolver.ASM
       
         /*0x0F, multi byte opcodes */
 
-        public static readonly x86OpCode Adc_32Ptr_16               = new x86OpCode("ADC", new byte[] { 0x10, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Adc_32Ptr_32              = new x86OpCode("ADC", new byte[] { 0x11, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
-        public static readonly x86OpCode Adc_16_32Ptr               = new x86OpCode("ADC", new byte[] { 0x12, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Adc_32_32Ptr              = new x86OpCode("ADC", new byte[] { 0x13, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Adc_r32Ptr_r8             = new x86OpCode("ADC", new byte[] { 0x10, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Adc_r32Ptr_r32            = new x86OpCode("ADC", new byte[] { 0x11, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Adc_r8_r32Ptr             = new x86OpCode("ADC", new byte[] { 0x12, 0x0 }, 0, x86OperandType.Multiple32Or8Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode Adc_r32_r32Ptr            = new x86OpCode("ADC", new byte[] { 0x13, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         public static readonly x86OpCode Adc_Al_Byte               = new x86OpCode("ADC AL,", new byte[] { 0x14 }, 1, x86OperandType.Byte);
         public static readonly x86OpCode Adc_Eax_Dword             = new x86OpCode("ADC EAX,", new byte[] { 0x15 }, 4, x86OperandType.Dword);
 
         public static readonly x86OpCode Push_Ss                   = new x86OpCode("PUSH SS", new byte[] { 0x16 }, 0, x86OperandType.None);
         public static readonly x86OpCode Pop_Ss                    = new x86OpCode("POP SS", new byte[] { 0x17 }, 0, x86OperandType.None);
 
-        public static readonly x86OpCode Ssb_32Ptr_16              = new x86OpCode("SSB", new byte[] { 0x18, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Ssb_32Ptr_32              = new x86OpCode("SSB", new byte[] { 0x19, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
-        public static readonly x86OpCode Ssb_16_32Ptr              = new x86OpCode("SSB", new byte[] { 0x1A, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Ssb_32_32Ptr              = new x86OpCode("SSB", new byte[] { 0x1B, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Ssb_r32Ptr_r8             = new x86OpCode("SSB", new byte[] { 0x18, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Ssb_r32Ptr_r32            = new x86OpCode("SSB", new byte[] { 0x19, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Ssb_r8_r32Ptr             = new x86OpCode("SSB", new byte[] { 0x1A, 0x0 }, 0, x86OperandType.Multiple32Or8Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode Ssb_r32_r32Ptr            = new x86OpCode("SSB", new byte[] { 0x1B, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         public static readonly x86OpCode Ssb_Al_Byte               = new x86OpCode("SSB AL,", new byte[] { 0x1C }, 1, x86OperandType.Byte);
         public static readonly x86OpCode Ssb_Eax_Dword             = new x86OpCode("SSB EAX,", new byte[] { 0x1D }, 4, x86OperandType.Dword);
 
         public static readonly x86OpCode Push_Ds                   = new x86OpCode("PUSH DS", new byte[] { 0x1E }, 0, x86OperandType.None);
         public static readonly x86OpCode Pop_Ds                    = new x86OpCode("POP DS", new byte[] { 0x1F }, 0, x86OperandType.None);
 
-        public static readonly x86OpCode And_32Ptr_16              = new x86OpCode("AND", new byte[] { 0x20, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode And_32Ptr_32              = new x86OpCode("AND", new byte[] { 0x21, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
-        public static readonly x86OpCode And_16_32Ptr              = new x86OpCode("AND", new byte[] { 0x22, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode And_32_32Ptr              = new x86OpCode("AND", new byte[] { 0x23, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode And_r32Ptr_r8             = new x86OpCode("AND", new byte[] { 0x20, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode And_r32Ptr_r32            = new x86OpCode("AND", new byte[] { 0x21, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode And_r8_r32Ptr             = new x86OpCode("AND", new byte[] { 0x22, 0x0 }, 0, x86OperandType.Multiple32Or8Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode And_r32_r32Ptr            = new x86OpCode("AND", new byte[] { 0x23, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         public static readonly x86OpCode And_Al_Byte               = new x86OpCode("AND AL,", new byte[] { 0x24 }, 1, x86OperandType.Byte);
         public static readonly x86OpCode And_Eax_Dword             = new x86OpCode("AND EAX,", new byte[] { 0x25 }, 4, x86OperandType.Dword);
 
@@ -69,10 +69,10 @@ namespace TUP.AsmResolver.ASM
 
         public static readonly x86OpCode Daa                       = new x86OpCode("DAA", new byte[] {0x27}, 0, x86OperandType.None);
 
-        public static readonly x86OpCode Sub_32Ptr_16               = new x86OpCode("SUB", new byte[] { 0x28, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Sub_32Ptr_32              = new x86OpCode("SUB", new byte[] { 0x29, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
-        public static readonly x86OpCode Sub_16_32Ptr               = new x86OpCode("SUB", new byte[] { 0x2A, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Sub_32_32Ptr              = new x86OpCode("SUB", new byte[] { 0x2B, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Sub_r32Ptr_r8             = new x86OpCode("SUB", new byte[] { 0x28, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Sub_r32Ptr_r32            = new x86OpCode("SUB", new byte[] { 0x29, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Sub_r8_r32Ptr             = new x86OpCode("SUB", new byte[] { 0x2A, 0x0 }, 0, x86OperandType.Multiple32Or8Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode Sub_r32_r32Ptr            = new x86OpCode("SUB", new byte[] { 0x2B, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         public static readonly x86OpCode Sub_Al_Byte               = new x86OpCode("SUB AL,", new byte[] { 0x2C }, 1, x86OperandType.Byte);
         public static readonly x86OpCode Sub_Eax_Dword             = new x86OpCode("SUB EAX,", new byte[] { 0x2D }, 4, x86OperandType.Dword);
 
@@ -80,21 +80,21 @@ namespace TUP.AsmResolver.ASM
 
         public static readonly x86OpCode Das                       = new x86OpCode("DAS", new byte[] { 0x2F }, 0, x86OperandType.None);
 
-        public static readonly x86OpCode Xor_32Ptr_16               = new x86OpCode("XOR", new byte[] { 0x30, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Xor_32Ptr_32              = new x86OpCode("XOR", new byte[] { 0x31, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
-        public static readonly x86OpCode Xor_16_32Ptr               = new x86OpCode("XOR", new byte[] { 0x32, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Xor_32_32Ptr              = new x86OpCode("XOR", new byte[] { 0x33, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Xor_r32Ptr_r8             = new x86OpCode("XOR", new byte[] { 0x30, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Xor_r32Ptr_r32            = new x86OpCode("XOR", new byte[] { 0x31, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Xor_r8_r32Ptr             = new x86OpCode("XOR", new byte[] { 0x32, 0x0 }, 0, x86OperandType.Multiple32Or8Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode Xor_r32_r32Ptr            = new x86OpCode("XOR", new byte[] { 0x33, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         public static readonly x86OpCode Xor_Al_Byte               = new x86OpCode("XOR AL,", new byte[] { 0x34 }, 1, x86OperandType.Byte);
         public static readonly x86OpCode Xor_Eax_Dword             = new x86OpCode("XOR EAX,", new byte[] { 0x35 }, 4, x86OperandType.Dword);
         
         /* 0x36 */
 
         public static readonly x86OpCode Aaa                       = new x86OpCode("AAA", new byte[] { 0x37 }, 0, x86OperandType.None);
-        
-        public static readonly x86OpCode Cmp_32Ptr_16               = new x86OpCode("CMP", new byte[] { 0x38, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Cmp_32Ptr_32              = new x86OpCode("CMP", new byte[] { 0x39, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
-        public static readonly x86OpCode Cmp_16_32Ptr               = new x86OpCode("CMP", new byte[] { 0x3A, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Cmp_32_32Ptr              = new x86OpCode("CMP", new byte[] { 0x3B, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+
+        public static readonly x86OpCode Cmp_r32Ptr_r8             = new x86OpCode("CMP", new byte[] { 0x38, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Cmp_r32Ptr_r32            = new x86OpCode("CMP", new byte[] { 0x39, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Cmp_r8_r32Ptr             = new x86OpCode("CMP", new byte[] { 0x3A, 0x0 }, 0, x86OperandType.Multiple32Or8Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode Cmp_r32_r32Ptr            = new x86OpCode("CMP", new byte[] { 0x3B, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         public static readonly x86OpCode Cmp_Al_Byte               = new x86OpCode("CMP AL,", new byte[] { 0x3C }, 1, x86OperandType.Byte);
         public static readonly x86OpCode Cmp_Eax_Dword             = new x86OpCode("CMP EAX,", new byte[] { 0x3D }, 4, x86OperandType.Dword);
 
@@ -180,41 +180,48 @@ namespace TUP.AsmResolver.ASM
 
 
         /* 0x80 group */
-        public static readonly x86OpCode Add_32Ptr_Byte            = new x86OpCode("ADD", new byte[] {0x80,0x0}, 1, x86OperandType.RegisterAndByte, 1);
+        public static readonly x86OpCode Add_r32_Byte              = new x86OpCode("ADD", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Or_r32_Byte               = new x86OpCode("OR", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Adc_r32_Byte              = new x86OpCode("ADC", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Ssb_r32_Byte              = new x86OpCode("SSB", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode And_r32_Byte              = new x86OpCode("AND", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Sub_r32_Byte              = new x86OpCode("SUB", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Xor_r32_Byte              = new x86OpCode("XOR", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Cmp_r32_Byte              = new x86OpCode("CMP", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
 
         /* 0x81 group */
-        public static readonly x86OpCode Add_32BytePtr_Dword       = new x86OpCode("ADD", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Adc_32BytePtr_Dword       = new x86OpCode("ADC", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Ssb_32BytePtr_Dword       = new x86OpCode("SSB", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode And_32BytePtr_Dword       = new x86OpCode("AND", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Sub_32BytePtr_Dword       = new x86OpCode("SUB", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Xor_32BytePtr_Dword       = new x86OpCode("XOR", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Cmp_32BytePtr_Dword       = new x86OpCode("CMP", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
+        public static readonly x86OpCode Add_r32BytePtr_Dword      = new x86OpCode("ADD", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
+        public static readonly x86OpCode Or_r32BytePtr_Dword       = new x86OpCode("OR", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
+        public static readonly x86OpCode Adc_r32BytePtr_Dword      = new x86OpCode("ADC", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
+        public static readonly x86OpCode Ssb_r32BytePtr_Dword      = new x86OpCode("SSB", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
+        public static readonly x86OpCode And_r32BytePtr_Dword      = new x86OpCode("AND", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
+        public static readonly x86OpCode Sub_r32BytePtr_Dword      = new x86OpCode("SUB", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
+        public static readonly x86OpCode Xor_r32BytePtr_Dword      = new x86OpCode("XOR", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
+        public static readonly x86OpCode Cmp_r32BytePtr_Dword      = new x86OpCode("CMP", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
 
         /* 0x82 */
 
         /* 0x83 group */
-        public static readonly x86OpCode Add_32_Dword             = new x86OpCode("ADD", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Adc_32_Dword             = new x86OpCode("ADC", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Ssb_32_Dword             = new x86OpCode("SSB", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode And_32_Dword             = new x86OpCode("AND", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Sub_32_Dword             = new x86OpCode("SUB", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Xor_32_Dword             = new x86OpCode("XOR", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
-        public static readonly x86OpCode Cmp_32_Dword             = new x86OpCode("CMP", new byte[] { 0x81, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
+        public static readonly x86OpCode Add_r32_Dword             = new x86OpCode("ADD", new byte[] { 0x83, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Adc_r32_Dword             = new x86OpCode("ADC", new byte[] { 0x83, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Ssb_r32_Dword             = new x86OpCode("SSB", new byte[] { 0x83, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode And_r32_Dword             = new x86OpCode("AND", new byte[] { 0x83, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Sub_r32_Dword             = new x86OpCode("SUB", new byte[] { 0x83, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Xor_r32_Dword             = new x86OpCode("XOR", new byte[] { 0x83, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Cmp_r32_Dword             = new x86OpCode("CMP", new byte[] { 0x83, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
 
 
-        public static readonly x86OpCode Test_32Ptr_16             = new x86OpCode("TEST", new byte[] {0x84,0x0}, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Test_32Ptr_32             = new x86OpCode("TEST", new byte[] {0x85,0x0}, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Test_r32_r8               = new x86OpCode("TEST", new byte[] {0x84,0x0}, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Test_r32_r32              = new x86OpCode("TEST", new byte[] {0x85,0x0}, 0, x86OperandType.Multiple32Register, 1);
       
-        public static readonly x86OpCode TXchg_32Ptr_16            = new x86OpCode("XCHG", new byte[] {0x86,0x0}, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode TXchg_32Ptr_32            = new x86OpCode("XCHG", new byte[] {0x87,0x0}, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode TXchg_r32_r8              = new x86OpCode("XCHG", new byte[] {0x86,0x0}, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode TXchg_r32_r32             = new x86OpCode("XCHG", new byte[] {0x87,0x0}, 0, x86OperandType.Multiple32Register, 1);
 
-        public static readonly x86OpCode Mov_32Or8                 = new x86OpCode("MOV", new byte[] { 0x88, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
-        public static readonly x86OpCode Mov_32Ptr_32              = new x86OpCode("MOV", new byte[] { 0x89, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Mov_r32Or8                = new x86OpCode("MOV", new byte[] { 0x88, 0x0 }, 0, x86OperandType.Multiple32Or8Register, 1);
+        public static readonly x86OpCode Mov_r32Ptr_r32            = new x86OpCode("MOV", new byte[] { 0x89, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
        
-        /* 0x8A */
-
-        public static readonly x86OpCode Mov_32_32Ptr              = new x86OpCode("MOV", new byte[] { 0x8B, 0x0 }, 0, x86OperandType.Multiple32Register, 1);
+        public static readonly x86OpCode Mov_r8_r32Or8Ptr          = new x86OpCode("MOV", new byte[] { 0x8A, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
+        public static readonly x86OpCode Mov_r32_r32Ptr            = new x86OpCode("MOV", new byte[] { 0x8B, 0x0 }, 0, x86OperandType.Multiple32Register | x86OperandType.OverrideOperandOrder, 1);
         
         /* 0x8C */
 
@@ -222,7 +229,7 @@ namespace TUP.AsmResolver.ASM
 
         /* 0x8E */
 
-        public static readonly x86OpCode Pop_Register              = new x86OpCode("POP", new byte[] { 0x8F, 0x0 }, 0, x86OperandType.Register, 1);
+        public static readonly x86OpCode Pop_Register              = new x86OpCode("POP", new byte[] { 0x8F, 0x0 }, 0, x86OperandType.Register32, 1);
 
         public static readonly x86OpCode Nop                       = new x86OpCode("NOP", new byte[] { 0x90 }, 0, x86OperandType.None);
         
@@ -246,10 +253,10 @@ namespace TUP.AsmResolver.ASM
         public static readonly x86OpCode Sahf                      = new x86OpCode("SAHF", new byte[] {0x9E}, 0, x86OperandType.None);
         public static readonly x86OpCode Lahf                      = new x86OpCode("LAHF", new byte[] {0x9F}, 0, x86OperandType.None);
 
-        public static readonly x86OpCode Mov_Al_DwordPtr           = new x86OpCode("MOV Al,", new byte[] {0xA0},4, x86OperandType.DwordPtr);
-        public static readonly x86OpCode Mov_Eax_DwordPtr          = new x86OpCode("MOV EAX,", new byte[] {0xA1},4, x86OperandType.DwordPtr);
-        public static readonly x86OpCode Mov_DwordPtr_Al           = new x86OpCode("MOV %operand1%, Al", new byte[] {0xA2},4, x86OperandType.DwordPtr);
-        public static readonly x86OpCode Mov_DwordPtr_Eax          = new x86OpCode("MOV %operand1%, EAX", new byte[] {0xA3},4, x86OperandType.DwordPtr);
+        public static readonly x86OpCode Mov_Al_DwordPtr           = new x86OpCode("MOV Al,", new byte[] {0xA0},4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Mov_Eax_DwordPtr          = new x86OpCode("MOV EAX,", new byte[] { 0xA1 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Mov_DwordPtr_Al           = new x86OpCode("MOV %operand1%, Al", new byte[] { 0xA2 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Mov_DwordPtr_Eax          = new x86OpCode("MOV %operand1%, EAX", new byte[] { 0xA3 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
         
         /* 0xA4 */
         /* 0xA5 */
@@ -284,18 +291,18 @@ namespace TUP.AsmResolver.ASM
         public static readonly x86OpCode Mov_Esi_Dword             = new x86OpCode("MOV ESI,", new byte[] {0xBE}, 4, x86OperandType.Dword);
         public static readonly x86OpCode Mov_Edi_Dword             = new x86OpCode("MOV EDI,", new byte[] {0xBF}, 4, x86OperandType.Dword);
 
-        public static readonly x86OpCode Rol_BytePtr_Byte          = new x86OpCode("ROL", new byte[] {0xC0,0x0},1, x86OperandType.RegisterAndByte, 1);
-        public static readonly x86OpCode Rol_DwordPtr_Byte         = new x86OpCode("ROL", new byte[] {0xC1,0x0},1, x86OperandType.RegisterAndByte, 1);
+        public static readonly x86OpCode Rol_BytePtr_Byte          = new x86OpCode("ROL", new byte[] {0xC0,0x0},1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Rol_DwordPtr_Byte         = new x86OpCode("ROL", new byte[] {0xC1,0x0},1, x86OperandType.Register32 | x86OperandType.Byte, 1);
 
         public static readonly x86OpCode Retn_Word                 = new x86OpCode("RETN", new byte[] {0xC2}, 2, x86OperandType.Word);
         public static readonly x86OpCode Retn                      = new x86OpCode("RETN", new byte[] {0xC3}, 0, x86OperandType.None);
 
-        public static readonly x86OpCode Les_Eax_FwordPtr          = new x86OpCode("LES EAX,", new byte[] {0xC4,0x0},0, x86OperandType.Register, 1);
-        public static readonly x86OpCode Lsd_Eax_FwordPtr          = new x86OpCode("LSD EAX,", new byte[] {0xC5,0x0},0, x86OperandType.Register, 1);
+        public static readonly x86OpCode Les_Eax_FwordPtr          = new x86OpCode("LES EAX,", new byte[] {0xC4,0x0},0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Lsd_Eax_FwordPtr          = new x86OpCode("LSD EAX,", new byte[] {0xC5,0x0},0, x86OperandType.Register32, 1);
 
-        public static readonly x86OpCode Mov_BytePtr_Byte          = new x86OpCode("MOV", new byte[] { 0xC6, 0x0 }, 1, x86OperandType.RegisterAndByte, 1);
+        public static readonly x86OpCode Mov_BytePtr_Byte          = new x86OpCode("MOV", new byte[] { 0xC6, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
         public static readonly x86OpCode Mov_DwordPtr_Esp_Dword    = new x86OpCode("MOV DWORD PTR [ESP],", new byte[] { 0xC7, 0x4, 0x24 }, 4, x86OperandType.Dword);
-        public static readonly x86OpCode Mov_DwordPtr_Dword        = new x86OpCode("MOV", new byte[] { 0xC7, 0x0 }, 4, x86OperandType.RegisterAndDword, 1);
+        public static readonly x86OpCode Mov_DwordPtr_Dword        = new x86OpCode("MOV", new byte[] { 0xC7, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
 
         public static readonly x86OpCode Enter                     = new x86OpCode("ENTER", new byte[] {0xC8},6,x86OperandType.WordAndByte);
         public static readonly x86OpCode Leave                     = new x86OpCode("LEAVE", new byte[] {0xC9},0, x86OperandType.None);
@@ -308,10 +315,46 @@ namespace TUP.AsmResolver.ASM
         public static readonly x86OpCode Into                      = new x86OpCode("INTO", new byte[] {0xCE}, 0, x86OperandType.None);
         public static readonly x86OpCode Iretd                     = new x86OpCode("IRETD", new byte[] {0xCF}, 0, x86OperandType.None);
 
-        /* 0xD0 */
-        /* 0xD1 */
-        /* 0xD2 */
-        /* 0xD3 */
+        /* 0xD0 group */
+        public static readonly x86OpCode Rol_r8_1                 = new x86OpCode("ROL %operand1%, 1", new byte[] { 0xD0, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Ror_r8_1                 = new x86OpCode("ROR %operand1%, 1", new byte[] { 0xD0, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Rcl_r8_1                 = new x86OpCode("RCL %operand1%, 1", new byte[] { 0xD0, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Rcr_r8_1                 = new x86OpCode("RCR %operand1%, 1", new byte[] { 0xD0, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Shl_r8_1                 = new x86OpCode("SHL %operand1%, 1", new byte[] { 0xD0, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Shr_r8_1                 = new x86OpCode("SHR %operand1%, 1", new byte[] { 0xD0, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Sal_r8_1                 = new x86OpCode("SAL %operand1%, 1", new byte[] { 0xD0, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Sar_r8_1                 = new x86OpCode("SAR %operand1%, 1", new byte[] { 0xD0, 0x0 }, 0, x86OperandType.Register8, 1);
+
+        /* 0xD1 group */
+        public static readonly x86OpCode Rol_r32_1                = new x86OpCode("ROL %operand1%, 1", new byte[] { 0xD1, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Ror_r32_1                = new x86OpCode("ROR %operand1%, 1", new byte[] { 0xD1, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Rcl_r32_1                = new x86OpCode("RCL %operand1%, 1", new byte[] { 0xD1, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Rcr_r32_1                = new x86OpCode("RCR %operand1%, 1", new byte[] { 0xD1, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Shl_r32_1                = new x86OpCode("SHL %operand1%, 1", new byte[] { 0xD1, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Shr_r32_1                = new x86OpCode("SHR %operand1%, 1", new byte[] { 0xD1, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Sal_r32_1                = new x86OpCode("SAL %operand1%, 1", new byte[] { 0xD1, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Sar_r32_1                = new x86OpCode("SAR %operand1%, 1", new byte[] { 0xD1, 0x0 }, 0, x86OperandType.Register32, 1);
+
+        /* 0xD2 group */
+        public static readonly x86OpCode Rol_r8_Cl                = new x86OpCode("ROL %operand1%, CL", new byte[] { 0xD2, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Ror_r8_Cl                = new x86OpCode("ROR %operand1%, CL", new byte[] { 0xD2, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Rcl_r8_Cl                = new x86OpCode("RCL %operand1%, CL", new byte[] { 0xD2, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Rcr_r8_Cl                = new x86OpCode("RCR %operand1%, CL", new byte[] { 0xD2, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Shl_r8_Cl                = new x86OpCode("SHL %operand1%, CL", new byte[] { 0xD2, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Shr_r8_Cl                = new x86OpCode("SHR %operand1%, CL", new byte[] { 0xD2, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Sal_r8_Cl                = new x86OpCode("SAL %operand1%, CL", new byte[] { 0xD2, 0x0 }, 0, x86OperandType.Register8, 1);
+        public static readonly x86OpCode Sar_r8_Cl                = new x86OpCode("SAR %operand1%, CL", new byte[] { 0xD2, 0x0 }, 0, x86OperandType.Register8, 1);
+
+        /* 0xD3 group */
+        public static readonly x86OpCode Rol_r32_Cl                = new x86OpCode("ROL %operand1%, CL", new byte[] { 0xD3, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Ror_r32_Cl                = new x86OpCode("ROR %operand1%, CL", new byte[] { 0xD3, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Rcl_r32_Cl                = new x86OpCode("RCL %operand1%, CL", new byte[] { 0xD3, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Rcr_r32_Cl                = new x86OpCode("RCR %operand1%, CL", new byte[] { 0xD3, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Shl_r32_Cl                = new x86OpCode("SHL %operand1%, CL", new byte[] { 0xD3, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Shr_r32_Cl                = new x86OpCode("SHR %operand1%, CL", new byte[] { 0xD3, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Sal_r32_Cl                = new x86OpCode("SAL %operand1%, CL", new byte[] { 0xD3, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Sar_r32_Cl                = new x86OpCode("SAR %operand1%, CL", new byte[] { 0xD3, 0x0 }, 0, x86OperandType.Register32, 1);
+        
 
         public static readonly x86OpCode Aam                       = new x86OpCode("AAM", new byte[] {0xD4}, 1, x86OperandType.Byte);
         public static readonly x86OpCode Aad                       = new x86OpCode("AAD", new byte[] {0xD5}, 1, x86OperandType.Byte);
@@ -370,24 +413,24 @@ namespace TUP.AsmResolver.ASM
 
        
         /* 0xFE group */
-        public static readonly x86OpCode Inc_BytePtr               = new x86OpCode("INC", new byte[] { 0xFE, 0x0 }, 0, x86OperandType.RegisterPointer);
-        public static readonly x86OpCode Dec_BytePtr               = new x86OpCode("DEC", new byte[] { 0xFE, 0x8 }, 0, x86OperandType.RegisterPointer);
+        public static readonly x86OpCode Inc_BytePtr               = new x86OpCode("INC", new byte[] { 0xFE, 0x0 }, 0, x86OperandType.Register32);
+        public static readonly x86OpCode Dec_BytePtr               = new x86OpCode("DEC", new byte[] { 0xFE, 0x8 }, 0, x86OperandType.Register32);
 
 
         /* 0xFF group */
-        public static readonly x86OpCode Inc_DwordPtr_Register     = new x86OpCode("INC", new byte[] {0xFF, 0x0}, 0, x86OperandType.RegisterOffset);
-        public static readonly x86OpCode Inc_DwordPtr              = new x86OpCode("INC", new byte[] {0xFF, 0x5}, 4, x86OperandType.DwordPtr);
-        public static readonly x86OpCode Dec_DwordPtr_Register     = new x86OpCode("DEC", new byte[] {0xFF, 0x8}, 0, x86OperandType.RegisterOffset);
-        public static readonly x86OpCode Dec_DwordPtr              = new x86OpCode("DEC", new byte[] {0xFF, 0xD}, 4, x86OperandType.DwordPtr);
-        public static readonly x86OpCode Call_DwordPtr_Register    = new x86OpCode("CALL", new byte[] {0xFF,0x10}, 0, x86OperandType.RegisterOffset);
-        public static readonly x86OpCode Call_DwordPtr             = new x86OpCode("CALL", new byte[] {0xFF,0x15}, 4, x86OperandType.DwordPtr);
-        public static readonly x86OpCode Jmp_DwordPtr_Register     = new x86OpCode("JMP", new byte[] {0xFF,0x20}, 0, x86OperandType.RegisterOffset);
-        public static readonly x86OpCode Jmp_DwordPtr              = new x86OpCode("JMP", new byte[] {0xFF,0x25}, 4, x86OperandType.DwordPtr);
-        public static readonly x86OpCode Jmp_Far_FwordPtr_Register = new x86OpCode("JMP FAR", new byte[] {0xFF,0x28}, 0, x86OperandType.RegisterOffset);
-        public static readonly x86OpCode Jmp_Far_FwordPtr          = new x86OpCode("JMP FAR", new byte[] {0xFF,0x2D}, 6, x86OperandType.FwordPtr);
-        public static readonly x86OpCode Push_DwordPtr_Register    = new x86OpCode("PUSH", new byte[] { 0xFF, 0x30 }, 0, x86OperandType.RegisterOffset);
-        public static readonly x86OpCode Push_DwordPtr             = new x86OpCode("PUSH", new byte[] { 0xFF, 0x35 }, 4, x86OperandType.DwordPtr);
-        public static readonly x86OpCode Call_Register             = new x86OpCode("CALL", new byte[] { 0xFF, 0xD0 }, 0, x86OperandType.Register,1);
-        public static readonly x86OpCode Jmp_Register              = new x86OpCode("JMP", new byte[] { 0xFF, 0xE0 }, 0, x86OperandType.Register,1);
+        public static readonly x86OpCode Inc_DwordPtr_Register     = new x86OpCode("INC", new byte[] { 0xFF, 0x0 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Inc_DwordPtr              = new x86OpCode("INC", new byte[] {0xFF, 0x5}, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Dec_DwordPtr_Register     = new x86OpCode("DEC", new byte[] { 0xFF, 0x8 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Dec_DwordPtr              = new x86OpCode("DEC", new byte[] { 0xFF, 0xD }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Call_DwordPtr_Register    = new x86OpCode("CALL", new byte[] { 0xFF, 0x10 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Call_DwordPtr             = new x86OpCode("CALL", new byte[] { 0xFF, 0x15 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Jmp_DwordPtr_Register     = new x86OpCode("JMP", new byte[] { 0xFF, 0x20 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Jmp_DwordPtr              = new x86OpCode("JMP", new byte[] { 0xFF, 0x25 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Jmp_Far_FwordPtr_Register = new x86OpCode("JMP FAR", new byte[] { 0xFF, 0x28 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Jmp_Far_FwordPtr          = new x86OpCode("JMP FAR", new byte[] { 0xFF, 0x2D }, 6, x86OperandType.Fword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Push_DwordPtr_Register    = new x86OpCode("PUSH", new byte[] { 0xFF, 0x30 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Push_DwordPtr             = new x86OpCode("PUSH", new byte[] { 0xFF, 0x35 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Call_Register             = new x86OpCode("CALL", new byte[] { 0xFF, 0xD0 }, 0, x86OperandType.Register32,1);
+        public static readonly x86OpCode Jmp_Register              = new x86OpCode("JMP", new byte[] { 0xFF, 0xE0 }, 0, x86OperandType.Register32,1);
     }
 }

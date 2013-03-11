@@ -15,7 +15,7 @@ namespace TUP.AsmResolver.ASM
         {
             this.assembly = assembly;
             OpCode = x86OpCodes.Unknown;
-            Offset = new Offset(0, 0,0,  OperandType.Normal);
+            Offset = new Offset(0, 0, 0);
         }
         /// <summary>
         /// Creates an instance of a x86 instruction without an operand.
@@ -167,9 +167,13 @@ namespace TUP.AsmResolver.ASM
         {
             string operand1 = this.operand1 == null ? "" : this.operand1.ToString(virtualString);
             string operand2 = this.operand2 == null ? "" : this.operand2.ToString(virtualString);
-            
-            
-            return code.ToString() + " " +  operand1 + (operand2 == "" ? "" : ", " + operand2);
+
+            string codeStr = code.ToString();
+
+            if (codeStr.Contains("%operand1%")) // special notations.
+                return codeStr.Replace("%operand1%", operand1);
+            else
+                return code.ToString() + " " +  operand1 + (operand2 == "" ? "" : ", " + operand2);
         }
 
         
@@ -188,7 +192,8 @@ namespace TUP.AsmResolver.ASM
 
         private void GenerateBytes()
         {
-            switch (code.operandtype)
+            
+            switch (code.GetNormalOperandType())
             {
                 case x86OperandType.None:
                     break;
@@ -199,7 +204,6 @@ namespace TUP.AsmResolver.ASM
                     operandbytes = BitConverter.GetBytes((short)operand1.Value);
                     break;
                 case x86OperandType.Dword:
-                case x86OperandType.DwordPtr:
                     operandbytes = BitConverter.GetBytes((int)operand1.Value);
                     break;
                 case x86OperandType.Qword:
@@ -215,7 +219,7 @@ namespace TUP.AsmResolver.ASM
                     difference = (int)((targetOffset.FileOffset + this.Size) - Offset.FileOffset);
                     operandbytes = new byte[] { (byte)difference };
                     break;
-                case x86OperandType.Register:
+                case x86OperandType.Register32:
                     code.opcodebytes[code.variableByteIndex] += (byte)(x86Register)operand1.Value;
                     break;
                 default:

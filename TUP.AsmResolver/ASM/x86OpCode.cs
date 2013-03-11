@@ -95,7 +95,6 @@ namespace TUP.AsmResolver.ASM
             get
             {
                 return operandtype;
-                
             }
         }
 
@@ -154,6 +153,18 @@ namespace TUP.AsmResolver.ASM
             return newCode;
         }
 
+        public x86OperandType GetNormalOperandType()
+        {
+            return OperandType & x86OperandType.NormalOperandMask;
+        }
+        public x86OperandType GetRegisterOperandType()
+        {
+            return OperandType & x86OperandType.RegisterOperandMask;
+        }
+        public x86OperandType GetOverrideOperandType()
+        {
+            return OperandType & x86OperandType.OverridingOperandMask;
+        }
         #endregion
 
     }

@@ -17,12 +17,11 @@ namespace TUP.AsmResolver
         /// <param name="rva">The virtual address that is relative to a section.</param>
         /// <param name="va">The virtual address.</param>
         /// <param name="offsettype">The type of offset.</param>
-        public Offset(uint offset, uint rva, ulong va, ASM.OperandType offsettype)
+        public Offset(uint offset, uint rva, ulong va)
         {
             this.FileOffset = offset;
             this.Rva = rva;
             this.Va = va;
-            this.OffsetType = offsettype;
         }
         /// <summary>
         /// Creates an instance of an offset by specifying a raw offset. 
@@ -33,9 +32,9 @@ namespace TUP.AsmResolver
         public static Offset FromFileOffset(uint rawoffset, Win32Assembly assembly)
         {
             if (rawoffset == 0)
-                return new Offset(0, 0, 0, ASM.OperandType.Normal);
+                return new Offset(0, 0, 0);
             OffsetConverter offsetconverter = CreateConverter(assembly, rawoffset, 1);
-            return new Offset(rawoffset, offsetconverter.FileOffsetToRva(rawoffset), offsetconverter.FileOffsetToVa(rawoffset), ASM.OperandType.Normal);
+            return new Offset(rawoffset, offsetconverter.FileOffsetToRva(rawoffset), offsetconverter.FileOffsetToVa(rawoffset));
         }
         /// <summary>
         /// Creates an instance of an offset by specifying a virtual address.
@@ -46,9 +45,9 @@ namespace TUP.AsmResolver
         public static Offset FromVa(ulong va, Win32Assembly assembly)
         {
             if (va == 0)
-                return new Offset(0, 0, 0, ASM.OperandType.Normal);
+                return new Offset(0, 0, 0);
             OffsetConverter offsetconverter = CreateConverter(assembly, va, 3);
-            return new Offset(offsetconverter.VaToFileOffset(va), offsetconverter.VaToRva(va), va, ASM.OperandType.Normal);
+            return new Offset(offsetconverter.VaToFileOffset(va), offsetconverter.VaToRva(va), va);
         }
         /// <summary>
         /// Creates an instance of an offset by specifying a virtual address that is relative to a section.
@@ -59,9 +58,9 @@ namespace TUP.AsmResolver
         public static Offset FromRva(uint rva, Win32Assembly assembly)
         {
             if (rva == 0)
-                return new Offset(0, 0, 0, ASM.OperandType.Normal);
+                return new Offset(0, 0, 0);
             OffsetConverter offsetconverter = CreateConverter(assembly, rva, 2);
-            return new Offset(offsetconverter.RvaToFileOffset(rva), rva, offsetconverter.RvaToVa(rva), ASM.OperandType.Normal);
+            return new Offset(offsetconverter.RvaToFileOffset(rva), rva, offsetconverter.RvaToVa(rva));
        
         }
 
@@ -88,14 +87,6 @@ namespace TUP.AsmResolver
             return converter;
         }
 
-        /// <summary>
-        /// Gets the way the offset is being used.
-        /// </summary>
-        public ASM.OperandType OffsetType
-        {
-            get;
-            set;
-        }
         /// <summary>
         /// Gets the file offset.
         /// </summary>
@@ -145,21 +136,6 @@ namespace TUP.AsmResolver
             else
                 throw new ArgumentException("Format can be either v (va), r (rva), or o (offset).");
 
-            switch (OffsetType)
-            {
-                case ASM.OperandType.Normal:
-                    return returningOffset.ToString("X8");
-                case ASM.OperandType.BytePointer:
-                    return "BYTE PTR [" + returningOffset.ToString("X8") + "]";
-                case ASM.OperandType.WordPointer:
-                    return "WORD PTR [" + returningOffset.ToString("X8") + "]";
-                case ASM.OperandType.DwordPointer:
-                    return "DWORD PTR [" + returningOffset.ToString("X8") + "]";
-                case ASM.OperandType.FwordPointer:
-                    return "FWORD PTR [" + returningOffset.ToString("X8") + "]";
-                case ASM.OperandType.QwordPointer:
-                    return "QWORD PTR [" + returningOffset.ToString("X8") + "]";
-            }
             return returningOffset.ToString("X8"); 
 
         }

@@ -233,7 +233,7 @@
             Represents an offset to a value or structure in an assembly, containing the raw, virtual and relative virtual address.
             </summary>
         </member>
-        <member name="M:TUP.AsmResolver.Offset.#ctor(System.UInt32,System.UInt32,System.UInt64,TUP.AsmResolver.ASM.OperandType)">
+        <member name="M:TUP.AsmResolver.Offset.#ctor(System.UInt32,System.UInt32,System.UInt64)">
             <summary>
             Creates a new instance of an offset.
             </summary>
@@ -306,11 +306,6 @@
             <param name="assembly">The assembly that contains the offset</param>
             <returns></returns>
         </member>
-        <member name="P:TUP.AsmResolver.Offset.OffsetType">
-            <summary>
-            Gets the way the offset is being used.
-            </summary>
-        </member>
         <member name="P:TUP.AsmResolver.Offset.FileOffset">
             <summary>
             Gets the file offset.
@@ -356,19 +351,9 @@
             The instruction has got a single dword operand.
             </summary>
         </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.DwordPtr">
-            <summary>
-            The instruction has got a single dword pointer operand.
-            </summary>
-        </member>
         <member name="F:TUP.AsmResolver.ASM.x86OperandType.Fword">
             <summary>
             The instruction has got a single fword operand.
-            </summary>
-        </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.FwordPtr">
-            <summary>
-            The instruction has got a single fword pointer operand.
             </summary>
         </member>
         <member name="F:TUP.AsmResolver.ASM.x86OperandType.Qword">
@@ -381,29 +366,34 @@
             The instruction has got a word and byte operand.
             </summary>
         </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Register">
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.InstructionAddress">
             <summary>
-            The instruction has got a single register operand.
+            The instruction has got an instruction address operand.
             </summary>
         </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterPointer">
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.ShortInstructionAddress">
             <summary>
-            The instruction has got a single register pointer operand.
+            The instruction has got a short instruction address operand.
             </summary>
         </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterAndByte">
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Instruction">
             <summary>
-            The instruction has got a register and byte operand.
+            The instruction is a prefix to another instruction.
             </summary>
         </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterAndDword">
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Register32">
             <summary>
-            The instruction has got a register and dword operand.
+            The instruction has got a single 32 bit register operand.
             </summary>
         </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.RegisterOffset">
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Register8">
             <summary>
-            The instruction has got a register and offset operand.
+            The instruction has got a single 8 bit register operand.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Register32Or8">
+            <summary>
+            The instruction has got a single 32 or 8 bit register operand.
             </summary>
         </member>
         <member name="F:TUP.AsmResolver.ASM.x86OperandType.Multiple32Register">
@@ -426,19 +416,9 @@
             The instruction has got a register and a LEA register.
             </summary>
         </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.InstructionAddress">
+        <member name="F:TUP.AsmResolver.ASM.x86OperandType.OverrideOperandOrder">
             <summary>
-            The instruction has got an instruction address operand.
-            </summary>
-        </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.ShortInstructionAddress">
-            <summary>
-            The instruction has got a short instruction address operand.
-            </summary>
-        </member>
-        <member name="F:TUP.AsmResolver.ASM.x86OperandType.Instruction">
-            <summary>
-            The instruction is a prefix to another instruction.
+            Indicates the instruction has got two operands which are in an inverted order.
             </summary>
         </member>
         <member name="T:TUP.AsmResolver.ASM.x86Register">
