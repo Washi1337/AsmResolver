@@ -418,19 +418,19 @@ namespace TUP.AsmResolver.ASM
 
 
         /* 0xFF group */
-        public static readonly x86OpCode Inc_DwordPtr_Register     = new x86OpCode("INC", new byte[] { 0xFF, 0x0 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Inc_DwordPtr_Register     = new x86OpCode("INC", new byte[] { 0xFF, 0x0 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer, 1);
         public static readonly x86OpCode Inc_DwordPtr              = new x86OpCode("INC", new byte[] {0xFF, 0x5}, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
-        public static readonly x86OpCode Dec_DwordPtr_Register     = new x86OpCode("DEC", new byte[] { 0xFF, 0x8 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Dec_DwordPtr_Register     = new x86OpCode("DEC", new byte[] { 0xFF, 0x8 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer, 1);
         public static readonly x86OpCode Dec_DwordPtr              = new x86OpCode("DEC", new byte[] { 0xFF, 0xD }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
-        public static readonly x86OpCode Call_DwordPtr_Register    = new x86OpCode("CALL", new byte[] { 0xFF, 0x10 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Call_DwordPtr_Register    = new x86OpCode("CALL", new byte[] { 0xFF, 0x10 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer, 1);
         public static readonly x86OpCode Call_DwordPtr             = new x86OpCode("CALL", new byte[] { 0xFF, 0x15 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
-        public static readonly x86OpCode Jmp_DwordPtr_Register     = new x86OpCode("JMP", new byte[] { 0xFF, 0x20 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Jmp_DwordPtr_Register     = new x86OpCode("JMP", new byte[] { 0xFF, 0x20 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer, 1);
         public static readonly x86OpCode Jmp_DwordPtr              = new x86OpCode("JMP", new byte[] { 0xFF, 0x25 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
-        public static readonly x86OpCode Jmp_Far_FwordPtr_Register = new x86OpCode("JMP FAR", new byte[] { 0xFF, 0x28 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Jmp_Far_FwordPtr_Register = new x86OpCode("JMP FAR", new byte[] { 0xFF, 0x28 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer, 1);
         public static readonly x86OpCode Jmp_Far_FwordPtr          = new x86OpCode("JMP FAR", new byte[] { 0xFF, 0x2D }, 6, x86OperandType.Fword | x86OperandType.ForceDwordPointer);
-        public static readonly x86OpCode Push_DwordPtr_Register    = new x86OpCode("PUSH", new byte[] { 0xFF, 0x30 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer);
+        public static readonly x86OpCode Push_DwordPtr_Register    = new x86OpCode("PUSH", new byte[] { 0xFF, 0x30 }, 0, x86OperandType.Register32 | x86OperandType.ForceDwordPointer, 1);
         public static readonly x86OpCode Push_DwordPtr             = new x86OpCode("PUSH", new byte[] { 0xFF, 0x35 }, 4, x86OperandType.Dword | x86OperandType.ForceDwordPointer);
-        public static readonly x86OpCode Call_Register             = new x86OpCode("CALL", new byte[] { 0xFF, 0xD0 }, 0, x86OperandType.Register32,1);
-        public static readonly x86OpCode Jmp_Register              = new x86OpCode("JMP", new byte[] { 0xFF, 0xE0 }, 0, x86OperandType.Register32,1);
+        public static readonly x86OpCode Call_Register             = new x86OpCode("CALL", new byte[] { 0xFF, 0xD0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Jmp_Register              = new x86OpCode("JMP", new byte[] { 0xFF, 0xE0 }, 0, x86OperandType.Register32, 1);
     }
 }

@@ -107,9 +107,9 @@ namespace AsmResolver
                     OpenFile(ofd.FileName);
                 else
                 {
-                    ReadingParameterDlg rdlg = new ReadingParameterDlg();
+                    PropertyGridDlg rdlg = new PropertyGridDlg(new ReadingParameters());
                     if (rdlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                        OpenFile(ofd.FileName, rdlg.Parameters);
+                        OpenFile(ofd.FileName, rdlg.Object as ReadingParameters);
                 }
             }
         }
@@ -139,7 +139,9 @@ namespace AsmResolver
             {
                 try
                 {
-                    GetCurrentAssembly().Rebuild(sfd.FileName, new WritingParameters());
+                    PropertyGridDlg dlg = new PropertyGridDlg(new WritingParameters());
+                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                        GetCurrentAssembly().Rebuild(sfd.FileName, dlg.Object as WritingParameters);
                 }
                 catch (Exception ex)
                 {

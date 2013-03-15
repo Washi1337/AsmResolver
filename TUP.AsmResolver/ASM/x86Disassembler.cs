@@ -13,7 +13,6 @@ namespace TUP.AsmResolver.ASM
     public class x86Disassembler
     {
         PeImage image;
-
         static List<x86OpCode> opcodeList;
 
         static x86Disassembler()
@@ -32,6 +31,7 @@ namespace TUP.AsmResolver.ASM
                 }
             }
         }
+
 
         /// <summary>
         /// Creates a new instance of a disassembler.
@@ -64,7 +64,7 @@ namespace TUP.AsmResolver.ASM
         {
             image.SetOffset(rawStartOffset);
             InstructionCollection instructions = new InstructionCollection();
-
+     
             long offset = rawStartOffset;
             long endOffset = rawStartOffset + length;
             while (image.stream.Position < endOffset)
@@ -73,11 +73,9 @@ namespace TUP.AsmResolver.ASM
                 instructions.Add(instruction);
                 offset += instruction.Size;
                 image.SetOffset(offset);
-                
-
             }
 
-          //  reader.Dispose();
+            //  reader.Dispose();
             return instructions;
         }
 
@@ -102,6 +100,7 @@ namespace TUP.AsmResolver.ASM
 
             return newInstruction;
         }
+
 
         private x86OpCode RetrieveNextOpCode()
         {
@@ -279,10 +278,17 @@ namespace TUP.AsmResolver.ASM
             x86OperandType operandType = instruction.OpCode.GetOverrideOperandType();
             if (operandType.HasFlag(x86OperandType.ForceDwordPointer))
             {
+
                 if (instruction.operand2 != null)
-                    instruction.operand2 = CreatePtr((uint)instruction.operand2.Value, OperandType.DwordPointer);
+                    if (instruction.operand2.Value is uint)
+                        instruction.operand2 = CreatePtr((uint)instruction.operand2.Value, OperandType.DwordPointer);
+                    else
+                        instruction.operand2.ValueType = OperandType.DwordPointer;
                 else
-                    instruction.operand1 = CreatePtr((uint)instruction.operand1.Value, OperandType.DwordPointer);
+                    if (instruction.operand1.Value is uint)
+                        instruction.operand1 = CreatePtr((uint)instruction.operand1.Value, OperandType.DwordPointer);
+                    else
+                        instruction.operand1.ValueType = OperandType.DwordPointer;
             }
             if (operandType.HasFlag(x86OperandType.OverrideOperandOrder))
             {
@@ -485,10 +491,9 @@ namespace TUP.AsmResolver.ASM
         {
             
             byte firstByte = instruction.OpCode.OpCodeBytes[0];
-            int length = instruction.Size;
             instruction.OpCode = x86OpCode.Create(x86OpCodes.Unknown);
             instruction.OpCode.opcodebytes = new byte[] { firstByte };
-            CurrentOffset -= (uint)(length - 1);
+            CurrentOffset = instruction.Offset.FileOffset + 1;
         }
 
       

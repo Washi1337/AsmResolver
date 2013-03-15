@@ -21,7 +21,9 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (method == null)
                 {
                     MetaDataTable methodtable = netheader.TablesHeap.GetTable(MetaDataTableType.Method);
-                    method = (MethodDefinition)methodtable.members[Convert.ToInt32(metadatarow.parts[1]) - 1];
+                    int index = Convert.ToInt32(metadatarow.parts[1]) - 1;
+                    if (index >= 0 && index < methodtable.members.Count)
+                        method = (MethodDefinition)methodtable.members[index];
                 }
                 return method;
             }

@@ -1,6 +1,6 @@
 ﻿namespace AsmResolver
 {
-    partial class ReadingParameterDlg
+    partial class PropertyGridDlg
     {
         /// <summary>
         /// Required designer variable.
@@ -65,7 +65,7 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
-            // ReadingParameterDlg
+            // PropertyGridDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -76,11 +76,11 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "ReadingParameterDlg";
+            this.Name = "PropertyGridDlg";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Reading Parameters";
+            this.Text = "Properties";
             this.Load += new System.EventHandler(this.ReadingParameterDlg_Load);
             this.ResumeLayout(false);
 

@@ -11,17 +11,17 @@ using TUP.AsmResolver;
 
 namespace AsmResolver
 {
-    public partial class ReadingParameterDlg : Form
+    public partial class PropertyGridDlg : Form
     {
-        public ReadingParameterDlg()
+        public PropertyGridDlg(object obj)
         {
             InitializeComponent();
-            propertyGrid1.SelectedObject = new ReadingParameters();
+            propertyGrid1.SelectedObject = obj;
         }
 
-        public ReadingParameters Parameters
+        public object Object
         {
-            get { return propertyGrid1.SelectedObject as ReadingParameters; }
+            get { return propertyGrid1.SelectedObject; }
         }
 
         private void ReadingParameterDlg_Load(object sender, EventArgs e)

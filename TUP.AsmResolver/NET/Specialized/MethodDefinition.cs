@@ -148,7 +148,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     if (nextparamlist != -1)
                         length = nextparamlist - paramlist;
                     else
-                        length = paramTable.members.Count - paramlist;
+                        length = paramTable.members.Count - (paramlist - 1);
 
                     ParameterDefinition[] paramdefs = null;
 

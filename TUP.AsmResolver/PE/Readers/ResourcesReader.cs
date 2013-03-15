@@ -13,27 +13,34 @@ namespace TUP.AsmResolver.PE.Readers
     {
         NTHeader header;
         PeImage image;
+        Stream stream;
+        BinaryReader reader;
         internal ResourceDirectory rootDirectory;
         DataDirectory resourceDirectory;
         internal ResourcesReader(NTHeader header)
         {
             this.header = header;
-            image = header.assembly.peImage;
+            this.image = header.assembly.peImage;
             resourceDirectory = header.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource];
-            ReadRootDirectory();
+            if (header.assembly.peImage.TrySetOffset(resourceDirectory.TargetOffset.FileOffset))
+            {
+                stream = header.assembly.peImage.ReadStream((int)resourceDirectory.Size);
+                reader = new BinaryReader(stream);
+                ReadRootDirectory();
+            }
         }
 
         internal void ReadRootDirectory()
         {
             if (resourceDirectory.TargetOffset.FileOffset != 0)
             {
-                rootDirectory = ReadDirectory(resourceDirectory.TargetOffset.FileOffset, null);
+                rootDirectory = ReadDirectory(0, null);
             }
         }
 
         internal ResourceDirectoryEntry ReadDirectoryEntry(uint offset)
         {
-            var rawEntry = image.ReadStructure<Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY>();
+            var rawEntry = ASMGlobals.ReadStructureFromReader<Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY>(reader);
             string customName = string.Empty;
             ResourceDirectoryEntry resourceEntry = new ResourceDirectoryEntry(image, offset, rawEntry, customName); 
 
@@ -42,9 +49,9 @@ namespace TUP.AsmResolver.PE.Readers
 
         internal ResourceDirectory ReadDirectory(uint offset, ResourceDirectoryEntry entry)
         {
-            if (image.TrySetOffset(offset))
+            if (TrySetOffset(offset))
             {
-                var rawDirectory = image.ReadStructure<Structures.IMAGE_RESOURCE_DIRECTORY>();
+                var rawDirectory = ASMGlobals.ReadStructureFromReader<Structures.IMAGE_RESOURCE_DIRECTORY>(reader);
 
                 return new ResourceDirectory(image, offset, this, entry, rawDirectory);
             }
@@ -52,7 +59,7 @@ namespace TUP.AsmResolver.PE.Readers
         }
         internal ResourceDirectoryEntry[] ReadChildEntries(uint offset, int count)
         {
-            if (image.TrySetOffset(offset))
+            if (TrySetOffset(offset))
             {
                 ResourceDirectoryEntry[] entries = ConstructChildEntries(count);
                 FillChildEntries(ref entries);
@@ -64,7 +71,7 @@ namespace TUP.AsmResolver.PE.Readers
         {
             ResourceDirectoryEntry[] entries = new ResourceDirectoryEntry[count];
             for (int i = 0; i < count; i++)
-                entries[i] = ReadDirectoryEntry((uint)image.Position);
+                entries[i] = ReadDirectoryEntry((uint)stream.Position);
             return entries;
         }
         internal void FillChildEntries(ref ResourceDirectoryEntry[] entries)
@@ -74,7 +81,7 @@ namespace TUP.AsmResolver.PE.Readers
 
                 if (!entries[i].IsEntryToData)
                 {
-                    entries[i].Directory = ReadDirectory(resourceDirectory.TargetOffset.FileOffset + entries[i].OffsetToData - 0x80000000, entries[i]);
+                    entries[i].Directory = ReadDirectory(entries[i].OffsetToData - 0x80000000, entries[i]);
                 }
                 else
                 {
@@ -84,9 +91,25 @@ namespace TUP.AsmResolver.PE.Readers
         }
         internal ResourceDataEntry ReadDataEntry(uint offset, ResourceDirectoryEntry entry)
         {
-            var rawDataEntry = image.ReadStructure<Structures.IMAGE_RESOURCE_DATA_ENTRY>();
+            var rawDataEntry = ASMGlobals.ReadStructureFromReader<Structures.IMAGE_RESOURCE_DATA_ENTRY>(reader);
             return new ResourceDataEntry(image, offset, entry, rawDataEntry);
         }
+
+        internal bool TrySetOffset(uint offset)
+        {
+            try
+            {
+                if (offset < 0 || offset > stream.Length)
+                    return false;
+                stream.Seek(offset, SeekOrigin.Begin);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
 
        // internal string GetEntryName() { }
         //internal void LoadResources()

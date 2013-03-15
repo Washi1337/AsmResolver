@@ -152,12 +152,13 @@ namespace AsmResolver
             x86disassembler.CurrentOffset = startOffset;
             try
             {
-                uint lastOffset = 0;
+                //uint lastOffset = 0;
                 while (x86disassembler.CurrentOffset < endOffset)
                 {
-                    if (lastOffset == x86disassembler.CurrentOffset)
-                        System.Diagnostics.Debugger.Break();
-                    lastOffset = x86disassembler.CurrentOffset;
+                    // Debugging purposes:
+                    //if (lastOffset == x86disassembler.CurrentOffset)
+                    //    System.Diagnostics.Debugger.Break();
+                    //lastOffset = x86disassembler.CurrentOffset;
 
                     x86Instruction instruction = x86disassembler.DisassembleNextInstruction();
                

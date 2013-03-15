@@ -33,7 +33,6 @@ namespace TUP.AsmResolver.PE.Writers
 
         public void RunProcedure()
         {
-
             WriteMZHeader();
             WriteNTHeaders();
         }
