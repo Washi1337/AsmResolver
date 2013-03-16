@@ -6,7 +6,7 @@ AsmResolver is a library that allows you to read and edit any kind of PE file, i
 Usage
 =====
 
-To use AsmResolver in Visual Studio, simply add the library to your references.
+To use AsmResolver in Visual Studio, simply add the library to your references. To find tutorials, go to the special [AsmResolver Wiki]("https://github.com/TheUnknownProgrammer/AsmResolver/wiki")
 
 Structure
 =========
