@@ -277,6 +277,15 @@ namespace TUP.AsmResolver
         }
 
         /// <summary>
+        /// Saves the assembly's image to the specified output stream. Added or removed members might not be saved.
+        /// </summary>
+        /// <param name="outputStream"></param>
+        public void QuickSave(Stream outputStream)
+        {
+            peImage.stream.CopyTo(outputStream);
+        }
+
+        /// <summary>
         /// Rebuilds the assembly and saves it to the specified file path.
         /// </summary>
         /// <param name="path"></param>

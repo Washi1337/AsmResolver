@@ -84,7 +84,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (signature != null)
                     return signature;
-                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[4]),this);
+                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[4]),this, DeclaringType);
                 return signature;
                 //return Convert.ToUInt32(metadatarow.parts[4]); 
             }

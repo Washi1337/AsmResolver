@@ -8,17 +8,23 @@ namespace TUP.AsmResolver.NET.Specialized
     public class GenericParameter : TypeReference
     {
 
-        MetaDataMember owner = null;
-        string name = string.Empty;
+        internal MetaDataMember owner = null;
+        internal string name = string.Empty;
 
         public ushort Index
         {
             get { return Convert.ToUInt16(metadatarow.parts[0]); }
+            set
+            {
+                metadatarow.parts[0] = value;
+            }
         }
+
         public GenericParameterAttributes GenericAttributes
         {
             get { return (GenericParameterAttributes)Convert.ToUInt16(metadatarow.parts[1]); }
         }
+
         public MetaDataMember Owner
         {
             get 
@@ -28,6 +34,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return owner;
             }
         }
+
         public override string Name
         {
             get {
@@ -36,6 +43,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
+
         public override string Namespace
         {
             get
@@ -43,6 +51,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return "";
             }
         }
+
         public override string FullName
         {
             get
@@ -50,8 +59,6 @@ namespace TUP.AsmResolver.NET.Specialized
                 return Name;
             }
         }
-
-        
 
     }
 }

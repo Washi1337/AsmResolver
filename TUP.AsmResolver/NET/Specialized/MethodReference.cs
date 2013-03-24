@@ -10,13 +10,18 @@ namespace TUP.AsmResolver.NET.Specialized
         internal MethodSignature signature = null;
         TypeReference declaringType = null;
         string name = null;
+        GenericParameter[] genericparams = null;
 
         public override TypeReference DeclaringType
         {
             get
             {
                 if (declaringType == null)
-                    declaringType = (TypeReference)netheader.TablesHeap.MemberRefParent.GetMember(Convert.ToInt32(metadatarow.parts[0]));
+                {
+                    MetaDataMember member;
+                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out member);
+                    declaringType = member as TypeReference;
+                }
                 return declaringType;
             }
         }
@@ -35,11 +40,12 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (signature != null)
                     return signature;
-                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), this);
+                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), this, this.DeclaringType);
                 return signature;
                 //return Convert.ToUInt32(metadatarow.parts[2]); 
             }
         }
+
         public virtual bool IsDefinition
         {
             get { return false; }
@@ -79,6 +85,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
+            genericparams = null;
             signature = null;
             declaringType = null;
             name = null;

@@ -5,9 +5,8 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public interface IGenericParametersProvider
+    public interface IGenericArgumentsProvider
     {
-        GenericParameter[] GenericParameters { get; }
-        bool IsDefinition { get; }
+        TypeReference[] GenericArguments { get; }
     }
 }

@@ -16,7 +16,11 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (declaringType == null)
-                    declaringType = (TypeReference)netheader.TablesHeap.MemberRefParent.GetMember(Convert.ToInt32(metadatarow.parts[0]));
+                {
+                    MetaDataMember member;
+                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out member);
+                    declaringType = member as TypeReference;
+                }
                 return declaringType;
             }
 
@@ -51,7 +55,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (signature != null)
                     return signature;
-                signature = (FieldSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), null);
+                signature = (FieldSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), this.DeclaringType, null);
                 return signature;
             }
         }

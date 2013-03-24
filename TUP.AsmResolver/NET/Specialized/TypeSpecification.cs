@@ -5,12 +5,13 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class TypeSpecification : TypeReference 
+    public class TypeSpecification : TypeReference , ISpecification
     {
         internal TypeSpecification()
         {
         }
-        TypeReference originaltype;
+
+        private TypeReference originaltype;
 
         public TypeSpecification(TypeReference typeRef)
         {
@@ -23,8 +24,17 @@ namespace TUP.AsmResolver.NET.Specialized
             IsGenericInstance = typeRef.IsGenericInstance;
             IsPinned = typeRef.IsPinned;
             IsValueType = typeRef.IsValueType;
+        }
 
-            
+        public ISpecification TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        {
+            if (this is GenericInstanceType)
+            {
+                TypeReference originalType = netheader.BlobHeap.ReadTypeSignature(Signature, paramProvider, argProvider);
+
+                return new TypeSpecification(originaltype) { metadatarow = this.metadatarow };
+            }
+            return this;
         }
 
         public TypeReference OriginalType
@@ -32,7 +42,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (originaltype == null)
-                    originaltype = netheader.BlobHeap.ReadTypeSignature(Signature, this);
+                    originaltype = netheader.BlobHeap.ReadTypeSignature(Signature, this, this);
                 return originaltype;
             }
             internal set { originaltype = value; }

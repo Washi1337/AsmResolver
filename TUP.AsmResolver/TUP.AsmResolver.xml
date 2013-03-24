@@ -2761,6 +2761,12 @@
             </summary>
             <param name="path">The path to save the assembly.</param>
         </member>
+        <member name="M:TUP.AsmResolver.Win32Assembly.QuickSave(System.IO.Stream)">
+            <summary>
+            Saves the assembly's image to the specified output stream. Added or removed members might not be saved.
+            </summary>
+            <param name="outputStream"></param>
+        </member>
         <member name="M:TUP.AsmResolver.Win32Assembly.Rebuild(System.String,TUP.AsmResolver.WritingParameters)">
             <summary>
             Rebuilds the assembly and saves it to the specified file path.

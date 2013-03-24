@@ -5,10 +5,13 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class MethodSpecification : MethodReference 
+    public class MethodSpecification : MethodReference , ISpecification
     {
         MethodReference originalmethod;
-        TypeReference[] genericarguments;
+        TypeReference[] genericArgs;
+        GenericParameter[] genericParams;
+        IGenericArgumentsProvider argProvider;
+        IGenericParametersProvider paramProvider;
 
         internal MethodSpecification()
         {
@@ -16,6 +19,22 @@ namespace TUP.AsmResolver.NET.Specialized
         public MethodSpecification(MethodReference methodRef)
         {
             OriginalMethod = methodRef;
+            paramProvider = methodRef;
+            argProvider = methodRef.DeclaringType;
+            
+        }
+
+        public ISpecification TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        {
+            if (this.IsGenericMethod)
+            {
+                MethodSpecification copy = new MethodSpecification(OriginalMethod);
+                copy.paramProvider = paramProvider ;
+                copy.argProvider = argProvider;
+                copy.metadatarow = this.metadatarow;
+                return copy;
+            }
+            return this;
         }
 
         public MethodReference OriginalMethod
@@ -70,22 +89,27 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (originalmethod != null)
-                    return originalmethod.GenericParameters;
-                else
-                    return null;
+                if (genericParams == null)
+                {
+                    genericParams = new GenericParameter[GenericArguments.Length];
+                    for (int i = 0; i < genericParams.Length; i++)
+                        genericParams[i] = new GenericParameter() { name = "!!" + i, owner = this };
+                }
+                return genericParams;
             }
         }
+
         public TypeReference[] GenericArguments
         {
             get
             {
-                if (genericarguments == null)
-                    genericarguments = netheader.BlobHeap.ReadGenericParametersSignature(SpecificationSignature, this);
-                return genericarguments;
+                if (genericArgs == null)
+                    genericArgs = netheader.BlobHeap.ReadGenericArgumentsSignature(SpecificationSignature, paramProvider, argProvider );
+                return genericArgs;
 
             }
         }
+
         public override MethodSignature Signature
         {
             get
@@ -93,6 +117,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return OriginalMethod.Signature;
             }
         }
+
         public uint SpecificationSignature
         {
             get { return Convert.ToUInt32(metadatarow.parts[1]); }
@@ -117,5 +142,6 @@ namespace TUP.AsmResolver.NET.Specialized
             return builder.ToString();
         }
         //public uint Signature { get { return Convert.ToUInt32(metadatarow.parts[1]); } }
+
     }
 }

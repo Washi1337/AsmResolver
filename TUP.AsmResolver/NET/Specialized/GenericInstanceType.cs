@@ -14,6 +14,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         }
 
+        internal TypeReference[] genericArguments;
+
         public override bool IsGenericInstance
         {
             get
@@ -22,7 +24,8 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public TypeReference[] GenericArguments { get; internal set; }
+
+        public override TypeReference[] GenericArguments { get { return genericArguments; } }
 
     }
 }

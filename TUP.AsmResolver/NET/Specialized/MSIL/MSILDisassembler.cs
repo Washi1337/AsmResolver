@@ -188,6 +188,8 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                         try
                         {
                             object operand = tokenresolver.ResolveMember(metadata);
+                            //if (operand is ISpecification)
+                            //    operand = ((ISpecification)operand).TransformWith(MethodBody.Method, MethodBody.Method.DeclaringType);
 
                             if ((operand is TypeSpecification) && (operand as TypeSpecification).OriginalType is GenericParamReference)
                             {

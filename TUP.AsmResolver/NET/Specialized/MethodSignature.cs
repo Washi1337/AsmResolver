@@ -25,5 +25,6 @@ namespace TUP.AsmResolver.NET.Specialized
             builder.Append(")");
             return builder.ToString();
         }
+
     }
 }

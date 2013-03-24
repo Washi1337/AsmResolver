@@ -34,7 +34,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (propertySig == null)
                 {
-                    propertySig = netheader.BlobHeap.ReadPropertySignature(Convert.ToUInt32(metadatarow.parts[2]));
+                    propertySig = netheader.BlobHeap.ReadPropertySignature(Convert.ToUInt32(metadatarow.parts[2]), this);
                 }
                 return propertySig;
             }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class TypeReference : MemberReference, IGenericParametersProvider
+    public class TypeReference : MemberReference, IGenericParametersProvider, IGenericArgumentsProvider
     {
         internal ElementType elementType = ElementType.None;
 
@@ -95,6 +95,8 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get { return null; }
         }
+
+        public virtual TypeReference[] GenericArguments { get { return null; } }
 
         public override void ClearCache()
         {
