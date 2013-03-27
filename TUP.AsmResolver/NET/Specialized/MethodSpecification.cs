@@ -109,7 +109,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
             }
         }
-
+         
         public override MethodSignature Signature
         {
             get

@@ -13,6 +13,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             Bytes = bytes;
             OperandType = operandType;
         }
+        private MSILCode? code;
 
         public string Name { get; internal set; }
         public byte[] Bytes { get; internal set; }
@@ -21,10 +22,20 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             get
             {
-                foreach (var field in typeof(MSILCode).GetFields())
-                    if (field.Name.ToLower() == Name.ToLower().Replace(".", "_"))
-                        return (MSILCode)field.GetValue(null);
-                return MSILCode.Nop;
+                if (!code.HasValue)
+                {
+                    foreach (var field in typeof(MSILCode).GetFields())
+                        if (field.Name.ToLower() == Name.ToLower().Replace(".", "_"))
+                        {
+                            code = (MSILCode)field.GetValue(null);
+                            break;
+                        }
+                }
+
+                if (!code.HasValue)
+                    return MSILCode.Nop;
+                
+                return code.Value;
             }
         }
         public override string ToString()

@@ -177,11 +177,14 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (semantics == null && netheader.TablesHeap.HasTable(MetaDataTableType.MethodSemantics))
                 {
                     foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).members)
-                        if (((MethodSemantics)member).Method.metadatatoken == this.metadatatoken)
+                    {
+                        MethodSemantics methodSem = member as MethodSemantics;
+                        if (methodSem.Method.metadatatoken == this.metadatatoken)
                         {
-                            semantics = (MethodSemantics)member;
+                            semantics = methodSem;
                             break;
                         }
+                    }
                 }
 
                 return semantics;

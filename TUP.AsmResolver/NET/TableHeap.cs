@@ -162,7 +162,7 @@ namespace TUP.AsmResolver.NET
                 else
                     return null;
             }
-            return tables.FirstOrDefault(t => t != null && t.type == type);
+            return tables[(int)type];
         }
 
         public void AddTable(MetaDataTableType type)
