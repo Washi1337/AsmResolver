@@ -18,7 +18,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam);
                     int index = Convert.ToInt32(metadatarow.parts[0]) - 1;
-                    if (index > 0 || index < table.members.Count)
+                    if (index > 0 || index < table.members.Length)
                         owner = table.members[index] as GenericParameter;
                 }
                 return owner;

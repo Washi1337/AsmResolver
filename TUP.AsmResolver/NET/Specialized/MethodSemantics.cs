@@ -22,7 +22,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     MetaDataTable methodtable = netheader.TablesHeap.GetTable(MetaDataTableType.Method);
                     int index = Convert.ToInt32(metadatarow.parts[1]) - 1;
-                    if (index >= 0 && index < methodtable.members.Count)
+                    if (index >= 0 && index < methodtable.members.Length)
                         method = (MethodDefinition)methodtable.members[index];
                 }
                 return method;

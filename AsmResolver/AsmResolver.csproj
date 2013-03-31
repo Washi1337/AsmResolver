@@ -87,6 +87,7 @@
     <Compile Include="PropertyGridDlg.Designer.cs">
       <DependentUpon>PropertyGridDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="PropertyGridUIEditor.cs" />
     <Compile Include="ResourceControl.cs">
       <SubType>Component</SubType>
     </Compile>

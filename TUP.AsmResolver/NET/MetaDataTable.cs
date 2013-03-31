@@ -13,12 +13,11 @@ namespace TUP.AsmResolver.NET
 
         internal MetaDataTable(TablesHeap tableHeap)
         {
-            TablesHeap = tableHeap;
-            members = new List<MetaDataMember>();
+            TablesHeap = tableHeap; 
         }
         internal int rowAmount;
         internal long rowAmountOffset;
-        internal List<MetaDataMember> members;
+        internal MetaDataMember[] members;
         internal MetaDataTableType type;
         
         /// <summary>
@@ -50,7 +49,7 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public MetaDataMember[] Members
         {
-            get { return members.ToArray(); }
+            get { return members; }
         }
        
         /// <summary>
@@ -77,7 +76,8 @@ namespace TUP.AsmResolver.NET
             member.MetaDataRow.offset = 0;
             rowAmount++;
             member.netheader = TablesHeap.netheader;
-            members.Add(member);
+            Array.Resize(ref members, members.Length + 1);
+            members[members.Length - 1] = member;
         }
 
         /// <summary>

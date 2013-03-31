@@ -21,7 +21,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     int index = Convert.ToInt32(metadatarow.parts[0]);
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.Field);
-                    if (index > 0 && index <= table.members.Count)
+                    if (index > 0 && index <= table.members.Length)
                         field = table.members[index - 1] as FieldDefinition;
                 }
                 return field;

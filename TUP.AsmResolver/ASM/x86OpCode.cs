@@ -119,17 +119,6 @@ namespace TUP.AsmResolver.ASM
             return res;
         }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is x86OpCode)
-            {
-                return IsBasedOn((x86OpCode)obj);
-            }
-            else
-                return false;
-        }
-
-
         /// <summary>
         /// Returns a boolean value if the current opcode is based on the given opcode.
         /// </summary>

@@ -124,14 +124,14 @@ namespace AsmResolver
             return builder.ToString();
         }
 
-        async void disassembleButton_Click(object sender, EventArgs e)
+        void disassembleButton_Click(object sender, EventArgs e)
         {
             try
             {
                 startOffset = uint.Parse(offsetBox.Text, NumberStyles.HexNumber);
                 endOffset = startOffset + uint.Parse(sizeBox.Text, NumberStyles.HexNumber);
             }
-            catch (Exception ex)
+            catch
             {
                 MessageBox.Show("Please enter a valid offset and size");
                 return;
@@ -141,9 +141,9 @@ namespace AsmResolver
             new Action(Disassemble).BeginInvoke(DisassembleCallBack, null);
         }
 
-        async void analyseButton_Click(object sender, EventArgs e)
+        void analyseButton_Click(object sender, EventArgs e)
         {
-            await Analyse(disassemblyView.Items);
+            Analyse(disassemblyView.Items);
         }
 
         void Disassemble()
@@ -210,7 +210,7 @@ namespace AsmResolver
             }));
         }
 
-        async Task Analyse(ListView.ListViewItemCollection items)
+        void Analyse(ListView.ListViewItemCollection items)
         {
             for (int i = 0; i < items.Count; i++)
             {

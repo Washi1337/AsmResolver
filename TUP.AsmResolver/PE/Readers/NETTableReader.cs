@@ -189,126 +189,127 @@ namespace TUP.AsmResolver.PE.Readers
                 if (table != null)
                 {
                     table.TableOffset = (uint)(tablesHeap.StreamOffset + reader.BaseStream.Position);
+                    table.members = new MetaDataMember[table.AmountOfRows];
                     for (uint i = 0; i < table.AmountOfRows; i++)
                     {
                         switch (table.Type)
                         {
                             case MetaDataTableType.Module:
-                                table.members.Add(ReadModule());
+                                table.members[i] = ReadModule();
                                 break;
                             case MetaDataTableType.TypeRef:
-                                table.members.Add(ReadTypeRef());
+                                table.members[i] = ReadTypeRef();
                                 break;
                             case MetaDataTableType.TypeDef:
-                                table.members.Add(ReadTypeDef());
+                                table.members[i] = ReadTypeDef();
                                 break;
                             case MetaDataTableType.Field:
-                                table.members.Add(ReadFieldDef());
+                                table.members[i] = ReadFieldDef();
                                 break;
                             case MetaDataTableType.Method:
-                                table.members.Add(ReadMethodDef());
+                                table.members[i] = ReadMethodDef();
                                 break;
                             case MetaDataTableType.ParamPtr:
-                                table.members.Add(ReadParamPtr());
+                                table.members[i] = ReadParamPtr();
                                 break;
                             case MetaDataTableType.Param:
-                                table.members.Add(ReadParamDef());
+                                table.members[i] = ReadParamDef();
                                 break;
                             case MetaDataTableType.InterfaceImpl:
-                                table.members.Add(ReadInterfaceImpl());
+                                table.members[i] = ReadInterfaceImpl();
                                 break;
                             case MetaDataTableType.MemberRef:
-                                table.members.Add(ReadMemberRef());
+                                table.members[i] = ReadMemberRef();
                                 break;
                             case MetaDataTableType.Constant:
-                                table.members.Add(ReadConstant());
+                                table.members[i] = ReadConstant();
                                 break;
                             case MetaDataTableType.CustomAttribute:
-                                table.members.Add(ReadCustomAttribute());
+                                table.members[i] = ReadCustomAttribute();
                                 break;
                             case MetaDataTableType.FieldMarshal:
-                                table.members.Add(ReadFieldMarshal());
+                                table.members[i] = ReadFieldMarshal();
                                 break;
                             case MetaDataTableType.DeclSecurity:
-                                table.members.Add(ReadSecurityDecl());
+                                table.members[i] = ReadSecurityDecl();
                                 break;
                             case MetaDataTableType.ClassLayout:
-                                table.members.Add(ReadClassLayout());
+                                table.members[i] = ReadClassLayout();
                                 break;
                             case MetaDataTableType.FieldLayout:
-                                table.members.Add(ReadFieldLayout());
+                                table.members[i] = ReadFieldLayout();
                                 break;
                             case MetaDataTableType.StandAloneSig:
-                                table.members.Add(ReadStandAloneSig());
+                                table.members[i] = ReadStandAloneSig();
                                 break;
                             case MetaDataTableType.EventMap:
-                                table.members.Add(ReadEventMap());
+                                table.members[i] = ReadEventMap();
                                 break;
                             case MetaDataTableType.Event:
-                                table.members.Add(ReadEventDef());
+                                table.members[i] = ReadEventDef();
                                 break;
                             case MetaDataTableType.PropertyMap:
-                                table.members.Add(ReadPropertyMap());
+                                table.members[i] = ReadPropertyMap();
                                 break;
                             case MetaDataTableType.Property:
-                                table.members.Add(ReadPropertyDef());
+                                table.members[i] = ReadPropertyDef();
                                 break;
                             case MetaDataTableType.MethodSemantics:
-                                table.members.Add(ReadMethodSemantics());
+                                table.members[i] = ReadMethodSemantics();
                                 break;
                             case MetaDataTableType.MethodImpl:
-                                table.members.Add(ReadMethodImpl());
+                                table.members[i] = ReadMethodImpl();
                                 break;
                             case MetaDataTableType.ModuleRef:
-                                table.members.Add(ReadModuleRef());
+                                table.members[i] = ReadModuleRef();
                                 break;
                             case MetaDataTableType.TypeSpec:
-                                table.members.Add(ReadTypeSpec());
+                                table.members[i] = ReadTypeSpec();
                                 break;
                             case MetaDataTableType.MethodSpec:
-                                table.members.Add(ReadMethodSpec());
+                                table.members[i] = ReadMethodSpec();
                                 break;
                             case MetaDataTableType.ImplMap:
-                                table.members.Add(ReadPInvokeImpl());
+                                table.members[i] = ReadPInvokeImpl();
                                 break;
                             case MetaDataTableType.FieldRVA:
-                                table.members.Add(ReadFieldRVA());
+                                table.members[i] = ReadFieldRVA();
                                 break;
                             case MetaDataTableType.Assembly:
-                                table.members.Add(ReadAssemblyDef());
+                                table.members[i] = ReadAssemblyDef();
                                 break;
                             case MetaDataTableType.AssemblyRef:
-                                table.members.Add(ReadAssemblyRef());
+                                table.members[i] = ReadAssemblyRef();
                                 break;
                             case MetaDataTableType.File:
-                                table.members.Add(ReadFileReference());
+                                table.members[i] = ReadFileReference();
                                 break;
                             case MetaDataTableType.ExportedType:
-                                table.members.Add(ReadExportedType());
+                                table.members[i] = ReadExportedType();
                                 break;
                             case MetaDataTableType.ManifestResource:
-                                table.members.Add(ReadManifestRes());
+                                table.members[i] = ReadManifestRes();
                                 break;
                             case MetaDataTableType.NestedClass:
-                                table.members.Add(ReadNestedClass());
+                                table.members[i] = ReadNestedClass();
                                 break;
                             case MetaDataTableType.EncLog:
-                                table.members.Add(ReadEnCLog());
+                                table.members[i] = ReadEnCLog();
                                 break;
                             case MetaDataTableType.EncMap:
-                                table.members.Add(ReadEnCMap());
+                                table.members[i] = ReadEnCMap();
                                 break;
                             case MetaDataTableType.GenericParam:
-                                table.members.Add(ReadGenericParam());
+                                table.members[i] = ReadGenericParam();
                                 break;
                             case MetaDataTableType.GenericParamConstraint:
-                                table.members.Add(ReadGenericParamConstraint());
+                                table.members[i] = ReadGenericParamConstraint();
                                 break;
                                 
                         }
-                        if (table.members.Count > 0)
+                        if (table.members.Length > 0)
                         {
-                            table.members.Last().metadatatoken = ConstructMetaDataToken(table.type, i);
+                            table.members[i].metadatatoken = ConstructMetaDataToken(table.type, i);
                         }
                     }
                 }

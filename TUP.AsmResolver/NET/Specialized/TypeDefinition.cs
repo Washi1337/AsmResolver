@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class TypeDefinition : TypeReference
     {
-        private MethodDefinition[] methods = null;
-        private FieldDefinition[] fields = null;
+        private MemberRange<MethodDefinition> methodRange = null;
+        private MemberRange<FieldDefinition> fieldRange = null;
         private PropertyMap propertymap = null;
         private EventMap eventmap = null;
         private NestedClass[] nestedClasses = null;
@@ -32,6 +32,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
+
         public override string FullName
         {
             get
@@ -123,6 +124,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get { return Convert.ToUInt32(metadatarow.parts[4]); }
         }
+
         public uint MethodList
         {
             get { return Convert.ToUInt32(metadatarow.parts[5]); }
@@ -130,46 +132,11 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public FieldDefinition[] Fields
         {
-            get {
-
-                if (this.fields != null || !netheader.TablesHeap.HasTable(MetaDataTableType.Field))
-                    return this.fields;
-
-                int fieldlist = Convert.ToInt32(metadatarow.parts[4]);
-
-                int nextfieldlist = -1;
-
-                if (netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).members.Last().metadatatoken != this.metadatatoken)
-                    nextfieldlist = Convert.ToInt32(netheader.TokenResolver.ResolveMember(this.MetaDataToken + 1).metadatarow.parts[4]);
-
-
-                MetaDataTable fieldTable = netheader.TablesHeap.GetTable(MetaDataTableType.Field);
-
-                int length = -1;
-                if (nextfieldlist != -1)
-                    length = nextfieldlist - fieldlist;
-                else
-                    length = fieldTable.members.Count - (fieldlist - 1);
-
-                if (length > 0)
-                {
-
-                    FieldDefinition[] fields = new FieldDefinition[length];
-                    for (int i = 0; i < fields.Length; i++)
-                    {
-                        int index = fieldlist + i - 1;
-                        if (index >= 0 && index < fieldTable.members.Count)
-                            fields[i] = (FieldDefinition)fieldTable.members[fieldlist + i - 1];
-                    }
-
-                    this.fields = fields;
-                    return fields;
-                }
-
-                return null;
-
-                //return Convert.ToUInt32(metadatarow.parts[4]); 
-            
+            get 
+            {
+                if (fieldRange == null)
+                    fieldRange = MemberRange.CreateRange<FieldDefinition>(this, 4, NETHeader.TablesHeap.GetTable(MetaDataTableType.Field, false));
+                return fieldRange.Members;
             }
         }
 
@@ -177,44 +144,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-
-                if (this.methods != null || !netheader.TablesHeap.HasTable(MetaDataTableType.Method))
-                    return this.methods;
-
-                int methodlist = Convert.ToInt32(metadatarow.parts[5]);
-
-                int nextmethodlist = -1;
-
-                if (netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).members.Last().metadatatoken != this.metadatatoken)
-                    nextmethodlist = Convert.ToInt32(netheader.TokenResolver.ResolveMember(this.MetaDataToken + 1).metadatarow.parts[5]);
-
-
-                MetaDataTable methodTable = netheader.TablesHeap.GetTable(MetaDataTableType.Method);
-                int length = -1;
-
-                if (nextmethodlist != -1)
-                    length = nextmethodlist - methodlist;
-                else
-                    length = methodTable.members.Count - (methodlist - 1);
-
-                if (length > 0)
-                {
-                    MethodDefinition[] methods = new MethodDefinition[length];
-                    for (int i = 0; i < methods.Length; i++)
-                    {
-                        int index = methodlist + i - 1;
-                        if (index >= 0 && index < methodTable.members.Count )
-                            methods[i] = (MethodDefinition)methodTable.members[methodlist + i - 1];
-                        
-                    }
-
-                    this.methods = methods;
-                    return methods;
-                }
-                return null;
-
-                // return Convert.ToUInt32(metadatarow.parts[5]); 
-            
+                if (methodRange == null)
+                    methodRange = MemberRange.CreateRange<MethodDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Method, false));
+                return methodRange.Members;
             }
         }
 
@@ -241,6 +173,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return this.interfaces;
             }
         }
+
         public PropertyMap PropertyMap
         {
             get
@@ -262,6 +195,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
             }
         }
+
         public EventMap EventMap
         {
             get
@@ -281,6 +215,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return eventmap;
             }
         }
+
         public NestedClass[] NestedClasses
         {
             get
@@ -301,6 +236,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return nestedClasses;
             }
         }
+
         public bool IsNested
         {
             get{
@@ -342,6 +278,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             return BaseType != null && BaseType.FullName == typeRef.FullName;
         }
+
         public bool IsBasedOn(string fullname)
         {
             return BaseType != null && BaseType.FullName == fullname;

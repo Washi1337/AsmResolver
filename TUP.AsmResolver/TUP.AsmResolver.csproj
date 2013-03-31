@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TUP.AsmResolver</RootNamespace>
     <AssemblyName>TUP.AsmResolver</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +26,7 @@
     <NoWarn>
     </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,6 +39,7 @@
     <DocumentationFile>TUP.AsmResolver.xml</DocumentationFile>
     <NoWarn>
     </NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -58,6 +61,8 @@
     <Compile Include="ICacheProvider.cs" />
     <Compile Include="IDataDirectoryProvider.cs" />
     <Compile Include="NameDemangler.cs" />
+    <Compile Include="NET\IImageProvider.cs" />
+    <Compile Include="NET\MemberRange.cs" />
     <Compile Include="NET\NETGlobals.cs" />
     <Compile Include="NET\Specialized\ArrayDimension.cs" />
     <Compile Include="NET\BlobSignatureReader.cs" />
@@ -90,6 +95,7 @@
     <Compile Include="PE\Writers\ImportExportWriter.cs" />
     <Compile Include="PE\Writers\IReconstructionTask.cs" />
     <Compile Include="PE\Writers\ManagedDataWriter.cs" />
+    <Compile Include="PE\Writers\MethodBodyWriter.cs" />
     <Compile Include="PE\Writers\NETTableReconstructor.cs" />
     <Compile Include="PE\Writers\ResourceWriter.cs" />
     <Compile Include="PE\Writers\SectionWriter.cs" />
@@ -218,6 +224,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SubSystem.cs" />
     <Compile Include="NET\TableHeap.cs" />
+    <Compile Include="PE\Writers\Table.cs" />
     <Compile Include="Win32Assembly.cs" />
     <Compile Include="NTHeader.cs" />
     <Compile Include="WritingParameters.cs" />

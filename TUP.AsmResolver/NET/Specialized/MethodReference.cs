@@ -10,7 +10,6 @@ namespace TUP.AsmResolver.NET.Specialized
         internal MethodSignature signature = null;
         TypeReference declaringType = null;
         string name = null;
-        GenericParameter[] genericparams = null;
 
         public override TypeReference DeclaringType
         {
@@ -85,7 +84,6 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            genericparams = null;
             signature = null;
             declaringType = null;
             name = null;

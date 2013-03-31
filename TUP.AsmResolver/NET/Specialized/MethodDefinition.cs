@@ -7,8 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class MethodDefinition : MethodReference
     {
-        ParameterDefinition[] paramdefs = null;
-        MethodSignature signature = null;
+        MemberRange<ParameterDefinition> paramRange = null;
         MethodSemantics semantics = null;
         MSIL.MethodBody body = null;
         TypeReference declaringtype;
@@ -130,43 +129,13 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ParameterDefinition[] Parameters
         {
-            get {
-                if (this.paramdefs != null)
-                    return this.paramdefs;
-                if (netheader.TablesHeap.HasTable(MetaDataTableType.Param))
+            get 
+            {
+                if (paramRange == null)
                 {
-                    int paramlist = Convert.ToInt32(metadatarow.parts[5]);
-
-                    int nextparamlist = -1;
-
-                    if (netheader.TablesHeap.GetTable( MetaDataTableType.Method).members.Last().metadatatoken != this.metadatatoken)
-                        nextparamlist = Convert.ToInt32(netheader.TokenResolver.ResolveMember(this.MetaDataToken + 1).metadatarow.parts[5]);
-
-
-                    MetaDataTable paramTable = netheader.TablesHeap.GetTable(MetaDataTableType.Param);
-                    int length = -1;
-                    if (nextparamlist != -1)
-                        length = nextparamlist - paramlist;
-                    else
-                        length = paramTable.members.Count - (paramlist - 1);
-
-                    ParameterDefinition[] paramdefs = null;
-
-                    if (length > -1)
-                    {
-                        paramdefs = new ParameterDefinition[length];
-                        if (length > paramTable.members.Count)
-                            return null;
-                        for (int i = 0; i < paramdefs.Length; i++)
-                        {
-                            paramdefs[i] = (ParameterDefinition)paramTable.members[paramlist + i - 1];
-                        }
-
-                    }
-                    this.paramdefs = paramdefs;
+                    paramRange = MemberRange.CreateRange<ParameterDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Param, false));
                 }
-                return this.paramdefs;
-                //return Convert.ToUInt32(metadatarow.parts[5]); 
+                return paramRange.Members;
             }
         }
 

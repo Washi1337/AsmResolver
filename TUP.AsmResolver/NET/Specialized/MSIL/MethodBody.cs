@@ -6,13 +6,14 @@ using TUP.AsmResolver.PE;
 using TUP.AsmResolver.PE.Readers;
 namespace TUP.AsmResolver.NET.Specialized.MSIL
 {
-    public class MethodBody
+    public class MethodBody : IImageProvider, ICacheProvider
     {
-        NETMethodReader reader;
-
         internal MethodBody()
         {
         }
+
+        NETMethodReader reader;
+        MSILInstruction[] instructions;
 
         public static MethodBody FromMethod(MethodDefinition methodDef)
         {
@@ -108,12 +109,6 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 
         }
 
-        public MSILInstruction[] Disassemble()
-        {
-            MSILDisassembler disassembler = new MSILDisassembler(this);
-            return disassembler.Disassemble();
-        }
-
         public MethodBodySection[] ExtraSections
         {
             get
@@ -128,6 +123,32 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 else
                     return null;
             }
+        }
+
+        public bool HasImage
+        {
+            get 
+            {
+                return Method.HasImage;
+            }
+        }
+
+        public MSILInstruction[] Instructions
+        {
+            get
+            {
+                if (instructions == null)
+                {
+                    MSILDisassembler disassembler = new MSILDisassembler(this);
+                    instructions = disassembler.Disassemble();
+                }
+                return instructions;
+            }
+        }
+
+        public void ClearCache()
+        {
+            instructions = null;
         }
     }
 }

@@ -9,7 +9,6 @@ namespace TUP.AsmResolver.NET.Specialized
     {
 
         internal MetaDataMember owner = null;
-        internal string name = string.Empty;
 
         public ushort Index
         {
@@ -38,7 +37,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public override string Name
         {
             get {
-                if (name == string.Empty)
+                if (string.IsNullOrEmpty(name))
                     name = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[3]));
                 return name;
             }

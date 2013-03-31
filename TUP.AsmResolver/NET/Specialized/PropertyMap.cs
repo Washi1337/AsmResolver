@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class PropertyMap : MetaDataMember
     {
-        PropertyDefinition[] properties;
+        MemberRange<PropertyDefinition> propertyRange;
         TypeDefinition parent;
         public TypeDefinition Parent
         {
@@ -17,7 +17,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
                     int index = Convert.ToInt32(metadatarow.parts[0]) - 1;
-                    if (index > 0 && index < table.members.Count)
+                    if (index > 0 && index < table.members.Length)
                         parent = table.members[index] as TypeDefinition;
                 }
                 return parent;
@@ -27,48 +27,12 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (properties == null)
+                if (propertyRange == null)
                 {
-                    int propertylist = Convert.ToInt32(metadatarow.parts[1]);
-
-                    int nextpropertylist = -1;
-
-                    if (netheader.TablesHeap.GetTable( MetaDataTableType.PropertyMap).members.Last().metadatatoken != this.metadatatoken)
-                        nextpropertylist = Convert.ToInt32(netheader.TokenResolver.ResolveMember(this.MetaDataToken + 1).metadatarow.parts[1]);
-
-
-                    MetaDataTable propertyTable = netheader.TablesHeap.GetTable(MetaDataTableType.Property);
-                    int length = -1;
-                    if (nextpropertylist != -1)
-                        length = nextpropertylist - propertylist;
-                    else
-                        length = propertyTable.members.Count - propertylist + 1;
-
-
-                    if (length > -1)
-                    {
-                        PropertyDefinition[] propertydefs = new PropertyDefinition[length];
-                        for (int i = 0; i < propertydefs.Length; i++)
-                        {
-                            int index = propertylist + i - 1;
-                            if (index >= 0 && index < propertyTable.members.Count)
-                                propertydefs[i] = (PropertyDefinition)propertyTable.members[propertylist + i - 1];
-                        }
-                       // int actualsize = 0;
-                       // for (int i = length-1; i > 0; i--)
-                       // {
-                       //     if (propertydefs[i] != null)
-                       //     {
-                       //         actualsize = i;
-                       //         break;
-                       //     }
-                       // }
-                        // Array.Resize<PropertyDefinition>(ref propertydefs, actualsize);
-                        this.properties = propertydefs;
-                    }
+                    propertyRange = MemberRange.CreateRange<PropertyDefinition>(this, 1, NETHeader.TablesHeap.GetTable(MetaDataTableType.Property, false));
 
                 }
-                return properties;
+                return propertyRange.Members;
 
                 //return Convert.ToUInt32(metadatarow.parts[1]); 
             }
@@ -76,7 +40,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            properties = null;
+            propertyRange = null;
             parent = null;
             
         }

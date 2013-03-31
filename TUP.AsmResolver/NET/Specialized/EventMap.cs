@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class EventMap : MetaDataMember 
     {
-        EventDefinition[] events = null;
+        MemberRange<EventDefinition> eventRange = null;
         TypeDefinition parent = null;
 
         public TypeDefinition Parent
@@ -18,7 +18,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
                     int index = Convert.ToInt32(metadatarow.parts[0]) - 1;
-                    if (index > 0 && index < table.members.Count)
+                    if (index > 0 && index < table.members.Length)
                         parent = table.members[index] as TypeDefinition;
                 }
                 return parent;
@@ -28,55 +28,18 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (events == null)
+                if (eventRange == null)
                 {
-                    int eventlist = Convert.ToInt32(metadatarow.parts[1]);
-
-                    int nexteventlist = -1;
-
-                    if (netheader.TablesHeap.GetTable(MetaDataTableType.EventMap).members.Last().metadatatoken != this.metadatatoken)
-                        nexteventlist = Convert.ToInt32(netheader.TokenResolver.ResolveMember(this.MetaDataToken + 1).metadatarow.parts[1]);
-
-
-                    MetaDataTable eventTable = netheader.TablesHeap.GetTable(MetaDataTableType.Event);
-                    int length = -1;
-                    if (nexteventlist != -1)
-                        length = nexteventlist - eventlist;
-                    else
-                        length = eventTable.members.Count - eventlist + 1;
-
-
-                    if (length > -1)
-                    {
-                        EventDefinition[] eventdefs = new EventDefinition[length];
-                        for (int i = 0; i < eventdefs.Length; i++)
-                        {
-                            int index = eventlist + i - 1;
-                            if (index >= 0 && index < eventTable.members.Count)
-                                eventdefs[i] = (EventDefinition)eventTable.members[eventlist + i - 1];
-                        }
-                        // int actualsize = 0;
-                        // for (int i = length-1; i > 0; i--)
-                        // {
-                        //     if (propertydefs[i] != null)
-                        //     {
-                        //         actualsize = i;
-                        //         break;
-                        //     }
-                        // }
-                        // Array.Resize<PropertyDefinition>(ref propertydefs, actualsize);
-                        this.events = eventdefs;
-                    }
-
+                    eventRange = MemberRange.CreateRange<EventDefinition>(this, 1, netheader.TablesHeap.GetTable(MetaDataTableType.Event, false));
                 }
-                return events;
+                return eventRange.Members;
 
                 //return Convert.ToUInt32(metadatarow.parts[1]); 
             }
         }
         public override void ClearCache()
         {
-            events = null;
+            eventRange = null;
             parent = null;
         }
         

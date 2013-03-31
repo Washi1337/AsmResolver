@@ -19,6 +19,7 @@ namespace AsmResolver
         {
             InitializeComponent();
             this.body = body;
+            this.propertyGrid1.SelectedObject = body;
             this.disassembler = new MSILDisassembler(body);
             this.Text = "Method Body of " + body.Method.MetaDataToken.ToString("X8");
 

@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using Be.Windows.Forms;
 using TUP.AsmResolver;
 using TUP.AsmResolver.NET;
+using TUP.AsmResolver.NET.Specialized;
 
 namespace AsmResolver
 {
@@ -66,19 +67,19 @@ namespace AsmResolver
 
         private void SetTypeConverters()
         {
-            Type[] types = new Type[] { 
+            Type[] numberTypes = new Type[] { 
                 typeof(ulong), typeof(uint), typeof(ushort), typeof(byte),
                 typeof(long), typeof(int), typeof(short), typeof(sbyte)};
 
-            foreach (Type t in types)
+            foreach (Type t in numberTypes)
             {
                 TypeDescriptionProvider m_OriginalProvider = TypeDescriptor.GetProvider(t);
                 TypeDescriptionProvider hexProvider = (TypeDescriptionProvider)Activator.CreateInstance(typeof(IntToHexTypeDescriptionProvider<>).MakeGenericType(new Type[] { t }), new object[] { m_OriginalProvider }); ;
                 TypeDescriptor.AddProvider(hexProvider, t);
             }
 
-
             TypeDescriptor.AddAttributes(typeof(Offset), new EditorAttribute(typeof(OffsetUIEditor), typeof(UITypeEditor)));
+            TypeDescriptor.AddAttributes(typeof(IMemberSignature), new EditorAttribute(typeof(PropertyGridUIEditor), typeof(UITypeEditor)));
         }
         
         private void MainForm_Load(object sender, EventArgs e)

@@ -3,15 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace TUP.AsmResolver.PE.Writers
 {
     internal unsafe class ImportExportWriter : IWriterTask , IReconstructionTask, ICalculationTask
     {
+        
         DataDirectory exportDirectory;
         DataDirectory importDirectory;
         LibraryReference[] importLibraries;
         OffsetConverter importOffsetConverter;
+
+        Table<Structures.IMAGE_IMPORT_DESCRIPTOR> importDescriptors;
+        Table<string> libNameTable;
+        Table<HintName> functionNameTable;
+        Table<uint?> oftTable;
+        Table<uint?> ftTable;
 
         internal ImportExportWriter(PEWriter writer)
         {
@@ -54,169 +62,160 @@ namespace TUP.AsmResolver.PE.Writers
         {
             // TODO...
         }
-        
+
         private void RebuildImports()
-        {   
-            // Might not working correctly since I haven't tested it that much.
+        {
+            // Might not work correctly since I haven't tested it that much.
             // TODO: Fix positions of fts.
             // TODO: 64 bit support.
 
             /* [PLAN] Writing structure of imports [PLAN] 
              * 
-             * - Descriptors array          --> Use starting offset of library names table and add to 
-             *                                  library name index. Calculate to Rva to get NameOfRva field.
-             *                                  
-             * - Library name tables        --> Calculate descriptors array size to get starting offset
-             *                                  of array.
-             *                                  
-             * - OFT Tables                 --> Add to relative offsets of method hint-name table entries
-             *                                  the actual starting offset and calculate to RVA to make an
-             *                                  OFT value.
-             *                                  
-             * - <random space?>
-             * 
-             * - Method hint-name tables    --> Calculate size of talbe and set indexes.
-             *                                  Use size of oft tables + library name tables +
-             *                                  descriptor array + import dir fileoffset to get 
-             *                                  correct starting offset.
+             * - Descriptors table
+             *      - Uses emptry structure terminator
+             * - Library name table
+             * - Function name table
+             * - Original thunk value table 
+             *      - Uses null terminators
+             * - Thunk value table
+             *      - Uses null terminators
              */
 
+            importDescriptors = CollectLibDescriptors();
+            importDescriptors.StartingRVA = importDirectory.TargetOffset.Rva;
 
-            uint sizeOfLibDescriptors = NewSize;
+            libNameTable = new Table<string>();
+            functionNameTable = new Table<HintName>();
+            oftTable = new Table<uint?>();
+            ftTable = new Table<uint?>();
 
-            uint[] libraryNameOffsets;
-            uint sizeOfLibNames = CalculateLibraryNamesSize(out libraryNameOffsets);
-
-            uint[,] methodNameOffsets;
-            uint methodsNameSize = CalculateMethodNamesSize(out methodNameOffsets);
-
-            uint sizeOfOfts = CalculateSizeOfOFTs();
             
-            uint oftStartingOffset = importDirectory.TargetOffset.FileOffset + sizeOfLibDescriptors;
-            uint libraryNameStartingOffset = oftStartingOffset + sizeOfOfts;
-            uint methodNameStartingOffet = libraryNameStartingOffset + sizeOfLibNames;
-
-            uint[,] oftsOffsets;
-            UpdateOFTs(out oftsOffsets, ref methodNameOffsets, methodNameStartingOffet);
-            UpdateLibraryDescriptors(libraryNameOffsets, libraryNameStartingOffset, oftsOffsets, oftStartingOffset);
-
-            uint[,] ftsOffsets;
-            uint sizeOfFts = CalculateFTsSize(out ftsOffsets);
-        }
-
-        private uint CalculateSizeOfOFTs()
-        {
-            uint size = 0;
-            foreach (LibraryReference libRef in importLibraries)
+            foreach (LibraryReference libRef in Writer.OriginalAssembly.LibraryImports)
             {
-                size += (uint)(sizeof(uint) * (libRef.ImportMethods.Length + 1)); // import ofts + 0 terminator.
-            }
-            return size;
-        }
+                libNameTable.Add(libRef.LibraryName);
+                AddNamesToTable(ref functionNameTable, libRef);
+                Addx86FtsToTable(ref ftTable, libRef);
 
-        private uint CalculateLibraryNamesSize(out uint[] rOffsets)
-        {
-            rOffsets = new uint[importLibraries.Length];
+                // create space to be filled in later after name rva calculation
+                for (int i = 0; i < libRef.ImportMethods.Length; i++)
+                    oftTable.Add(0);
 
-            uint currentOffset = 0;
-            for (int i = 0; i < importLibraries.Length; i++)
-            {
-                rOffsets[i] = currentOffset;
-                currentOffset += (uint)Encoding.ASCII.GetBytes(importLibraries[i].LibraryName).Length + 1;// name + terminator.
+                // add terminator oft.
+                oftTable.Add(null);
             }
 
-            return currentOffset;
+            // add starting rvas to every table.
+            Table[] tables = new Table[] {importDescriptors, libNameTable, functionNameTable, oftTable, ftTable };
+            CalculateRvas(ref tables, importDescriptors.StartingRVA);
+
+            // set ofts to rvas of function names.
+            UpdateOfts(ref oftTable, functionNameTable);
+
+            // update rvas in descriptors.
+            UpdateLibraryRvas(ref importDescriptors, libNameTable, oftTable, ftTable);
+
         }
 
-        private uint CalculateMethodNamesSize(out uint[,] rOffsetsByLibIndex)
+        private Table<Structures.IMAGE_IMPORT_DESCRIPTOR> CollectLibDescriptors()
         {
-            int count = 0;
-            foreach (LibraryReference libRef in importLibraries)
-                count += libRef.ImportMethods.Length;
+            Table<Structures.IMAGE_IMPORT_DESCRIPTOR> descriptors = new Table<Structures.IMAGE_IMPORT_DESCRIPTOR>();
+            foreach (LibraryReference libRef in Writer.OriginalAssembly.LibraryImports)
+                descriptors.Add(libRef.rawDescriptor);
 
-            rOffsetsByLibIndex = new uint[importLibraries.Length, count];
-            uint currentOffset = 0; 
+            descriptors.Add(default(Structures.IMAGE_IMPORT_DESCRIPTOR));
+            return descriptors;
+        }
 
-            for (int libIndex = 0; libIndex < importLibraries.Length; libIndex++)
+        private void AddNamesToTable(ref Table<HintName> sourceTable, LibraryReference libRef)
+        {
+            foreach (ImportMethod method in libRef.ImportMethods)
+                sourceTable.Add(new HintName(method.Ordinal, method.Name));
+        }
+
+        private void Addx86FtsToTable(ref Table<uint?> sourceTable, LibraryReference libRef)
+        {
+            foreach (ImportMethod method in libRef.ImportMethods)
+                sourceTable.Add(method.ThunkValue);
+
+            sourceTable.Add(null); // terminator
+        }
+
+        private void CalculateRvas(ref Table[] tables, uint startingRva)
+        {
+            foreach (Table table in tables)
             {
-                for (int i = 0; i < importLibraries[libIndex].ImportMethods.Length; i++)
+                table.StartingRVA = startingRva;
+                table.AddStartingRvas();
+                startingRva += table.CalculateSize();
+            }
+        }
+
+        private void UpdateOfts(ref Table<uint?> sourceTable, Table<HintName> names)
+        {
+            uint[] funcNameRvas = names.Items.Keys.ToArray();
+
+            var items = sourceTable.Items.ToArray();
+            sourceTable.Items.Clear();
+
+            int currentIndex = 0;
+            foreach (var item in items)
+            {
+                // check if terminator, don't increment name index.
+                if (!item.Value.HasValue)
+                    sourceTable.Items.Add(item.Key, item.Value);
+                else
                 {
-                    rOffsetsByLibIndex[libIndex, i] = currentOffset; // save relative offset.
-                    ImportMethod method = importLibraries[libIndex].ImportMethods[i];
-
-                    currentOffset += (uint)(sizeof(ushort) + Encoding.ASCII.GetBytes(method.Name).Length + 1); // hint + data length + terminator.
+                    sourceTable.Items.Add(item.Key, funcNameRvas[currentIndex]);
+                    currentIndex++;
                 }
-                //currentOffset++; // descriptor terminator.
             }
-
-            return currentOffset;
         }
 
-        private void UpdateOFTs(out uint[,] rOffsetsByLibIndex, ref uint[,] methodNameOffsets, uint startNameOffset)
+        private void UpdateLibraryRvas(
+            ref Table<Structures.IMAGE_IMPORT_DESCRIPTOR> descriptors, 
+            Table<string> nameTable,
+            Table<uint?> oftTable,
+            Table<uint?> ftTable)
         {
-            int count = 0;
-            foreach (LibraryReference libRef in importLibraries)
-                count += libRef.ImportMethods.Length;
+            uint[] libNameRvas = nameTable.Items.Keys.ToArray();
+            uint[] ofts = oftTable.Items.Keys.ToArray();
+            uint[] fts = ftTable.Items.Keys.ToArray();
 
-            rOffsetsByLibIndex = new uint[importLibraries.Length, count];
-            uint currentOffset = 0;
+            var items = descriptors.Items.ToArray();
+            descriptors.Items.Clear();
 
-            for (int libIndex = 0; libIndex < importLibraries.Length; libIndex++)
+            int currentIndex = 0;
+            int lastOFTIndex = 0;
+            int lastFTIndex = 0;
+            foreach (var item in items)
             {
-                for (int i = 0; i < importLibraries[libIndex].ImportMethods.Length; i++)
+                var descriptor = item.Value;
+                if (ASMGlobals.IsEmptyStructure(descriptor))
+                    descriptors.Items.Add(item.Key, item.Value); // don't process terminator descriptor.
+                else
                 {
-                    // save index.
-                    rOffsetsByLibIndex[libIndex, i] = currentOffset;
-                    // update oft roffset to actual file offset.
-                    methodNameOffsets[libIndex, i] += startNameOffset;
-                    // calculate oft (rva hint-name)
-                    uint newOFT = importOffsetConverter.FileOffsetToRva(methodNameOffsets[libIndex, i]);
-                    // update oft.
-                    importLibraries[libIndex].ImportMethods[i].OriginalThunkValue = newOFT;
+                    descriptor.NameRVA = libNameRvas[currentIndex];
+                    descriptor.OriginalFirstThunk = ofts[lastOFTIndex];
+                    descriptor.FirstThunk = fts[lastFTIndex];
 
-                    // add oft size.
-                    currentOffset += sizeof(uint);
+                    descriptors.Items.Add(item.Key, descriptor);
+
+                    currentIndex++;
+                    lastOFTIndex = GetNextTerminatorIndex(oftTable, lastOFTIndex) + 1;
+                    lastFTIndex = GetNextTerminatorIndex(ftTable, lastFTIndex) + 1;
                 }
-                currentOffset += sizeof(uint); // import descriptor terminator.
             }
-            //return currentOffset;
+
         }
 
-        private void UpdateLibraryDescriptors(uint[] libnames, uint libNameStartingOffset, uint[,] oftOffsets, uint oftStartingOffset)
+        private int GetNextTerminatorIndex(Table<uint?> table, int previousIndex)
         {
-            for (int i = 0; i < importLibraries.Length; i++)
-            {
-                uint libNameRva = importOffsetConverter.FileOffsetToRva(libNameStartingOffset + libnames[i]);
-                importLibraries[i].rawDescriptor.NameRVA = libNameRva;
-
-                uint firstOFTptr = importOffsetConverter.FileOffsetToRva(oftOffsets[i, 0] + oftStartingOffset);
-                importLibraries[i].rawDescriptor.OriginalFirstThunk = firstOFTptr;
-            }
+            uint?[] values = table.Items.Values.ToArray();
+            for (int i = previousIndex; i < values.Length; i++)
+                if (!values[i].HasValue)
+                    return i;
+            return -1;
         }
-
-        private uint CalculateFTsSize(out uint[,] rOffsetsByLibIndex)
-        {
-            int count = 0;
-            foreach (LibraryReference libRef in importLibraries)
-                count += libRef.ImportMethods.Length;
-
-            rOffsetsByLibIndex = new uint[importLibraries.Length, count];
-
-            uint currentOffset = 0;
-
-            for (int libIndex = 0; libIndex < importLibraries.Length; libIndex++)
-            {
-                for (int i = 0; i < importLibraries[libIndex].ImportMethods.Length; i++)
-                {
-                    currentOffset += sizeof(uint); // size of ft value.
-                }
-                currentOffset += sizeof(uint); // terminator
-            }
-
-            return currentOffset;
-        }
-
-
 
         public void RunProcedure()
         {
@@ -273,25 +272,59 @@ namespace TUP.AsmResolver.PE.Writers
             {
                 OffsetConverter converter = new OffsetConverter(importDirectory.Section);
                 Writer.MoveToOffset(importDirectory.TargetOffset.FileOffset);
-                foreach (LibraryReference libRef in Writer.OriginalAssembly.LibraryImports)
-                {
-                    Writer.WriteStructure<Structures.IMAGE_IMPORT_DESCRIPTOR>(libRef.rawDescriptor);
-                }
-                foreach (LibraryReference libRef in Writer.OriginalAssembly.LibraryImports)
-                {
-                    Writer.MoveToOffset(converter.RvaToFileOffset(libRef.rawDescriptor.NameRVA));
-                    Writer.WriteAsciiZString(libRef.LibraryName);
 
-                    uint oftOffset = converter.RvaToFileOffset(libRef.rawDescriptor.OriginalFirstThunk);
-                    uint ftOffset = converter.RvaToFileOffset(libRef.rawDescriptor.FirstThunk);
-
-                    for (int i = 0; i < libRef.ImportMethods.Length; i++)
-                    {
-                        WriteFunctionName(libRef.ImportMethods[i], converter);
-                        WriteFunctionValue((ulong)libRef.ImportMethods[i].OriginalThunkValue, ref oftOffset);
-                        WriteFunctionValue((ulong)libRef.ImportMethods[i].ThunkValue, ref ftOffset);
-                    }
+                foreach (var libRef in importDescriptors.Items)
+                {
+                    Writer.MoveToOffset(converter.RvaToFileOffset(libRef.Key));
+                    Writer.WriteStructure<Structures.IMAGE_IMPORT_DESCRIPTOR>(libRef.Value);
                 }
+                foreach (var libName in libNameTable.Items)
+                {
+                    Writer.MoveToOffset(converter.RvaToFileOffset(libName.Key));
+                    Writer.WriteAsciiZString(libName.Value);
+                }
+                foreach (var funcName in functionNameTable.Items)
+                {
+                    Writer.MoveToOffset(converter.RvaToFileOffset(funcName.Key));
+                    Writer.BinWriter.Write(funcName.Value.Hint);
+                    Writer.WriteAsciiZString(funcName.Value.Name);
+                }
+                foreach (var oftValue in oftTable.Items)
+                {
+                    Writer.MoveToOffset(converter.RvaToFileOffset(oftValue.Key));
+                    if (oftValue.Value.HasValue)
+                        Writer.BinWriter.Write(oftValue.Value.Value);
+                    else
+                        Writer.BinWriter.Write((uint)0);
+                }
+                foreach (var ftValue in ftTable.Items)
+                {
+                    Writer.MoveToOffset(converter.RvaToFileOffset(ftValue.Key));
+                    if (ftValue.Value.HasValue)
+                        Writer.BinWriter.Write(ftValue.Value.Value);
+                    else
+                        Writer.BinWriter.Write((uint)0);
+                }
+
+                //foreach (LibraryReference libRef in Writer.OriginalAssembly.LibraryImports)
+                //{
+                //    Writer.WriteStructure<Structures.IMAGE_IMPORT_DESCRIPTOR>(libRef.rawDescriptor);
+                //}
+                //foreach (LibraryReference libRef in Writer.OriginalAssembly.LibraryImports)
+                //{
+                //    Writer.MoveToOffset(converter.RvaToFileOffset(libRef.rawDescriptor.NameRVA));
+                //    Writer.WriteAsciiZString(libRef.LibraryName);
+                //
+                //    uint oftOffset = converter.RvaToFileOffset(libRef.rawDescriptor.OriginalFirstThunk);
+                //    uint ftOffset = converter.RvaToFileOffset(libRef.rawDescriptor.FirstThunk);
+                //
+                //    for (int i = 0; i < libRef.ImportMethods.Length; i++)
+                //    {
+                //        WriteFunctionName(libRef.ImportMethods[i], converter);
+                //        WriteFunctionValue((ulong)libRef.ImportMethods[i].OriginalThunkValue, ref oftOffset);
+                //      //  WriteFunctionValue((ulong)libRef.ImportMethods[i].ThunkValue, ref ftOffset);
+                //    }
+                //}
             }
         }
 

@@ -6,7 +6,7 @@ using TUP.AsmResolver.PE.Readers;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public abstract class MetaDataMember : IDisposable , ICacheProvider
+    public abstract class MetaDataMember : IDisposable , ICacheProvider, IImageProvider
     {
         internal uint metadatatoken;
         internal MetaDataRow metadatarow;

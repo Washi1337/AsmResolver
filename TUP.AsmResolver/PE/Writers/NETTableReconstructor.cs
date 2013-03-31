@@ -58,7 +58,7 @@ namespace TUP.AsmResolver.PE.Writers
                 if (tablesHeap.HasTable((MetaDataTableType)i))
                 {
                     MetaDataTable table = tablesHeap.GetTable((MetaDataTableType)i);
-                    if (table.members.Count > 0)
+                    if (table.members.Length > 0)
                         validMask |= ((ulong)1 << i);
                     else
                         tablesHeap.tables[i] = null;
@@ -96,7 +96,7 @@ namespace TUP.AsmResolver.PE.Writers
             {
                 if (tablesHeap.HasTable((MetaDataTableType)i))
                 {
-                    writer.Write(tablesHeap.GetTable((MetaDataTableType)i).members.Count);
+                    writer.Write(tablesHeap.GetTable((MetaDataTableType)i).members.Length);
 
                 }
             }

@@ -56,6 +56,7 @@ namespace AsmResolver
                 Dock = DockStyle.Fill,
             };
             tablesTree.AfterSelect += tablesTree_AfterSelect;
+            tablesTree.AfterExpand += tablesTree_AfterSelect;
             dataGridView.Columns.AddRange(new DataGridViewTextBoxColumn() 
             { 
                 HeaderText = "#",
@@ -182,7 +183,6 @@ namespace AsmResolver
                 MessageBox.Show("An error occured. " + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         public void SetTablesHeap(TablesHeap tablesHeap)
         {
             this.currentTablesHeap = tablesHeap;
@@ -192,17 +192,22 @@ namespace AsmResolver
                 if (table != null)
                 {
                     TreeNode node = new TreeNode(table.Type.ToString() + " (" + table.AmountOfRows.ToString() + ")");
+                    node.Tag = table;
+                    if (table.AmountOfRows > 0)
+                    {
+                        node.Nodes.Add(new TreeNode("Loading..."));
+                    }
                     tablesTree.Nodes.Add(node);
-                    index = 1;
-                    foreach (MetaDataMember member in table.Members)
-                        node.Nodes.Add(CreateTreeNode(member));
+
+
                 }
             }
-        }    
+        }
 
         private TreeNode CreateTreeNode(MetaDataMember member)
         {
             TreeNode node = new TreeNode();
+            uint index = (member.MetaDataToken | ((uint)0xFF << 24)) - ((uint)0xFF << 24);
             try
             {
                 node.Text = index + (member is MemberReference ? " (" + (member as MemberReference).Name + ")" : "");
@@ -217,9 +222,24 @@ namespace AsmResolver
         {
 
             dataGridView.Rows.Clear();
-            if (tablesTree.SelectedNode.Tag != null)
+            if (e.Node.Tag is MetaDataTable)
             {
-                currentMember = (MetaDataMember)tablesTree.SelectedNode.Tag;
+                MetaDataTable table = e.Node.Tag as MetaDataTable;
+                if (e.Node.Nodes.Count == 1 && e.Node.Nodes[0].Text == "Loading...")
+                {
+                    e.Node.Nodes.Clear();
+                    TreeNode[] subNodes = new TreeNode[table.Members.Length];
+                    for (int i = 0; i < subNodes.Length; i++)
+                        subNodes[i] = CreateTreeNode(table.Members[i]);
+
+                    tablesTree.BeginUpdate();
+                    e.Node.Nodes.AddRange(subNodes);
+                    tablesTree.EndUpdate();
+                }
+            }
+            else if (e.Node.Tag is MetaDataMember)
+            {
+                currentMember = (MetaDataMember)e.Node.Tag;
                 propertyGrid.SelectedObject = currentMember;
                 SetMetaDataRow(currentMember.MetaDataRow);
             }

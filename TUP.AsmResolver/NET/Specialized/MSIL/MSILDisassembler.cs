@@ -20,6 +20,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             LoadOpCodes();
         }
+
         public MSILDisassembler(MethodBody body)
         {
             MethodBody = body;
@@ -41,10 +42,12 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 opcodes[i] = (MSILOpCode)fields[i].GetValue(null);
 
         }
+
         public MSILInstruction[] Disassemble()
         {
             return Disassemble(0, (int)MethodBody.CodeSize);
         }
+
         public MSILInstruction[] Disassemble(int startoffset, int length)
         {
             List<MSILInstruction> instructions = new List<MSILInstruction>();
@@ -62,6 +65,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             SetBranchTargets(instructions);
             return instructions.ToArray();
         }
+
         public MSILInstruction DisassembleNextInstruction()
         {
             int currentOffset = (int)(image.Position - ilOffset);
@@ -74,6 +78,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             return new MSILInstruction(currentOffset, opcode, rawoperand, operand);
 
         }
+
         public int CurrentOffset
         {
             get{
@@ -106,6 +111,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             }
             return new MSILOpCode("<unknown>", (indexToCheck == 1 ? new byte[] {0xFE, opcodebyte} : new byte[] { opcodebyte }), OperandType.None);
         }
+
         private byte[] ReadRawOperand(MSILOpCode opcode)
         {
             int size = opcode.Bytes.Length;
@@ -116,7 +122,11 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 case OperandType.ShortInstructionTarget:
                 case OperandType.ShortVariable:
                     return image.ReadBytes(1);
+
                 case OperandType.Argument:
+                case OperandType.Variable:
+                    return image.ReadBytes(2);
+
                 case OperandType.Field:
                 case OperandType.Int32:
                 case OperandType.Float32:
@@ -126,11 +136,12 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 case OperandType.String:
                 case OperandType.Token:
                 case OperandType.Type:
-                case OperandType.Variable:
                     return image.ReadBytes(4);
+
                 case OperandType.Float64:
                 case OperandType.Int64:
                     return image.ReadBytes(8);
+
                 case OperandType.InstructionTable:
                     byte[] header = image.ReadBytes(4);
                     byte[] offsets = image.ReadBytes(BitConverter.ToInt32(header, 0) * sizeof(int));
@@ -138,6 +149,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             }
             return null;
         }
+
         private object ConvertToOperand(int instructionOffset, MSILOpCode opcode, byte[] rawoperand)
         {
             try
@@ -145,14 +157,23 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 switch (opcode.OperandType)
                 {
                     case OperandType.Argument:
-                        return GetParameter(BitConverter.ToInt32(rawoperand, 0));
+                        ParameterDefinition paramDef = GetParameter(BitConverter.ToInt16(rawoperand, 0));
+                        if (paramDef == null)
+                            return BitConverter.ToInt16(rawoperand, 0);
+                        return paramDef;
+
                     case OperandType.ShortArgument:
-                        return GetParameter(rawoperand[0]);
+                        paramDef = GetParameter(rawoperand[0]);
+                        if (paramDef == null)
+                            return rawoperand[0];
+                        return paramDef;
 
                     case OperandType.Float32:
                         return BitConverter.ToSingle(rawoperand, 0);
+
                     case OperandType.Float64:
                         return BitConverter.ToDouble(rawoperand, 0);
+
                     case OperandType.InstructionTable:
 
                         int length = BitConverter.ToInt32(rawoperand, 0);
@@ -170,16 +191,18 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                     case OperandType.InstructionTarget:
                         return BitConverter.ToInt32(rawoperand, 0) + instructionOffset + opcode.Bytes.Length + sizeof(int);
 
-
                     case OperandType.ShortInstructionTarget:
                         return ASMGlobals.ByteToSByte(rawoperand[0]) + instructionOffset + opcode.Bytes.Length + sizeof(byte);
 
                     case OperandType.Int8:
                         return ASMGlobals.ByteToSByte(rawoperand[0]);
+
                     case OperandType.Int32:
                         return BitConverter.ToInt32(rawoperand, 0);
+
                     case OperandType.Int64:
                         return BitConverter.ToInt64(rawoperand, 0);
+
                     case OperandType.Token:
                     case OperandType.Field:
                     case OperandType.Method:
@@ -188,8 +211,6 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                         try
                         {
                             object operand = tokenresolver.ResolveMember(metadata);
-                            //if (operand is ISpecification)
-                            //    operand = ((ISpecification)operand).TransformWith(MethodBody.Method, MethodBody.Method.DeclaringType);
 
                             if ((operand is TypeSpecification) && (operand as TypeSpecification).OriginalType is GenericParamReference)
                             {
@@ -210,11 +231,20 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                         catch { return new TypeReference() { name = "TOKEN:" + metadata.ToString("X8") }; }
 
                     case OperandType.ShortVariable:
-                        return GetVariable(ASMGlobals.ByteToSByte(rawoperand[0]));
+                        VariableDefinition varDef = GetVariable(rawoperand[0]);
+                        if (varDef == null)
+                            return rawoperand[0];
+                        return varDef;
+
                     case OperandType.Variable:
-                        return GetVariable(BitConverter.ToInt32(rawoperand, 0));
+                        varDef = GetVariable(BitConverter.ToInt16(rawoperand, 0));
+                        if (varDef == null)
+                            return rawoperand[0];
+                        return varDef;
+
                     case OperandType.Signature:
                         return BitConverter.ToInt32(rawoperand, 0);
+
                     case OperandType.String:
                         return tokenresolver.ResolveString(BitConverter.ToUInt32(rawoperand, 0));
                 }
@@ -222,7 +252,6 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             catch { }
 
             return null;
-
 
         }
 
@@ -240,6 +269,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 }
             }
         }
+
         private void SetEnclosingInstructions(List<MSILInstruction> instructions)
         {
             for (int i = 0; i < instructions.Count; i++)
@@ -257,6 +287,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 return MethodBody.Variables[index];
             return null;
         }
+
         private ParameterDefinition GetParameter(int index)
         {
             if (!MethodBody.Method.Attributes.HasFlag(MethodAttributes.Static))
