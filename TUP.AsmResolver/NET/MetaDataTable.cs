@@ -80,6 +80,20 @@ namespace TUP.AsmResolver.NET
             members[members.Length - 1] = member;
         }
 
+        public void RemoveMember(MetaDataMember member)
+        {
+            uint index = member.TableIndex - 1;
+            member.netheader = null;
+            for (uint i = index; i < members.Length - 1; i++)
+            {
+                members[i] = members[i + 1];
+                members[i].metadatatoken--;
+            }
+            members[members.Length - 1] = null;
+            rowAmount--;
+            Array.Resize(ref members, members.Length - 1);
+        }
+
         /// <summary>
         /// Returns true when this table can be seen as a large table by specifying the bits to be encoded in an index value to a member in the table.
         /// </summary>

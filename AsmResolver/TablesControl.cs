@@ -20,6 +20,7 @@ namespace AsmResolver
         ToolStripMenuItem disassembleItem;
         ToolStripMenuItem addTableItem;
         ToolStripMenuItem addMemberItem;
+        ToolStripMenuItem removeMemberItem;
         TablesHeap currentTablesHeap;
 
         public TablesControl()
@@ -82,13 +83,15 @@ namespace AsmResolver
             addTableItem.Click += addTableItem_Click;
             addMemberItem = new ToolStripMenuItem("Add Member");
             addMemberItem.Click += addMemberItem_Click;
-
+            removeMemberItem = new ToolStripMenuItem("Remove Member");
+            removeMemberItem.Click += removeMemberItem_Click;
             ContextMenuStrip menuStrip = new System.Windows.Forms.ContextMenuStrip();
             menuStrip.Items.AddRange(new ToolStripMenuItem[]
             {
                 disassembleItem,
                 addTableItem,
                 addMemberItem,
+                removeMemberItem,
             });
 
             tablesTree.ContextMenuStrip = menuStrip;
@@ -101,6 +104,16 @@ namespace AsmResolver
             tabControl.TabPages.Add(propertyTab);
             mainSplitter.Panel2.Controls.Add(tabControl);
             this.Controls.Add(mainSplitter);
+        }
+
+        void removeMemberItem_Click(object sender, EventArgs e)
+        {
+            if (tablesTree.SelectedNode != null && tablesTree.SelectedNode.Tag is MetaDataMember)
+            {
+                MetaDataMember member = tablesTree.SelectedNode.Tag as MetaDataMember;
+                currentTablesHeap.GetTable(member.Table, false).RemoveMember(member);
+                tablesTree.SelectedNode.Remove();
+            }
         }
 
         private void addMemberItem_Click(object sender, EventArgs e)

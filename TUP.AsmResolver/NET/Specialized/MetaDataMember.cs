@@ -17,15 +17,23 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get { return metadatatoken; }
         }
+
+        public uint TableIndex
+        {
+            get { return (uint)((metadatatoken | (0xFF << 24)) - (0xFF << 24)); }
+        }
+
         public MetaDataRow MetaDataRow
         {
             get { return metadatarow; }
             set { metadatarow = value; }
         }
+
         public NETHeader NETHeader
         {
             get { return netheader; }
         }
+
         public MetaDataTableType Table
         {
             get { return table; }
@@ -35,6 +43,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             return Convert.ChangeType(value, metadatarow.parts[partindex].GetType());
         }
+
         public bool HasImage
         {
             get { return netheader != null; }

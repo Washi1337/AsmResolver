@@ -24,12 +24,21 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             {
                 if (!code.HasValue)
                 {
+                    string name = Name.ToLower();
+                    if (name[name.Length - 1] == '.')
+                        name = name.Substring(0, name.Length - 1);
+                                        
+                    name = name.Replace(".", "_");
+
                     foreach (var field in typeof(MSILCode).GetFields())
-                        if (field.Name.ToLower() == Name.ToLower().Replace(".", "_"))
+                    {
+                        
+                        if (field.Name.ToLower() == name)
                         {
                             code = (MSILCode)field.GetValue(null);
                             break;
                         }
+                    }
                 }
 
                 if (!code.HasValue)
