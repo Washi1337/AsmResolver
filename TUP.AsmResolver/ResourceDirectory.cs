@@ -64,7 +64,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDirectory.Characteristics = value;
             }
         }
@@ -78,7 +78,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][1]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDirectory.TimeDateStamp = value;
             }
         }
@@ -92,7 +92,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][2]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDirectory.MajorVersion = value;
             }
         }
@@ -106,7 +106,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][3]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDirectory.MinorVersion = value;
             }
         }
@@ -119,7 +119,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][4]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDirectory.NumberOfNamedEntries = value;
             }
         }
@@ -132,7 +132,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][5]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDirectory.NumberOfIdEntries = value;
             }
         }

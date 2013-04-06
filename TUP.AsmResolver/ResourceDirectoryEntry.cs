@@ -32,7 +32,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawEntry.Name = value;
             }
         }
@@ -70,7 +70,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset + sizeof(uint));
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawEntry.Name = value;
             }
         }

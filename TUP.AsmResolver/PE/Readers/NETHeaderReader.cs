@@ -38,7 +38,7 @@ namespace TUP.AsmResolver.PE.Readers
             if (ntHeader.IsManagedAssembly)
             {
 
-                image.stream.Seek(ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Clr].targetOffset.FileOffset, SeekOrigin.Begin);
+                image.Stream.Seek(ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Clr].targetOffset.FileOffset, SeekOrigin.Begin);
 
                 netHeaderOffset = (uint)image.Position;
                 netHeader = image.ReadStructure<Structures.IMAGE_COR20_HEADER>();

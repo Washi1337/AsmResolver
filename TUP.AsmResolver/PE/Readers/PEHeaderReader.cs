@@ -58,11 +58,11 @@ namespace TUP.AsmResolver.PE.Readers
 
             dosHeader = image.ReadStructure<Structures.IMAGE_DOS_HEADER>();
 
-            ntheaderoffset = image.stream.Position;
+            ntheaderoffset = image.Stream.Position;
 
-            image.stream.Seek(dosHeader.e_lfanew, SeekOrigin.Begin);
+            image.Stream.Seek(dosHeader.e_lfanew, SeekOrigin.Begin);
 
-            ntHeadersSignature = image.reader.ReadUInt32();
+            ntHeadersSignature = image.Reader.ReadUInt32();
 
             ReadFileHeader();
             ReadOptionalHeader();
@@ -78,8 +78,8 @@ namespace TUP.AsmResolver.PE.Readers
 
         private void CheckDosHeader()
         {
-            mainheadersignature = image.reader.ReadUInt16();
-            image.reader.BaseStream.Seek(0, SeekOrigin.Begin);
+            mainheadersignature = image.Reader.ReadUInt16();
+            image.Reader.BaseStream.Seek(0, SeekOrigin.Begin);
 
             if (((ImageSignature)mainheadersignature) != ImageSignature.DOS)
                 throw new InvalidDataException("Assembly's signature is not recognized as a valid signature for an executable or library.");
@@ -87,15 +87,15 @@ namespace TUP.AsmResolver.PE.Readers
         private void ReadFileHeader()
         {
 
-            fileheaderoffset = image.stream.Position;
+            fileheaderoffset = image.Stream.Position;
             fileHeader = image.ReadStructure<Structures.IMAGE_FILE_HEADER>();
 
         }
         private void ReadOptionalHeader()
         {
-            optionalheaderoffset = image.stream.Position;
-            optionalheadersig = image.reader.ReadUInt16();
-            image.stream.Seek(-2, SeekOrigin.Current);
+            optionalheaderoffset = image.Stream.Position;
+            optionalheadersig = image.Reader.ReadUInt16();
+            image.Stream.Seek(-2, SeekOrigin.Current);
 
             if (optionalheadersig == 0x10b)
             {
@@ -115,7 +115,7 @@ namespace TUP.AsmResolver.PE.Readers
 
             for (int i = 0; i < (ignoreHeaderNumbers ? 0x10 : (optionalheadersig == 0x10b ? optionalHeader32.NumberOfRvaAndSizes : optionalHeader64.NumberOfRvaAndSizes)); i++)
             {
-                uint byteoffset = (uint)image.stream.Position;
+                uint byteoffset = (uint)image.Stream.Position;
                 Structures.IMAGE_DATA_DIRECTORY datadir = image.ReadStructure<Structures.IMAGE_DATA_DIRECTORY>();
                 rawdatadirs.Add(byteoffset, datadir);
             }
@@ -124,11 +124,11 @@ namespace TUP.AsmResolver.PE.Readers
 
         private void ReadSections()
         {
-            image.stream.Seek(optionalheaderoffset + fileHeader.SizeOfOptionalHeader, SeekOrigin.Begin);
+            image.Stream.Seek(optionalheaderoffset + fileHeader.SizeOfOptionalHeader, SeekOrigin.Begin);
 
             for (int i = 0; i < fileHeader.NumberOfSections; i++)
             {
-                uint byteoffset = (uint)image.stream.Position;
+                uint byteoffset = (uint)image.Stream.Position;
                 Structures.IMAGE_SECTION_HEADER section = image.ReadStructure<Structures.IMAGE_SECTION_HEADER>();
                 Section s = new Section(assembly, byteoffset, section);
                 sections.Add(s);

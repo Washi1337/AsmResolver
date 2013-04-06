@@ -96,7 +96,8 @@ namespace TUP.AsmResolver.NET
             set
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_COR20_HEADER)][4];
-                assembly.peImage.Write(targetoffset, (uint)value);
+                assembly.peImage.SetOffset(targetoffset);
+                assembly.peImage.Writer.Write((uint)value);
                 flags = (uint)value;
             }
         }

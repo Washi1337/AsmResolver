@@ -82,7 +82,7 @@ namespace TUP.AsmResolver
                     bytes.Add(0);
 
                 assembly.peImage.SetOffset(0x4E);
-                assembly.peImage.writer.Write(bytes.ToArray());
+                assembly.peImage.Writer.Write(bytes.ToArray());
                 
             }
         }

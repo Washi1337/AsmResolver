@@ -59,7 +59,8 @@ namespace TUP.AsmResolver.NET.Specialized
             if (HasSavedMetaDataRow && metadatarow.offset != 0)
             {
                 byte[] generatedBytes = metadatarow.GenerateBytes();
-                netheader.ParentAssembly.peImage.Write((int)metadatarow.offset, generatedBytes);
+                netheader.ParentAssembly.peImage.SetOffset(metadatarow.offset);
+                netheader.ParentAssembly.peImage.Writer.Write(generatedBytes);
 
             }
            // else

@@ -31,8 +31,9 @@ namespace TUP.AsmResolver
             set
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][0];
-                assembly.Image.Write(targetoffset, (ushort)value);
-                header.fileHeader.Machine = (UInt16)value;
+                assembly.peImage.SetOffset(targetoffset);
+                assembly.Image.Writer.Write((ushort)value);
+                header.fileHeader.Machine = (ushort)value;
             }
         }
 
@@ -48,7 +49,8 @@ namespace TUP.AsmResolver
             set
             {
                 header.fileHeader.NumberOfSections = value;
-                assembly.Image.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][1], value);
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][1]);
+                assembly.Image.Writer.Write(value);
             }
         }
 
@@ -75,7 +77,8 @@ namespace TUP.AsmResolver
             set
             {
                 header.fileHeader.SizeOfOptionalHeader = value;
-                assembly.Image.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][5], value);
+                assembly.Image.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][5]);
+                assembly.Image.Writer.Write(value);
             }
         }
 
@@ -91,7 +94,8 @@ namespace TUP.AsmResolver
             set
             {
                 int offset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][6];
-                assembly.peImage.Write(offset, (ushort)value);
+                assembly.peImage.SetOffset(offset);
+                assembly.peImage.Writer.Write((ushort)value);
                 header.fileHeader.Characteristics = (UInt16)value;
             }
         }

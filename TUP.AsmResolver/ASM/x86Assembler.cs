@@ -42,7 +42,7 @@ namespace TUP.AsmResolver.ASM
             if (!overwriteWhenLarger && targetInstruction.Size < newInstruction.Size)
                 throw new ArgumentException("The size of the new instruction is bigger than the target instruction.", "newInstruction");
 
-            newInstruction.assembly = image.assembly;
+            newInstruction.assembly = image.ParentAssembly;
             newInstruction.Offset = targetInstruction.Offset;
 
             int NopsToAdd = CalculateSpaceNeeded(targetInstruction, newInstruction) - newInstruction.Size;
@@ -51,10 +51,11 @@ namespace TUP.AsmResolver.ASM
             for (int i = 0; i < NopsToAdd; i++)
                 NOPS[i] = 0x90;
 
-            image.Write(targetOffset, newInstruction.OpCode.opcodebytes);
+            image.SetOffset(targetOffset);
+            image.Writer.Write(newInstruction.OpCode.opcodebytes);
             if (newInstruction.operandbytes != null)
-                image.Write(targetOffset + newInstruction.OpCode.opcodebytes.Length, newInstruction.operandbytes);
-            image.Write(targetOffset + newInstruction.Size, NOPS);
+                image.Writer.Write(newInstruction.operandbytes);
+            image.Writer.Write(NOPS);
         }
         /// <summary>
         /// Calculates and returns the size in bytes needed when replacing an instruction.

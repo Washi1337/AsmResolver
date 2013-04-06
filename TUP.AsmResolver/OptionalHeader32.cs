@@ -49,7 +49,8 @@ namespace TUP.AsmResolver
             {
                 header.optionalHeader32.MajorLinkerVersion = (byte)value.Major;
                 header.optionalHeader32.MinorLinkerVersion = (byte)value.Minor;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][1], new byte[] { (byte)value.Major, (byte)value.Minor });
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][1]);
+                assembly.peImage.Writer.Write(new byte[] { (byte)value.Major, (byte)value.Minor });
             }
         }
 
@@ -66,7 +67,8 @@ namespace TUP.AsmResolver
             {
                 header.optionalHeader32.MajorOperatingSystemVersion = (byte)value.Major;
                 header.optionalHeader32.MinorOperatingSystemVersion = (byte)value.Minor;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][12], new byte[] { (byte)value.Major, (byte)value.Minor });
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][12]);
+                assembly.peImage.Writer.Write(new byte[] { (byte)value.Major, (byte)value.Minor });
             }
         }
 
@@ -83,7 +85,8 @@ namespace TUP.AsmResolver
             {
                 header.optionalHeader32.MajorSubsystemVersion = (byte)value.Major;
                 header.optionalHeader32.MinorSubsystemVersion = (byte)value.Minor;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][16], new byte[] { (byte)value.Major, (byte)value.Minor });
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][16]);
+                assembly.peImage.Writer.Write(new byte[] { (byte)value.Major, (byte)value.Minor });
             }
         }
 
@@ -103,7 +106,8 @@ namespace TUP.AsmResolver
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][6];
                 header.optionalHeader32.AddressOfEntryPoint = value.Rva;
                 entrypoint = value;
-                assembly.peImage.Write(targetoffset, value.Rva);
+                assembly.peImage.SetOffset(targetoffset);
+                assembly.peImage.Writer.Write(value.Rva);
             }
         }
 
@@ -119,7 +123,8 @@ namespace TUP.AsmResolver
             set
             {
                 header.optionalHeader32.SizeOfHeaders = value;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][20], value);
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][20]);
+                assembly.peImage.Writer.Write(value);
             }
         }
 
@@ -135,7 +140,8 @@ namespace TUP.AsmResolver
             set
             {
                 header.optionalHeader32.ImageBase = (uint)value;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][9], (uint)value);
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][9]);
+                assembly.peImage.Writer.Write((uint)value);
             }
         }
 
@@ -151,7 +157,8 @@ namespace TUP.AsmResolver
             set
             {
                 header.optionalHeader32.BaseOfCode = value;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][7], value);
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][7]);
+                assembly.peImage.Writer.Write(value);
             }
         }
 
@@ -167,7 +174,8 @@ namespace TUP.AsmResolver
             set
             {
                 header.optionalHeader32.SizeOfCode = value;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][19], value);
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][19]);
+                assembly.peImage.Writer.Write(value);
             }
         }
 
@@ -184,7 +192,8 @@ namespace TUP.AsmResolver
             set
             {
                 header.optionalHeader32.BaseOfData = value;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][8], value);
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][8]);
+                assembly.peImage.Writer.Write(value);
             }
         }
 
@@ -200,7 +209,8 @@ namespace TUP.AsmResolver
             set
             {
                 header.optionalHeader32.FileAlignment = value;
-                assembly.peImage.Write((int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][11], value);
+                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][11]);
+                assembly.peImage.Writer.Write(value);
             }
         }
 
@@ -216,7 +226,8 @@ namespace TUP.AsmResolver
             set
             {
                 byte sys = (byte)value;
-                assembly.peImage.Write((int)RawOffset +  Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][22], sys);
+                assembly.peImage.SetOffset(RawOffset +  Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][22]);
+                assembly.peImage.Writer.Write(sys);
                 header.optionalHeader32.Subsystem = sys;
             }
         }
@@ -241,7 +252,8 @@ namespace TUP.AsmResolver
             set
             {
                 int offset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][23];
-                assembly.peImage.Write(offset, (UInt16)value);
+                assembly.peImage.SetOffset(offset);
+                assembly.peImage.Writer.Write((ushort)value);
                 header.optionalHeader32.DllCharacteristics = (UInt16)value;
             }
         }
@@ -277,7 +289,8 @@ namespace TUP.AsmResolver
             set
             {
                 int offset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER32)][28];
-                assembly.peImage.Write(offset, value);
+                assembly.peImage.SetOffset(offset);
+                assembly.peImage.Writer.Write(value);
                 header.optionalHeader32.NumberOfRvaAndSizes = value;
             }
         }

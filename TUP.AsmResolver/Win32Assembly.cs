@@ -273,7 +273,7 @@ namespace TUP.AsmResolver
         /// <param name="path">The path to save the assembly.</param>
         public void QuickSave(string path)
         {
-            File.WriteAllBytes(path, peImage.stream.ToArray());
+            File.WriteAllBytes(path, peImage.Stream.ToArray());
         }
 
         /// <summary>
@@ -282,7 +282,7 @@ namespace TUP.AsmResolver
         /// <param name="outputStream"></param>
         public void QuickSave(Stream outputStream)
         {
-            peImage.stream.CopyTo(outputStream);
+            peImage.Stream.CopyTo(outputStream);
         }
 
         /// <summary>

@@ -54,11 +54,12 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             int NopsToAdd = totalSize - newInstruction.Size;
             byte[] NOPS = new byte[NopsToAdd];
 
-            image.Write(targetOffset, newInstruction.OpCode.Bytes);
+            image.SetOffset(targetOffset);
+            image.Writer.Write(newInstruction.OpCode.Bytes);
             if (newInstruction.OperandBytes != null)
-                image.Write(targetOffset + newInstruction.OpCode.Bytes.Length, newInstruction.OperandBytes);
+                image.Writer.Write(newInstruction.OperandBytes);
 
-            image.Write(targetOffset + newInstruction.Size, NOPS);
+            image.Writer.Write(NOPS);
         }
 
         public bool ValidateReference(MetaDataMember member)

@@ -94,12 +94,12 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {           
 
             int indexToCheck = 0;
-            byte opcodebyte = image.ReadByte();
+            byte opcodebyte = image.Reader.ReadByte();
 
             if (opcodebyte == 0xFE)
             {
                 indexToCheck = 1;
-                opcodebyte = image.ReadByte();
+                opcodebyte = image.Reader.ReadByte();
             }
 
             foreach (MSILOpCode opcode in opcodes)

@@ -24,7 +24,7 @@ namespace TUP.AsmResolver
             this.ParentEntry = parentEntry;
             this.rawDataEntry = rawDataEntry;
 
-            Section resourceSection = Section.GetSectionByRva(image.assembly, image.assembly.ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.Rva);
+            Section resourceSection = Section.GetSectionByRva(image.ParentAssembly, image.ParentAssembly.ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.Rva);
             targetOffset = OffsetToData - resourceSection.RVA + resourceSection.RawOffset;
         }
         /// <summary>
@@ -44,7 +44,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(offset);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDataEntry.OffsetToData = value;
             }
         }
@@ -57,7 +57,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DATA_ENTRY)][1]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDataEntry.Size = value;
             }
         }
@@ -70,7 +70,7 @@ namespace TUP.AsmResolver
             set
             {
                 image.SetOffset(Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DATA_ENTRY)][2]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 rawDataEntry.CodePage = value;
             }
         }

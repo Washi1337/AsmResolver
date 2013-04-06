@@ -26,7 +26,7 @@ namespace TUP.AsmResolver.NET.Specialized
                        if (Implementation == null)
                        {
                            netheader.assembly.peImage.SetOffset(netheader.ResourcesDirectory.TargetOffset.FileOffset + Offset);
-                           stream = netheader.assembly.peImage.ReadStream(netheader.assembly.peImage.reader.ReadInt32());
+                           stream = netheader.assembly.peImage.ReadStream(netheader.assembly.peImage.Reader.ReadInt32());
                        }
                        else
                        {

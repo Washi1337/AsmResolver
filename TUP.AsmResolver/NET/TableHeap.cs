@@ -73,7 +73,7 @@ namespace TUP.AsmResolver.NET
             {
                 PeImage image = netheader.assembly.peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][1]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 header.MajorVersion = value;
             }
         }
@@ -85,7 +85,7 @@ namespace TUP.AsmResolver.NET
             {
                 PeImage image = netheader.assembly.peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][2]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 header.MinorVersion = value;
             }
         }
@@ -97,7 +97,7 @@ namespace TUP.AsmResolver.NET
             {
                 PeImage image = netheader.assembly.peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][3]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 header.HeapOffsetSizes = value;
             }
         }
@@ -109,7 +109,7 @@ namespace TUP.AsmResolver.NET
             {
                 PeImage image = netheader.assembly.peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][6]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 header.MaskSorted = value;
             }
         }
@@ -121,7 +121,7 @@ namespace TUP.AsmResolver.NET
             {
                 PeImage image = netheader.assembly.peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][5]);
-                image.writer.Write(value);
+                image.Writer.Write(value);
                 header.MaskValid = value;
             }
         }

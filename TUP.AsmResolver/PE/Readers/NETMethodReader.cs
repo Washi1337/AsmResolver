@@ -25,20 +25,20 @@ namespace TUP.AsmResolver.PE.Readers
         MethodBody methodbody;
         internal NETMethodReader(PeImage peImage, MethodBody methodbody)
         {
-            tokenResolver = new MetaDataTokenResolver(peImage.assembly.netHeader);
+            tokenResolver = new MetaDataTokenResolver(peImage.ParentAssembly.netHeader);
             this.peImage = peImage;
             this.rva = methodbody.Method.RVA;
             this.methodbody = methodbody;
-            peImage.SetOffset(Offset.FromRva(rva, peImage.assembly).FileOffset);
-            rawoffset = (uint)peImage.stream.Position;
-            signature = peImage.ReadByte();
+            peImage.SetOffset(Offset.FromRva(rva, peImage.ParentAssembly).FileOffset);
+            rawoffset = (uint)peImage.Stream.Position;
+            signature = peImage.Reader.ReadByte();
             
         }
 
         internal void ReadFatMethod()
         {
 
-            peImage.SetOffset(Offset.FromRva(rva, peImage.assembly).FileOffset);
+            peImage.SetOffset(Offset.FromRva(rva, peImage.ParentAssembly).FileOffset);
 
             fatsig = BitConverter.ToInt16(peImage.ReadBytes(2),0);
             maxstack = BitConverter.ToInt16(peImage.ReadBytes(2),0);
@@ -80,13 +80,13 @@ namespace TUP.AsmResolver.PE.Readers
         private void Align(int align)
         {
             align--;
-            peImage.ReadBytes((((int)peImage.stream.Position + align) & ~align) - (int)peImage.stream.Position);
+            peImage.ReadBytes((((int)peImage.Stream.Position + align) & ~align) - (int)peImage.Stream.Position);
         }
 
         internal MethodBodySection ReadSection()
         {
             Align(4);
-            byte flag = peImage.ReadByte();
+            byte flag = peImage.Reader.ReadByte();
             if ((flag & 0x40) == 0)
                 return ReadSmallSection(flag);
             else
@@ -98,16 +98,16 @@ namespace TUP.AsmResolver.PE.Readers
         {
             MethodBodySection section = new MethodBodySection(flag);
 
-            int count = peImage.ReadByte() / 12;
+            int count = peImage.Reader.ReadByte() / 12;
             peImage.ReadBytes(2);
             
             for (int i = 0; i < count; i++)
             {
                 ExceptionHandler handler = new ExceptionHandler((ExceptionHandlerType)(BitConverter.ToInt16(peImage.ReadBytes(2), 0) & 7),
                         BitConverter.ToInt16(peImage.ReadBytes(2), 0),
-                        peImage.ReadByte(),
+                        peImage.Reader.ReadByte(),
                         BitConverter.ToInt16(peImage.ReadBytes(2), 0),
-                        peImage.ReadByte());
+                        peImage.Reader.ReadByte());
 
                 if (handler.Type == ExceptionHandlerType.Catch)
                     handler.CatchType = (TypeReference)methodbody.Method.netheader.TokenResolver.ResolveMember(BitConverter.ToUInt32(peImage.ReadBytes(4), 0));
@@ -124,7 +124,7 @@ namespace TUP.AsmResolver.PE.Readers
         internal MethodBodySection ReadFatSection(byte flag)
         {
             MethodBodySection section = new MethodBodySection(flag);
-            peImage.SetOffset(peImage.stream.Position - 1);
+            peImage.SetOffset(peImage.Stream.Position - 1);
             int count = (BitConverter.ToInt32(peImage.ReadBytes(4),0) >> 8) / 0x18;
 
             for (int i = 0; i < count; i++)

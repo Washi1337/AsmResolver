@@ -57,7 +57,8 @@ namespace TUP.AsmResolver
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][9];
                 rawHeader.Characteristics = (uint)value;
-                assembly.peImage.Write(targetoffset, rawHeader.Characteristics);
+                assembly.peImage.SetOffset(targetoffset);
+                assembly.peImage.Writer.Write(rawHeader.Characteristics);
             }
         }
         /// <summary>
@@ -77,10 +78,8 @@ namespace TUP.AsmResolver
                     bytes.Add(0);
 
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][0];
-
-                assembly.peImage.Write(targetoffset, bytes.ToArray());
-                // assembly.contents.RemoveRange((int)headeroffset, MaxSectionNameLength);
-                // assembly.contents.InsertRange((int)headeroffset, bytes);
+                assembly.peImage.SetOffset(targetoffset);
+                assembly.peImage.Writer.Write(bytes.ToArray());
                 rawHeader.Name = value;
             }
         }
@@ -93,7 +92,8 @@ namespace TUP.AsmResolver
             set
             {
                 rawHeader.PointerToRawData = value;
-                assembly.peImage.Write((int)headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][4], value);
+                assembly.peImage.SetOffset(headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][4]);
+                assembly.peImage.Writer.Write(value);
             }
         }
         /// <summary>
@@ -105,7 +105,8 @@ namespace TUP.AsmResolver
             set
             {
                 rawHeader.SizeOfRawData = value;
-                assembly.peImage.Write((int)headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][3], value);
+                assembly.peImage.SetOffset(headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][3]);
+                assembly.peImage.Writer.Write(value);
             }
         }
         /// <summary>
@@ -117,7 +118,8 @@ namespace TUP.AsmResolver
             set
             {
                 rawHeader.VirtualAddress = value;
-                assembly.peImage.Write((int)headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][2], value);
+                assembly.peImage.SetOffset(headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][2]);
+                assembly.peImage.Writer.Write(value);
             }
         }
         /// <summary>
@@ -129,7 +131,8 @@ namespace TUP.AsmResolver
             set
             {
                 rawHeader.VirtualSize = value;
-                assembly.peImage.Write((int)headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][1], value);
+                assembly.peImage.SetOffset(headeroffset + Structures.DataOffsets[typeof(Structures.IMAGE_SECTION_HEADER)][1]);
+                assembly.peImage.Writer.Write(value);
             }
         }
         /// <summary>

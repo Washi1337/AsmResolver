@@ -55,11 +55,11 @@ namespace TUP.AsmResolver.PE.Readers
             for (uint i = 0; i < exportDirectory.NumberOfFunctions; i++)
             {
                 image.SetOffset(functionoffset);
-                uint functionRVA = image.reader.ReadUInt32();
+                uint functionRVA = image.Reader.ReadUInt32();
                 image.SetOffset(functionnameoffset);
-                uint functionNameRVA = image.reader.ReadUInt32();
+                uint functionNameRVA = image.Reader.ReadUInt32();
                 image.SetOffset(functionnameordinaloffset);
-                uint functionNameOrdinal = image.reader.ReadUInt32();
+                uint functionNameOrdinal = image.Reader.ReadUInt32();
 
                 string name = image.ReadZeroTerminatedString(offsetConverter.RvaToFileOffset(functionNameRVA));
 
@@ -174,13 +174,13 @@ namespace TUP.AsmResolver.PE.Readers
             {
                 image.SetOffset(baseOffset + (currentIndex * sizeof(ulong)));
                 offset = (uint)image.Position;
-                return image.reader.ReadUInt64();
+                return image.Reader.ReadUInt64();
             }
             else
             {
                 image.SetOffset(baseOffset + (currentIndex * sizeof(uint)));
                 offset = (uint)image.Position;
-                return image.reader.ReadUInt32();
+                return image.Reader.ReadUInt32();
             }
         }
         private string ReadFunctionName(ulong ofunction, out ushort hint)
@@ -200,7 +200,7 @@ namespace TUP.AsmResolver.PE.Readers
             {
                 if (ofunction > 0 && image.TrySetOffset(offsetConverter.RvaToFileOffset((uint)ofunction)))
                 {
-                    hint = image.reader.ReadUInt16();
+                    hint = image.Reader.ReadUInt16();
                     return image.ReadZeroTerminatedString((uint)image.Position);
                 }
                 hint = 0;

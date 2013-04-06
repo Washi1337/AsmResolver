@@ -39,7 +39,7 @@ namespace TUP.AsmResolver.NET
             {
                 var image = TablesHeap.netheader.assembly.peImage;
                 image.SetOffset(rowAmountOffset);
-                image.writer.Write(rowAmount);
+                image.Writer.Write(rowAmount);
                 rowAmount = value;
             }
         }
