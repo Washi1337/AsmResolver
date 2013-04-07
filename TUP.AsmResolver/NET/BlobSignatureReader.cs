@@ -13,7 +13,8 @@ namespace TUP.AsmResolver.NET
         {
         }
 
-        internal IGenericArgumentsProvider callingInstance;
+        public IGenericParametersProvider ParameterProvider { get; set; }
+        public IGenericArgumentsProvider ArgumentProvider { get; set; }
 
     }
 }

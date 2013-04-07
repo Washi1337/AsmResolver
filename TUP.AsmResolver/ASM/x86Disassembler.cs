@@ -12,7 +12,8 @@ namespace TUP.AsmResolver.ASM
     /// </summary>
     public class x86Disassembler
     {
-        PeImage image;
+        BinaryReader reader;
+        Win32Assembly assembly;
         static List<x86OpCode> opcodeList;
 
         static x86Disassembler()
@@ -34,13 +35,31 @@ namespace TUP.AsmResolver.ASM
 
 
         /// <summary>
-        /// Creates a new instance of a disassembler.
+        /// Creates a new instance of a disassembler, by using an assembly as input.
         /// </summary>
         /// <param name="assembly">The assembly to be disassembled.</param>
         public x86Disassembler(Win32Assembly assembly)
         {
-            this.image = assembly.peImage;
-            
+            this.reader = assembly.peImage.Reader;
+            this.assembly = assembly;
+        }
+
+        /// <summary>
+        /// Creates a new instance of a disassembler, by using a byte array as input.
+        /// </summary>
+        /// <param name="bytes">The bytes to be disassembled.</param>
+        public x86Disassembler(byte[] bytes)
+            :this(new MemoryStream(bytes))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of a disassembler, by using a stream as input.
+        /// </summary>
+        /// <param name="stream">The stream to be disassembled.</param>
+        public x86Disassembler(Stream stream)
+        {
+            this.reader = new BinaryReader(stream);
         }
 
         /// <summary>
@@ -48,9 +67,10 @@ namespace TUP.AsmResolver.ASM
         /// </summary>
         public uint CurrentOffset
         {
-            get { return (uint)image.Position; }
+            get { return (uint)reader.BaseStream.Position; }
             set
-            { image.SetOffset(value); 
+            {
+                reader.BaseStream.Position = value;
             }
         }
 
@@ -62,17 +82,17 @@ namespace TUP.AsmResolver.ASM
         /// <returns></returns>
         public InstructionCollection Disassemble(long rawStartOffset, long length)
         {
-            image.SetOffset(rawStartOffset);
+            reader.BaseStream.Position = rawStartOffset;
             InstructionCollection instructions = new InstructionCollection();
      
             long offset = rawStartOffset;
             long endOffset = rawStartOffset + length;
-            while (image.Stream.Position < endOffset)
+            while (reader.BaseStream.Position < endOffset)
             {
                 x86Instruction instruction = DisassembleNextInstruction();
                 instructions.Add(instruction);
                 offset += instruction.Size;
-                image.SetOffset(offset);
+                reader.BaseStream.Position = offset;
             }
 
             //  reader.Dispose();
@@ -85,8 +105,8 @@ namespace TUP.AsmResolver.ASM
         /// <returns></returns>
         public x86Instruction DisassembleNextInstruction()
         {
-            x86Instruction newInstruction = new x86Instruction(image.ParentAssembly);
-            newInstruction.Offset = Offset.FromFileOffset((uint)image.Stream.Position, image.ParentAssembly);
+            x86Instruction newInstruction = new x86Instruction();
+            newInstruction.Offset = Offset.FromFileOffset((uint)reader.BaseStream.Position, assembly) ;
 
             newInstruction.OpCode = RetrieveNextOpCode();
             ProcessVariableByteIndex(ref newInstruction.code);
@@ -105,7 +125,7 @@ namespace TUP.AsmResolver.ASM
         private x86OpCode RetrieveNextOpCode()
         {
             x86OpCode returnOpCode = x86OpCode.Create(x86OpCodes.Unknown);
-            byte opcodeByte = image.Reader.ReadByte();
+            byte opcodeByte = reader.ReadByte();
             returnOpCode.opcodebytes = new byte[] { opcodeByte };
 
             x86OpCode[] matchingOpcodes = MatchWithOpCodes(opcodeByte);
@@ -116,11 +136,11 @@ namespace TUP.AsmResolver.ASM
                 returnOpCode = x86OpCode.Create(matchingOpcodes[0]);
             else if (matchingOpcodes.Length > 1)
             {
-                x86OpCode selected = SelectOpCodeFromToken(matchingOpcodes, image.Reader.ReadByte());
+                x86OpCode selected = SelectOpCodeFromToken(matchingOpcodes, reader.ReadByte());
                 if (selected != null)
                     returnOpCode = selected;
                 if (selected == null || selected.variableByteIndex > -1)
-                    image.Stream.Seek(-1, SeekOrigin.Current);
+                    reader.BaseStream.Seek(-1, SeekOrigin.Current);
             }
             return returnOpCode;
         }
@@ -165,7 +185,7 @@ namespace TUP.AsmResolver.ASM
         {
             if (opcode.variableByteIndex >= 0)
             {
-                opcode.opcodebytes[opcode.variableByteIndex] = image.Reader.ReadByte();
+                opcode.opcodebytes[opcode.variableByteIndex] = reader.ReadByte();
             }
         }
 
@@ -193,22 +213,22 @@ namespace TUP.AsmResolver.ASM
             {
                 case x86OperandType.Byte:
                 case x86OperandType.ShortInstructionAddress:
-                    return new byte[] { image.Reader.ReadByte() };
+                    return new byte[] { reader.ReadByte() };
 
                 case x86OperandType.Dword:
                 case x86OperandType.InstructionAddress:
-                    return image.ReadBytes(sizeof(int)) ;
+                    return reader.ReadBytes(sizeof(int));
 
                 case x86OperandType.Fword:
-                    return image.ReadBytes(6);
+                    return reader.ReadBytes(6);
 
                 case x86OperandType.Word:
-                    return image.ReadBytes(sizeof(ushort));
+                    return reader.ReadBytes(sizeof(ushort));
                 case x86OperandType.WordAndByte:
-                    return image.ReadBytes(sizeof(ushort) + sizeof(byte));
+                    return reader.ReadBytes(sizeof(ushort) + sizeof(byte));
 
                 case x86OperandType.Qword:
-                    return image.ReadBytes(sizeof(ulong));
+                    return reader.ReadBytes(sizeof(ulong));
 
                 case x86OperandType.Multiple32Register:
                 case x86OperandType.Multiple16Register:
@@ -302,12 +322,12 @@ namespace TUP.AsmResolver.ASM
 
         private Operand CreateTargetOffset(uint offset, OperandType offsetType = OperandType.Normal)
         {
-            return new Operand(Offset.FromFileOffset(offset, image.ParentAssembly));
+            return new Operand(Offset.FromFileOffset(offset, assembly));
         }
 
         private Operand CreatePtr(uint offset, OperandType offsetType = OperandType.DwordPointer)
         {
-            return new Operand(Offset.FromVa(offset, image.ParentAssembly), OperandType.DwordPointer);
+            return new Operand(Offset.FromVa(offset, assembly), OperandType.DwordPointer);
         }
 
         private void DecodeSingleRegister(ref x86Instruction instruction, byte registerstoken)
@@ -343,7 +363,7 @@ namespace TUP.AsmResolver.ASM
                     return;
                 }
                 registerValueType = OperandType.DwordPointer;
-                instruction.operandbytes = new byte[] { image.Reader.ReadByte() };
+                instruction.operandbytes = new byte[] { reader.ReadByte() };
                 instruction.OpCode.operandlength = 1;
                 addition = ASMGlobals.ByteToSByte(instruction.operandbytes[0]);
             }
@@ -356,7 +376,7 @@ namespace TUP.AsmResolver.ASM
                     return;
                 }
                 registerValueType = OperandType.DwordPointer;
-                instruction.operandbytes = image.ReadBytes(4);
+                instruction.operandbytes = reader.ReadBytes(4);
                 instruction.OpCode.operandlength = 4;
                 addition = BitConverter.ToInt32(instruction.operandbytes, 0);
             }
@@ -407,7 +427,7 @@ namespace TUP.AsmResolver.ASM
             // one register is a dword pointer with an sbyte addition
             else if (registersToken > 0x3F && registersToken < 0x7F)
             {
-                instruction.operandbytes = image.ReadBytes(1);
+                instruction.operandbytes = reader.ReadBytes(1);
                 instruction.code.operandlength++; 
                 instruction.operand1 = new Operand(register1, isLEA ? OperandType.LeaRegister : OperandType.DwordPointer, ASMGlobals.ByteToSByte(instruction.operandbytes[0]));
                 instruction.operand2 = new Operand(register2, OperandType.Normal);
@@ -415,7 +435,7 @@ namespace TUP.AsmResolver.ASM
             // one register is a dword pointer with an int32 addition
             else if (registersToken >= 0x80 && registersToken <= 0xBF)
             {
-                instruction.operandbytes = image.ReadBytes(4);
+                instruction.operandbytes = reader.ReadBytes(4);
                 instruction.code.operandlength += 4;
                 int addition = BitConverter.ToInt32(instruction.operandbytes, 0);
                 instruction.operand1 = new Operand(register1, isLEA ? OperandType.LeaRegister : OperandType.DwordPointer, addition);

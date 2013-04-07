@@ -249,7 +249,13 @@ namespace AsmResolver
             }
         }
 
+        private void addSectionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            GetCurrentAssembly().NETHeader.MetaDataStreams.Insert(0, new MetaDataStream("1337", new byte[] { 0x13, 0x37, 0xC0, 0xDE }));
+        }
+
 
 
     }
+
 }

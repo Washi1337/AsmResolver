@@ -42,7 +42,6 @@ namespace TUP.AsmResolver.ASM
             if (!overwriteWhenLarger && targetInstruction.Size < newInstruction.Size)
                 throw new ArgumentException("The size of the new instruction is bigger than the target instruction.", "newInstruction");
 
-            newInstruction.assembly = image.ParentAssembly;
             newInstruction.Offset = targetInstruction.Offset;
 
             int NopsToAdd = CalculateSpaceNeeded(targetInstruction, newInstruction) - newInstruction.Size;

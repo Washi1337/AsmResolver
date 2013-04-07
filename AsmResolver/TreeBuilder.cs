@@ -26,7 +26,7 @@ namespace AsmResolver
                     })
                     
                 }),
-                CreateArrayNode("Sections", assembly.NTHeader.Sections, (obj) => { return ((Section)obj).Name; }),
+                CreateArrayNode("Sections", assembly.NTHeader.Sections.ToArray(), (obj) => { return ((Section)obj).Name; }),
 
                 CreateArrayNode("Export Directory", assembly.LibraryExports.ToArray()),
                 CreateArrayNode("Import Directory", assembly.LibraryImports.ToArray(), (obj) => { return ((LibraryReference)obj).LibraryName; }).AddForEachNode((tag) => { return ((LibraryReference)tag.Object).ImportMethods; }, (obj) => { return ((ImportMethod)obj).Name;}),

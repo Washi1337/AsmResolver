@@ -134,7 +134,7 @@ namespace TUP.AsmResolver.PE.Readers
                 case "#Blob":
                     return new BlobHeap(netheader, headeroffset, rawHeader, name);
                 default:
-                    throw new ArgumentException("Metadatastream is not recognized as a valid heap.");
+                    return new MetaDataStream(netheader, headeroffset, rawHeader, name);
             }
 
         }  

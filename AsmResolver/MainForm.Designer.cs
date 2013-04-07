@@ -53,13 +53,14 @@
             this.helpToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.treeView1 = new System.Windows.Forms.TreeView();
-            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.disassembleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.disassemblerControl1 = new AsmResolver.DisassemblerControl();
             this.hexBoxControl1 = new AsmResolver.HexBoxControl();
             this.tablesControl1 = new AsmResolver.TablesControl();
             this.resourceControl1 = new AsmResolver.ResourceControl();
+            this.addSectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -169,7 +170,7 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.optionsToolStripMenuItem.Text = "&Options";
             // 
             // helpToolStripMenuItem
@@ -288,6 +289,21 @@
             this.treeView1.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeView1_DragDrop);
             this.treeView1.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeView1_DragEnter);
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.disassembleToolStripMenuItem,
+            this.addSectionToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 70);
+            // 
+            // disassembleToolStripMenuItem
+            // 
+            this.disassembleToolStripMenuItem.Name = "disassembleToolStripMenuItem";
+            this.disassembleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.disassembleToolStripMenuItem.Text = "Disassemble";
+            this.disassembleToolStripMenuItem.Click += new System.EventHandler(this.disassembleToolStripMenuItem_Click);
+            // 
             // propertyGrid1
             // 
             this.propertyGrid1.HelpVisible = false;
@@ -296,20 +312,6 @@
             this.propertyGrid1.Size = new System.Drawing.Size(100, 100);
             this.propertyGrid1.TabIndex = 0;
             this.propertyGrid1.Visible = false;
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.disassembleToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(140, 26);
-            // 
-            // disassembleToolStripMenuItem
-            // 
-            this.disassembleToolStripMenuItem.Name = "disassembleToolStripMenuItem";
-            this.disassembleToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
-            this.disassembleToolStripMenuItem.Text = "Disassemble";
-            this.disassembleToolStripMenuItem.Click += new System.EventHandler(this.disassembleToolStripMenuItem_Click);
             // 
             // disassemblerControl1
             // 
@@ -346,6 +348,13 @@
             this.resourceControl1.TabIndex = 1;
             this.resourceControl1.Text = "resourceControl1";
             this.resourceControl1.Visible = false;
+            // 
+            // addSectionToolStripMenuItem
+            // 
+            this.addSectionToolStripMenuItem.Name = "addSectionToolStripMenuItem";
+            this.addSectionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.addSectionToolStripMenuItem.Text = "Add Section";
+            this.addSectionToolStripMenuItem.Click += new System.EventHandler(this.addSectionToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -405,6 +414,7 @@
         private System.Windows.Forms.ToolStripMenuItem openWithParametersToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem disassembleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addSectionToolStripMenuItem;
     }
 }
 

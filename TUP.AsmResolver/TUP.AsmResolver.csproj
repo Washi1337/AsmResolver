@@ -61,7 +61,7 @@
     <Compile Include="ICacheProvider.cs" />
     <Compile Include="IDataDirectoryProvider.cs" />
     <Compile Include="NameDemangler.cs" />
-    <Compile Include="NET\IImageProvider.cs" />
+    <Compile Include="IImageProvider.cs" />
     <Compile Include="NET\MemberRange.cs" />
     <Compile Include="NET\NETGlobals.cs" />
     <Compile Include="NET\Specialized\ArrayDimension.cs" />

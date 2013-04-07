@@ -26,15 +26,9 @@ namespace TUP.AsmResolver.NET.Specialized
             IsValueType = typeRef.IsValueType;
         }
 
-        public ISpecification TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        public MemberReference TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
         {
-            if (this is GenericInstanceType)
-            {
-                TypeReference originalType = netheader.BlobHeap.ReadTypeSignature(Signature, paramProvider, argProvider);
-
-                return new TypeSpecification(originaltype) { metadatarow = this.metadatarow };
-            }
-            return this;
+            return netheader.BlobHeap.ReadTypeSignature(Signature, paramProvider, argProvider); 
         }
 
         public TypeReference OriginalType

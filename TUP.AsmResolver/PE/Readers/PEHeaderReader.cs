@@ -51,9 +51,6 @@ namespace TUP.AsmResolver.PE.Readers
         internal void LoadData(bool ignoreHeaderNumbers)
         {
 
-            // Read in the DLL or EXE and get the timestamp
-
-            assembly.ntHeader.Initialize(this);
             CheckDosHeader();
 
             dosHeader = image.ReadStructure<Structures.IMAGE_DOS_HEADER>();

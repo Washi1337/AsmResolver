@@ -10,8 +10,23 @@ namespace TUP.AsmResolver.NET
     /// <summary>
     /// Represents a metadata stream of a .NET application.
     /// </summary>
-    public abstract class MetaDataStream : IDisposable, ICacheProvider
+    public class MetaDataStream : IDisposable, ICacheProvider, IImageProvider
     {
+        public MetaDataStream(string name, byte[] contents)
+        {
+            Name = name;
+            this.streamHeader = new Structures.METADATA_STREAM_HEADER()
+            {
+                Offset = 0,
+                Size = (uint)contents.Length,
+            };
+
+            mainStream = new MemoryStream();
+            binReader = new BinaryReader(mainStream);
+            binWriter = new BinaryWriter(mainStream);
+            mainStream.Write(contents, 0, contents.Length);
+            mainStream.Seek(0, SeekOrigin.Begin);
+        }
 
         internal MetaDataStream(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
         {
@@ -78,7 +93,8 @@ namespace TUP.AsmResolver.NET
             set
             {
                 name = value;
-                netheader.assembly.peImage.Write((int)headeroffset + 8, name, Encoding.ASCII);
+                if (HasImage)
+                    netheader.assembly.peImage.Write((int)headeroffset + 8, name, Encoding.ASCII);
             }
         }
     
@@ -92,7 +108,14 @@ namespace TUP.AsmResolver.NET
             get { return netheader; }
         }
 
-        internal abstract void Initialize();
+        public bool HasImage
+        {
+            get { return netheader != null; }
+        }
+
+        internal virtual void Initialize()
+        {
+        }
 
         public virtual void Dispose()
         {
@@ -102,7 +125,9 @@ namespace TUP.AsmResolver.NET
             ClearCache();
         }
 
-        public abstract void ClearCache();
+        public virtual void ClearCache()
+        {
+        }
 
         internal virtual void MakeEmpty()
         {
@@ -114,6 +139,7 @@ namespace TUP.AsmResolver.NET
             binReader = new BinaryReader(mainStream);
             binWriter = new BinaryWriter(mainStream);
         }
+
 
     }
 }

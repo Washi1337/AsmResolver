@@ -33,6 +33,8 @@ namespace TUP.AsmResolver
         {
             if (rawoffset == 0)
                 return new Offset(0, 0, 0);
+            if (assembly == null)
+                return new Offset(rawoffset, 0, 0);
             OffsetConverter offsetconverter = CreateConverter(assembly, rawoffset, 1);
             return new Offset(rawoffset, offsetconverter.FileOffsetToRva(rawoffset), offsetconverter.FileOffsetToVa(rawoffset));
         }
@@ -46,6 +48,8 @@ namespace TUP.AsmResolver
         {
             if (va == 0)
                 return new Offset(0, 0, 0);
+            if (assembly == null)
+                return new Offset(0, 0, va);
             OffsetConverter offsetconverter = CreateConverter(assembly, va, 3);
             return new Offset(offsetconverter.VaToFileOffset(va), offsetconverter.VaToRva(va), va);
         }
@@ -59,6 +63,8 @@ namespace TUP.AsmResolver
         {
             if (rva == 0)
                 return new Offset(0, 0, 0);
+            if (assembly == null)
+                return new Offset(0, rva, 0);
             OffsetConverter offsetconverter = CreateConverter(assembly, rva, 2);
             return new Offset(offsetconverter.RvaToFileOffset(rva), rva, offsetconverter.RvaToVa(rva));
        

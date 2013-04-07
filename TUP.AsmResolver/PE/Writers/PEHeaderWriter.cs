@@ -125,6 +125,7 @@ namespace TUP.AsmResolver.PE.Writers
 
         private void WriteSectionHeaders()
         {
+            
             foreach (Section section in Writer.OriginalAssembly.NTHeader.Sections)
             {
                 byte[] sectionName = Encoding.ASCII.GetBytes(section.Name);

@@ -29,6 +29,7 @@ namespace TUP.AsmResolver.NET
         /// Gets a metadata token resolver to lookup members by its metadata token.
         /// </summary>
         public MetaDataTokenResolver TokenResolver { get; internal set; }
+
         /// <summary>
         /// Gets the type system class that holds all element types.
         /// </summary>

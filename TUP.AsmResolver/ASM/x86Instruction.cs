@@ -11,9 +11,8 @@ namespace TUP.AsmResolver.ASM
     /// </summary>
     public class x86Instruction
     {
-        internal x86Instruction(Win32Assembly assembly)
+        internal x86Instruction()
         {
-            this.assembly = assembly;
             OpCode = x86OpCodes.Unknown;
             Offset = new Offset(0, 0, 0);
         }
@@ -23,9 +22,9 @@ namespace TUP.AsmResolver.ASM
         /// <param name="assembly">The parent assembly.</param>
         /// <param name="opcode">The opcode to use.</param>
         /// <returns></returns>
-        public static x86Instruction Create(Win32Assembly assembly, x86OpCode opcode)
+        public static x86Instruction Create(x86OpCode opcode)
         {
-            return Create(assembly, opcode, null, null);
+            return Create(opcode, null, null);
         }
         /// <summary>
         /// Creates an instance of a x86 instruction with a single operand.
@@ -34,9 +33,9 @@ namespace TUP.AsmResolver.ASM
         /// <param name="opcode">The opcode to use.</param>
         /// <param name="operand">The operand to use.</param>
         /// <returns></returns>
-        public static x86Instruction Create(Win32Assembly assembly, x86OpCode opcode, Operand operand)
+        public static x86Instruction Create(x86OpCode opcode, Operand operand)
         {
-            return Create(assembly, opcode, operand, null);
+            return Create(opcode, operand, null);
         }
         /// <summary>
         /// Creates an instance of a x86 instruction with two operands.
@@ -46,9 +45,9 @@ namespace TUP.AsmResolver.ASM
         /// <param name="operand1">The first operand to use.</param>
         /// <param name="operand2">The second operand to use.</param>
         /// <returns></returns>
-        public static x86Instruction Create(Win32Assembly assembly, x86OpCode opcode, Operand operand1, Operand operand2)
+        public static x86Instruction Create(x86OpCode opcode, Operand operand1, Operand operand2)
         {
-            x86Instruction newInstruction = new x86Instruction(assembly);
+            x86Instruction newInstruction = new x86Instruction();
             newInstruction.OpCode = opcode;
             newInstruction.operand1 = operand1;
             newInstruction.operand2 = operand2;

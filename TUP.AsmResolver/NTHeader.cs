@@ -19,6 +19,11 @@ namespace TUP.AsmResolver
         internal string file;
         internal Win32Assembly assembly;
         
+        internal NTHeader()
+        {
+
+        }
+
         /// <summary>
         /// Gets the file destination the header is located in.
         /// </summary>
@@ -67,9 +72,9 @@ namespace TUP.AsmResolver
         /// <summary>
         /// Gets the sections of the portable executable file.
         /// </summary>
-        public Section[] Sections
+        public List<Section> Sections
         {
-            get { return header.sections.ToArray(); }
+            get { return header.sections; }
         }
         /// <summary>
         /// Gets the parent assembly container of the NT header.
@@ -109,21 +114,7 @@ namespace TUP.AsmResolver
             
             return a;
         }
-        internal NTHeader()
-        {
 
-        }
-        internal void Initialize(PeHeaderReader reader)
-        {
-            //header = assembly.headerreader;
-            //
-            //fheader.header = header;
-            //if (header.Is32BitHeader)
-            //    oheader = OptionalHeader32.FromAssembly(assembly);
-            //else
-            //    oheader = OptionalHeader64.FromAssembly(assembly);
-
-        }
 
 
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using TUP.AsmResolver.NET;
 namespace TUP.AsmResolver.PE.Writers
@@ -32,19 +33,30 @@ namespace TUP.AsmResolver.PE.Writers
             if (Writer.OriginalAssembly.ntHeader.IsManagedAssembly)
             {
                 NETHeader netHeader = Writer.OriginalAssembly.NETHeader;
-
-                uint streamOffset = netHeader.MetaDataStreams[0].streamHeader.Offset;
-                netHeader.reader.netHeader.MetaData.Size = streamOffset;
-                DataDirectory dataDir = netHeader.MetaDataDirectory;
-                dataDir.rawDataDir.Size = streamOffset;
+                netHeader.reader.metadataHeader2.NumberOfStreams = (ushort)netHeader.MetaDataStreams.Count;
 
                 // reconstruct blob (temporary solution, will be removed once blobs are being re-serialized).
                 netHeader.BlobHeap.Reconstruct();
                 // rebuild tables heap and update all other heaps.
                 netHeader.TablesHeap.Reconstruct();
 
+                uint streamOffset = 0x20;// (uint)(Marshal.SizeOf(typeof(Structures.METADATA_STREAM_HEADER)) * netHeader.MetaDataStreams.Count);
+
                 foreach (MetaDataStream stream in netHeader.MetaDataStreams)
                 {
+                    int namelength = 4 * ((stream.Name.Length / 4) + 1);
+                    streamOffset += (uint)Marshal.SizeOf(typeof(Structures.METADATA_STREAM_HEADER));
+                    streamOffset += (uint)namelength;
+                }
+
+                netHeader.reader.netHeader.MetaData.Size = streamOffset;
+                DataDirectory dataDir = netHeader.MetaDataDirectory;
+                dataDir.rawDataDir.Size = streamOffset;
+
+                foreach (MetaDataStream stream in netHeader.MetaDataStreams)
+                {
+                    // give image
+                    stream.netheader = netHeader;
                     // reset offset to prevent overwriting of expanded streams.
                     stream.streamHeader.Offset = streamOffset;
                     // calculate next stream offset.

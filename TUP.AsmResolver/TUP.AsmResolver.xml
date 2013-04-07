@@ -47,9 +47,21 @@
         </member>
         <member name="M:TUP.AsmResolver.ASM.x86Disassembler.#ctor(TUP.AsmResolver.Win32Assembly)">
             <summary>
-            Creates a new instance of a disassembler.
+            Creates a new instance of a disassembler, by using an assembly as input.
             </summary>
             <param name="assembly">The assembly to be disassembled.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Disassembler.#ctor(System.Byte[])">
+            <summary>
+            Creates a new instance of a disassembler, by using a byte array as input.
+            </summary>
+            <param name="bytes">The bytes to be disassembled.</param>
+        </member>
+        <member name="M:TUP.AsmResolver.ASM.x86Disassembler.#ctor(System.IO.Stream)">
+            <summary>
+            Creates a new instance of a disassembler, by using a stream as input.
+            </summary>
+            <param name="stream">The stream to be disassembled.</param>
         </member>
         <member name="M:TUP.AsmResolver.ASM.x86Disassembler.Disassemble(System.Int64,System.Int64)">
             <summary>
@@ -2242,7 +2254,7 @@
             Represents a 32-bit assembly instruction.
             </summary>
         </member>
-        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.Win32Assembly,TUP.AsmResolver.ASM.x86OpCode)">
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.ASM.x86OpCode)">
             <summary>
             Creates an instance of a x86 instruction without an operand.
             </summary>
@@ -2250,7 +2262,7 @@
             <param name="opcode">The opcode to use.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.Win32Assembly,TUP.AsmResolver.ASM.x86OpCode,TUP.AsmResolver.ASM.Operand)">
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.ASM.x86OpCode,TUP.AsmResolver.ASM.Operand)">
             <summary>
             Creates an instance of a x86 instruction with a single operand.
             </summary>
@@ -2259,7 +2271,7 @@
             <param name="operand">The operand to use.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.Win32Assembly,TUP.AsmResolver.ASM.x86OpCode,TUP.AsmResolver.ASM.Operand,TUP.AsmResolver.ASM.Operand)">
+        <member name="M:TUP.AsmResolver.ASM.x86Instruction.Create(TUP.AsmResolver.ASM.x86OpCode,TUP.AsmResolver.ASM.Operand,TUP.AsmResolver.ASM.Operand)">
             <summary>
             Creates an instance of a x86 instruction with two operands.
             </summary>
@@ -2521,7 +2533,7 @@
             <param name="sectionname">The section name to search for.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.Section.GetSectionByName(TUP.AsmResolver.Section[],System.String)">
+        <member name="M:TUP.AsmResolver.Section.GetSectionByName(System.Collections.Generic.IEnumerable{TUP.AsmResolver.Section},System.String)">
             <summary>
             Gets the section of a list of sections by it's name.
             </summary>
@@ -2537,7 +2549,7 @@
             <param name="rawoffset">The raw offset to search for.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.Section.GetSectionByFileOffset(TUP.AsmResolver.Section[],System.UInt32)">
+        <member name="M:TUP.AsmResolver.Section.GetSectionByFileOffset(System.Collections.Generic.IEnumerable{TUP.AsmResolver.Section},System.UInt32)">
             <summary>
             Gets the section of a list of sections by it's raw offset
             </summary>
@@ -2553,7 +2565,7 @@
             <param name="va">The virtual offset to search for.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.Section.GetSectionByRva(TUP.AsmResolver.Section[],System.UInt32)">
+        <member name="M:TUP.AsmResolver.Section.GetSectionByRva(System.Collections.Generic.IEnumerable{TUP.AsmResolver.Section},System.UInt32)">
             <summary>
             Gets the section of a list of sections by it's virtual offset
             </summary>
@@ -2569,7 +2581,7 @@
             <param name="characteristics">The flag to search for.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.Section.GetFirstSectionByFlag(TUP.AsmResolver.Section[],TUP.AsmResolver.SectionFlags)">
+        <member name="M:TUP.AsmResolver.Section.GetFirstSectionByFlag(System.Collections.Generic.IEnumerable{TUP.AsmResolver.Section},TUP.AsmResolver.SectionFlags)">
             <summary>
             Gets the first section of a list of sections that contains the specified flag
             </summary>
@@ -2585,7 +2597,7 @@
             <param name="characteristics">The flag to search for.</param>
             <returns></returns>
         </member>
-        <member name="M:TUP.AsmResolver.Section.GetLastSectionByFlag(TUP.AsmResolver.Section[],TUP.AsmResolver.SectionFlags)">
+        <member name="M:TUP.AsmResolver.Section.GetLastSectionByFlag(System.Collections.Generic.IEnumerable{TUP.AsmResolver.Section},TUP.AsmResolver.SectionFlags)">
             <summary>
             Gets the last section of a list of sections that contains the specified flag
             </summary>

@@ -24,11 +24,11 @@ namespace TUP.AsmResolver.NET.Specialized
             
         }
 
-        public ISpecification TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        public MemberReference TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
         {
             if (this.IsGenericMethod)
             {
-                MethodSpecification copy = new MethodSpecification(OriginalMethod);
+                MethodSpecification copy = this.MemberwiseClone() as MethodSpecification;
                 copy.paramProvider = paramProvider ;
                 copy.argProvider = argProvider;
                 copy.metadatarow = this.metadatarow;
