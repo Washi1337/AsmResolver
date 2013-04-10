@@ -24,6 +24,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return parent;
             }
         }
+
         public EventDefinition[] Events
         {
             get
@@ -37,6 +38,12 @@ namespace TUP.AsmResolver.NET.Specialized
                 //return Convert.ToUInt32(metadatarow.parts[1]); 
             }
         }
+
+        public bool HasEvents
+        {
+            get { return Events != null && Events.Length > 0; }
+        }
+
         public override void ClearCache()
         {
             eventRange = null;

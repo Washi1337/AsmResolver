@@ -38,6 +38,11 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public bool HasProperties
+        {
+            get { return Properties != null && Properties.Length > 0; }
+        }
+
         public override void ClearCache()
         {
             propertyRange = null;

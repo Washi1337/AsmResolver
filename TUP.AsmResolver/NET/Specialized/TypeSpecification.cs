@@ -52,6 +52,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     return null;
             }
         }
+
         public override string Namespace
         {
             get
@@ -62,11 +63,13 @@ namespace TUP.AsmResolver.NET.Specialized
                     return null;
             }
         }
+
         public override string FullName
         {
             get { return (Namespace == "" ? "" : Namespace + ".") + Name; }
         }
-        public override MetaDataMember ResolutionScope
+
+        public override IResolutionScope ResolutionScope
         {
             get
             {
@@ -86,6 +89,12 @@ namespace TUP.AsmResolver.NET.Specialized
                     return 0;
             }
         }
+
+        public override TypeReference GetElementType()
+        {
+            return OriginalType.GetElementType();
+        }
+
         public override string ToString()
         {
             return FullName;

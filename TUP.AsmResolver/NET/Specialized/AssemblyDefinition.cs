@@ -5,17 +5,17 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class AssemblyDefinition : MetaDataMember
+    public class AssemblyDefinition : AssemblyReference
     {
         string name;
         string culture;
 
-        public AssemblyHashAlgorithm HashAlgorithm
+        public override AssemblyHashAlgorithm HashAlgorithm
         {
             get { return (AssemblyHashAlgorithm)Convert.ToUInt32(metadatarow.parts[0]); }
         }
 
-        public Version Version
+        public override Version Version
         {
             get
             {
@@ -28,17 +28,17 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public AssemblyAttributes Attributes
+        public override AssemblyAttributes Attributes
         {
             get { return (AssemblyAttributes)Convert.ToUInt32(metadatarow.parts[5]); }
         }
 
-        public uint PublicKey
+        public override uint PublicKeyOrToken
         {
             get { return Convert.ToUInt32(metadatarow.parts[6]); }
         }
 
-        public string Name
+        public override string Name
         {
             get
             {
@@ -48,7 +48,7 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public string Culture
+        public override string Culture
         {
             get
             { 

@@ -5,25 +5,28 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class TypeReference : MemberReference, IGenericParametersProvider, IGenericArgumentsProvider
+    public class TypeReference : MemberReference, IGenericParametersProvider, IGenericArgumentsProvider, IResolutionScope
     {
         internal ElementType elementType = ElementType.None;
 
-        internal MetaDataMember resolutionScope;
+        internal IResolutionScope resolutionScope;
         internal string name = string.Empty;
         internal string @namespace = string.Empty;
         public override TypeReference DeclaringType
         {
             get { return null; }
         }
-        public virtual MetaDataMember ResolutionScope
+        public virtual IResolutionScope ResolutionScope
         {
             get
             {
                 if (resolutionScope != null || !HasSavedMetaDataRow)
                     return resolutionScope;
 
-                netheader.TablesHeap.ResolutionScope.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out resolutionScope);
+                MetaDataMember member;
+                netheader.TablesHeap.ResolutionScope.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out member);
+                resolutionScope = member as IResolutionScope;
+
                 return resolutionScope; 
             }
         }
@@ -89,14 +92,17 @@ namespace TUP.AsmResolver.NET.Specialized
             return FullName;
         }
 
-
-
         public virtual GenericParameter[] GenericParameters
         {
             get { return null; }
         }
 
         public virtual TypeReference[] GenericArguments { get { return null; } }
+
+        public virtual TypeReference GetElementType()
+        {
+            return this;
+        }
 
         public override void ClearCache()
         {

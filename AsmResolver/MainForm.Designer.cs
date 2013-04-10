@@ -55,12 +55,12 @@
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.disassembleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            this.addStreamToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.disassemblerControl1 = new AsmResolver.DisassemblerControl();
             this.hexBoxControl1 = new AsmResolver.HexBoxControl();
             this.tablesControl1 = new AsmResolver.TablesControl();
             this.resourceControl1 = new AsmResolver.ResourceControl();
-            this.addSectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -170,7 +170,7 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.optionsToolStripMenuItem.Text = "&Options";
             // 
             // helpToolStripMenuItem
@@ -293,25 +293,23 @@
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.disassembleToolStripMenuItem,
-            this.addSectionToolStripMenuItem});
+            this.addStreamToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 70);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(164, 70);
             // 
             // disassembleToolStripMenuItem
             // 
             this.disassembleToolStripMenuItem.Name = "disassembleToolStripMenuItem";
-            this.disassembleToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.disassembleToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.disassembleToolStripMenuItem.Text = "Disassemble";
             this.disassembleToolStripMenuItem.Click += new System.EventHandler(this.disassembleToolStripMenuItem_Click);
             // 
-            // propertyGrid1
+            // addStreamToolStripMenuItem
             // 
-            this.propertyGrid1.HelpVisible = false;
-            this.propertyGrid1.Location = new System.Drawing.Point(230, 28);
-            this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(100, 100);
-            this.propertyGrid1.TabIndex = 0;
-            this.propertyGrid1.Visible = false;
+            this.addStreamToolStripMenuItem.Name = "addStreamToolStripMenuItem";
+            this.addStreamToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.addStreamToolStripMenuItem.Text = "Add 1337 Stream";
+            this.addStreamToolStripMenuItem.Click += new System.EventHandler(this.addStreamToolStripMenuItem_Click);
             // 
             // disassemblerControl1
             // 
@@ -349,12 +347,14 @@
             this.resourceControl1.Text = "resourceControl1";
             this.resourceControl1.Visible = false;
             // 
-            // addSectionToolStripMenuItem
+            // propertyGrid1
             // 
-            this.addSectionToolStripMenuItem.Name = "addSectionToolStripMenuItem";
-            this.addSectionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.addSectionToolStripMenuItem.Text = "Add Section";
-            this.addSectionToolStripMenuItem.Click += new System.EventHandler(this.addSectionToolStripMenuItem_Click);
+            this.propertyGrid1.HelpVisible = false;
+            this.propertyGrid1.Location = new System.Drawing.Point(230, 28);
+            this.propertyGrid1.Name = "propertyGrid1";
+            this.propertyGrid1.Size = new System.Drawing.Size(100, 100);
+            this.propertyGrid1.TabIndex = 0;
+            this.propertyGrid1.Visible = false;
             // 
             // MainForm
             // 
@@ -414,7 +414,7 @@
         private System.Windows.Forms.ToolStripMenuItem openWithParametersToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem disassembleToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem addSectionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addStreamToolStripMenuItem;
     }
 }
 

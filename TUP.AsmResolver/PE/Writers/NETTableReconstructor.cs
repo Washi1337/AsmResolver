@@ -286,7 +286,7 @@ namespace TUP.AsmResolver.PE.Writers
         {
             object[] parts = new object[]
             {
-                GetCodedIndex(tablesHeap.ResolutionScope, typeRef.ResolutionScope),
+                GetCodedIndex(tablesHeap.ResolutionScope, typeRef.ResolutionScope as MetaDataMember),
                 GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeRef.Name)),
                 GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeRef.Namespace)),
             };

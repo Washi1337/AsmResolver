@@ -5,11 +5,12 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class ModuleDefinition : MetaDataMember
+    public class ModuleDefinition : ModuleReference
     {
         string name = null;
         Guid mvid = default(Guid);
-        public string Name
+
+        public override string Name
         {
             get
             {
@@ -18,6 +19,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
+
         public Guid Mvid
         {
             get
@@ -27,10 +29,12 @@ namespace TUP.AsmResolver.NET.Specialized
                 return mvid;
             }
         }
+
         public override string ToString()
         {
             return Name;
         }
+
         public override void ClearCache()
         {
             name = null;

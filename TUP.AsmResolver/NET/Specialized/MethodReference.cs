@@ -24,6 +24,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return declaringType;
             }
         }
+
         public override string Name
         {
             get
@@ -33,6 +34,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
+
         public virtual MethodSignature Signature
         {
             get
@@ -49,16 +51,23 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get { return false; }
         }
+
         public virtual bool IsGenericMethod
         {
             get { return false; }
         }
+
         public virtual GenericParameter[] GenericParameters
         {
             get
             {
                 return null;
             }
+        }
+
+        public bool HasGenericParameters
+        {
+            get { return GenericParameters != null && GenericParameters.Length > 0; }
         }
 
         public override string FullName

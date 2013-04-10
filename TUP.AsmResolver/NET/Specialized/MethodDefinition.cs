@@ -66,10 +66,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
             }
         }
+
         public override string Name
         {
             get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[3])); }
         }
+
         public override bool IsDefinition
         {
             get
@@ -77,6 +79,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return true;
             }
         }
+
         public override MethodSignature Signature
         {
             get
@@ -88,6 +91,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 //return Convert.ToUInt32(metadatarow.parts[4]); 
             }
         }
+
         public override GenericParameter[] GenericParameters
         {
             get
@@ -161,11 +165,6 @@ namespace TUP.AsmResolver.NET.Specialized
 
         }
 
-        public bool HasBody
-        {
-            get { return RVA != 0; }
-        }
-        
         public MSIL.MethodBody Body
         {
             get
@@ -175,8 +174,15 @@ namespace TUP.AsmResolver.NET.Specialized
                 return body;
             }
         }
+        
+        public bool HasBody
+        {
+            get { return RVA != 0; }
+        }
 
-       
-
+        public bool HasParameters
+        {
+            get { return Parameters != null && Parameters.Length > 0; }
+        }
     }
 }

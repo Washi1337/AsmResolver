@@ -249,9 +249,19 @@ namespace AsmResolver
             }
         }
 
-        private void addSectionToolStripMenuItem_Click(object sender, EventArgs e)
+        private void addStreamToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            GetCurrentAssembly().NETHeader.MetaDataStreams.Insert(0, new MetaDataStream("1337", new byte[] { 0x13, 0x37, 0xC0, 0xDE }));
+            byte[] bytes = new byte[0x100];
+            byte[] pattern = new byte[] { 0x13, 0x37, 0xC0, 0xDE };
+            int j = 0;
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                bytes[i] = pattern[j];
+                j++;
+                if (j >= pattern.Length)
+                    j = 0;
+            }
+            GetCurrentAssembly().NETHeader.MetaDataStreams.Insert(0, new MetaDataStream("1337", bytes));
         }
 
 

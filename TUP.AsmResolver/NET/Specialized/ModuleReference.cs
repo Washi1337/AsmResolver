@@ -5,10 +5,10 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class ModuleReference : MetaDataMember 
+    public class ModuleReference : MetaDataMember, IResolutionScope
     {
         string name = null;
-        public string Name
+        public virtual string Name
         {
             get
             {

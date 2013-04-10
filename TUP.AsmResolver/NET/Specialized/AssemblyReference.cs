@@ -5,12 +5,12 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class AssemblyReference : MetaDataMember 
+    public class AssemblyReference : MetaDataMember , IResolutionScope
     {
         internal string name;
         Version version;
 
-        public Version Version
+        public virtual Version Version
         {
             get
             {
@@ -24,15 +24,15 @@ namespace TUP.AsmResolver.NET.Specialized
                 return version;
             }
         }
-        public AssemblyAttributes Attributes
+        public virtual AssemblyAttributes Attributes
         {
             get { return (AssemblyAttributes)Convert.ToUInt32(metadatarow.parts[4]); }
         }
-        public uint PublicKeyOrToken
+        public virtual uint PublicKeyOrToken
         {
             get { return Convert.ToUInt32(metadatarow.parts[5]); }
         }
-        public string Name
+        public virtual string Name
         {
             get {
                 if (!string.IsNullOrEmpty(name))
@@ -41,13 +41,13 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
-        public string Culture
+        public virtual string Culture
         {
             get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[7])); }
         }
-        public uint HashAlgorithm
+        public virtual AssemblyHashAlgorithm HashAlgorithm
         {
-            get { return Convert.ToUInt32(metadatarow.parts[8]); }
+            get { return (AssemblyHashAlgorithm)Convert.ToUInt32(metadatarow.parts[8]); }
         }
         public override string ToString()
         {

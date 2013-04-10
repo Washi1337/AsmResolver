@@ -17,6 +17,7 @@ namespace TUP.AsmResolver.NET.Specialized
         private GenericParameter[] genericparams = null;
         private string fullname = string.Empty;
         private TypeReference baseType = null;
+        private IResolutionScope resolutionScope = null;
 
         public TypeAttributes Attributes
         {
@@ -69,11 +70,15 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public override MetaDataMember ResolutionScope
+        public override IResolutionScope ResolutionScope
         {
             get
             {
-                return null;
+                if (resolutionScope == null && HasImage)
+                {
+                    resolutionScope = NETHeader.TablesHeap.GetTable(MetaDataTableType.Assembly, false).Members[0] as IResolutionScope;
+                }
+                return resolutionScope;
             }
         }
 
@@ -267,6 +272,26 @@ namespace TUP.AsmResolver.NET.Specialized
                 }
                 return genericparams;
             }
+        }
+
+        public bool HasFields
+        {
+            get { return Fields != null && Fields.Length > 0; }
+        }
+
+        public bool HasMethods
+        {
+            get { return Methods != null && Methods.Length > 0; }
+        }
+
+        public bool HasNestedClasses
+        {
+            get { return NestedClasses != null && NestedClasses.Length > 0; }
+        }
+
+        public bool HasInterfaces
+        {
+            get { return Interfaces != null && Interfaces.Length > 0; }
         }
 
         public override string ToString()

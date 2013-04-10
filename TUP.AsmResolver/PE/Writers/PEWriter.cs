@@ -18,7 +18,7 @@ namespace TUP.AsmResolver.PE.Writers
             this.Parameters = parameters;
 
             this.Tasks = new IWriterTask[] {
-                new PEReconstructor(this),     // Fix all offsets
+                new PEReconstructor(this),      // Fix all offsets
                 new PEHeaderWriter(this),       // Write vital pe headers
                 new SectionWriter(this),        // Temp solution to make exe working. Need to be removed once all rebuilding is done, or maybe just write the code section(s).
                 new DataDirectoryWriter(this),  // Rewrite data directories that don't need to be rebuilded.
