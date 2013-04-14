@@ -138,6 +138,16 @@
             Demangles imported or exported method names. Under construction
             </summary>
         </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FileAttributes.ContainsMetadata">
+            <summary>
+            Specifies the file reference contains metadata.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FileAttributes.ContainsNoMetadata">
+            <summary>
+            Specifies the file references doesn't contain metadata.
+            </summary>
+        </member>
         <member name="T:TUP.AsmResolver.OffsetConverter">
             <summary>
             A class that is able to calculate different kinds of offsets.
@@ -216,6 +226,216 @@
             Indicates that the standard amount of data directories will be used instead of the amount specified in the Optional Header
             </summary>
         </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.PublicKey">
+            <summary>
+            The assembly holds the full (unhashed) public key.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.None">
+            <summary>
+            The assembly uses an unspecified processor architecture.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.MSIL">
+            <summary>
+            The assembly uses a neutral pe32 processor architecture.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.x86">
+            <summary>
+            The assembly uses a x86 pe32 processor architecture.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.IA64">
+            <summary>
+            The assembly uses an itanium pe32+ processor architecture.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.AMD64">
+            <summary>
+            The assembly uses an AMD x64 pe32+ processor architecture.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.Specified">
+            <summary>
+            Propagate PA flags to Assembly record.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.Mask">
+            <summary>
+            Bits describing the processor architecture.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.EnableJITcompileTracking">
+            <summary>
+            From "DebuggableAttribute".
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.DisableJITcompileOptimizer">
+            <summary>
+            From "DebuggableAttribute".
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyAttributes.Retargetable">
+            <summary>
+            The assembly can be retargeted (at runtime) to an assembly from a different publisher.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyHashAlgorithm.None">
+            <summary>
+            No assembly hash algorithm is being used.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyHashAlgorithm.MD5">
+            <summary>
+            The md5 hash algorithm is being used.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.AssemblyHashAlgorithm.SHA1">
+            <summary>
+            The sha1 hash algorithm is being used.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.EventAttributes.SpecialName">
+            <summary>
+            Specifies that the event is using a special name.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.EventAttributes.RTSpecialName">
+            <summary>
+            Specifies that the runtime should check the name encoding.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.FieldAccessMask">
+            <summary>
+            The bitmask that is being used to get the access level of the field.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.PrivateScope">
+            <summary>
+            Specifies the field cannot be referenced.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.Private">
+            <summary>
+            Specifies the field can only be accessed by its declaring type.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.FamANDAssem">
+            <summary>
+            Specifies the field can only be accessed by sub-types in the same assembly.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.Assembly">
+            <summary>
+            Specifies the field can only be accessed by members in the same assembly.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.Family">
+            <summary>
+            Specifies the field can only be accessed by this type and sub-types.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.FamORAssem">
+            <summary>
+            Specifies the field can only be accessed by sub-types and anyone in the assembly.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.Public">
+            <summary>
+            Specifies the field can be accesed by anyone who has visibility to this scope.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.Static">
+            <summary>
+            Specifies the field can be accessed without requiring an instance.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.InitOnly">
+            <summary>
+            Specifies the field can only be initialized and not being written after the initialization.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.Literal">
+            <summary>
+            Specifies the field's value is at compile time constant.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.NotSerialized">
+            <summary>
+            Specifies the field does not have to be serialized when the type is remoted.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.SpecialName">
+            <summary>
+            Specifies the field uses a special name.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.PinvokeImpl">
+            <summary>
+            Specifies the field is an implementation that is being forwarded through PInvoke.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.ReservedMask">
+            <summary>
+            Reserved flags for runtime use only.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.RTSpecialName">
+            <summary>
+            Specifies the runtime should check the name encoding.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.HasFieldMarshal">
+            <summary>
+            Specifies the field has got marshalling information.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.HasDefault">
+            <summary>
+            Specifies the field has got a default value.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.FieldAttributes.HasFieldRVA">
+            <summary>
+            Specifies the field has got an RVA.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.GenericParameterAttributes.Covariant">
+            <summary>
+            Specifies the generic parameter is covariant and can appear as the result type of a method, the type of a read-only field, a declared base type or an implemented interface.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.GenericParameterAttributes.Contravariant">
+            <summary>
+            Specifies the generic parameter is contravariant and can appear as a parameter type in method signatures.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.GenericParameterAttributes.ReferenceTypeConstraint">
+            <summary>
+            Specifies the generic parameter's type argument must be a type reference.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.GenericParameterAttributes.NotNullableValueTypeConstraint">
+            <summary>
+            Specifies the generic parameter's type argument must be a value type and not nullable.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.GenericParameterAttributes.DefaultConstructorConstraint">
+            <summary>
+            Specifies the generic parameter's type argument must have a public default constructor.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.ManifestResourceAttributes.Public">
+            <summary>
+            Specifies the resource is exported from the asembly.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.ManifestResourceAttributes.Private">
+            <summary>
+            Specifies the resource is private to the assembly.
+            </summary>
+        </member>
         <member name="T:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver">
             <summary>
             A class that is able to look up members or strings by its metadata token.
@@ -234,6 +454,226 @@
             </summary>
             <param name="metadataToken">The token of the string value to look up.</param>
             <returns></returns>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.CompilerControlled">
+            <summary>
+            Specifies the method can't be referenced.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.Private">
+            <summary>
+            Specifies the method can only be accessed by its declaring type.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.FamANDAssem">
+            <summary>
+            Specifies the method can only be accessed by sub-types in the same assembly.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.Assembly">
+            <summary>
+            Specifies the method can only be accessed by members in the same assembly.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.Family">
+            <summary>
+            Specifies that the method can only be accessed by this type and sub-types.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.FamORAssem">
+            <summary>
+            Specifies the method can only be accessed by sub-types and anyone in the assembly.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.Public">
+            <summary>
+            Specifies the method can be accesed by anyone who has visibility to this scope.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.Static">
+            <summary>
+            Specifies the method can be accessed without requiring an instance.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.Final">
+            <summary>
+            Specifies the method cannot be overridden.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.Virtual">
+            <summary>
+            Specifies the method is virtual.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.HideBySig">
+            <summary>
+            Specifies the method is being distinguished by it's name + signature.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.ReuseSlot">
+            <summary>
+            Specifies the method reuses an existing slot in vtable.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.NewSlot">
+            <summary>
+            Specifies the method always gets a new slot in the vtable.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.SpecialName">
+            <summary>
+            Specifies that the method uses a special name.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.RTSpecialName">
+            <summary>
+            Specifies that the runtime should check the name encoding.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.PInvokeImpl">
+            <summary>
+            Specifies that the method is an implementation that is being forwarded through PInvoke.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.HasSecurity">
+            <summary>
+            Specifies the method has security associate with it.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodAttributes.RequireSecObject">
+            <summary>
+            Specifies the method calls another method containing security code.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.IL">
+            <summary>
+            Method implementation is IL.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.Native">
+            <summary>
+            Method implementation is native.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.OPTIL">
+            <summary>
+            Method implementation is OPTIL.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.Runtime">
+            <summary>
+            Method implementation is provided by the runtime.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.Unmanaged">
+            <summary>
+            Method implementation is unmanaged.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.Managed">
+            <summary>
+            Method implementation is managed.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.ForwardRef">
+            <summary>
+            Indicates the method is defined; used primarily in merge scenarios.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.NoOptimization">
+            <summary>
+            Method will not be optimized when generating native code.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.PreserveSig">
+            <summary>
+            Indicates the method signature is not to be mangled to do HRESULT conversion.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.InternalCall">
+            <summary>
+            Reserved for internal use.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.Synchronized">
+            <summary>
+            Method is single threaded through the body.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodImplAttributes.NoInlining">
+            <summary>
+            Method may not be inlined.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodSemanticsAttributes.Setter">
+            <summary>
+            The method is a setter for a property.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodSemanticsAttributes.Getter">
+            <summary>
+            The method is a getter for a property.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodSemanticsAttributes.Other">
+            <summary>
+            The method is an unspecified method for a property or event.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodSemanticsAttributes.AddOn">
+            <summary>
+            The method is an AddOn for an event.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodSemanticsAttributes.RemoveOn">
+            <summary>
+            The method is a RemoveOn for an event.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.MethodSemanticsAttributes.Fire">
+            <summary>
+            The method is used to fire an event.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.ParameterAttributes.In">
+            <summary>
+            Parameter is an input parameter.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.ParameterAttributes.Out">
+            <summary>
+            Parameter is an output parameter.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.ParameterAttributes.Optional">
+            <summary>
+            Parameter is an optional parameter.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.ParameterAttributes.HasDefault">
+            <summary>
+            Parameter has got a default value.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.ParameterAttributes.HasFieldMarshal">
+            <summary>
+            Parameter has got field marshalling information.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.PropertyAttributes.SpecialName">
+            <summary>
+            The property uses a special name.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.PropertyAttributes.RTSpecialName">
+            <summary>
+            The runtime should check the name encoding.
+            </summary>
+        </member>
+        <member name="F:TUP.AsmResolver.NET.Specialized.PropertyAttributes.HasDefault">
+            <summary>
+            The proeprty has got a default value.
+            </summary>
         </member>
         <member name="T:TUP.AsmResolver.NET.Specialized.TypeSystem">
             <summary>

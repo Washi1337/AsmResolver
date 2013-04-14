@@ -13,8 +13,10 @@ namespace TUP.AsmResolver.NET
 
         internal MetaDataTable(TablesHeap tableHeap)
         {
-            TablesHeap = tableHeap; 
+            TablesHeap = tableHeap;
+            members = new MetaDataMember[0];
         }
+
         internal int rowAmount;
         internal long rowAmountOffset;
         internal MetaDataMember[] members;

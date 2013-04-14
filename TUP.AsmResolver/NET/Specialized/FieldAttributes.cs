@@ -8,33 +8,86 @@ namespace TUP.AsmResolver.NET.Specialized
     [Flags]
     public enum FieldAttributes : ushort
     {
+        /// <summary>
+        /// The bitmask that is being used to get the access level of the field.
+        /// </summary>
         FieldAccessMask           =   0x0007,
-        PrivateScope              =   0x0000,     // Member not referenceable.
-        Private                   =   0x0001,     // Accessible only by the parent type.
-        FamANDAssem               =   0x0002,     // Accessible by sub-types only in this Assembly.
-        Assembly                  =   0x0003,     // Accessibly by anyone in the Assembly.
-        Family                    =   0x0004,     // Accessible only by type and sub-types.
-        FamORAssem                =   0x0005,     // Accessibly by sub-types anywhere, plus anyone in assembly.
-        Public                    =   0x0006,     // Accessibly by anyone who has visibility to this scope.
+        /// <summary>
+        /// Specifies the field cannot be referenced.
+        /// </summary>
+        PrivateScope              =   0x0000,
+        /// <summary>
+        /// Specifies the field can only be accessed by its declaring type.
+        /// </summary>
+        Private                   =   0x0001,
+        /// <summary>
+        /// Specifies the field can only be accessed by sub-types in the same assembly.
+        /// </summary>
+        FamANDAssem               =   0x0002,
+        /// <summary>
+        /// Specifies the field can only be accessed by members in the same assembly.
+        /// </summary>
+        Assembly                  =   0x0003,
+        /// <summary>
+        /// Specifies the field can only be accessed by this type and sub-types.
+        /// </summary>
+        Family                    =   0x0004,
+        /// <summary>
+        /// Specifies the field can only be accessed by sub-types and anyone in the assembly.
+        /// </summary>
+        FamORAssem                =   0x0005,
+        /// <summary>
+        /// Specifies the field can be accesed by anyone who has visibility to this scope.
+        /// </summary>
+        Public                    =   0x0006,
         
-        // end member access mask
+        /// <summary>
+        /// Specifies the field can be accessed without requiring an instance.
+        /// </summary>
+        Static                    =   0x0010, 
+        /// <summary>
+        /// Specifies the field can only be initialized and not being written after the initialization.
+        /// </summary>
+        InitOnly                  =   0x0020,
+        /// <summary>
+        /// Specifies the field's value is at compile time constant.
+        /// </summary>
+        Literal                   =   0x0040,
+        /// <summary>
+        /// Specifies the field does not have to be serialized when the type is remoted.
+        /// </summary>
+        NotSerialized             =   0x0080,
         
-        // field contract attributes.
-        Static                    =   0x0010,     // Defined on type, else per instance.
-        InitOnly                  =   0x0020,     // Field may only be initialized, not written to after init.
-        Literal                   =   0x0040,     // Value is compile time constant.
-        NotSerialized             =   0x0080,     // Field does not have to be serialized when type is remoted.
+        /// <summary>
+        /// Specifies the field uses a special name.
+        /// </summary>
+        SpecialName               =   0x0200,
         
-        SpecialName               =   0x0200,     // field is special. Name describes how.
+        /// <summary>
+        /// Specifies the field is an implementation that is being forwarded through PInvoke.
+        /// </summary>
+        PinvokeImpl               =   0x2000,
         
-        // interop attributes
-        PinvokeImpl               =   0x2000,     // Implementation is forwarded through pinvoke.
-        
-        // Reserved flags for runtime use only.
+        /// <summary>
+        /// Reserved flags for runtime use only.
+        /// </summary>
         ReservedMask              =   0x9500,
-        RTSpecialName             =   0x0400,     // Runtime(metadata internal APIs) should check name encoding.
-        HasFieldMarshal           =   0x1000,     // Field has marshalling information.
-        HasDefault                =   0x8000,     // Field has default.
-        HasFieldRVA               =   0x0100,     // Field has RVA.
+
+        /// <summary>
+        /// Specifies the runtime should check the name encoding.
+        /// </summary>
+        RTSpecialName             =   0x0400,
+        /// <summary>
+        /// Specifies the field has got marshalling information.
+        /// </summary>
+        HasFieldMarshal           =   0x1000,
+        /// <summary>
+        /// Specifies the field has got a default value.
+        /// </summary>
+        HasDefault                =   0x8000,
+        /// <summary>
+        /// Specifies the field has got an RVA.
+        /// </summary>
+        HasFieldRVA               =   0x0100,
     }
 }

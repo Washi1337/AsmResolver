@@ -8,11 +8,20 @@ namespace TUP.AsmResolver.NET.Specialized
     [Flags]
     public enum PropertyAttributes : ushort
     {
-        SpecialName = 0x0200,     // property is special. Name describes how.
+        /// <summary>
+        /// The property uses a special name.
+        /// </summary>
+        SpecialName = 0x0200,
 
         // Reserved flags for Runtime use only.
         ReservedMask = 0xf400,
-        RTSpecialName = 0x0400,     // Runtime(metadata internal APIs) should check name encoding.
-        HasDefault = 0x1000,     // Property has default
+        /// <summary>
+        /// The runtime should check the name encoding.
+        /// </summary>
+        RTSpecialName = 0x0400,
+        /// <summary>
+        /// The proeprty has got a default value.
+        /// </summary>
+        HasDefault = 0x1000,
     }
 }
