@@ -9,6 +9,17 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         FieldDefinition field;
 
+        public FieldLayout(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public FieldLayout(FieldDefinition field, uint offset)
+            : base(new MetaDataRow(offset, field.TableIndex))
+        {
+            this.field = field;
+        }
+
         public uint Offset
         {
             get { return Convert.ToUInt32(metadatarow.parts[0]); }

@@ -11,10 +11,24 @@ namespace TUP.AsmResolver.NET.Specialized
         string entrypoint = null;
         ModuleReference importScope = null;
 
+        public PInvokeImplementation(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public PInvokeImplementation(MetaDataMember member, PInvokeImplAttributes attributes, ModuleReference moduleRef, string entrypoint)
+            : base(new MetaDataRow((uint)attributes, (uint)0, (uint)0, moduleRef.TableIndex))
+        {
+            this.member = member;
+            this.importScope = moduleRef;
+            this.entrypoint = entrypoint;
+        }
+
         public PInvokeImplAttributes Attributes
         {
             get { return (PInvokeImplAttributes)Convert.ToUInt32(metadatarow.parts[0]); }
         }
+
         public MetaDataMember Member
         {
             get
@@ -24,6 +38,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return member;
             }
         }
+
         public string Entrypoint
         {
             get
@@ -33,6 +48,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return entrypoint;
             }
         }
+
         public ModuleReference ImportScope
         {
             get 
@@ -46,10 +62,12 @@ namespace TUP.AsmResolver.NET.Specialized
                 return importScope; 
             }
         }
+
         public override string ToString()
         {
             return Entrypoint;
         }
+
         public override void ClearCache()
         {
             member = null;

@@ -8,7 +8,26 @@ namespace TUP.AsmResolver.NET.Specialized
     public class AssemblyReference : MetaDataMember , IResolutionScope
     {
         internal string name;
+        internal string culture;
         Version version;
+
+        public AssemblyReference(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public AssemblyReference(string name, AssemblyAttributes attributes, Version version, AssemblyHashAlgorithm hashAlgorithm, uint publicKey, string culture)
+            : base(new MetaDataRow(
+                (byte)version.Major, (byte)version.Minor, (byte)version.Build, (byte)version.Revision,
+                (uint)attributes,
+                publicKey,
+                0U,
+                0U,
+                (uint)hashAlgorithm))
+        {
+            this.name = name;
+            this.culture = culture;
+        }
 
         public virtual Version Version
         {
@@ -24,14 +43,17 @@ namespace TUP.AsmResolver.NET.Specialized
                 return version;
             }
         }
+
         public virtual AssemblyAttributes Attributes
         {
             get { return (AssemblyAttributes)Convert.ToUInt32(metadatarow.parts[4]); }
         }
+
         public virtual uint PublicKeyOrToken
         {
             get { return Convert.ToUInt32(metadatarow.parts[5]); }
         }
+
         public virtual string Name
         {
             get {
@@ -41,14 +63,22 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
+
         public virtual string Culture
         {
-            get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[7])); }
+            get
+            {
+                if (string.IsNullOrEmpty(culture))
+                    culture = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[7]));
+                return culture;
+            }
         }
+
         public virtual AssemblyHashAlgorithm HashAlgorithm
         {
             get { return (AssemblyHashAlgorithm)Convert.ToUInt32(metadatarow.parts[8]); }
         }
+
         public override string ToString()
         {
             return Name;

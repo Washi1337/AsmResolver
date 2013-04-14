@@ -9,6 +9,19 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         TypeDefinition @class;
         TypeDefinition enclosingClass;
+
+        public NestedClass(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public NestedClass(TypeDefinition nestedClass, TypeDefinition enclosingClass)
+            : base(new MetaDataRow(nestedClass.TableIndex, enclosingClass.TableIndex))
+        {
+            this.@class = nestedClass;
+            this.enclosingClass = enclosingClass;
+        }
+
         public TypeDefinition Class
         {
             get {

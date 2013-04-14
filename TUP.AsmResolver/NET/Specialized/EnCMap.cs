@@ -7,6 +7,16 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class EnCMap : MetaDataMember
     {
+        public EnCMap(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public EnCMap(uint token)
+            : base(new MetaDataRow(token))
+        {
+        }
+
         public uint Token
         {
             get { return Convert.ToUInt32(metadatarow.parts[0]); }

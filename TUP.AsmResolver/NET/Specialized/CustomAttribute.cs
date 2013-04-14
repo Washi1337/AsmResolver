@@ -11,6 +11,18 @@ namespace TUP.AsmResolver.NET.Specialized
         MethodReference constructor;
         CustomAttributeSignature signature;
 
+        public CustomAttribute(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public CustomAttribute(MetaDataMember parent, MethodReference constructor, uint value)
+            :base(new MetaDataRow(0U,0U, value))
+        {
+            this.parent = parent;
+            this.constructor = constructor;
+        }
+
         public MetaDataMember Parent
         {
             get
@@ -24,6 +36,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return parent;
             }
         }
+
         public MethodReference Constructor
         {
             get
@@ -37,6 +50,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return constructor;
             }
         }
+
         public uint Value
         {
             get { return Convert.ToUInt32(metadatarow.parts[2]); }
@@ -58,6 +72,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             return Constructor.FullName;
         }
+
         public override void ClearCache()
         {
             parent = null;

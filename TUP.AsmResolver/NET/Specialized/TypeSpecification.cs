@@ -7,13 +7,15 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class TypeSpecification : TypeReference , ISpecification
     {
-        internal TypeSpecification()
+        private TypeReference originaltype;
+
+        public TypeSpecification(MetaDataRow row)
+            : base(row)
         {
         }
 
-        private TypeReference originaltype;
-
         public TypeSpecification(TypeReference typeRef)
+            : base(null)
         {
             originaltype = typeRef;
             netheader = typeRef.netheader;

@@ -8,7 +8,12 @@ namespace TUP.AsmResolver.NET.Specialized
     public abstract class MemberReference : MetaDataMember
     {
         PInvokeImplementation pinvokeimpl = null;
-        CustomAttribute[] customAttributes = null; 
+        CustomAttribute[] customAttributes = null;
+
+        public MemberReference(MetaDataRow row)
+            : base(row)
+        {
+        }
 
         public abstract string Name { get; }
         public abstract string FullName { get; }

@@ -10,10 +10,23 @@ namespace TUP.AsmResolver.NET.Specialized
         MethodDefinition method;
         MetaDataMember association;
 
+        public MethodSemantics(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public MethodSemantics(MethodDefinition method, MetaDataMember association, MethodSemanticsAttributes attributes)
+            : base(new MetaDataRow((uint)attributes, method.TableIndex, (uint)0))
+        {
+            this.method = method;
+            this.association = association;
+        }
+
         public MethodSemanticsAttributes Attributes
         {
             get { return (MethodSemanticsAttributes)Convert.ToUInt16(metadatarow.parts[0]); }
         }
+
         public MethodDefinition Method
         {
             get 
@@ -28,6 +41,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return method;
             }
         }
+
         public MetaDataMember Association
         {
             get
@@ -37,6 +51,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return association;
             }
         }
+
         public override void ClearCache()
         {
             method = null;

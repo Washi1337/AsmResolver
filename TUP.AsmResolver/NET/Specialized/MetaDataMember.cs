@@ -8,6 +8,12 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public abstract class MetaDataMember : IDisposable , ICacheProvider, IImageProvider
     {
+        public MetaDataMember(MetaDataRow row)
+        {
+            UpdateRowOnRebuild = true;
+            metadatarow = row;
+        }
+
         internal uint metadatatoken;
         internal MetaDataRow metadatarow;
         internal MetaDataTableType table;
@@ -51,7 +57,13 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public bool HasSavedMetaDataRow
         {
-            get { return HasImage && metadatarow != null; }
+            get { return HasImage && metadatarow != null && metadatarow.offset != 0; }
+        }
+
+        public bool UpdateRowOnRebuild
+        {
+            get;
+            set;
         }
 
         public void ApplyChanges()

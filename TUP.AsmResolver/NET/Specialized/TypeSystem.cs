@@ -18,7 +18,7 @@ namespace TUP.AsmResolver.NET.Specialized
             if (iscorlib)
                 return (TypeReference)managedHeader.TablesHeap.GetTable(MetaDataTableType.TypeDef).members.FirstOrDefault(t => t.ToString() == @namespace + "." + name);
             else
-                return new TypeReference() { @namespace = @namespace, name = name, netheader = managedHeader, resolutionScope = mscorlibref, IsElementType = true, elementType = type };
+                return new TypeReference(@namespace, name, mscorlibref) { netheader = managedHeader, IsElementType = true, elementType = type };
         }
 
         internal TypeSystem(NETHeader netheader)
@@ -28,7 +28,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 iscorlib = true;
             else
             {
-                mscorlibref = new AssemblyReference() { name = "mscorlib", netheader = netheader };
+                mscorlibref = new AssemblyReference("mscorlib", AssemblyAttributes.None, new Version(), AssemblyHashAlgorithm.None, 0 , null) {netheader = netheader };
                 //mscorlibref = netheader.TablesHeap.GetTable( MetaDataTableType.AssemblyRef).Members.First(m => (m as AssemblyReference).Name == "mscorlib") as AssemblyReference;
             }
             Void = CreateCorLibTypeRef("System", "Void", ElementType.Void);

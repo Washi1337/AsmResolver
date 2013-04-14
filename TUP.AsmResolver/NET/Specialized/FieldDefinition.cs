@@ -10,6 +10,17 @@ namespace TUP.AsmResolver.NET.Specialized
         Constant constant;
         TypeDefinition declaringType;
 
+        public FieldDefinition(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public FieldDefinition(string name, FieldAttributes attributes, uint signature)
+            : base(new MetaDataRow((ushort)attributes, 0U, signature))
+        {
+            this.name = name;
+        }
+
         public FieldAttributes Attributes
         {
             get { return (FieldAttributes)metadatarow.parts[0]; }

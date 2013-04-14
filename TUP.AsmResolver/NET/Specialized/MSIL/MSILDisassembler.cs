@@ -231,7 +231,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                             //}
                             return operand;
                         }
-                        catch { return new TypeReference() { name = "TOKEN:" + metadata.ToString("X8") }; }
+                        catch { return new TypeReference(string.Empty, "TOKEN:" + metadata.ToString("X8"), null); }
 
                     case OperandType.ShortVariable:
                         VariableDefinition varDef = GetVariable(rawoperand[0]);

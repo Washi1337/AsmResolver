@@ -11,6 +11,19 @@ namespace TUP.AsmResolver.NET.Specialized
         MetaDataMember methodBody;
         MetaDataMember methodDeclaration;
 
+        public MethodImplementation(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public MethodImplementation(TypeDefinition @class, MethodReference methodDeclaration, MethodReference newMethod)
+            : base(new MetaDataRow(@class.TableIndex, 0U, newMethod.TableIndex))
+        {
+            this.@class = @class;
+            this.methodDeclaration = methodDeclaration;
+            this.methodBody = newMethod;
+        }
+
         public TypeDefinition Class
         {
             get

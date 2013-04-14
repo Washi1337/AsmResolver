@@ -8,14 +8,29 @@ namespace TUP.AsmResolver.NET.Specialized
     public class TypeReference : MemberReference, IGenericParametersProvider, IGenericArgumentsProvider, IResolutionScope
     {
         internal ElementType elementType = ElementType.None;
-
         internal IResolutionScope resolutionScope;
         internal string name = string.Empty;
         internal string @namespace = string.Empty;
+        internal string fullname = string.Empty;
+
+        public TypeReference(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public TypeReference(string @namespace, string name, IResolutionScope resolutionScope)
+            : base(new MetaDataRow(0U, 0U, 0U))
+        {
+            this.name = name;
+            this.@namespace = @namespace;
+            this.resolutionScope = resolutionScope;
+        }
+
         public override TypeReference DeclaringType
         {
             get { return null; }
         }
+
         public virtual IResolutionScope ResolutionScope
         {
             get
@@ -39,6 +54,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return this.name;
             }
         }
+
         public virtual string Namespace
         {
             get
@@ -48,28 +64,36 @@ namespace TUP.AsmResolver.NET.Specialized
                 return @namespace;
             }
         }
+
         public override string FullName
         {
             get
             {
-                //if (Name.Contains("Checked"))
-                //    System.Diagnostics.Debugger.Break();
-
-                TypeReference declaringType = DeclaringType;
-                if (declaringType == null)
-                    return (Namespace == "" ? "" : Namespace + ".") + Name;
-                
-                StringBuilder builder = new StringBuilder();
-                builder.Append(Name);
-                while (declaringType != null)
+                if (string.IsNullOrEmpty(fullname))
                 {
-                    builder.Insert(0,DeclaringType.FullName + ".");
 
-                    declaringType = declaringType.DeclaringType;
+                    TypeReference declaringType = this.DeclaringType;
+                    if (declaringType == null)
+                    {
+                        fullname = (string.IsNullOrEmpty(Namespace) ? string.Empty : Namespace + ".") + Name;
+                    }
+                    else
+                    {
+                        StringBuilder builder = new StringBuilder();
+                        builder.Append(Name);
+                        while (declaringType != null)
+                        {
+                            builder.Insert(0, declaringType.FullName + "/");
+
+                            declaringType = declaringType.DeclaringType;
+                        }
+                        fullname = builder.ToString();
+                    }
                 }
-                return builder.ToString();
+                return fullname;
             }
         }
+
         public virtual bool IsArray { get; internal set; }
         public virtual bool IsPointer { get; internal set; }
         public virtual bool IsByReference { get; internal set; }
@@ -86,11 +110,6 @@ namespace TUP.AsmResolver.NET.Specialized
             internal set;
         }
         public virtual bool IsElementType { get; internal set; }
-
-        public override string ToString()
-        {
-            return FullName;
-        }
 
         public virtual GenericParameter[] GenericParameters
         {
@@ -109,6 +128,13 @@ namespace TUP.AsmResolver.NET.Specialized
             resolutionScope = null;
             name = null;
             @namespace = null;
+            fullname = null;
         }
+
+        public override string ToString()
+        {
+            return FullName;
+        }
+
     }
 }

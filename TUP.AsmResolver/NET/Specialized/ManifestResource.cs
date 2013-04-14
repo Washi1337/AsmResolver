@@ -12,6 +12,18 @@ namespace TUP.AsmResolver.NET.Specialized
         string name;
         MetaDataMember implementation;
 
+        public ManifestResource(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public ManifestResource(string name, ManifestResourceAttributes attributes, MetaDataMember implementation, uint offset)
+            : base(new MetaDataRow(offset, (uint)attributes, 0U, 0U))
+        {
+            this.name = name;
+            this.implementation = implementation;
+        }
+
         public uint Offset
         {
             get { return Convert.ToUInt32(metadatarow.parts[0]); }
@@ -49,6 +61,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get { return (ManifestResourceAttributes)Convert.ToUInt32(metadatarow.parts[1]); }
         }
+
         public string Name
         {
             get
@@ -58,6 +71,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
+
         public MetaDataMember Implementation
         {
             get {
@@ -71,6 +85,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return implementation;
             }
         }
+
         public override void ClearCache()
         {
             if (stream != null)

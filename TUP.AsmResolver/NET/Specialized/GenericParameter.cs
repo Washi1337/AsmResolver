@@ -7,8 +7,19 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class GenericParameter : TypeReference
     {
-
         internal MetaDataMember owner = null;
+        
+        public GenericParameter(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public GenericParameter(string name, ushort index, GenericParameterAttributes attributes, MetaDataMember owner)
+            : base(new MetaDataRow(index, (ushort)attributes, 0U, 0U))
+        {
+            this.name = name;
+            this.owner = owner;
+        }
 
         public ushort Index
         {

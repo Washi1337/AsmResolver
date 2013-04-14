@@ -13,6 +13,17 @@ namespace TUP.AsmResolver.NET.Specialized
         TypeReference declaringtype;
         GenericParameter[] genericparams = null;
 
+        public MethodDefinition(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public MethodDefinition(string name, MethodAttributes attributes, uint rva, uint signature, uint paramlist)
+            : base(new MetaDataRow(rva, (ushort)0, (ushort)attributes, 0U, signature, paramlist))
+        {
+            this.name = name;
+        }
+
         public uint RVA
         {
             get { return Convert.ToUInt32(metadatarow.parts[0]); }
@@ -24,6 +35,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get { return (MethodImplAttributes)metadatarow.parts[1]; }
             set { metadatarow.parts[1] = ((ushort)value); }
         }
+
         public MethodAttributes Attributes
         {
             get { 

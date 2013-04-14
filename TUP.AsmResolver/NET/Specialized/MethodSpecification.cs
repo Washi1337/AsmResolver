@@ -13,10 +13,13 @@ namespace TUP.AsmResolver.NET.Specialized
         IGenericArgumentsProvider argProvider;
         IGenericParametersProvider paramProvider;
 
-        internal MethodSpecification()
+        public MethodSpecification(MetaDataRow row)
+            : base(row)
         {
         }
+
         public MethodSpecification(MethodReference methodRef)
+            : base(null)
         {
             OriginalMethod = methodRef;
             paramProvider = methodRef;
@@ -93,7 +96,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     genericParams = new GenericParameter[GenericArguments.Length];
                     for (int i = 0; i < genericParams.Length; i++)
-                        genericParams[i] = new GenericParameter() { name = "!!" + i, owner = this };
+                        genericParams[i] = new GenericParameter("!!" + i, (ushort)i, (GenericParameterAttributes)0, this);
                 }
                 return genericParams;
             }

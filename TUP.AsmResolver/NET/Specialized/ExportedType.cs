@@ -9,6 +9,11 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         MetaDataMember implementation;
 
+        public ExportedType(MetaDataRow row) 
+            : base(row)
+        {
+        }
+
         public TypeAttributes Attributes { get { return (TypeAttributes)Convert.ToUInt32(metadatarow.parts[0]); } }
         public uint TypeID { get { return Convert.ToUInt32(metadatarow.parts[1]); } }
         public string TypeName { get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[2])); } }

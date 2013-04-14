@@ -9,10 +9,22 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         FieldDefinition field;
 
+        public FieldRVA(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public FieldRVA(FieldDefinition field, uint rva)
+            : base(new MetaDataRow(rva, field.TableIndex))
+        {
+            this.field = field;
+        }
+
         public uint RVA
         {
             get { return Convert.ToUInt32(metadatarow.parts[0]); }
         }
+
         public FieldDefinition Field
         {
             get
@@ -27,6 +39,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return field;
             }
         }
+
         public override void ClearCache()
         {
             field = null;

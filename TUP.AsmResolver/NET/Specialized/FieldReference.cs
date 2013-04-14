@@ -8,8 +8,20 @@ namespace TUP.AsmResolver.NET.Specialized
     public class FieldReference : MemberReference
     {
         internal FieldSignature signature = null;
-        TypeReference declaringType;
-        string name;
+        internal TypeReference declaringType;
+        internal string name;
+
+        public FieldReference(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public FieldReference(string name, TypeReference declaringType, uint signature)
+            : base(new MetaDataRow(0U, 0U, signature))
+        {
+            this.name = name;
+            this.declaringType = declaringType;
+        }
 
         public override TypeReference DeclaringType
         {

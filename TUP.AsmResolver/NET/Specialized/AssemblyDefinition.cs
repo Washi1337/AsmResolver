@@ -10,6 +10,27 @@ namespace TUP.AsmResolver.NET.Specialized
         string name;
         string culture;
 
+        public AssemblyDefinition(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public AssemblyDefinition(string name, AssemblyAttributes attributes, Version version, AssemblyHashAlgorithm hashAlgorithm, uint publicKey, string culture)
+            : base(new MetaDataRow(
+                (uint)hashAlgorithm,
+                (byte)version.Major,
+                (byte)version.Minor,
+                (byte)version.Build,
+                (byte)version.Revision,
+                (uint)attributes,
+                publicKey,
+                0U,
+                0U))
+        {
+            this.name = name;
+            this.culture = culture;
+        }
+
         public override AssemblyHashAlgorithm HashAlgorithm
         {
             get { return (AssemblyHashAlgorithm)Convert.ToUInt32(metadatarow.parts[0]); }

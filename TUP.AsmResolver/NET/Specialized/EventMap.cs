@@ -10,6 +10,17 @@ namespace TUP.AsmResolver.NET.Specialized
         MemberRange<EventDefinition> eventRange = null;
         TypeDefinition parent = null;
 
+        public EventMap(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public EventMap(TypeDefinition parent, uint startingIndex)
+            :base(new MetaDataRow(parent.TableIndex, startingIndex))
+        {
+            this.parent = parent;
+        }
+
         public TypeDefinition Parent
         {
             get

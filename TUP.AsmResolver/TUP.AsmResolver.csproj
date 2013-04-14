@@ -134,7 +134,6 @@
     <Compile Include="NET\Specialized\IGenericParametersProvider.cs" />
     <Compile Include="NET\Specialized\IMemberSignature.cs" />
     <Compile Include="NET\Specialized\MemberReference.cs" />
-    <Compile Include="NET\Specialized\MemberResolver.cs" />
     <Compile Include="NET\Specialized\MethodSignature.cs" />
     <Compile Include="NET\Specialized\InterfaceImplementation.cs" />
     <Compile Include="NET\Specialized\ManifestResource.cs" />

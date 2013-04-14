@@ -8,14 +8,27 @@ namespace TUP.AsmResolver.NET.Specialized
     public class ParameterDefinition : MetaDataMember
     {
         string name = null;
+
+        public ParameterDefinition(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public ParameterDefinition(string name, ElementType parameterType, ParameterAttributes attributes, ushort sequence)
+            : base(new MetaDataRow((uint)attributes, sequence, 0U, (uint)parameterType))
+        {
+        }
+
         public ParameterAttributes Attributes
         {
             get{return (ParameterAttributes)metadatarow.parts[0];}
         }
+
         public ushort Sequence
         {
             get { return Convert.ToUInt16(metadatarow.parts[1]); }
         }
+
         public string Name
         {
             get
@@ -25,16 +38,18 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
-        public override string ToString()
-        {
-            return Name;
-        }
 
         public ElementType ParameterType
         {
             get;
             internal set;
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+
         public override void ClearCache()
         {
             name = null;

@@ -10,6 +10,18 @@ namespace TUP.AsmResolver.NET.Specialized
         private GenericParameter owner;
         private TypeReference constraint;
 
+        public GenericParamConstraint(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public GenericParamConstraint(GenericParameter owner, TypeReference constraint)
+            : base(new MetaDataRow(owner.TableIndex, 0U))
+        {
+            this.owner = owner;
+            this.constraint = constraint;
+        }
+
         public GenericParameter Owner
         {
             get

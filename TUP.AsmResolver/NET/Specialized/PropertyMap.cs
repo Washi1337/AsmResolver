@@ -9,6 +9,17 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         MemberRange<PropertyDefinition> propertyRange;
         TypeDefinition parent;
+
+        public PropertyMap(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public PropertyMap(TypeDefinition parentType, uint startingIndex)
+            : base(new MetaDataRow(parentType.TableIndex, startingIndex))
+        {
+        }
+
         public TypeDefinition Parent
         {
             get

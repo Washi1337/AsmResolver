@@ -13,11 +13,24 @@ namespace TUP.AsmResolver.NET.Specialized
         TypeReference eventType = null;
         TypeDefinition declaringType = null;
 
+        public EventDefinition(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public EventDefinition(string name, EventAttributes attributes, TypeReference eventType)
+            : base(new MetaDataRow((ushort)attributes, 0U, 0U))
+        {
+            this.name = name;
+            this.eventType = eventType;
+        }
+
         public EventAttributes Attributes
         {
             get { return (EventAttributes)Convert.ToUInt16(metadatarow.parts[0]); }
             set { metadatarow.parts[0] = (ushort)value; }
         }
+
         public override string Name
         {
             get
@@ -27,6 +40,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
+
         public TypeReference EventType
         {
             get
@@ -117,6 +131,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             return Name;
         }
+
         public override void ClearCache()
         {
             addmethod = null;

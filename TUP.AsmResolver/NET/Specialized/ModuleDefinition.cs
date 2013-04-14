@@ -10,6 +10,18 @@ namespace TUP.AsmResolver.NET.Specialized
         string name = null;
         Guid mvid = default(Guid);
 
+        public ModuleDefinition(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public ModuleDefinition(string name, Guid mvid)
+            : base(new MetaDataRow(0U, 0U, 0U, 0U, 0U))
+        {
+            this.name = name;
+            this.mvid = mvid;
+        }
+
         public override string Name
         {
             get

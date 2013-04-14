@@ -18,15 +18,15 @@ namespace TUP.AsmResolver.NET
         public MetaDataRow()
         {
         }
-        public MetaDataRow(object[] parts)
+        public MetaDataRow(params object[] parts)
         {
             this.parts = parts;
         }
-        public MetaDataRow(uint offset, object[] parts)
-        {
-            this.offset = offset;
-            this.parts = parts;
-        }
+        //public MetaDataRow(uint offset, params object[] parts)
+        //{
+        //    this.offset = offset;
+        //    this.parts = parts;
+        //}
         /// <summary>
         /// Gets the raw offset of the metadata row.
         /// </summary>
@@ -55,17 +55,16 @@ namespace TUP.AsmResolver.NET
                 BinaryWriter writer = new BinaryWriter(stream);
                 foreach (object part in parts)
                 {
-                    if (part is uint)
+                    if (part is uint || part is int)
                         writer.Write((uint)part);
-                    else if (part is ushort)
+                    else if (part is ushort || part is short)
                         writer.Write((ushort)part);
-                    else if (part is byte)
+                    else if (part is byte || part is sbyte)
                         writer.Write((byte)part);
                 }
                 return stream.ToArray();
             }
         }
-
 
     }
 }

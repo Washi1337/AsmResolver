@@ -13,11 +13,23 @@ namespace TUP.AsmResolver.NET.Specialized
         TypeDefinition declaringType = null;
         string name = null;
 
+        public PropertyDefinition(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public PropertyDefinition(string name, PropertyAttributes attributes, uint signature)
+            : base(new MetaDataRow((uint)attributes, 0U, signature))
+        {
+            this.name = name;
+        }
+
         public PropertyAttributes Attributes
         {
             get { return (PropertyAttributes)Convert.ToUInt16(metadatarow.parts[0]); }
             set { metadatarow.parts[0] = (ushort)value; }
         }
+
         public override string Name
         {
             get
@@ -39,6 +51,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return propertySig;
             }
         }
+
         public MethodDefinition GetMethod
         {
             get
@@ -58,6 +71,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return getmethod;
             }
         }
+
         public MethodDefinition SetMethod
         {
             get

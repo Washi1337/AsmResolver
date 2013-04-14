@@ -270,454 +270,564 @@ namespace TUP.AsmResolver.PE.Writers
 
         internal void WriteModule(ModuleDefinition moduleDef)
         {
-            object[] parts = new object[]
+            if (moduleDef.UpdateRowOnRebuild)
             {
-                (ushort)0,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(moduleDef.Name)),
-                GetHeapOffset(netHeader.GuidHeap, netHeader.GuidHeap.GetGuidOffset(moduleDef.Mvid)),
-                GetHeapOffset(netHeader.GuidHeap, 0),
-                GetHeapOffset(netHeader.GuidHeap, 0),
-            };
-            moduleDef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (ushort)0,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(moduleDef.Name)),
+                    GetHeapOffset(netHeader.GuidHeap, netHeader.GuidHeap.GetGuidOffset(moduleDef.Mvid)),
+                    GetHeapOffset(netHeader.GuidHeap, 0),
+                    GetHeapOffset(netHeader.GuidHeap, 0),
+                };
+                moduleDef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(moduleDef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteTypeRef(TypeReference typeRef)
         {
-            object[] parts = new object[]
+            if (typeRef.UpdateRowOnRebuild)
             {
-                GetCodedIndex(tablesHeap.ResolutionScope, typeRef.ResolutionScope as MetaDataMember),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeRef.Name)),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeRef.Namespace)),
-            };
-            typeRef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetCodedIndex(tablesHeap.ResolutionScope, typeRef.ResolutionScope as MetaDataMember),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeRef.Name)),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeRef.Namespace)),
+                };
+                typeRef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(typeRef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteTypeDef(TypeDefinition typeDef)
         {
-            object[] parts = new object[]
+            if (typeDef.UpdateRowOnRebuild)
             {
-                (uint)typeDef.Attributes,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeDef.Name)),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeDef.Namespace)),
-                GetCodedIndex(tablesHeap.TypeDefOrRef, typeDef.BaseType),
-                ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Field), typeDef.FieldList),
-                ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Method), typeDef.MethodList),
-            };
-            typeDef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (uint)typeDef.Attributes,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeDef.Name)),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(typeDef.Namespace)),
+                    GetCodedIndex(tablesHeap.TypeDefOrRef, typeDef.BaseType),
+                    ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Field), typeDef.FieldList),
+                    ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Method), typeDef.MethodList),
+                };
+                typeDef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(typeDef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteFieldDef(FieldDefinition fieldDef)
         {
-            object[] parts = new object[]
+            if (fieldDef.UpdateRowOnRebuild)
             {
-                (ushort)fieldDef.Attributes,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(fieldDef.Name)),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(fieldDef.metadatarow.parts[2])), // TODO: Serialize signatures.
+                object[] parts = new object[]
+                {
+                    (ushort)fieldDef.Attributes,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(fieldDef.Name)),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(fieldDef.metadatarow.parts[2])), // TODO: Serialize signatures.
 
-            };
-            fieldDef.MetaDataRow = new MetaDataRow(parts);
+                };
+                fieldDef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(fieldDef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteMethodDef(MethodDefinition methodDef)
         {
-            object[] parts = new object[]
+            if (methodDef.UpdateRowOnRebuild)
             {
-                (uint)methodDef.RVA,
-                (ushort)methodDef.ImplementationAttributes,
-                (ushort)methodDef.Attributes,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(methodDef.Name)),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(methodDef.metadatarow.parts[4])), // TODO: Serialize signatures.
-                ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Param), Convert.ToUInt32(methodDef.metadatarow.parts[5])),
-            };
-            methodDef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (uint)methodDef.RVA,
+                    (ushort)methodDef.ImplementationAttributes,
+                    (ushort)methodDef.Attributes,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(methodDef.Name)),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(methodDef.metadatarow.parts[4])), // TODO: Serialize signatures.
+                    ProcessIndex(tablesHeap.GetTable(MetaDataTableType.Param), Convert.ToUInt32(methodDef.metadatarow.parts[5])),
+                };
+                methodDef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(methodDef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteParamPtr(ParamPtr paramPtr)
         {
-            object[] parts = new object[]
+            if (paramPtr.UpdateRowOnRebuild)
             {
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(paramPtr.metadatarow.parts[0])), // TODO: Serialize signatures.
-            };
-
-            paramPtr.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(paramPtr.metadatarow.parts[0])), // TODO: Serialize signatures.
+                };
+                paramPtr.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(paramPtr.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteParamDef(ParameterDefinition paramDef)
         {
-            object[] parts = new object[]
+            if (paramDef.UpdateRowOnRebuild)
             {
-                (ushort)paramDef.Attributes,
-                paramDef.Sequence,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(paramDef.Name)),
-            };
-            paramDef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (ushort)paramDef.Attributes,
+                    paramDef.Sequence,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(paramDef.Name)),
+                };
+                paramDef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(paramDef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteInterfaceImpl(InterfaceImplementation interfaceImpl)
         {
-            object[] parts = new object[]
+            if (interfaceImpl.UpdateRowOnRebuild)
             {
-                GetMemberIndex(interfaceImpl.Class),
-                GetCodedIndex(tablesHeap.TypeDefOrRef, interfaceImpl.Interface),
-            };
-            interfaceImpl.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetMemberIndex(interfaceImpl.Class),
+                    GetCodedIndex(tablesHeap.TypeDefOrRef, interfaceImpl.Interface),
+                };
+                interfaceImpl.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(interfaceImpl.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteMemberRef(MemberReference memberRef)
         {
-            object[] parts = new object[] 
+            if (memberRef.UpdateRowOnRebuild)
             {
-                GetCodedIndex(tablesHeap.MemberRefParent, memberRef.DeclaringType),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(memberRef.Name)),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(memberRef.MetaDataRow.Parts[2])), // TODO: Serialize signatures.
-            };
-            memberRef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[] 
+                {
+                    GetCodedIndex(tablesHeap.MemberRefParent, memberRef.DeclaringType),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(memberRef.Name)),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(memberRef.MetaDataRow.Parts[2])), // TODO: Serialize signatures.
+                };
+                memberRef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(memberRef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteConstant(Constant constant)
         {
-            object[] parts = new object[]
+            if (constant.UpdateRowOnRebuild)
             {
-                (byte)constant.ConstantType,
-                (byte)0,
-                GetCodedIndex(tablesHeap.HasConstant, constant.Parent),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(constant.MetaDataRow.Parts[3])), // TODO: Serialize signatures.
-            };
-            constant.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (byte)constant.ConstantType,
+                    (byte)0,
+                    GetCodedIndex(tablesHeap.HasConstant, constant.Parent),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(constant.MetaDataRow.Parts[3])), // TODO: Serialize signatures.
+                };
+                constant.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(constant.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteCustomAttribute(CustomAttribute attribute)
         {
-            object[] parts = new object[]
+            if (attribute.UpdateRowOnRebuild)
             {
-                GetCodedIndex(tablesHeap.HasCustomAttribute, attribute.Parent),
-                GetCodedIndex(tablesHeap.CustomAttributeType, attribute.Constructor),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(attribute.MetaDataRow.Parts[2])), // TODO: Serialize signatures.
-             };
-            attribute.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetCodedIndex(tablesHeap.HasCustomAttribute, attribute.Parent),
+                    GetCodedIndex(tablesHeap.CustomAttributeType, attribute.Constructor),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(attribute.MetaDataRow.Parts[2])), // TODO: Serialize signatures.
+                };
+                attribute.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(attribute.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteFieldMarshal(FieldMarshal fieldMarshal)
         {
-            object[] parts = new object[]
+            if (fieldMarshal.UpdateRowOnRebuild)
             {
-                GetCodedIndex(tablesHeap.HasFieldMarshall, fieldMarshal.Parent),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(fieldMarshal.MetaDataRow.Parts[1])), // TODO: Serialize signatures.
-            };
-            fieldMarshal.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetCodedIndex(tablesHeap.HasFieldMarshall, fieldMarshal.Parent),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(fieldMarshal.MetaDataRow.Parts[1])), // TODO: Serialize signatures.
+                };
+                fieldMarshal.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(fieldMarshal.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteSecurityDecl(SecurityDeclaration securityDecl)
         {
-            object[] parts = new object[]
+            if (securityDecl.UpdateRowOnRebuild)
             {
-                securityDecl.Action,
-                GetCodedIndex(tablesHeap.HasDeclSecurity, securityDecl.Parent),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(securityDecl.MetaDataRow.Parts[2])), // TODO: Serialize signatures.
-            };
-            securityDecl.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (ushort)securityDecl.Action,
+                    GetCodedIndex(tablesHeap.HasDeclSecurity, securityDecl.Parent),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(securityDecl.MetaDataRow.Parts[2])), // TODO: Serialize signatures.
+                };
+                securityDecl.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(securityDecl.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteClassLayout(ClassLayout classLayout)
         {
-            object[] parts = new object[]
+            if (classLayout.UpdateRowOnRebuild)
             {
-                classLayout.PackingSize,
-                classLayout.ClassSize,
-                ProcessIndex(tablesHeap.GetTable(MetaDataTableType.TypeDef),classLayout.Parent),   
-            };
-            classLayout.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    classLayout.PackingSize,
+                    classLayout.ClassSize,
+                    ProcessIndex(tablesHeap.GetTable(MetaDataTableType.TypeDef),classLayout.Parent.TableIndex),
+                };
+                classLayout.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(classLayout.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteFieldLayout(FieldLayout fieldLayout)
         {
-            object[] parts = new object[]
+            if (fieldLayout.UpdateRowOnRebuild)
             {
-                fieldLayout.Offset,
-                GetMemberIndex(fieldLayout.Field),  
-            };
-            fieldLayout.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    fieldLayout.Offset,
+                    GetMemberIndex(fieldLayout.Field),  
+                };
+                fieldLayout.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(fieldLayout.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteStandAloneSig(StandAloneSignature signature)
         {
-            object[] parts = new object[]
+            if (signature.UpdateRowOnRebuild)
             {
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(signature.MetaDataRow.Parts[0])), // TODO: Serialize signatures.
-            };
-            signature.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(signature.MetaDataRow.Parts[0])), // TODO: Serialize signatures.
+                };
+                signature.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(signature.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteEventMap(EventMap eventMap)
         {
-            object[] parts = new object[]
+            if (eventMap.UpdateRowOnRebuild)
             {
-                GetMemberIndex(eventMap.Parent),
-                GetMemberIndex(eventMap.Events[0]),
-            };
-            eventMap.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetMemberIndex(eventMap.Parent),
+                    GetMemberIndex(eventMap.Events[0]),
+                };
+                eventMap.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(eventMap.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteEventDef(EventDefinition eventDef)
         {
-            object[] parts = new object[]
+            if (eventDef.UpdateRowOnRebuild)
             {
-                (ushort)eventDef.Attributes,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(eventDef.Name)),
-                GetCodedIndex(tablesHeap.TypeDefOrRef, eventDef.EventType),
-            };
-            eventDef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (ushort)eventDef.Attributes,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(eventDef.Name)),
+                    GetCodedIndex(tablesHeap.TypeDefOrRef, eventDef.EventType),
+                };
+                eventDef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(eventDef.MetaDataRow.GenerateBytes());
         }
 
         internal void WritePropertyMap(PropertyMap propertyMap)
         {
-            object[] parts = new object[]
+            if (propertyMap.UpdateRowOnRebuild)
             {
-                GetMemberIndex(propertyMap.Parent),
-                GetMemberIndex(propertyMap.Properties[0]),
-            };
-            propertyMap.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetMemberIndex(propertyMap.Parent),
+                    GetMemberIndex(propertyMap.Properties[0]),
+                };
+                propertyMap.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(propertyMap.MetaDataRow.GenerateBytes());
         }
 
         internal void WritePropertyDef(PropertyDefinition propertyDef)
         {
-            object[] parts = new object[]
+            if (propertyDef.UpdateRowOnRebuild)
             {
-                (ushort)propertyDef.Attributes,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(propertyDef.Name)),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(propertyDef.MetaDataRow.parts[2])), // TODO: Serialize signatures.
-            };
-            propertyDef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (ushort)propertyDef.Attributes,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(propertyDef.Name)),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(propertyDef.MetaDataRow.parts[2])), // TODO: Serialize signatures.
+                };
+                propertyDef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(propertyDef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteMethodSemantics(MethodSemantics semantics)
         {
-            object[] parts = new object[]
+            if (semantics.UpdateRowOnRebuild)
             {
-                (ushort)semantics.Attributes,
-                GetMemberIndex(semantics.Method),
-                GetCodedIndex(tablesHeap.HasSemantics, semantics.Association),
-            };
-            semantics.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (ushort)semantics.Attributes,
+                    GetMemberIndex(semantics.Method),
+                    GetCodedIndex(tablesHeap.HasSemantics, semantics.Association),
+                };
+                semantics.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(semantics.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteMethodImpl(MethodImplementation implementation)
         {
-            object[] parts = new object[]
+            if (implementation.UpdateRowOnRebuild)
             {
-                GetMemberIndex(implementation.Class),
-                GetCodedIndex(tablesHeap.MethodDefOrRef, implementation.MethodBody),
-                GetCodedIndex(tablesHeap.MethodDefOrRef, implementation.MethodDeclaration),
-            };
-            implementation.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetMemberIndex(implementation.Class),
+                    GetCodedIndex(tablesHeap.MethodDefOrRef, implementation.MethodBody),
+                    GetCodedIndex(tablesHeap.MethodDefOrRef, implementation.MethodDeclaration),
+                };
+                implementation.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(implementation.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteModuleRef(ModuleReference moduleRef)
         {
-            object[] parts = new object[]
+            if (moduleRef.UpdateRowOnRebuild)
             {
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(moduleRef.Name)),
-            };
-            moduleRef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(moduleRef.Name)),
+                };
+                moduleRef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(moduleRef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteTypeSpec(TypeSpecification typeSpec)
         {
-            object[] parts = new object[]
+            if (typeSpec.UpdateRowOnRebuild)
             {
-                GetHeapOffset(netHeader.BlobHeap, typeSpec.Signature), // TODO: Serialize signatures.
-            };
-            typeSpec.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetHeapOffset(netHeader.BlobHeap, typeSpec.Signature), // TODO: Serialize signatures.
+                };
+                typeSpec.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(typeSpec.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteMethodSpec(MethodSpecification methodSpec)
         {
-            object[] parts = new object[]
+            if (methodSpec.UpdateRowOnRebuild)
             {
-                GetCodedIndex(tablesHeap.MethodDefOrRef, methodSpec.OriginalMethod),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(methodSpec.MetaDataRow.parts[1])), // TODO: Serialize signatures.
-            };
-            methodSpec.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetCodedIndex(tablesHeap.MethodDefOrRef, methodSpec.OriginalMethod),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(methodSpec.MetaDataRow.parts[1])), // TODO: Serialize signatures.
+                };
+                methodSpec.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(methodSpec.MetaDataRow.GenerateBytes());
         }
 
         internal void WritePInvokeImpl(PInvokeImplementation implementation)
         {
-            object[] parts = new object[]
+            if (implementation.UpdateRowOnRebuild)
             {
-                (ushort)implementation.Attributes,
-                GetCodedIndex(tablesHeap.MemberForwarded, implementation.Member),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(implementation.Entrypoint)),
-                GetMemberIndex(implementation.ImportScope),
-            };
-            implementation.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (ushort)implementation.Attributes,
+                    GetCodedIndex(tablesHeap.MemberForwarded, implementation.Member),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(implementation.Entrypoint)),
+                    GetMemberIndex(implementation.ImportScope),
+                };
+                implementation.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(implementation.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteFieldRVA(FieldRVA fieldRVA)
         {
-            object[] parts = new object[]
+            if (fieldRVA.UpdateRowOnRebuild)
             {
-                (uint)fieldRVA.RVA,
-                GetMemberIndex(fieldRVA.Field)
-            };
-            fieldRVA.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (uint)fieldRVA.RVA,
+                    GetMemberIndex(fieldRVA.Field)
+                };
+                fieldRVA.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(fieldRVA.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteAssemblyDef(AssemblyDefinition asmDef)
         {
-            object[] parts = new object[]
+            if (asmDef.UpdateRowOnRebuild)
             {
-                (uint)asmDef.HashAlgorithm,
-                (ushort)asmDef.Version.Major,
-                (ushort)asmDef.Version.Minor,
-                (ushort)asmDef.Version.Build,
-                (ushort)asmDef.Version.Revision,
-                (uint)asmDef.Attributes,
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmDef.MetaDataRow.parts[6])), // TODO: Serialize signatures.
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmDef.Name)),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmDef.Culture)),
-            };
-            asmDef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (uint)asmDef.HashAlgorithm,
+                    (ushort)asmDef.Version.Major,
+                    (ushort)asmDef.Version.Minor,
+                    (ushort)asmDef.Version.Build,
+                    (ushort)asmDef.Version.Revision,
+                    (uint)asmDef.Attributes,
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmDef.MetaDataRow.parts[6])), // TODO: Serialize signatures.
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmDef.Name)),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmDef.Culture)),
+                };
+                asmDef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(asmDef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteAssemblyRef(AssemblyReference asmRef)
         {
-            object[] parts = new object[]
+            if (asmRef.UpdateRowOnRebuild)
             {
-                (ushort)asmRef.Version.Major,
-                (ushort)asmRef.Version.Minor,
-                (ushort)asmRef.Version.Build,
-                (ushort)asmRef.Version.Revision,
-                (uint)asmRef.Attributes,
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmRef.MetaDataRow.parts[5])), // TODO: Serialize signatures.
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmRef.Name)),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmRef.Culture)),
-                GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmRef.MetaDataRow.parts[8])), // TODO: Serialize signatures.
-                
-            };
-            asmRef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (ushort)asmRef.Version.Major,
+                    (ushort)asmRef.Version.Minor,
+                    (ushort)asmRef.Version.Build,
+                    (ushort)asmRef.Version.Revision,
+                    (uint)asmRef.Attributes,
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmRef.MetaDataRow.parts[5])), // TODO: Serialize signatures.
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmRef.Name)),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(asmRef.Culture)),
+                    GetHeapOffset(netHeader.BlobHeap, Convert.ToUInt32(asmRef.MetaDataRow.parts[8])), // TODO: Serialize signatures.
+                    
+                };
+                asmRef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(asmRef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteFileRef(FileReference fileRef)
         {
-            object[] parts = new object[]
+            if (fileRef.UpdateRowOnRebuild)
             {
-                (uint)fileRef.Flags,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(fileRef.Name)),
-                GetHeapOffset(netHeader.BlobHeap, fileRef.Hash), // TODO: Serialize signatures.
-            };
-            fileRef.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (uint)fileRef.Flags,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(fileRef.Name)),
+                    GetHeapOffset(netHeader.BlobHeap, fileRef.Hash), // TODO: Serialize signatures.
+                };
+                fileRef.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(fileRef.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteExportedType(ExportedType type)
         {
-            object[] parts = new object[]
+            if (type.UpdateRowOnRebuild)
             {
-                (uint)type.Attributes,
-                type.TypeID,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(type.TypeName)),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(type.TypeNamespace)),
-                GetCodedIndex(tablesHeap.Implementation, type.Implementation),
-            };
-            type.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    (uint)type.Attributes,
+                    type.TypeID,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(type.TypeName)),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(type.TypeNamespace)),
+                    GetCodedIndex(tablesHeap.Implementation, type.Implementation),
+                };
+                type.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(type.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteManifestRes(ManifestResource resource)
         {
-            object[] parts = new object[]
+            if (resource.UpdateRowOnRebuild)
             {
-                resource.Offset,
-                (uint)resource.Attributes,
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(resource.Name)),
-                GetCodedIndex(tablesHeap.Implementation, resource.Implementation),
-            };
-            resource.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    resource.Offset,
+                    (uint)resource.Attributes,
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(resource.Name)),
+                    GetCodedIndex(tablesHeap.Implementation, resource.Implementation),
+                };
+                resource.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(resource.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteNestedClass(NestedClass nestedClass)
         {
-            object[] parts = new object[]
+            if (nestedClass.UpdateRowOnRebuild)
             {
-                GetMemberIndex(nestedClass.Class),
-                GetMemberIndex(nestedClass.EnclosingClass),
-            };
-            nestedClass.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetMemberIndex(nestedClass.Class),
+                    GetMemberIndex(nestedClass.EnclosingClass),
+                };
+                nestedClass.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(nestedClass.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteEnCLog(EnCLog log)
         {
-            object[] parts = new object[]
+            if (log.UpdateRowOnRebuild)
             {
-                log.Token,
-                log.FuncCode, 
-            };
-            log.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    log.Token,
+                    log.FuncCode, 
+                };
+                log.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(log.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteEnCMap(EnCMap map)
         {
-            object[] parts = new object[]
+            if (map.UpdateRowOnRebuild)
             {
-                map.Token,
-            };
-            map.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    map.Token,
+                };
+                map.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(map.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteGenericParam(GenericParameter genericParameter)
         {
-            object[] parts = new object[]
+            if (genericParameter.UpdateRowOnRebuild)
             {
-                genericParameter.Index,
-                (ushort)genericParameter.GenericAttributes,
-                GetCodedIndex(tablesHeap.TypeOrMethod, genericParameter.Owner),
-                GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(genericParameter.name)),
-            };
-            genericParameter.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    genericParameter.Index,
+                    (ushort)genericParameter.GenericAttributes,
+                    GetCodedIndex(tablesHeap.TypeOrMethod, genericParameter.Owner),
+                    GetHeapOffset(newStringsHeap, newStringsHeap.GetStringOffset(genericParameter.Name)),
+                };
+                genericParameter.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(genericParameter.MetaDataRow.GenerateBytes());
         }
 
         internal void WriteGenericParamConstraint(GenericParamConstraint paramConstraint)
         {
-            object[] parts = new object[]
+            if (paramConstraint.UpdateRowOnRebuild)
             {
-                GetMemberIndex(paramConstraint.Owner),
-                GetCodedIndex(tablesHeap.TypeDefOrRef, paramConstraint.Constraint),
-            };
-            paramConstraint.MetaDataRow = new MetaDataRow(parts);
+                object[] parts = new object[]
+                {
+                    GetMemberIndex(paramConstraint.Owner),
+                    GetCodedIndex(tablesHeap.TypeDefOrRef, paramConstraint.Constraint),
+                };
+                paramConstraint.MetaDataRow = new MetaDataRow(parts);
+            }
             writer.Write(paramConstraint.MetaDataRow.GenerateBytes());
         }
 

@@ -10,10 +10,21 @@ namespace TUP.AsmResolver.NET.Specialized
         object value;
         MetaDataMember parent;
 
+        public Constant(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public Constant(MetaDataMember parent, ElementType type, uint signature)
+            : base(new MetaDataRow((byte)type, 0U, signature))
+        {
+        }
+
         public ElementType ConstantType
         {
             get { return (Specialized.ElementType)Convert.ToByte(metadatarow.parts[0]); }
         }
+
         public MetaDataMember Parent
         {
             get 
@@ -24,10 +35,12 @@ namespace TUP.AsmResolver.NET.Specialized
                 return null;
             }
         }
+
         public uint Signature
         {
             get { return Convert.ToUInt32(metadatarow.parts[3]); }
         }
+
         public object Value
         {
             get
@@ -38,6 +51,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
             }
         }
+
         public override void ClearCache()
         {
             value = null;

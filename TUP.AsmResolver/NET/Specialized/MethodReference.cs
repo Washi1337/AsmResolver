@@ -8,8 +8,20 @@ namespace TUP.AsmResolver.NET.Specialized
     public class MethodReference : MemberReference, IGenericParametersProvider
     {
         internal MethodSignature signature = null;
-        TypeReference declaringType = null;
-        string name = null;
+        internal TypeReference declaringType = null;
+        internal string name = null;
+
+        public MethodReference(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public MethodReference(string name, TypeReference declaringType, uint signature)
+            : base(new MetaDataRow(0U, 0U, signature))
+        {
+            this.name = name;
+            this.declaringType = declaringType;
+        }
 
         public override TypeReference DeclaringType
         {

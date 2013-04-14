@@ -323,10 +323,9 @@ namespace TUP.AsmResolver.PE.Readers
 
         private byte GetDefaultIndex(MetaDataTableType type)
         {
-            for (int i = 0;i< tablesHeap.tables.Length;i++)
-                if (tablesHeap.tables[i] != null)
-                    if (tablesHeap.tables[i].type == type && tablesHeap.tables[i].IsLarge(0))
-                        return sizeof(uint);
+            MetaDataTable table = tablesHeap.Tables[(int)type];
+            if (table != null && table.IsLarge(0))
+                return sizeof(uint);
             return sizeof(ushort);
         }
         private byte GetDefaultIndex(MetaDataTableGroup tablegroup)
@@ -367,7 +366,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.GuidHeap.indexsize
             };
 
-            return new ModuleDefinition() { table = MetaDataTableType.Module , netheader = tablesHeap.netheader,  metadatarow = ReadRow(parts) };
+            return new ModuleDefinition(ReadRow(parts)) { table = MetaDataTableType.Module , netheader = tablesHeap.netheader };
         }
         internal TypeReference ReadTypeRef()
         {
@@ -377,7 +376,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.StringsHeap.indexsize,
             };
 
-            return new TypeReference() { table = MetaDataTableType.TypeRef , netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new TypeReference(ReadRow(parts)) { table = MetaDataTableType.TypeRef , netheader = tablesHeap.netheader };
         }
         internal TypeDefinition ReadTypeDef()
         {
@@ -390,7 +389,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(MetaDataTableType.Method),
             };
 
-            return new TypeDefinition() { table = MetaDataTableType.TypeDef ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new TypeDefinition(ReadRow(parts)) { table = MetaDataTableType.TypeDef, netheader = tablesHeap.netheader };
         }
         internal FieldDefinition ReadFieldDef()
         {
@@ -401,7 +400,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new FieldDefinition() { table = MetaDataTableType.Field ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new FieldDefinition(ReadRow(parts)) { table = MetaDataTableType.Field, netheader = tablesHeap.netheader };
         }
         internal MethodDefinition ReadMethodDef()
         {
@@ -415,7 +414,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new MethodDefinition() { table = MetaDataTableType.Method ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new MethodDefinition(ReadRow(parts)) { table = MetaDataTableType.Method, netheader = tablesHeap.netheader };
         }
         internal ParamPtr ReadParamPtr()
         {
@@ -423,7 +422,7 @@ namespace TUP.AsmResolver.PE.Readers
             {
                  tablesHeap.netheader.BlobHeap.indexsize
             };
-            return new ParamPtr() { table = MetaDataTableType.ParamPtr,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new ParamPtr(ReadRow(parts)) { table = MetaDataTableType.ParamPtr, netheader = tablesHeap.netheader };
         }
         internal ParameterDefinition ReadParamDef()
         {
@@ -434,7 +433,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new ParameterDefinition() { table = MetaDataTableType.Param,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new ParameterDefinition(ReadRow(parts)) { table = MetaDataTableType.Param, netheader = tablesHeap.netheader };
         }
         internal InterfaceImplementation ReadInterfaceImpl()
         {
@@ -444,7 +443,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new InterfaceImplementation() { table = MetaDataTableType.InterfaceImpl,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new InterfaceImplementation(ReadRow(parts)) { table = MetaDataTableType.InterfaceImpl, netheader = tablesHeap.netheader };
 
         }
         internal MemberReference ReadMemberRef()
@@ -461,9 +460,9 @@ namespace TUP.AsmResolver.PE.Readers
             byte sigtype = tablesHeap.netheader.BlobHeap.binReader.ReadByte();
             //IMemberSignature sig = tableheap.netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(row.parts[2]));
             if (sigtype == 0x6)
-                return new FieldReference() { table = MetaDataTableType.MemberRef,  netheader = tablesHeap.netheader, metadatarow = row };
+                return new FieldReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
             else
-                return new NET.Specialized.MethodReference() { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
+                return new NET.Specialized.MethodReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
         }
         internal Constant ReadConstant()
         {
@@ -475,7 +474,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new Constant() { table = MetaDataTableType.Constant ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new Constant(ReadRow(parts)) { table = MetaDataTableType.Constant, netheader = tablesHeap.netheader };
         }
         internal CustomAttribute ReadCustomAttribute()
         {
@@ -486,7 +485,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new CustomAttribute() { table = MetaDataTableType.CustomAttribute ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new CustomAttribute(ReadRow(parts)) { table = MetaDataTableType.CustomAttribute, netheader = tablesHeap.netheader };
         
         }
         internal FieldMarshal ReadFieldMarshal()
@@ -497,7 +496,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new FieldMarshal() { table = MetaDataTableType.FieldMarshal ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new FieldMarshal(ReadRow(parts)) { table = MetaDataTableType.FieldMarshal, netheader = tablesHeap.netheader };
 
         }
         internal SecurityDeclaration ReadSecurityDecl()
@@ -509,7 +508,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new SecurityDeclaration() { table = MetaDataTableType.DeclSecurity ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };            
+            return new SecurityDeclaration(ReadRow(parts)) { table = MetaDataTableType.DeclSecurity, netheader = tablesHeap.netheader };            
         }
         internal ClassLayout ReadClassLayout()
         {
@@ -520,7 +519,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new ClassLayout() { table = MetaDataTableType.ClassLayout ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };      
+            return new ClassLayout(ReadRow(parts)) { table = MetaDataTableType.ClassLayout, netheader = tablesHeap.netheader };      
         }
         internal FieldLayout ReadFieldLayout()
         {
@@ -530,7 +529,7 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new FieldLayout() { table = MetaDataTableType.FieldLayout ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) }; 
+            return new FieldLayout(ReadRow(parts)) { table = MetaDataTableType.FieldLayout, netheader = tablesHeap.netheader }; 
         }
         internal StandAloneSignature ReadStandAloneSig()
         {
@@ -538,7 +537,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new StandAloneSignature() { table = MetaDataTableType.StandAloneSig ,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) }; 
+            return new StandAloneSignature(ReadRow(parts)) { table = MetaDataTableType.StandAloneSig, netheader = tablesHeap.netheader }; 
 
         }
         internal EventMap ReadEventMap()
@@ -548,7 +547,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(MetaDataTableType.Event),
             };
 
-            return new EventMap() { table = MetaDataTableType.EventMap,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new EventMap(ReadRow(parts)) { table = MetaDataTableType.EventMap, netheader = tablesHeap.netheader };
         }
         internal EventDefinition ReadEventDef()
         {
@@ -558,7 +557,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(tablesHeap.TypeDefOrRef),
             };
 
-            return new EventDefinition() { table = MetaDataTableType.Event,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new EventDefinition(ReadRow(parts)) { table = MetaDataTableType.Event, netheader = tablesHeap.netheader };
         }
         internal PropertyMap ReadPropertyMap()
         {
@@ -567,7 +566,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(MetaDataTableType.Property),
             };
 
-            return new PropertyMap() { table = MetaDataTableType.PropertyMap,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new PropertyMap(ReadRow(parts)) { table = MetaDataTableType.PropertyMap, netheader = tablesHeap.netheader };
 
         }
         internal PropertyDefinition ReadPropertyDef()
@@ -578,7 +577,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new PropertyDefinition() { table = MetaDataTableType.Property,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new PropertyDefinition(ReadRow(parts)) { table = MetaDataTableType.Property, netheader = tablesHeap.netheader };
 
         }
         internal MethodSemantics ReadMethodSemantics()
@@ -589,7 +588,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(tablesHeap.HasSemantics),
             };
 
-            return new MethodSemantics() { table = MetaDataTableType.MethodSemantics,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new MethodSemantics(ReadRow(parts)) { table = MetaDataTableType.MethodSemantics, netheader = tablesHeap.netheader };
         }
         internal MethodImplementation ReadMethodImpl()
         {
@@ -599,7 +598,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(tablesHeap.MethodDefOrRef),
             };
 
-            return new MethodImplementation() { table = MetaDataTableType.MethodImpl,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new MethodImplementation(ReadRow(parts)) { table = MetaDataTableType.MethodImpl,  netheader = tablesHeap.netheader };
         
 
         }
@@ -609,7 +608,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.StringsHeap.indexsize,
             };
 
-            return new ModuleReference() { table = MetaDataTableType.ModuleRef,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new ModuleReference(ReadRow(parts)) { table = MetaDataTableType.ModuleRef, netheader = tablesHeap.netheader };
         }
         internal TypeSpecification ReadTypeSpec()
         {
@@ -617,7 +616,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new TypeSpecification() { table = MetaDataTableType.TypeSpec,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new TypeSpecification(ReadRow(parts)) { table = MetaDataTableType.TypeSpec, netheader = tablesHeap.netheader };
         }
         internal MethodSpecification ReadMethodSpec()
         {
@@ -626,7 +625,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new MethodSpecification() { table = MetaDataTableType.MethodSpec,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new MethodSpecification(ReadRow(parts)) { table = MetaDataTableType.MethodSpec, netheader = tablesHeap.netheader };
        }
         internal PInvokeImplementation ReadPInvokeImpl()
         {
@@ -637,7 +636,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(MetaDataTableType.ModuleRef),
             };
 
-            return new PInvokeImplementation() { table = MetaDataTableType.ImplMap,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new PInvokeImplementation(ReadRow(parts)) { table = MetaDataTableType.ImplMap, netheader = tablesHeap.netheader };
         }
         internal FieldRVA ReadFieldRVA()
         {
@@ -646,7 +645,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(MetaDataTableType.Field),
             };
 
-            return new FieldRVA() { table = MetaDataTableType.FieldRVA,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new FieldRVA(ReadRow(parts)) { table = MetaDataTableType.FieldRVA, netheader = tablesHeap.netheader };
         }
         internal AssemblyDefinition ReadAssemblyDef()
         {
@@ -662,7 +661,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.StringsHeap.indexsize ,
             };
 
-            return new AssemblyDefinition() { table = MetaDataTableType.Assembly,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new AssemblyDefinition(ReadRow(parts)) { table = MetaDataTableType.Assembly, netheader = tablesHeap.netheader };
        
         }
         internal AssemblyReference ReadAssemblyRef()
@@ -679,7 +678,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize ,
             };
 
-            return new AssemblyReference() { table = MetaDataTableType.AssemblyRef,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new AssemblyReference(ReadRow(parts)) { table = MetaDataTableType.AssemblyRef, netheader = tablesHeap.netheader };
        
 
         }
@@ -691,7 +690,7 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new FileReference() { table = MetaDataTableType.File,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new FileReference(ReadRow(parts)) { table = MetaDataTableType.File, netheader = tablesHeap.netheader };
        
         }
         internal ExportedType ReadExportedType()
@@ -704,7 +703,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(tablesHeap.Implementation),
             };
 
-            return new ExportedType() { table = MetaDataTableType.ExportedType,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new ExportedType(ReadRow(parts)) { table = MetaDataTableType.ExportedType, netheader = tablesHeap.netheader };
        
         }
         internal ManifestResource ReadManifestRes()
@@ -716,7 +715,7 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(tablesHeap.Implementation),
             };
 
-            return new ManifestResource() { table = MetaDataTableType.ManifestResource,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new ManifestResource(ReadRow(parts)) { table = MetaDataTableType.ManifestResource, netheader = tablesHeap.netheader };
        
 
         }
@@ -727,19 +726,19 @@ namespace TUP.AsmResolver.PE.Readers
                 GetDefaultIndex(MetaDataTableType.TypeDef),
             };
 
-            return new NestedClass() { table = MetaDataTableType.NestedClass,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new NestedClass(ReadRow(parts)) { table = MetaDataTableType.NestedClass, netheader = tablesHeap.netheader };
        
             
         }
         internal EnCLog ReadEnCLog()
         {
             byte[] parts = new byte[] { sizeof(uint),sizeof(uint) };
-            return new EnCLog() { table = MetaDataTableType.EncLog,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new EnCLog(ReadRow(parts)) { table = MetaDataTableType.EncLog, netheader = tablesHeap.netheader };
         }
         internal EnCMap ReadEnCMap()
         {
             byte[] parts = new byte[] { sizeof(uint) };
-            return new EnCMap() { table = MetaDataTableType.EncMap,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new EnCMap(ReadRow(parts)) { table = MetaDataTableType.EncMap, netheader = tablesHeap.netheader };
 
         }
         internal GenericParameter ReadGenericParam()
@@ -749,7 +748,7 @@ namespace TUP.AsmResolver.PE.Readers
                 sizeof(ushort),
                 GetDefaultIndex(tablesHeap.TypeOrMethod),
                 tablesHeap.netheader.StringsHeap.indexsize};
-            return new GenericParameter() { table = MetaDataTableType.GenericParam,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new GenericParameter(ReadRow(parts)) { table = MetaDataTableType.GenericParam, netheader = tablesHeap.netheader };
 
         }
         internal GenericParamConstraint ReadGenericParamConstraint()
@@ -757,7 +756,7 @@ namespace TUP.AsmResolver.PE.Readers
             byte[] parts = new byte[] { 
                 GetDefaultIndex(MetaDataTableType.GenericParam),
                 GetDefaultIndex(tablesHeap.TypeDefOrRef),};
-            return new GenericParamConstraint() { table = MetaDataTableType.GenericParamConstraint,  netheader = tablesHeap.netheader, metadatarow = ReadRow(parts) };
+            return new GenericParamConstraint(ReadRow(parts)) { table = MetaDataTableType.GenericParamConstraint, netheader = tablesHeap.netheader };
 
         }
         internal uint ConstructMetaDataToken(MetaDataTableType type, uint index)

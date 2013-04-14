@@ -8,6 +8,17 @@ namespace TUP.AsmResolver.NET.Specialized
     public class ModuleReference : MetaDataMember, IResolutionScope
     {
         string name = null;
+
+        public ModuleReference(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public ModuleReference(string name)
+            : base(new MetaDataRow((uint)0))
+        {
+        }
+
         public virtual string Name
         {
             get

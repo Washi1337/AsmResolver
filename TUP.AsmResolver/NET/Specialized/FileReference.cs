@@ -11,6 +11,17 @@ namespace TUP.AsmResolver.NET.Specialized
         Stream stream;
         string name;
 
+        public FileReference(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public FileReference(string name, FileAttributes flags, uint hash)
+            : base(new MetaDataRow((uint)flags, 0U, hash))
+        {
+            this.name = name;
+        }
+
         public FileAttributes Flags { get { return (FileAttributes)Convert.ToUInt32(metadatarow.parts[0]); } }
         public string Name
         {

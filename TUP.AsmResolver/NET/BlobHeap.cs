@@ -407,7 +407,7 @@ namespace TUP.AsmResolver.NET
                 case ElementType.MVar:
 
                     if(reader.ParameterProvider == null)
-                        return new GenericParamReference(NETGlobals.ReadCompressedInt32(reader), new TypeReference() { name = "MVar", elementType = ElementType.MVar, @namespace = "", netheader = this.netheader });
+                        return new GenericParamReference(NETGlobals.ReadCompressedInt32(reader), new TypeReference(string.Empty, "MVar",null) { elementType = ElementType.MVar, @namespace = "", netheader = this.netheader });
 
                     return ReadGenericType(reader);
 
@@ -420,7 +420,7 @@ namespace TUP.AsmResolver.NET
                         else if (reader.ParameterProvider.GenericParameters != null && reader.ParameterProvider.GenericParameters.Length > token)
                             return reader.ParameterProvider.GenericParameters[token];
                     }
-                    return new GenericParamReference((int)token, new TypeReference() { name = "Var", elementType = ElementType.Var, @namespace = "", netheader = this.netheader });
+                    return new GenericParamReference((int)token, new TypeReference(string.Empty, "Var", null) { elementType = ElementType.Var, @namespace = "", netheader = this.netheader });
 
                 case ElementType.Array:
                     return ReadArrayType(reader);
@@ -448,7 +448,7 @@ namespace TUP.AsmResolver.NET
                     }
                     return instance;
             }
-            return new TypeReference() { name = type.ToString(), @namespace = "" , netheader = this.netheader};
+            return new TypeReference(string.Empty, type.ToString(), null) { netheader = this.netheader };
 
         }
 
@@ -525,7 +525,7 @@ namespace TUP.AsmResolver.NET
                 return reader.ParameterProvider.GenericParameters[token];
             }
 
-            return new TypeReference() { name = token.ToString(), elementType = ElementType.MVar };
+            return new TypeReference(string.Empty, token.ToString(), null);
 
         }
 

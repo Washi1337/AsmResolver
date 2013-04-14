@@ -10,6 +10,18 @@ namespace TUP.AsmResolver.NET.Specialized
         TypeDefinition @class = null;
         TypeReference @interface = null;
 
+        public InterfaceImplementation(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public InterfaceImplementation(TypeDefinition @class, TypeReference @interface)
+            : base(new MetaDataRow(@class.TableIndex, 0U))
+        {
+            this.@class = @class;
+            this.@interface = @interface;
+        }
+    
         public TypeDefinition Class
         {
             get
@@ -23,6 +35,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return @class;
             }
         }
+
         public TypeReference Interface
         {
             get
@@ -32,10 +45,12 @@ namespace TUP.AsmResolver.NET.Specialized
                 return @interface;
             }
         }
+
         public override string ToString()
         {
             return Interface.ToString();
         }
+
         public override void ClearCache()
         {
             @class = null;

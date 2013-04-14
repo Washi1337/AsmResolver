@@ -9,6 +9,17 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         ParameterDefinition reference;
 
+        public ParamPtr(MetaDataRow row)
+            : base(row)
+        {
+        }
+
+        public ParamPtr(ParameterDefinition reference)
+            : base(new MetaDataRow(reference.TableIndex))
+        {
+            this.reference = reference;
+        }
+
         public ParameterDefinition Reference
         {
             get
