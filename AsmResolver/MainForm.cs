@@ -264,6 +264,15 @@ namespace AsmResolver
             GetCurrentAssembly().NETHeader.MetaDataStreams.Insert(0, new MetaDataStream("1337", bytes));
         }
 
+        private void unloadApplicationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeView1.SelectedNode != null)
+            {
+                GetCurrentAssembly().Dispose();
+                treeView1.SelectedNode.Remove();
+            }
+        }
+
 
 
     }

@@ -13,7 +13,7 @@ namespace TUP.AsmResolver.PE.Readers
     {
         BinaryReader reader;
         internal TablesHeap tablesHeap;
-
+        uint tablesOffset = 0;
 
 
         internal NETTableReader(TablesHeap tablesheap)
@@ -22,22 +22,29 @@ namespace TUP.AsmResolver.PE.Readers
             tablesheap.header = ASMGlobals.ReadStructureFromReader<Structures.METADATA_TABLE_HEADER>(reader);
             this.tablesHeap = tablesheap;
 
-
             for (int i = 0; i < 45; i++)
                 if (tablesHeap.HasTable((MetaDataTableType)i))
                 {
                     tablesHeap.tablecount++;
                 }
-            ReadTableHeaders();
+
             tablesHeap.tablereader = this;
+            if ((tablesHeap.HeapOffsetSizes & 1) == 1)
+                tablesHeap.netheader.StringsHeap.indexsize = 4;
+            if ((tablesHeap.HeapOffsetSizes & 2) == 2)
+                tablesHeap.netheader.GuidHeap.indexsize = 4;
+            if ((tablesHeap.HeapOffsetSizes & 4) == 4)
+                tablesHeap.netheader.BlobHeap.indexsize = 4;
+
            // ReadTables();
 
         }
+
         internal MetaDataTable CreateTable(MetaDataTableType type, int rowAmount, long rowAmountOffset)
         {
             //customattribute[permission]?
 
-            MetaDataTable table = new MetaDataTable(tablesHeap);
+            MetaDataTable table = new MetaDataTable(tablesHeap, false);
             table.Type = type;
             table.rowAmount = rowAmount;
             table.rowAmountOffset = rowAmountOffset;
@@ -147,17 +154,22 @@ namespace TUP.AsmResolver.PE.Readers
         {
             SetupCodedIndexes();
 
+            uint tableOffset = (uint)Marshal.SizeOf(typeof(Structures.METADATA_TABLE_HEADER));
+            tableOffset =  (uint)(tableOffset + (tablesHeap.tablecount) * 4);
             for (int i = 0; i < 45; i++)
             {
-                    
                 if (tablesHeap.HasTable((MetaDataTableType)i))
                 {
-                    long offset = reader.BaseStream.Position + tablesHeap.StreamOffset;
-                    tablesHeap.tables[i] = (CreateTable((MetaDataTableType)i, reader.ReadInt32(), offset));
+                    long headerOffset = reader.BaseStream.Position + tablesHeap.StreamOffset;
+                    MetaDataTable table = CreateTable((MetaDataTableType)i, reader.ReadInt32(), headerOffset);
+                    table.TableOffset = tableOffset;
+                    tableOffset += (uint)table.PhysicalSize;
+                    tablesHeap.tables[i] = table;
                 }
             }
 
         }
+
         internal void SetupCodedIndexes()
         {
             tablesHeap.TypeDefOrRef = new MetaDataTableGroup(3, 2);
@@ -175,160 +187,157 @@ namespace TUP.AsmResolver.PE.Readers
             tablesHeap.TypeOrMethod = new MetaDataTableGroup(2, 1);
         }
 
-        internal void ReadTables()
+        internal MetaDataMember[] ReadMembers(MetaDataTable table)
         {
-            if ((tablesHeap.HeapOffsetSizes & 1) == 1)
-                tablesHeap.netheader.StringsHeap.indexsize = 4;
-            if ((tablesHeap.HeapOffsetSizes & 2) == 2)
-                tablesHeap.netheader.GuidHeap.indexsize = 4;
-            if ((tablesHeap.HeapOffsetSizes & 4) == 4)
-                tablesHeap.netheader.BlobHeap.indexsize = 4;
-
-            foreach (MetaDataTable table in tablesHeap.tables)
+            MetaDataMember[] members = null;
+            if (table != null)
             {
-                if (table != null)
+                reader.BaseStream.Position = table.TableOffset;
+                members = new MetaDataMember[table.AmountOfRows];
+                for (uint i = 0; i < table.AmountOfRows; i++)
                 {
-                    table.TableOffset = (uint)(tablesHeap.StreamOffset + reader.BaseStream.Position);
-                    table.members = new MetaDataMember[table.AmountOfRows];
-                    for (uint i = 0; i < table.AmountOfRows; i++)
+                    switch (table.Type)
                     {
-                        switch (table.Type)
-                        {
-                            case MetaDataTableType.Module:
-                                table.members[i] = ReadModule();
-                                break;
-                            case MetaDataTableType.TypeRef:
-                                table.members[i] = ReadTypeRef();
-                                break;
-                            case MetaDataTableType.TypeDef:
-                                table.members[i] = ReadTypeDef();
-                                break;
-                            case MetaDataTableType.Field:
-                                table.members[i] = ReadFieldDef();
-                                break;
-                            case MetaDataTableType.Method:
-                                table.members[i] = ReadMethodDef();
-                                break;
-                            case MetaDataTableType.ParamPtr:
-                                table.members[i] = ReadParamPtr();
-                                break;
-                            case MetaDataTableType.Param:
-                                table.members[i] = ReadParamDef();
-                                break;
-                            case MetaDataTableType.InterfaceImpl:
-                                table.members[i] = ReadInterfaceImpl();
-                                break;
-                            case MetaDataTableType.MemberRef:
-                                table.members[i] = ReadMemberRef();
-                                break;
-                            case MetaDataTableType.Constant:
-                                table.members[i] = ReadConstant();
-                                break;
-                            case MetaDataTableType.CustomAttribute:
-                                table.members[i] = ReadCustomAttribute();
-                                break;
-                            case MetaDataTableType.FieldMarshal:
-                                table.members[i] = ReadFieldMarshal();
-                                break;
-                            case MetaDataTableType.DeclSecurity:
-                                table.members[i] = ReadSecurityDecl();
-                                break;
-                            case MetaDataTableType.ClassLayout:
-                                table.members[i] = ReadClassLayout();
-                                break;
-                            case MetaDataTableType.FieldLayout:
-                                table.members[i] = ReadFieldLayout();
-                                break;
-                            case MetaDataTableType.StandAloneSig:
-                                table.members[i] = ReadStandAloneSig();
-                                break;
-                            case MetaDataTableType.EventMap:
-                                table.members[i] = ReadEventMap();
-                                break;
-                            case MetaDataTableType.Event:
-                                table.members[i] = ReadEventDef();
-                                break;
-                            case MetaDataTableType.PropertyMap:
-                                table.members[i] = ReadPropertyMap();
-                                break;
-                            case MetaDataTableType.Property:
-                                table.members[i] = ReadPropertyDef();
-                                break;
-                            case MetaDataTableType.MethodSemantics:
-                                table.members[i] = ReadMethodSemantics();
-                                break;
-                            case MetaDataTableType.MethodImpl:
-                                table.members[i] = ReadMethodImpl();
-                                break;
-                            case MetaDataTableType.ModuleRef:
-                                table.members[i] = ReadModuleRef();
-                                break;
-                            case MetaDataTableType.TypeSpec:
-                                table.members[i] = ReadTypeSpec();
-                                break;
-                            case MetaDataTableType.MethodSpec:
-                                table.members[i] = ReadMethodSpec();
-                                break;
-                            case MetaDataTableType.ImplMap:
-                                table.members[i] = ReadPInvokeImpl();
-                                break;
-                            case MetaDataTableType.FieldRVA:
-                                table.members[i] = ReadFieldRVA();
-                                break;
-                            case MetaDataTableType.Assembly:
-                                table.members[i] = ReadAssemblyDef();
-                                break;
-                            case MetaDataTableType.AssemblyRef:
-                                table.members[i] = ReadAssemblyRef();
-                                break;
-                            case MetaDataTableType.File:
-                                table.members[i] = ReadFileReference();
-                                break;
-                            case MetaDataTableType.ExportedType:
-                                table.members[i] = ReadExportedType();
-                                break;
-                            case MetaDataTableType.ManifestResource:
-                                table.members[i] = ReadManifestRes();
-                                break;
-                            case MetaDataTableType.NestedClass:
-                                table.members[i] = ReadNestedClass();
-                                break;
-                            case MetaDataTableType.EncLog:
-                                table.members[i] = ReadEnCLog();
-                                break;
-                            case MetaDataTableType.EncMap:
-                                table.members[i] = ReadEnCMap();
-                                break;
-                            case MetaDataTableType.GenericParam:
-                                table.members[i] = ReadGenericParam();
-                                break;
-                            case MetaDataTableType.GenericParamConstraint:
-                                table.members[i] = ReadGenericParamConstraint();
-                                break;
-                                
-                        }
-                        if (table.members.Length > 0)
-                        {
-                            table.members[i].metadatatoken = ConstructMetaDataToken(table.type, i);
-                        }
+                        case MetaDataTableType.Module:
+                            members[i] = CreateMember<ModuleDefinition>(GetModuleSignature(), table.type);
+                            break;
+                        case MetaDataTableType.TypeRef:
+                            members[i] = CreateMember<TypeReference>(GetTypeRefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.TypeDef:
+                            members[i] = CreateMember<TypeDefinition>(GetTypeDefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.Field:
+                            members[i] = CreateMember<FieldDefinition>(GetFieldDefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.Method:
+                            members[i] = CreateMember<MethodDefinition>(GetMethodDefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.ParamPtr:
+                            members[i] = CreateMember<ParamPtr>(GetParamPtrSignature(), table.type);
+                            break;
+                        case MetaDataTableType.Param:
+                            members[i] = CreateMember<ParameterDefinition>(GetParamDefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.InterfaceImpl:
+                            members[i] = CreateMember<InterfaceImplementation>(GetInterfaceImplSignature(), table.type);
+                            break;
+                        case MetaDataTableType.MemberRef:
+                            MetaDataRow row = ReadRow(GetMemberRefSignature());
+                            tablesHeap.netheader.BlobHeap.mainStream.Seek(Convert.ToUInt32(row.parts[2]), SeekOrigin.Begin);
+                            tablesHeap.netheader.BlobHeap.binReader.ReadByte();
+                            byte sigtype = tablesHeap.netheader.BlobHeap.binReader.ReadByte();
+                            //IMemberSignature sig = tableheap.netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(row.parts[2]));
+                            if (sigtype == 0x6)
+                                members[i] = new FieldReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
+                            else
+                                members[i] = new NET.Specialized.MethodReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
+
+                            break;
+                        case MetaDataTableType.Constant:
+                            members[i] = CreateMember<Constant>(GetConstantSignature(), table.type);
+                            break;
+                        case MetaDataTableType.CustomAttribute:
+                            members[i] = CreateMember<CustomAttribute>(GetCustomAttributeSignature(), table.type);
+                            break;
+                        case MetaDataTableType.FieldMarshal:
+                            members[i] = CreateMember<FieldMarshal>(GetFieldMarshalSignature(), table.type);
+                            break;
+                        case MetaDataTableType.DeclSecurity:
+                            members[i] = CreateMember<SecurityDeclaration>(GetSecurityDeclSignature(), table.type);
+                            break;
+                        case MetaDataTableType.ClassLayout:
+                            members[i] = CreateMember<ClassLayout>(GetClassLayoutSignature(), table.type);
+                            break;
+                        case MetaDataTableType.FieldLayout:
+                            members[i] = CreateMember<FieldLayout>(GetFieldLayoutSignature(), table.type);
+                            break;
+                        case MetaDataTableType.StandAloneSig:
+                            members[i] = CreateMember<StandAloneSignature>(GetStandAloneSigSignature(), table.type);
+                            break;
+                        case MetaDataTableType.EventMap:
+                            members[i] = CreateMember<EventMap>(GetEventMapSignature(), table.type);
+                            break;
+                        case MetaDataTableType.Event:
+                            members[i] = CreateMember<EventDefinition>(GetEventDefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.PropertyMap:
+                            members[i] = CreateMember<PropertyMap>(GetPropertyMapSignature(), table.type);
+                            break;
+                        case MetaDataTableType.Property:
+                            members[i] = CreateMember<PropertyDefinition>(GetPropertyDefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.MethodSemantics:
+                            members[i] = CreateMember<MethodSemantics>(GetMethodSemanticsSignature(), table.type);
+                            break;
+                        case MetaDataTableType.MethodImpl:
+                            members[i] = CreateMember<MethodImplementation>(GetMethodImplSignature(), table.type);
+                            break;
+                        case MetaDataTableType.ModuleRef:
+                            members[i] = CreateMember<ModuleReference>(GetModuleRefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.TypeSpec:
+                            members[i] = CreateMember<TypeSpecification>(GetTypeSpecSignature(), table.type);
+                            break;
+                        case MetaDataTableType.MethodSpec:
+                            members[i] = CreateMember<MethodSpecification>(GetMethodSpecSignature(), table.type);
+                            break;
+                        case MetaDataTableType.ImplMap:
+                            members[i] = CreateMember<PInvokeImplementation>(GetPInvokeImplSignature(), table.type);
+                            break;
+                        case MetaDataTableType.FieldRVA:
+                            members[i] = CreateMember<FieldRVA>(GetFieldRVASignature(), table.type);
+                            break;
+                        case MetaDataTableType.Assembly:
+                            members[i] = CreateMember<AssemblyDefinition>(GetAssemblyDefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.AssemblyRef:
+                            members[i] = CreateMember<AssemblyReference>(GetAssemblyRefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.File:
+                            members[i] = CreateMember<FileReference>(GetFileReferenceSignature(), table.type);
+                            break;
+                        case MetaDataTableType.ExportedType:
+                            members[i] = CreateMember<ExportedType>(GetExportedTypeSignature(), table.type);
+                            break;
+                        case MetaDataTableType.ManifestResource:
+                            members[i] = CreateMember<ManifestResource>(GetManifestResSignature(), table.type);
+                            break;
+                        case MetaDataTableType.NestedClass:
+                            members[i] = CreateMember<NestedClass>(GetNestedClassSignature(), table.type);
+                            break;
+                        case MetaDataTableType.EncLog:
+                            members[i] = CreateMember<EnCLog>(GetEnCLogSignature(), table.type);
+                            break;
+                        case MetaDataTableType.EncMap:
+                            members[i] = CreateMember<EnCMap>(GetEnCMapSignature(), table.type);
+                            break;
+                        case MetaDataTableType.GenericParam:
+                            members[i] = CreateMember<GenericParameter>(GetGenericParamSignature(), table.type);
+                            break;
+                        case MetaDataTableType.GenericParamConstraint:
+                            members[i] = CreateMember<GenericParamConstraint>(GetGenericParamConstraintSignature(), table.type);
+                            break;
+
+                    }
+                    if (members.Length > 0)
+                    {
+                        members[i].metadatatoken = ConstructMetaDataToken(table.type, i);
                     }
                 }
             }
-            reader.BaseStream.Close();
-            reader.BaseStream.Dispose();
+            return members;
         }
-
-
-
-
-        private byte GetDefaultIndex(MetaDataTableType type)
+        
+        private byte GetIndexSize(MetaDataTableType type)
         {
             MetaDataTable table = tablesHeap.Tables[(int)type];
             if (table != null && table.IsLarge(0))
                 return sizeof(uint);
             return sizeof(ushort);
         }
-        private byte GetDefaultIndex(MetaDataTableGroup tablegroup)
+
+        private byte GetIndexSize(MetaDataTableGroup tablegroup)
         {
             foreach (MetaDataTable table in tablegroup.tables)
                 if (table != null && table.IsLarge(tablegroup.bits))
@@ -356,7 +365,15 @@ namespace TUP.AsmResolver.PE.Readers
             return row;
         }
 
-        internal ModuleDefinition ReadModule()
+        internal T CreateMember<T>(byte[] rowSignature, MetaDataTableType table) where T : MetaDataMember
+        {
+            T member = (T)Activator.CreateInstance(typeof(T), ReadRow(rowSignature));
+            member.table = table;
+            member.netheader = tablesHeap.netheader;
+            return member;
+        }
+
+        internal byte[] GetModuleSignature()
         {
             byte[] parts = new byte[] {
                 sizeof(ushort),
@@ -366,32 +383,33 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.GuidHeap.indexsize
             };
 
-            return new ModuleDefinition(ReadRow(parts)) { table = MetaDataTableType.Module , netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal TypeReference ReadTypeRef()
+
+        internal byte[] GetTypeRefSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(tablesHeap.ResolutionScope),
+                GetIndexSize(tablesHeap.ResolutionScope),
                 tablesHeap.netheader.StringsHeap.indexsize,
                 tablesHeap.netheader.StringsHeap.indexsize,
             };
 
-            return new TypeReference(ReadRow(parts)) { table = MetaDataTableType.TypeRef , netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal TypeDefinition ReadTypeDef()
+        internal byte[] GetTypeDefSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
                 tablesHeap.netheader.StringsHeap.indexsize,
                 tablesHeap.netheader.StringsHeap.indexsize,
-                GetDefaultIndex(tablesHeap.TypeDefOrRef),
-                GetDefaultIndex(MetaDataTableType.Field),
-                GetDefaultIndex(MetaDataTableType.Method),
+                GetIndexSize(tablesHeap.TypeDefOrRef),
+                GetIndexSize(MetaDataTableType.Field),
+                GetIndexSize(MetaDataTableType.Method),
             };
 
-            return new TypeDefinition(ReadRow(parts)) { table = MetaDataTableType.TypeDef, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal FieldDefinition ReadFieldDef()
+        internal byte[] GetFieldDefSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
@@ -400,9 +418,9 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new FieldDefinition(ReadRow(parts)) { table = MetaDataTableType.Field, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal MethodDefinition ReadMethodDef()
+        internal byte[] GetMethodDefSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
@@ -410,21 +428,21 @@ namespace TUP.AsmResolver.PE.Readers
                 sizeof(ushort),
                 tablesHeap.netheader.StringsHeap.indexsize,
                 tablesHeap.netheader.BlobHeap.indexsize,
-                GetDefaultIndex(MetaDataTableType.Param),
+                GetIndexSize(MetaDataTableType.Param),
      
             };
 
-            return new MethodDefinition(ReadRow(parts)) { table = MetaDataTableType.Method, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal ParamPtr ReadParamPtr()
+        internal byte[] GetParamPtrSignature()
         {
             byte[] parts = new byte[]
             {
                  tablesHeap.netheader.BlobHeap.indexsize
             };
-            return new ParamPtr(ReadRow(parts)) { table = MetaDataTableType.ParamPtr, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal ParameterDefinition ReadParamDef()
+        internal byte[] GetParamDefSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
@@ -433,143 +451,136 @@ namespace TUP.AsmResolver.PE.Readers
      
             };
 
-            return new ParameterDefinition(ReadRow(parts)) { table = MetaDataTableType.Param, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal InterfaceImplementation ReadInterfaceImpl()
+        internal byte[] GetInterfaceImplSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(MetaDataTableType.TypeDef),
-                GetDefaultIndex(tablesHeap.TypeDefOrRef),
+                GetIndexSize(MetaDataTableType.TypeDef),
+                GetIndexSize(tablesHeap.TypeDefOrRef),
      
             };
 
-            return new InterfaceImplementation(ReadRow(parts)) { table = MetaDataTableType.InterfaceImpl, netheader = tablesHeap.netheader };
+            return parts;
 
         }
-        internal MemberReference ReadMemberRef()
+        internal byte[] GetMemberRefSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(tablesHeap.MemberRefParent),
+                GetIndexSize(tablesHeap.MemberRefParent),
                 tablesHeap.netheader.StringsHeap.indexsize,
                 tablesHeap.netheader.BlobHeap.indexsize
      
             };
-            MetaDataRow row = ReadRow(parts);
-            tablesHeap.netheader.BlobHeap.mainStream.Seek(Convert.ToUInt32(row.parts[2]), SeekOrigin.Begin);
-            tablesHeap.netheader.BlobHeap.binReader.ReadByte();
-            byte sigtype = tablesHeap.netheader.BlobHeap.binReader.ReadByte();
-            //IMemberSignature sig = tableheap.netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(row.parts[2]));
-            if (sigtype == 0x6)
-                return new FieldReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
-            else
-                return new NET.Specialized.MethodReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
+            return parts;
+           
         }
-        internal Constant ReadConstant()
+        internal byte[] GetConstantSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(byte),
                 sizeof(byte),
-                GetDefaultIndex(tablesHeap.HasConstant),
+                GetIndexSize(tablesHeap.HasConstant),
                 tablesHeap.netheader.BlobHeap.indexsize,
      
             };
 
-            return new Constant(ReadRow(parts)) { table = MetaDataTableType.Constant, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal CustomAttribute ReadCustomAttribute()
+        internal byte[] GetCustomAttributeSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(tablesHeap.HasCustomAttribute),
-                GetDefaultIndex(tablesHeap.CustomAttributeType),
+                GetIndexSize(tablesHeap.HasCustomAttribute),
+                GetIndexSize(tablesHeap.CustomAttributeType),
                 tablesHeap.netheader.BlobHeap.indexsize,
      
             };
 
-            return new CustomAttribute(ReadRow(parts)) { table = MetaDataTableType.CustomAttribute, netheader = tablesHeap.netheader };
+            return parts;
         
         }
-        internal FieldMarshal ReadFieldMarshal()
+        internal byte[] GetFieldMarshalSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(tablesHeap.HasFieldMarshall),
+                GetIndexSize(tablesHeap.HasFieldMarshall),
                 tablesHeap.netheader.BlobHeap.indexsize,
      
             };
 
-            return new FieldMarshal(ReadRow(parts)) { table = MetaDataTableType.FieldMarshal, netheader = tablesHeap.netheader };
+            return parts;
 
         }
-        internal SecurityDeclaration ReadSecurityDecl()
+        internal byte[] GetSecurityDeclSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
-                GetDefaultIndex(tablesHeap.HasDeclSecurity),
+                GetIndexSize(tablesHeap.HasDeclSecurity),
                 tablesHeap.netheader.BlobHeap.indexsize,
      
             };
 
-            return new SecurityDeclaration(ReadRow(parts)) { table = MetaDataTableType.DeclSecurity, netheader = tablesHeap.netheader };            
+            return parts;
         }
-        internal ClassLayout ReadClassLayout()
+        internal byte[] GetClassLayoutSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
                 sizeof(uint),
-                GetDefaultIndex(MetaDataTableType.TypeDef),
+                GetIndexSize(MetaDataTableType.TypeDef),
      
             };
 
-            return new ClassLayout(ReadRow(parts)) { table = MetaDataTableType.ClassLayout, netheader = tablesHeap.netheader };      
+            return parts;
         }
-        internal FieldLayout ReadFieldLayout()
+        internal byte[] GetFieldLayoutSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
-                GetDefaultIndex(MetaDataTableType.Field),
+                GetIndexSize(MetaDataTableType.Field),
      
             };
 
-            return new FieldLayout(ReadRow(parts)) { table = MetaDataTableType.FieldLayout, netheader = tablesHeap.netheader }; 
+            return parts;
         }
-        internal StandAloneSignature ReadStandAloneSig()
+        internal byte[] GetStandAloneSigSignature()
         {
             byte[] parts = new byte[] { 
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new StandAloneSignature(ReadRow(parts)) { table = MetaDataTableType.StandAloneSig, netheader = tablesHeap.netheader }; 
+            return parts;
 
         }
-        internal EventMap ReadEventMap()
+        internal byte[] GetEventMapSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(MetaDataTableType.TypeDef),
-                GetDefaultIndex(MetaDataTableType.Event),
+                GetIndexSize(MetaDataTableType.TypeDef),
+                GetIndexSize(MetaDataTableType.Event),
             };
 
-            return new EventMap(ReadRow(parts)) { table = MetaDataTableType.EventMap, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal EventDefinition ReadEventDef()
+        internal byte[] GetEventDefSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
                 tablesHeap.netheader.StringsHeap.indexsize,
-                GetDefaultIndex(tablesHeap.TypeDefOrRef),
+                GetIndexSize(tablesHeap.TypeDefOrRef),
             };
 
-            return new EventDefinition(ReadRow(parts)) { table = MetaDataTableType.Event, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal PropertyMap ReadPropertyMap()
+        internal byte[] GetPropertyMapSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(MetaDataTableType.TypeDef),
-                GetDefaultIndex(MetaDataTableType.Property),
+                GetIndexSize(MetaDataTableType.TypeDef),
+                GetIndexSize(MetaDataTableType.Property),
             };
 
-            return new PropertyMap(ReadRow(parts)) { table = MetaDataTableType.PropertyMap, netheader = tablesHeap.netheader };
+            return parts;
 
         }
-        internal PropertyDefinition ReadPropertyDef()
+        internal byte[] GetPropertyDefSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
@@ -577,77 +588,77 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new PropertyDefinition(ReadRow(parts)) { table = MetaDataTableType.Property, netheader = tablesHeap.netheader };
+            return parts;
 
         }
-        internal MethodSemantics ReadMethodSemantics()
+        internal byte[] GetMethodSemanticsSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
-                GetDefaultIndex(MetaDataTableType.Method),
-                GetDefaultIndex(tablesHeap.HasSemantics),
+                GetIndexSize(MetaDataTableType.Method),
+                GetIndexSize(tablesHeap.HasSemantics),
             };
 
-            return new MethodSemantics(ReadRow(parts)) { table = MetaDataTableType.MethodSemantics, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal MethodImplementation ReadMethodImpl()
+        internal byte[] GetMethodImplSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(MetaDataTableType.TypeDef),
-                GetDefaultIndex(tablesHeap.MethodDefOrRef),
-                GetDefaultIndex(tablesHeap.MethodDefOrRef),
+                GetIndexSize(MetaDataTableType.TypeDef),
+                GetIndexSize(tablesHeap.MethodDefOrRef),
+                GetIndexSize(tablesHeap.MethodDefOrRef),
             };
 
-            return new MethodImplementation(ReadRow(parts)) { table = MetaDataTableType.MethodImpl,  netheader = tablesHeap.netheader };
+            return parts;
         
 
         }
-        internal ModuleReference ReadModuleRef()
+        internal byte[] GetModuleRefSignature()
         {
             byte[] parts = new byte[] { 
                 tablesHeap.netheader.StringsHeap.indexsize,
             };
 
-            return new ModuleReference(ReadRow(parts)) { table = MetaDataTableType.ModuleRef, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal TypeSpecification ReadTypeSpec()
+        internal byte[] GetTypeSpecSignature()
         {
             byte[] parts = new byte[] { 
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new TypeSpecification(ReadRow(parts)) { table = MetaDataTableType.TypeSpec, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal MethodSpecification ReadMethodSpec()
+        internal byte[] GetMethodSpecSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(tablesHeap.MethodDefOrRef),
+                GetIndexSize(tablesHeap.MethodDefOrRef),
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new MethodSpecification(ReadRow(parts)) { table = MetaDataTableType.MethodSpec, netheader = tablesHeap.netheader };
+            return parts;
        }
-        internal PInvokeImplementation ReadPInvokeImpl()
+        internal byte[] GetPInvokeImplSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
-                GetDefaultIndex(tablesHeap.MemberForwarded),
+                GetIndexSize(tablesHeap.MemberForwarded),
                 tablesHeap.netheader.StringsHeap.indexsize,
-                GetDefaultIndex(MetaDataTableType.ModuleRef),
+                GetIndexSize(MetaDataTableType.ModuleRef),
             };
 
-            return new PInvokeImplementation(ReadRow(parts)) { table = MetaDataTableType.ImplMap, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal FieldRVA ReadFieldRVA()
+        internal byte[] GetFieldRVASignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
-                GetDefaultIndex(MetaDataTableType.Field),
+                GetIndexSize(MetaDataTableType.Field),
             };
 
-            return new FieldRVA(ReadRow(parts)) { table = MetaDataTableType.FieldRVA, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal AssemblyDefinition ReadAssemblyDef()
+        internal byte[] GetAssemblyDefSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
@@ -661,10 +672,10 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.StringsHeap.indexsize ,
             };
 
-            return new AssemblyDefinition(ReadRow(parts)) { table = MetaDataTableType.Assembly, netheader = tablesHeap.netheader };
+            return parts;
        
         }
-        internal AssemblyReference ReadAssemblyRef()
+        internal byte[] GetAssemblyRefSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
@@ -678,11 +689,11 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize ,
             };
 
-            return new AssemblyReference(ReadRow(parts)) { table = MetaDataTableType.AssemblyRef, netheader = tablesHeap.netheader };
+            return parts;
        
 
         }
-        internal FileReference ReadFileReference()
+        internal byte[] GetFileReferenceSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
@@ -690,73 +701,71 @@ namespace TUP.AsmResolver.PE.Readers
                 tablesHeap.netheader.BlobHeap.indexsize,
             };
 
-            return new FileReference(ReadRow(parts)) { table = MetaDataTableType.File, netheader = tablesHeap.netheader };
+            return parts;
        
         }
-        internal ExportedType ReadExportedType()
+        internal byte[] GetExportedTypeSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
                 sizeof(uint),
                 tablesHeap.netheader.StringsHeap.indexsize,
                 tablesHeap.netheader.StringsHeap.indexsize,
-                GetDefaultIndex(tablesHeap.Implementation),
+                GetIndexSize(tablesHeap.Implementation),
             };
 
-            return new ExportedType(ReadRow(parts)) { table = MetaDataTableType.ExportedType, netheader = tablesHeap.netheader };
+            return parts;
        
         }
-        internal ManifestResource ReadManifestRes()
+        internal byte[] GetManifestResSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
                 sizeof(uint),
                 tablesHeap.netheader.StringsHeap.indexsize,
-                GetDefaultIndex(tablesHeap.Implementation),
+                GetIndexSize(tablesHeap.Implementation),
             };
 
-            return new ManifestResource(ReadRow(parts)) { table = MetaDataTableType.ManifestResource, netheader = tablesHeap.netheader };
+            return parts;
        
 
         }
-        internal NestedClass ReadNestedClass()
+        internal byte[] GetNestedClassSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(MetaDataTableType.TypeDef),
-                GetDefaultIndex(MetaDataTableType.TypeDef),
+                GetIndexSize(MetaDataTableType.TypeDef),
+                GetIndexSize(MetaDataTableType.TypeDef),
             };
-
-            return new NestedClass(ReadRow(parts)) { table = MetaDataTableType.NestedClass, netheader = tablesHeap.netheader };
-       
+            return parts;
             
         }
-        internal EnCLog ReadEnCLog()
+        internal byte[] GetEnCLogSignature()
         {
             byte[] parts = new byte[] { sizeof(uint),sizeof(uint) };
-            return new EnCLog(ReadRow(parts)) { table = MetaDataTableType.EncLog, netheader = tablesHeap.netheader };
+            return parts;
         }
-        internal EnCMap ReadEnCMap()
+        internal byte[] GetEnCMapSignature()
         {
             byte[] parts = new byte[] { sizeof(uint) };
-            return new EnCMap(ReadRow(parts)) { table = MetaDataTableType.EncMap, netheader = tablesHeap.netheader };
+            return parts;
 
         }
-        internal GenericParameter ReadGenericParam()
+        internal byte[] GetGenericParamSignature()
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
                 sizeof(ushort),
-                GetDefaultIndex(tablesHeap.TypeOrMethod),
+                GetIndexSize(tablesHeap.TypeOrMethod),
                 tablesHeap.netheader.StringsHeap.indexsize};
-            return new GenericParameter(ReadRow(parts)) { table = MetaDataTableType.GenericParam, netheader = tablesHeap.netheader };
+            return parts;
 
         }
-        internal GenericParamConstraint ReadGenericParamConstraint()
+        internal byte[] GetGenericParamConstraintSignature()
         {
             byte[] parts = new byte[] { 
-                GetDefaultIndex(MetaDataTableType.GenericParam),
-                GetDefaultIndex(tablesHeap.TypeDefOrRef),};
-            return new GenericParamConstraint(ReadRow(parts)) { table = MetaDataTableType.GenericParamConstraint, netheader = tablesHeap.netheader };
+                GetIndexSize(MetaDataTableType.GenericParam),
+                GetIndexSize(tablesHeap.TypeDefOrRef),};
+            return parts;
 
         }
         internal uint ConstructMetaDataToken(MetaDataTableType type, uint index)

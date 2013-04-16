@@ -33,8 +33,8 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     int index = Convert.ToInt32(metadatarow.parts[0]);
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.Field);
-                    if (index > 0 && index <= table.members.Length)
-                        field = table.members[index - 1] as FieldDefinition;
+                    if (index > 0 && index <= table.Members.Length)
+                        field = table.Members[index - 1] as FieldDefinition;
                 }
                 return field;
             }

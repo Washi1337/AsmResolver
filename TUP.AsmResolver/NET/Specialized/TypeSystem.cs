@@ -16,7 +16,7 @@ namespace TUP.AsmResolver.NET.Specialized
         private TypeReference CreateCorLibTypeRef(string @namespace, string name, ElementType type)
         {
             if (iscorlib)
-                return (TypeReference)managedHeader.TablesHeap.GetTable(MetaDataTableType.TypeDef).members.FirstOrDefault(t => t.ToString() == @namespace + "." + name);
+                return (TypeReference)managedHeader.TablesHeap.GetTable(MetaDataTableType.TypeDef).Members.FirstOrDefault(t => t.ToString() == @namespace + "." + name);
             else
                 return new TypeReference(@namespace, name, mscorlibref) { netheader = managedHeader, IsElementType = true, elementType = type };
         }

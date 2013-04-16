@@ -56,7 +56,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     uint relativetoken = this.metadatatoken - (6 << 0x18);
 
                     TypeDefinition lasttypeDef = null;
-                    foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).members)
+                    foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members)
                     {
 
                         TypeDefinition typeDef = ((TypeDefinition)member);
@@ -114,7 +114,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     {
                         List<GenericParameter> parameters = new List<GenericParameter>();
 
-                        foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.GenericParam).members)
+                        foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.GenericParam).Members)
                         {
                             GenericParameter param = (GenericParameter)member;
                             try
@@ -161,7 +161,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (semantics == null && netheader.TablesHeap.HasTable(MetaDataTableType.MethodSemantics))
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics methodSem = member as MethodSemantics;
                         if (methodSem.Method.metadatatoken == this.metadatatoken)

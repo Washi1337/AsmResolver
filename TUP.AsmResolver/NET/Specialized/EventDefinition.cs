@@ -57,7 +57,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (addmethod == null)
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
                         if (semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.AddOn) == MethodSemanticsAttributes.AddOn)
@@ -77,7 +77,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (removemethod  == null)
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
                         if (semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.RemoveOn) == MethodSemanticsAttributes.RemoveOn)
@@ -113,7 +113,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (declaringType == null)
                 {
                     MetaDataTable eventMapTable = netheader.TablesHeap.GetTable(MetaDataTableType.EventMap);
-                    foreach (var member in eventMapTable.members)
+                    foreach (var member in eventMapTable.Members)
                     {
                         EventMap eventMap = member as EventMap;
                         if (eventMap.Events.Contains(this))

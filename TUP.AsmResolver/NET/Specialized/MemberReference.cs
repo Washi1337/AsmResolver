@@ -32,7 +32,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     List<CustomAttribute> customattributes = new List<CustomAttribute>();
 
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).members)
+                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).Members)
                     {
                         CustomAttribute attribute = member as CustomAttribute;
                         if (attribute.Parent != null && attribute.Parent.metadatatoken == this.metadatatoken)
@@ -51,7 +51,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (pinvokeimpl == null && netheader.TablesHeap.HasTable(MetaDataTableType.ImplMap))
                 {
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.ImplMap).members)
+                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.ImplMap).Members)
                     {
                         PInvokeImplementation implementation = member as PInvokeImplementation;
                         if (implementation.Member.metadatatoken == this.metadatatoken)

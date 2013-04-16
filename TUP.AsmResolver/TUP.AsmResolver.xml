@@ -82,6 +82,11 @@
             Gets or sets a value indicating the current byte offset of the disassembler.
             </summary>
         </member>
+        <member name="P:TUP.AsmResolver.ASM.x86Disassembler.IsDynamic">
+            <summary>
+            Indicates the x86 disassembler is being created by a custom stream or byte array and not from an assembly image.
+            </summary>
+        </member>
         <member name="T:TUP.AsmResolver.DataDirectory">
             <summary>
             Represents a data directory in the executable.
@@ -146,6 +151,11 @@
         <member name="F:TUP.AsmResolver.NET.Specialized.FileAttributes.ContainsNoMetadata">
             <summary>
             Specifies the file references doesn't contain metadata.
+            </summary>
+        </member>
+        <member name="P:TUP.AsmResolver.NET.Specialized.MSIL.MSILDisassembler.CurrentOffset">
+            <summary>
+            Gets or sets the current relative IL offset.
             </summary>
         </member>
         <member name="T:TUP.AsmResolver.OffsetConverter">
@@ -438,7 +448,7 @@
         </member>
         <member name="T:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver">
             <summary>
-            A class that is able to look up members or strings by its metadata token.
+            A class that is able to look up Members or strings by its metadata token.
             </summary>
         </member>
         <member name="M:TUP.AsmResolver.NET.Specialized.MetaDataTokenResolver.ResolveMember(System.UInt32)">
@@ -1196,7 +1206,7 @@
         </member>
         <member name="T:TUP.AsmResolver.NET.BlobHeap">
             <summary>
-            Represents the blob heap stream containing various values of many metadata members.
+            Represents the blob heap stream containing various values of many metadata Members.
             </summary>
         </member>
         <member name="T:TUP.AsmResolver.NET.MetaDataStream">
@@ -1267,6 +1277,12 @@
             <summary>
             Represents a metadata row containing the raw values of a member.
             </summary>
+        </member>
+        <member name="M:TUP.AsmResolver.NET.MetaDataRow.CalculateSize">
+            <summary>
+            Calculatest he size of the metadata row in bytes.
+            </summary>
+            <returns></returns>
         </member>
         <member name="M:TUP.AsmResolver.NET.MetaDataRow.GenerateBytes">
             <summary>
@@ -1872,7 +1888,7 @@
         </member>
         <member name="P:TUP.AsmResolver.NET.NETHeader.TokenResolver">
             <summary>
-            Gets a metadata token resolver to lookup members by its metadata token.
+            Gets a metadata token resolver to lookup Members by its metadata token.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.NET.NETHeader.TypeSystem">
@@ -3209,13 +3225,13 @@
         </member>
         <member name="M:TUP.AsmResolver.Win32Assembly.QuickSave(System.String)">
             <summary>
-            Saves the assembly's image to the harddisk to a specific path. Added or removed members might not be saved.
+            Saves the assembly's image to the harddisk to a specific path. Added or removed Members might not be saved.
             </summary>
             <param name="path">The path to save the assembly.</param>
         </member>
         <member name="M:TUP.AsmResolver.Win32Assembly.QuickSave(System.IO.Stream)">
             <summary>
-            Saves the assembly's image to the specified output stream. Added or removed members might not be saved.
+            Saves the assembly's image to the specified output stream. Added or removed Members might not be saved.
             </summary>
             <param name="outputStream"></param>
         </member>

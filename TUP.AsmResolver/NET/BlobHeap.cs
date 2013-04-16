@@ -9,7 +9,7 @@ using TUP.AsmResolver.PE;
 namespace TUP.AsmResolver.NET
 {
     /// <summary>
-    /// Represents the blob heap stream containing various values of many metadata members.
+    /// Represents the blob heap stream containing various values of many metadata Members.
     /// </summary>
     public class BlobHeap : MetaDataStream
     {

@@ -32,8 +32,8 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     int index = Convert.ToInt32(metadatarow.parts[0]);
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
-                    if (index > 0 && index <= table.members.Length)
-                        @class = table.members[index - 1] as TypeDefinition;
+                    if (index > 0 && index <= table.Members.Length)
+                        @class = table.Members[index - 1] as TypeDefinition;
                 }
                 return @class;
             }

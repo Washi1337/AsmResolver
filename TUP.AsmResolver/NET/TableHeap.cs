@@ -18,7 +18,6 @@ namespace TUP.AsmResolver.NET
         internal MetaDataTable[] tables;
         internal int tablecount;
 
-
         internal TablesHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
             : base(netheader, headeroffset, rawHeader, name)
         {
@@ -27,9 +26,8 @@ namespace TUP.AsmResolver.NET
         internal override void Initialize()
         {
             tables = new MetaDataTable[45];
-
-            NETTableReader reader = new NETTableReader(this);
-            reader.ReadTables();
+            tablereader = new NETTableReader(this);
+            tablereader.ReadTableHeaders();
         }
 
         internal void Reconstruct()
@@ -167,7 +165,7 @@ namespace TUP.AsmResolver.NET
 
         public void AddTable(MetaDataTableType type)
         {
-            MetaDataTable table = new MetaDataTable(this);
+            MetaDataTable table = new MetaDataTable(this, true);
             table.type = type;
             tables[(int)type] = table;
             MaskValid |= ((ulong)1 << (int)type);

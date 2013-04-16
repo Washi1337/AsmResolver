@@ -71,7 +71,7 @@ namespace TUP.AsmResolver.NET
             if (rowindex == 0)
                 throw new ArgumentException("Cannot resolve a member from a zero metadata token", "token");
 
-            return tables[tableindex].members[rowindex - 1];
+            return tables[tableindex].Members[rowindex - 1];
         }
 
         public uint GetCodedIndex(MetaDataMember member)

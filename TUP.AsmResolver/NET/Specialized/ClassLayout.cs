@@ -35,7 +35,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get 
             {
                 if (parent == null)
-                    parent = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef,false).members[Convert.ToInt32(metadatarow.parts[2])] as TypeDefinition;
+                    parent = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef,false).Members[Convert.ToInt32(metadatarow.parts[2])] as TypeDefinition;
                 return parent;
             }
         }

@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
 
     /// <summary>
-    /// A class that is able to look up members or strings by its metadata token.
+    /// A class that is able to look up Members or strings by its metadata token.
     /// </summary>
     public class MetaDataTokenResolver
     {
@@ -44,7 +44,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
             uint subtraction = ((uint)tabletype) * 0x1000000;
             uint rowindex = metadataToken - subtraction;
-            return netheader.TablesHeap.GetTable( tabletype).members[(int)rowindex - 1];
+            return netheader.TablesHeap.GetTable( tabletype).Members[(int)rowindex - 1];
         }
         /// <summary>
         /// Resolves a string value by its metadata token.

@@ -33,7 +33,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (declaringType == null)
                 {
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).members)
+                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).Members)
                     {
                         TypeDefinition typeDef = member as TypeDefinition;
                         if (typeDef.Fields != null)
@@ -55,7 +55,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (constant == null && Attributes.HasFlag(FieldAttributes.Literal) && netheader.TablesHeap.HasTable(MetaDataTableType.Constant))
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.Constant).members)
+                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.Constant).Members)
                     {
                         Constant c = (Constant)member;
                         if (c.Parent != null && c.Parent.metadatatoken == this.metadatatoken)

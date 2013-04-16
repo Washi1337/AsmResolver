@@ -61,6 +61,7 @@
             this.tablesControl1 = new AsmResolver.TablesControl();
             this.resourceControl1 = new AsmResolver.ResourceControl();
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            this.unloadApplicationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -293,21 +294,22 @@
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.disassembleToolStripMenuItem,
-            this.addStreamToolStripMenuItem});
+            this.addStreamToolStripMenuItem,
+            this.unloadApplicationToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(164, 70);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(175, 92);
             // 
             // disassembleToolStripMenuItem
             // 
             this.disassembleToolStripMenuItem.Name = "disassembleToolStripMenuItem";
-            this.disassembleToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.disassembleToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             this.disassembleToolStripMenuItem.Text = "Disassemble";
             this.disassembleToolStripMenuItem.Click += new System.EventHandler(this.disassembleToolStripMenuItem_Click);
             // 
             // addStreamToolStripMenuItem
             // 
             this.addStreamToolStripMenuItem.Name = "addStreamToolStripMenuItem";
-            this.addStreamToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.addStreamToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             this.addStreamToolStripMenuItem.Text = "Add 1337 Stream";
             this.addStreamToolStripMenuItem.Click += new System.EventHandler(this.addStreamToolStripMenuItem_Click);
             // 
@@ -355,6 +357,13 @@
             this.propertyGrid1.Size = new System.Drawing.Size(100, 100);
             this.propertyGrid1.TabIndex = 0;
             this.propertyGrid1.Visible = false;
+            // 
+            // unloadApplicationToolStripMenuItem
+            // 
+            this.unloadApplicationToolStripMenuItem.Name = "unloadApplicationToolStripMenuItem";
+            this.unloadApplicationToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.unloadApplicationToolStripMenuItem.Text = "Unload application";
+            this.unloadApplicationToolStripMenuItem.Click += new System.EventHandler(this.unloadApplicationToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -415,6 +424,7 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem disassembleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addStreamToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem unloadApplicationToolStripMenuItem;
     }
 }
 

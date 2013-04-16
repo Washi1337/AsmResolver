@@ -14,6 +14,7 @@ namespace TUP.AsmResolver.ASM
     {
         BinaryReader reader;
         Win32Assembly assembly;
+
         static List<x86OpCode> opcodeList;
 
         static x86Disassembler()
@@ -42,6 +43,7 @@ namespace TUP.AsmResolver.ASM
         {
             this.reader = assembly.peImage.Reader;
             this.assembly = assembly;
+            this.IsDynamic = false;
         }
 
         /// <summary>
@@ -60,6 +62,7 @@ namespace TUP.AsmResolver.ASM
         public x86Disassembler(Stream stream)
         {
             this.reader = new BinaryReader(stream);
+            this.IsDynamic = true;
         }
 
         /// <summary>
@@ -72,6 +75,15 @@ namespace TUP.AsmResolver.ASM
             {
                 reader.BaseStream.Position = value;
             }
+        }
+        
+        /// <summary>
+        /// Indicates the x86 disassembler is being created by a custom stream or byte array and not from an assembly image.
+        /// </summary>
+        public bool IsDynamic
+        {
+            get;
+            private set;
         }
 
         /// <summary>

@@ -26,7 +26,7 @@ namespace TUP.AsmResolver.NET
         MetaDataHeader metadata;
 
         /// <summary>
-        /// Gets a metadata token resolver to lookup members by its metadata token.
+        /// Gets a metadata token resolver to lookup Members by its metadata token.
         /// </summary>
         public MetaDataTokenResolver TokenResolver { get; internal set; }
 

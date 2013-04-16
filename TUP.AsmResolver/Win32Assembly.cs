@@ -268,7 +268,7 @@ namespace TUP.AsmResolver
         }
 
         /// <summary>
-        /// Saves the assembly's image to the harddisk to a specific path. Added or removed members might not be saved.
+        /// Saves the assembly's image to the harddisk to a specific path. Added or removed Members might not be saved.
         /// </summary>
         /// <param name="path">The path to save the assembly.</param>
         public void QuickSave(string path)
@@ -277,7 +277,7 @@ namespace TUP.AsmResolver
         }
 
         /// <summary>
-        /// Saves the assembly's image to the specified output stream. Added or removed members might not be saved.
+        /// Saves the assembly's image to the specified output stream. Added or removed Members might not be saved.
         /// </summary>
         /// <param name="outputStream"></param>
         public void QuickSave(Stream outputStream)

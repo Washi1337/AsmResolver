@@ -75,7 +75,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (decltype == null && netheader.TablesHeap.HasTable(MetaDataTableType.NestedClass))
                 {
                     MetaDataTable nestedClassTable = netheader.TablesHeap.GetTable(MetaDataTableType.NestedClass);
-                    foreach (MetaDataMember member in nestedClassTable.members)
+                    foreach (MetaDataMember member in nestedClassTable.Members)
                     {
                         NestedClass nestedclass = (NestedClass)member;
                         if (nestedclass.Class != null && nestedclass.EnclosingClass != null)
@@ -149,7 +149,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     List<InterfaceImplementation> interfaces = new List<InterfaceImplementation>();
 
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.InterfaceImpl).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.InterfaceImpl).Members)
                     {
                         InterfaceImplementation @interface = (InterfaceImplementation)member;
 
@@ -171,7 +171,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (propertymap == null && netheader.TablesHeap.HasTable(MetaDataTableType.PropertyMap))
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.PropertyMap).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.PropertyMap).Members)
                     {
                         PropertyMap prprtymap = (PropertyMap)member;
                         if (prprtymap.Parent != null && (prprtymap.Parent.metadatatoken == this.metadatatoken))
@@ -193,7 +193,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (eventmap == null && netheader.TablesHeap.HasTable(MetaDataTableType.EventMap))
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.EventMap).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.EventMap).Members)
                     {
                         EventMap emap = (EventMap)member;
                         if (emap.Parent != null && (emap.Parent.metadatatoken == this.metadatatoken))
@@ -215,7 +215,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     List<NestedClass> nestedclasses = new List<NestedClass>();
 
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.NestedClass).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.NestedClass).Members)
                     {
                         NestedClass nestedType = (NestedClass)member;
                         if (nestedType.EnclosingClass != null && nestedType.EnclosingClass.metadatatoken == this.metadatatoken)
@@ -243,7 +243,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     List<GenericParameter> generics = new List<GenericParameter>();
 
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam).members)
+                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam).Members)
                     {
                         GenericParameter genericParam = member as GenericParameter;
                         if (genericParam.Owner != null && genericParam.Owner.metadatatoken == this.metadatatoken)

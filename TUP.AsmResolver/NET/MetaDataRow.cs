@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using TUP.AsmResolver.NET.Specialized;
+using System.Runtime.InteropServices;
 
 namespace TUP.AsmResolver.NET
 {
@@ -22,11 +23,7 @@ namespace TUP.AsmResolver.NET
         {
             this.parts = parts;
         }
-        //public MetaDataRow(uint offset, params object[] parts)
-        //{
-        //    this.offset = offset;
-        //    this.parts = parts;
-        //}
+
         /// <summary>
         /// Gets the raw offset of the metadata row.
         /// </summary>
@@ -34,6 +31,7 @@ namespace TUP.AsmResolver.NET
         {
             get { return offset; }
         }
+
         /// <summary>
         /// Gets the parts in array format.
         /// </summary>
@@ -44,6 +42,19 @@ namespace TUP.AsmResolver.NET
                return parts; 
            } 
         }
+
+        /// <summary>
+        /// Calculatest he size of the metadata row in bytes.
+        /// </summary>
+        /// <returns></returns>
+        public int CalculateSize()
+        {
+            int size = 0;
+            foreach (object part in parts)
+                size += Marshal.SizeOf(part);
+            return size;
+        }
+
         /// <summary>
         /// Serializes the metadata row into a byte array.
         /// </summary>

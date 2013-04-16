@@ -118,7 +118,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                     case OperandType.Token:
                     case OperandType.Method:
                     case OperandType.Type:
-                        // TODO: importing metadata members into tablesheap
+                        // TODO: importing metadata Members into tablesheap
                         if (instruction.Operand is MetaDataMember)
                             instruction.OperandBytes = BitConverter.GetBytes((instruction.Operand as MetaDataMember).metadatatoken);
                         break;
