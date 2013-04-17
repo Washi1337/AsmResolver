@@ -35,12 +35,17 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         }
 
         public MSILInstruction Next { get; internal set; }
+
         public MSILInstruction Previous { get; internal set; }
 
         public int Offset { get; internal set; }
+
         public MSILOpCode OpCode { get; internal set; }
+
         public object Operand { get; internal set; }
+
         public byte[] OperandBytes { get; internal set; }
+
         public int Size
         {
             get
@@ -110,6 +115,78 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                     return Operand == null ? "" : Operand.ToString();
 
             }
+        }
+
+        public int CalculateStackModification()
+        {
+            int stackModification = 0;
+            switch (OpCode.StackBehaviourPop)
+            {
+                case StackBehaviour.Pop1:
+                case StackBehaviour.Popi:
+                case StackBehaviour.Popref:
+                    stackModification--;
+                    break;
+                case StackBehaviour.Pop1_pop1:
+                case StackBehaviour.Popi_pop1:
+                case StackBehaviour.Popi_popi:
+                case StackBehaviour.Popi_popi8:
+                case StackBehaviour.Popi_popr4:
+                case StackBehaviour.Popi_popr8:
+                case StackBehaviour.Popref_pop1:
+                case StackBehaviour.Popref_popi:
+                    stackModification -= 2;
+                    break;
+                case StackBehaviour.Popi_popi_popi:
+                case StackBehaviour.Popref_popi_pop1:
+                case StackBehaviour.Popref_popi_popi:
+                case StackBehaviour.Popref_popi_popi8:
+                case StackBehaviour.Popref_popi_popr4:
+                case StackBehaviour.Popref_popi_popr8:
+                case StackBehaviour.Popref_popi_popref:
+                    stackModification -= 3;
+                    break;
+                case StackBehaviour.Varpop:
+                    if (Operand is MethodReference)
+                    {
+                        MethodReference methodRef = Operand as MethodReference;
+                        if (methodRef.Signature != null)
+                        {
+                            if (methodRef.Signature.HasParameters)
+                                stackModification -= methodRef.Signature.Parameters.Length;
+
+                            if (methodRef.Signature.HasThis)
+                                stackModification--;
+                        }
+                    }
+                    break;
+            }
+
+            switch (OpCode.StackBehaviourPush)
+            {
+                case StackBehaviour.Push1:
+                case StackBehaviour.Pushi:
+                case StackBehaviour.Pushi8:
+                case StackBehaviour.Pushr4:
+                case StackBehaviour.Pushr8:
+                case StackBehaviour.Pushref:
+                    stackModification++;
+                    break;
+                case StackBehaviour.Push1_push1:
+                    stackModification += 2;
+                    break;
+                case StackBehaviour.Varpush:
+                    if (Operand is MethodReference)
+                    {
+                        MethodReference methodRef = Operand as MethodReference;
+                        if (methodRef.Signature != null)
+                            if (methodRef.Signature.ReturnType.FullName != "System.Void")
+                                stackModification++;
+                    }
+                    break;
+            }
+
+            return stackModification;
         }
 
         public override string ToString()

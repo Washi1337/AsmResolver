@@ -139,7 +139,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                     return opcode;
                 }
             }
-            return new MSILOpCode("<unknown>", (indexToCheck == 1 ? new byte[] {0xFE, opcodebyte} : new byte[] { opcodebyte }), OperandType.None);
+            return new MSILOpCode("<unknown>", (indexToCheck == 1 ? new byte[] {0xFE, opcodebyte} : new byte[] { opcodebyte }), OperandType.None, StackBehaviour.Push0 | StackBehaviour.Pop0);
         }
 
         private byte[] ReadRawOperand(MSILOpCode opcode)

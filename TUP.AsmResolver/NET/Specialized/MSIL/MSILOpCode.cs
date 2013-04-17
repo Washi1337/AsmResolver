@@ -7,17 +7,40 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 {
     public class MSILOpCode
     {
-        internal MSILOpCode(string name, byte[] bytes, OperandType operandType)
+        internal MSILOpCode(string name, byte[] bytes, OperandType operandType, StackBehaviour stackBehaviour)
         {
             Name = name;
             Bytes = bytes;
             OperandType = operandType;
+            StackBehaviour = stackBehaviour;
         }
+
         private MSILCode? code;
 
         public string Name { get; internal set; }
+
         public byte[] Bytes { get; internal set; }
+
         public OperandType OperandType { get; internal set; }
+
+        public StackBehaviour StackBehaviour { get; internal set; }
+
+        public StackBehaviour StackBehaviourPush
+        {
+            get
+            {
+                return (StackBehaviour)((ushort)StackBehaviour & 0xFF00);
+            }
+        }
+
+        public StackBehaviour StackBehaviourPop
+        {
+            get
+            {
+                return (StackBehaviour)((ushort)StackBehaviour & 0x00FF);
+            }
+        }
+        
         public MSILCode Code
         {
             get
@@ -47,6 +70,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 return code.Value;
             }
         }
+        
         public override string ToString()
         {
             return Name;

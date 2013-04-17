@@ -89,6 +89,7 @@
     <Compile Include="NET\Specialized\MSIL\MSILOpCode.cs" />
     <Compile Include="NET\Specialized\MSIL\MSILOpCodes.cs" />
     <Compile Include="NET\Specialized\MSIL\OperandType.cs" />
+    <Compile Include="NET\Specialized\MSIL\StackBehaviour.cs" />
     <Compile Include="NET\Specialized\MSIL\VariableDefinition.cs" />
     <Compile Include="NET\Specialized\ParamPtr.cs" />
     <Compile Include="OffsetConverter.cs" />
