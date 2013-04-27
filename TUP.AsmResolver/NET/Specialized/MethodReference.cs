@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class MethodReference : MemberReference, IGenericParametersProvider
+    public class MethodReference : MemberReference, IGenericContext
     {
         internal MethodSignature signature = null;
         internal TypeReference declaringType = null;
@@ -53,7 +53,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (signature != null)
                     return signature;
-                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), this, this.DeclaringType);
+                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), this);
                 return signature;
                 //return Convert.ToUInt32(metadatarow.parts[2]); 
             }
@@ -77,9 +77,22 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public virtual TypeReference[] GenericArguments
+        {
+            get 
+            { 
+                return null;
+            }
+        }
+
         public bool HasGenericParameters
         {
             get { return GenericParameters != null && GenericParameters.Length > 0; }
+        }
+
+        public bool HasGenericArguments
+        {
+            get { return GenericArguments != null && GenericArguments.Length > 0; }
         }
 
         public override string FullName
@@ -96,6 +109,11 @@ namespace TUP.AsmResolver.NET.Specialized
                 }
                 catch { return Name; }
             }
+        }
+
+        public virtual MethodReference GetElementMethod()
+        {
+            return this;
         }
 
         public override string ToString()

@@ -76,6 +76,5 @@ namespace TUP.AsmResolver.NET
                 return stream.ToArray();
             }
         }
-
     }
 }

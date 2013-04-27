@@ -154,8 +154,7 @@ namespace TUP.AsmResolver.PE.Readers
         {
             SetupCodedIndexes();
 
-            uint tableOffset = (uint)Marshal.SizeOf(typeof(Structures.METADATA_TABLE_HEADER));
-            tableOffset =  (uint)(tableOffset + (tablesHeap.tablecount) * 4);
+            uint tableOffset = (uint)(tablesHeap.StreamOffset + Marshal.SizeOf(typeof(Structures.METADATA_TABLE_HEADER)) + (tablesHeap.tablecount) * 4);
             for (int i = 0; i < 45; i++)
             {
                 if (tablesHeap.HasTable((MetaDataTableType)i))
@@ -192,7 +191,7 @@ namespace TUP.AsmResolver.PE.Readers
             MetaDataMember[] members = null;
             if (table != null)
             {
-                reader.BaseStream.Position = table.TableOffset;
+                reader.BaseStream.Position = table.TableOffset- tablesHeap.StreamOffset;
                 members = new MetaDataMember[table.AmountOfRows];
                 for (uint i = 0; i < table.AmountOfRows; i++)
                 {

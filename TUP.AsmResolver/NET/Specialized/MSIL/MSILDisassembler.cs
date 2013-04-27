@@ -243,22 +243,8 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                             object operand = TokenResolver.ResolveMember(metadata);
 
                             if (operand is ISpecification)
-                                operand = (operand as ISpecification).TransformWith(MethodBody.Method, MethodBody.Method.DeclaringType);
+                                operand = (operand as ISpecification).TransformWith(MethodBody.Method);
 
-                            //if ((operand is TypeSpecification) && (operand as TypeSpecification).OriginalType is GenericParamReference)
-                            //{
-                            //    GenericParamReference paramRef = (operand as TypeSpecification).OriginalType as GenericParamReference;
-                            //    if (paramRef.IsMethodVar)
-                            //    {
-                            //        if (MethodBody.Method.GenericParameters != null && MethodBody.Method.GenericParameters.Length > 0)
-                            //            operand = MethodBody.Method.GenericParameters[paramRef.Index];
-                            //    }
-                            //    else
-                            //    {
-                            //        if (MethodBody.Method.DeclaringType.GenericParameters != null && MethodBody.Method.DeclaringType.GenericParameters.Length > 0)
-                            //            operand = MethodBody.Method.DeclaringType.GenericParameters[paramRef.Index];
-                            //    }
-                            //}
                             return operand;
                         }
                         catch { return new TypeReference(string.Empty, "TOKEN:" + metadata.ToString("X8"), null); }

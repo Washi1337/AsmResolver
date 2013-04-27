@@ -57,7 +57,7 @@ namespace TUP.AsmResolver.NET
             get {
 
                 if (members == null)
-                    members = TablesHeap.tablereader.ReadMembers(this);
+                    LoadMembers();
                 
                 return members; 
             }
@@ -81,8 +81,17 @@ namespace TUP.AsmResolver.NET
             internal set;
         }
 
+        public int PhysicalSize
+        {
+            get
+            {
+                return rowAmount * CalculateRowSize();
+            }
+        }
+
         public void AddMember(MetaDataMember member)
         {
+            LoadMembers();
             member.metadatatoken = (uint)(((uint)type << 24) + Members.Length + 1);
             member.MetaDataRow.offset = 0;
             rowAmount++;
@@ -93,6 +102,7 @@ namespace TUP.AsmResolver.NET
 
         public void RemoveMember(MetaDataMember member)
         {
+            LoadMembers();
             uint index = member.TableIndex - 1;
             member.netheader = null;
             for (uint i = index; i < Members.Length - 1; i++)
@@ -119,21 +129,11 @@ namespace TUP.AsmResolver.NET
             return isbigger;
         }
 
-        public int PhysicalSize
-        {
-            get
-            {
-                if (tablesize == -1)
-                    tablesize = rowAmount * CalculateRowSize();
-                return tablesize;
-            }
-        }
-
         public int CalculateRowSize()
         {
             switch (Type)
             {
-                case  MetaDataTableType.Assembly:
+                case MetaDataTableType.Assembly:
                     return GetSignatureSize(TablesHeap.tablereader.GetAssemblyDefSignature());
                 case MetaDataTableType.AssemblyRef:
                     return GetSignatureSize(TablesHeap.tablereader.GetAssemblyRefSignature());
@@ -215,6 +215,11 @@ namespace TUP.AsmResolver.NET
                 default:
                     throw new NotSupportedException("Table is not supported by AsmResolver");
             }
+        }
+
+        private void LoadMembers()
+        {
+            members = TablesHeap.tablereader.ReadMembers(this);
         }
 
         private int GetSignatureSize(byte[] signature)

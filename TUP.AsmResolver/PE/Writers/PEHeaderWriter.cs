@@ -122,7 +122,6 @@ namespace TUP.AsmResolver.PE.Writers
             }
         }
         
-
         private void WriteSectionHeaders()
         {
             

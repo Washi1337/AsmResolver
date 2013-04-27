@@ -13,8 +13,7 @@ namespace TUP.AsmResolver.NET
         {
         }
 
-        public IGenericParametersProvider ParameterProvider { get; set; }
-        public IGenericArgumentsProvider ArgumentProvider { get; set; }
+        public IGenericContext GenericContext { get; set; }
 
     }
 }

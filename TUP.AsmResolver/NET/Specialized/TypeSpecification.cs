@@ -28,9 +28,9 @@ namespace TUP.AsmResolver.NET.Specialized
             IsValueType = typeRef.IsValueType;
         }
 
-        public MemberReference TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        public MemberReference TransformWith(IGenericContext context)
         {
-            return netheader.BlobHeap.ReadTypeSignature(Signature, paramProvider, argProvider); 
+            return netheader.BlobHeap.ReadTypeSignature(Signature, context); 
         }
 
         public TypeReference OriginalType
@@ -38,7 +38,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (originaltype == null)
-                    originaltype = netheader.BlobHeap.ReadTypeSignature(Signature, this, this);
+                    originaltype = netheader.BlobHeap.ReadTypeSignature(Signature, this);
                 return originaltype;
             }
             internal set { originaltype = value; }
@@ -92,6 +92,22 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+       // public override TypeReference[] GenericArguments
+       // {
+       //     get
+       //     {
+       //         return OriginalType.GenericArguments;
+       //     }
+       // }
+       //
+       // public override GenericParameter[] GenericParameters
+       // {
+       //     get
+       //     {
+       //         return OriginalType.GenericParameters;
+       //     }
+       // }
+       
         public override TypeReference GetElementType()
         {
             return OriginalType.GetElementType();

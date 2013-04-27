@@ -52,6 +52,7 @@ namespace TUP.AsmResolver.PE.Writers
 
         private void WriteFatHeader(MethodBody methodBody)
         {
+
             ushort signature = (ushort)((methodBody.InitLocals ? 1 << 4 : 0) | (methodBody.HasExtraSections ? 1 << 2 : 0) | 2);
             Writer.BinWriter.Write(signature);
             Writer.BinWriter.Write((ushort)methodBody.MaxStack);

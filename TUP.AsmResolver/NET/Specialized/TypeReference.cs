@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class TypeReference : MemberReference, IGenericParametersProvider, IGenericArgumentsProvider, IResolutionScope
+    public class TypeReference : MemberReference, IGenericContext, IResolutionScope
     {
         internal ElementType elementType = ElementType.None;
         internal IResolutionScope resolutionScope;

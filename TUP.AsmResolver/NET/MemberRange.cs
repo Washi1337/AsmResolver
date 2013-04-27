@@ -32,6 +32,9 @@ namespace TUP.AsmResolver.NET
                     range.Length = nextIndex - range.Start;
                 }
             }
+            if (range.Length > targetTable.AmountOfRows - range.Start)
+                range.Length = 0;
+
             return range;
 
         }

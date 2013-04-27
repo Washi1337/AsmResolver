@@ -298,7 +298,7 @@ namespace TUP.AsmResolver
             }
             set
             {
-                int offset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][28];
+                int offset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_OPTIONAL_HEADER64)][29];
                 assembly.peImage.SetOffset(offset);
                 assembly.peImage.Writer.Write(value);
                 header.optionalHeader64.NumberOfRvaAndSizes = value;

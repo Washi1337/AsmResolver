@@ -114,6 +114,19 @@ namespace TUP.AsmResolver.NET
             return reader;
         }
 
+        /// <summary>
+        /// Gets the blob value by it's signature/index and creates a binary reader using a generic instance.
+        /// </summary>
+        /// <param name="index">The index or signature to get the blob value from.</param>
+        /// <param name="instance">The generic instance that is being used as a context.</param>
+        /// <returns></returns>
+        public BlobSignatureReader GetBlobReader(uint index, IGenericContext instance)
+        {
+            BlobSignatureReader reader = GetBlobReader(index);
+            reader.GenericContext = instance;
+            return reader;
+        }
+
         public uint GetBlobIndex(byte[] blobValue)
         {
             ReadAllBlobs();
@@ -129,13 +142,11 @@ namespace TUP.AsmResolver.NET
             return index;
         }
 
-        public IMemberSignature ReadMemberRefSignature(uint sig, IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        public IMemberSignature ReadMemberRefSignature(uint sig, IGenericContext context)
         {
             IMemberSignature signature = null;
-            using (BlobSignatureReader reader = GetBlobReader(sig))
+            using (BlobSignatureReader reader = GetBlobReader(sig, context))
             {
-                reader.ParameterProvider = paramProvider;
-                reader.ArgumentProvider = argProvider;
                 byte flag = reader.ReadByte();
 
                 if (flag == 0x6)
@@ -147,7 +158,7 @@ namespace TUP.AsmResolver.NET
                 else
                 {
                     MethodSignature methodsignature = new MethodSignature();
-
+                    
                     if ((flag & 0x20) != 0)
                     {
                         methodsignature.HasThis = true;
@@ -164,30 +175,21 @@ namespace TUP.AsmResolver.NET
                     }
                     methodsignature.CallingConvention = (MethodCallingConvention)flag;
 
-                    //if ((flag & 0x10) != 0x0)
-                    //{
-                    //    uint num2 = ReadCompressedUInt32();
-                    //
-                    //    List<GenericParameter> generics = new List<GenericParameter>();
-                    //    for (int i = 0; i < num2; i++)
-                    //    {
-                    //    }
-                    //    
-                    //}
-
                     uint num3 = NETGlobals.ReadCompressedUInt32(reader);
-                    ElementType type = (ElementType)NETGlobals.ReadCompressedUInt32(reader);
+                    ElementType type = (ElementType)reader.ReadByte();
 
-                    methodsignature.ReturnType = ReadTypeReference(reader, type);//ReadTypeSignature((uint)stream.Position);
+                    methodsignature.ReturnType = ReadTypeReference(reader, type);
+
                     if (num3 != 0)
                     {
                         ParameterReference[] parameters = new ParameterReference[num3];
                         for (int i = 0; i < num3; i++)
                         {
-                            parameters[i] = new ParameterReference() { ParameterType = ReadTypeReference(reader, (ElementType)NETGlobals.ReadCompressedUInt32(reader)) };
+                            parameters[i] = new ParameterReference() { ParameterType = ReadTypeReference(reader, (ElementType)reader.ReadByte())};
                         }
                         methodsignature.Parameters = parameters;
                     }
+
                     signature = methodsignature;
 
                 }
@@ -200,8 +202,7 @@ namespace TUP.AsmResolver.NET
             PropertySignature propertySig = null;
             using (BlobSignatureReader reader = GetBlobReader(signature))
             {
-                reader.ParameterProvider = parentProperty.DeclaringType;
-                reader.ArgumentProvider = parentProperty.DeclaringType;
+                reader.GenericContext = parentProperty.DeclaringType;
 
                 byte flag = reader.ReadByte();
 
@@ -221,8 +222,7 @@ namespace TUP.AsmResolver.NET
             VariableDefinition[] variables = null;
             using (BlobSignatureReader reader = GetBlobReader(signature))
             {
-                reader.ParameterProvider = parentMethod;
-                reader.ArgumentProvider = parentMethod.DeclaringType;
+                reader.GenericContext = parentMethod;
 
                 byte local_sig = reader.ReadByte();
 
@@ -242,25 +242,22 @@ namespace TUP.AsmResolver.NET
             return variables;
         }
               
-        public TypeReference ReadTypeSignature(uint signature, IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        public TypeReference ReadTypeSignature(uint signature, IGenericContext paramProvider)
         {
             TypeReference typeRef = null;
             using (BlobSignatureReader reader = GetBlobReader(signature))
             {
-                reader.ParameterProvider = paramProvider;
-                reader.ArgumentProvider = argProvider;
+                reader.GenericContext = paramProvider;
                 typeRef = ReadTypeReference(reader, (ElementType)NETGlobals.ReadCompressedUInt32(reader));
             }
 
             return typeRef;
         }
         
-        public TypeReference[] ReadGenericArgumentsSignature(uint signature, IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        public TypeReference[] ReadGenericArgumentsSignature(uint signature, IGenericContext context)
         {
-            using (BlobSignatureReader reader = GetBlobReader(signature))
+            using (BlobSignatureReader reader = GetBlobReader(signature, context))
             {
-                reader.ParameterProvider = paramProvider;
-                reader.ArgumentProvider = argProvider;
                 if (reader.ReadByte() == 0xa)
                 {
                     uint count = NETGlobals.ReadCompressedUInt32(reader);
@@ -406,19 +403,19 @@ namespace TUP.AsmResolver.NET
                     return new PointerType(ReadTypeReference(reader,(ElementType)reader.ReadByte()));
                 case ElementType.MVar:
 
-                    if(reader.ParameterProvider == null)
+                    if(reader.GenericContext == null)
                         return new GenericParamReference(NETGlobals.ReadCompressedInt32(reader), new TypeReference(string.Empty, "MVar",null) { elementType = ElementType.MVar, @namespace = "", netheader = this.netheader });
 
                     return ReadGenericType(reader);
 
                 case ElementType.Var:
                     uint token = NETGlobals.ReadCompressedUInt32(reader);
-                    if (reader.ParameterProvider != null)
+                    if (reader.GenericContext != null)
                     {
-                        if (reader.ParameterProvider.DeclaringType != null && reader.ParameterProvider.DeclaringType.GenericParameters != null && reader.ParameterProvider.DeclaringType.GenericParameters.Length > token)
-                            return reader.ParameterProvider.DeclaringType.GenericParameters[token];
-                        else if (reader.ParameterProvider.GenericParameters != null && reader.ParameterProvider.GenericParameters.Length > token)
-                            return reader.ParameterProvider.GenericParameters[token];
+                        if (reader.GenericContext.DeclaringType != null && reader.GenericContext.DeclaringType.GenericParameters != null && reader.GenericContext.DeclaringType.GenericParameters.Length > token)
+                            return reader.GenericContext.DeclaringType.GenericParameters[token];
+                        else if (reader.GenericContext.GenericParameters != null && reader.GenericContext.GenericParameters.Length > token)
+                            return reader.GenericContext.GenericParameters[token];
                     }
                     return new GenericParamReference((int)token, new TypeReference(string.Empty, "Var", null) { elementType = ElementType.Var, @namespace = "", netheader = this.netheader });
 
@@ -455,9 +452,7 @@ namespace TUP.AsmResolver.NET
         private void ReadGenericInstanceSignature(BlobSignatureReader reader, GenericInstanceType genericType)
         {
             uint number = NETGlobals.ReadCompressedUInt32(reader);
-
-            reader.ArgumentProvider = genericType;
-
+            
             genericType.genericArguments = new TypeReference[number];
 
             for (int i = 0; i < number; i++)
@@ -469,7 +464,7 @@ namespace TUP.AsmResolver.NET
         {
             TypeReference typeRef = netheader.TablesHeap.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader)) as TypeReference;
             if (typeRef is ISpecification)
-                typeRef = (typeRef as TypeSpecification).TransformWith(reader.ParameterProvider, reader.ArgumentProvider) as TypeReference;
+                typeRef = (typeRef as TypeSpecification).TransformWith(reader.GenericContext) as TypeReference;
             return typeRef;
         }
 
@@ -519,11 +514,16 @@ namespace TUP.AsmResolver.NET
             // not finished yet!
 
             uint token = NETGlobals.ReadCompressedUInt32(reader);
+            object genericType;
 
-            if (reader.ParameterProvider.IsDefinition)
+            if (reader.GenericContext.IsDefinition)
             {
-                return reader.ParameterProvider.GenericParameters[token];
+                if (TryGetArrayValue(reader.GenericContext.GenericParameters, token, out genericType))
+                    return genericType as TypeReference;
             }
+
+            if (TryGetArrayValue(reader.GenericContext.GenericArguments, token, out genericType))
+                return genericType as TypeReference;
 
             return new TypeReference(string.Empty, token.ToString(), null);
 
@@ -586,6 +586,13 @@ namespace TUP.AsmResolver.NET
             return null;
         }
 
-
+        private bool TryGetArrayValue(Array array, uint index, out object value)
+        {
+            value = null;
+            if (array == null || array.Length < index || index < 0)
+                return false;
+            value = array.GetValue(index);
+            return true;
+        }
     }
 }

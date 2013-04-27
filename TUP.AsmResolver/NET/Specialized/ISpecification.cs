@@ -7,6 +7,6 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public interface ISpecification
     {
-        MemberReference TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider);
+        MemberReference TransformWith(IGenericContext context);
     }
 }

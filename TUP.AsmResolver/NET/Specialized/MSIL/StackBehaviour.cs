@@ -28,6 +28,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         Popref_popi_popr4 = 0x0010,
         Popref_popi_popr8 = 0x0011,
         Popref_popi_popref = 0x0012,
+        Varpop = 0x0013,
 
         Push0 = 0x0100,
         Push1 = 0x0200,
@@ -37,8 +38,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         Pushr4 = 0x0600,
         Pushr8 = 0x0700,
         Pushref = 0x0800,
-        Varpop = 0x0900,
-        Varpush = 0x0A00,
+        Varpush = 0x0900,
     }
 
 }

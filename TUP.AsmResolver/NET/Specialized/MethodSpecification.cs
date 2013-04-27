@@ -5,13 +5,12 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class MethodSpecification : MethodReference , ISpecification
+    public class MethodSpecification : MethodReference, ISpecification
     {
         MethodReference originalmethod;
         TypeReference[] genericArgs;
         GenericParameter[] genericParams;
-        IGenericArgumentsProvider argProvider;
-        IGenericParametersProvider paramProvider;
+        IGenericContext context;
 
         public MethodSpecification(MetaDataRow row)
             : base(row)
@@ -22,19 +21,24 @@ namespace TUP.AsmResolver.NET.Specialized
             : base(null)
         {
             OriginalMethod = methodRef;
-            paramProvider = methodRef;
-            argProvider = methodRef.DeclaringType;
-            
+            context = methodRef;            
         }
 
-        public MemberReference TransformWith(IGenericParametersProvider paramProvider, IGenericArgumentsProvider argProvider)
+        public MemberReference TransformWith(IGenericContext context)
         {
             if (this.IsGenericMethod)
             {
                 MethodSpecification copy = this.MemberwiseClone() as MethodSpecification;
-                copy.paramProvider = paramProvider ;
-                copy.argProvider = argProvider;
+                copy.context = context;
                 copy.metadatarow = this.metadatarow;
+                copy.genericArgs = netheader.BlobHeap.ReadGenericArgumentsSignature(copy.SpecificationSignature, context);
+                uint signature = 0;
+                if (copy.OriginalMethod.IsDefinition)
+                    signature = Convert.ToUInt32(copy.OriginalMethod.MetaDataRow.Parts[4]);
+                else
+                    signature = Convert.ToUInt32(copy.originalmethod.MetaDataRow.Parts[2]);
+
+                copy.signature = netheader.BlobHeap.ReadMemberRefSignature(signature, copy) as MethodSignature;
                 return copy;
             }
             return this;
@@ -92,22 +96,23 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (genericParams == null)
-                {
-                    genericParams = new GenericParameter[GenericArguments.Length];
-                    for (int i = 0; i < genericParams.Length; i++)
-                        genericParams[i] = new GenericParameter("!!" + i, (ushort)i, (GenericParameterAttributes)0, this);
-                }
-                return genericParams;
+                return OriginalMethod.GenericParameters;
+                //if (genericParams == null)
+                //{
+                //    genericParams = new GenericParameter[GenericArguments.Length];
+                //    for (int i = 0; i < genericParams.Length; i++)
+                //        genericParams[i] = new GenericParameter("!!" + i, (ushort)i, (GenericParameterAttributes)0, this);
+                //}
+                //return genericParams;
             }
         }
 
-        public TypeReference[] GenericArguments
+        public override TypeReference[] GenericArguments
         {
             get
             {
                 if (genericArgs == null)
-                    genericArgs = netheader.BlobHeap.ReadGenericArgumentsSignature(SpecificationSignature, paramProvider, argProvider );
+                    genericArgs = netheader.BlobHeap.ReadGenericArgumentsSignature(SpecificationSignature, context);
                 return genericArgs;
 
             }
@@ -117,7 +122,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                return OriginalMethod.Signature;
+                if (signature == null)
+                    signature = OriginalMethod.Signature; //netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(OriginalMethod.metadatarow.parts[2]), this, this) as MethodSignature;
+                return signature;
             }
         }
 
@@ -126,14 +133,19 @@ namespace TUP.AsmResolver.NET.Specialized
             get { return Convert.ToUInt32(metadatarow.parts[1]); }
         }
 
+        public override MethodReference GetElementMethod()
+        {
+            return OriginalMethod.GetElementMethod();
+        }
+
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append(OriginalMethod.Signature.ReturnType.FullName);
+            builder.Append(Signature.ReturnType.FullName);
             builder.Append(" ");
-            builder.Append(OriginalMethod.DeclaringType.ToString());
+            builder.Append(DeclaringType.ToString());
             builder.Append("::");
-            builder.Append(OriginalMethod.Name);
+            builder.Append(Name);
             if (GenericArguments != null && GenericArguments.Length > 0)
             {
                 builder.Append("<");
@@ -141,7 +153,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     builder.Append(GenericArguments[i].FullName + (i == GenericArguments.Length-1 ? "": ", "));
                 builder.Append(">");
             }
-            builder.Append(OriginalMethod.Signature.GetParameterString());
+            builder.Append(Signature.GetParameterString());
             return builder.ToString();
         }
         //public uint Signature { get { return Convert.ToUInt32(metadatarow.parts[1]); } }

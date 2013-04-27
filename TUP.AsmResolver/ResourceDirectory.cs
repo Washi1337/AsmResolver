@@ -15,6 +15,7 @@ namespace TUP.AsmResolver
         PeImage image;
         internal Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory;
         uint offset;
+        uint fileOffset;
         ResourceDirectoryEntry[] childEntries;
         ResourcesReader reader;
 
@@ -23,6 +24,7 @@ namespace TUP.AsmResolver
             this.image = image;
             this.ParentEntry = parentEntry;
             this.offset = offset;
+            this.fileOffset = offset + image.ParentAssembly.ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.FileOffset;
             this.rawDirectory = rawDirectory;
             this.reader = reader;
         }
@@ -63,7 +65,7 @@ namespace TUP.AsmResolver
             get { return rawDirectory.Characteristics; }
             set
             {
-                image.SetOffset(offset);
+                image.SetOffset(fileOffset);
                 image.Writer.Write(value);
                 rawDirectory.Characteristics = value;
             }
@@ -77,7 +79,7 @@ namespace TUP.AsmResolver
             get { return rawDirectory.TimeDateStamp; }
             set
             {
-                image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][1]);
+                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][1]);
                 image.Writer.Write(value);
                 rawDirectory.TimeDateStamp = value;
             }
@@ -91,7 +93,7 @@ namespace TUP.AsmResolver
             get { return rawDirectory.MajorVersion; }
             set
             {
-                image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][2]);
+                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][2]);
                 image.Writer.Write(value);
                 rawDirectory.MajorVersion = value;
             }
@@ -105,7 +107,7 @@ namespace TUP.AsmResolver
             get { return rawDirectory.MinorVersion; }
             set
             {
-                image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][3]);
+                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][3]);
                 image.Writer.Write(value);
                 rawDirectory.MinorVersion = value;
             }
@@ -118,7 +120,7 @@ namespace TUP.AsmResolver
             get { return rawDirectory.NumberOfNamedEntries; }
             set
             {
-                image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][4]);
+                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][4]);
                 image.Writer.Write(value);
                 rawDirectory.NumberOfNamedEntries = value;
             }
@@ -131,7 +133,7 @@ namespace TUP.AsmResolver
             get { return rawDirectory.NumberOfIdEntries; }
             set
             {
-                image.SetOffset(offset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][5]);
+                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][5]);
                 image.Writer.Write(value);
                 rawDirectory.NumberOfIdEntries = value;
             }

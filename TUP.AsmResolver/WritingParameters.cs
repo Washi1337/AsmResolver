@@ -19,7 +19,7 @@ namespace TUP.AsmResolver
             RebuildExportTable = true;
             RebuildImportTable = true;
             RebuildNETHeaders = true;
-            BuildAsManagedApp = false;
+            //BuildAsManagedApp = false;
         }
         /// <summary>
         /// Indicates the writer should rebuild the resources directory.
@@ -37,10 +37,12 @@ namespace TUP.AsmResolver
         /// Indicates the writer should rebuild the .NET directory.
         /// </summary>
         public bool RebuildNETHeaders { get; set; }
-        /// <summary>
-        /// Indicates the writer should rebuild the application as it would be a managed application.
-        /// </summary>
-        public bool BuildAsManagedApp { get; set; }
+
+        // Will be uncomment once it actually does something.
+        ///// <summary>
+        ///// Indicates the writer should rebuild the application as it would be a managed application.
+        ///// </summary>
+        //public bool BuildAsManagedApp { get; set; }
         
     }
 }

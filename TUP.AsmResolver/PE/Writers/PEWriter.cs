@@ -70,6 +70,7 @@ namespace TUP.AsmResolver.PE.Writers
         {
             ASMGlobals.WriteStructureToWriter(BinWriter, structure);
         }
+
         internal void WritePaddingZeros(uint endoffset)
         {
             if (endoffset < OutputStream.Position)
