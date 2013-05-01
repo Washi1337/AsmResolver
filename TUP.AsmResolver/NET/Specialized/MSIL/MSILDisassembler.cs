@@ -49,7 +49,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         public MSILDisassembler(Stream stream, MetaDataTokenResolver tokenResolver)
         {
             TokenResolver = tokenResolver;
-
+            reader = new BinaryReader(stream);
         }
 
         /// <summary>
@@ -302,6 +302,9 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 
         private VariableDefinition GetVariable(int index)
         {
+            if (MethodBody == null)
+                return null;
+
             if (index >= 0 && index <= MethodBody.Variables.Length)
                 return MethodBody.Variables[index];
             return null;
@@ -309,6 +312,9 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 
         private ParameterDefinition GetParameter(int index)
         {
+            if (MethodBody == null)
+                return null;
+
             if (!MethodBody.Method.Attributes.HasFlag(MethodAttributes.Static))
                 index--;
             if (index >= 0 && index <= MethodBody.Method.Parameters.Length)

@@ -278,7 +278,7 @@ namespace TUP.AsmResolver.ASM
                     operandValue = CreateTargetOffset((uint)(nextOffset + BitConverter.ToInt32(instruction.operandbytes, 0)));
                     break;
                 case x86OperandType.ShortInstructionAddress:
-                    operandValue = CreateTargetOffset(nextOffset + instruction.operandbytes[0]);
+                    operandValue = CreateTargetOffset((uint)(nextOffset + ASMGlobals.ByteToSByte(instruction.operandbytes[0])));
                     break;
                 case x86OperandType.Register32:
                     DecodeSingleRegister(ref instruction, instruction.code.opcodebytes[instruction.code.opcodebytes.Length - 1]);

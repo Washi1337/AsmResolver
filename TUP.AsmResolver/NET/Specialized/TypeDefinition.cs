@@ -125,7 +125,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (fieldRange == null)
+                if (fieldRange == null && netheader.TablesHeap.HasTable(MetaDataTableType.Field))
                     fieldRange = MemberRange.CreateRange<FieldDefinition>(this, 4, NETHeader.TablesHeap.GetTable(MetaDataTableType.Field, false));
                 return fieldRange.Members;
             }
@@ -135,7 +135,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (methodRange == null)
+                if (methodRange == null && netheader.TablesHeap.HasTable(MetaDataTableType.Method))
                     methodRange = MemberRange.CreateRange<MethodDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Method, false));
                 return methodRange.Members;
             }
