@@ -60,6 +60,9 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                         size += 1;
                         break;
                     case OperandType.Argument:
+                    case OperandType.Variable:
+                        size += 2;
+                        break;
                     case OperandType.Field:
                     case OperandType.Int32:
                     case OperandType.Float32:
@@ -69,7 +72,6 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                     case OperandType.String:
                     case OperandType.Token:
                     case OperandType.Type:
-                    case OperandType.Variable:
                         size += 4;
                         break;
                     case OperandType.Float64:

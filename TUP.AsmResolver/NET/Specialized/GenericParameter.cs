@@ -39,8 +39,8 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (owner == null && Convert.ToUInt16(metadatarow.parts[2]) != 0)
-                    netheader.TablesHeap.TypeOrMethod.TryGetMember(Convert.ToUInt16(metadatarow.parts[2]), out owner);
+                if (owner == null && Convert.ToInt32(metadatarow.parts[2]) != 0)
+                    netheader.TablesHeap.TypeOrMethod.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out owner);
                 return owner;
             }
         }

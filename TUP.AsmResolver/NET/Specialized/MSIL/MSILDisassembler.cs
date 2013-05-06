@@ -110,7 +110,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         public MSILInstruction DisassembleNextInstruction()
         {
             int currentOffset = (int)(reader.BaseStream.Position - ilOffset);
-
+            
             MSILOpCode opcode = ReadNextOpCode();
 
             byte[] rawoperand = ReadRawOperand(opcode);
