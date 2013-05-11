@@ -89,6 +89,19 @@ namespace TUP.AsmResolver.NET
             }
         }
 
+        public bool TryGetMember<T>(int index, out T member) where T:MetaDataMember
+        {
+            member = null;
+
+            if (index < 0 || index > rowAmount)
+                return false;
+
+            member = Members[index] as T;
+            if (member == null)
+                return false;
+            return true;
+        }
+
         public void AddMember(MetaDataMember member)
         {
             LoadMembers();
@@ -202,7 +215,8 @@ namespace TUP.AsmResolver.NET
                     return GetSignatureSize(TablesHeap.tablereader.GetPropertyDefSignature());
                 case MetaDataTableType.PropertyMap:
                     return GetSignatureSize(TablesHeap.tablereader.GetPropertyMapSignature());
-
+                case MetaDataTableType.PropertyPtr:
+                    return GetSignatureSize(TablesHeap.tablereader.GetPropertyPtrSignature());
                 case MetaDataTableType.StandAloneSig:
                     return GetSignatureSize(TablesHeap.tablereader.GetStandAloneSigSignature());
                 case MetaDataTableType.TypeDef:

@@ -154,16 +154,24 @@ namespace TUP.AsmResolver.PE.Readers
         {
             SetupCodedIndexes();
 
-            uint tableOffset = (uint)(tablesHeap.StreamOffset + Marshal.SizeOf(typeof(Structures.METADATA_TABLE_HEADER)) + (tablesHeap.tablecount) * 4);
             for (int i = 0; i < 45; i++)
             {
                 if (tablesHeap.HasTable((MetaDataTableType)i))
                 {
                     long headerOffset = reader.BaseStream.Position + tablesHeap.StreamOffset;
                     MetaDataTable table = CreateTable((MetaDataTableType)i, reader.ReadInt32(), headerOffset);
+                
+                    tablesHeap.tables[i] = table;
+                }
+            }
+
+            uint tableOffset = (uint)(tablesHeap.StreamOffset + Marshal.SizeOf(typeof(Structures.METADATA_TABLE_HEADER)) + (tablesHeap.tablecount) * 4);
+            foreach (MetaDataTable table in tablesHeap.tables)
+            {
+                if (table != null)
+                {
                     table.TableOffset = tableOffset;
                     tableOffset += (uint)table.PhysicalSize;
-                    tablesHeap.tables[i] = table;
                 }
             }
 
@@ -226,7 +234,7 @@ namespace TUP.AsmResolver.PE.Readers
                             tablesHeap.netheader.BlobHeap.mainStream.Seek(Convert.ToUInt32(row.parts[2]), SeekOrigin.Begin);
                             tablesHeap.netheader.BlobHeap.binReader.ReadByte();
                             byte sigtype = tablesHeap.netheader.BlobHeap.binReader.ReadByte();
-                            //IMemberSignature sig = tableheap.netheader.blobheap.ReadMemberRefSignature(Convert.ToUInt32(row.parts[2]));
+                           
                             if (sigtype == 0x6)
                                 members[i] = new FieldReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
                             else
@@ -263,6 +271,9 @@ namespace TUP.AsmResolver.PE.Readers
                         case MetaDataTableType.PropertyMap:
                             members[i] = CreateMember<PropertyMap>(GetPropertyMapSignature(), table.type);
                             break;
+                        case MetaDataTableType.PropertyPtr:
+                            members[i] = CreateMember<PropertyPtr>(GetPropertyPtrSignature(), table.type);
+                            break;
                         case MetaDataTableType.Property:
                             members[i] = CreateMember<PropertyDefinition>(GetPropertyDefSignature(), table.type);
                             break;
@@ -290,8 +301,20 @@ namespace TUP.AsmResolver.PE.Readers
                         case MetaDataTableType.Assembly:
                             members[i] = CreateMember<AssemblyDefinition>(GetAssemblyDefSignature(), table.type);
                             break;
+                        case MetaDataTableType.AssemblyProcessor:
+                            members[i] = CreateMember<AssemblyProcessor>(GetAssemblyProcSignature(), table.type);
+                            break;
+                        case MetaDataTableType.AssemblyOS:
+                            members[i] = CreateMember<AssemblyOS>(GetAssemblyOSSignature(), table.type);
+                            break;
                         case MetaDataTableType.AssemblyRef:
                             members[i] = CreateMember<AssemblyReference>(GetAssemblyRefSignature(), table.type);
+                            break;
+                        case MetaDataTableType.AssemblyRefProcessor:
+                            members[i] = CreateMember<AssemblyRefProcessor>(GetAssemblyRefProcSignature(), table.type);
+                            break;
+                        case MetaDataTableType.AssemblyRefOS:
+                            members[i] = CreateMember<AssemblyRefOS>(GetAssemblyRefOSSignature(), table.type);
                             break;
                         case MetaDataTableType.File:
                             members[i] = CreateMember<FileReference>(GetFileReferenceSignature(), table.type);
@@ -579,6 +602,15 @@ namespace TUP.AsmResolver.PE.Readers
             return parts;
 
         }
+        internal byte[] GetPropertyPtrSignature()
+        {
+            byte[] parts = new byte[]
+            {
+                GetIndexSize(MetaDataTableType.Property),
+            };
+
+            return parts;
+        }
         internal byte[] GetPropertyDefSignature()
         {
             byte[] parts = new byte[] { 
@@ -674,6 +706,19 @@ namespace TUP.AsmResolver.PE.Readers
             return parts;
        
         }
+        internal byte[] GetAssemblyProcSignature()
+        {
+            return new byte[] { sizeof(uint) };
+        }
+        internal byte[] GetAssemblyOSSignature()
+        {
+            return new byte[]
+            {
+                sizeof(uint),
+                sizeof(uint),
+                sizeof(uint),
+            };
+        }
         internal byte[] GetAssemblyRefSignature()
         {
             byte[] parts = new byte[] { 
@@ -689,8 +734,26 @@ namespace TUP.AsmResolver.PE.Readers
             };
 
             return parts;
-       
 
+
+        }
+        internal byte[] GetAssemblyRefProcSignature()
+        {
+            return new byte[] 
+            { 
+                sizeof(uint), 
+                GetIndexSize(MetaDataTableType.AssemblyRef),
+            };
+        }
+        internal byte[] GetAssemblyRefOSSignature()
+        {
+            return new byte[]
+            {
+                sizeof(uint),
+                sizeof(uint),
+                sizeof(uint),
+                GetIndexSize(MetaDataTableType.AssemblyRef),
+            };
         }
         internal byte[] GetFileReferenceSignature()
         {

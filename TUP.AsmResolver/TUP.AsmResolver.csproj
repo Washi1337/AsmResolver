@@ -66,6 +66,7 @@
     <Compile Include="NET\NETGlobals.cs" />
     <Compile Include="NET\Specialized\ArrayDimension.cs" />
     <Compile Include="NET\BlobSignatureReader.cs" />
+    <Compile Include="NET\Specialized\ObsoleteAssemblyTables.cs" />
     <Compile Include="NET\Specialized\CustomAttributeArgument.cs" />
     <Compile Include="NET\Specialized\CustomAttributeSignature.cs" />
     <Compile Include="NET\Specialized\ExportedType.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="NET\Specialized\MSIL\StackBehaviour.cs" />
     <Compile Include="NET\Specialized\MSIL\VariableDefinition.cs" />
     <Compile Include="NET\Specialized\ParamPtr.cs" />
+    <Compile Include="NET\Specialized\PropertyPtr.cs" />
     <Compile Include="OffsetConverter.cs" />
     <Compile Include="PE\Writers\ICalculationTask.cs" />
     <Compile Include="PE\Writers\ImportExportWriter.cs" />
