@@ -77,6 +77,7 @@ namespace TUP.AsmResolver.PE.Readers
 
             metadataRva = netHeader.MetaData.RVA;
             Section section = Section.GetSectionByRva(ntHeader.assembly, metadataRva);
+            offsetConverter = new OffsetConverter(section);
             metadataFileOffset = offsetConverter.RvaToFileOffset(metadataRva);//= (uint)new CodeOffsetConverter(header.oheader).RVirtualToFileOffset((int)metadatavirtualoffset);
 
             metadataHeader1 = ntHeader.assembly.peImage.ReadStructure<Structures.METADATA_HEADER_1>(metadataFileOffset);
