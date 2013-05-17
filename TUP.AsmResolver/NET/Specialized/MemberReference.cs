@@ -65,6 +65,13 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public bool HasCustomAttributes
+        {
+            get
+            {
+                return CustomAttributes != null && CustomAttributes.Length > 0;
+            }
+        }
 
         public override void ClearCache()
         {

@@ -14,7 +14,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public ArrayType(TypeReference typeRef, int rank, ArrayDimension[] dimensions) :base (typeRef)
         {
         //    System.Diagnostics.Debugger.Break();
-            this.name = typeRef.name;
+            this.name = typeRef.Name;
             if (rank == 0)
                 this.name += "[]";
             else
