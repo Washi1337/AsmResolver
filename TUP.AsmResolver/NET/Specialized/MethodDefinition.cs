@@ -12,7 +12,7 @@ namespace TUP.AsmResolver.NET.Specialized
         MSIL.MethodBody body = null;
         TypeReference declaringtype;
         GenericParameter[] genericparams = null;
-
+        
         public MethodDefinition(MetaDataRow row)
             : base(row)
         {
@@ -81,7 +81,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override string Name
         {
-            get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[3])); }
+            get 
+            { 
+                if (name == null)
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[3]), out name);
+                return name;
+            }
         }
 
         public override bool IsDefinition

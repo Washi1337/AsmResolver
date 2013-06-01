@@ -78,10 +78,10 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public virtual string Name
         {
-            get {
-                if (!string.IsNullOrEmpty(name))
-                    return name;
-                name = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[6]));
+            get
+            {
+                if (name == null)
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[6]), out name);
                 return name;
             }
         }

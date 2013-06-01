@@ -67,7 +67,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (name == null)
-                    name = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]));
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]), out name);
                 return name;
             }
         }

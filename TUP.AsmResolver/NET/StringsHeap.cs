@@ -74,6 +74,17 @@ namespace TUP.AsmResolver.NET
             hasReadAllStrings = false;
         }
 
+        public bool TryGetStringByOffset(uint offset, out string value)
+        {
+            value = string.Empty;
+
+            if (offset > mainStream.Length)
+                return false;
+
+            value = GetStringByOffset(offset);
+            return true;
+        }
+
         /// <summary>
         /// Gets the string by its offset.
         /// </summary>
@@ -84,7 +95,9 @@ namespace TUP.AsmResolver.NET
             string stringValue;
             if (readStrings.TryGetValue(offset, out stringValue))
                 return stringValue;
-            
+
+            if (mainStream.Position > mainStream.Length)
+                throw new EndOfStreamException();
 
             mainStream.Seek(offset, SeekOrigin.Begin);
             byte lastByte = 0;
@@ -92,7 +105,7 @@ namespace TUP.AsmResolver.NET
             {
                 lastByte = binReader.ReadByte();
 
-            } while (lastByte != 0);
+            } while (lastByte != 0 && mainStream.Position < mainStream.Length);
 
             int endoffset = (int)mainStream.Position - 1;
 

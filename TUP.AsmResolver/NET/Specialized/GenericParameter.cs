@@ -49,7 +49,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get {
                 if (string.IsNullOrEmpty(name))
-                    name = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[3]));
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[3]), out name);
                 return name;
             }
         }

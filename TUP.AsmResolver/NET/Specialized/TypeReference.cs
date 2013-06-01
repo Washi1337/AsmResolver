@@ -50,7 +50,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(this.name))
-                    this.name = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]));
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
                 return this.name;
             }
         }
@@ -60,7 +60,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (HasSavedMetaDataRow)
-                    @namespace = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]));
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]), out @namespace);
                 return @namespace;
             }
         }
