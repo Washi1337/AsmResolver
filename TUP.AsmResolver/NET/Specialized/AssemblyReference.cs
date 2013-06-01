@@ -10,6 +10,7 @@ namespace TUP.AsmResolver.NET.Specialized
         internal string name;
         internal string culture;
         Version version;
+        CustomAttribute[] customAttributes = null;
 
         public AssemblyReference(MetaDataRow row)
             : base(row)
@@ -27,6 +28,27 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             this.name = name;
             this.culture = culture;
+        }
+
+        public virtual CustomAttribute[] CustomAttributes
+        {
+            get
+            {
+                if (customAttributes == null && netheader.TablesHeap.HasTable(MetaDataTableType.CustomAttribute))
+                {
+                    List<CustomAttribute> customattributes = new List<CustomAttribute>();
+
+                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).Members)
+                    {
+                        CustomAttribute attribute = member as CustomAttribute;
+                        if (attribute.Parent != null && attribute.Parent.metadatatoken == this.metadatatoken)
+                            customattributes.Add(attribute);
+                    }
+
+                    customAttributes = customattributes.ToArray();
+                }
+                return customAttributes;
+            }
         }
 
         public virtual Version Version
@@ -89,6 +111,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             version = null;
             name = null;
+            customAttributes = null;
         }
     }
 }
