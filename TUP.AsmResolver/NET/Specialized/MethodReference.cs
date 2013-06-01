@@ -29,9 +29,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (declaringType == null)
                 {
-                    MetaDataMember member;
-                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out member);
-                    declaringType = member as TypeReference;
+                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out declaringType);
                 }
                 return declaringType;
             }

@@ -41,7 +41,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (@interface == null)
-                    @interface = (TypeReference)netheader.TablesHeap.TypeDefOrRef.GetMember(Convert.ToInt32(metadatarow.parts[1]));
+                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out @interface);
                 return @interface;
             }
         }

@@ -74,13 +74,16 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public MetaDataMember Implementation
         {
-            get {
+            get 
+            {
                 if (implementation == null)
                 {
                     int token = Convert.ToInt32(metadatarow.parts[3]);
                     if (token == 0 || token == 1)
                         return null;
-                    implementation = netheader.TablesHeap.Implementation.GetMember(token);
+
+                    netheader.TablesHeap.Implementation.TryGetMember(token, out implementation);
+                    
                 }
                 return implementation;
             }

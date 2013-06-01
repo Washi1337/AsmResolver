@@ -105,7 +105,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 {
                     if (Convert.ToInt32(metadatarow.parts[3]) == 0)
                         return null;
-                    baseType = (TypeReference)netheader.TablesHeap.TypeDefOrRef.GetMember(Convert.ToInt32(metadatarow.parts[3]));
+                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[3]), out baseType);
                 }
                 return baseType;
             }

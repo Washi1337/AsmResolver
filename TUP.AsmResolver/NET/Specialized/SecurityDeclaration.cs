@@ -30,7 +30,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (parent == null)
-                    parent = netheader.TablesHeap.HasDeclSecurity.GetMember(Convert.ToInt32(metadatarow.parts[1]));
+                    netheader.TablesHeap.HasDeclSecurity.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out parent);
                 return parent;
             }
         }

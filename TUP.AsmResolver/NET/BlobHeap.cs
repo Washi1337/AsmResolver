@@ -424,11 +424,19 @@ namespace TUP.AsmResolver.NET
                 case ElementType.SzArray:
                     return new ArrayType(ReadTypeReference(reader,(ElementType)reader.ReadByte()));
                 case ElementType.Class:
-                    return (TypeReference)netheader.TablesHeap.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
+                    TypeReference typeRef;
+                    if (netheader.TablesHeap.TypeDefOrRef.TryGetMember((int)NETGlobals.ReadCompressedUInt32(reader), out typeRef))
+                    {
+                        return typeRef;
+                    }
+                    break;
                 case ElementType.ValueType:
-                    TypeReference typeRef = (TypeReference)netheader.TablesHeap.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader));
-                    typeRef.IsValueType = true;
-                    return typeRef;
+                    if (netheader.TablesHeap.TypeDefOrRef.TryGetMember((int)NETGlobals.ReadCompressedUInt32(reader), out typeRef))
+                    {
+                        typeRef.IsValueType = true;
+                        return typeRef;
+                    }
+                    break;
                 case ElementType.ByRef:
                     return new ByReferenceType(ReadTypeReference(reader, (ElementType)reader.ReadByte()));
                 case ElementType.Pinned:
@@ -462,9 +470,14 @@ namespace TUP.AsmResolver.NET
 
         private TypeReference ReadTypeToken(BlobSignatureReader reader)
         {
-            TypeReference typeRef = netheader.TablesHeap.TypeDefOrRef.GetMember((int)NETGlobals.ReadCompressedUInt32(reader)) as TypeReference;
-            if (typeRef is ISpecification)
-                typeRef = (typeRef as TypeSpecification).TransformWith(reader.GenericContext) as TypeReference;
+            TypeReference typeRef;
+
+            if (netheader.TablesHeap.TypeDefOrRef.TryGetMember((int)NETGlobals.ReadCompressedUInt32(reader), out typeRef))
+            {
+                if (typeRef is ISpecification)
+                    typeRef = (typeRef as TypeSpecification).TransformWith(reader.GenericContext) as TypeReference;
+            }
+
             return typeRef;
         }
 

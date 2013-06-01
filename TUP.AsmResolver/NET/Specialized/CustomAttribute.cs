@@ -29,9 +29,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (parent == null)
                 {
-                    MetaDataMember member;
-                    netheader.TablesHeap.HasCustomAttribute.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out member);
-                    parent = member;
+                    netheader.TablesHeap.HasCustomAttribute.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out parent);
                 }
                 return parent;
             }
@@ -43,9 +41,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (constructor == null)
                 {
-                    MetaDataMember member;
-                    netheader.TablesHeap.CustomAttributeType.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out member);
-                    constructor = (MethodReference)member;
+                    netheader.TablesHeap.CustomAttributeType.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out constructor);
                 }
                 return constructor;
             }

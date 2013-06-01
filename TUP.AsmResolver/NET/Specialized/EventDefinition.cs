@@ -46,7 +46,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (eventType == null)
-                    eventType = (TypeReference)netheader.TablesHeap.TypeDefOrRef.GetMember(Convert.ToInt32(metadatarow.parts[2]));
+                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out eventType);
                 return eventType;
             }
         }

@@ -34,7 +34,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (member == null)
-                    member = netheader.TablesHeap.MemberForwarded.GetMember(Convert.ToInt32(metadatarow.parts[1]));
+                    netheader.TablesHeap.MemberForwarded.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out member);
                 return member;
             }
         }

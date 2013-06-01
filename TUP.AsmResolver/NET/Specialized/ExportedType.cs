@@ -23,7 +23,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (implementation == null)
-                    implementation = netheader.TablesHeap.Implementation.GetMember(Convert.ToInt32(metadatarow.parts[4]));
+                    netheader.TablesHeap.Implementation.TryGetMember(Convert.ToInt32(metadatarow.parts[4]), out implementation);
                 return implementation;
             }
         }

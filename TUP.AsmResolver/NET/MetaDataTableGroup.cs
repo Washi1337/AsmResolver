@@ -53,6 +53,19 @@ namespace TUP.AsmResolver.NET
             catch { member = null; return false; }
         }
 
+        public bool TryGetMember<T>(int codedIndex, out T member) where T:MetaDataMember
+        {
+            MetaDataMember uncastedMember;
+            bool result = TryGetMember(codedIndex, out uncastedMember);
+            if (uncastedMember is T)
+            {
+                member = uncastedMember as T;
+                return true;
+            }
+            member = null;
+            return false;
+        }
+        
         public MetaDataMember GetMember(int codedIndex)
         {
             if (codedIndex == 0)

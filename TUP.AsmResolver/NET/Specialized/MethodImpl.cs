@@ -8,8 +8,8 @@ namespace TUP.AsmResolver.NET.Specialized
     public class MethodImplementation : MetaDataMember 
     {
         TypeDefinition @class;
-        MetaDataMember methodBody;
-        MetaDataMember methodDeclaration;
+        MethodReference methodBody;
+        MethodReference methodDeclaration;
 
         public MethodImplementation(MetaDataRow row)
             : base(row)
@@ -44,7 +44,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (methodBody == null)
                     netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out methodBody);
-                return methodBody as MethodReference;
+                return methodBody;
             }
         }
         public MethodReference MethodDeclaration
@@ -53,7 +53,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (methodBody == null)
                     netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out methodDeclaration);
-                return methodDeclaration as MethodReference;
+                return methodDeclaration;
             }
         }
         public override void ClearCache()

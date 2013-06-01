@@ -49,11 +49,8 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (originalmethod == null)
-                    originalmethod = (MethodReference)netheader.TablesHeap.MethodDefOrRef.GetMember(Convert.ToInt32(metadatarow.parts[0]));
+                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out originalmethod);
                 return originalmethod;
-                //if ( == 0)
-                //    return null;
-                //return (MethodReference)netheader.tableheap.tablereader.MethodDefOrRef.GetMember(Convert.ToInt32(metadatarow.parts[0]));
             }
             private set { originalmethod = value; }
         }
