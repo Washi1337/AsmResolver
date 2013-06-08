@@ -19,8 +19,15 @@ namespace TUP.AsmResolver.NET
         public MetaDataRow()
         {
         }
+
         public MetaDataRow(params object[] parts)
         {
+            this.parts = parts;
+        }
+
+        public MetaDataRow(uint offset, params object[] parts)
+        {
+            this.offset = offset;
             this.parts = parts;
         }
 

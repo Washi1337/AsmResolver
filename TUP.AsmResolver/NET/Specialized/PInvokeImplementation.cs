@@ -43,8 +43,8 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (entrypoint == null)
-                    entrypoint = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]));
+                if (string.IsNullOrEmpty(entrypoint))
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]), out entrypoint);
                 return entrypoint;
             }
         }

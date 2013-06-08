@@ -41,7 +41,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public override string Name
         {
             get { 
-                if (name == string.Empty)
+                if (string.IsNullOrEmpty(name))
                     netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
                 return name;
             }
@@ -50,7 +50,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public override string Namespace
         {
             get {
-                if (@namespace == string.Empty)
+                if (string.IsNullOrEmpty(@namespace))
                     netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]), out @namespace);
                 return @namespace;
             }
