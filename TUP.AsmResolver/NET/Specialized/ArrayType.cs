@@ -13,13 +13,6 @@ namespace TUP.AsmResolver.NET.Specialized
         }
         public ArrayType(TypeReference typeRef, int rank, ArrayDimension[] dimensions) :base (typeRef)
         {
-        //    System.Diagnostics.Debugger.Break();
-            this.name = typeRef.Name;
-            if (rank == 0)
-                this.name += "[]";
-            else
-                for (int i = 0; i < rank; i++)
-                    this.name = this.name + dimensions[i].ToString();
             Rank = rank;
             Dimensions = dimensions;
         }
@@ -42,7 +35,13 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                return this.name;
+                string name = base.Name;
+                if (Rank == 0)
+                    name += "[]";
+                else
+                    for (int i = 0; i < Rank; i++)
+                        name += Dimensions[i].ToString();
+                return name;
             }
         }
        //public override string FullName

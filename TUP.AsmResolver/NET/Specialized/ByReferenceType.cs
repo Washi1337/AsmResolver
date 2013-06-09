@@ -11,9 +11,16 @@ namespace TUP.AsmResolver.NET.Specialized
         public ByReferenceType(TypeReference typeRef)
             : base(typeRef)
         {
-            this.name = typeRef.Name + "&";
-
         }
+
+        public override string Name
+        {
+            get
+            {
+                return base.Name + "&";
+            }
+        }
+
         public override bool IsByReference
         {
             get

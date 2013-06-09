@@ -9,9 +9,15 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         public PointerType(TypeReference typeRef) : base(typeRef)
         {
-            this.name = typeRef.Name + "*";
         }
 
+        public override string Name
+        {
+            get
+            {
+                return base.Name + "*";
+            }
+        }
         public override bool IsPointer
         {
             get
