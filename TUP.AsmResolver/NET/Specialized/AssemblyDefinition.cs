@@ -74,7 +74,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             { 
                 if (culture == null)
-                    culture = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[8]));
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[8]), out name);
                 return culture;
             }
         }
@@ -89,5 +89,6 @@ namespace TUP.AsmResolver.NET.Specialized
             name = null;
             culture = null;
         }
+
     }
 }

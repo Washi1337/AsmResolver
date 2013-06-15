@@ -106,12 +106,18 @@ namespace TUP.AsmResolver.NET.Specialized
             return Name;
         }
 
-
         public override void ClearCache()
         {
             version = null;
             name = null;
             customAttributes = null;
+        }
+
+        public override void LoadCache()
+        {
+            this.name = Name;
+            this.culture = Culture;
+            this.customAttributes = CustomAttributes;
         }
     }
 }

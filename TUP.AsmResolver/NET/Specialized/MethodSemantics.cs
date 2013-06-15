@@ -58,5 +58,11 @@ namespace TUP.AsmResolver.NET.Specialized
             association = null;
         }
 
+        public override void LoadCache()
+        {
+            method = Method;
+            association = Association;
+        }
+
     }
 }

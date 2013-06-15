@@ -56,11 +56,19 @@ namespace TUP.AsmResolver.NET.Specialized
                 return methodDeclaration;
             }
         }
+
         public override void ClearCache()
         {
             @class = null;
             methodBody = null;
             methodDeclaration = null;
+        }
+
+        public override void LoadCache()
+        {
+            @class = Class;
+            methodBody = MethodBody;
+            methodDeclaration = MethodDeclaration;
         }
     }
 }

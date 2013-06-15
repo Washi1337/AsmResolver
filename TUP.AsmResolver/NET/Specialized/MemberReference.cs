@@ -77,5 +77,11 @@ namespace TUP.AsmResolver.NET.Specialized
         {
 
         }
+
+        public override void LoadCache()
+        {
+            pinvokeimpl = PInvokeImplementation;
+            customAttributes = CustomAttributes;
+        }
     }
 }

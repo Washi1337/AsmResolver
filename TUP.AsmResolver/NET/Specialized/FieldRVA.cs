@@ -44,5 +44,10 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             field = null;
         }
+
+        public override void LoadCache()
+        {
+            field = Field;
+        }
     }
 }

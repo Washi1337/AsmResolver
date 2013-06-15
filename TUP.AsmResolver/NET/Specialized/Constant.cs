@@ -58,5 +58,10 @@ namespace TUP.AsmResolver.NET.Specialized
             parent = null;
         }
 
+        public override void LoadCache()
+        {
+            value = Value;
+            parent = Parent;
+        }
     }
 }

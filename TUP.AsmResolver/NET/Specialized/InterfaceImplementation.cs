@@ -56,5 +56,11 @@ namespace TUP.AsmResolver.NET.Specialized
             @class = null;
             @interface = null;
         }
+
+        public override void LoadCache()
+        {
+            @class = Class;
+            @interface = Interface;
+        }
     }
 }

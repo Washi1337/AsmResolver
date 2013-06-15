@@ -15,9 +15,7 @@ namespace TUP.AsmResolver.NET.Specialized
         private InterfaceImplementation[] interfaces = null;
         private TypeDefinition decltype = null;
         private GenericParameter[] genericparams = null;
-        private string fullname = string.Empty;
         private TypeReference baseType = null;
-        private IResolutionScope resolutionScope = null;
 
         public TypeDefinition(MetaDataRow row)
             : base(row)
@@ -295,6 +293,34 @@ namespace TUP.AsmResolver.NET.Specialized
         public bool IsBasedOn(string fullname)
         {
             return BaseType != null && BaseType.FullName == fullname;
+        }
+
+        public override void ClearCache()
+        {
+            base.ClearCache();
+            methodRange = null;
+            fieldRange = null;
+            propertymap = null;
+            eventmap = null;
+            nestedClasses = null;
+            interfaces = null;
+            decltype = null;
+            genericparams = null;
+            baseType = null;
+        }
+
+        public override void LoadCache()
+        {
+            base.LoadCache();
+            methodRange = MemberRange.CreateRange<MethodDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Method, false));
+            fieldRange = MemberRange.CreateRange<FieldDefinition>(this, 4, NETHeader.TablesHeap.GetTable(MetaDataTableType.Field, false));
+            propertymap = PropertyMap;
+            eventmap = EventMap;
+            nestedClasses = NestedClasses;
+            interfaces = Interfaces;
+            decltype = DeclaringType as TypeDefinition;
+            genericparams = GenericParameters;
+            baseType = BaseType;
         }
     }
 }

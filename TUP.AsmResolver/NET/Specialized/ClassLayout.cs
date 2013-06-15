@@ -42,7 +42,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
+            this.parent = null;
+        }
 
+        public override void LoadCache()
+        {
+            this.parent = Parent;
         }
     }
 }

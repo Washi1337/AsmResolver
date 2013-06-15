@@ -44,5 +44,10 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             reference = null;
         }
+
+        public override void LoadCache()
+        {
+            reference = Reference;
+        }
     }
 }

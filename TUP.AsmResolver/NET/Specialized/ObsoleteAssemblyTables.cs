@@ -39,6 +39,10 @@ namespace TUP.AsmResolver.NET.Specialized
         public override void ClearCache()
         {
         }
+
+        public override void LoadCache()
+        {
+        }
     }
 
     public class AssemblyProcessor : MetaDataMember 
@@ -60,6 +64,10 @@ namespace TUP.AsmResolver.NET.Specialized
         }
 
         public override void ClearCache()
+        {
+        }
+
+        public override void LoadCache()
         {
         }
     }
@@ -97,6 +105,11 @@ namespace TUP.AsmResolver.NET.Specialized
             base.ClearCache();
             reference = null;
         }
+
+        public override void LoadCache()
+        {
+            reference = Reference;
+        }
     }
 
     public class AssemblyRefProcessor : AssemblyProcessor
@@ -131,6 +144,11 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             base.ClearCache();
             reference = null;
+        }
+
+        public override void LoadCache()
+        {
+            reference = Reference;
         }
     }
 }

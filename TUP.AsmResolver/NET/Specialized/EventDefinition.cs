@@ -140,5 +140,13 @@ namespace TUP.AsmResolver.NET.Specialized
             eventType = null;
         }
 
+        public override void LoadCache()
+        {
+            addmethod = AddMethod;
+            removemethod = RemoveMethod;
+            name = Name;
+            eventType = EventType;
+        }
+
     }
 }

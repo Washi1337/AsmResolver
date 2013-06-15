@@ -8,7 +8,6 @@ namespace TUP.AsmResolver.NET.Specialized
     public class FieldDefinition : FieldReference
     {
         Constant constant;
-        TypeDefinition declaringType;
 
         public FieldDefinition(MetaDataRow row)
             : base(row)
@@ -66,6 +65,12 @@ namespace TUP.AsmResolver.NET.Specialized
                     }
                 return constant;
             }
+        }
+
+        public override void LoadCache()
+        {
+            base.LoadCache();
+            constant = Constant;
         }
 
     }

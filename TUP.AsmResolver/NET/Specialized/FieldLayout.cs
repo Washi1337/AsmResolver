@@ -24,6 +24,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get { return Convert.ToUInt32(metadatarow.parts[0]); }
         }
+
         public FieldDefinition Field
         {
             get
@@ -33,9 +34,15 @@ namespace TUP.AsmResolver.NET.Specialized
                 return field;
             }
         }
+
         public override void ClearCache()
         {
             field = null;
+        }
+
+        public override void LoadCache()
+        {
+            field = Field;
         }
     }
 }

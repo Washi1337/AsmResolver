@@ -75,5 +75,11 @@ namespace TUP.AsmResolver.NET.Specialized
             importScope = null;
         }
 
+        public override void LoadCache()
+        {
+            member = Member;
+            entrypoint = Entrypoint;
+            importScope = ImportScope;
+        }
     }
 }

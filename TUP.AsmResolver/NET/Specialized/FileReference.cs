@@ -23,6 +23,7 @@ namespace TUP.AsmResolver.NET.Specialized
         }
 
         public FileAttributes Flags { get { return (FileAttributes)Convert.ToUInt32(metadatarow.parts[0]); } }
+
         public string Name
         {
             get
@@ -32,6 +33,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return name;
             }
         }
+
         public uint Hash { get { return Convert.ToUInt32(metadatarow.parts[2]); } }
 
         public Stream Stream
@@ -46,6 +48,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 return stream;
             }
         }
+
         public override void ClearCache()
         {
             if (stream != null)
@@ -54,5 +57,10 @@ namespace TUP.AsmResolver.NET.Specialized
             name = null;
         }
 
+        public override void LoadCache()
+        {
+            stream = Stream;
+            name = Name;
+        }
     }
 }

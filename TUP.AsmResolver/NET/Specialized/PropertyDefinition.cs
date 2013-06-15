@@ -105,6 +105,15 @@ namespace TUP.AsmResolver.NET.Specialized
             propertySig = null;
         }
 
+        public override void LoadCache()
+        {
+            base.LoadCache();
+            getmethod = GetMethod;
+            setmethod = SetMethod;
+            name = Name;
+            propertySig = Signature;
+        }
+
         public override string FullName
         {
             get

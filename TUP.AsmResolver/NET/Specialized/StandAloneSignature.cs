@@ -20,9 +20,15 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get { return Convert.ToUInt32(metadatarow.parts[0]); }
         }
+
         public override void ClearCache()
         {
 
+        }
+
+        public override void LoadCache()
+        {
+            
         }
     }
 }

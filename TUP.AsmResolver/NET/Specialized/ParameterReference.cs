@@ -18,5 +18,6 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             return ParameterType.Name;
         }
+
     }
 }

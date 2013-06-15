@@ -10,7 +10,6 @@ namespace TUP.AsmResolver.NET.Specialized
         MemberRange<ParameterDefinition> paramRange = null;
         MethodSemantics semantics = null;
         MSIL.MethodBody body = null;
-        TypeReference declaringtype;
         GenericParameter[] genericparams = null;
         
         public MethodDefinition(MetaDataRow row)
@@ -51,7 +50,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 
-                if (declaringtype == null)
+                if (declaringType == null)
                 {
                     uint relativetoken = this.metadatatoken - (6 << 0x18);
 
@@ -64,8 +63,8 @@ namespace TUP.AsmResolver.NET.Specialized
                         {
                             if (typeDef.MethodList > relativetoken && lasttypeDef.MethodList <= relativetoken)
                             {
-                                declaringtype = lasttypeDef;
-                                return declaringtype;
+                                declaringType = lasttypeDef;
+                                return declaringType;
                             }
                         }
 
@@ -74,7 +73,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     if (lasttypeDef != null && lasttypeDef.MethodList <= relativetoken)
                         return lasttypeDef;
                 }
-                return declaringtype;
+                return declaringType;
 
             }
         }
@@ -200,6 +199,24 @@ namespace TUP.AsmResolver.NET.Specialized
         public bool HasParameters
         {
             get { return Parameters != null && Parameters.Length > 0; }
+        }
+
+        public override void ClearCache()
+        {
+            base.ClearCache();
+            paramRange = null;
+            semantics = null;
+            body = null;
+            genericparams = null;
+        }
+
+        public override void LoadCache()
+        {
+            base.LoadCache();
+            paramRange = MemberRange.CreateRange<ParameterDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Param, false));
+            semantics = Semantics;
+            body = Body;
+            genericparams = GenericParameters;
         }
     }
 }

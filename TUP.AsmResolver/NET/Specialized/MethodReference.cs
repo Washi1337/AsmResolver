@@ -125,5 +125,13 @@ namespace TUP.AsmResolver.NET.Specialized
             declaringType = null;
             name = null;
         }
+
+        public override void LoadCache()
+        {
+            base.LoadCache();
+            signature = Signature;
+            declaringType = DeclaringType;
+            name = Name;
+        }
     }
 }

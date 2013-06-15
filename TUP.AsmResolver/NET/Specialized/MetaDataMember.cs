@@ -86,6 +86,7 @@ namespace TUP.AsmResolver.NET.Specialized
         }
 
         public abstract void ClearCache();
-        
+
+        public abstract void LoadCache();
     }
 }

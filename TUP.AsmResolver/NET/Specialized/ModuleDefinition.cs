@@ -75,5 +75,13 @@ namespace TUP.AsmResolver.NET.Specialized
             mvid = default(Guid);
             customAttributes = null;
         }
+
+        public override void LoadCache()
+        {
+            base.LoadCache();
+            name = Name;
+            mvid = Mvid;
+            customAttributes = CustomAttributes;
+        }
     }
 }

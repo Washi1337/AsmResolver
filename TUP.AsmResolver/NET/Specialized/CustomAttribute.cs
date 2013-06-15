@@ -75,5 +75,12 @@ namespace TUP.AsmResolver.NET.Specialized
             constructor = null;
             signature = null;
         }
+
+        public override void LoadCache()
+        {
+            parent = Parent;
+            constructor = Constructor;
+            signature = Signature;
+        }
     }
 }

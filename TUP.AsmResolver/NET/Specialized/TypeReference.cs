@@ -131,6 +131,15 @@ namespace TUP.AsmResolver.NET.Specialized
             fullname = null;
         }
 
+        public override void LoadCache()
+        {
+            base.LoadCache();
+            resolutionScope = ResolutionScope;
+            name = Name;
+            @namespace = Namespace;
+            fullname = FullName;
+        }
+
         public override string ToString()
         {
             return FullName;

@@ -70,5 +70,11 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public override void LoadCache()
+        {
+            base.LoadCache();
+            owner = Owner;
+        }
+
     }
 }

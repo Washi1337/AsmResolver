@@ -29,7 +29,11 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-
         }
+
+        public override void LoadCache()
+        {
+        }
+
     }
 }

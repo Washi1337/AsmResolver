@@ -97,5 +97,12 @@ namespace TUP.AsmResolver.NET.Specialized
             name = null;
             implementation = null;
         }
+
+        public override void LoadCache()
+        {
+            stream = Stream;
+            name = Name;
+            implementation = Implementation;
+        }
     }
 }

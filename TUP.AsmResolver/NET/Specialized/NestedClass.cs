@@ -64,10 +64,17 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             return Class.Name + " -> " + EnclosingClass.FullName;
         }
+
         public override void ClearCache()
         {
             @class = null;
             enclosingClass = null;
+        }
+
+        public override void LoadCache()
+        {
+            @class = Class;
+            enclosingClass = EnclosingClass;
         }
     }
 }

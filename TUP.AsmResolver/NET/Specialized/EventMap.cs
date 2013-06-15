@@ -60,7 +60,11 @@ namespace TUP.AsmResolver.NET.Specialized
             eventRange = null;
             parent = null;
         }
-        
 
+        public override void LoadCache()
+        {
+            eventRange = MemberRange.CreateRange<EventDefinition>(this, 1, netheader.TablesHeap.GetTable(MetaDataTableType.Event, false));
+            parent = Parent;
+        }
     }
 }

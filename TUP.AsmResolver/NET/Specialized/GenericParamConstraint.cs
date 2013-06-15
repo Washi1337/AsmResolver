@@ -54,5 +54,11 @@ namespace TUP.AsmResolver.NET.Specialized
             owner = null;
             constraint = null;
         }
+
+        public override void LoadCache()
+        {
+            owner = Owner;
+            constraint = Constraint;
+        }
     }
 }
