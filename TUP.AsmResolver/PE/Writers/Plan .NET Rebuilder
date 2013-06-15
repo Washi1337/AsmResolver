@@ -1,0 +1,113 @@
+---- .NET assembly rebuilding plan ----
+
+Definitions
+- struct MEMBER_DATA
+  {
+ 	 - original token
+ 	 - new token
+ 	 - string[] temp strings data
+	 - byte[][] temp blob data <-- should be removed once all blobs are handled.
+ 	 - member instance
+  }
+- class METHOD_BODY_TABLE
+  {
+	- method entries
+	- stream
+		- binwriter
+  }
+- struct METHOD_BODY_DATA
+  {
+ 	 - offset in stream/table
+	 - size
+  }
+
+Writing Parameters
+- Log Event
+	- Type => message, warning, error
+	- Exception => error instance
+	- StopProcess => bool indicating ignore error/warning or not.
+
+Tasks:
+- Read all data
+	- Read all method bodies 
+	- Read all blobs 
+	- Collect members data (list<MEMBER_DATA>)
+	
+- Clear all data members
+	- Clear metadata streams
+	
+- Reconstruct tables phase 1
+	- Append members for member ranges
+		- TypeDef's fieldlist, methodlist
+		- MethodDef's paramlist
+		- PropertyMap's propertylist
+		- EventMap's eventlist
+	- For each member
+		- If string property => get string from list<MEMBER_DATA> and add to #Strings
+		- If guid => add to #GUID
+		- If resource offset => add contents to .net resource dir
+		- If blob, or reference to other member => ignore
+		- Set new md token
+		
+- Reconstruct method bodies 
+	- Generate method body table stream, (relative offset, size)
+	- For each method
+		- Rebuild msil body
+			- If string => add to #US
+			- If memberref => get from table (by original token)
+				- maybe auto-import members? 
+		- Reconstruct method body header and extra sections (exception handlers)
+		- Calculate method body size
+		- Append to method body table stream and advance next offset with size.
+		
+- Reconstruct tables phase 2
+	- Append table headers
+	- For each member
+		- If string property => ignore
+		- If blob => serialize signature and add to #Blob
+		- If reference => generate coded index.
+		- Append mdrow to stream.
+
+- Generate Import Tables
+	- Add mscoree.dll!_CorExeMain
+	
+- Calculate sizes and determine offsets
+	- Calculate sizes and relative offsets of md streams
+		- Relative offset = METADATA_HEADER offset + METADATA_HEADER size
+	- Calculate method body table size
+	- Calculate data directory sizes
+	- Create PE section entries
+		- .text
+			- Size = .net directory + metadata dirs + methodbody tables size + import dir
+		- .rsrc & .reloc
+			- Keep same
+	- Set PE section offsets and virtual offsets
+		- Raw offset start = 0x200
+		- Virtual offset start = 0x2000
+		- For each section
+			- Set current raw and virtual offset
+			- Increment current offsets with raw size
+	- Set RVA's of data directories
+	
+- Write Executable
+	- Generate PE headers
+		- Update Optional Header
+			- SizeOfCode => .text rawsize
+			- SizeOfInitializedData => .rsrc rawsize + .reloc rawsize
+			- BaseOfCode => .text rva
+			- BaseOfData => .rsrc rva
+		- Update File Header
+			- SizeOfOptionalHeader => 0xE0
+	- Write sections
+		- .text
+			- .net directory
+			- metadata dirs
+			- methdod body tables
+			- import dir
+			- Startup stub
+				- Set rva in optional header
+		- .rsrc & .reloc
+			- write normal data.
+	- Append section headers after optional header 
+
+	

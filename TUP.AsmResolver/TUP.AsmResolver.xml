@@ -3459,24 +3459,9 @@
             Creates a new instance of the WritingParameters, and sets the arguments to their default values.
             </summary>
         </member>
-        <member name="P:TUP.AsmResolver.WritingParameters.RebuildResources">
+        <member name="P:TUP.AsmResolver.WritingParameters.BuildAsManagedApp">
             <summary>
-            Indicates the writer should rebuild the resources directory.
-            </summary>
-        </member>
-        <member name="P:TUP.AsmResolver.WritingParameters.RebuildExportTable">
-            <summary>
-            Indicates the writer should rebuild the export tables.
-            </summary>
-        </member>
-        <member name="P:TUP.AsmResolver.WritingParameters.RebuildImportTable">
-            <summary>
-            Indicates the writer should rebuild the import tables.
-            </summary>
-        </member>
-        <member name="P:TUP.AsmResolver.WritingParameters.RebuildNETHeaders">
-            <summary>
-            Indicates the writer should rebuild the .NET directory.
+            Indicates the writer should rebuild the application as it would be a managed application.
             </summary>
         </member>
     </members>

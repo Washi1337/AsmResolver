@@ -15,34 +15,14 @@ namespace TUP.AsmResolver
         /// </summary>
         public WritingParameters()
         {
-            RebuildResources = true;
-            RebuildExportTable = true;
-            RebuildImportTable = true;
-            RebuildNETHeaders = true;
-            //BuildAsManagedApp = false;
+            BuildAsManagedApp = false;
         }
-        /// <summary>
-        /// Indicates the writer should rebuild the resources directory.
-        /// </summary>
-        public bool RebuildResources { get; set; }
-        /// <summary>
-        /// Indicates the writer should rebuild the export tables.
-        /// </summary>
-        public bool RebuildExportTable { get; set; }
-        /// <summary>
-        /// Indicates the writer should rebuild the import tables.
-        /// </summary>
-        public bool RebuildImportTable { get; set; }
-        /// <summary>
-        /// Indicates the writer should rebuild the .NET directory.
-        /// </summary>
-        public bool RebuildNETHeaders { get; set; }
 
-        // Will be uncomment once it actually does something.
-        ///// <summary>
-        ///// Indicates the writer should rebuild the application as it would be a managed application.
-        ///// </summary>
-        //public bool BuildAsManagedApp { get; set; }
+
+       /// <summary>
+       /// Indicates the writer should rebuild the application as it would be a managed application.
+       /// </summary>
+        public bool BuildAsManagedApp { get { return true; } set { throw new NotImplementedException(); } }
         
     }
 }

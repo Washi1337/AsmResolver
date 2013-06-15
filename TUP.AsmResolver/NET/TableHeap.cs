@@ -29,18 +29,7 @@ namespace TUP.AsmResolver.NET
             tablereader = new NETTableReader(this);
             tablereader.ReadTableHeaders();
         }
-
-        internal void Reconstruct()
-        {
-            foreach (MetaDataStream stream in netheader.MetaDataStreams)
-                stream.ClearCache();
-
-            NETTableReconstructor reconstructor = new NETTableReconstructor(this);
-
-            // Rebuild all tables and update heaps
-            reconstructor.Reconstruct();
-        }
-
+        
         internal override void MakeEmpty()
         {
             base.Dispose();

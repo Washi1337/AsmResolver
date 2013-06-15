@@ -177,7 +177,7 @@ namespace TUP.AsmResolver.PE
         {
             try
             {
-                if (offset < 0 || offset > Stream.Length)
+                if (!ContainsOffset(offset))
                     return false;
                 Stream.Seek(offset, SeekOrigin.Begin);
                 return true;
@@ -186,6 +186,11 @@ namespace TUP.AsmResolver.PE
             {
                 return false;
             }
+        }
+
+        public bool ContainsOffset(long offset)
+        {
+            return (offset < 0 || offset > Stream.Length);
         }
 
         public void Dispose()

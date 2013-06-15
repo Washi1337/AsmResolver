@@ -78,7 +78,7 @@ namespace TUP.AsmResolver.NET
         {
             value = string.Empty;
 
-            if (offset > mainStream.Length)
+            if (offset == 0 || offset > mainStream.Length)
                 return false;
 
             value = GetStringByOffset(offset);

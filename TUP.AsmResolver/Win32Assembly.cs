@@ -306,8 +306,8 @@ namespace TUP.AsmResolver
         /// <param name="writingParameters"></param>
         public void Rebuild(Stream outputStream, WritingParameters writingParameters)
         {
-            PEWriter writer = new PEWriter(this, writingParameters);
-            writer.WriteExecutable(outputStream);
+            PEConstructor constructor = new PEConstructor(this);
+            constructor.RebuildAndWrite(writingParameters);
         }
 
         /// <summary>
