@@ -22,6 +22,8 @@ namespace TUP.AsmResolver.PE.Writers
             Tasks = new RebuildingTask[]
             {
                 new PreparationTask(this),
+                new MetaDataBuilderTask(this),
+
             };
         }
 

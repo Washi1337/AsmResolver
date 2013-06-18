@@ -10,7 +10,7 @@ namespace TUP.AsmResolver.NET
     /// <summary>
     /// Represents a metadata stream of a .NET application.
     /// </summary>
-    public class MetaDataStream : IDisposable, ICacheProvider, IImageProvider
+    public class MetaDataStream : IDisposable, ICacheProvider, IImageProvider, ICloneable 
     {
         public MetaDataStream(string name, byte[] contents)
         {
@@ -129,6 +129,10 @@ namespace TUP.AsmResolver.NET
         {
         }
 
+        public virtual void LoadCache()
+        {
+        }
+
         internal virtual void MakeEmpty()
         {
             // used for rebuilding to remove all unused data.
@@ -140,6 +144,10 @@ namespace TUP.AsmResolver.NET
             binWriter = new BinaryWriter(mainStream);
         }
 
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
 
     }
 }

@@ -94,6 +94,7 @@
     <Compile Include="NET\Specialized\ParamPtr.cs" />
     <Compile Include="NET\Specialized\PropertyPtr.cs" />
     <Compile Include="OffsetConverter.cs" />
+    <Compile Include="PE\Writers\MetaDataBuilderTask.cs" />
     <Compile Include="PE\Writers\PEConstructor.cs" />
     <Compile Include="PE\Writers\PreparationTask.cs" />
     <Compile Include="PE\Writers\RebuildingTask.cs" />

@@ -56,7 +56,7 @@ namespace TUP.AsmResolver.NET.Specialized
         }
 
         public override void ClearCache()
-        {
+        {   
             eventRange = null;
             parent = null;
         }
@@ -64,6 +64,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public override void LoadCache()
         {
             eventRange = MemberRange.CreateRange<EventDefinition>(this, 1, netheader.TablesHeap.GetTable(MetaDataTableType.Event, false));
+            eventRange.LoadCache();
             parent = Parent;
         }
     }

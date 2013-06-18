@@ -313,7 +313,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             base.LoadCache();
             methodRange = MemberRange.CreateRange<MethodDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Method, false));
+            methodRange.LoadCache();
             fieldRange = MemberRange.CreateRange<FieldDefinition>(this, 4, NETHeader.TablesHeap.GetTable(MetaDataTableType.Field, false));
+            fieldRange.LoadCache();
             propertymap = PropertyMap;
             eventmap = EventMap;
             nestedClasses = NestedClasses;

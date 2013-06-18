@@ -92,7 +92,7 @@ namespace TUP.AsmResolver.NET
             if (member == null)
                 return 0;
 
-            MetaDataTable table = tables.FirstOrDefault(t => t != null && t.Type == member.Table);
+            MetaDataTable table = tables.FirstOrDefault(t => t != null && t.Type == member.TableType);
             if (table == null)
                 throw new ArgumentException("Member does not belong to the metadata table group.");
 

@@ -20,7 +20,7 @@ namespace TUP.AsmResolver.NET
             range.Start = Convert.ToInt32(member.MetaDataRow.Parts[mdrowIndex]) - 1; 
             range.TargetTable = targetTable;
 
-            MetaDataTable currentTable = member.NETHeader.TablesHeap.GetTable(member.Table, false);
+            MetaDataTable currentTable = member.NETHeader.TablesHeap.GetTable(member.TableType, false);
             int memberIndex = (int)(member.metadatatoken | (0xFF << 24)) - (0xFF << 24);
             if (currentTable != null)
             {
@@ -40,7 +40,7 @@ namespace TUP.AsmResolver.NET
         }
     }
 
-    public class MemberRange<T> : MemberRange where T : MetaDataMember
+    public class MemberRange<T> : MemberRange, ICacheProvider  where T : MetaDataMember
     {
         T[] members;
 
@@ -60,5 +60,14 @@ namespace TUP.AsmResolver.NET
             }
         }
 
+        public void ClearCache()
+        {
+            members = null;
+        }
+
+        public void LoadCache()
+        {
+            members = Members;
+        }
     }
 }

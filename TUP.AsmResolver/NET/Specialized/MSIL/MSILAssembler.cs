@@ -150,7 +150,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                         break;
                     case OperandType.ShortInstructionTarget:
                         if (instruction.Operand is MSILInstruction)
-                            instruction.OperandBytes = new byte[] { byte.Parse(((sbyte)(instruction.Operand as MSILInstruction).Offset - sizeof(sbyte) - instruction.OpCode.Bytes.Length - instruction.Offset).ToString("x2"), System.Globalization.NumberStyles.HexNumber) };
+                            instruction.OperandBytes = new byte[] { byte.Parse(((sbyte)((instruction.Operand as MSILInstruction).Offset - sizeof(sbyte) - instruction.OpCode.Bytes.Length - instruction.Offset)).ToString("x2"), System.Globalization.NumberStyles.HexNumber) };
                         break;
                     case OperandType.String:
                         //TODO: importing strings into stringsheap

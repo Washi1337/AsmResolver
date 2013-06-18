@@ -63,6 +63,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public override void LoadCache()
         {
             propertyRange = MemberRange.CreateRange<PropertyDefinition>(this, 1, NETHeader.TablesHeap.GetTable(MetaDataTableType.Property, false));
+            propertyRange.LoadCache();
             parent = Parent;
         }
     }

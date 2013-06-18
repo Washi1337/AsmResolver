@@ -15,9 +15,7 @@ namespace TUP.AsmResolver
         /// </summary>
         public WritingParameters()
         {
-            BuildAsManagedApp = false;
         }
-
 
        /// <summary>
        /// Indicates the writer should rebuild the application as it would be a managed application.

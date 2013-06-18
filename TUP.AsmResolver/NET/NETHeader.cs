@@ -266,5 +266,14 @@ namespace TUP.AsmResolver.NET
             guidheap = null;
             
         }
+
+        public void LoadCache()
+        {
+            tableheap = TablesHeap;
+            stringsheap = StringsHeap;
+            usheap = UserStringsHeap;
+            blobheap = BlobHeap;
+            guidheap = GuidHeap;
+        }
     }
 }

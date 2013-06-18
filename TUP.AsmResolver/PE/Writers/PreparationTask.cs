@@ -25,7 +25,7 @@ namespace TUP.AsmResolver.PE.Writers
             CacheMethodBodies(netHeader.TablesHeap);
             CacheBlobs(netHeader.BlobHeap);
             CollectMembers(netHeader.TablesHeap, workspace);
-            ClearAllStreams(netHeader);
+            ClearAllStreams(netHeader, workspace);
         }
 
         private void CacheMethodBodies(TablesHeap tablesHeap)
@@ -65,30 +65,33 @@ namespace TUP.AsmResolver.PE.Writers
                     {
                         MetaDataMemberInfo[] subMembers = new MetaDataMemberInfo[table.Members.Length];
 
-                        for (int j = 0; i < subMembers.Length; j++)
+                        for (int j = 0; j < subMembers.Length; j++)
                         {
-                            subMembers[j] = new MetaDataMemberInfo()
-                            {
-                                Instance = table.Members[j],
-                                OriginalToken = table.Members[j].MetaDataToken,
-                            };
-
-                            // TODO: Cache all strings (maybe an extra method in MetaDataMember)
+                            subMembers[j] = new MetaDataMemberInfo(table.Members[j]);
                         }
 
-                        workspace.Members.AddRange(subMembers);
+                        workspace.Members.Add(tableType, subMembers);
                     }
                 }
             }
         }
 
-        private void ClearAllStreams(NETHeader netHeader)
+        private void ClearAllStreams(NETHeader netHeader,  Workspace workspace)
         {
             Constructor.Log("Clearing .NET metadata streams.");
-            for (int i = 0; i < netHeader.MetaDataStreams.Count; i++)
+            workspace.NewStreams = CloneArray(netHeader.MetaDataStreams.ToArray());
+            for (int i = 0; i < workspace.NewStreams.Length; i++)
             {
-                netHeader.MetaDataStreams[i].MakeEmpty();
+                workspace.NewStreams[i].MakeEmpty();
             }
+        }
+
+        private T[] CloneArray<T>(T[] array) where T : ICloneable
+        {
+            T[] newArray = new T[array.Length];
+            for (int i = 0; i < array.Length; i++)
+                newArray[i] = (T)array[i].Clone();
+            return newArray;
         }
 
     }

@@ -150,5 +150,10 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             instructions = null;
         }
+
+        public void LoadCache()
+        {
+            instructions = Instructions;
+        }
     }
 }

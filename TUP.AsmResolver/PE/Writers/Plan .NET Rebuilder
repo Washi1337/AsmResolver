@@ -3,11 +3,8 @@
 Definitions
 - struct MEMBER_DATA
   {
- 	 - original token
- 	 - new token
- 	 - string[] temp strings data
-	 - byte[][] temp blob data <-- should be removed once all blobs are handled.
- 	 - member instance
+ 	 - old instance
+	 - new instance
   }
 - class METHOD_BODY_TABLE
   {
@@ -28,27 +25,21 @@ Writing Parameters
 	- StopProcess => bool indicating ignore error/warning or not.
 
 Tasks:
-- Read all data
+- Preparation
 	- Read all method bodies 
 	- Read all blobs 
 	- Collect members data (list<MEMBER_DATA>)
+	- Create new metadata streams.
 	
-- Clear all data members
-	- Clear metadata streams
-	
-- Reconstruct tables phase 1
+- Building Metadata
 	- Append members for member ranges
 		- TypeDef's fieldlist, methodlist
 		- MethodDef's paramlist
 		- PropertyMap's propertylist
 		- EventMap's eventlist
-	- For each member
-		- If string property => get string from list<MEMBER_DATA> and add to #Strings
-		- If guid => add to #GUID
-		- If resource offset => add contents to .net resource dir
-		- If blob, or reference to other member => ignore
 		- Set new md token
-		
+	- Set new metadata tokens
+	
 - Reconstruct method bodies 
 	- Generate method body table stream, (relative offset, size)
 	- For each method
@@ -60,10 +51,12 @@ Tasks:
 		- Calculate method body size
 		- Append to method body table stream and advance next offset with size.
 		
-- Reconstruct tables phase 2
+- Finalizing Metadata
 	- Append table headers
 	- For each member
-		- If string property => ignore
+		- If string property => get string from list<MEMBER_DATA> and add to #Strings
+		- If guid => add to #GUID
+		- If resource offset => add contents to .net resource dir
 		- If blob => serialize signature and add to #Blob
 		- If reference => generate coded index.
 		- Append mdrow to stream.

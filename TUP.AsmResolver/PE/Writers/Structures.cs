@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TUP.AsmResolver.NET;
 using TUP.AsmResolver.NET.Specialized;
 
 namespace TUP.AsmResolver.PE.Writers
@@ -13,21 +14,50 @@ namespace TUP.AsmResolver.PE.Writers
         public Workspace(WritingParameters writingParameters)
         {
             WritingParameters = writingParameters;
+            Members = new Dictionary<MetaDataTableType, MetaDataMemberInfo[]>();
+            MethodBodyTable = new MethodBodyTable();
+            
         }
 
-        public List<MetaDataMemberInfo> Members;
-        public MethodBodyTable MethodBodyTable = new MethodBodyTable();
+        public Dictionary<MetaDataTableType, MetaDataMemberInfo[]> Members;
+        public MethodBodyTable MethodBodyTable;
         public readonly WritingParameters WritingParameters;
+        public MetaDataStream[] NewStreams;
 
+        public T[] GetMembers<T>(MetaDataTableType table) where T : MetaDataMember
+        {
+            
+            T[] output = new T[Members[table].Length];
+            for (int i = 0; i < output.Length; i++)
+                output[i] = Members[table][i].Instance as T;
+
+            return output;
+        }
+
+        public int GetIndexOfMember<T>(T member) where T : MetaDataMember
+        {
+            return Array.FindIndex(Members[member.TableType], m => m.Instance == member);
+        }
     }
 
     public struct MetaDataMemberInfo
     {
-    	 public uint OriginalToken;
-    	 public uint NewToken;
-    	 public string[] TempStrings;
-	     public byte[][] TempBlobs; // <-- should be removed once all blobs are handled.
-    	 public MetaDataMember Instance;
+        public MetaDataMemberInfo(MetaDataMember member)
+        {
+            member.LoadCache();
+            Instance = member;
+            OriginalToken = member.MetaDataToken;
+        }
+
+        public readonly uint OriginalToken;
+        public MetaDataMember Instance;
+
+        public override string ToString()
+        {
+            if (Instance != null)
+                return string.Format("[{0:X}]{1}", OriginalToken, Instance);
+            return  string.Format("[{0:X}]",OriginalToken);
+        }
     }
 
     public class MethodBodyTable

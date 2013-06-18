@@ -6,7 +6,7 @@ using TUP.AsmResolver.PE.Readers;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public abstract class MetaDataMember : IDisposable , ICacheProvider, IImageProvider
+    public abstract class MetaDataMember : IDisposable , ICacheProvider, IImageProvider, ICloneable
     {
         public MetaDataMember(MetaDataRow row)
         {
@@ -40,9 +40,17 @@ namespace TUP.AsmResolver.NET.Specialized
             get { return netheader; }
         }
 
-        public MetaDataTableType Table
+        public MetaDataTableType TableType
         {
             get { return table; }
+        }
+
+        public MetaDataTable Table
+        {
+            get
+            {
+                return netheader.TablesHeap.GetTable(TableType, false);
+            }
         }
 
         public object ProcessPartType(int partindex, object value)
@@ -88,5 +96,11 @@ namespace TUP.AsmResolver.NET.Specialized
         public abstract void ClearCache();
 
         public abstract void LoadCache();
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
     }
 }

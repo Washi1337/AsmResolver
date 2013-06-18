@@ -111,7 +111,7 @@ namespace AsmResolver
             if (tablesTree.SelectedNode != null && tablesTree.SelectedNode.Tag is MetaDataMember)
             {
                 MetaDataMember member = tablesTree.SelectedNode.Tag as MetaDataMember;
-                currentTablesHeap.GetTable(member.Table, false).RemoveMember(member);
+                currentTablesHeap.GetTable(member.TableType, false).RemoveMember(member);
                 tablesTree.SelectedNode.Remove();
             }
         }

@@ -14,5 +14,9 @@ namespace TUP.AsmResolver
         /// Clears the cached values.
         /// </summary>
         void ClearCache();
+        /// <summary>
+        /// Loads all cache values.
+        /// </summary>
+        void LoadCache();
     }
 }

@@ -138,6 +138,11 @@
             Clears the cached values.
             </summary>
         </member>
+        <member name="M:TUP.AsmResolver.ICacheProvider.LoadCache">
+            <summary>
+            Loads all cache values.
+            </summary>
+        </member>
         <member name="T:TUP.AsmResolver.NameDemangler">
             <summary>
             Demangles imported or exported method names. Under construction
