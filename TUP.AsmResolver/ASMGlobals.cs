@@ -89,5 +89,12 @@ namespace TUP.AsmResolver
             return result;
         }
 
+        internal static void Align(BinaryWriter writer, int align)
+        {
+            align--;
+            byte[] bytes = new byte[(writer.BaseStream.Position + align & ~align) - writer.BaseStream.Position];
+            writer.Write(bytes);
+        }
+
     }
 }

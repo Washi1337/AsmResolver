@@ -8,7 +8,6 @@ namespace TUP.AsmResolver.NET.Specialized
     public class FieldReference : MemberReference
     {
         internal FieldSignature signature = null;
-        internal TypeReference declaringType;
         internal string name;
 
         public FieldReference(MetaDataRow row)
@@ -23,18 +22,6 @@ namespace TUP.AsmResolver.NET.Specialized
             this.declaringType = declaringType;
         }
 
-        public override TypeReference DeclaringType
-        {
-            get
-            {
-                if (declaringType == null)
-                {
-                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out declaringType);
-                }
-                return declaringType;
-            }
-
-        }
         public override string Name
         {
             get

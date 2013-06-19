@@ -9,6 +9,7 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         PInvokeImplementation pinvokeimpl = null;
         CustomAttribute[] customAttributes = null;
+        internal TypeReference declaringType = null;
 
         public MemberReference(MetaDataRow row)
             : base(row)
@@ -17,7 +18,17 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public abstract string Name { get; }
         public abstract string FullName { get; }
-        public abstract TypeReference DeclaringType { get; }
+        public virtual TypeReference DeclaringType
+        {
+            get
+            {
+                if (declaringType == null)
+                {
+                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out declaringType);
+                }
+                return declaringType;
+            }
+        }
 
         public override string ToString()
         {
@@ -75,13 +86,16 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-
+            customAttributes = null;
+            declaringType = null;
+            pinvokeimpl = null;
         }
 
         public override void LoadCache()
         {
             pinvokeimpl = PInvokeImplementation;
             customAttributes = CustomAttributes;
+            declaringType = DeclaringType;
         }
     }
 }

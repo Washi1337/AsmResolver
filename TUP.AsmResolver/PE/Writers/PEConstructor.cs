@@ -23,7 +23,7 @@ namespace TUP.AsmResolver.PE.Writers
             {
                 new PreparationTask(this),
                 new MetaDataBuilderTask(this),
-
+                new MsilMethodBuilder(this),
             };
         }
 

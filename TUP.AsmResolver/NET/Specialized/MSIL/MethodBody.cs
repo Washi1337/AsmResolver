@@ -93,6 +93,14 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             get { return ((reader.fatsig & 8) == 8); }
         }
 
+        public bool HasVariables
+        {
+            get
+            {
+                return IsFat && (Variables != null && Variables.Length > 0);
+            }
+        }
+
         public VariableDefinition[] Variables
         {
             get
@@ -154,6 +162,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         public void LoadCache()
         {
             instructions = Instructions;
+            reader.vars = Variables;
         }
     }
 }

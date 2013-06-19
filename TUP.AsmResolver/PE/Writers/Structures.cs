@@ -24,6 +24,11 @@ namespace TUP.AsmResolver.PE.Writers
         public readonly WritingParameters WritingParameters;
         public MetaDataStream[] NewStreams;
 
+        public T GetStream<T>() where T : MetaDataStream
+        {
+            return NewStreams.FirstOrDefault(s => s is T) as T;
+        }
+
         public T[] GetMembers<T>(MetaDataTableType table) where T : MetaDataMember
         {
             
@@ -60,17 +65,29 @@ namespace TUP.AsmResolver.PE.Writers
         }
     }
 
-    public class MethodBodyTable
+    public class MethodBodyTable : IDisposable
     {
+        public MethodBodyTable()
+        {
+            Stream = new MemoryStream();
+            Writer = new BinaryWriter(Stream);
+        }
 	    public List<MethodBodyInfo> MethodEntries = new List<MethodBodyInfo>();
-	    
-        Stream Stream;
-        BinaryWriter Writer;
 
-        public void AppendMethodBody(ref MethodBodyInfo methodBody)
+        public MemoryStream Stream;
+        public BinaryWriter Writer;
+
+        public void AppendMethodBody(MethodBodyInfo methodBody)
         {
             methodBody.RelativeOffset = (uint)Stream.Position;
             Writer.Write(methodBody.Bytes);
+            MethodEntries.Add(methodBody);
+        }
+
+        public void Dispose()
+        {
+            Writer.Dispose();
+            Stream.Dispose();
         }
     }
 

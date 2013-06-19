@@ -8,7 +8,6 @@ namespace TUP.AsmResolver.NET.Specialized
     public class MethodReference : MemberReference, IGenericContext
     {
         internal MethodSignature signature = null;
-        internal TypeReference declaringType = null;
         internal string name = null;
 
         public MethodReference(MetaDataRow row)
@@ -23,17 +22,6 @@ namespace TUP.AsmResolver.NET.Specialized
             this.declaringType = declaringType;
         }
 
-        public override TypeReference DeclaringType
-        {
-            get
-            {
-                if (declaringType == null)
-                {
-                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out declaringType);
-                }
-                return declaringType;
-            }
-        }
 
         public override string Name
         {
@@ -122,7 +110,6 @@ namespace TUP.AsmResolver.NET.Specialized
         public override void ClearCache()
         {
             signature = null;
-            declaringType = null;
             name = null;
         }
 
@@ -130,7 +117,6 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             base.LoadCache();
             signature = Signature;
-            declaringType = DeclaringType;
             name = Name;
         }
     }

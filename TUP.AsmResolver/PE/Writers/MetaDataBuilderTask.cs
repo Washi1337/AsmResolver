@@ -25,8 +25,9 @@ namespace TUP.AsmResolver.PE.Writers
         {
             ReorderRange<TypeDefinition, FieldDefinition>(workspace, MetaDataTableType.TypeDef, MetaDataTableType.Field, 4, t => t.Fields);
             ReorderRange<TypeDefinition, MethodDefinition>(workspace, MetaDataTableType.TypeDef, MetaDataTableType.Method, 5, t => t.Methods);
-            ReorderRange<PropertyMap, PropertyDefinition>(workspace, MetaDataTableType.PropertyMap, MetaDataTableType.Property, 5, m => m.Properties);
-            ReorderRange<EventMap, EventDefinition>(workspace, MetaDataTableType.EventMap, MetaDataTableType.Event, 5, m => m.Events);
+            ReorderRange<PropertyMap, PropertyDefinition>(workspace, MetaDataTableType.PropertyMap, MetaDataTableType.Property, 1, m => m.Properties);
+            ReorderRange<EventMap, EventDefinition>(workspace, MetaDataTableType.EventMap, MetaDataTableType.Event, 1, m => m.Events);
+            ReorderRange<MethodDefinition, ParameterDefinition>(workspace, MetaDataTableType.Method, MetaDataTableType.Param, 1, m => m.Parameters);
         }
 
         private void ReorderRange<TParent, TMember>(Workspace workspace, MetaDataTableType parentTable, MetaDataTableType memberTable, int memberListIndex, Func<TParent, TMember[]> getMembersFunc)

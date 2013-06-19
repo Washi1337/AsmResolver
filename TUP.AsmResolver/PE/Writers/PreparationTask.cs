@@ -40,7 +40,7 @@ namespace TUP.AsmResolver.PE.Writers
                         Constructor.Log("Failed to read method body.", LogMessageType.Error, new ArgumentException("Invalid method RVA."));
 
                     // cache instructions.
-                    MSILInstruction[] instructions = methodDef.Body.Instructions;
+                    methodDef.Body.LoadCache();
                 }
             }
         }
