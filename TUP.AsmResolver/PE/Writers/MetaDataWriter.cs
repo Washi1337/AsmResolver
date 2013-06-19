@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using TUP.AsmResolver.NET;
@@ -8,15 +9,60 @@ using TUP.AsmResolver.NET.Specialized;
 
 namespace TUP.AsmResolver.PE.Writers
 {
-    public class MetaDataUpdater : RebuildingTask 
+    public class MetaDataWriter : RebuildingTask 
     {
-        public MetaDataUpdater(PEConstructor constructor)
+        public MetaDataWriter(PEConstructor constructor)
             : base(constructor)
         {
         }
 
         public override void RunProcedure(Workspace workspace)
         {
+            AppendHeaders(workspace);
+            UpdateMetaDataRows(workspace);
+            AppendMembers(workspace);
+        }
+
+        private void AppendHeaders(Workspace workspace)
+        {
+            TablesHeap tablesHeap = workspace.GetStream<TablesHeap>();
+
+            foreach (var keypair in workspace.Members)
+            {
+                tablesHeap.binWriter.Write(keypair.Value.Length);
+            }
+        }
+
+        private void AppendMembers(Workspace workspace)
+        {
+            TablesHeap tablesHeap = workspace.GetStream<TablesHeap>();
+            foreach (var keypair in workspace.Members)
+            {
+                foreach (MetaDataMemberInfo memberInfo in keypair.Value)
+                {
+                    AppendMetaDataRow(tablesHeap, memberInfo.Instance.MetaDataRow);
+                }
+            }
+        }
+
+        private void AppendMetaDataRow(TablesHeap tablesHeap, MetaDataRow row)
+        {
+            foreach (object part in row.Parts)
+            {
+                if (Marshal.SizeOf(part) == sizeof(uint))
+                    tablesHeap.binWriter.Write((uint)part);
+                else if (Marshal.SizeOf(part) == sizeof(ushort))
+                    tablesHeap.binWriter.Write((ushort)part);
+                else if (Marshal.SizeOf(part) == sizeof(byte))
+                    tablesHeap.binWriter.Write((byte)part);
+                else
+                    throw new ArgumentException("Invalid MetaData Row");
+            }
+        }
+
+        private void UpdateMetaDataRows(Workspace workspace)
+        {
+            TablesHeap tablesHeap = workspace.GetStream<TablesHeap>();
             foreach (var table in workspace.Members)
             {
                 foreach (MetaDataMemberInfo member in table.Value)
@@ -56,7 +102,7 @@ namespace TUP.AsmResolver.PE.Writers
                         case MetaDataTableType.ModuleRef: UpdateModuleRef(workspace, member.Instance as ModuleReference); break;
                         case MetaDataTableType.NestedClass: ; break;
                         case MetaDataTableType.Param: UpdateParamDef(workspace, member.Instance as ParameterDefinition); break;
-                        case MetaDataTableType.ParamPtr:UpdateParamPtr(workspace, member.Instance as ParamPtr); break;
+                        case MetaDataTableType.ParamPtr: UpdateParamPtr(workspace, member.Instance as ParamPtr); break;
                         case MetaDataTableType.Property: UpdatePropertyDef(workspace, member.Instance as PropertyDefinition); break;
                         case MetaDataTableType.PropertyMap: UpdatePropertyMap(workspace, member.Instance as PropertyMap); break;
                         case MetaDataTableType.PropertyPtr: UpdatePropertyPtr(workspace, member.Instance as PropertyPtr); break;
@@ -66,6 +112,7 @@ namespace TUP.AsmResolver.PE.Writers
                         case MetaDataTableType.TypeSpec: UpdateTypeSpec(workspace, member.Instance as TypeSpecification); break;
 
                     }
+
                 }
             }
         }

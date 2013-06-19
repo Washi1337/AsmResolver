@@ -99,7 +99,7 @@
     <Compile Include="PE\Writers\PEConstructor.cs" />
     <Compile Include="PE\Writers\PreparationTask.cs" />
     <Compile Include="PE\Writers\RebuildingTask.cs" />
-    <Compile Include="PE\Writers\MetaDataUpdater.cs" />
+    <Compile Include="PE\Writers\MetaDataWriter.cs" />
     <Compile Include="PE\Writers\Structures.cs" />
     <Compile Include="ReadingParameters.cs" />
     <Compile Include="NET\MetaDataTableGroup.cs" />

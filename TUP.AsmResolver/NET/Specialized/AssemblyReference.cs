@@ -64,6 +64,13 @@ namespace TUP.AsmResolver.NET.Specialized
                     );
                 return version;
             }
+            set
+            {
+                metadatarow.parts[0] = (ushort)value.Major;
+                metadatarow.parts[1] = (ushort)value.Minor;
+                metadatarow.parts[2] = (ushort)value.Build;
+                metadatarow.parts[3] = (ushort)value.Revision;
+            }
         }
 
         public virtual AssemblyAttributes Attributes

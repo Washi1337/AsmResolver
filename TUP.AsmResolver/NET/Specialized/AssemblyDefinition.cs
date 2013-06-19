@@ -47,6 +47,13 @@ namespace TUP.AsmResolver.NET.Specialized
                 Convert.ToInt32(metadatarow.parts[4])
                 );
             }
+            set
+            {
+                metadatarow.parts[1] = (ushort)value.Major;
+                metadatarow.parts[2] = (ushort)value.Minor;
+                metadatarow.parts[3] = (ushort)value.Build;
+                metadatarow.parts[4] = (ushort)value.Revision;
+            }
         }
 
         public override AssemblyAttributes Attributes
