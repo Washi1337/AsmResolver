@@ -261,7 +261,7 @@ namespace AsmResolver
                 if (j >= pattern.Length)
                     j = 0;
             }
-            GetCurrentAssembly().NETHeader.MetaDataStreams.Insert(0, new MetaDataStream("1337", bytes));
+           // GetCurrentAssembly().NETHeader.MetaDataStreams.Insert(0, new MetaDataStream("1337", bytes));
         }
 
         private void unloadApplicationToolStripMenuItem_Click(object sender, EventArgs e)

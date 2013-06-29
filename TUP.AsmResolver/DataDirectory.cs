@@ -32,22 +32,23 @@ namespace TUP.AsmResolver
             }
             
         }
+
         internal DataDirectory(DataDirectoryName name, Section targetSection, uint headerOffset, Structures.IMAGE_DATA_DIRECTORY rawDataDir)
         {
             this.name = name;
             this.headerOffset = headerOffset;
             this.rawDataDir = rawDataDir;
-            if (rawDataDir.RVA == 0)
+            if (rawDataDir.RVA == 0 || targetSection == null)
             {
                 targetOffset = new Offset(0, 0, 0);
             }
             else
             {
-                OffsetConverter converter = new OffsetConverter(targetSection);
                 this.targetOffset = Offset.FromRva(rawDataDir.RVA, targetSection.ParentAssembly);
                 this.targetSection = targetSection;
             }
         }
+
         internal uint headerOffset;
         internal Offset targetOffset;
         internal Structures.IMAGE_DATA_DIRECTORY rawDataDir;

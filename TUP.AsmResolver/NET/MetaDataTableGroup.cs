@@ -45,12 +45,8 @@ namespace TUP.AsmResolver.NET
 
         public bool TryGetMember(int codedIndex, out MetaDataMember member)
         {
-            try
-            {
-                member = GetMember(codedIndex);
-                return true;
-            }
-            catch { member = null; return false; }
+            member = GetMember(codedIndex);
+            return true;
         }
 
         public bool TryGetMember<T>(int codedIndex, out T member) where T:MetaDataMember

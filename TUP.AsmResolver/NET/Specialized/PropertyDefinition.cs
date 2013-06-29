@@ -61,7 +61,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
-                        if (semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Getter ) == MethodSemanticsAttributes.Getter)
+                        if (semantics.Association != null && semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Getter) == MethodSemanticsAttributes.Getter)
                         {
                             getmethod = semantics.Method;
                             break;
@@ -81,7 +81,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
-                        if (semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Setter) == MethodSemanticsAttributes.Setter)
+                        if (semantics.Association != null && semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Setter) == MethodSemanticsAttributes.Setter)
                         {
                             setmethod = semantics.Method;
                             break;
@@ -131,7 +131,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override TypeReference DeclaringType
         {
-            get {
+            get 
+            {
                 if (declaringType == null)
                 {
                     MetaDataTable propertyMapTable = netheader.TablesHeap.GetTable(MetaDataTableType.PropertyMap);

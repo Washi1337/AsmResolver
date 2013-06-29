@@ -66,7 +66,7 @@ Tasks:
 	
 - Calculate sizes and determine offsets
 	- Calculate sizes and relative offsets of md streams
-		- Relative offset = METADATA_HEADER offset + METADATA_HEADER size
+		- Offset relative to metadata header, comes after stream headers.
 	- Calculate method body table size
 	- Calculate data directory sizes
 	- Create PE section entries
@@ -94,8 +94,9 @@ Tasks:
 	- Write sections
 		- .text
 			- .net directory
+			- method body tables
+				- give methods correct rva.
 			- metadata dirs
-			- methdod body tables
 			- import dir
 			- Startup stub
 				- Set rva in optional header

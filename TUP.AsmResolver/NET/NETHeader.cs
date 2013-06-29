@@ -12,11 +12,10 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class NETHeader : IHeader , IDisposable , IDataDirectoryProvider, ICacheProvider
     {
-        
+
+        internal Structures.IMAGE_COR20_HEADER rawHeader;
         internal Win32Assembly assembly;
-        internal NETHeaderReader reader;
-        internal uint flags;
-        internal uint entryPointToken;
+        //internal NETHeaderReader reader;
         StringsHeap stringsheap;
         UserStringsHeap usheap;
         TablesHeap tableheap;
@@ -24,6 +23,8 @@ namespace TUP.AsmResolver.NET
         GuidHeap guidheap;
         internal TypeSystem typeSystem;
         MetaDataHeader metadata;
+        internal MetaDataStream[] streams;
+        internal uint rawOffset;
 
         /// <summary>
         /// Gets a metadata token resolver to lookup Members by its metadata token.
@@ -69,11 +70,9 @@ namespace TUP.AsmResolver.NET
             NETHeader header = new NETHeader();
             
             header.assembly = assembly;
-            header.reader = new NETHeaderReader(assembly.ntHeader, header);
-            header.metadata = new MetaDataHeader(header.reader);
-            header.reader.LoadData();
-            header.flags = header.reader.netHeader.Flags;
-            header.entryPointToken = header.reader.netHeader.EntryPointToken;
+            NETHeaderReader reader = new NETHeaderReader(assembly.ntHeader, header);
+            header.metadata = new MetaDataHeader(reader);
+            reader.LoadData();
             header.TokenResolver = new MetaDataTokenResolver(header);
             return header;
             
@@ -85,7 +84,7 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public uint EntryPointToken
         {
-            get { return entryPointToken; }
+            get { return rawHeader.EntryPointToken; }
         }
 
         /// <summary>
@@ -93,13 +92,13 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public NETHeaderFlags Flags
         {
-            get { return (NETHeaderFlags)flags; }
+            get { return (NETHeaderFlags)rawHeader.Flags; }
             set
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_COR20_HEADER)][4];
                 assembly.peImage.SetOffset(targetoffset);
                 assembly.peImage.Writer.Write((uint)value);
-                flags = (uint)value;
+                rawHeader.Flags = (uint)value;
             }
         }
 
@@ -114,9 +113,9 @@ namespace TUP.AsmResolver.NET
         /// <summary>
         /// Gets the metadata streams in an array.
         /// </summary>
-        public List<MetaDataStream> MetaDataStreams
+        public MetaDataStream[] MetaDataStreams
         {
-            get { return reader.metadatastreams; }
+            get { return streams; }
         }
 
         /// <summary>
@@ -205,7 +204,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                return reader.netHeaderOffset;
+                return rawOffset;
             }
         }
 
@@ -216,7 +215,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                if (MetaDataStreams == null || MetaDataStreams.Count == 0)
+                if (MetaDataStreams == null || MetaDataStreams.Length == 0)
                     return false;
                 if (!HasStream("#~") && !HasStream("#-"))
                     return false;
@@ -234,7 +233,7 @@ namespace TUP.AsmResolver.NET
         /// <returns></returns>
         public bool HasStream(string name)
         {
-            if (MetaDataStreams == null || MetaDataStreams.Count == 0)
+            if (MetaDataStreams == null || MetaDataStreams.Length == 0)
                 return false;
             return (MetaDataStreams.FirstOrDefault(s => s.name == name) != null);
         }

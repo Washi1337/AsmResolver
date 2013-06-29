@@ -168,7 +168,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics methodSem = member as MethodSemantics;
-                        if (methodSem.Method.metadatatoken == this.metadatatoken)
+                        if (methodSem.Method != null && methodSem.Method.metadatatoken == this.metadatatoken)
                         {
                             semantics = methodSem;
                             break;

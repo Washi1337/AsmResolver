@@ -11,24 +11,23 @@ namespace TUP.AsmResolver.PE.Readers
     internal unsafe class NETHeaderReader
     {
         internal NTHeader ntHeader;
-        internal Structures.IMAGE_COR20_HEADER netHeader;
+        internal NETHeader parent;
         internal Structures.METADATA_HEADER_1 metadataHeader1;
         internal Structures.METADATA_HEADER_2 metadataHeader2;
         internal string metadataVersionString;
-        internal List<MetaDataStream> metadatastreams = new List<MetaDataStream>();
         internal uint metadataFileOffset;
         internal uint metadataRva;
         internal uint metadataStreamOffset;
-        internal uint netHeaderOffset;
 
         PeImage image;
         OffsetConverter offsetConverter;
 
         internal NETHeaderReader(NTHeader header, NETHeader parent)
         {
-                header.assembly.netHeader = parent;
-                image = header.assembly.peImage;
-                this.ntHeader = header;
+            this.parent = parent;
+            header.assembly.netHeader = parent;
+            image = header.assembly.peImage;
+            this.ntHeader = header;
             
         }
 
@@ -40,10 +39,10 @@ namespace TUP.AsmResolver.PE.Readers
 
                 image.Stream.Seek(ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Clr].targetOffset.FileOffset, SeekOrigin.Begin);
 
-                netHeaderOffset = (uint)image.Position;
-                netHeader = image.ReadStructure<Structures.IMAGE_COR20_HEADER>();
+                parent.rawOffset = (uint)image.Position;
+                parent.rawHeader = image.ReadStructure<Structures.IMAGE_COR20_HEADER>();
 
-                Section targetsection = Section.GetSectionByFileOffset(ntHeader.Sections, netHeaderOffset);
+                Section targetsection = Section.GetSectionByFileOffset(ntHeader.Sections, parent.rawOffset);
                 offsetConverter = new OffsetConverter(targetsection);
 
                 LoadDirectories();
@@ -61,13 +60,13 @@ namespace TUP.AsmResolver.PE.Readers
         void ConstructDirectories()
         {
             ntHeader.assembly.netHeader.DataDirectories = new DataDirectory[] {
-             new DataDirectory(DataDirectoryName.NETMetadata, offsetConverter.TargetSection, 0, netHeader.MetaData),
-             new DataDirectory(DataDirectoryName.NETResource, offsetConverter.TargetSection, 0, netHeader.Resources),
-             new DataDirectory(DataDirectoryName.NETStrongName, offsetConverter.TargetSection, 0, netHeader.StrongNameSignature),
-             new DataDirectory(DataDirectoryName.NETCodeManager, offsetConverter.TargetSection, 0, netHeader.CodeManagerTable),
-             new DataDirectory(DataDirectoryName.NETVTableFixups, offsetConverter.TargetSection, 0, netHeader.VTableFixups),
-             new DataDirectory(DataDirectoryName.NETExport, offsetConverter.TargetSection, 0, netHeader.ExportAddressTableJumps),
-             new DataDirectory(DataDirectoryName.NETNativeHeader, offsetConverter.TargetSection, 0, netHeader.ManagedNativeHeader),
+             new DataDirectory(DataDirectoryName.NETMetadata, offsetConverter.TargetSection, 0, parent.rawHeader.MetaData),
+             new DataDirectory(DataDirectoryName.NETResource, offsetConverter.TargetSection, 0, parent.rawHeader.Resources),
+             new DataDirectory(DataDirectoryName.NETStrongName, offsetConverter.TargetSection, 0, parent.rawHeader.StrongNameSignature),
+             new DataDirectory(DataDirectoryName.NETCodeManager, offsetConverter.TargetSection, 0, parent.rawHeader.CodeManagerTable),
+             new DataDirectory(DataDirectoryName.NETVTableFixups, offsetConverter.TargetSection, 0, parent.rawHeader.VTableFixups),
+             new DataDirectory(DataDirectoryName.NETExport, offsetConverter.TargetSection, 0, parent.rawHeader.ExportAddressTableJumps),
+             new DataDirectory(DataDirectoryName.NETNativeHeader, offsetConverter.TargetSection, 0, parent.rawHeader.ManagedNativeHeader),
             };
 
        }
@@ -75,7 +74,7 @@ namespace TUP.AsmResolver.PE.Readers
         void LoadMetaData()
         {
 
-            metadataRva = netHeader.MetaData.RVA;
+            metadataRva = parent.rawHeader.MetaData.RVA;
             Section section = Section.GetSectionByRva(ntHeader.assembly, metadataRva);
             offsetConverter = new OffsetConverter(section);
             metadataFileOffset = offsetConverter.RvaToFileOffset(metadataRva);//= (uint)new CodeOffsetConverter(header.oheader).RVirtualToFileOffset((int)metadatavirtualoffset);
@@ -94,6 +93,7 @@ namespace TUP.AsmResolver.PE.Readers
         void LoadMetaDataStreams()
         {
             int add = 0;
+            parent.streams = new MetaDataStream[metadataHeader2.NumberOfStreams];
             for (int i = 0; i < metadataHeader2.NumberOfStreams; i++)
             {
                 long offset = metadataStreamOffset + add + (i * 4);
@@ -109,12 +109,12 @@ namespace TUP.AsmResolver.PE.Readers
                     add += 12;
                 else
                     add += 8;
-  
-                metadatastreams.Add(GetHeap(ntHeader.assembly.netHeader, (int)offset, streamHeader, name));
+
+                parent.streams[i] = GetHeap(ntHeader.assembly.netHeader, (int)offset, streamHeader, name);
 
             }
 
-            foreach (MetaDataStream stream in metadatastreams)
+            foreach (MetaDataStream stream in parent.streams)
                 stream.Initialize();
 
         }

@@ -96,6 +96,7 @@
     <Compile Include="OffsetConverter.cs" />
     <Compile Include="PE\Writers\MetaDataBuilderTask.cs" />
     <Compile Include="PE\Writers\MsilMethodBuilder.cs" />
+    <Compile Include="PE\Writers\OffsetSizeCalculator.cs" />
     <Compile Include="PE\Writers\PEConstructor.cs" />
     <Compile Include="PE\Writers\PreparationTask.cs" />
     <Compile Include="PE\Writers\RebuildingTask.cs" />
@@ -227,6 +228,9 @@
   <ItemGroup>
     <Content Include="ASM\Notes.txt" />
     <Content Include="PE\Writers\Notes.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PE\Writers\Plan .NET Rebuilder" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

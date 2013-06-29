@@ -79,10 +79,10 @@ namespace TUP.AsmResolver.PE.Writers
         private void ClearAllStreams(NETHeader netHeader,  Workspace workspace)
         {
             Constructor.Log("Clearing .NET metadata streams.");
-            workspace.NewStreams = CloneArray(netHeader.MetaDataStreams.ToArray());
-            for (int i = 0; i < workspace.NewStreams.Length; i++)
+            workspace.NewNetHeader.streams = CloneArray(netHeader.MetaDataStreams.ToArray());
+            for (int i = 0; i < workspace.NewNetHeader.MetaDataStreams.Length; i++)
             {
-                workspace.NewStreams[i].MakeEmpty();
+                workspace.NewNetHeader.MetaDataStreams[i].MakeEmpty();
             }
         }
 

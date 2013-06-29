@@ -16,17 +16,19 @@ namespace TUP.AsmResolver.PE.Writers
             WritingParameters = writingParameters;
             Members = new Dictionary<MetaDataTableType, MetaDataMemberInfo[]>();
             MethodBodyTable = new MethodBodyTable();
-            
+            NewDataDirectories = new DataDirectory[16];
+            NewNetHeader = new NETHeader();
         }
 
         public Dictionary<MetaDataTableType, MetaDataMemberInfo[]> Members;
         public MethodBodyTable MethodBodyTable;
         public readonly WritingParameters WritingParameters;
-        public MetaDataStream[] NewStreams;
+        public DataDirectory[] NewDataDirectories;
+        public NETHeader NewNetHeader;
 
         public T GetStream<T>() where T : MetaDataStream
         {
-            return NewStreams.FirstOrDefault(s => s is T) as T;
+            return NewNetHeader.MetaDataStreams.FirstOrDefault(s => s is T) as T;
         }
 
         public T[] GetMembers<T>(MetaDataTableType table) where T : MetaDataMember
