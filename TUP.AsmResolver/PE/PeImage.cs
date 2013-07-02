@@ -190,7 +190,7 @@ namespace TUP.AsmResolver.PE
 
         public bool ContainsOffset(long offset)
         {
-            return (offset < 0 || offset > Stream.Length);
+            return (offset >= 0 && offset < Stream.Length);
         }
 
         public void Dispose()

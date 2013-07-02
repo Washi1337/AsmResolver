@@ -45,7 +45,24 @@ namespace TUP.AsmResolver.NET
 
         public bool TryGetMember(int codedIndex, out MetaDataMember member)
         {
-            member = GetMember(codedIndex);
+            member = null;
+            if (codedIndex == 0)
+                return false;
+
+            int tableindex = 0;
+            for (int i = tables.Length - 1; i > 0; i--)
+                if ((codedIndex & i) == i)
+                {
+                    tableindex = i;
+                    break;
+                }
+
+            int rowindex = codedIndex >> bits;
+
+            if (rowindex == 0)
+                return false;
+
+            member = tables[tableindex].Members[rowindex - 1];
             return true;
         }
 
@@ -64,23 +81,14 @@ namespace TUP.AsmResolver.NET
         
         public MetaDataMember GetMember(int codedIndex)
         {
-            if (codedIndex == 0)
-                throw new ArgumentException("Cannot resolve a member from a zero metadata token", "token");
-
-            int tableindex = 0;
-            for (int i = tables.Length-1; i > 0 ;i--)
-                if ((codedIndex & i) == i)
-                {
-                    tableindex = i;
-                    break;
-                }
-
-            int rowindex = codedIndex >> bits;
-
-            if (rowindex == 0)
-                throw new ArgumentException("Cannot resolve a member from a zero metadata token", "token");
-
-            return tables[tableindex].Members[rowindex - 1];
+            MetaDataMember member;
+            if (!TryGetMember(codedIndex, out member))
+            {
+                if (codedIndex == 0)
+                    throw new ArgumentException("Cannot resolve a member from a zero coded index.");
+                throw new ArgumentException("Invalid coded index.");
+            }
+            return member;
         }
 
         public uint GetCodedIndex(MetaDataMember member)
