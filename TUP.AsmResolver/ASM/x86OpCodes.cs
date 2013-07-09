@@ -301,7 +301,7 @@ namespace TUP.AsmResolver.ASM
         public static readonly x86OpCode Lsd_Eax_FwordPtr          = new x86OpCode("LSD EAX,", new byte[] {0xC5,0x0},0, x86OperandType.Register32, 1);
 
         public static readonly x86OpCode Mov_BytePtr_Byte          = new x86OpCode("MOV", new byte[] { 0xC6, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
-        public static readonly x86OpCode Mov_DwordPtr_Esp_Dword    = new x86OpCode("MOV DWORD PTR [ESP],", new byte[] { 0xC7, 0x4, 0x24 }, 4, x86OperandType.Dword);
+        //public static readonly x86OpCode Mov_DwordPtr_Esp_Dword    = new x86OpCode("MOV DWORD PTR [ESP],", new byte[] { 0xC7, 0x4, 0x24 }, 4, x86OperandType.Dword);
         public static readonly x86OpCode Mov_DwordPtr_Dword        = new x86OpCode("MOV", new byte[] { 0xC7, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
 
         public static readonly x86OpCode Enter                     = new x86OpCode("ENTER", new byte[] {0xC8},6,x86OperandType.WordAndByte);
@@ -413,8 +413,8 @@ namespace TUP.AsmResolver.ASM
 
        
         /* 0xFE group */
-        public static readonly x86OpCode Inc_BytePtr               = new x86OpCode("INC", new byte[] { 0xFE, 0x0 }, 0, x86OperandType.Register32);
-        public static readonly x86OpCode Dec_BytePtr               = new x86OpCode("DEC", new byte[] { 0xFE, 0x8 }, 0, x86OperandType.Register32);
+        public static readonly x86OpCode Inc_BytePtr               = new x86OpCode("INC", new byte[] { 0xFE, 0x0 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Dec_BytePtr               = new x86OpCode("DEC", new byte[] { 0xFE, 0x8 }, 0, x86OperandType.Register32, 1);
 
 
         /* 0xFF group */

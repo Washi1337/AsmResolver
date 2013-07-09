@@ -255,6 +255,7 @@ namespace TUP.AsmResolver.ASM
         private void ProcessOperandBytes(ref x86Instruction instruction)
         {
             uint nextOffset = (uint)(instruction.Offset.FileOffset + instruction.Size);
+            
             Operand operandValue = null;
             switch (instruction.OpCode.GetNormalOperandType())
             {
@@ -376,7 +377,7 @@ namespace TUP.AsmResolver.ASM
                 }
                 registerValueType = OperandType.DwordPointer;
                 instruction.operandbytes = new byte[] { reader.ReadByte() };
-                instruction.OpCode.operandlength = 1;
+                instruction.OpCode.operandlength++;
                 addition = ASMGlobals.ByteToSByte(instruction.operandbytes[0]);
             }
             else if (registerstoken >= 0x80 && registerstoken < 0xC0)
@@ -389,7 +390,7 @@ namespace TUP.AsmResolver.ASM
                 }
                 registerValueType = OperandType.DwordPointer;
                 instruction.operandbytes = reader.ReadBytes(4);
-                instruction.OpCode.operandlength = 4;
+                instruction.OpCode.operandlength += 4;
                 addition = BitConverter.ToInt32(instruction.operandbytes, 0);
             }
             else if (registerstoken >= 0xC0 && registerstoken <= 0xFF)
