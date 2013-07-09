@@ -180,14 +180,14 @@ namespace TUP.AsmResolver.ASM
 
 
         /* 0x80 group */
-        public static readonly x86OpCode Add_r32_Byte              = new x86OpCode("ADD", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
-        public static readonly x86OpCode Or_r32_Byte               = new x86OpCode("OR", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
-        public static readonly x86OpCode Adc_r32_Byte              = new x86OpCode("ADC", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
-        public static readonly x86OpCode Ssb_r32_Byte              = new x86OpCode("SSB", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
-        public static readonly x86OpCode And_r32_Byte              = new x86OpCode("AND", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
-        public static readonly x86OpCode Sub_r32_Byte              = new x86OpCode("SUB", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
-        public static readonly x86OpCode Xor_r32_Byte              = new x86OpCode("XOR", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
-        public static readonly x86OpCode Cmp_r32_Byte              = new x86OpCode("CMP", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Add_r32_Byte              = new x86OpCode("ADD", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32Or8 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Or_r32_Byte               = new x86OpCode("OR", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32Or8 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Adc_r32_Byte              = new x86OpCode("ADC", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32Or8 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Ssb_r32_Byte              = new x86OpCode("SSB", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32Or8 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode And_r32_Byte              = new x86OpCode("AND", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32Or8 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Sub_r32_Byte              = new x86OpCode("SUB", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32Or8 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Xor_r32_Byte              = new x86OpCode("XOR", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32Or8 | x86OperandType.Byte, 1);
+        public static readonly x86OpCode Cmp_r32_Byte              = new x86OpCode("CMP", new byte[] { 0x80, 0x0 }, 1, x86OperandType.Register32Or8 | x86OperandType.Byte, 1);
 
         /* 0x81 group */
         public static readonly x86OpCode Add_r32BytePtr_Dword      = new x86OpCode("ADD", new byte[] { 0x81, 0x0 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
@@ -402,8 +402,18 @@ namespace TUP.AsmResolver.ASM
         public static readonly x86OpCode Cmc                       = new x86OpCode("CMC", new byte[] {0xF5},0, x86OperandType.None);
 
         /* 0xF6 */
-        /* 0xF7 */        
-        
+
+        /* 0xF7 group */
+        public static readonly x86OpCode Test_r32_Dword            = new x86OpCode("TEST", new byte[] { 0xF7, 0x00 }, 4, x86OperandType.Register32 | x86OperandType.Dword, 1);
+        internal static readonly x86OpCode __INVALID_F7            = new x86OpCode("DB F7", new byte[] { 0xF7 }, 0, x86OperandType.None) { _isValid = false };
+        public static readonly x86OpCode Not_r32                   = new x86OpCode("NOT", new byte[] { 0xF7, 0x10 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Neg_r32                   = new x86OpCode("NEG", new byte[] { 0xF7, 0x18 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Mul_r32                   = new x86OpCode("MUL", new byte[] { 0xF7, 0x20 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode IMul_r32                  = new x86OpCode("IMUL", new byte[] { 0xF7, 0x28 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode Div_r32                   = new x86OpCode("DIV", new byte[] { 0xF7, 0x30 }, 0, x86OperandType.Register32, 1);
+        public static readonly x86OpCode IDiv_r32                  = new x86OpCode("IDIV", new byte[] { 0xF7, 0x38 }, 0, x86OperandType.Register32, 1);
+
+
         public static readonly x86OpCode Clc                       = new x86OpCode("HLT", new byte[] {0xF8},0, x86OperandType.None);
         public static readonly x86OpCode Stc                       = new x86OpCode("CMC", new byte[] {0xF9},0, x86OperandType.None);
         public static readonly x86OpCode Cli                       = new x86OpCode("CLI", new byte[] {0xFA},0, x86OperandType.None);

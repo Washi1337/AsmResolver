@@ -140,7 +140,7 @@ namespace TUP.AsmResolver.ASM
         {
             get
             {
-                return OpCode.opcodebytes.Length + OpCode.operandlength;
+                return OpCode._opcodeBytes.Length + OpCode._operandLength;
             }
         }
 
@@ -219,7 +219,7 @@ namespace TUP.AsmResolver.ASM
                     operandbytes = new byte[] { (byte)difference };
                     break;
                 case x86OperandType.Register32:
-                    code.opcodebytes[code.variableByteIndex] += (byte)(x86Register)operand1.Value;
+                    code._opcodeBytes[code._variableByteIndex] += (byte)(x86Register)operand1.Value;
                     break;
                 default:
                     throw new NotImplementedException("The instruction bytes could not be created because the operand type is not supported yet.");

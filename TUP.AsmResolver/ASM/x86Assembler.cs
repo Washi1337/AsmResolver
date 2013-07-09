@@ -51,7 +51,7 @@ namespace TUP.AsmResolver.ASM
                 NOPS[i] = 0x90;
 
             image.SetOffset(targetOffset);
-            image.Writer.Write(newInstruction.OpCode.opcodebytes);
+            image.Writer.Write(newInstruction.OpCode._opcodeBytes);
             if (newInstruction.operandbytes != null)
                 image.Writer.Write(newInstruction.operandbytes);
             image.Writer.Write(NOPS);

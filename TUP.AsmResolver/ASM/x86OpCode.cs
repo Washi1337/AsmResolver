@@ -12,49 +12,38 @@ namespace TUP.AsmResolver.ASM
     /// </summary>
     public class x86OpCode
     {
-
-        #region Constructors
-
-
         internal x86OpCode()
         {
         }
+
         internal x86OpCode(string name, byte[] opcodebytes, int operandlength, x86OperandType type)
         {
-            this.name = name;
-            this.originalbytes = opcodebytes;
-            this.opcodebytes = opcodebytes;
-            this.operandtype = type;
-            this.operandlength = operandlength;
-            variableByteIndex = -1;
+            this._name = name;
+            this._originalBytes = opcodebytes;
+            this._opcodeBytes = opcodebytes;
+            this._operandType = type;
+            this._operandLength = operandlength;
+            _variableByteIndex = -1;
         }
+
         internal x86OpCode(string name, byte[] opcodebytes, int operandlength, x86OperandType type, int variableByteIndex)
         {
-            this.name = name;
-            this.originalbytes = opcodebytes;
-            this.opcodebytes = opcodebytes;
-            this.operandtype = type;
-            this.operandlength = operandlength;
-            this.variableByteIndex = variableByteIndex;
+            this._name = name;
+            this._originalBytes = opcodebytes;
+            this._opcodeBytes = opcodebytes;
+            this._operandType = type;
+            this._operandLength = operandlength;
+            this._variableByteIndex = variableByteIndex;
             
         }
 
-
-        #endregion
-
-        #region vars
-     
-
-        internal string name;
-        internal byte[] opcodebytes;
-        internal byte[] originalbytes;
-        internal x86OperandType operandtype;
-        internal int operandlength;
-        internal int variableByteIndex;
-        
-        #endregion
-
-        #region Properties
+        internal string _name;
+        internal byte[] _opcodeBytes;
+        internal byte[] _originalBytes;
+        internal x86OperandType _operandType;
+        internal int _operandLength;
+        internal int _variableByteIndex;
+        internal bool _isValid;
 
         /// <summary>
         /// Gets the assembly opcode name.
@@ -63,11 +52,11 @@ namespace TUP.AsmResolver.ASM
         {
             get
             {
-                return name;
+                return _name;
             }
             internal set
             {
-                name = value;
+                _name = value;
             }
         }
 
@@ -76,7 +65,7 @@ namespace TUP.AsmResolver.ASM
         /// </summary>
         public byte[] OpCodeBytes
         {
-            get { return opcodebytes; }
+            get { return _opcodeBytes; }
         }
         
         /// <summary>
@@ -84,7 +73,7 @@ namespace TUP.AsmResolver.ASM
         /// </summary>
         public int OperandLength
         {
-            get { return operandlength; }
+            get { return _operandLength; }
         }
 
         /// <summary>
@@ -94,14 +83,17 @@ namespace TUP.AsmResolver.ASM
         {
             get
             {
-                return operandtype;
+                return _operandType;
             }
         }
 
-        #endregion
-
-        #region Methods
-        
+        public bool IsValid
+        {
+            get
+            {
+                return _isValid;
+            }
+        }
 
         /// <summary>
         /// Returns the opcode string.
@@ -112,7 +104,7 @@ namespace TUP.AsmResolver.ASM
             //System.Diagnostics.Debugger.Launch();
             //if (Name.Contains("ADD %"))
             //    System.Diagnostics.Debugger.Break();
-            string res = name;
+            string res = _name;
 
             
 
@@ -126,19 +118,19 @@ namespace TUP.AsmResolver.ASM
         /// <returns></returns>
         public bool IsBasedOn(x86OpCode code)
         {
-            return code.originalbytes == this.originalbytes;
+            return code._originalBytes == this._originalBytes;
         }
 
         internal static x86OpCode Create(x86OpCode code)
         {
             // copies an opcode. we don't want to change the opcode bytes of the list.
             x86OpCode newCode = new x86OpCode();
-            newCode.name = code.name;
-            newCode.originalbytes = code.originalbytes;
-            newCode.opcodebytes = code.opcodebytes;
-            newCode.operandtype = code.operandtype;
-            newCode.operandlength = code.operandlength;
-            newCode.variableByteIndex = code.variableByteIndex;
+            newCode._name = code._name;
+            newCode._originalBytes = code._originalBytes;
+            newCode._opcodeBytes = code._opcodeBytes;
+            newCode._operandType = code._operandType;
+            newCode._operandLength = code._operandLength;
+            newCode._variableByteIndex = code._variableByteIndex;
             return newCode;
         }
 
@@ -146,15 +138,16 @@ namespace TUP.AsmResolver.ASM
         {
             return OperandType & x86OperandType.NormalOperandMask;
         }
+
         public x86OperandType GetRegisterOperandType()
         {
             return OperandType & x86OperandType.RegisterOperandMask;
         }
+
         public x86OperandType GetOverrideOperandType()
         {
             return OperandType & x86OperandType.OverridingOperandMask;
         }
-        #endregion
 
     }
 
