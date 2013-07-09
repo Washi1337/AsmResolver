@@ -223,7 +223,7 @@ namespace AsmResolver
             uint index = (member.MetaDataToken | ((uint)0xFF << 24)) - ((uint)0xFF << 24);
             try
             {
-                node.Text = index + (member is MemberReference ? " (" + (member as MemberReference).Name + ")" : "");
+                node.Text = string.Format("{0} ({1})", index, (member is MemberReference ? (member as MemberReference).Name : member.ToString()));
             }
             catch { node.Text = index.ToString(); }
             index++;
