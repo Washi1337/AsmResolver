@@ -71,7 +71,7 @@ Tasks:
 	- Calculate data directory sizes
 	- Create PE section entries
 		- .text
-			- Size = .net directory + metadata dirs + methodbody tables size + import dir
+			- Size = .net directory + metadata dirs + methodbody tables size + import dir + startup stub
 		- .rsrc & .reloc
 			- Keep same
 	- Set PE section offsets and virtual offsets

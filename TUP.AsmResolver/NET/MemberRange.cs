@@ -17,7 +17,14 @@ namespace TUP.AsmResolver.NET
         public static MemberRange<T> CreateRange<T>(MetaDataMember member, int mdrowIndex, MetaDataTable targetTable) where T : MetaDataMember
         {
             MemberRange<T> range = new MemberRange<T>();
-            range.Start = Convert.ToInt32(member.MetaDataRow.Parts[mdrowIndex]) - 1; 
+            range.Start = Convert.ToInt32(member.MetaDataRow.Parts[mdrowIndex]) - 1;
+
+            if (targetTable == null)
+            {
+                range.Length = 0;
+                return range;
+            }
+
             range.TargetTable = targetTable;
 
             int memberIndex = (int)(member.metadatatoken | (0xFF << 24)) - (0xFF << 24);
@@ -27,15 +34,21 @@ namespace TUP.AsmResolver.NET
                     range.Length = targetTable.AmountOfRows - range.Start;
                 else
                 {
-                    int nextIndex = Convert.ToInt32(member.Table.Members[memberIndex].MetaDataRow.parts[mdrowIndex]) - 1;
+                    int nextIndex = Convert.ToInt32(member.Table.Members[memberIndex].MetaDataRow.Parts[mdrowIndex]) - 1;
                     range.Length = nextIndex - range.Start;
                 }
             }
+
             if (range.Length > targetTable.AmountOfRows - range.Start)
                 range.Length = 0;
 
             return range;
 
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{{Table={0}, Start={1}, Length={2}}}", TargetTable.Type, Start, Length);
         }
     }
 

@@ -62,7 +62,7 @@ namespace TUP.AsmResolver.NET
 
             int rowindex = codedIndex >> bits;
 
-            if (rowindex == 0 || rowindex >= tables[tableindex].AmountOfRows)
+            if (rowindex == 0 || rowindex > tables[tableindex].AmountOfRows)
                 return false;
 
             member = tables[tableindex].Members[rowindex - 1];
@@ -72,8 +72,7 @@ namespace TUP.AsmResolver.NET
         public bool TryGetMember<T>(int codedIndex, out T member) where T:MetaDataMember
         {
             MetaDataMember uncastedMember;
-            bool result = TryGetMember(codedIndex, out uncastedMember);
-            if (uncastedMember is T)
+            if (TryGetMember(codedIndex, out uncastedMember) && uncastedMember is T)
             {
                 member = uncastedMember as T;
                 return true;

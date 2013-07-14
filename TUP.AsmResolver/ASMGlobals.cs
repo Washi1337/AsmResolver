@@ -7,7 +7,7 @@ using System.Text;
 using TUP.AsmResolver.PE;
 namespace TUP.AsmResolver
 {
-    class ASMGlobals
+    internal static class ASMGlobals
     {
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -44,6 +44,11 @@ namespace TUP.AsmResolver
             Marshal.Copy(buffer, rawDatas, 0, rawSize);
             Marshal.FreeHGlobal(buffer);
             writer.Write(rawDatas);
+        }
+
+        internal static void WriteStructure(this BinaryWriter writer, object structure)
+        {
+            WriteStructureToWriter(writer, structure);
         }
 
         internal static bool IsEmptyStructure(object structure)

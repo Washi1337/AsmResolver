@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -18,6 +19,9 @@ namespace TUP.AsmResolver.PE.Writers
         public override void RunProcedure(Workspace workspace)
         {
             UpdateStreamHeaders(workspace);
+            ConstructNetDirectories(workspace.NewNetHeader);
+            ConstructNativeDirectories(workspace);
+
         }
 
         private void UpdateStreamHeaders(Workspace workspace)
@@ -99,7 +103,32 @@ namespace TUP.AsmResolver.PE.Writers
         private void ConstructNativeDirectories(Workspace workspace)
         {
             workspace.NewDataDirectories = new DataDirectory[16];
-          //  workspace.NewDataDirectories[
+
+            var originalDirectories = Constructor.OriginalAssembly.NTHeader.OptionalHeader.DataDirectories;
+            for (int i = 0; i < originalDirectories.Length; i++)
+            {
+                workspace.NewDataDirectories[i] = new DataDirectory(originalDirectories[i].Name, default(Section), 0, originalDirectories[i].rawDataDir);
+            }
+
+            workspace.NewDataDirectories[(int)DataDirectoryName.Clr].rawDataDir.Size = workspace.NewNetHeader.rawHeader.cb;
+
+        }
+
+        private void ConstructPeSections(Workspace workspace)
+        {
+            Section textSection = CreateTextSection(workspace);
+            Section[] sections = new Section[3]
+            {
+                textSection,
+                Section.GetSectionByName(Constructor.OriginalAssembly, ".rsrc"),
+                Section.GetSectionByName(Constructor.OriginalAssembly, ".reloc"),
+            };
+
+        }
+
+        private Section CreateTextSection(Workspace workspace)
+        {
+            return null; //temp
         }
 
         public int Align(int number, int align)

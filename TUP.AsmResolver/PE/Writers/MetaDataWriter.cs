@@ -47,7 +47,7 @@ namespace TUP.AsmResolver.PE.Writers
 
         private void AppendMetaDataRow(TablesHeap tablesHeap, MetaDataRow row)
         {
-            foreach (object part in row.Parts)
+            foreach (var part in row.Parts)
             {
                 if (Marshal.SizeOf(part) == sizeof(uint))
                     tablesHeap.binWriter.Write((uint)part);
