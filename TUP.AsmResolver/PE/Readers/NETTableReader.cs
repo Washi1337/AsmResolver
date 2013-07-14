@@ -370,7 +370,7 @@ namespace TUP.AsmResolver.PE.Readers
         internal MetaDataRow ReadRow(byte[] parts)
         {
             MetaDataRow row = new MetaDataRow();
-            row.parts = new object[parts.Length];
+            row.parts = new ValueType[parts.Length];
 
             row.offset = (uint)(reader.BaseStream.Position + tablesHeap.StreamOffset);
             

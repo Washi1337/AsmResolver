@@ -57,9 +57,12 @@ namespace TUP.AsmResolver.NET
                     break;
                 }
 
+            if (tableindex >= tables.Length)
+                return false;
+
             int rowindex = codedIndex >> bits;
 
-            if (rowindex == 0)
+            if (rowindex == 0 || rowindex >= tables[tableindex].AmountOfRows)
                 return false;
 
             member = tables[tableindex].Members[rowindex - 1];

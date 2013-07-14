@@ -117,33 +117,33 @@ namespace TUP.AsmResolver.PE.Writers
             }
         }
 
-        private object GetHeapOffset(MetaDataStream stream, uint index)
+        private ValueType GetHeapOffset(MetaDataStream stream, uint index)
         {
             if (stream.IndexSize == 4)
                 return index;
             return (ushort)index;
         }
 
-        private object GetStringIndex(Workspace workspace, string str)
+        private ValueType GetStringIndex(Workspace workspace, string str)
         {
             StringsHeap stringsHeap = workspace.GetStream<StringsHeap>();
             return GetHeapOffset(stringsHeap, stringsHeap.GetStringOffset(str));
         }
 
-        private object GetGuidIndex(Workspace workspace, Guid guid)
+        private ValueType GetGuidIndex(Workspace workspace, Guid guid)
         {
             GuidHeap guidHeap = workspace.GetStream<GuidHeap>();
             return GetHeapOffset(guidHeap, guidHeap.GetGuidOffset(guid));
         }
 
-        private object GetMemberIndex(Workspace workspace, MetaDataMember member)
+        private ValueType GetMemberIndex(Workspace workspace, MetaDataMember member)
         {
             if (member.Table.IsLarge(0))
                 return member.TableIndex;
             return (ushort)member.TableIndex;
         }
 
-        private object GetMemberIndex(Workspace workspace, MetaDataTableGroup group, MetaDataMember member)
+        private ValueType GetMemberIndex(Workspace workspace, MetaDataTableGroup group, MetaDataMember member)
         {
             if (group.IsLarge)
                 return group.GetCodedIndex(member);

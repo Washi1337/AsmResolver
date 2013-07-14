@@ -171,7 +171,7 @@ namespace AsmResolver
         {
             try
             {
-                object[] parts = new object[dataGridView.Rows.Count];
+                ValueType[] parts = new ValueType[dataGridView.Rows.Count];
                 for (int i = 0; i < dataGridView.Rows.Count; i++)
                 {
                     DataGridViewRow row = dataGridView.Rows[i];

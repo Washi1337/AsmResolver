@@ -53,9 +53,9 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public object ProcessPartType(int partindex, object value)
+        public ValueType ProcessPartType(int partindex, object value)
         {
-            return Convert.ChangeType(value, metadatarow.parts[partindex].GetType());
+            return Convert.ChangeType(value, metadatarow.parts[partindex].GetType()) as ValueType;
         }
 
         public bool HasImage

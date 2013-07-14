@@ -13,19 +13,19 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class MetaDataRow
     {
-        internal object[] parts;
+        internal ValueType[] parts;
         internal uint offset;
 
         public MetaDataRow()
         {
         }
 
-        public MetaDataRow(params object[] parts)
+        public MetaDataRow(params ValueType[] parts)
         {
             this.parts = parts;
         }
 
-        public MetaDataRow(uint offset, params object[] parts)
+        public MetaDataRow(uint offset, params ValueType[] parts)
         {
             this.offset = offset;
             this.parts = parts;
@@ -42,7 +42,7 @@ namespace TUP.AsmResolver.NET
         /// <summary>
         /// Gets the parts in array format.
         /// </summary>
-        public object[] Parts
+        public ValueType[] Parts
         { 
            get 
            { 
@@ -82,6 +82,27 @@ namespace TUP.AsmResolver.NET
                 }
                 return stream.ToArray();
             }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append("{");
+
+            if (parts == null || parts.Length == 0)
+            {
+                builder.Append("<empty>");
+            }
+            else
+            {
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    builder.Append(string.Format("{0:X}{1}", parts[i], i == parts.Length - 1 ? "" : ", "));
+                }
+            }
+
+            builder.Append("}");
+            return builder.ToString();
         }
     }
 }

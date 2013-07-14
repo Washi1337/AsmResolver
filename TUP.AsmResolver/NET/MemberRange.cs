@@ -20,15 +20,14 @@ namespace TUP.AsmResolver.NET
             range.Start = Convert.ToInt32(member.MetaDataRow.Parts[mdrowIndex]) - 1; 
             range.TargetTable = targetTable;
 
-            MetaDataTable currentTable = member.NETHeader.TablesHeap.GetTable(member.TableType, false);
             int memberIndex = (int)(member.metadatatoken | (0xFF << 24)) - (0xFF << 24);
-            if (currentTable != null)
+            if (member.Table != null)
             {
-                if (memberIndex == currentTable.AmountOfRows)
+                if (memberIndex == member.Table.AmountOfRows)
                     range.Length = targetTable.AmountOfRows - range.Start;
                 else
                 {
-                    int nextIndex = Convert.ToInt32(currentTable.Members[memberIndex].MetaDataRow.parts[mdrowIndex]) - 1;
+                    int nextIndex = Convert.ToInt32(member.Table.Members[memberIndex].MetaDataRow.parts[mdrowIndex]) - 1;
                     range.Length = nextIndex - range.Start;
                 }
             }

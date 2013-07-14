@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class StandAloneSignature : MetaDataMember 
     {
-        public StandAloneSignature(uint signature) : this(new MetaDataRow((object)signature))
+        public StandAloneSignature(uint signature) : this(new MetaDataRow(signature))
         {
         }
 

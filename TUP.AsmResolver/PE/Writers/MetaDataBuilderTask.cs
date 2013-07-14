@@ -64,7 +64,7 @@ namespace TUP.AsmResolver.PE.Writers
             }
         }
 
-        private object ConvertToIndex(MetaDataTable table, uint index)
+        private ValueType ConvertToIndex(MetaDataTable table, uint index)
         {
             if (table.IsLarge(0))
                 return index;
