@@ -200,7 +200,8 @@ namespace TUP.AsmResolver.NET
                     return GetSignatureSize(TablesHeap._tablereader.GetMethodDefSignature());
                 case MetaDataTableType.MethodImpl:
                     return GetSignatureSize(TablesHeap._tablereader.GetMethodImplSignature());
-
+                case MetaDataTableType.MethodPtr:
+                    return GetSignatureSize(TablesHeap._tablereader.GetMethodPtrSignature());
                 case MetaDataTableType.MethodSemantics:
                     return GetSignatureSize(TablesHeap._tablereader.GetMethodSemanticsSignature());
                 case MetaDataTableType.MethodSpec:

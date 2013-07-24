@@ -221,6 +221,9 @@ namespace TUP.AsmResolver.PE.Readers
                                 case MetaDataTableType.Field:
                                     members[i] = CreateMember<FieldDefinition>(reader, GetFieldDefSignature(), table._type);
                                     break;
+                                case MetaDataTableType.MethodPtr:
+                                    members[i] = CreateMember<MethodPtr>(reader, GetMethodPtrSignature(), table._type);
+                                    break;
                                 case MetaDataTableType.Method:
                                     members[i] = CreateMember<MethodDefinition>(reader, GetMethodDefSignature(), table._type);
                                     break;
@@ -449,6 +452,16 @@ namespace TUP.AsmResolver.PE.Readers
 
             return parts;
         }
+
+        internal byte[] GetMethodPtrSignature()
+        {
+            byte[] parts = new byte[]
+            {
+                GetIndexSize(MetaDataTableType.Method),
+            };
+            return parts;
+        }
+
         internal byte[] GetMethodDefSignature()
         {
             byte[] parts = new byte[] { 
