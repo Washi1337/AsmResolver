@@ -66,23 +66,9 @@ namespace TUP.AsmResolver.NET
                 case ElementType.Ptr:
                     return new PointerType(ReadTypeReference((ElementType)this.ReadByte()));
                 case ElementType.MVar:
-
-                    if (GenericContext == null)
-                        return new GenericParamReference(NETGlobals.ReadCompressedInt32(this), new TypeReference(string.Empty, "MVar", null) { elementType = ElementType.MVar, @namespace = "", netheader = this._netHeader });
-
-                    return ReadGenericType();
-
+                    return GetGenericParameter(GenericParamType.Method, NETGlobals.ReadCompressedInt32(this));
                 case ElementType.Var:
-                    uint token = NETGlobals.ReadCompressedUInt32(this);
-                    if (GenericContext != null)
-                    {
-                        if (GenericContext.DeclaringType != null && GenericContext.DeclaringType.GenericParameters != null && GenericContext.DeclaringType.GenericParameters.Length > token)
-                            return GenericContext.DeclaringType.GenericParameters[token];
-                        else if (GenericContext.GenericParameters != null && GenericContext.GenericParameters.Length > token)
-                            return GenericContext.GenericParameters[token];
-                    }
-                    return new GenericParamReference((int)token, new TypeReference(string.Empty, "Var", null) { elementType = ElementType.Var, @namespace = "", netheader = this._netHeader });
-
+                    return GetGenericParameter(GenericParamType.Type, NETGlobals.ReadCompressedInt32(this));
                 case ElementType.Array:
                     return ReadArrayType();
                 case ElementType.SzArray:
@@ -106,30 +92,50 @@ namespace TUP.AsmResolver.NET
                 case ElementType.Pinned:
                     return new PinnedType(ReadTypeReference((ElementType)this.ReadByte()));
                 case ElementType.GenericInst:
-                    bool flag = this.ReadByte() == 0x11;
+                    bool isValueType = this.ReadByte() == 0x11;
                     TypeReference reference2 = ReadTypeToken();
                     GenericInstanceType instance = new GenericInstanceType(reference2);
-                    this.ReadGenericInstanceSignature(instance);
-                    if (flag)
-                    {
-                        instance.IsValueType = true;
+                    instance.genericArguments = ReadGenericArguments();
+                    instance.IsValueType = isValueType;
 
-                    }
                     return instance;
             }
             return new TypeReference(string.Empty, type.ToString(), null) { netheader = this._netHeader };
 
         }
 
-        public void ReadGenericInstanceSignature(GenericInstanceType genericType)
+        private TypeReference GetGenericParameter(GenericParamType type, int index)
+        {
+            if (GenericContext != null)
+            {
+                IGenericParamProvider paramProvider = null;
+                if (type == GenericParamType.Method)
+                    paramProvider = GenericContext.Method;
+                else
+                    paramProvider = GenericContext.Type;
+                AddMissingGenericParameters(paramProvider, index);
+                return paramProvider.GenericParameters[index];
+            }
+
+            return new GenericParameter(string.Format("{0}{1}", type == GenericParamType.Method ? "!!" : "!", index), (ushort)index, GenericParameterAttributes.NonVariant, null);
+        }
+
+        private void AddMissingGenericParameters(IGenericParamProvider provider, int index)
+        { 
+            for (int i = provider.GenericParameters.Length; i <= index; i++)
+                provider.AddGenericParameter(new GenericParameter(provider, i));
+        }
+
+        public TypeReference[] ReadGenericArguments()
         {
             uint number = NETGlobals.ReadCompressedUInt32(this);
 
-            genericType.genericArguments = new TypeReference[number];
+            var genericArguments = new TypeReference[number];
 
             for (int i = 0; i < number; i++)
-                genericType.genericArguments[i] = ReadTypeReference((ElementType)this.ReadByte());
+               genericArguments[i] = ReadTypeReference((ElementType)this.ReadByte());
 
+            return genericArguments;
         }
 
         public TypeReference ReadTypeToken()
@@ -185,27 +191,7 @@ namespace TUP.AsmResolver.NET
             return new ArrayType(arrayType, (int)rank, dimensions);
 
         }
-
-        public TypeReference ReadGenericType()
-        {
-            // not finished yet!
-
-            uint token = NETGlobals.ReadCompressedUInt32(this);
-            object genericType;
-
-            if (GenericContext.IsDefinition)
-            {
-                if (TryGetArrayValue(GenericContext.GenericParameters, token, out genericType))
-                    return genericType as TypeReference;
-            }
-
-            if (TryGetArrayValue(GenericContext.GenericArguments, token, out genericType))
-                return genericType as TypeReference;
-
-            return new TypeReference(string.Empty, token.ToString(), null);
-
-        }
-
+        
         public object ReadArgumentValue(TypeReference paramType)
         {
             if (!paramType.IsArray || !(paramType as ArrayType).IsVector)
@@ -226,7 +212,7 @@ namespace TUP.AsmResolver.NET
             if (paramType.FullName == "System.Type")
                 return ReadUtf8String();
 
-            switch (paramType.elementType)
+            switch (paramType._elementType)
             {
                 case ElementType.I1:
                     return this.ReadSByte();
@@ -261,15 +247,6 @@ namespace TUP.AsmResolver.NET
 
             }
             return null;
-        }
-
-        public bool TryGetArrayValue(Array array, uint index, out object value)
-        {
-            value = null;
-            if (array == null || array.Length < index || index < 0)
-                return false;
-            value = array.GetValue(index);
-            return true;
         }
 
         public string ReadUtf8String()

@@ -8,6 +8,8 @@ namespace TUP.AsmResolver.NET.Specialized
     [Flags]
     public enum GenericParameterAttributes
     {
+        NonVariant = 0x0000,
+
         // Variance of type parameters, only applicable to generic parameters 
         // for generic interfaces and delegates
         VarianceMask = 0x0003,

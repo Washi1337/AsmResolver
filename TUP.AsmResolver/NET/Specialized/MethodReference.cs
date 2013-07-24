@@ -5,10 +5,11 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class MethodReference : MemberReference, IGenericContext
+    public class MethodReference : MemberReference, IGenericParamProvider, IGenericContext
     {
-        internal MethodSignature signature = null;
-        internal string name = null;
+        internal MethodSignature _signature = null;
+        internal string _name = null;
+        internal GenericParameter[] _genericParameters = new GenericParameter[0];
 
         public MethodReference(MetaDataRow row)
             : base(row)
@@ -18,7 +19,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public MethodReference(string name, TypeReference declaringType, uint signature)
             : base(new MetaDataRow(0U, 0U, signature))
         {
-            this.name = name;
+            this._name = name;
             this.declaringType = declaringType;
         }
 
@@ -27,9 +28,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out _name);
+                return _name;
             }
         }
 
@@ -37,10 +38,10 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (signature != null)
-                    return signature;
-                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), this);
-                return signature;
+                if (_signature != null)
+                    return _signature;
+                _signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow._parts[2]), this);
+                return _signature;
                 //return Convert.ToUInt32(metadatarow.parts[2]); 
             }
         }
@@ -59,26 +60,13 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                return null;
+                return _genericParameters;
             }
         }
-
-        public virtual TypeReference[] GenericArguments
-        {
-            get 
-            { 
-                return null;
-            }
-        }
-
+        
         public bool HasGenericParameters
         {
             get { return GenericParameters != null && GenericParameters.Length > 0; }
-        }
-
-        public bool HasGenericArguments
-        {
-            get { return GenericArguments != null && GenericArguments.Length > 0; }
         }
 
         public override string FullName
@@ -109,15 +97,39 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            signature = null;
-            name = null;
+            _signature = null;
+            _name = null;
         }
 
         public override void LoadCache()
         {
             base.LoadCache();
-            signature = Signature;
-            name = Name;
+            _signature = Signature;
+            _name = Name;
+        }
+
+        IGenericParamProvider IGenericContext.Method
+        {
+            get { return this; }
+        }
+
+        IGenericParamProvider IGenericContext.Type
+        {
+            get { return this.DeclaringType; }
+        }
+
+        GenericParamType IGenericParamProvider.ParamType
+        {
+            get { return GenericParamType.Method; }
+        }
+        
+        void IGenericParamProvider.AddGenericParameter(GenericParameter parameter)
+        {
+            if (_genericParameters == null)
+                _genericParameters = new GenericParameter[1];
+            else
+                Array.Resize(ref _genericParameters, _genericParameters.Length + 1);
+            _genericParameters[_genericParameters.Length - 1] = parameter;
         }
     }
 }

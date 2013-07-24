@@ -28,7 +28,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
                 return name;
             }
         }
@@ -59,7 +59,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (mvid == default(Guid))
-                    mvid = netheader.GuidHeap.GetGuidByOffset(Convert.ToUInt32(metadatarow.parts[2]));
+                    mvid = netheader.GuidHeap.GetGuidByOffset(Convert.ToUInt32(metadatarow._parts[2]));
                 return mvid;
             }
         }

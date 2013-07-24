@@ -22,14 +22,14 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ElementType ConstantType
         {
-            get { return (Specialized.ElementType)Convert.ToByte(metadatarow.parts[0]); }
+            get { return (Specialized.ElementType)Convert.ToByte(metadatarow._parts[0]); }
         }
 
         public MetaDataMember Parent
         {
             get 
             {
-                if (parent != null || netheader.TablesHeap.HasConstant.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out parent))
+                if (parent != null || netheader.TablesHeap.HasConstant.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out parent))
                     return parent;
                 
                 return null;
@@ -38,7 +38,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint Signature
         {
-            get { return Convert.ToUInt32(metadatarow.parts[3]); }
+            get { return Convert.ToUInt32(metadatarow._parts[3]); }
         }
 
         public object Value

@@ -27,7 +27,6 @@ namespace TUP.AsmResolver.NET
         {
             tables = new MetaDataTable[45];
             tablereader = new NETTableReader(this);
-            tablereader.ReadTableHeaders();
         }
         
         internal override void MakeEmpty()

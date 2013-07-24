@@ -27,7 +27,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (parent == null)
                 {
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
-                    int index = Convert.ToInt32(metadatarow.parts[0]) - 1;
+                    int index = Convert.ToInt32(metadatarow._parts[0]) - 1;
                     if (index >= 0 && index < table.Members.Length)
                         parent = table.Members[index] as TypeDefinition;
                 }

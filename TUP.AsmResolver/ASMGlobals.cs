@@ -101,5 +101,15 @@ namespace TUP.AsmResolver
             writer.Write(bytes);
         }
 
+        internal static bool TryGetItem<T>(this T[] array, int index, out T item)
+        {
+            item = default(T);
+            if (index >= 0 && array.Length > index)
+            {
+                item = array[index];
+                return true;
+            }
+            return false;
+        }
     }
 }

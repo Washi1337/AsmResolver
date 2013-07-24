@@ -20,29 +20,29 @@ namespace TUP.AsmResolver.NET.Specialized
         public MethodDefinition(string name, MethodAttributes attributes, uint rva, uint signature, uint paramlist)
             : base(new MetaDataRow(rva, (ushort)0, (ushort)attributes, 0U, signature, paramlist))
         {
-            this.name = name;
+            this._name = name;
         }
 
         public uint RVA
         {
-            get { return Convert.ToUInt32(metadatarow.parts[0]); }
-            set { metadatarow.parts[0] = value; }
+            get { return Convert.ToUInt32(metadatarow._parts[0]); }
+            set { metadatarow._parts[0] = value; }
         }
 
         public MethodImplAttributes ImplementationAttributes
         {
-            get { return (MethodImplAttributes)metadatarow.parts[1]; }
-            set { metadatarow.parts[1] = ((ushort)value); }
+            get { return (MethodImplAttributes)metadatarow._parts[1]; }
+            set { metadatarow._parts[1] = ((ushort)value); }
         }
 
         public MethodAttributes Attributes
         {
             get { 
                 
-                MethodAttributes attr = (MethodAttributes)metadatarow.parts[2];
+                MethodAttributes attr = (MethodAttributes)metadatarow._parts[2];
                 return attr;
             }
-            set { metadatarow.parts[2] = ((ushort)value); }
+            set { metadatarow._parts[2] = ((ushort)value); }
         }
 
         public override TypeReference DeclaringType
@@ -82,9 +82,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             { 
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[3]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[3]), out _name);
+                return _name;
             }
         }
 
@@ -100,10 +100,10 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (signature != null)
-                    return signature;
-                signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[4]), this);
-                return signature;
+                if (_signature != null)
+                    return _signature;
+                _signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow._parts[4]), this);
+                return _signature;
                 //return Convert.ToUInt32(metadatarow.parts[4]); 
             }
         }
@@ -114,25 +114,25 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (genericparams == null && netheader.TablesHeap.HasTable(MetaDataTableType.GenericParam))
                 {
+                    List<GenericParameter> parameters = new List<GenericParameter>();
                     try
                     {
-                        List<GenericParameter> parameters = new List<GenericParameter>();
 
                         foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.GenericParam).Members)
                         {
                             GenericParameter param = (GenericParameter)member;
                             try
                             {
-                                if (param.Owner != null && param.Owner.metadatatoken == this.metadatatoken)
+                                if (param.Owner != null && param.Owner.MetaDataToken == this.metadatatoken)
                                     parameters.Add(param);
                             }
                             catch { }
                         }
 
-                        genericparams = parameters.ToArray();
                         parameters.Clear();
                     }
                     catch { }
+                    genericparams = parameters.ToArray();
                 }
                 return genericparams;
             }

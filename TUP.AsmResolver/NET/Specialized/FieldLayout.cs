@@ -22,7 +22,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint Offset
         {
-            get { return Convert.ToUInt32(metadatarow.parts[0]); }
+            get { return Convert.ToUInt32(metadatarow._parts[0]); }
         }
 
         public FieldDefinition Field
@@ -30,7 +30,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (field == null)
-                    field = (FieldDefinition)netheader.TablesHeap.GetTable(MetaDataTableType.Field).Members[Convert.ToInt32(metadatarow.parts[1])];
+                    field = (FieldDefinition)netheader.TablesHeap.GetTable(MetaDataTableType.Field).Members[Convert.ToInt32(metadatarow._parts[1])];
                 return field;
             }
         }

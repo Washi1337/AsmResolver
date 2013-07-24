@@ -26,7 +26,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint Offset
         {
-            get { return Convert.ToUInt32(metadatarow.parts[0]); }
+            get { return Convert.ToUInt32(metadatarow._parts[0]); }
         }
         
         public Stream Stream
@@ -59,7 +59,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ManifestResourceAttributes Attributes
         {
-            get { return (ManifestResourceAttributes)Convert.ToUInt32(metadatarow.parts[1]); }
+            get { return (ManifestResourceAttributes)Convert.ToUInt32(metadatarow._parts[1]); }
         }
 
         public string Name
@@ -67,7 +67,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out name);
                 return name;
             }
         }
@@ -78,7 +78,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (implementation == null)
                 {
-                    int token = Convert.ToInt32(metadatarow.parts[3]);
+                    int token = Convert.ToInt32(metadatarow._parts[3]);
                     if (token == 0 || token == 1)
                         return null;
 

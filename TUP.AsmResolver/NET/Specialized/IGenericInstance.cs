@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public interface IResolutionScope : IMetaDataMember
+    public interface IGenericInstance : IMetaDataMember
     {
-        string Name { get; }
-        uint MetaDataToken { get; }
-        MetaDataRow MetaDataRow { get; }
+        TypeReference[] GenericArguments { get; }
+        bool HasGenericArguments { get; }
     }
 }

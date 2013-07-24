@@ -25,32 +25,32 @@ namespace TUP.AsmResolver.NET.Specialized
         public TypeDefinition(string @namespace, string name, TypeAttributes attributes, TypeReference baseType, uint fieldList, uint methodList)
             : base(new MetaDataRow((uint)attributes, 0U, 0U, 0U, fieldList, methodList))
         {
-            this.@namespace = @namespace;
-            this.name = name;
+            this._namespace = @namespace;
+            this._name = name;
             this.baseType = baseType;
         }
 
         public TypeAttributes Attributes
         {
-            get{return (TypeAttributes)metadatarow.parts[0];}
-            set { metadatarow.parts[0] = (uint)value; }
+            get{return (TypeAttributes)metadatarow._parts[0];}
+            set { metadatarow._parts[0] = (uint)value; }
         }
 
         public override string Name
         {
             get { 
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out _name);
+                return _name;
             }
         }
 
         public override string Namespace
         {
             get {
-                if (string.IsNullOrEmpty(@namespace))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]), out @namespace);
-                return @namespace;
+                if (string.IsNullOrEmpty(_namespace))
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out _namespace);
+                return _namespace;
             }
         }
 
@@ -58,11 +58,11 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (resolutionScope == null && HasImage)
+                if (_resolutionScope == null && HasImage)
                 {
-                    resolutionScope = NETHeader.TablesHeap.GetTable(MetaDataTableType.Assembly, false).Members[0] as IResolutionScope;
+                    _resolutionScope = NETHeader.TablesHeap.GetTable(MetaDataTableType.Assembly, false).Members[0] as IResolutionScope;
                 }
-                return resolutionScope;
+                return _resolutionScope;
             }
         }
 
@@ -101,9 +101,9 @@ namespace TUP.AsmResolver.NET.Specialized
             get {
                 if (baseType == null)
                 {
-                    if (Convert.ToInt32(metadatarow.parts[3]) == 0)
+                    if (Convert.ToInt32(metadatarow._parts[3]) == 0)
                         return null;
-                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[3]), out baseType);
+                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[3]), out baseType);
                 }
                 return baseType;
             }
@@ -111,12 +111,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint FieldList
         {
-            get { return Convert.ToUInt32(metadatarow.parts[4]); }
+            get { return Convert.ToUInt32(metadatarow._parts[4]); }
         }
 
         public uint MethodList
         {
-            get { return Convert.ToUInt32(metadatarow.parts[5]); }
+            get { return Convert.ToUInt32(metadatarow._parts[5]); }
         }
 
         public FieldDefinition[] Fields
@@ -246,7 +246,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam).Members)
                     {
                         GenericParameter genericParam = member as GenericParameter;
-                        if (genericParam.Owner != null && genericParam.Owner.metadatatoken == this.metadatatoken)
+                        if (genericParam.Owner != null && genericParam.Owner.MetaDataToken == this.metadatatoken)
                         {
                             generics.Insert(genericParam.Index, genericParam);
                         }

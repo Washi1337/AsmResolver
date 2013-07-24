@@ -175,21 +175,17 @@ namespace TUP.AsmResolver.NET
                     }
                     methodsignature.CallingConvention = (MethodCallingConvention)flag;
 
-                    uint num3 = NETGlobals.ReadCompressedUInt32(reader);
+                    uint paramCount = NETGlobals.ReadCompressedUInt32(reader);
                     methodsignature.ReturnType = reader.ReadTypeReference();
-
-                    if (num3 != 0)
+                    
+                    ParameterReference[] parameters = new ParameterReference[paramCount];
+                    for (int i = 0; i < paramCount; i++)
                     {
-                        ParameterReference[] parameters = new ParameterReference[num3];
-                        for (int i = 0; i < num3; i++)
-                        {
-                            parameters[i] = new ParameterReference() { ParameterType = reader.ReadTypeReference((ElementType)reader.ReadByte()) };
-                        }
-                        methodsignature.Parameters = parameters;
+                        parameters[i] = new ParameterReference() { ParameterType = reader.ReadTypeReference((ElementType)reader.ReadByte()) };
                     }
+                    methodsignature.Parameters = parameters;
 
                     signature = methodsignature;
-
                 }
             }
             return signature;

@@ -24,7 +24,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (declaringType == null)
                 {
-                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out declaringType);
+                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out declaringType);
                 }
                 return declaringType;
             }

@@ -66,6 +66,8 @@
     <Compile Include="NET\NETGlobals.cs" />
     <Compile Include="NET\Specialized\ArrayDimension.cs" />
     <Compile Include="NET\BlobSignatureReader.cs" />
+    <Compile Include="NET\Specialized\IGenericInstance.cs" />
+    <Compile Include="NET\Specialized\IGenericParamProvider.cs" />
     <Compile Include="NET\Specialized\ObsoleteAssemblyTables.cs" />
     <Compile Include="NET\Specialized\CustomAttributeArgument.cs" />
     <Compile Include="NET\Specialized\CustomAttributeSignature.cs" />
@@ -74,7 +76,6 @@
     <Compile Include="NET\Specialized\FileReference.cs" />
     <Compile Include="NET\Specialized\GenericInstanceType.cs" />
     <Compile Include="NET\Specialized\GenericParamConstraint.cs" />
-    <Compile Include="NET\Specialized\GenericParamReference.cs" />
     <Compile Include="NET\Specialized\IResolutionScope.cs" />
     <Compile Include="NET\Specialized\ISpecification.cs" />
     <Compile Include="NET\Specialized\IStreamProvider.cs" />

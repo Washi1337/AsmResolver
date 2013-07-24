@@ -262,7 +262,7 @@ namespace AsmResolver
         private void SetMetaDataRow(MetaDataRow row)
         {
             dataGridView.Rows.Clear();
-            if (row == null)
+            if (row.Parts == null)
                 return;
             
             for (int i = 0; i < row.Parts.Length; i++)

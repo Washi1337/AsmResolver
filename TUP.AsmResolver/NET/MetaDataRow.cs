@@ -11,24 +11,30 @@ namespace TUP.AsmResolver.NET
     /// <summary>
     /// Represents a metadata row containing the raw values of a member.
     /// </summary>
-    public class MetaDataRow
+    public struct MetaDataRow
     {
-        internal ValueType[] parts;
-        internal uint offset;
-
-        public MetaDataRow()
-        {
-        }
+        internal ValueType[] _parts;
+        internal uint _offset;
+        internal NETHeader _netHeader;
 
         public MetaDataRow(params ValueType[] parts)
         {
-            this.parts = parts;
+            this._parts = parts;
+            this._offset = 0;
+            this._netHeader = null;
         }
 
         public MetaDataRow(uint offset, params ValueType[] parts)
         {
-            this.offset = offset;
-            this.parts = parts;
+            this._offset = offset;
+            this._parts = parts;
+            this._netHeader = null;
+        }
+
+        public NETHeader NETHeader
+        {
+            get { return _netHeader; }
+            set { _netHeader = value; }
         }
 
         /// <summary>
@@ -36,7 +42,8 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public uint Offset
         {
-            get { return offset; }
+            get { return _offset; }
+            set { _offset = value; }
         }
 
         /// <summary>
@@ -44,10 +51,18 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public ValueType[] Parts
         { 
-           get 
-           { 
-               return parts; 
-           } 
+            get 
+            { 
+                return _parts; 
+            }
+            set
+            {
+                if (value.Length != _parts.Length)
+                {
+                    throw new NotSupportedException("Value must have the same length.");
+                }
+                _parts = value;
+            }
         }
 
         /// <summary>
@@ -57,7 +72,7 @@ namespace TUP.AsmResolver.NET
         public int CalculateSize()
         {
             int size = 0;
-            foreach (object part in parts)
+            foreach (object part in _parts)
                 size += Marshal.SizeOf(part);
             return size;
         }
@@ -71,7 +86,7 @@ namespace TUP.AsmResolver.NET
             using (MemoryStream stream = new MemoryStream())
             {
                 BinaryWriter writer = new BinaryWriter(stream);
-                foreach (object part in parts)
+                foreach (object part in _parts)
                 {
                     if (part is uint || part is int)
                         writer.Write((uint)part);
@@ -87,20 +102,19 @@ namespace TUP.AsmResolver.NET
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
+            if (Offset != 0)
+            {
+                builder.Append(string.Format("0x{0:X}:", Offset));
+            }
+
             builder.Append("{");
-
-            if (parts == null || parts.Length == 0)
+            
+            for (int i = 0; i < _parts.Length; i++)
             {
-                builder.Append("<empty>");
+                builder.Append(string.Format("0x{0:X}{1}", _parts[i], i == _parts.Length - 1 ? "" : ", "));
             }
-            else
-            {
-                for (int i = 0; i < parts.Length; i++)
-                {
-                    builder.Append(string.Format("{0:X}{1}", parts[i], i == parts.Length - 1 ? "" : ", "));
-                }
-            }
-
+            
+            
             builder.Append("}");
             return builder.ToString();
         }

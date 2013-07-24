@@ -27,7 +27,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
                 return name;
             }
         }
@@ -52,7 +52,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (signature != null)
                     return signature;
-                signature = (FieldSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow.parts[2]), this.DeclaringType);
+                signature = (FieldSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow._parts[2]), this.DeclaringType);
                 return signature;
             }
         }

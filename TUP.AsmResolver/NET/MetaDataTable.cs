@@ -33,7 +33,7 @@ namespace TUP.AsmResolver.NET
             get { return type; }
             internal set { type = value; }
         }
-       
+        
         /// <summary>
         /// Gets or sets the amount of rows that are available in the table.
         /// </summary>
@@ -106,7 +106,11 @@ namespace TUP.AsmResolver.NET
         {
             LoadMembers();
             member.metadatatoken = (uint)(((uint)type << 24) + Members.Length + 1);
-            member.MetaDataRow.offset = 0;
+
+            var mdrow = member.MetaDataRow;
+            mdrow.Offset = 0;
+            member.MetaDataRow = mdrow;
+
             rowAmount++;
             member.netheader = TablesHeap.netheader;
             Array.Resize(ref members, Members.Length + 1);

@@ -5,11 +5,10 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public interface IGenericContext
+    public interface IGenericContext : IMetaDataMember
     {
-        GenericParameter[] GenericParameters { get; }
-        TypeReference[] GenericArguments { get; }
-        TypeReference DeclaringType { get; }
+        IGenericParamProvider Method { get; }
+        IGenericParamProvider Type { get; }
         bool IsDefinition { get; }
     }
 }

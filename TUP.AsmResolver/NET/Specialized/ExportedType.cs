@@ -14,16 +14,16 @@ namespace TUP.AsmResolver.NET.Specialized
         {
         }
 
-        public TypeAttributes Attributes { get { return (TypeAttributes)Convert.ToUInt32(metadatarow.parts[0]); } }
-        public uint TypeID { get { return Convert.ToUInt32(metadatarow.parts[1]); } }
-        public string TypeName { get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[2])); } }
-        public string TypeNamespace { get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow.parts[3])); } }
+        public TypeAttributes Attributes { get { return (TypeAttributes)Convert.ToUInt32(metadatarow._parts[0]); } }
+        public uint TypeID { get { return Convert.ToUInt32(metadatarow._parts[1]); } }
+        public string TypeName { get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow._parts[2])); } }
+        public string TypeNamespace { get { return netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow._parts[3])); } }
         public MetaDataMember Implementation
         {
             get
             {
                 if (implementation == null)
-                    netheader.TablesHeap.Implementation.TryGetMember(Convert.ToInt32(metadatarow.parts[4]), out implementation);
+                    netheader.TablesHeap.Implementation.TryGetMember(Convert.ToInt32(metadatarow._parts[4]), out implementation);
                 return implementation;
             }
         }

@@ -10,22 +10,16 @@ namespace TUP.AsmResolver.NET.Specialized
         private TypeReference originaltype;
 
         public TypeSpecification(MetaDataRow row)
-            : base(row)
+            : this(row.NETHeader.BlobHeap.ReadTypeSignature(Convert.ToUInt32(row._parts[0]), null))
         {
+            metadatarow = row;
         }
 
         public TypeSpecification(TypeReference typeRef)
-            : base(null)
+            : base(default(MetaDataRow))
         {
             originaltype = typeRef;
             netheader = typeRef.netheader;
-            IsArray = typeRef.IsArray;
-            IsPointer = typeRef.IsPointer;
-            IsByReference = typeRef.IsByReference;
-            IsDefinition = typeRef.IsDefinition;
-            IsGenericInstance = typeRef.IsGenericInstance;
-            IsPinned = typeRef.IsPinned;
-            IsValueType = typeRef.IsValueType;
         }
 
         public MemberReference TransformWith(IGenericContext context)
@@ -54,7 +48,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     return null;
             }
         }
-
+        
         public override string Namespace
         {
             get
@@ -65,7 +59,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     return null;
             }
         }
-
+        
         public override string FullName
         {
             get { return (Namespace == "" ? "" : Namespace + ".") + Name; }
@@ -84,29 +78,22 @@ namespace TUP.AsmResolver.NET.Specialized
         
         public uint Signature
         {
-            get {
+            get 
+            {
                 if (HasSavedMetaDataRow)
-                    return Convert.ToUInt32(metadatarow.parts[0]);
+                    return Convert.ToUInt32(metadatarow._parts[0]);
                 else
                     return 0;
             }
         }
 
-       // public override TypeReference[] GenericArguments
-       // {
-       //     get
-       //     {
-       //         return OriginalType.GenericArguments;
-       //     }
-       // }
-       //
-       // public override GenericParameter[] GenericParameters
-       // {
-       //     get
-       //     {
-       //         return OriginalType.GenericParameters;
-       //     }
-       // }
+        //public override GenericParameter[] GenericParameters
+        //{
+        //    get
+        //    {
+        //        return OriginalType.GenericParameters;
+        //    }
+        //}
        
         public override TypeReference GetElementType()
         {

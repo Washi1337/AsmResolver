@@ -22,12 +22,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ushort PackingSize
         {
-            get { return Convert.ToUInt16(metadatarow.parts[0]); }
+            get { return Convert.ToUInt16(metadatarow._parts[0]); }
         }
 
         public uint ClassSize
         {
-            get { return Convert.ToUInt32(metadatarow.parts[1]); }
+            get { return Convert.ToUInt32(metadatarow._parts[1]); }
         }
 
         public TypeDefinition Parent
@@ -35,7 +35,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get 
             {
                 if (parent == null)
-                    parent = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef,false).Members[Convert.ToInt32(metadatarow.parts[2])] as TypeDefinition;
+                    parent = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef,false).Members[Convert.ToInt32(metadatarow._parts[2])] as TypeDefinition;
                 return parent;
             }
         }

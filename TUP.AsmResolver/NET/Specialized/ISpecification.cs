@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public interface ISpecification
+    public interface ISpecification : IMetaDataMember
     {
         MemberReference TransformWith(IGenericContext context);
     }

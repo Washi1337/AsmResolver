@@ -27,8 +27,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public EventAttributes Attributes
         {
-            get { return (EventAttributes)Convert.ToUInt16(metadatarow.parts[0]); }
-            set { metadatarow.parts[0] = (ushort)value; }
+            get { return (EventAttributes)Convert.ToUInt16(metadatarow._parts[0]); }
+            set { metadatarow._parts[0] = (ushort)value; }
         }
 
         public override string Name
@@ -36,7 +36,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
                 return name;
             }
         }
@@ -46,7 +46,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (eventType == null)
-                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out eventType);
+                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out eventType);
                 return eventType;
             }
         }

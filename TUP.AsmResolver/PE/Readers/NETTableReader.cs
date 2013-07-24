@@ -11,33 +11,33 @@ namespace TUP.AsmResolver.PE.Readers
 {
     internal class NETTableReader : IDisposable
     {
-        BinaryReader reader;
         internal TablesHeap tablesHeap;
         uint tablesOffset = 0;
 
 
         internal NETTableReader(TablesHeap tablesheap)
         {
-            reader = new BinaryReader(new MemoryStream(tablesheap.Contents));
-            tablesheap.header = ASMGlobals.ReadStructureFromReader<Structures.METADATA_TABLE_HEADER>(reader);
-            this.tablesHeap = tablesheap;
+            using (BinaryReader reader = new BinaryReader(new MemoryStream(tablesheap.Contents)))
+            {
+                tablesheap.header = ASMGlobals.ReadStructureFromReader<Structures.METADATA_TABLE_HEADER>(reader);
+                this.tablesHeap = tablesheap;
 
-            for (int i = 0; i < 45; i++)
-                if (tablesHeap.HasTable((MetaDataTableType)i))
-                {
-                    tablesHeap.tablecount++;
-                }
+                for (int i = 0; i < 45; i++)
+                    if (tablesHeap.HasTable((MetaDataTableType)i))
+                    {
+                        tablesHeap.tablecount++;
+                    }
 
-            tablesHeap.tablereader = this;
-            if ((tablesHeap.HeapOffsetSizes & 1) == 1)
-                tablesHeap.netheader.StringsHeap.indexsize = 4;
-            if ((tablesHeap.HeapOffsetSizes & 2) == 2)
-                tablesHeap.netheader.GuidHeap.indexsize = 4;
-            if ((tablesHeap.HeapOffsetSizes & 4) == 4)
-                tablesHeap.netheader.BlobHeap.indexsize = 4;
+                tablesHeap.tablereader = this;
+                if ((tablesHeap.HeapOffsetSizes & 1) == 1)
+                    tablesHeap.netheader.StringsHeap.indexsize = 4;
+                if ((tablesHeap.HeapOffsetSizes & 2) == 2)
+                    tablesHeap.netheader.GuidHeap.indexsize = 4;
+                if ((tablesHeap.HeapOffsetSizes & 4) == 4)
+                    tablesHeap.netheader.BlobHeap.indexsize = 4;
 
-           // ReadTables();
-
+                ReadTableHeaders(reader);
+            }
         }
 
         internal MetaDataTable CreateTable(MetaDataTableType type, int rowAmount, long rowAmountOffset)
@@ -150,7 +150,7 @@ namespace TUP.AsmResolver.PE.Readers
             return table;
         }
 
-        internal void ReadTableHeaders()
+        internal void ReadTableHeaders(BinaryReader reader)
         {
             SetupCodedIndexes();
 
@@ -199,152 +199,158 @@ namespace TUP.AsmResolver.PE.Readers
             MetaDataMember[] members = null;
             if (table != null)
             {
-                reader.BaseStream.Position = table.TableOffset- tablesHeap.StreamOffset;
-                members = new MetaDataMember[table.AmountOfRows];
-                for (uint i = 0; i < table.AmountOfRows; i++)
+                using (MemoryStream stream = new MemoryStream(tablesHeap.Contents))
                 {
-                    switch (table.Type)
+                    using (BinaryReader reader = new BinaryReader(stream))
                     {
-                        case MetaDataTableType.Module:
-                            members[i] = CreateMember<ModuleDefinition>(GetModuleSignature(), table.type);
-                            break;
-                        case MetaDataTableType.TypeRef:
-                            members[i] = CreateMember<TypeReference>(GetTypeRefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.TypeDef:
-                            members[i] = CreateMember<TypeDefinition>(GetTypeDefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.Field:
-                            members[i] = CreateMember<FieldDefinition>(GetFieldDefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.Method:
-                            members[i] = CreateMember<MethodDefinition>(GetMethodDefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.ParamPtr:
-                            members[i] = CreateMember<ParamPtr>(GetParamPtrSignature(), table.type);
-                            break;
-                        case MetaDataTableType.Param:
-                            members[i] = CreateMember<ParameterDefinition>(GetParamDefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.InterfaceImpl:
-                            members[i] = CreateMember<InterfaceImplementation>(GetInterfaceImplSignature(), table.type);
-                            break;
-                        case MetaDataTableType.MemberRef:
-                            MetaDataRow row = ReadRow(GetMemberRefSignature());
-                            tablesHeap.netheader.BlobHeap.mainStream.Seek(Convert.ToUInt32(row.parts[2]), SeekOrigin.Begin);
-                            tablesHeap.netheader.BlobHeap.binReader.ReadByte();
-                            byte sigtype = tablesHeap.netheader.BlobHeap.binReader.ReadByte();
-                           
-                            if (sigtype == 0x6)
-                                members[i] = new FieldReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
-                            else
-                                members[i] = new NET.Specialized.MethodReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
+                        stream.Position = table.TableOffset - tablesHeap.StreamOffset;
+                        members = new MetaDataMember[table.AmountOfRows];
+                        for (uint i = 0; i < table.AmountOfRows; i++)
+                        {
+                            switch (table.Type)
+                            {
+                                case MetaDataTableType.Module:
+                                    members[i] = CreateMember<ModuleDefinition>(reader, GetModuleSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.TypeRef:
+                                    members[i] = CreateMember<TypeReference>(reader, GetTypeRefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.TypeDef:
+                                    members[i] = CreateMember<TypeDefinition>(reader, GetTypeDefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.Field:
+                                    members[i] = CreateMember<FieldDefinition>(reader, GetFieldDefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.Method:
+                                    members[i] = CreateMember<MethodDefinition>(reader, GetMethodDefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.ParamPtr:
+                                    members[i] = CreateMember<ParamPtr>(reader, GetParamPtrSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.Param:
+                                    members[i] = CreateMember<ParameterDefinition>(reader, GetParamDefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.InterfaceImpl:
+                                    members[i] = CreateMember<InterfaceImplementation>(reader, GetInterfaceImplSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.MemberRef:
+                                    MetaDataRow row = ReadRow(reader, GetMemberRefSignature());
+                                    tablesHeap.netheader.BlobHeap.mainStream.Seek(Convert.ToUInt32(row._parts[2]), SeekOrigin.Begin);
+                                    tablesHeap.netheader.BlobHeap.binReader.ReadByte();
+                                    byte sigtype = tablesHeap.netheader.BlobHeap.binReader.ReadByte();
 
-                            break;
-                        case MetaDataTableType.Constant:
-                            members[i] = CreateMember<Constant>(GetConstantSignature(), table.type);
-                            break;
-                        case MetaDataTableType.CustomAttribute:
-                            members[i] = CreateMember<CustomAttribute>(GetCustomAttributeSignature(), table.type);
-                            break;
-                        case MetaDataTableType.FieldMarshal:
-                            members[i] = CreateMember<FieldMarshal>(GetFieldMarshalSignature(), table.type);
-                            break;
-                        case MetaDataTableType.DeclSecurity:
-                            members[i] = CreateMember<SecurityDeclaration>(GetSecurityDeclSignature(), table.type);
-                            break;
-                        case MetaDataTableType.ClassLayout:
-                            members[i] = CreateMember<ClassLayout>(GetClassLayoutSignature(), table.type);
-                            break;
-                        case MetaDataTableType.FieldLayout:
-                            members[i] = CreateMember<FieldLayout>(GetFieldLayoutSignature(), table.type);
-                            break;
-                        case MetaDataTableType.StandAloneSig:
-                            members[i] = CreateMember<StandAloneSignature>(GetStandAloneSigSignature(), table.type);
-                            break;
-                        case MetaDataTableType.EventMap:
-                            members[i] = CreateMember<EventMap>(GetEventMapSignature(), table.type);
-                            break;
-                        case MetaDataTableType.Event:
-                            members[i] = CreateMember<EventDefinition>(GetEventDefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.PropertyMap:
-                            members[i] = CreateMember<PropertyMap>(GetPropertyMapSignature(), table.type);
-                            break;
-                        case MetaDataTableType.PropertyPtr:
-                            members[i] = CreateMember<PropertyPtr>(GetPropertyPtrSignature(), table.type);
-                            break;
-                        case MetaDataTableType.Property:
-                            members[i] = CreateMember<PropertyDefinition>(GetPropertyDefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.MethodSemantics:
-                            members[i] = CreateMember<MethodSemantics>(GetMethodSemanticsSignature(), table.type);
-                            break;
-                        case MetaDataTableType.MethodImpl:
-                            members[i] = CreateMember<MethodImplementation>(GetMethodImplSignature(), table.type);
-                            break;
-                        case MetaDataTableType.ModuleRef:
-                            members[i] = CreateMember<ModuleReference>(GetModuleRefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.TypeSpec:
-                            members[i] = CreateMember<TypeSpecification>(GetTypeSpecSignature(), table.type);
-                            break;
-                        case MetaDataTableType.MethodSpec:
-                            members[i] = CreateMember<MethodSpecification>(GetMethodSpecSignature(), table.type);
-                            break;
-                        case MetaDataTableType.ImplMap:
-                            members[i] = CreateMember<PInvokeImplementation>(GetPInvokeImplSignature(), table.type);
-                            break;
-                        case MetaDataTableType.FieldRVA:
-                            members[i] = CreateMember<FieldRVA>(GetFieldRVASignature(), table.type);
-                            break;
-                        case MetaDataTableType.Assembly:
-                            members[i] = CreateMember<AssemblyDefinition>(GetAssemblyDefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.AssemblyProcessor:
-                            members[i] = CreateMember<AssemblyProcessor>(GetAssemblyProcSignature(), table.type);
-                            break;
-                        case MetaDataTableType.AssemblyOS:
-                            members[i] = CreateMember<AssemblyOS>(GetAssemblyOSSignature(), table.type);
-                            break;
-                        case MetaDataTableType.AssemblyRef:
-                            members[i] = CreateMember<AssemblyReference>(GetAssemblyRefSignature(), table.type);
-                            break;
-                        case MetaDataTableType.AssemblyRefProcessor:
-                            members[i] = CreateMember<AssemblyRefProcessor>(GetAssemblyRefProcSignature(), table.type);
-                            break;
-                        case MetaDataTableType.AssemblyRefOS:
-                            members[i] = CreateMember<AssemblyRefOS>(GetAssemblyRefOSSignature(), table.type);
-                            break;
-                        case MetaDataTableType.File:
-                            members[i] = CreateMember<FileReference>(GetFileReferenceSignature(), table.type);
-                            break;
-                        case MetaDataTableType.ExportedType:
-                            members[i] = CreateMember<ExportedType>(GetExportedTypeSignature(), table.type);
-                            break;
-                        case MetaDataTableType.ManifestResource:
-                            members[i] = CreateMember<ManifestResource>(GetManifestResSignature(), table.type);
-                            break;
-                        case MetaDataTableType.NestedClass:
-                            members[i] = CreateMember<NestedClass>(GetNestedClassSignature(), table.type);
-                            break;
-                        case MetaDataTableType.EncLog:
-                            members[i] = CreateMember<EnCLog>(GetEnCLogSignature(), table.type);
-                            break;
-                        case MetaDataTableType.EncMap:
-                            members[i] = CreateMember<EnCMap>(GetEnCMapSignature(), table.type);
-                            break;
-                        case MetaDataTableType.GenericParam:
-                            members[i] = CreateMember<GenericParameter>(GetGenericParamSignature(), table.type);
-                            break;
-                        case MetaDataTableType.GenericParamConstraint:
-                            members[i] = CreateMember<GenericParamConstraint>(GetGenericParamConstraintSignature(), table.type);
-                            break;
+                                    if (sigtype == 0x6)
+                                        members[i] = new FieldReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
+                                    else
+                                        members[i] = new NET.Specialized.MethodReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
 
-                    }
-                    if (members.Length > 0)
-                    {
-                        members[i].metadatatoken = ConstructMetaDataToken(table.type, i);
+                                    break;
+                                case MetaDataTableType.Constant:
+                                    members[i] = CreateMember<Constant>(reader, GetConstantSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.CustomAttribute:
+                                    members[i] = CreateMember<CustomAttribute>(reader, GetCustomAttributeSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.FieldMarshal:
+                                    members[i] = CreateMember<FieldMarshal>(reader, GetFieldMarshalSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.DeclSecurity:
+                                    members[i] = CreateMember<SecurityDeclaration>(reader, GetSecurityDeclSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.ClassLayout:
+                                    members[i] = CreateMember<ClassLayout>(reader, GetClassLayoutSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.FieldLayout:
+                                    members[i] = CreateMember<FieldLayout>(reader, GetFieldLayoutSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.StandAloneSig:
+                                    members[i] = CreateMember<StandAloneSignature>(reader, GetStandAloneSigSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.EventMap:
+                                    members[i] = CreateMember<EventMap>(reader, GetEventMapSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.Event:
+                                    members[i] = CreateMember<EventDefinition>(reader, GetEventDefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.PropertyMap:
+                                    members[i] = CreateMember<PropertyMap>(reader, GetPropertyMapSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.PropertyPtr:
+                                    members[i] = CreateMember<PropertyPtr>(reader, GetPropertyPtrSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.Property:
+                                    members[i] = CreateMember<PropertyDefinition>(reader, GetPropertyDefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.MethodSemantics:
+                                    members[i] = CreateMember<MethodSemantics>(reader, GetMethodSemanticsSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.MethodImpl:
+                                    members[i] = CreateMember<MethodImplementation>(reader, GetMethodImplSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.ModuleRef:
+                                    members[i] = CreateMember<ModuleReference>(reader, GetModuleRefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.TypeSpec:
+                                    members[i] = CreateMember<TypeSpecification>(reader, GetTypeSpecSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.MethodSpec:
+                                    members[i] = CreateMember<MethodSpecification>(reader, GetMethodSpecSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.ImplMap:
+                                    members[i] = CreateMember<PInvokeImplementation>(reader, GetPInvokeImplSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.FieldRVA:
+                                    members[i] = CreateMember<FieldRVA>(reader, GetFieldRVASignature(), table.type);
+                                    break;
+                                case MetaDataTableType.Assembly:
+                                    members[i] = CreateMember<AssemblyDefinition>(reader, GetAssemblyDefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.AssemblyProcessor:
+                                    members[i] = CreateMember<AssemblyProcessor>(reader, GetAssemblyProcSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.AssemblyOS:
+                                    members[i] = CreateMember<AssemblyOS>(reader, GetAssemblyOSSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.AssemblyRef:
+                                    members[i] = CreateMember<AssemblyReference>(reader, GetAssemblyRefSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.AssemblyRefProcessor:
+                                    members[i] = CreateMember<AssemblyRefProcessor>(reader, GetAssemblyRefProcSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.AssemblyRefOS:
+                                    members[i] = CreateMember<AssemblyRefOS>(reader, GetAssemblyRefOSSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.File:
+                                    members[i] = CreateMember<FileReference>(reader, GetFileReferenceSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.ExportedType:
+                                    members[i] = CreateMember<ExportedType>(reader, GetExportedTypeSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.ManifestResource:
+                                    members[i] = CreateMember<ManifestResource>(reader, GetManifestResSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.NestedClass:
+                                    members[i] = CreateMember<NestedClass>(reader, GetNestedClassSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.EncLog:
+                                    members[i] = CreateMember<EnCLog>(reader, GetEnCLogSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.EncMap:
+                                    members[i] = CreateMember<EnCMap>(reader, GetEnCMapSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.GenericParam:
+                                    members[i] = CreateMember<GenericParameter>(reader, GetGenericParamSignature(), table.type);
+                                    break;
+                                case MetaDataTableType.GenericParamConstraint:
+                                    members[i] = CreateMember<GenericParamConstraint>(reader, GetGenericParamConstraintSignature(), table.type);
+                                    break;
+
+                            }
+                            if (members.Length > 0)
+                            {
+                                members[i].metadatatoken = ConstructMetaDataToken(table.type, i);
+                            }
+                        }
                     }
                 }
             }
@@ -367,29 +373,30 @@ namespace TUP.AsmResolver.PE.Readers
             return sizeof(ushort);
         }
 
-        internal MetaDataRow ReadRow(byte[] parts)
+        internal MetaDataRow ReadRow(BinaryReader reader, byte[] signature)
         {
             MetaDataRow row = new MetaDataRow();
-            row.parts = new ValueType[parts.Length];
+            row._parts = new ValueType[signature.Length];
+            row.NETHeader = tablesHeap.netheader;
 
-            row.offset = (uint)(reader.BaseStream.Position + tablesHeap.StreamOffset);
+            row._offset = (uint)(reader.BaseStream.Position + tablesHeap.StreamOffset);
             
-            for (int i = 0; i< parts.Length;i++)
+            for (int i = 0; i< signature.Length;i++)
             {
-                if (parts[i] == sizeof(uint))
-                    row.parts[i] = reader.ReadUInt32();
-                else if (parts[i] == sizeof(ushort))
-                    row.parts[i] = reader.ReadUInt16();
-                else if (parts[i] == sizeof(byte))
-                    row.parts[i] = reader.ReadByte();
+                if (signature[i] == sizeof(uint))
+                    row._parts[i] = reader.ReadUInt32();
+                else if (signature[i] == sizeof(ushort))
+                    row._parts[i] = reader.ReadUInt16();
+                else if (signature[i] == sizeof(byte))
+                    row._parts[i] = reader.ReadByte();
             }
             
             return row;
         }
 
-        internal T CreateMember<T>(byte[] rowSignature, MetaDataTableType table) where T : MetaDataMember
+        internal T CreateMember<T>(BinaryReader reader, byte[] rowSignature, MetaDataTableType table) where T : MetaDataMember
         {
-            T member = (T)Activator.CreateInstance(typeof(T), ReadRow(rowSignature));
+            T member = (T)Activator.CreateInstance(typeof(T), ReadRow(reader, rowSignature));
             member.table = table;
             member.netheader = tablesHeap.netheader;
             return member;
@@ -841,10 +848,6 @@ namespace TUP.AsmResolver.PE.Readers
 
         public void Dispose()
         {
-            reader.BaseStream.Close();
-            reader.BaseStream.Dispose();
-            reader.Close();
-            reader.Dispose();
         }
     }
 }

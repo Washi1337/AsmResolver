@@ -28,7 +28,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (@class == null)
                 {
-                    int token = Convert.ToInt32(metadatarow.parts[0]) - 1;
+                    int token = Convert.ToInt32(metadatarow._parts[0]) - 1;
                     netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).TryGetMember(token, out @class);
                 }
                 return @class;
@@ -40,7 +40,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (@interface == null)
-                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out @interface);
+                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out @interface);
                 return @interface;
             }
         }

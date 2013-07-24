@@ -5,7 +5,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class MethodSpecification : MethodReference, ISpecification
+    public class MethodSpecification : MethodReference, ISpecification, IGenericInstance
     {
         MethodReference originalmethod;
         TypeReference[] genericArgs;
@@ -18,7 +18,7 @@ namespace TUP.AsmResolver.NET.Specialized
         }
 
         public MethodSpecification(MethodReference methodRef)
-            : base(null)
+            : base(default(MetaDataRow))
         {
             OriginalMethod = methodRef;
             context = methodRef;            
@@ -38,7 +38,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 else
                     signature = Convert.ToUInt32(copy.originalmethod.MetaDataRow.Parts[2]);
 
-                copy.signature = netheader.BlobHeap.ReadMemberRefSignature(signature, copy) as MethodSignature;
+                copy._signature = netheader.BlobHeap.ReadMemberRefSignature(signature, copy) as MethodSignature;
                 return copy;
             }
             return this;
@@ -49,7 +49,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (originalmethod == null)
-                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out originalmethod);
+                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out originalmethod);
                 return originalmethod;
             }
             private set { originalmethod = value; }
@@ -104,7 +104,7 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public override TypeReference[] GenericArguments
+        public TypeReference[] GenericArguments
         {
             get
             {
@@ -114,20 +114,25 @@ namespace TUP.AsmResolver.NET.Specialized
 
             }
         }
+    
+        public bool HasGenericArguments
+        {
+            get { return GenericArguments != null && GenericArguments.Length != 0; }
+        }
          
         public override MethodSignature Signature
         {
             get
             {
-                if (signature == null)
-                    signature = OriginalMethod.Signature; //netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(OriginalMethod.metadatarow.parts[2]), this, this) as MethodSignature;
-                return signature;
+                if (_signature == null)
+                    _signature = OriginalMethod.Signature; //netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(OriginalMethod.metadatarow.parts[2]), this, this) as MethodSignature;
+                return _signature;
             }
         }
 
         public uint SpecificationSignature
         {
-            get { return Convert.ToUInt32(metadatarow.parts[1]); }
+            get { return Convert.ToUInt32(metadatarow._parts[1]); }
         }
 
         public override MethodReference GetElementMethod()

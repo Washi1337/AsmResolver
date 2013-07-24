@@ -22,19 +22,19 @@ namespace TUP.AsmResolver.NET.Specialized
             this.name = name;
         }
 
-        public FileAttributes Flags { get { return (FileAttributes)Convert.ToUInt32(metadatarow.parts[0]); } }
+        public FileAttributes Flags { get { return (FileAttributes)Convert.ToUInt32(metadatarow._parts[0]); } }
 
         public string Name
         {
             get
             {
                 if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
                 return name;
             }
         }
 
-        public uint Hash { get { return Convert.ToUInt32(metadatarow.parts[2]); } }
+        public uint Hash { get { return Convert.ToUInt32(metadatarow._parts[2]); } }
 
         public Stream Stream
         {

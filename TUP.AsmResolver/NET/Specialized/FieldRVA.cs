@@ -22,7 +22,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint RVA
         {
-            get { return Convert.ToUInt32(metadatarow.parts[0]); }
+            get { return Convert.ToUInt32(metadatarow._parts[0]); }
         }
 
         public FieldDefinition Field
@@ -31,7 +31,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (field == null)
                 {
-                    int index = Convert.ToInt32(metadatarow.parts[0]);
+                    int index = Convert.ToInt32(metadatarow._parts[0]);
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.Field);
                     if (index > 0 && index <= table.Members.Length)
                         field = table.Members[index - 1] as FieldDefinition;

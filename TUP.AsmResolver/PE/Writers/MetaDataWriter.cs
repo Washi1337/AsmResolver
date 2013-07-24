@@ -158,7 +158,7 @@ namespace TUP.AsmResolver.PE.Writers
 
         private void UpdateTypeRef(Workspace workspace, TypeReference typeRef)
         {
-            typeRef.MetaDataRow.Parts[0] = GetMemberIndex(workspace, typeRef.resolutionScope as MetaDataMember);
+            typeRef.MetaDataRow.Parts[0] = GetMemberIndex(workspace, typeRef._resolutionScope as MetaDataMember);
             typeRef.MetaDataRow.Parts[1] = GetStringIndex(workspace, typeRef.Namespace);
             typeRef.MetaDataRow.Parts[2] = GetStringIndex(workspace, typeRef.Name);
         }

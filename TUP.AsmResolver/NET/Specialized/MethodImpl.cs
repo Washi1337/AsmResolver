@@ -30,7 +30,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (@class == null)
                 {
-                    int index = Convert.ToInt32(metadatarow.parts[0]);
+                    int index = Convert.ToInt32(metadatarow._parts[0]);
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
                     if (index > 0 && index <= table.Members.Length)
                         @class = table.Members[index - 1] as TypeDefinition;
@@ -43,7 +43,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (methodBody == null)
-                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out methodBody);
+                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out methodBody);
                 return methodBody;
             }
         }
@@ -52,7 +52,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (methodBody == null)
-                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out methodDeclaration);
+                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out methodDeclaration);
                 return methodDeclaration;
             }
         }

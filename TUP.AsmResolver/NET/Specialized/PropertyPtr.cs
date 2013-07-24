@@ -27,7 +27,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (reference == null && netheader.TablesHeap.HasTable(MetaDataTableType.Property))
                 {
                     MetaDataTable propertyTable = netheader.TablesHeap.GetTable(MetaDataTableType.Property);
-                    uint index =  Convert.ToUInt32(metadatarow.parts[0]);
+                    uint index =  Convert.ToUInt32(metadatarow._parts[0]);
                     if (index < propertyTable.AmountOfRows)
                         reference = propertyTable.Members[index] as PropertyDefinition;
                 }
@@ -36,7 +36,7 @@ namespace TUP.AsmResolver.NET.Specialized
             set
             {
                 reference = value;
-                metadatarow.parts[0] = value.TableIndex;
+                metadatarow._parts[0] = value.TableIndex;
             }
         }
 

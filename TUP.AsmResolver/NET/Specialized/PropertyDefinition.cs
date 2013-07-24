@@ -26,8 +26,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public PropertyAttributes Attributes
         {
-            get { return (PropertyAttributes)Convert.ToUInt16(metadatarow.parts[0]); }
-            set { metadatarow.parts[0] = (ushort)value; }
+            get { return (PropertyAttributes)Convert.ToUInt16(metadatarow._parts[0]); }
+            set { metadatarow._parts[0] = (ushort)value; }
         }
 
         public override string Name
@@ -35,7 +35,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
                 return name;
             }
         }
@@ -46,7 +46,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (propertySig == null)
                 {
-                    propertySig = netheader.BlobHeap.ReadPropertySignature(Convert.ToUInt32(metadatarow.parts[2]), this);
+                    propertySig = netheader.BlobHeap.ReadPropertySignature(Convert.ToUInt32(metadatarow._parts[2]), this);
                 }
                 return propertySig;
             }

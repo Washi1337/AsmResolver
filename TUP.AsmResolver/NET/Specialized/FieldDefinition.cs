@@ -22,8 +22,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public FieldAttributes Attributes
         {
-            get { return (FieldAttributes)metadatarow.parts[0]; }
-            set { metadatarow.parts[0] = (ushort)value; }
+            get { return (FieldAttributes)metadatarow._parts[0]; }
+            set { metadatarow._parts[0] = (ushort)value; }
         }
 
         public override TypeReference DeclaringType

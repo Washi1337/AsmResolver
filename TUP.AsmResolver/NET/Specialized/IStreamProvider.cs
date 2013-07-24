@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public interface IStreamProvider
+    public interface IStreamProvider : IMetaDataMember
     {
         Stream Stream { get; }
     }

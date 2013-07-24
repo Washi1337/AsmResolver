@@ -21,12 +21,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ParameterAttributes Attributes
         {
-            get{return (ParameterAttributes)metadatarow.parts[0];}
+            get{return (ParameterAttributes)metadatarow._parts[0];}
         }
 
         public ushort Sequence
         {
-            get { return Convert.ToUInt16(metadatarow.parts[1]); }
+            get { return Convert.ToUInt16(metadatarow._parts[1]); }
         }
 
         public string Name
@@ -34,7 +34,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out name);
                 return name;
             }
         }

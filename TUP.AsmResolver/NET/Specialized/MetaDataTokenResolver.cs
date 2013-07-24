@@ -46,6 +46,7 @@ namespace TUP.AsmResolver.NET.Specialized
             uint rowindex = metadataToken - subtraction;
             return netheader.TablesHeap.GetTable( tabletype).Members[(int)rowindex - 1];
         }
+
         /// <summary>
         /// Resolves a string value by its metadata token.
         /// </summary>

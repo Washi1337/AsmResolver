@@ -26,7 +26,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (parent == null)
                 {
-                    netheader.TablesHeap.HasFieldMarshall.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out parent);
+                    netheader.TablesHeap.HasFieldMarshall.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out parent);
                 }
                 return parent;
                 
@@ -35,7 +35,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint NativeType
         {
-            get { return Convert.ToUInt32(metadatarow.parts[1]); }
+            get { return Convert.ToUInt32(metadatarow._parts[1]); }
         }
 
         public override void ClearCache()

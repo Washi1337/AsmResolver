@@ -29,7 +29,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (parent == null)
                 {
-                    netheader.TablesHeap.HasCustomAttribute.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out parent);
+                    netheader.TablesHeap.HasCustomAttribute.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out parent);
                 }
                 return parent;
             }
@@ -41,7 +41,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (constructor == null)
                 {
-                    netheader.TablesHeap.CustomAttributeType.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out constructor);
+                    netheader.TablesHeap.CustomAttributeType.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out constructor);
                 }
                 return constructor;
             }
@@ -49,7 +49,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint Value
         {
-            get { return Convert.ToUInt32(metadatarow.parts[2]); }
+            get { return Convert.ToUInt32(metadatarow._parts[2]); }
         }
 
         public CustomAttributeSignature Signature

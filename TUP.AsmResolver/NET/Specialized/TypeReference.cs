@@ -5,13 +5,14 @@ using System.Text;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public class TypeReference : MemberReference, IGenericContext, IResolutionScope
+    public class TypeReference : MemberReference, IGenericParamProvider, IGenericContext, IResolutionScope
     {
-        internal ElementType elementType = ElementType.None;
-        internal IResolutionScope resolutionScope;
-        internal string name = string.Empty;
-        internal string @namespace = string.Empty;
-        internal string fullname = string.Empty;
+        internal ElementType _elementType = ElementType.None;
+        internal IResolutionScope _resolutionScope;
+        internal string _name = string.Empty;
+        internal string _namespace = string.Empty;
+        internal string _fullname = string.Empty;
+        internal GenericParameter[] _genericParameters = new GenericParameter[0];
 
         public TypeReference(MetaDataRow row)
             : base(row)
@@ -21,9 +22,9 @@ namespace TUP.AsmResolver.NET.Specialized
         public TypeReference(string @namespace, string name, IResolutionScope resolutionScope)
             : base(new MetaDataRow(0U, 0U, 0U))
         {
-            this.name = name;
-            this.@namespace = @namespace;
-            this.resolutionScope = resolutionScope;
+            this._name = name;
+            this._namespace = @namespace;
+            this._resolutionScope = resolutionScope;
         }
 
         public override TypeReference DeclaringType
@@ -35,23 +36,23 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (resolutionScope != null || !HasSavedMetaDataRow)
-                    return resolutionScope;
+                if (_resolutionScope != null || !HasSavedMetaDataRow)
+                    return _resolutionScope;
 
                 MetaDataMember member;
-                netheader.TablesHeap.ResolutionScope.TryGetMember(Convert.ToInt32(metadatarow.parts[0]), out member);
-                resolutionScope = member as IResolutionScope;
+                netheader.TablesHeap.ResolutionScope.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out member);
+                _resolutionScope = member as IResolutionScope;
 
-                return resolutionScope; 
+                return _resolutionScope;
             }
         }
         public override string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(this.name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[1]), out name);
-                return this.name;
+                if (string.IsNullOrEmpty(this._name))
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out _name);
+                return this._name;
             }
         }
 
@@ -60,8 +61,8 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (HasSavedMetaDataRow)
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[2]), out @namespace);
-                return @namespace;
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out _namespace);
+                return _namespace;
             }
         }
 
@@ -69,13 +70,13 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (string.IsNullOrEmpty(fullname))
+                if (string.IsNullOrEmpty(_fullname))
                 {
 
                     TypeReference declaringType = this.DeclaringType;
                     if (declaringType == null)
                     {
-                        fullname = (string.IsNullOrEmpty(Namespace) ? string.Empty : Namespace + ".") + Name;
+                        _fullname = (string.IsNullOrEmpty(Namespace) ? string.Empty : Namespace + ".") + Name;
                     }
                     else
                     {
@@ -87,10 +88,10 @@ namespace TUP.AsmResolver.NET.Specialized
 
                             declaringType = declaringType.DeclaringType;
                         }
-                        fullname = builder.ToString();
+                        _fullname = builder.ToString();
                     }
                 }
-                return fullname;
+                return _fullname;
             }
         }
 
@@ -113,10 +114,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public virtual GenericParameter[] GenericParameters
         {
-            get { return null; }
+            get { return _genericParameters; }
         }
-
-        public virtual TypeReference[] GenericArguments { get { return null; } }
 
         public virtual TypeReference GetElementType()
         {
@@ -125,19 +124,19 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            resolutionScope = null;
-            name = null;
-            @namespace = null;
-            fullname = null;
+            _resolutionScope = null;
+            _name = null;
+            _namespace = null;
+            _fullname = null;
         }
 
         public override void LoadCache()
         {
             base.LoadCache();
-            resolutionScope = ResolutionScope;
-            name = Name;
-            @namespace = Namespace;
-            fullname = FullName;
+            _resolutionScope = ResolutionScope;
+            _name = Name;
+            _namespace = Namespace;
+            _fullname = FullName;
         }
 
         public override string ToString()
@@ -145,5 +144,29 @@ namespace TUP.AsmResolver.NET.Specialized
             return FullName;
         }
 
+
+        IGenericParamProvider IGenericContext.Method
+        {
+            get { return null; }
+        }
+
+        IGenericParamProvider IGenericContext.Type
+        {
+            get { return this; }
+        }
+
+        GenericParamType IGenericParamProvider.ParamType
+        {
+            get { return GenericParamType.Type; }
+        }
+
+        void IGenericParamProvider.AddGenericParameter(GenericParameter parameter)
+        {
+            if (_genericParameters == null)
+                _genericParameters = new GenericParameter[1];
+            else 
+                Array.Resize(ref _genericParameters, _genericParameters.Length + 1);
+            _genericParameters[_genericParameters.Length - 1] = parameter;
+        }
     }
 }

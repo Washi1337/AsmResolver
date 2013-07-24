@@ -24,7 +24,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public MethodSemanticsAttributes Attributes
         {
-            get { return (MethodSemanticsAttributes)Convert.ToUInt16(metadatarow.parts[0]); }
+            get { return (MethodSemanticsAttributes)Convert.ToUInt16(metadatarow._parts[0]); }
         }
 
         public MethodDefinition Method
@@ -34,7 +34,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (method == null)
                 {
                     MetaDataTable methodtable = netheader.TablesHeap.GetTable(MetaDataTableType.Method);
-                    int index = Convert.ToInt32(metadatarow.parts[1]) - 1;
+                    int index = Convert.ToInt32(metadatarow._parts[1]) - 1;
                     if (index >= 0 && index < methodtable.Members.Length)
                         method = (MethodDefinition)methodtable.Members[index];
                 }
@@ -47,7 +47,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (association == null)
-                    netheader.TablesHeap.HasSemantics.TryGetMember(Convert.ToInt32(metadatarow.parts[2]), out association);
+                    netheader.TablesHeap.HasSemantics.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out association);
                 return association;
             }
         }

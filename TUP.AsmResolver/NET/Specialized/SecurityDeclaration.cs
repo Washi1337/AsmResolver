@@ -22,7 +22,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public SecurityAction Action
         {
-            get { return (SecurityAction)Convert.ToUInt16(metadatarow.parts[0]); }
+            get { return (SecurityAction)Convert.ToUInt16(metadatarow._parts[0]); }
         }
 
         public MetaDataMember Parent
@@ -30,14 +30,14 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (parent == null)
-                    netheader.TablesHeap.HasDeclSecurity.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out parent);
+                    netheader.TablesHeap.HasDeclSecurity.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out parent);
                 return parent;
             }
         }
 
         public uint PermissionSet
         {
-            get { return Convert.ToUInt32(metadatarow.parts[2]); }
+            get { return Convert.ToUInt32(metadatarow._parts[2]); }
         }
 
         public override void ClearCache()

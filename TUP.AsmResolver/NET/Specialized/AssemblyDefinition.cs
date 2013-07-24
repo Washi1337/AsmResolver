@@ -33,7 +33,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override AssemblyHashAlgorithm HashAlgorithm
         {
-            get { return (AssemblyHashAlgorithm)Convert.ToUInt32(metadatarow.parts[0]); }
+            get { return (AssemblyHashAlgorithm)Convert.ToUInt32(metadatarow._parts[0]); }
         }
 
         public override Version Version
@@ -41,29 +41,29 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 return new Version(
-                Convert.ToInt32(metadatarow.parts[1]),
-                Convert.ToInt32(metadatarow.parts[2]),
-                Convert.ToInt32(metadatarow.parts[3]),
-                Convert.ToInt32(metadatarow.parts[4])
+                Convert.ToInt32(metadatarow._parts[1]),
+                Convert.ToInt32(metadatarow._parts[2]),
+                Convert.ToInt32(metadatarow._parts[3]),
+                Convert.ToInt32(metadatarow._parts[4])
                 );
             }
             set
             {
-                metadatarow.parts[1] = (ushort)value.Major;
-                metadatarow.parts[2] = (ushort)value.Minor;
-                metadatarow.parts[3] = (ushort)value.Build;
-                metadatarow.parts[4] = (ushort)value.Revision;
+                metadatarow._parts[1] = (ushort)value.Major;
+                metadatarow._parts[2] = (ushort)value.Minor;
+                metadatarow._parts[3] = (ushort)value.Build;
+                metadatarow._parts[4] = (ushort)value.Revision;
             }
         }
 
         public override AssemblyAttributes Attributes
         {
-            get { return (AssemblyAttributes)Convert.ToUInt32(metadatarow.parts[5]); }
+            get { return (AssemblyAttributes)Convert.ToUInt32(metadatarow._parts[5]); }
         }
 
         public override uint PublicKeyOrToken
         {
-            get { return Convert.ToUInt32(metadatarow.parts[6]); }
+            get { return Convert.ToUInt32(metadatarow._parts[6]); }
         }
 
         public override string Name
@@ -71,7 +71,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[7]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[7]), out name);
                 return name;
             }
         }
@@ -81,7 +81,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             { 
                 if (culture == null)
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow.parts[8]), out name);
+                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[8]), out name);
                 return culture;
             }
         }

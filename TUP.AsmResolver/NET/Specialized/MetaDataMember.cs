@@ -6,7 +6,12 @@ using TUP.AsmResolver.PE.Readers;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public abstract class MetaDataMember : IDisposable , ICacheProvider, IImageProvider, ICloneable
+    public interface IMetaDataMember
+    {
+        uint MetaDataToken { get; }
+    }
+
+    public abstract class MetaDataMember : IMetaDataMember, IDisposable, ICacheProvider, IImageProvider, ICloneable
     {
         public MetaDataMember(MetaDataRow row)
         {
@@ -31,8 +36,15 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public MetaDataRow MetaDataRow
         {
-            get { return metadatarow; }
-            set { metadatarow = value; }
+            get 
+            { 
+                return metadatarow; 
+            }
+            set
+            { 
+                metadatarow = value;
+                metadatarow._netHeader = this.NETHeader;
+            }
         }
 
         public NETHeader NETHeader
@@ -55,7 +67,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ValueType ProcessPartType(int partindex, object value)
         {
-            return Convert.ChangeType(value, metadatarow.parts[partindex].GetType()) as ValueType;
+            return Convert.ChangeType(value, metadatarow._parts[partindex].GetType()) as ValueType;
         }
 
         public bool HasImage
@@ -65,7 +77,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public bool HasSavedMetaDataRow
         {
-            get { return HasImage && metadatarow != null && metadatarow.offset != 0; }
+            get { return HasImage && metadatarow._offset != 0; }
         }
 
         public bool UpdateRowOnRebuild
@@ -76,10 +88,10 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public void ApplyChanges()
         {
-            if (HasSavedMetaDataRow && metadatarow.offset != 0)
+            if (HasSavedMetaDataRow && metadatarow._offset != 0)
             {
                 byte[] generatedBytes = metadatarow.GenerateBytes();
-                netheader.ParentAssembly.peImage.SetOffset(metadatarow.offset);
+                netheader.ParentAssembly.peImage.SetOffset(metadatarow._offset);
                 netheader.ParentAssembly.peImage.Writer.Write(generatedBytes);
 
             }
@@ -89,7 +101,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public void Dispose()
         {
-            metadatarow = null;
+            metadatarow = default(MetaDataRow);
             ClearCache();
         }
 

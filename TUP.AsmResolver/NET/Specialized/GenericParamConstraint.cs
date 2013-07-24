@@ -29,7 +29,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (owner == null)
                 {
                     MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam);
-                    int index = Convert.ToInt32(metadatarow.parts[0]) - 1;
+                    int index = Convert.ToInt32(metadatarow._parts[0]) - 1;
                     if (index > 0 || index < table.Members.Length)
                         owner = table.Members[index] as GenericParameter;
                 }
@@ -42,7 +42,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (constraint == null)
                 {
-                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow.parts[1]), out constraint);
+                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out constraint);
 
                 }
                 return constraint;

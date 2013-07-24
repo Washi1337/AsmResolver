@@ -43,7 +43,7 @@ namespace TUP.AsmResolver.NET
             }
         }
 
-        public bool TryGetMember(int codedIndex, out MetaDataMember member)
+        public bool TryGetMember(int codedIndex, out IMetaDataMember member)
         {
             member = null;
             if (codedIndex == 0)
@@ -69,15 +69,15 @@ namespace TUP.AsmResolver.NET
             return true;
         }
 
-        public bool TryGetMember<T>(int codedIndex, out T member) where T:MetaDataMember
+        public bool TryGetMember<T>(int codedIndex, out T member) where T:IMetaDataMember
         {
-            MetaDataMember uncastedMember;
+            IMetaDataMember uncastedMember;
             if (TryGetMember(codedIndex, out uncastedMember) && uncastedMember is T)
             {
-                member = uncastedMember as T;
+                member = (T)uncastedMember;
                 return true;
             }
-            member = null;
+            member = default(T);
             return false;
         }
         
