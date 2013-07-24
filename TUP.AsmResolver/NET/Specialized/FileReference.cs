@@ -41,7 +41,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get {
                 if (_stream == null)
                 {
-                    string fullpath = _netheader.assembly._path.Substring(0, _netheader.assembly._path.LastIndexOf('\\') + 1) + Name;
+                    string fullpath = _netheader._assembly._path.Substring(0, _netheader._assembly._path.LastIndexOf('\\') + 1) + Name;
                     if (File.Exists(fullpath))
                         _stream = File.Open(fullpath, FileMode.Open, FileAccess.Read);
                 }

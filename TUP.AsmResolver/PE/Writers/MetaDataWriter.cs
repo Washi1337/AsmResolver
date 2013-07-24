@@ -29,7 +29,7 @@ namespace TUP.AsmResolver.PE.Writers
 
             foreach (var keypair in workspace.Members)
             {
-                tablesHeap.binWriter.Write(keypair.Value.Length);
+                tablesHeap._binWriter.Write(keypair.Value.Length);
             }
         }
 
@@ -50,11 +50,11 @@ namespace TUP.AsmResolver.PE.Writers
             foreach (var part in row.Parts)
             {
                 if (Marshal.SizeOf(part) == sizeof(uint))
-                    tablesHeap.binWriter.Write((uint)part);
+                    tablesHeap._binWriter.Write((uint)part);
                 else if (Marshal.SizeOf(part) == sizeof(ushort))
-                    tablesHeap.binWriter.Write((ushort)part);
+                    tablesHeap._binWriter.Write((ushort)part);
                 else if (Marshal.SizeOf(part) == sizeof(byte))
-                    tablesHeap.binWriter.Write((byte)part);
+                    tablesHeap._binWriter.Write((byte)part);
                 else
                     throw new ArgumentException("Invalid MetaData Row");
             }

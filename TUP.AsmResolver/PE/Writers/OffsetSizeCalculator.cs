@@ -30,8 +30,8 @@ namespace TUP.AsmResolver.PE.Writers
             uint currentOffset = (uint)CalculateMetaDataHeaderSize(workspace);
             foreach (MetaDataStream stream in workspace.NewNetHeader.MetaDataStreams)
             {
-                stream.streamHeader.Offset = currentOffset;
-                stream.streamHeader.Size = (uint)stream.mainStream.Length;
+                stream._streamHeader.Offset = currentOffset;
+                stream._streamHeader.Size = (uint)stream._mainStream.Length;
 
                 // next stream comes right after current stream.
                 currentOffset += stream.StreamSize;
@@ -75,7 +75,7 @@ namespace TUP.AsmResolver.PE.Writers
             ConstructNetDirectories(newHeader);
 
             // first stream has offset equal to md header size.
-            uint mdSize = newHeader.MetaDataStreams[0].streamHeader.Offset;
+            uint mdSize = newHeader.MetaDataStreams[0]._streamHeader.Offset;
 
             // add sizes of streams.
             foreach (MetaDataStream stream in newHeader.MetaDataStreams)
@@ -89,13 +89,13 @@ namespace TUP.AsmResolver.PE.Writers
         private void ConstructNetDirectories(NETHeader newHeader)
         {
             newHeader.DataDirectories = new DataDirectory[] {
-             new DataDirectory(DataDirectoryName.NETMetadata, default(Section), 0, newHeader.rawHeader.MetaData),
-             new DataDirectory(DataDirectoryName.NETResource, default(Section), 0, newHeader.rawHeader.Resources),
-             new DataDirectory(DataDirectoryName.NETStrongName, default(Section), 0, newHeader.rawHeader.StrongNameSignature),
-             new DataDirectory(DataDirectoryName.NETCodeManager, default(Section), 0, newHeader.rawHeader.CodeManagerTable),
-             new DataDirectory(DataDirectoryName.NETVTableFixups, default(Section), 0, newHeader.rawHeader.VTableFixups),
-             new DataDirectory(DataDirectoryName.NETExport, default(Section), 0, newHeader.rawHeader.ExportAddressTableJumps),
-             new DataDirectory(DataDirectoryName.NETNativeHeader, default(Section), 0, newHeader.rawHeader.ManagedNativeHeader),
+             new DataDirectory(DataDirectoryName.NETMetadata, default(Section), 0, newHeader._rawHeader.MetaData),
+             new DataDirectory(DataDirectoryName.NETResource, default(Section), 0, newHeader._rawHeader.Resources),
+             new DataDirectory(DataDirectoryName.NETStrongName, default(Section), 0, newHeader._rawHeader.StrongNameSignature),
+             new DataDirectory(DataDirectoryName.NETCodeManager, default(Section), 0, newHeader._rawHeader.CodeManagerTable),
+             new DataDirectory(DataDirectoryName.NETVTableFixups, default(Section), 0, newHeader._rawHeader.VTableFixups),
+             new DataDirectory(DataDirectoryName.NETExport, default(Section), 0, newHeader._rawHeader.ExportAddressTableJumps),
+             new DataDirectory(DataDirectoryName.NETNativeHeader, default(Section), 0, newHeader._rawHeader.ManagedNativeHeader),
             };
 
         }
@@ -110,7 +110,7 @@ namespace TUP.AsmResolver.PE.Writers
                 workspace.NewDataDirectories[i] = new DataDirectory(originalDirectories[i].Name, default(Section), 0, originalDirectories[i]._rawDataDir);
             }
 
-            workspace.NewDataDirectories[(int)DataDirectoryName.Clr]._rawDataDir.Size = workspace.NewNetHeader.rawHeader.cb;
+            workspace.NewDataDirectories[(int)DataDirectoryName.Clr]._rawDataDir.Size = workspace.NewNetHeader._rawHeader.cb;
 
         }
 

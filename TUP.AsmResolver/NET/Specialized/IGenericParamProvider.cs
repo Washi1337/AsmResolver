@@ -9,6 +9,7 @@ namespace TUP.AsmResolver.NET.Specialized
     public interface IGenericParamProvider : IMetaDataMember 
     {
         GenericParameter[] GenericParameters { get; }
+        bool HasGenericParameters { get; }
         TypeReference DeclaringType { get; }
         bool IsDefinition { get; }
         GenericParamType ParamType { get; }

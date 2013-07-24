@@ -14,24 +14,24 @@ namespace TUP.AsmResolver.NET
         internal MetaDataTable(TablesHeap tableHeap, bool createNew)
         {
             TablesHeap = tableHeap;
-            tablesize = -1;
+            _tablesize = -1;
             if (createNew)
-                members = new MetaDataMember[0];
+                _members = new MetaDataMember[0];
         }
 
-        internal int rowAmount;
-        internal long rowAmountOffset;
-        internal int tablesize;
-        MetaDataMember[] members;
-        internal MetaDataTableType type;
+        internal int _rowAmount;
+        internal long _rowAmountOffset;
+        internal int _tablesize;
+        MetaDataMember[] _members;
+        internal MetaDataTableType _type;
         
         /// <summary>
         /// Gets the type of members located in the metadata table.
         /// </summary>
         public MetaDataTableType Type
         {
-            get { return type; }
-            internal set { type = value; }
+            get { return _type; }
+            internal set { _type = value; }
         }
         
         /// <summary>
@@ -39,13 +39,13 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public int AmountOfRows
         {
-            get { return rowAmount; }
+            get { return _rowAmount; }
             set
             {
-                var image = TablesHeap.netheader.assembly._peImage;
-                image.SetOffset(rowAmountOffset);
-                image.Writer.Write(rowAmount);
-                rowAmount = value;
+                var image = TablesHeap._netheader._assembly._peImage;
+                image.SetOffset(_rowAmountOffset);
+                image.Writer.Write(_rowAmount);
+                _rowAmount = value;
             }
         }
        
@@ -54,12 +54,12 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public MetaDataMember[] Members
         {
-            get {
-
-                if (members == null)
+            get 
+            {
+                if (_members == null)
                     LoadMembers();
                 
-                return members; 
+                return _members; 
             }
         }
        
@@ -85,7 +85,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                return rowAmount * CalculateRowSize();
+                return _rowAmount * CalculateRowSize();
             }
         }
 
@@ -93,7 +93,7 @@ namespace TUP.AsmResolver.NET
         {
             member = null;
 
-            if (index < 0 || index > rowAmount)
+            if (index < 0 || index > _rowAmount)
                 return false;
 
             member = Members[index] as T;
@@ -105,15 +105,15 @@ namespace TUP.AsmResolver.NET
         public void AddMember(MetaDataMember member)
         {
             LoadMembers();
-            member._metadatatoken = (uint)(((uint)type << 24) + Members.Length + 1);
+            member._metadatatoken = (uint)(((uint)_type << 24) + Members.Length + 1);
 
             var mdrow = member.MetaDataRow;
             mdrow.Offset = 0;
             member.MetaDataRow = mdrow;
 
-            rowAmount++;
-            member._netheader = TablesHeap.netheader;
-            Array.Resize(ref members, Members.Length + 1);
+            _rowAmount++;
+            member._netheader = TablesHeap._netheader;
+            Array.Resize(ref _members, Members.Length + 1);
             Members[Members.Length - 1] = member;
         }
 
@@ -124,12 +124,12 @@ namespace TUP.AsmResolver.NET
             member._netheader = null;
             for (uint i = index; i < Members.Length - 1; i++)
             {
-                members[i] = members[i + 1];
-                members[i]._metadatatoken--;
+                _members[i] = _members[i + 1];
+                _members[i]._metadatatoken--;
             }
-            Members[members.Length - 1] = null;
-            rowAmount--;
-            Array.Resize(ref members, Members.Length - 1);
+            Members[_members.Length - 1] = null;
+            _rowAmount--;
+            Array.Resize(ref _members, Members.Length - 1);
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace TUP.AsmResolver.NET
             if (bitsToEncode < 0)
                 throw new ArgumentException("Cannot have a negative amount of bits.");
             ushort maxamount = (ushort)((ushort)0xFFFF >> (ushort)bitsToEncode);
-            bool isbigger = rowAmount > maxamount ;
+            bool isbigger = _rowAmount > maxamount ;
             return isbigger;
         }
 
@@ -151,84 +151,84 @@ namespace TUP.AsmResolver.NET
             switch (Type)
             {
                 case MetaDataTableType.Assembly:
-                    return GetSignatureSize(TablesHeap.tablereader.GetAssemblyDefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetAssemblyDefSignature());
                 case MetaDataTableType.AssemblyRef:
-                    return GetSignatureSize(TablesHeap.tablereader.GetAssemblyRefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetAssemblyRefSignature());
                 case MetaDataTableType.ClassLayout:
-                    return GetSignatureSize(TablesHeap.tablereader.GetClassLayoutSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetClassLayoutSignature());
                 case MetaDataTableType.Constant:
-                    return GetSignatureSize(TablesHeap.tablereader.GetConstantSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetConstantSignature());
                 case MetaDataTableType.CustomAttribute:
-                    return GetSignatureSize(TablesHeap.tablereader.GetCustomAttributeSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetCustomAttributeSignature());
                 case MetaDataTableType.DeclSecurity:
-                    return GetSignatureSize(TablesHeap.tablereader.GetSecurityDeclSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetSecurityDeclSignature());
                 case MetaDataTableType.EncLog:
-                    return GetSignatureSize(TablesHeap.tablereader.GetEnCLogSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetEnCLogSignature());
                 case MetaDataTableType.EncMap:
-                    return GetSignatureSize(TablesHeap.tablereader.GetEnCMapSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetEnCMapSignature());
                 case MetaDataTableType.Event:
-                    return GetSignatureSize(TablesHeap.tablereader.GetEventDefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetEventDefSignature());
                 case MetaDataTableType.EventMap:
-                    return GetSignatureSize(TablesHeap.tablereader.GetEventMapSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetEventMapSignature());
 
                 case MetaDataTableType.ExportedType:
-                    return GetSignatureSize(TablesHeap.tablereader.GetExportedTypeSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetExportedTypeSignature());
                 case MetaDataTableType.Field:
-                    return GetSignatureSize(TablesHeap.tablereader.GetFieldDefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetFieldDefSignature());
                 case MetaDataTableType.FieldLayout:
-                    return GetSignatureSize(TablesHeap.tablereader.GetFieldLayoutSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetFieldLayoutSignature());
                 case MetaDataTableType.FieldMarshal:
-                    return GetSignatureSize(TablesHeap.tablereader.GetFieldMarshalSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetFieldMarshalSignature());
 
                 case MetaDataTableType.FieldRVA:
-                    return GetSignatureSize(TablesHeap.tablereader.GetFieldRVASignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetFieldRVASignature());
                 case MetaDataTableType.File:
-                    return GetSignatureSize(TablesHeap.tablereader.GetFileReferenceSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetFileReferenceSignature());
                 case MetaDataTableType.GenericParam:
-                    return GetSignatureSize(TablesHeap.tablereader.GetGenericParamSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetGenericParamSignature());
                 case MetaDataTableType.GenericParamConstraint:
-                    return GetSignatureSize(TablesHeap.tablereader.GetGenericParamConstraintSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetGenericParamConstraintSignature());
                 case MetaDataTableType.ImplMap:
-                    return GetSignatureSize(TablesHeap.tablereader.GetPInvokeImplSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetPInvokeImplSignature());
                 case MetaDataTableType.InterfaceImpl:
-                    return GetSignatureSize(TablesHeap.tablereader.GetInterfaceImplSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetInterfaceImplSignature());
                 case MetaDataTableType.ManifestResource:
-                    return GetSignatureSize(TablesHeap.tablereader.GetManifestResSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetManifestResSignature());
                 case MetaDataTableType.MemberRef:
-                    return GetSignatureSize(TablesHeap.tablereader.GetMemberRefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetMemberRefSignature());
                 case MetaDataTableType.Method:
-                    return GetSignatureSize(TablesHeap.tablereader.GetMethodDefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetMethodDefSignature());
                 case MetaDataTableType.MethodImpl:
-                    return GetSignatureSize(TablesHeap.tablereader.GetMethodImplSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetMethodImplSignature());
 
                 case MetaDataTableType.MethodSemantics:
-                    return GetSignatureSize(TablesHeap.tablereader.GetMethodSemanticsSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetMethodSemanticsSignature());
                 case MetaDataTableType.MethodSpec:
-                    return GetSignatureSize(TablesHeap.tablereader.GetMethodSpecSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetMethodSpecSignature());
                 case MetaDataTableType.Module:
-                    return GetSignatureSize(TablesHeap.tablereader.GetModuleSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetModuleSignature());
                 case MetaDataTableType.ModuleRef:
-                    return GetSignatureSize(TablesHeap.tablereader.GetModuleRefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetModuleRefSignature());
                 case MetaDataTableType.NestedClass:
-                    return GetSignatureSize(TablesHeap.tablereader.GetNestedClassSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetNestedClassSignature());
                 case MetaDataTableType.Param:
-                    return GetSignatureSize(TablesHeap.tablereader.GetParamDefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetParamDefSignature());
                 case MetaDataTableType.ParamPtr:
-                    return GetSignatureSize(TablesHeap.tablereader.GetParamPtrSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetParamPtrSignature());
                 case MetaDataTableType.Property:
-                    return GetSignatureSize(TablesHeap.tablereader.GetPropertyDefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetPropertyDefSignature());
                 case MetaDataTableType.PropertyMap:
-                    return GetSignatureSize(TablesHeap.tablereader.GetPropertyMapSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetPropertyMapSignature());
                 case MetaDataTableType.PropertyPtr:
-                    return GetSignatureSize(TablesHeap.tablereader.GetPropertyPtrSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetPropertyPtrSignature());
                 case MetaDataTableType.StandAloneSig:
-                    return GetSignatureSize(TablesHeap.tablereader.GetStandAloneSigSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetStandAloneSigSignature());
                 case MetaDataTableType.TypeDef:
-                    return GetSignatureSize(TablesHeap.tablereader.GetTypeDefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetTypeDefSignature());
                 case MetaDataTableType.TypeRef:
-                    return GetSignatureSize(TablesHeap.tablereader.GetTypeRefSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetTypeRefSignature());
                 case MetaDataTableType.TypeSpec:
-                    return GetSignatureSize(TablesHeap.tablereader.GetTypeSpecSignature());
+                    return GetSignatureSize(TablesHeap._tablereader.GetTypeSpecSignature());
 
                 default:
                     throw new NotSupportedException("Table is not supported by AsmResolver");
@@ -237,7 +237,7 @@ namespace TUP.AsmResolver.NET
 
         private void LoadMembers()
         {
-            members = TablesHeap.tablereader.ReadMembers(this);
+            _members = TablesHeap._tablereader.ReadMembers(this);
         }
 
         private int GetSignatureSize(byte[] signature)
@@ -254,7 +254,7 @@ namespace TUP.AsmResolver.NET
         /// <returns></returns>
         public override string ToString()
         {
-            return "Type: " + type.ToString() + ", Rows: " + rowAmount.ToString();
+            return "Type: " + _type.ToString() + ", Rows: " + _rowAmount.ToString();
         }
         
         /// <summary>
@@ -262,8 +262,8 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public void ApplyChanges()
         {
-            if (members != null)
-                foreach (MetaDataMember member in members)
+            if (_members != null)
+                foreach (MetaDataMember member in _members)
                     member.ApplyChanges();
         }
        
@@ -272,8 +272,8 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public void Dispose()
         {
-            if (members != null)
-                foreach (var member in members)
+            if (_members != null)
+                foreach (var member in _members)
                     member.Dispose();
         }
 

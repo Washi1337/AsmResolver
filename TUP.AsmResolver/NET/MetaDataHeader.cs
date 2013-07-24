@@ -12,10 +12,10 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class MetaDataHeader :IHeader 
     {
-        NETHeaderReader reader;
+        NETHeaderReader _reader;
         internal MetaDataHeader(NETHeaderReader reader)
         {
-            this.reader = reader;
+            this._reader = reader;
             
         }
         /// <summary>
@@ -23,7 +23,7 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public string VersionString
         {
-            get { return reader.metadataVersionString; }
+            get { return _reader.metadataVersionString; }
         }
 
 
@@ -44,7 +44,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                return reader.metadataFileOffset;
+                return _reader.metadataFileOffset;
             }
         }
 

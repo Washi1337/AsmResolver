@@ -66,9 +66,9 @@ namespace TUP.AsmResolver.NET
                 case ElementType.Ptr:
                     return new PointerType(ReadTypeReference((ElementType)this.ReadByte()));
                 case ElementType.MVar:
-                    return GetGenericParameter(GenericParamType.Method, NETGlobals.ReadCompressedInt32(this));
+                    return GetGenericParameter(GenericParamType.Method, (int)NETGlobals.ReadCompressedUInt32(this));
                 case ElementType.Var:
-                    return GetGenericParameter(GenericParamType.Type, NETGlobals.ReadCompressedInt32(this));
+                    return GetGenericParameter(GenericParamType.Type, (int)NETGlobals.ReadCompressedUInt32(this));
                 case ElementType.Array:
                     return ReadArrayType();
                 case ElementType.SzArray:
@@ -121,9 +121,11 @@ namespace TUP.AsmResolver.NET
         }
 
         private void AddMissingGenericParameters(IGenericParamProvider provider, int index)
-        { 
+        {
             for (int i = provider.GenericParameters.Length; i <= index; i++)
+            {
                 provider.AddGenericParameter(new GenericParameter(provider, i));
+            } 
         }
 
         public TypeReference[] ReadGenericArguments()

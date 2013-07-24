@@ -89,20 +89,20 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public override GenericParameter[] GenericParameters
-        {
-            get
-            {
-                return OriginalMethod.GenericParameters;
-                //if (genericParams == null)
-                //{
-                //    genericParams = new GenericParameter[GenericArguments.Length];
-                //    for (int i = 0; i < genericParams.Length; i++)
-                //        genericParams[i] = new GenericParameter("!!" + i, (ushort)i, (GenericParameterAttributes)0, this);
-                //}
-                //return genericParams;
-            }
-        }
+        //public override GenericParameter[] GenericParameters
+        //{
+        //    get
+        //    {
+        //        return OriginalMethod.GenericParameters;
+        //        //if (genericParams == null)
+        //        //{
+        //        //    genericParams = new GenericParameter[GenericArguments.Length];
+        //        //    for (int i = 0; i < genericParams.Length; i++)
+        //        //        genericParams[i] = new GenericParameter("!!" + i, (ushort)i, (GenericParameterAttributes)0, this);
+        //        //}
+        //        //return genericParams;
+        //    }
+        //}
 
         public TypeReference[] GenericArguments
         {

@@ -12,9 +12,9 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class UserStringsHeap : MetaDataStream
     {
-        uint newEntryOffset = 0;
-        bool hasReadAllStrings = false;
-        SortedDictionary<uint, string> readStrings = new SortedDictionary<uint, string>();
+        uint _newEntryOffset = 0;
+        bool _hasReadAllStrings = false;
+        SortedDictionary<uint, string> _readStrings = new SortedDictionary<uint, string>();
 
         internal UserStringsHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
             : base(netheader, headeroffset, rawHeader, name)
@@ -48,28 +48,28 @@ namespace TUP.AsmResolver.NET
 
         internal void ReadAllStrings()
         {
-            mainStream.Seek(0, SeekOrigin.Begin);
+            _mainStream.Seek(0, SeekOrigin.Begin);
 
-            uint lastPosition = (uint)mainStream.Position;
-            while (mainStream.Position + 1 < mainStream.Length)
+            uint lastPosition = (uint)_mainStream.Position;
+            while (_mainStream.Position + 1 < _mainStream.Length)
             {
                 // TODO: write string.empty strings..
 
-                bool alreadyExisted = readStrings.ContainsKey((uint)mainStream.Position + 1);
-                string value = GetStringByOffset((uint)mainStream.Position + 1);
+                bool alreadyExisted = _readStrings.ContainsKey((uint)_mainStream.Position + 1);
+                string value = GetStringByOffset((uint)_mainStream.Position + 1);
 
 
                 int length = value.Length * 2;
-                if (length == 0 && lastPosition == (uint)mainStream.Position)
-                    mainStream.Seek(1, SeekOrigin.Current);
+                if (length == 0 && lastPosition == (uint)_mainStream.Position)
+                    _mainStream.Seek(1, SeekOrigin.Current);
                 if (alreadyExisted)
-                    mainStream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length) + 1, SeekOrigin.Current);
+                    _mainStream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length) + 1, SeekOrigin.Current);
 
-                lastPosition = (uint)mainStream.Position;
+                lastPosition = (uint)_mainStream.Position;
             }
 
-            hasReadAllStrings = true;
-            newEntryOffset = (uint)mainStream.Length;
+            _hasReadAllStrings = true;
+            _newEntryOffset = (uint)_mainStream.Length;
         }
 
         /// <summary>
@@ -77,16 +77,16 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public override void Dispose()
         {
-            binReader.BaseStream.Close();
-            binReader.BaseStream.Dispose();
-            binReader.Close();
-            binReader.Dispose();
+            _binReader.BaseStream.Close();
+            _binReader.BaseStream.Dispose();
+            _binReader.Close();
+            _binReader.Dispose();
         }
 
         public override void ClearCache()
         {
-            readStrings.Clear();
-            hasReadAllStrings = false;
+            _readStrings.Clear();
+            _hasReadAllStrings = false;
         }
 
         /// <summary>
@@ -97,26 +97,26 @@ namespace TUP.AsmResolver.NET
         public string GetStringByOffset(uint offset)
         {
             string stringValue;
-            if (readStrings.TryGetValue(offset, out stringValue))
+            if (_readStrings.TryGetValue(offset, out stringValue))
                 return stringValue;
 
-            mainStream.Seek(offset, SeekOrigin.Begin);
+            _mainStream.Seek(offset, SeekOrigin.Begin);
 
-            uint length = (uint)(NETGlobals.ReadCompressedUInt32(binReader) & -2);
+            uint length = (uint)(NETGlobals.ReadCompressedUInt32(_binReader) & -2);
             if (length == 0)
             {
-                readStrings.Add(offset, string.Empty);
+                _readStrings.Add(offset, string.Empty);
                 return string.Empty;
             }
             
             char[] chars = new char[length / 2];
 
             for (int i = 0; i < length; i += 2)
-                chars[i / 2] = (char)binReader.ReadInt16();
+                chars[i / 2] = (char)_binReader.ReadInt16();
             
 
             stringValue = new string(chars);
-            readStrings.Add(offset, stringValue);
+            _readStrings.Add(offset, stringValue);
             return stringValue;
         }
 
@@ -127,19 +127,19 @@ namespace TUP.AsmResolver.NET
         /// <returns></returns>
         public uint GetStringOffset(string value)
         {
-            if (!hasReadAllStrings)
+            if (!_hasReadAllStrings)
                 ReadAllStrings();
 
-            if (readStrings.ContainsValue(value))
-                return readStrings.First(rs => rs.Value == value).Key;
+            if (_readStrings.ContainsValue(value))
+                return _readStrings.First(rs => rs.Value == value).Key;
 
-            uint offset = newEntryOffset;
-            mainStream.Seek(offset, SeekOrigin.Begin);
-            binWriter.Write(Encoding.Unicode.GetBytes(value));
-            newEntryOffset += (uint)(value.Length + 1);
-            readStrings.Add(offset, value);
+            uint offset = _newEntryOffset;
+            _mainStream.Seek(offset, SeekOrigin.Begin);
+            _binWriter.Write(Encoding.Unicode.GetBytes(value));
+            _newEntryOffset += (uint)(value.Length + 1);
+            _readStrings.Add(offset, value);
 
-            streamHeader.Size = (uint)mainStream.Length;
+            _streamHeader.Size = (uint)_mainStream.Length;
 
             return offset;
         }

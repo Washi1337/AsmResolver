@@ -11,8 +11,8 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class StringsHeap : MetaDataStream
     {
-        bool hasReadAllStrings = false;
-        SortedDictionary<uint, string> readStrings = new SortedDictionary<uint, string>();
+        bool _hasReadAllStrings = false;
+        SortedDictionary<uint, string> _readStrings = new SortedDictionary<uint, string>();
 
         internal StringsHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
             : base(netheader, headeroffset, rawHeader, name)
@@ -44,19 +44,19 @@ namespace TUP.AsmResolver.NET
 
         internal void ReadAllStrings()
         {
-            mainStream.Seek(0, SeekOrigin.Begin);
-            while (mainStream.Position + 1 < mainStream.Length)
+            _mainStream.Seek(0, SeekOrigin.Begin);
+            while (_mainStream.Position + 1 < _mainStream.Length)
             {
-                bool alreadyExisted = readStrings.ContainsKey((uint)mainStream.Position + 1);
-                string value = GetStringByOffset((uint)mainStream.Position + 1);
+                bool alreadyExisted = _readStrings.ContainsKey((uint)_mainStream.Position + 1);
+                string value = GetStringByOffset((uint)_mainStream.Position + 1);
 
                 int length = Encoding.UTF8.GetBytes(value).Length;
                 if (length == 0)
-                    mainStream.Seek(1, SeekOrigin.Current);
+                    _mainStream.Seek(1, SeekOrigin.Current);
                 if (alreadyExisted)
-                    mainStream.Seek(length + 1, SeekOrigin.Current);
+                    _mainStream.Seek(length + 1, SeekOrigin.Current);
             }
-            hasReadAllStrings = true;
+            _hasReadAllStrings = true;
         }
 
         /// <summary>
@@ -70,15 +70,15 @@ namespace TUP.AsmResolver.NET
 
         public override void ClearCache()
         {
-            readStrings.Clear();
-            hasReadAllStrings = false;
+            _readStrings.Clear();
+            _hasReadAllStrings = false;
         }
 
         public bool TryGetStringByOffset(uint offset, out string value)
         {
             value = string.Empty;
 
-            if (offset == 0 || offset > mainStream.Length)
+            if (offset == 0 || offset > _mainStream.Length)
                 return false;
 
             value = GetStringByOffset(offset);
@@ -93,27 +93,27 @@ namespace TUP.AsmResolver.NET
         public string GetStringByOffset(uint offset)
         {
             string stringValue;
-            if (readStrings.TryGetValue(offset, out stringValue))
+            if (_readStrings.TryGetValue(offset, out stringValue))
                 return stringValue;
 
-            if (mainStream.Position > mainStream.Length)
+            if (_mainStream.Position > _mainStream.Length)
                 throw new EndOfStreamException();
 
-            mainStream.Seek(offset, SeekOrigin.Begin);
+            _mainStream.Seek(offset, SeekOrigin.Begin);
             byte lastByte = 0;
             do
             {
-                lastByte = binReader.ReadByte();
+                lastByte = _binReader.ReadByte();
 
-            } while (lastByte != 0 && mainStream.Position < mainStream.Length);
+            } while (lastByte != 0 && _mainStream.Position < _mainStream.Length);
 
-            int endoffset = (int)mainStream.Position - 1;
+            int endoffset = (int)_mainStream.Position - 1;
 
-            mainStream.Seek(offset, SeekOrigin.Begin);
+            _mainStream.Seek(offset, SeekOrigin.Begin);
 
-            stringValue = Encoding.UTF8.GetString(binReader.ReadBytes(endoffset - (int)offset), 0, endoffset - (int)offset);
-            readStrings.Add(offset, stringValue);
-            return readStrings[offset];
+            stringValue = Encoding.UTF8.GetString(_binReader.ReadBytes(endoffset - (int)offset), 0, endoffset - (int)offset);
+            _readStrings.Add(offset, stringValue);
+            return _readStrings[offset];
         }
 
         /// <summary>
@@ -126,20 +126,20 @@ namespace TUP.AsmResolver.NET
             if (string.IsNullOrEmpty(value))
                 return 0;
 
-            if (!hasReadAllStrings)
+            if (!_hasReadAllStrings)
                 ReadAllStrings();
 
-            if (readStrings.ContainsValue(value))
-                return readStrings.First(rs => rs.Value == value).Key;
+            if (_readStrings.ContainsValue(value))
+                return _readStrings.First(rs => rs.Value == value).Key;
 
-            uint offset = (uint)mainStream.Length;
-            mainStream.Seek(offset, SeekOrigin.Begin);
-            binWriter.Write(Encoding.UTF8.GetBytes(value)); // data
-            binWriter.Write((byte)0); // terminator
+            uint offset = (uint)_mainStream.Length;
+            _mainStream.Seek(offset, SeekOrigin.Begin);
+            _binWriter.Write(Encoding.UTF8.GetBytes(value)); // data
+            _binWriter.Write((byte)0); // terminator
 
-            readStrings.Add(offset, value);
+            _readStrings.Add(offset, value);
 
-            streamHeader.Size = (uint)mainStream.Length;
+            _streamHeader.Size = (uint)_mainStream.Length;
             
             return offset;
         }

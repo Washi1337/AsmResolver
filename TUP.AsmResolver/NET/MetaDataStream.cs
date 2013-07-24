@@ -15,64 +15,64 @@ namespace TUP.AsmResolver.NET
         public MetaDataStream(string name, byte[] contents)
         {
             Name = name;
-            this.streamHeader = new Structures.METADATA_STREAM_HEADER()
+            this._streamHeader = new Structures.METADATA_STREAM_HEADER()
             {
                 Offset = 0,
                 Size = (uint)contents.Length,
             };
 
-            mainStream = new MemoryStream();
-            binReader = new BinaryReader(mainStream);
-            binWriter = new BinaryWriter(mainStream);
-            mainStream.Write(contents, 0, contents.Length);
-            mainStream.Seek(0, SeekOrigin.Begin);
+            _mainStream = new MemoryStream();
+            _binReader = new BinaryReader(_mainStream);
+            _binWriter = new BinaryWriter(_mainStream);
+            _mainStream.Write(contents, 0, contents.Length);
+            _mainStream.Seek(0, SeekOrigin.Begin);
         }
 
         internal MetaDataStream(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
         {
-            this.headeroffset = headeroffset;
-            this.netheader = netheader;
-            this.streamHeader = rawHeader;
-            this.name = name;
-            this.indexsize = 2;
+            this._headeroffset = headeroffset;
+            this._netheader = netheader;
+            this._streamHeader = rawHeader;
+            this._name = name;
+            this._indexsize = 2;
 
-            byte[] contents = netheader.assembly._peImage.ReadBytes(StreamOffset, (int)StreamSize);
-            mainStream = new MemoryStream();
-            binReader = new BinaryReader(mainStream);
-            binWriter = new BinaryWriter(mainStream);
-            mainStream.Write(contents, 0, contents.Length);
-            mainStream.Seek(0, SeekOrigin.Begin);
+            byte[] contents = netheader._assembly._peImage.ReadBytes(StreamOffset, (int)StreamSize);
+            _mainStream = new MemoryStream();
+            _binReader = new BinaryReader(_mainStream);
+            _binWriter = new BinaryWriter(_mainStream);
+            _mainStream.Write(contents, 0, contents.Length);
+            _mainStream.Seek(0, SeekOrigin.Begin);
         }
 
-        internal int headeroffset;
-        internal string name;
-        internal NETHeader netheader;
-        internal Structures.METADATA_STREAM_HEADER streamHeader;
-        internal byte indexsize;
-        internal MemoryStream mainStream;
-        internal BinaryReader binReader;
-        internal BinaryWriter binWriter;
+        internal int _headeroffset;
+        internal string _name;
+        internal NETHeader _netheader;
+        internal Structures.METADATA_STREAM_HEADER _streamHeader;
+        internal byte _indexsize;
+        internal MemoryStream _mainStream;
+        internal BinaryReader _binReader;
+        internal BinaryWriter _binWriter;
 
         /// <summary>
         /// Gets the offset of the header of the metadata.
         /// </summary>
         public int HeaderOffset
         {
-            get { return headeroffset; }
+            get { return _headeroffset; }
         }
         /// <summary>
         /// Gets the actual file offset of the stream.
         /// </summary>
         public uint StreamOffset
         {
-            get { return streamHeader.Offset + (uint)netheader.MetaDataHeader.RawOffset; }
+            get { return _streamHeader.Offset + (uint)_netheader.MetaDataHeader.RawOffset; }
         }
         /// <summary>
         /// Gets the length of bytes of the stream
         /// </summary>
         public uint StreamSize
         {
-            get { return streamHeader.Size ; }
+            get { return _streamHeader.Size ; }
         }
         /// <summary>
         /// Gets the contents in byte array format.
@@ -81,7 +81,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                return mainStream.ToArray();
+                return _mainStream.ToArray();
             }
         }
         /// <summary>
@@ -89,28 +89,28 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public string Name
         {
-            get { return name; }
+            get { return _name; }
             set
             {
-                name = value;
+                _name = value;
                 if (HasImage)
-                    netheader.assembly._peImage.Write((int)headeroffset + 8, name, Encoding.ASCII);
+                    _netheader._assembly._peImage.Write((int)_headeroffset + 8, _name, Encoding.ASCII);
             }
         }
     
         public byte IndexSize
         {
-            get { return indexsize; }
+            get { return _indexsize; }
         }
 
         public NETHeader NETHeader
         {
-            get { return netheader; }
+            get { return _netheader; }
         }
 
         public bool HasImage
         {
-            get { return netheader != null; }
+            get { return _netheader != null; }
         }
 
         internal virtual void Initialize()
@@ -119,9 +119,9 @@ namespace TUP.AsmResolver.NET
 
         public virtual void Dispose()
         {
-            binReader.Dispose();
-            binWriter.Dispose();
-            mainStream.Dispose();
+            _binReader.Dispose();
+            _binWriter.Dispose();
+            _mainStream.Dispose();
             ClearCache();
         }
 
@@ -138,10 +138,10 @@ namespace TUP.AsmResolver.NET
             // used for rebuilding to remove all unused data.
 
             Dispose();
-            streamHeader.Size = 0;
-            mainStream = new MemoryStream();
-            binReader = new BinaryReader(mainStream);
-            binWriter = new BinaryWriter(mainStream);
+            _streamHeader.Size = 0;
+            _mainStream = new MemoryStream();
+            _binReader = new BinaryReader(_mainStream);
+            _binWriter = new BinaryWriter(_mainStream);
         }
 
         public object Clone()

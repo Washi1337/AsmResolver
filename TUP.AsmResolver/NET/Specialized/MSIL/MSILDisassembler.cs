@@ -33,7 +33,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             MethodBody = body;
             
-            Section section = Section.GetSectionByRva(body.Method._netheader.assembly, body.Method.RVA);
+            Section section = Section.GetSectionByRva(body.Method._netheader._assembly, body.Method.RVA);
 
             _ilOffset = new OffsetConverter(section).RvaToFileOffset(body.Method.RVA) + (uint)body.HeaderSize;
 
@@ -110,7 +110,10 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         public MSILInstruction DisassembleNextInstruction()
         {
             int currentOffset = (int)(_reader.BaseStream.Position - _ilOffset);
-            
+
+            //if (currentOffset == 0x64)
+            //    System.Diagnostics.Debugger.Break();
+
             MSILOpCode opcode = ReadNextOpCode();
 
             byte[] rawoperand = ReadRawOperand(opcode);

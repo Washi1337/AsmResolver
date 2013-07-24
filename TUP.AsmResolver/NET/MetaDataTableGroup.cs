@@ -7,19 +7,19 @@ namespace TUP.AsmResolver.NET
 {
     public struct MetaDataTableGroup
     {
-        internal MetaDataTable[] tables;
-        internal int bits;
+        internal MetaDataTable[] _tables;
+        internal int _bits;
 
         internal MetaDataTable this[int index]
         {
-            get { return tables[index]; }
-            set { tables[index] = value; }
+            get { return _tables[index]; }
+            set { _tables[index] = value; }
         }
 
         internal MetaDataTableGroup(int tables, int bits)
         {
-            this.tables = new MetaDataTable[tables];
-            this.bits = bits;
+            this._tables = new MetaDataTable[tables];
+            this._bits = bits;
         }
 
         public bool IsLarge
@@ -35,9 +35,9 @@ namespace TUP.AsmResolver.NET
             get
             {
                 int endresult = 0;
-                foreach (MetaDataTable table in tables)
+                foreach (MetaDataTable table in _tables)
                     if (table != null)
-                        endresult += table.rowAmount;
+                        endresult += table._rowAmount;
 
                 return endresult;
             }
@@ -50,22 +50,22 @@ namespace TUP.AsmResolver.NET
                 return false;
 
             int tableindex = 0;
-            for (int i = tables.Length - 1; i > 0; i--)
+            for (int i = _tables.Length - 1; i > 0; i--)
                 if ((codedIndex & i) == i)
                 {
                     tableindex = i;
                     break;
                 }
 
-            if (tableindex >= tables.Length)
+            if (tableindex >= _tables.Length)
                 return false;
 
-            int rowindex = codedIndex >> bits;
+            int rowindex = codedIndex >> _bits;
 
-            if (rowindex == 0 || rowindex > tables[tableindex].AmountOfRows)
+            if (rowindex == 0 || rowindex > _tables[tableindex].AmountOfRows)
                 return false;
 
-            member = tables[tableindex].Members[rowindex - 1];
+            member = _tables[tableindex].Members[rowindex - 1];
             return true;
         }
 
@@ -98,14 +98,14 @@ namespace TUP.AsmResolver.NET
             if (member == null)
                 return 0;
 
-            MetaDataTable table = tables.FirstOrDefault(t => t != null && t.Type == member.TableType);
+            MetaDataTable table = _tables.FirstOrDefault(t => t != null && t.Type == member.TableType);
             if (table == null)
                 throw new ArgumentException("Member does not belong to the metadata table group.");
 
             uint rowIndex = ((uint)(member._metadatatoken - ((uint)table.Type << 24)));
-            uint tableIndex = (uint)Array.IndexOf(tables, table);
+            uint tableIndex = (uint)Array.IndexOf(_tables, table);
 
-            return (rowIndex << bits) | tableIndex;
+            return (rowIndex << _bits) | tableIndex;
         }
     }
 }

@@ -54,7 +54,7 @@ namespace TUP.AsmResolver.PE.Writers
         private void CollectMembers(TablesHeap tablesHeap, Workspace workspace)
         {
             Constructor.Log("Collecting .NET metadata members.");
-            for (int i = 0; i < tablesHeap.tables.Length; i++)
+            for (int i = 0; i < tablesHeap._tables.Length; i++)
             {
                 MetaDataTableType tableType = (MetaDataTableType)i;
                 if (tablesHeap.HasTable(tableType))
@@ -79,7 +79,7 @@ namespace TUP.AsmResolver.PE.Writers
         private void ClearAllStreams(NETHeader netHeader,  Workspace workspace)
         {
             Constructor.Log("Clearing .NET metadata streams.");
-            workspace.NewNetHeader.streams = CloneArray(netHeader.MetaDataStreams.ToArray());
+            workspace.NewNetHeader._streams = CloneArray(netHeader.MetaDataStreams.ToArray());
             for (int i = 0; i < workspace.NewNetHeader.MetaDataStreams.Length; i++)
             {
                 workspace.NewNetHeader.MetaDataStreams[i].MakeEmpty();

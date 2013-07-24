@@ -8,8 +8,8 @@ namespace TUP.AsmResolver.NET
 {
     public class GuidHeap : MetaDataStream
     {
-        uint newEntryOffset = 0;
-        bool hasReadAllGuids = false;
+        uint _newEntryOffset = 0;
+        bool _hasReadAllGuids = false;
 
         SortedDictionary<uint, Guid> readGuids = new SortedDictionary<uint, Guid>();
 
@@ -23,8 +23,8 @@ namespace TUP.AsmResolver.NET
             Guid guid;
             if (readGuids.TryGetValue(offset, out guid))
                 return guid;
-            mainStream.Seek(offset - 1, SeekOrigin.Begin);
-            guid = new Guid(binReader.ReadBytes(16));
+            _mainStream.Seek(offset - 1, SeekOrigin.Begin);
+            guid = new Guid(_binReader.ReadBytes(16));
             readGuids.Add(offset, guid);
             return guid;
         }
@@ -34,15 +34,15 @@ namespace TUP.AsmResolver.NET
             if (guid == null || guid == Guid.Empty)
                 return 0;
 
-            if (!hasReadAllGuids)
+            if (!_hasReadAllGuids)
                 ReadAllGuids();
 
             if (readGuids.ContainsValue(guid))
                 return readGuids.First(rg => rg.Value == guid).Key;
 
-            uint offset = newEntryOffset;
+            uint offset = _newEntryOffset;
             readGuids.Add(offset, guid);
-            newEntryOffset += 16;
+            _newEntryOffset += 16;
             return offset;
         }
 
@@ -52,17 +52,17 @@ namespace TUP.AsmResolver.NET
 
         internal void ReadAllGuids()
         {
-            mainStream.Seek(1, SeekOrigin.Begin);
-            while (mainStream.Position < mainStream.Length)
+            _mainStream.Seek(1, SeekOrigin.Begin);
+            while (_mainStream.Position < _mainStream.Length)
             {
-                bool alreadyExists = readGuids.ContainsKey((uint)mainStream.Position);
-                GetGuidByOffset((uint)mainStream.Position);
+                bool alreadyExists = readGuids.ContainsKey((uint)_mainStream.Position);
+                GetGuidByOffset((uint)_mainStream.Position);
                 if (alreadyExists)
-                    mainStream.Seek(16, SeekOrigin.Current);
+                    _mainStream.Seek(16, SeekOrigin.Current);
             }
 
-            newEntryOffset = (uint)mainStream.Length;
-            hasReadAllGuids = true;
+            _newEntryOffset = (uint)_mainStream.Length;
+            _hasReadAllGuids = true;
         }
 
         public override void Dispose()

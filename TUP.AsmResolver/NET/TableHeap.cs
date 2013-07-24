@@ -13,10 +13,10 @@ namespace TUP.AsmResolver.NET
 {
     public class TablesHeap : MetaDataStream
     {
-        internal Structures.METADATA_TABLE_HEADER header;
-        internal NETTableReader tablereader;
-        internal MetaDataTable[] tables;
-        internal int tablecount;
+        internal Structures.METADATA_TABLE_HEADER _header;
+        internal NETTableReader _tablereader;
+        internal MetaDataTable[] _tables;
+        internal int _tablecount;
 
         internal TablesHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
             : base(netheader, headeroffset, rawHeader, name)
@@ -25,8 +25,8 @@ namespace TUP.AsmResolver.NET
 
         internal override void Initialize()
         {
-            tables = new MetaDataTable[45];
-            tablereader = new NETTableReader(this);
+            _tables = new MetaDataTable[45];
+            _tablereader = new NETTableReader(this);
         }
         
         internal override void MakeEmpty()
@@ -36,13 +36,13 @@ namespace TUP.AsmResolver.NET
 
         public override void Dispose()
         {
-            foreach (var table in tables)
+            foreach (var table in _tables)
                 if (table != null)
                     table.Dispose();
 
-            Array.Clear(tables, 0, tables.Length);
+            Array.Clear(_tables, 0, _tables.Length);
 
-            tablereader.Dispose();
+            _tablereader.Dispose();
             ClearCache();
             base.Dispose();
         }
@@ -54,72 +54,72 @@ namespace TUP.AsmResolver.NET
 
         public byte MajorVersion
         {
-            get { return header.MajorVersion; }
+            get { return _header.MajorVersion; }
             set
             {
-                PeImage image = netheader.assembly._peImage;
+                PeImage image = _netheader._assembly._peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][1]);
                 image.Writer.Write(value);
-                header.MajorVersion = value;
+                _header.MajorVersion = value;
             }
         }
 
         public byte MinorVersion
         {
-            get { return header.MinorVersion; }
+            get { return _header.MinorVersion; }
             set
             {
-                PeImage image = netheader.assembly._peImage;
+                PeImage image = _netheader._assembly._peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][2]);
                 image.Writer.Write(value);
-                header.MinorVersion = value;
+                _header.MinorVersion = value;
             }
         }
 
         public byte HeapOffsetSizes
         {
-            get { return header.HeapOffsetSizes; }
+            get { return _header.HeapOffsetSizes; }
             set
             {
-                PeImage image = netheader.assembly._peImage;
+                PeImage image = _netheader._assembly._peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][3]);
                 image.Writer.Write(value);
-                header.HeapOffsetSizes = value;
+                _header.HeapOffsetSizes = value;
             }
         }
 
         public ulong MaskSorted
         {
-            get { return header.MaskSorted; }
+            get { return _header.MaskSorted; }
             set
             {
-                PeImage image = netheader.assembly._peImage;
+                PeImage image = _netheader._assembly._peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][6]);
                 image.Writer.Write(value);
-                header.MaskSorted = value;
+                _header.MaskSorted = value;
             }
         }
 
         public ulong MaskValid
         {
-            get { return header.MaskValid; }
+            get { return _header.MaskValid; }
             set
             {
-                PeImage image = netheader.assembly._peImage;
+                PeImage image = _netheader._assembly._peImage;
                 image.SetOffset(StreamOffset + Structures.DataOffsets[typeof(Structures.METADATA_TABLE_HEADER)][5]);
                 image.Writer.Write(value);
-                header.MaskValid = value;
+                _header.MaskValid = value;
             }
         }
         
         public MetaDataTable[] Tables
         {
-            get { return tables.ToArray(); }
+            get { return _tables.ToArray(); }
         }
 
         public int TableCount
         {
-            get { return tablecount; }
+            get { return _tablecount; }
         }
 
         public bool HasTable(MetaDataTableType table)
@@ -129,7 +129,7 @@ namespace TUP.AsmResolver.NET
 
         public void ApplyChanges()
         {
-            foreach (MetaDataTable table in tables)
+            foreach (MetaDataTable table in _tables)
                 if (table != null)
                     table.ApplyChanges();
         }
@@ -148,14 +148,14 @@ namespace TUP.AsmResolver.NET
                 else
                     return null;
             }
-            return tables[(int)type];
+            return _tables[(int)type];
         }
 
         public void AddTable(MetaDataTableType type)
         {
             MetaDataTable table = new MetaDataTable(this, true);
-            table.type = type;
-            tables[(int)type] = table;
+            table._type = type;
+            _tables[(int)type] = table;
             MaskValid |= ((ulong)1 << (int)type);
         }
 

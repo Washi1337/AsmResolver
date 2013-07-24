@@ -19,7 +19,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             MethodBody body = new MethodBody();
             body.Method = methodDef;
-            body._reader = new NETMethodReader(methodDef._netheader.assembly._peImage, body);
+            body._reader = new NETMethodReader(methodDef._netheader._assembly._peImage, body);
             if (body.IsFat)
                 body._reader.ReadFatMethod();
             return body;

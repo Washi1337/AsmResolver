@@ -125,10 +125,7 @@ namespace TUP.AsmResolver.NET.Specialized
         
         void IGenericParamProvider.AddGenericParameter(GenericParameter parameter)
         {
-            if (_genericParameters == null)
-                _genericParameters = new GenericParameter[1];
-            else
-                Array.Resize(ref _genericParameters, _genericParameters.Length + 1);
+            Array.Resize(ref _genericParameters, _genericParameters.Length + 1);
             _genericParameters[_genericParameters.Length - 1] = parameter;
         }
     }

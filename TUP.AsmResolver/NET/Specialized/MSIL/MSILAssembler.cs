@@ -17,8 +17,8 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             this.MethodBody = methodBody;
             _disassembler = new MSILDisassembler(methodBody);
-            _image = methodBody.Method._netheader.assembly.Image;
-            _offsetConverter = new OffsetConverter(Section.GetSectionByRva(methodBody.Method._netheader.assembly, methodBody.Method.RVA));
+            _image = methodBody.Method._netheader._assembly.Image;
+            _offsetConverter = new OffsetConverter(Section.GetSectionByRva(methodBody.Method._netheader._assembly, methodBody.Method.RVA));
             _bodyOffset = _offsetConverter.RvaToFileOffset(methodBody.Method.RVA) + methodBody.HeaderSize;
             _tokenResolver = methodBody.Method._netheader.TokenResolver;
         }

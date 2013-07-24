@@ -14,7 +14,7 @@ namespace TUP.AsmResolver.NET
     public class BlobHeap : MetaDataStream
     {
 
-        internal SortedDictionary<uint, byte[]> readBlobs = new SortedDictionary<uint, byte[]>();
+        internal SortedDictionary<uint, byte[]> _readBlobs = new SortedDictionary<uint, byte[]>();
         
         //MetaDataStream stream)
             //: base(stream)
@@ -37,34 +37,34 @@ namespace TUP.AsmResolver.NET
             writer.Write((byte)0);
             ReadAllBlobs();
         
-            foreach (var blob in readBlobs)
+            foreach (var blob in _readBlobs)
             {
                 NETGlobals.WriteCompressedUInt32(writer, (uint)blob.Value.Length);
                 writer.Write(blob.Value);
             }
         
-            mainStream.Dispose();
-            binReader.Dispose();
-            binWriter.Dispose();
-            mainStream = newStream;
-            binReader = new BinaryReader(newStream);
-            binWriter = new BinaryWriter(newStream);
-            this.streamHeader.Size = (uint)newStream.Length;
+            _mainStream.Dispose();
+            _binReader.Dispose();
+            _binWriter.Dispose();
+            _mainStream = newStream;
+            _binReader = new BinaryReader(newStream);
+            _binWriter = new BinaryWriter(newStream);
+            this._streamHeader.Size = (uint)newStream.Length;
         }
 
         internal void ReadAllBlobs()
         {
-            mainStream.Seek(1, SeekOrigin.Begin);
-            while (mainStream.Position < mainStream.Length)
+            _mainStream.Seek(1, SeekOrigin.Begin);
+            while (_mainStream.Position < _mainStream.Length)
             {
-                bool alreadyExisted = readBlobs.ContainsKey((uint)mainStream.Position);
-                byte[] value = GetBlob((uint)mainStream.Position);
+                bool alreadyExisted = _readBlobs.ContainsKey((uint)_mainStream.Position);
+                byte[] value = GetBlob((uint)_mainStream.Position);
 
                 int length = value.Length;
                 if (length == 0)
                     break;
                 if (alreadyExisted)
-                    mainStream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length), SeekOrigin.Current);
+                    _mainStream.Seek(length + NETGlobals.GetCompressedUInt32Size((uint)length), SeekOrigin.Current);
 
             }
         }
@@ -77,7 +77,7 @@ namespace TUP.AsmResolver.NET
 
         public override void ClearCache()
         {
-            readBlobs.Clear();
+            _readBlobs.Clear();
         }
 
         /// <summary>
@@ -88,14 +88,14 @@ namespace TUP.AsmResolver.NET
         public byte[] GetBlob(uint index)
         {
             byte[] bytes = null;
-            if (readBlobs.TryGetValue(index, out bytes))
+            if (_readBlobs.TryGetValue(index, out bytes))
                 return bytes;
 
-            mainStream.Seek(index, SeekOrigin.Begin);
-            int length = (int)NETGlobals.ReadCompressedUInt32(binReader);
+            _mainStream.Seek(index, SeekOrigin.Begin);
+            int length = (int)NETGlobals.ReadCompressedUInt32(_binReader);
 
-            bytes = binReader.ReadBytes(length);
-            readBlobs.Add(index, bytes);
+            bytes = _binReader.ReadBytes(length);
+            _readBlobs.Add(index, bytes);
             return bytes;
             
         }
@@ -110,7 +110,7 @@ namespace TUP.AsmResolver.NET
             byte[] bytes = GetBlob(index);
             MemoryStream newStream = new MemoryStream(bytes);
             newStream.Seek(0, SeekOrigin.Begin);
-            BlobSignatureReader reader = new BlobSignatureReader(newStream, netheader);
+            BlobSignatureReader reader = new BlobSignatureReader(newStream, _netheader);
             return reader;
         }
 
@@ -131,14 +131,14 @@ namespace TUP.AsmResolver.NET
         {
             ReadAllBlobs();
 
-            if (readBlobs.ContainsValue(blobValue))
-                return readBlobs.FirstOrDefault(b => b.Value == blobValue).Key;
+            if (_readBlobs.ContainsValue(blobValue))
+                return _readBlobs.FirstOrDefault(b => b.Value == blobValue).Key;
 
-            mainStream.Seek(0, SeekOrigin.End);
-            uint index = (uint)mainStream.Position;
-            NETGlobals.WriteCompressedUInt32(binWriter, (uint)blobValue.Length);
-            binWriter.Write(blobValue);
-            readBlobs.Add(index, blobValue);
+            _mainStream.Seek(0, SeekOrigin.End);
+            uint index = (uint)_mainStream.Position;
+            NETGlobals.WriteCompressedUInt32(_binWriter, (uint)blobValue.Length);
+            _binWriter.Write(blobValue);
+            _readBlobs.Add(index, blobValue);
             return index;
         }
 
@@ -171,7 +171,11 @@ namespace TUP.AsmResolver.NET
                     }
                     if ((flag & 0x10) != 0)
                     {
-                        uint genericsig = NETGlobals.ReadCompressedUInt32(reader);
+                        int genericsig = NETGlobals.ReadCompressedInt32(reader);
+                        if (!context.IsDefinition)
+                        {
+                            AddMissingGenericParameters(context.Method, genericsig - 1);
+                        }
                     }
                     methodsignature.CallingConvention = (MethodCallingConvention)flag;
 
@@ -349,6 +353,10 @@ namespace TUP.AsmResolver.NET
             return customAttrSig;
         }
 
-
+        private void AddMissingGenericParameters(IGenericParamProvider provider, int index)
+        {
+            for (int i = provider.GenericParameters.Length; i <= index; i++)
+                provider.AddGenericParameter(new GenericParameter(provider, i));
+        }
     }
 }

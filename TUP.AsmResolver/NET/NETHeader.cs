@@ -13,18 +13,18 @@ namespace TUP.AsmResolver.NET
     public class NETHeader : IHeader , IDisposable , IDataDirectoryProvider, ICacheProvider
     {
 
-        internal Structures.IMAGE_COR20_HEADER rawHeader;
-        internal Win32Assembly assembly;
+        internal Structures.IMAGE_COR20_HEADER _rawHeader;
+        internal Win32Assembly _assembly;
         //internal NETHeaderReader reader;
-        StringsHeap stringsheap;
-        UserStringsHeap usheap;
-        TablesHeap tableheap;
-        BlobHeap blobheap;
-        GuidHeap guidheap;
-        internal TypeSystem typeSystem;
-        MetaDataHeader metadata;
-        internal MetaDataStream[] streams;
-        internal uint rawOffset;
+        StringsHeap _stringsheap;
+        UserStringsHeap _usheap;
+        TablesHeap _tableheap;
+        BlobHeap _blobheap;
+        GuidHeap _guidheap;
+        internal TypeSystem _typeSystem;
+        MetaDataHeader _metadata;
+        internal MetaDataStream[] _streams;
+        internal uint _rawOffset;
 
         /// <summary>
         /// Gets a metadata token resolver to lookup Members by its metadata token.
@@ -38,9 +38,9 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                if (typeSystem == null)
-                    typeSystem = new TypeSystem(this);
-                return typeSystem;
+                if (_typeSystem == null)
+                    _typeSystem = new TypeSystem(this);
+                return _typeSystem;
             }
         }
 
@@ -69,9 +69,9 @@ namespace TUP.AsmResolver.NET
         {
             NETHeader header = new NETHeader();
             
-            header.assembly = assembly;
+            header._assembly = assembly;
             NETHeaderReader reader = new NETHeaderReader(assembly._ntHeader, header);
-            header.metadata = new MetaDataHeader(reader);
+            header._metadata = new MetaDataHeader(reader);
             reader.LoadData();
             header.TokenResolver = new MetaDataTokenResolver(header);
             return header;
@@ -84,7 +84,7 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public uint EntryPointToken
         {
-            get { return rawHeader.EntryPointToken; }
+            get { return _rawHeader.EntryPointToken; }
         }
 
         /// <summary>
@@ -92,13 +92,13 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public NETHeaderFlags Flags
         {
-            get { return (NETHeaderFlags)rawHeader.Flags; }
+            get { return (NETHeaderFlags)_rawHeader.Flags; }
             set
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_COR20_HEADER)][4];
-                assembly._peImage.SetOffset(targetoffset);
-                assembly._peImage.Writer.Write((uint)value);
-                rawHeader.Flags = (uint)value;
+                _assembly._peImage.SetOffset(targetoffset);
+                _assembly._peImage.Writer.Write((uint)value);
+                _rawHeader.Flags = (uint)value;
             }
         }
 
@@ -107,7 +107,7 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public MetaDataHeader MetaDataHeader
         {
-            get { return metadata; }
+            get { return _metadata; }
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public MetaDataStream[] MetaDataStreams
         {
-            get { return streams; }
+            get { return _streams; }
         }
 
         /// <summary>
@@ -125,12 +125,12 @@ namespace TUP.AsmResolver.NET
         {
             get 
             {
-                if (tableheap == null)
+                if (_tableheap == null)
                 {
-                    tableheap = (TablesHeap)MetaDataStreams.FirstOrDefault(t => t.name == "#~" || t.name == "#-");
+                    _tableheap = (TablesHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#~" || t._name == "#-");
                 }
 
-                return tableheap;
+                return _tableheap;
             }
         }
 
@@ -141,9 +141,9 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                if (stringsheap == null)
-                    stringsheap = (StringsHeap)MetaDataStreams.FirstOrDefault(t => t.name == "#Strings");
-                return stringsheap;
+                if (_stringsheap == null)
+                    _stringsheap = (StringsHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#Strings");
+                return _stringsheap;
             }
         }
 
@@ -154,9 +154,9 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                if (usheap == null)
-                    usheap = (UserStringsHeap)MetaDataStreams.FirstOrDefault(t => t.name == "#US");
-                return usheap;
+                if (_usheap == null)
+                    _usheap = (UserStringsHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#US");
+                return _usheap;
             }
         }
 
@@ -167,9 +167,9 @@ namespace TUP.AsmResolver.NET
         {
             get
             { 
-                if (blobheap == null)
-                    blobheap = (BlobHeap)MetaDataStreams.FirstOrDefault(t => t.name == "#Blob"); 
-                return blobheap;
+                if (_blobheap == null)
+                    _blobheap = (BlobHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#Blob"); 
+                return _blobheap;
             }
         }
 
@@ -180,9 +180,9 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                if (guidheap == null)
-                    guidheap = (GuidHeap)MetaDataStreams.First(t => t.name == "#GUID");
-                return guidheap;
+                if (_guidheap == null)
+                    _guidheap = (GuidHeap)MetaDataStreams.First(t => t._name == "#GUID");
+                return _guidheap;
             }
         }
 
@@ -193,7 +193,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                return assembly;
+                return _assembly;
             }
         }
 
@@ -204,7 +204,7 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                return rawOffset;
+                return _rawOffset;
             }
         }
 
@@ -235,7 +235,7 @@ namespace TUP.AsmResolver.NET
         {
             if (MetaDataStreams == null || MetaDataStreams.Length == 0)
                 return false;
-            return (MetaDataStreams.FirstOrDefault(s => s.name == name) != null);
+            return (MetaDataStreams.FirstOrDefault(s => s._name == name) != null);
         }
 
         /// <summary>
@@ -243,36 +243,36 @@ namespace TUP.AsmResolver.NET
         /// </summary>
         public void Dispose()
         {
-            if (blobheap != null)
-                blobheap.Dispose();
-            if (guidheap != null)
-                guidheap.Dispose();
-            if (stringsheap != null)
-                stringsheap.Dispose();
-            if (usheap != null)
-                usheap.Dispose();
-            if (tableheap != null)
-                tableheap.Dispose();
+            if (_blobheap != null)
+                _blobheap.Dispose();
+            if (_guidheap != null)
+                _guidheap.Dispose();
+            if (_stringsheap != null)
+                _stringsheap.Dispose();
+            if (_usheap != null)
+                _usheap.Dispose();
+            if (_tableheap != null)
+                _tableheap.Dispose();
 
         }
 
         public void ClearCache()
         {
-            tableheap = null;
-            stringsheap = null;
-            usheap = null;
-            blobheap = null;
-            guidheap = null;
+            _tableheap = null;
+            _stringsheap = null;
+            _usheap = null;
+            _blobheap = null;
+            _guidheap = null;
             
         }
 
         public void LoadCache()
         {
-            tableheap = TablesHeap;
-            stringsheap = StringsHeap;
-            usheap = UserStringsHeap;
-            blobheap = BlobHeap;
-            guidheap = GuidHeap;
+            _tableheap = TablesHeap;
+            _stringsheap = StringsHeap;
+            _usheap = UserStringsHeap;
+            _blobheap = BlobHeap;
+            _guidheap = GuidHeap;
         }
     }
 }

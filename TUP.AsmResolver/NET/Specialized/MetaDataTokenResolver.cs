@@ -42,9 +42,8 @@ namespace TUP.AsmResolver.NET.Specialized
             if (!_netheader.TablesHeap.HasTable(tabletype))
                 throw new ArgumentException("Table is not present in tables heap.");
 
-            uint subtraction = ((uint)tabletype) * 0x1000000;
-            uint rowindex = metadataToken - subtraction;
-            return _netheader.TablesHeap.GetTable( tabletype).Members[(int)rowindex - 1];
+            uint rowindex = metadataToken & 0x00FFFFFF;
+            return _netheader.TablesHeap.GetTable(tabletype).Members[(int)rowindex - 1];
         }
 
         /// <summary>
@@ -54,7 +53,7 @@ namespace TUP.AsmResolver.NET.Specialized
         /// <returns></returns>
         public string ResolveString(uint metadataToken)
         {
-            uint actualindex = metadataToken - 0x70000000;
+            uint actualindex = metadataToken & 0x00FFFFFF;
             return _netheader.UserStringsHeap.GetStringByOffset(actualindex);
             
         }
