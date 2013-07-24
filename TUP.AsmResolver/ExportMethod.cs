@@ -12,31 +12,31 @@ namespace TUP.AsmResolver
     {
         internal ExportMethod(string lib, string name, uint nameRva, uint rva, ushort ordinal)
         {
-            this.lib = lib;
-            this.name = name;
-            this.nameRva = nameRva;
-            this.rva = rva;
-            this.ordinal = ordinal;
+            this._lib = lib;
+            this._name = name;
+            this._nameRva = nameRva;
+            this._rva = rva;
+            this._ordinal = ordinal;
         }
-        internal string lib;
-        internal string name;
-        internal uint nameRva;
-        internal uint rva;
-        internal ushort ordinal;
+        internal string _lib;
+        internal string _name;
+        internal uint _nameRva;
+        internal uint _rva;
+        internal ushort _ordinal;
 
         /// <summary>
         /// Gets the name of the method.
         /// </summary>
         public string Name
         {
-            get { return name; }
+            get { return _name; }
         }        
         /// <summary>
         /// Gets the name of the declaring library of the method.
         /// </summary>
         public string LibraryName
         {
-            get { return System.IO.Path.GetFileName(lib); }
+            get { return System.IO.Path.GetFileName(_lib); }
         }
         /// <summary>
         /// Gets the full name of the method, including the declaring library and method name.
@@ -50,14 +50,14 @@ namespace TUP.AsmResolver
         /// </summary>
         public uint RVA
         {
-            get { return rva; }
+            get { return _rva; }
         }
         /// <summary>
         /// Gets the ordinal of the method.
         /// </summary>
         public ushort Ordinal
         {
-            get { return ordinal; }
+            get { return _ordinal; }
         }
 
         

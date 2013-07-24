@@ -10,16 +10,16 @@ namespace TUP.AsmResolver
     /// </summary>
     public class ReadingParameters
     {
-        internal Win32Assembly assembly;
-        private bool onlyManaged, ignoreDataDirectoryAmount;
+        internal Win32Assembly _assembly;
+        private bool _onlyManaged, _ignoreDataDirectoryAmount;
 
         /// <summary>
         /// Creates a new instance of the ReadingParameters, and sets the arguments to their default values.
         /// </summary>
         public ReadingParameters()
         {
-            onlyManaged = false;
-            ignoreDataDirectoryAmount = false;
+            _onlyManaged = false;
+            _ignoreDataDirectoryAmount = false;
         }
 
         /// <summary>
@@ -27,12 +27,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public bool OnlyManaged
         {
-            get { return onlyManaged; }
+            get { return _onlyManaged; }
             set
             {
-                if (assembly != null)
+                if (_assembly != null)
                     ThrowInvalidOperation();
-                onlyManaged = value;
+                _onlyManaged = value;
             }
         }
         /// <summary>
@@ -40,12 +40,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public bool IgnoreDataDirectoryAmount
         {
-            get { return ignoreDataDirectoryAmount; }
+            get { return _ignoreDataDirectoryAmount; }
             set
             {
-                if (assembly != null)
+                if (_assembly != null)
                     ThrowInvalidOperation();
-                ignoreDataDirectoryAmount = value;
+                _ignoreDataDirectoryAmount = value;
             }
         }
 

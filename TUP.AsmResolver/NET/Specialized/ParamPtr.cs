@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class ParamPtr : MetaDataMember
     {
-        ParameterDefinition reference;
+        private ParameterDefinition _reference;
 
         public ParamPtr(MetaDataRow row)
             : base(row)
@@ -17,32 +17,32 @@ namespace TUP.AsmResolver.NET.Specialized
         public ParamPtr(ParameterDefinition reference)
             : base(new MetaDataRow(reference.TableIndex))
         {
-            this.reference = reference;
+            this._reference = reference;
         }
 
         public ParameterDefinition Reference
         {
             get
             {
-                if (reference == null)
+                if (_reference == null)
                 {
-                    uint rowIndex = Convert.ToUInt32(metadatarow._parts[0]);
-                    MetaDataTable table =netheader.TablesHeap.GetTable(MetaDataTableType.Param);
+                    uint rowIndex = Convert.ToUInt32(_metadatarow._parts[0]);
+                    MetaDataTable table =_netheader.TablesHeap.GetTable(MetaDataTableType.Param);
                     if (rowIndex > 0 && rowIndex <= table.AmountOfRows)
-                        reference = table.Members[rowIndex] as ParameterDefinition;
+                        _reference = table.Members[rowIndex] as ParameterDefinition;
                 }
-                return reference;
+                return _reference;
             }
         }
 
         public override void ClearCache()
         {
-            reference = null;
+            _reference = null;
         }
 
         public override void LoadCache()
         {
-            reference = Reference;
+            _reference = Reference;
         }
     }
 }

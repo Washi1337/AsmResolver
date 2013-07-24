@@ -7,10 +7,10 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class AssemblyReference : MetaDataMember , IResolutionScope
     {
-        internal string name;
-        internal string culture;
-        Version version;
-        CustomAttribute[] customAttributes = null;
+        internal string _name;
+        internal string _culture;
+        Version _version;
+        CustomAttribute[] _customAttributes = null;
 
         public AssemblyReference(MetaDataRow row)
             : base(row)
@@ -26,28 +26,28 @@ namespace TUP.AsmResolver.NET.Specialized
                 0U,
                 (uint)hashAlgorithm))
         {
-            this.name = name;
-            this.culture = culture;
+            this._name = name;
+            this._culture = culture;
         }
 
         public virtual CustomAttribute[] CustomAttributes
         {
             get
             {
-                if (customAttributes == null && netheader.TablesHeap.HasTable(MetaDataTableType.CustomAttribute))
+                if (_customAttributes == null && _netheader.TablesHeap.HasTable(MetaDataTableType.CustomAttribute))
                 {
                     List<CustomAttribute> customattributes = new List<CustomAttribute>();
 
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).Members)
+                    foreach (var member in _netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).Members)
                     {
                         CustomAttribute attribute = member as CustomAttribute;
-                        if (attribute.Parent != null && attribute.Parent.metadatatoken == this.metadatatoken)
+                        if (attribute.Parent != null && attribute.Parent._metadatatoken == this._metadatatoken)
                             customattributes.Add(attribute);
                     }
 
-                    customAttributes = customattributes.ToArray();
+                    _customAttributes = customattributes.ToArray();
                 }
-                return customAttributes;
+                return _customAttributes;
             }
         }
 
@@ -63,41 +63,41 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (version == null)
-                    version = new Version(
-                    Convert.ToInt32(metadatarow._parts[0]),
-                    Convert.ToInt32(metadatarow._parts[1]),
-                    Convert.ToInt32(metadatarow._parts[2]),
-                    Convert.ToInt32(metadatarow._parts[3])
+                if (_version == null)
+                    _version = new Version(
+                    Convert.ToInt32(_metadatarow._parts[0]),
+                    Convert.ToInt32(_metadatarow._parts[1]),
+                    Convert.ToInt32(_metadatarow._parts[2]),
+                    Convert.ToInt32(_metadatarow._parts[3])
                     );
-                return version;
+                return _version;
             }
             set
             {
-                metadatarow._parts[0] = (ushort)value.Major;
-                metadatarow._parts[1] = (ushort)value.Minor;
-                metadatarow._parts[2] = (ushort)value.Build;
-                metadatarow._parts[3] = (ushort)value.Revision;
+                _metadatarow._parts[0] = (ushort)value.Major;
+                _metadatarow._parts[1] = (ushort)value.Minor;
+                _metadatarow._parts[2] = (ushort)value.Build;
+                _metadatarow._parts[3] = (ushort)value.Revision;
             }
         }
 
         public virtual AssemblyAttributes Attributes
         {
-            get { return (AssemblyAttributes)Convert.ToUInt32(metadatarow._parts[4]); }
+            get { return (AssemblyAttributes)Convert.ToUInt32(_metadatarow._parts[4]); }
         }
 
         public virtual uint PublicKeyOrToken
         {
-            get { return Convert.ToUInt32(metadatarow._parts[5]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[5]); }
         }
 
         public virtual string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[6]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[6]), out _name);
+                return _name;
             }
         }
 
@@ -105,15 +105,15 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (string.IsNullOrEmpty(culture))
-                    culture = netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(metadatarow._parts[7]));
-                return culture;
+                if (string.IsNullOrEmpty(_culture))
+                    _culture = _netheader.StringsHeap.GetStringByOffset(Convert.ToUInt32(_metadatarow._parts[7]));
+                return _culture;
             }
         }
 
         public virtual AssemblyHashAlgorithm HashAlgorithm
         {
-            get { return (AssemblyHashAlgorithm)Convert.ToUInt32(metadatarow._parts[8]); }
+            get { return (AssemblyHashAlgorithm)Convert.ToUInt32(_metadatarow._parts[8]); }
         }
 
         public override string ToString()
@@ -123,16 +123,16 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            version = null;
-            name = null;
-            customAttributes = null;
+            _version = null;
+            _name = null;
+            _customAttributes = null;
         }
 
         public override void LoadCache()
         {
-            this.name = Name;
-            this.culture = Culture;
-            this.customAttributes = CustomAttributes;
+            this._name = Name;
+            this._culture = Culture;
+            this._customAttributes = CustomAttributes;
         }
     }
 }

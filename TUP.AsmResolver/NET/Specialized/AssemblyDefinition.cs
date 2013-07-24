@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class AssemblyDefinition : AssemblyReference
     {
-        string name;
-        string culture;
+        string _name;
+        string _culture;
 
         public AssemblyDefinition(MetaDataRow row)
             : base(row)
@@ -27,13 +27,13 @@ namespace TUP.AsmResolver.NET.Specialized
                 0U,
                 0U))
         {
-            this.name = name;
-            this.culture = culture;
+            this._name = name;
+            this._culture = culture;
         }
 
         public override AssemblyHashAlgorithm HashAlgorithm
         {
-            get { return (AssemblyHashAlgorithm)Convert.ToUInt32(metadatarow._parts[0]); }
+            get { return (AssemblyHashAlgorithm)Convert.ToUInt32(_metadatarow._parts[0]); }
         }
 
         public override Version Version
@@ -41,38 +41,38 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 return new Version(
-                Convert.ToInt32(metadatarow._parts[1]),
-                Convert.ToInt32(metadatarow._parts[2]),
-                Convert.ToInt32(metadatarow._parts[3]),
-                Convert.ToInt32(metadatarow._parts[4])
+                Convert.ToInt32(_metadatarow._parts[1]),
+                Convert.ToInt32(_metadatarow._parts[2]),
+                Convert.ToInt32(_metadatarow._parts[3]),
+                Convert.ToInt32(_metadatarow._parts[4])
                 );
             }
             set
             {
-                metadatarow._parts[1] = (ushort)value.Major;
-                metadatarow._parts[2] = (ushort)value.Minor;
-                metadatarow._parts[3] = (ushort)value.Build;
-                metadatarow._parts[4] = (ushort)value.Revision;
+                _metadatarow._parts[1] = (ushort)value.Major;
+                _metadatarow._parts[2] = (ushort)value.Minor;
+                _metadatarow._parts[3] = (ushort)value.Build;
+                _metadatarow._parts[4] = (ushort)value.Revision;
             }
         }
 
         public override AssemblyAttributes Attributes
         {
-            get { return (AssemblyAttributes)Convert.ToUInt32(metadatarow._parts[5]); }
+            get { return (AssemblyAttributes)Convert.ToUInt32(_metadatarow._parts[5]); }
         }
 
         public override uint PublicKeyOrToken
         {
-            get { return Convert.ToUInt32(metadatarow._parts[6]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[6]); }
         }
 
         public override string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[7]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[7]), out _name);
+                return _name;
             }
         }
 
@@ -80,9 +80,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             { 
-                if (culture == null)
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[8]), out name);
-                return culture;
+                if (_culture == null)
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[8]), out _name);
+                return _culture;
             }
         }
 
@@ -93,8 +93,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            name = null;
-            culture = null;
+            _name = null;
+            _culture = null;
         }
 
     }

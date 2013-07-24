@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class FieldLayout : MetaDataMember
     {
-        FieldDefinition field;
+        FieldDefinition _field;
 
         public FieldLayout(MetaDataRow row)
             : base(row)
@@ -17,32 +17,32 @@ namespace TUP.AsmResolver.NET.Specialized
         public FieldLayout(FieldDefinition field, uint offset)
             : base(new MetaDataRow(offset, field.TableIndex))
         {
-            this.field = field;
+            this._field = field;
         }
 
         public uint Offset
         {
-            get { return Convert.ToUInt32(metadatarow._parts[0]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[0]); }
         }
 
         public FieldDefinition Field
         {
             get
             {
-                if (field == null)
-                    field = (FieldDefinition)netheader.TablesHeap.GetTable(MetaDataTableType.Field).Members[Convert.ToInt32(metadatarow._parts[1])];
-                return field;
+                if (_field == null)
+                    _field = (FieldDefinition)_netheader.TablesHeap.GetTable(MetaDataTableType.Field).Members[Convert.ToInt32(_metadatarow._parts[1])];
+                return _field;
             }
         }
 
         public override void ClearCache()
         {
-            field = null;
+            _field = null;
         }
 
         public override void LoadCache()
         {
-            field = Field;
+            _field = Field;
         }
     }
 }

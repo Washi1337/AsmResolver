@@ -7,9 +7,9 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class CustomAttribute : MetaDataMember
     {
-        MetaDataMember parent;
-        MethodReference constructor;
-        CustomAttributeSignature signature;
+        MetaDataMember _parent;
+        MethodReference _constructor;
+        CustomAttributeSignature _signature;
 
         public CustomAttribute(MetaDataRow row)
             : base(row)
@@ -19,19 +19,19 @@ namespace TUP.AsmResolver.NET.Specialized
         public CustomAttribute(MetaDataMember parent, MethodReference constructor, uint value)
             :base(new MetaDataRow(0U,0U, value))
         {
-            this.parent = parent;
-            this.constructor = constructor;
+            this._parent = parent;
+            this._constructor = constructor;
         }
 
         public MetaDataMember Parent
         {
             get
             {
-                if (parent == null)
+                if (_parent == null)
                 {
-                    netheader.TablesHeap.HasCustomAttribute.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out parent);
+                    _netheader.TablesHeap.HasCustomAttribute.TryGetMember(Convert.ToInt32(_metadatarow._parts[0]), out _parent);
                 }
-                return parent;
+                return _parent;
             }
         }
 
@@ -39,28 +39,28 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (constructor == null)
+                if (_constructor == null)
                 {
-                    netheader.TablesHeap.CustomAttributeType.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out constructor);
+                    _netheader.TablesHeap.CustomAttributeType.TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _constructor);
                 }
-                return constructor;
+                return _constructor;
             }
         }
 
         public uint Value
         {
-            get { return Convert.ToUInt32(metadatarow._parts[2]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[2]); }
         }
 
         public CustomAttributeSignature Signature
         {
             get
             {
-                if (signature == null)
+                if (_signature == null)
                 {
-                    signature = netheader.BlobHeap.ReadCustomAttributeSignature(this, Value);
+                    _signature = _netheader.BlobHeap.ReadCustomAttributeSignature(this, Value);
                 }
-                return signature;
+                return _signature;
             }
         }
     
@@ -71,16 +71,16 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            parent = null;
-            constructor = null;
-            signature = null;
+            _parent = null;
+            _constructor = null;
+            _signature = null;
         }
 
         public override void LoadCache()
         {
-            parent = Parent;
-            constructor = Constructor;
-            signature = Signature;
+            _parent = Parent;
+            _constructor = Constructor;
+            _signature = Signature;
         }
     }
 }

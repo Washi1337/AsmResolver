@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class ModuleReference : MetaDataMember, IResolutionScope
     {
-        string name = null;
+        private string _name = null;
 
         public ModuleReference(MetaDataRow row)
             : base(row)
@@ -23,9 +23,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (name == null)
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[0]), out name);
-                return name;
+                if (_name == null)
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[0]), out _name);
+                return _name;
             }
         }
         public override string ToString()
@@ -35,12 +35,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            name = null;
+            _name = null;
         }
 
         public override void LoadCache()
         {
-            name = Name;
+            _name = Name;
         }
     }
 }

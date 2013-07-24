@@ -17,9 +17,9 @@ namespace TUP.AsmResolver.ASM
 
         internal x86Assembler(Win32Assembly assembly)
         {
-            this.image = assembly.peImage;
-            disassembler = assembly.disassembler;
-            offsetConverter = new OffsetConverter(Section.GetSectionByRva(assembly, assembly.ntHeader.OptionalHeader.BaseOfCode));
+            this.image = assembly._peImage;
+            disassembler = assembly._disassembler;
+            offsetConverter = new OffsetConverter(Section.GetSectionByRva(assembly, assembly._ntHeader.OptionalHeader.BaseOfCode));
         }
         /// <summary>
         /// Replaces an instruction with a new instruction.

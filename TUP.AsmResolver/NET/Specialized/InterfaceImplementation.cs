@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class InterfaceImplementation : MetaDataMember
     {
-        TypeDefinition @class = null;
-        TypeReference @interface = null;
+        TypeDefinition _class = null;
+        TypeReference _interface = null;
 
         public InterfaceImplementation(MetaDataRow row)
             : base(row)
@@ -18,20 +18,20 @@ namespace TUP.AsmResolver.NET.Specialized
         public InterfaceImplementation(TypeDefinition @class, TypeReference @interface)
             : base(new MetaDataRow(@class.TableIndex, 0U))
         {
-            this.@class = @class;
-            this.@interface = @interface;
+            this._class = @class;
+            this._interface = @interface;
         }
     
         public TypeDefinition Class
         {
             get
             {
-                if (@class == null)
+                if (_class == null)
                 {
-                    int token = Convert.ToInt32(metadatarow._parts[0]) - 1;
-                    netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).TryGetMember(token, out @class);
+                    int token = Convert.ToInt32(_metadatarow._parts[0]) - 1;
+                    _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).TryGetMember(token, out _class);
                 }
-                return @class;
+                return _class;
             }
         }
 
@@ -39,9 +39,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (@interface == null)
-                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out @interface);
-                return @interface;
+                if (_interface == null)
+                    _netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _interface);
+                return _interface;
             }
         }
 
@@ -52,14 +52,14 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            @class = null;
-            @interface = null;
+            _class = null;
+            _interface = null;
         }
 
         public override void LoadCache()
         {
-            @class = Class;
-            @interface = Interface;
+            _class = Class;
+            _interface = Interface;
         }
     }
 }

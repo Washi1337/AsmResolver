@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class GenericParamConstraint : MetaDataMember
     {
-        private GenericParameter owner;
-        private TypeReference constraint;
+        private GenericParameter _owner;
+        private TypeReference _constraint;
 
         public GenericParamConstraint(MetaDataRow row)
             : base(row)
@@ -18,47 +18,47 @@ namespace TUP.AsmResolver.NET.Specialized
         public GenericParamConstraint(GenericParameter owner, TypeReference constraint)
             : base(new MetaDataRow(owner.TableIndex, 0U))
         {
-            this.owner = owner;
-            this.constraint = constraint;
+            this._owner = owner;
+            this._constraint = constraint;
         }
 
         public GenericParameter Owner
         {
             get
             {
-                if (owner == null)
+                if (_owner == null)
                 {
-                    MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam);
-                    int index = Convert.ToInt32(metadatarow._parts[0]) - 1;
+                    MetaDataTable table = _netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam);
+                    int index = Convert.ToInt32(_metadatarow._parts[0]) - 1;
                     if (index > 0 || index < table.Members.Length)
-                        owner = table.Members[index] as GenericParameter;
+                        _owner = table.Members[index] as GenericParameter;
                 }
-                return owner;
+                return _owner;
             }
         }
         public TypeReference Constraint
         {
             get
             {
-                if (constraint == null)
+                if (_constraint == null)
                 {
-                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out constraint);
+                    _netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _constraint);
 
                 }
-                return constraint;
+                return _constraint;
             }
         }
 
         public override void ClearCache()
         {
-            owner = null;
-            constraint = null;
+            _owner = null;
+            _constraint = null;
         }
 
         public override void LoadCache()
         {
-            owner = Owner;
-            constraint = Constraint;
+            _owner = Owner;
+            _constraint = Constraint;
         }
     }
 }

@@ -42,7 +42,7 @@ namespace TUP.AsmResolver.NET
             get { return rowAmount; }
             set
             {
-                var image = TablesHeap.netheader.assembly.peImage;
+                var image = TablesHeap.netheader.assembly._peImage;
                 image.SetOffset(rowAmountOffset);
                 image.Writer.Write(rowAmount);
                 rowAmount = value;
@@ -105,14 +105,14 @@ namespace TUP.AsmResolver.NET
         public void AddMember(MetaDataMember member)
         {
             LoadMembers();
-            member.metadatatoken = (uint)(((uint)type << 24) + Members.Length + 1);
+            member._metadatatoken = (uint)(((uint)type << 24) + Members.Length + 1);
 
             var mdrow = member.MetaDataRow;
             mdrow.Offset = 0;
             member.MetaDataRow = mdrow;
 
             rowAmount++;
-            member.netheader = TablesHeap.netheader;
+            member._netheader = TablesHeap.netheader;
             Array.Resize(ref members, Members.Length + 1);
             Members[Members.Length - 1] = member;
         }
@@ -121,11 +121,11 @@ namespace TUP.AsmResolver.NET
         {
             LoadMembers();
             uint index = member.TableIndex - 1;
-            member.netheader = null;
+            member._netheader = null;
             for (uint i = index; i < Members.Length - 1; i++)
             {
                 members[i] = members[i + 1];
-                members[i].metadatatoken--;
+                members[i]._metadatatoken--;
             }
             Members[members.Length - 1] = null;
             rowAmount--;

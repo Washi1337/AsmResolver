@@ -7,10 +7,10 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class MethodSpecification : MethodReference, ISpecification, IGenericInstance
     {
-        MethodReference originalmethod;
-        TypeReference[] genericArgs;
-        GenericParameter[] genericParams;
-        IGenericContext context;
+        MethodReference _originalmethod;
+        TypeReference[] _genericArgs;
+        GenericParameter[] _genericParams;
+        IGenericContext _context;
 
         public MethodSpecification(MetaDataRow row)
             : base(row)
@@ -21,7 +21,7 @@ namespace TUP.AsmResolver.NET.Specialized
             : base(default(MetaDataRow))
         {
             OriginalMethod = methodRef;
-            context = methodRef;            
+            _context = methodRef;            
         }
 
         public MemberReference TransformWith(IGenericContext context)
@@ -29,16 +29,16 @@ namespace TUP.AsmResolver.NET.Specialized
             if (this.IsGenericMethod)
             {
                 MethodSpecification copy = this.MemberwiseClone() as MethodSpecification;
-                copy.context = context;
-                copy.metadatarow = this.metadatarow;
-                copy.genericArgs = netheader.BlobHeap.ReadGenericArgumentsSignature(copy.SpecificationSignature, context);
+                copy._context = context;
+                copy._metadatarow = this._metadatarow;
+                copy._genericArgs = _netheader.BlobHeap.ReadGenericArgumentsSignature(copy.SpecificationSignature, context);
                 uint signature = 0;
                 if (copy.OriginalMethod.IsDefinition)
                     signature = Convert.ToUInt32(copy.OriginalMethod.MetaDataRow.Parts[4]);
                 else
-                    signature = Convert.ToUInt32(copy.originalmethod.MetaDataRow.Parts[2]);
+                    signature = Convert.ToUInt32(copy._originalmethod.MetaDataRow.Parts[2]);
 
-                copy._signature = netheader.BlobHeap.ReadMemberRefSignature(signature, copy) as MethodSignature;
+                copy._signature = _netheader.BlobHeap.ReadMemberRefSignature(signature, copy) as MethodSignature;
                 return copy;
             }
             return this;
@@ -48,19 +48,19 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (originalmethod == null)
-                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out originalmethod);
-                return originalmethod;
+                if (_originalmethod == null)
+                    _netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(_metadatarow._parts[0]), out _originalmethod);
+                return _originalmethod;
             }
-            private set { originalmethod = value; }
+            private set { _originalmethod = value; }
         }
 
         public override TypeReference DeclaringType
         {
             get
             {
-                if (originalmethod != null)
-                    return originalmethod.DeclaringType;
+                if (_originalmethod != null)
+                    return _originalmethod.DeclaringType;
                 else
                     return null;
             }
@@ -76,8 +76,8 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (originalmethod != null)
-                    return originalmethod.Name;
+                if (_originalmethod != null)
+                    return _originalmethod.Name;
                 return null;
             }
         }
@@ -108,9 +108,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (genericArgs == null)
-                    genericArgs = netheader.BlobHeap.ReadGenericArgumentsSignature(SpecificationSignature, context);
-                return genericArgs;
+                if (_genericArgs == null)
+                    _genericArgs = _netheader.BlobHeap.ReadGenericArgumentsSignature(SpecificationSignature, _context);
+                return _genericArgs;
 
             }
         }
@@ -132,7 +132,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint SpecificationSignature
         {
-            get { return Convert.ToUInt32(metadatarow._parts[1]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[1]); }
         }
 
         public override MethodReference GetElementMethod()

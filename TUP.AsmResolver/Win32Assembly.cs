@@ -53,14 +53,14 @@ namespace TUP.AsmResolver
             
             ReadingFinishedEventHandler handler = ReadingFinished;
             if (handler != null)
-                synchroniser.Send(RaiseReadingFinished, e);
+                _synchroniser.Send(RaiseReadingFinished, e);
         }
 
         private void OnReadingProcessChanged(ReadingProcessChangedEventArgs e)
         {
             ReadingProcessChangedEventHandler handler = ReadingProcessChanged;
             if (handler != null)
-                synchroniser.Send(RaiseReadingProcessChanged, e);
+                _synchroniser.Send(RaiseReadingProcessChanged, e);
 
         }
 
@@ -77,17 +77,17 @@ namespace TUP.AsmResolver
         #endregion
 
         #region Variables
-        private readonly SynchronizationContext synchroniser = SynchronizationContext.Current;
-        internal PeImage peImage;
-        internal string path;
-        internal NTHeader ntHeader;
-        internal MZHeader mzHeader;
-        internal NETHeader netHeader;
-        internal PeHeaderReader headerReader;
-        internal x86Assembler assembler;
-        internal x86Disassembler disassembler;
-        internal ImportExportTableReader importExportTableReader;
-        internal ResourcesReader resourcesReader;
+        private readonly SynchronizationContext _synchroniser = SynchronizationContext.Current;
+        internal PeImage _peImage;
+        internal string _path;
+        internal NTHeader _ntHeader;
+        internal MZHeader _mzHeader;
+        internal NETHeader _netHeader;
+        internal PeHeaderReader _headerReader;
+        internal x86Assembler _assembler;
+        internal x86Disassembler _disassembler;
+        internal ImportExportTableReader _importExportTableReader;
+        internal ResourcesReader _resourcesReader;
         #endregion
     
         #region Properties
@@ -99,7 +99,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembler;
+                return _assembler;
             }
         }
 
@@ -115,7 +115,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return path;
+                return _path;
             }
         }
 
@@ -126,8 +126,8 @@ namespace TUP.AsmResolver
         {
             get
             {
-                if (importExportTableReader != null)
-                    return importExportTableReader.Imports;
+                if (_importExportTableReader != null)
+                    return _importExportTableReader.Imports;
                 return new List<LibraryReference>();
             }
         }
@@ -139,8 +139,8 @@ namespace TUP.AsmResolver
         {
             get
             {
-                if (importExportTableReader != null)
-                    return importExportTableReader.Exports;
+                if (_importExportTableReader != null)
+                    return _importExportTableReader.Exports;
                 return new List<ExportMethod>();
             }
         }
@@ -150,7 +150,7 @@ namespace TUP.AsmResolver
         /// </summary>
         public NTHeader NTHeader
         {
-            get { return ntHeader; }
+            get { return _ntHeader; }
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return mzHeader;
+                return _mzHeader;
             }
         }
 
@@ -169,7 +169,7 @@ namespace TUP.AsmResolver
         /// </summary>
         public NETHeader NETHeader
         {
-            get { return netHeader; }
+            get { return _netHeader; }
         }
 
         /// <summary>
@@ -179,8 +179,8 @@ namespace TUP.AsmResolver
         {
             get
             {
-                if (resourcesReader != null)
-                    return resourcesReader.rootDirectory;
+                if (_resourcesReader != null)
+                    return _resourcesReader.rootDirectory;
                 return null;
             }
         }
@@ -190,7 +190,7 @@ namespace TUP.AsmResolver
         /// </summary>
         public x86Disassembler Disassembler
         {
-            get { return disassembler; }
+            get { return _disassembler; }
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace TUP.AsmResolver
         /// </summary>
         public PeImage Image
         {
-            get { return peImage; }
+            get { return _peImage; }
         }
 
         #endregion
@@ -231,27 +231,27 @@ namespace TUP.AsmResolver
                 Win32Assembly a = new Win32Assembly();
 
 
-                a.path = file;
+                a._path = file;
                 a.ReadingArguments = arguments;
-                a.peImage = PeImage.LoadFromAssembly(a);
+                a._peImage = PeImage.LoadFromAssembly(a);
 
-                a.headerReader = PeHeaderReader.FromAssembly(a);
-                a.ntHeader = NTHeader.FromAssembly(a);
-                a.mzHeader = MZHeader.FromAssembly(a);
-                a.headerReader.LoadData(arguments.IgnoreDataDirectoryAmount);
+                a._headerReader = PeHeaderReader.FromAssembly(a);
+                a._ntHeader = NTHeader.FromAssembly(a);
+                a._mzHeader = MZHeader.FromAssembly(a);
+                a._headerReader.LoadData(arguments.IgnoreDataDirectoryAmount);
 
 
                 if (!arguments.OnlyManaged)
                 {
-                    a.disassembler = new x86Disassembler(a);
-                    a.assembler = new x86Assembler(a);
-                    a.importExportTableReader = new ImportExportTableReader(a.ntHeader);
-                    a.resourcesReader = new ResourcesReader(a.ntHeader);
+                    a._disassembler = new x86Disassembler(a);
+                    a._assembler = new x86Assembler(a);
+                    a._importExportTableReader = new ImportExportTableReader(a._ntHeader);
+                    a._resourcesReader = new ResourcesReader(a._ntHeader);
                 }
 
 
-                a.netHeader = NETHeader.FromAssembly(a);
-                a.peImage.SetOffset(a.ntHeader.OptionalHeader.HeaderSize);
+                a._netHeader = NETHeader.FromAssembly(a);
+                a._peImage.SetOffset(a._ntHeader.OptionalHeader.HeaderSize);
 
                 return a;
 
@@ -273,7 +273,7 @@ namespace TUP.AsmResolver
         /// <param name="path">The path to save the assembly.</param>
         public void QuickSave(string path)
         {
-            File.WriteAllBytes(path, peImage.Stream.ToArray());
+            File.WriteAllBytes(path, _peImage.Stream.ToArray());
         }
 
         /// <summary>
@@ -282,7 +282,7 @@ namespace TUP.AsmResolver
         /// <param name="outputStream"></param>
         public void QuickSave(Stream outputStream)
         {
-            peImage.Stream.CopyTo(outputStream);
+            _peImage.Stream.CopyTo(outputStream);
         }
 
         /// <summary>
@@ -316,13 +316,13 @@ namespace TUP.AsmResolver
         public void Dispose()
         {
            
-            path = null;
-            assembler = null;
+            _path = null;
+            _assembler = null;
 
-            peImage.Dispose();
+            _peImage.Dispose();
             
-            if (netHeader != null)
-                netHeader.Dispose();
+            if (_netHeader != null)
+                _netHeader.Dispose();
                 
         }
 

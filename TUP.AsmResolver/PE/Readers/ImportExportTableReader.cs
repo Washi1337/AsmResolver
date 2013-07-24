@@ -28,7 +28,7 @@ namespace TUP.AsmResolver.PE.Readers
         public ImportExportTableReader(NTHeader header)
         {
             this.header = header;
-            image = header.assembly.peImage;
+            image = header._assembly._peImage;
             LoadExports();
             LoadImports();
         }
@@ -37,10 +37,10 @@ namespace TUP.AsmResolver.PE.Readers
         {
             // TODO: Unnamed exports (detect exports with only an ordinal).
 
-            string libraryname = header.assembly.path.Substring(header.assembly.path.LastIndexOf('\\') + 1);
+            string libraryname = header._assembly._path.Substring(header._assembly._path.LastIndexOf('\\') + 1);
             DataDirectory exportdatadir = header.OptionalHeader.DataDirectories[(int)DataDirectoryName.Export];
 
-            if (exportdatadir.targetOffset.FileOffset == 0)
+            if (exportdatadir._targetOffset.FileOffset == 0)
                 return;
 
             image.SetOffset(exportdatadir.TargetOffset.FileOffset);

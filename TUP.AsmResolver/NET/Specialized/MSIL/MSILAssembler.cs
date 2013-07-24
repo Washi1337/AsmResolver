@@ -7,20 +7,20 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 {
     public class MSILAssembler
     {
-        PeImage image;
-        OffsetConverter offsetConverter;
-        long bodyOffset = 0;
-        MetaDataTokenResolver tokenResolver;
-        MSILDisassembler disassembler;
+        private PeImage _image;
+        private OffsetConverter _offsetConverter;
+        private long _bodyOffset = 0;
+        private MetaDataTokenResolver _tokenResolver;
+        private MSILDisassembler _disassembler;
 
         public MSILAssembler(MethodBody methodBody)
         {
             this.MethodBody = methodBody;
-            disassembler = new MSILDisassembler(methodBody);
-            image = methodBody.Method.netheader.assembly.Image;
-            offsetConverter = new OffsetConverter(Section.GetSectionByRva(methodBody.Method.netheader.assembly, methodBody.Method.RVA));
-            bodyOffset = offsetConverter.RvaToFileOffset(methodBody.Method.RVA) + methodBody.HeaderSize;
-            tokenResolver = methodBody.Method.netheader.TokenResolver;
+            _disassembler = new MSILDisassembler(methodBody);
+            _image = methodBody.Method._netheader.assembly.Image;
+            _offsetConverter = new OffsetConverter(Section.GetSectionByRva(methodBody.Method._netheader.assembly, methodBody.Method.RVA));
+            _bodyOffset = _offsetConverter.RvaToFileOffset(methodBody.Method.RVA) + methodBody.HeaderSize;
+            _tokenResolver = methodBody.Method._netheader.TokenResolver;
         }
 
         public MethodBody MethodBody { get; private set; }
@@ -36,7 +36,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 
         public void Replace(MSILInstruction targetInstruction, MSILInstruction newInstruction, bool overwriteWhenLarger, bool suppressInvalidReferences)
         {
-            int targetOffset = (int)(bodyOffset + targetInstruction.Offset);
+            int targetOffset = (int)(_bodyOffset + targetInstruction.Offset);
 
             if(!overwriteWhenLarger && targetInstruction.Size < newInstruction.Size)
                 throw new ArgumentException("The size of the new instruction is bigger than the target instruction.", "newInstruction");
@@ -54,17 +54,17 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             int NopsToAdd = totalSize - newInstruction.Size;
             byte[] NOPS = new byte[NopsToAdd];
 
-            image.SetOffset(targetOffset);
-            image.Writer.Write(newInstruction.OpCode.Bytes);
+            _image.SetOffset(targetOffset);
+            _image.Writer.Write(newInstruction.OpCode.Bytes);
             if (newInstruction.OperandBytes != null)
-                image.Writer.Write(newInstruction.OperandBytes);
+                _image.Writer.Write(newInstruction.OperandBytes);
 
-            image.Writer.Write(NOPS);
+            _image.Writer.Write(NOPS);
         }
 
         public bool ValidateReference(MetaDataMember member)
         {
-            if (member.ToString() == tokenResolver.ResolveMember(member.metadatatoken).ToString())
+            if (member.ToString() == _tokenResolver.ResolveMember(member._metadatatoken).ToString())
                 return false;
             return true;
         }
@@ -83,8 +83,8 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             int currentOffset = targetInstruction.Offset;
             while (sizeNeeded < newSize)
             {
-                disassembler.CurrentOffset = currentOffset;
-                MSILInstruction currentInstruction = disassembler.DisassembleNextInstruction();
+                _disassembler.CurrentOffset = currentOffset;
+                MSILInstruction currentInstruction = _disassembler.DisassembleNextInstruction();
                 sizeNeeded += currentInstruction.Size;
                 currentOffset += currentInstruction.Size;
             }
@@ -120,7 +120,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                     case OperandType.Type:
                         // TODO: importing metadata Members into tablesheap
                         if (instruction.Operand is MetaDataMember)
-                            instruction.OperandBytes = BitConverter.GetBytes((instruction.Operand as MetaDataMember).metadatatoken);
+                            instruction.OperandBytes = BitConverter.GetBytes((instruction.Operand as MetaDataMember)._metadatatoken);
                         break;
                     case OperandType.Float32:
                         if (instruction.Operand is float)

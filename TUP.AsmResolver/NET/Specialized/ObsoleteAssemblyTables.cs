@@ -20,20 +20,20 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint PlatformID
         {
-            get { return Convert.ToUInt32(metadatarow._parts[0]); }
-            set { metadatarow._parts[0] = value; }
+            get { return Convert.ToUInt32(_metadatarow._parts[0]); }
+            set { _metadatarow._parts[0] = value; }
         }
 
         public uint MajorVersion
         {
-            get { return Convert.ToUInt32(metadatarow._parts[1]); }
-            set { metadatarow._parts[1] = value; }
+            get { return Convert.ToUInt32(_metadatarow._parts[1]); }
+            set { _metadatarow._parts[1] = value; }
         }
 
         public uint MinorVersion
         {
-            get { return Convert.ToUInt32(metadatarow._parts[2]); }
-            set { metadatarow._parts[2] = value; }
+            get { return Convert.ToUInt32(_metadatarow._parts[2]); }
+            set { _metadatarow._parts[2] = value; }
         }
 
         public override void ClearCache()
@@ -59,8 +59,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint Processor
         {
-            get { return Convert.ToUInt32(metadatarow._parts[0]); }
-            set { metadatarow._parts[0] = value; }
+            get { return Convert.ToUInt32(_metadatarow._parts[0]); }
+            set { _metadatarow._parts[0] = value; }
         }
 
         public override void ClearCache()
@@ -94,7 +94,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (reference == null && NETHeader.TablesHeap.HasTable(MetaDataTableType.AssemblyRef))
                 {
                     MetaDataTable asmrefTable = NETHeader.TablesHeap.GetTable(MetaDataTableType.AssemblyRef);
-                    asmrefTable.TryGetMember(Convert.ToInt32(metadatarow._parts[3]), out reference);
+                    asmrefTable.TryGetMember(Convert.ToInt32(_metadatarow._parts[3]), out reference);
                 }
                 return reference;
             }
@@ -134,7 +134,7 @@ namespace TUP.AsmResolver.NET.Specialized
                 if (reference == null && NETHeader.TablesHeap.HasTable(MetaDataTableType.AssemblyRef))
                 {
                     MetaDataTable asmrefTable = NETHeader.TablesHeap.GetTable(MetaDataTableType.AssemblyRef);
-                    asmrefTable.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out reference);
+                    asmrefTable.TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out reference);
                 }
                 return reference;
             }

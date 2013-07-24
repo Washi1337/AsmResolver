@@ -7,11 +7,11 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class PropertyDefinition : MemberReference
     {
-        MethodDefinition getmethod = null;
-        MethodDefinition setmethod = null;
-        PropertySignature propertySig = null;
-        TypeDefinition declaringType = null;
-        string name = null;
+        private MethodDefinition _getMethod = null;
+        private MethodDefinition _setMethod = null;
+        private PropertySignature _propertySig = null;
+        private TypeDefinition _declaringType = null;
+        private string _name = null;
 
         public PropertyDefinition(MetaDataRow row)
             : base(row)
@@ -21,22 +21,22 @@ namespace TUP.AsmResolver.NET.Specialized
         public PropertyDefinition(string name, PropertyAttributes attributes, uint signature)
             : base(new MetaDataRow((uint)attributes, 0U, signature))
         {
-            this.name = name;
+            this._name = name;
         }
 
         public PropertyAttributes Attributes
         {
-            get { return (PropertyAttributes)Convert.ToUInt16(metadatarow._parts[0]); }
-            set { metadatarow._parts[0] = (ushort)value; }
+            get { return (PropertyAttributes)Convert.ToUInt16(_metadatarow._parts[0]); }
+            set { _metadatarow._parts[0] = (ushort)value; }
         }
 
         public override string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[1]), out _name);
+                return _name;
             }
         }
 
@@ -44,11 +44,11 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (propertySig == null)
+                if (_propertySig == null)
                 {
-                    propertySig = netheader.BlobHeap.ReadPropertySignature(Convert.ToUInt32(metadatarow._parts[2]), this);
+                    _propertySig = _netheader.BlobHeap.ReadPropertySignature(Convert.ToUInt32(_metadatarow._parts[2]), this);
                 }
-                return propertySig;
+                return _propertySig;
             }
         }
 
@@ -56,19 +56,19 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (getmethod == null)
+                if (_getMethod == null)
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
-                        if (semantics.Association != null && semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Getter) == MethodSemanticsAttributes.Getter)
+                        if (semantics.Association != null && semantics.Association._metadatatoken == this._metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Getter) == MethodSemanticsAttributes.Getter)
                         {
-                            getmethod = semantics.Method;
+                            _getMethod = semantics.Method;
                             break;
                         }
                     }
                 }
-                return getmethod;
+                return _getMethod;
             }
         }
 
@@ -76,19 +76,19 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (setmethod == null)
+                if (_setMethod == null)
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
-                        if (semantics.Association != null && semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Setter) == MethodSemanticsAttributes.Setter)
+                        if (semantics.Association != null && semantics.Association._metadatatoken == this._metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.Setter) == MethodSemanticsAttributes.Setter)
                         {
-                            setmethod = semantics.Method;
+                            _setMethod = semantics.Method;
                             break;
                         }
                     }
                 }
-                return setmethod;
+                return _setMethod;
             }
         }
 
@@ -99,19 +99,19 @@ namespace TUP.AsmResolver.NET.Specialized
         
         public override void ClearCache()
         {
-            getmethod = null;
-            setmethod = null;
-            name = null;
-            propertySig = null;
+            _getMethod = null;
+            _setMethod = null;
+            _name = null;
+            _propertySig = null;
         }
 
         public override void LoadCache()
         {
             base.LoadCache();
-            getmethod = GetMethod;
-            setmethod = SetMethod;
-            name = Name;
-            propertySig = Signature;
+            _getMethod = GetMethod;
+            _setMethod = SetMethod;
+            _name = Name;
+            _propertySig = Signature;
         }
 
         public override string FullName
@@ -133,20 +133,20 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (declaringType == null)
+                if (_declaringType == null)
                 {
-                    MetaDataTable propertyMapTable = netheader.TablesHeap.GetTable(MetaDataTableType.PropertyMap);
+                    MetaDataTable propertyMapTable = _netheader.TablesHeap.GetTable(MetaDataTableType.PropertyMap);
                     foreach (var member in propertyMapTable.Members)
                     {
                         PropertyMap propertyMap = member as PropertyMap;
                         if (propertyMap.Properties.Contains(this))
                         {
-                            declaringType = propertyMap.Parent;
+                            _declaringType = propertyMap.Parent;
                             break;
                         }
                     }
                 }
-                return declaringType;
+                return _declaringType;
             }
         }
 

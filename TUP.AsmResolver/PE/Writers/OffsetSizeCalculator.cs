@@ -107,10 +107,10 @@ namespace TUP.AsmResolver.PE.Writers
             var originalDirectories = Constructor.OriginalAssembly.NTHeader.OptionalHeader.DataDirectories;
             for (int i = 0; i < originalDirectories.Length; i++)
             {
-                workspace.NewDataDirectories[i] = new DataDirectory(originalDirectories[i].Name, default(Section), 0, originalDirectories[i].rawDataDir);
+                workspace.NewDataDirectories[i] = new DataDirectory(originalDirectories[i].Name, default(Section), 0, originalDirectories[i]._rawDataDir);
             }
 
-            workspace.NewDataDirectories[(int)DataDirectoryName.Clr].rawDataDir.Size = workspace.NewNetHeader.rawHeader.cb;
+            workspace.NewDataDirectories[(int)DataDirectoryName.Clr]._rawDataDir.Size = workspace.NewNetHeader.rawHeader.cb;
 
         }
 

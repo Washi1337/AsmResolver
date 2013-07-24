@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class FieldRVA : MetaDataMember
     {
-        FieldDefinition field;
+        FieldDefinition _field;
 
         public FieldRVA(MetaDataRow row)
             : base(row)
@@ -17,37 +17,37 @@ namespace TUP.AsmResolver.NET.Specialized
         public FieldRVA(FieldDefinition field, uint rva)
             : base(new MetaDataRow(rva, field.TableIndex))
         {
-            this.field = field;
+            this._field = field;
         }
 
         public uint RVA
         {
-            get { return Convert.ToUInt32(metadatarow._parts[0]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[0]); }
         }
 
         public FieldDefinition Field
         {
             get
             {
-                if (field == null)
+                if (_field == null)
                 {
-                    int index = Convert.ToInt32(metadatarow._parts[0]);
-                    MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.Field);
+                    int index = Convert.ToInt32(_metadatarow._parts[0]);
+                    MetaDataTable table = _netheader.TablesHeap.GetTable(MetaDataTableType.Field);
                     if (index > 0 && index <= table.Members.Length)
-                        field = table.Members[index - 1] as FieldDefinition;
+                        _field = table.Members[index - 1] as FieldDefinition;
                 }
-                return field;
+                return _field;
             }
         }
 
         public override void ClearCache()
         {
-            field = null;
+            _field = null;
         }
 
         public override void LoadCache()
         {
-            field = Field;
+            _field = Field;
         }
     }
 }

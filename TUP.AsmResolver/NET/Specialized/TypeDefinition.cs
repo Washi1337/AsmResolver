@@ -7,15 +7,15 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class TypeDefinition : TypeReference
     {
-        private MemberRange<MethodDefinition> methodRange = null;
-        private MemberRange<FieldDefinition> fieldRange = null;
-        private PropertyMap propertymap = null;
-        private EventMap eventmap = null;
-        private NestedClass[] nestedClasses = null;
-        private InterfaceImplementation[] interfaces = null;
-        private TypeDefinition decltype = null;
-        private GenericParameter[] genericparams = null;
-        private TypeReference baseType = null;
+        private MemberRange<MethodDefinition> _methodRange = null;
+        private MemberRange<FieldDefinition> _fieldRange = null;
+        private PropertyMap _propertyMap = null;
+        private EventMap _eventMap = null;
+        private NestedClass[] _nestedClasses = null;
+        private InterfaceImplementation[] _interfaces = null;
+        private TypeDefinition _decltype = null;
+        private GenericParameter[] _genericparams = null;
+        private TypeReference _baseType = null;
 
         public TypeDefinition(MetaDataRow row)
             : base(row)
@@ -27,20 +27,20 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             this._namespace = @namespace;
             this._name = name;
-            this.baseType = baseType;
+            this._baseType = baseType;
         }
 
         public TypeAttributes Attributes
         {
-            get{return (TypeAttributes)metadatarow._parts[0];}
-            set { metadatarow._parts[0] = (uint)value; }
+            get{return (TypeAttributes)_metadatarow._parts[0];}
+            set { _metadatarow._parts[0] = (uint)value; }
         }
 
         public override string Name
         {
             get { 
                 if (string.IsNullOrEmpty(_name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out _name);
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[1]), out _name);
                 return _name;
             }
         }
@@ -49,7 +49,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get {
                 if (string.IsNullOrEmpty(_namespace))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out _namespace);
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[2]), out _namespace);
                 return _namespace;
             }
         }
@@ -70,21 +70,21 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (decltype == null && netheader.TablesHeap.HasTable(MetaDataTableType.NestedClass))
+                if (_decltype == null && _netheader.TablesHeap.HasTable(MetaDataTableType.NestedClass))
                 {
-                    MetaDataTable nestedClassTable = netheader.TablesHeap.GetTable(MetaDataTableType.NestedClass);
+                    MetaDataTable nestedClassTable = _netheader.TablesHeap.GetTable(MetaDataTableType.NestedClass);
                     foreach (MetaDataMember member in nestedClassTable.Members)
                     {
                         NestedClass nestedclass = (NestedClass)member;
                         if (nestedclass.Class != null && nestedclass.EnclosingClass != null)
-                            if (nestedclass.Class.metadatatoken == this.metadatatoken)
+                            if (nestedclass.Class._metadatatoken == this._metadatatoken)
                             {
-                                decltype = nestedclass.EnclosingClass;
+                                _decltype = nestedclass.EnclosingClass;
                                 break;
                             }
                     }
                 }
-                return decltype;
+                return _decltype;
             }
         }
 
@@ -99,34 +99,34 @@ namespace TUP.AsmResolver.NET.Specialized
         public TypeReference BaseType
         {
             get {
-                if (baseType == null)
+                if (_baseType == null)
                 {
-                    if (Convert.ToInt32(metadatarow._parts[3]) == 0)
+                    if (Convert.ToInt32(_metadatarow._parts[3]) == 0)
                         return null;
-                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[3]), out baseType);
+                    _netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(_metadatarow._parts[3]), out _baseType);
                 }
-                return baseType;
+                return _baseType;
             }
         }
 
         public uint FieldList
         {
-            get { return Convert.ToUInt32(metadatarow._parts[4]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[4]); }
         }
 
         public uint MethodList
         {
-            get { return Convert.ToUInt32(metadatarow._parts[5]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[5]); }
         }
 
         public FieldDefinition[] Fields
         {
             get 
             {
-                if (fieldRange == null && netheader.TablesHeap.HasTable(MetaDataTableType.Field))
-                    fieldRange = MemberRange.CreateRange<FieldDefinition>(this, 4, NETHeader.TablesHeap.GetTable(MetaDataTableType.Field, false));
+                if (_fieldRange == null && _netheader.TablesHeap.HasTable(MetaDataTableType.Field))
+                    _fieldRange = MemberRange.CreateRange<FieldDefinition>(this, 4, NETHeader.TablesHeap.GetTable(MetaDataTableType.Field, false));
 
-                return fieldRange != null ? fieldRange.Members : null;
+                return _fieldRange != null ? _fieldRange.Members : null;
             }
         }
 
@@ -134,10 +134,10 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (methodRange == null && netheader.TablesHeap.HasTable(MetaDataTableType.Method))
-                    methodRange = MemberRange.CreateRange<MethodDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Method, false));
+                if (_methodRange == null && _netheader.TablesHeap.HasTable(MetaDataTableType.Method))
+                    _methodRange = MemberRange.CreateRange<MethodDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Method, false));
 
-                return methodRange != null ? methodRange.Members : null;
+                return _methodRange != null ? _methodRange.Members : null;
             }
         }
 
@@ -145,23 +145,23 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (this.interfaces == null && netheader.TablesHeap.HasTable(MetaDataTableType.InterfaceImpl))
+                if (this._interfaces == null && _netheader.TablesHeap.HasTable(MetaDataTableType.InterfaceImpl))
                 {
                     List<InterfaceImplementation> interfaces = new List<InterfaceImplementation>();
 
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.InterfaceImpl).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.InterfaceImpl).Members)
                     {
                         InterfaceImplementation @interface = (InterfaceImplementation)member;
 
-                        if (@interface.Class != null && @interface.Class.metadatatoken == this.metadatatoken)
+                        if (@interface.Class != null && @interface.Class._metadatatoken == this._metadatatoken)
                             interfaces.Add(@interface);
 
                     }
 
-                    this.interfaces = interfaces.ToArray();
+                    this._interfaces = interfaces.ToArray();
                 }
 
-                return this.interfaces;
+                return this._interfaces;
             }
         }
 
@@ -169,20 +169,20 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (propertymap == null && netheader.TablesHeap.HasTable(MetaDataTableType.PropertyMap))
+                if (_propertyMap == null && _netheader.TablesHeap.HasTable(MetaDataTableType.PropertyMap))
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.PropertyMap).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.PropertyMap).Members)
                     {
                         PropertyMap prprtymap = (PropertyMap)member;
-                        if (prprtymap.Parent != null && (prprtymap.Parent.metadatatoken == this.metadatatoken))
+                        if (prprtymap.Parent != null && (prprtymap.Parent._metadatatoken == this._metadatatoken))
                         {
-                            propertymap = prprtymap;
+                            _propertyMap = prprtymap;
                             break;
                         }
                     }
                 }
 
-                return propertymap;
+                return _propertyMap;
 
             }
         }
@@ -191,19 +191,19 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (eventmap == null && netheader.TablesHeap.HasTable(MetaDataTableType.EventMap))
+                if (_eventMap == null && _netheader.TablesHeap.HasTable(MetaDataTableType.EventMap))
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.EventMap).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.EventMap).Members)
                     {
                         EventMap emap = (EventMap)member;
-                        if (emap.Parent != null && (emap.Parent.metadatatoken == this.metadatatoken))
+                        if (emap.Parent != null && (emap.Parent._metadatatoken == this._metadatatoken))
                         {
-                            eventmap = emap;
+                            _eventMap = emap;
                             break;
                         }
                     }
                 }
-                return eventmap;
+                return _eventMap;
             }
         }
 
@@ -211,20 +211,20 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (nestedClasses == null && netheader.TablesHeap.HasTable(MetaDataTableType.NestedClass) )
+                if (_nestedClasses == null && _netheader.TablesHeap.HasTable(MetaDataTableType.NestedClass) )
                 {
                     List<NestedClass> nestedclasses = new List<NestedClass>();
 
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.NestedClass).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.NestedClass).Members)
                     {
                         NestedClass nestedType = (NestedClass)member;
-                        if (nestedType.EnclosingClass != null && nestedType.EnclosingClass.metadatatoken == this.metadatatoken)
+                        if (nestedType.EnclosingClass != null && nestedType.EnclosingClass._metadatatoken == this._metadatatoken)
                             nestedclasses.Add(nestedType);
                     }
 
-                    nestedClasses = nestedclasses.Count == 0 ? null : nestedclasses.ToArray();
+                    _nestedClasses = nestedclasses.Count == 0 ? null : nestedclasses.ToArray();
                 }
-                return nestedClasses;
+                return _nestedClasses;
             }
         }
 
@@ -239,24 +239,24 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (genericparams == null && netheader.TablesHeap.HasTable(MetaDataTableType.GenericParam))
+                if (_genericparams == null && _netheader.TablesHeap.HasTable(MetaDataTableType.GenericParam))
                 {
                     List<GenericParameter> generics = new List<GenericParameter>();
 
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam).Members)
                     {
                         GenericParameter genericParam = member as GenericParameter;
-                        if (genericParam.Owner != null && genericParam.Owner.MetaDataToken == this.metadatatoken)
+                        if (genericParam.Owner != null && genericParam.Owner.MetaDataToken == this._metadatatoken)
                         {
                             generics.Insert(genericParam.Index, genericParam);
                         }
 
                     }
 
-                    genericparams = generics.ToArray();
+                    _genericparams = generics.ToArray();
 
                 }
-                return genericparams;
+                return _genericparams;
             }
         }
 
@@ -298,31 +298,31 @@ namespace TUP.AsmResolver.NET.Specialized
         public override void ClearCache()
         {
             base.ClearCache();
-            methodRange = null;
-            fieldRange = null;
-            propertymap = null;
-            eventmap = null;
-            nestedClasses = null;
-            interfaces = null;
-            decltype = null;
-            genericparams = null;
-            baseType = null;
+            _methodRange = null;
+            _fieldRange = null;
+            _propertyMap = null;
+            _eventMap = null;
+            _nestedClasses = null;
+            _interfaces = null;
+            _decltype = null;
+            _genericparams = null;
+            _baseType = null;
         }
 
         public override void LoadCache()
         {
             base.LoadCache();
-            methodRange = MemberRange.CreateRange<MethodDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Method, false));
-            methodRange.LoadCache();
-            fieldRange = MemberRange.CreateRange<FieldDefinition>(this, 4, NETHeader.TablesHeap.GetTable(MetaDataTableType.Field, false));
-            fieldRange.LoadCache();
-            propertymap = PropertyMap;
-            eventmap = EventMap;
-            nestedClasses = NestedClasses;
-            interfaces = Interfaces;
-            decltype = DeclaringType as TypeDefinition;
-            genericparams = GenericParameters;
-            baseType = BaseType;
+            _methodRange = MemberRange.CreateRange<MethodDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Method, false));
+            _methodRange.LoadCache();
+            _fieldRange = MemberRange.CreateRange<FieldDefinition>(this, 4, NETHeader.TablesHeap.GetTable(MetaDataTableType.Field, false));
+            _fieldRange.LoadCache();
+            _propertyMap = PropertyMap;
+            _eventMap = EventMap;
+            _nestedClasses = NestedClasses;
+            _interfaces = Interfaces;
+            _decltype = DeclaringType as TypeDefinition;
+            _genericparams = GenericParameters;
+            _baseType = BaseType;
         }
     }
 }

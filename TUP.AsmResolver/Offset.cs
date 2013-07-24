@@ -80,7 +80,7 @@ namespace TUP.AsmResolver
                     converter = new OffsetConverter(Section.GetSectionByRva(assembly, (uint)offset));
                     break;
                 case 3:
-                    converter = new OffsetConverter(Section.GetSectionByRva(assembly, (uint)(offset - assembly.ntHeader.OptionalHeader.ImageBase)));
+                    converter = new OffsetConverter(Section.GetSectionByRva(assembly, (uint)(offset - assembly._ntHeader.OptionalHeader.ImageBase)));
                     break;
 
                 default: // case 1:
@@ -152,7 +152,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public x86Instruction ToInstruction(Win32Assembly assembly)
         {
-            return assembly.disassembler.Disassemble(FileOffset, 10)[0];
+            return assembly._disassembler.Disassemble(FileOffset, 10)[0];
         }
         /// <summary>
         /// Converts the offset to an Ascii String pointer.
@@ -163,7 +163,7 @@ namespace TUP.AsmResolver
         {
 
             Section targetsection = Section.GetSectionByRva(assembly, Rva);
-            ulong stroffset = Va - assembly.ntHeader.OptionalHeader.ImageBase - targetsection.RVA + targetsection.RawOffset;
+            ulong stroffset = Va - assembly._ntHeader.OptionalHeader.ImageBase - targetsection.RVA + targetsection.RawOffset;
            // if (stroffset < 0)
            //     throw new ArgumentException("The target offset is not a valid offset to a string");
             return stroffset;
@@ -175,7 +175,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public string ToAsciiString(Win32Assembly assembly)
         {
-            return assembly.peImage.ReadZeroTerminatedString((uint)this.ToAsciiStringPtr(assembly));
+            return assembly._peImage.ReadZeroTerminatedString((uint)this.ToAsciiStringPtr(assembly));
         }
        /// <summary>
        /// Converts the offset to an imported or exported method/
@@ -187,12 +187,12 @@ namespace TUP.AsmResolver
             foreach (LibraryReference lib in assembly.LibraryImports)
                 foreach (ImportMethod method in lib.ImportMethods)
                 {
-                    if (method.RVA + assembly.ntHeader.OptionalHeader.ImageBase == Va)
+                    if (method.RVA + assembly._ntHeader.OptionalHeader.ImageBase == Va)
                         return method;
                 }
             foreach (ExportMethod method in assembly.LibraryExports)
             {
-                if (Va == method.RVA + assembly.ntHeader.OptionalHeader.ImageBase)
+                if (Va == method.RVA + assembly._ntHeader.OptionalHeader.ImageBase)
                     return method;
             }
 

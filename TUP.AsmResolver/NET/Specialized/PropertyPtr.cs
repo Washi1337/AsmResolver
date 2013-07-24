@@ -8,7 +8,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class PropertyPtr : MetaDataMember 
     {
-        PropertyDefinition reference;
+        private PropertyDefinition _reference;
 
         public PropertyPtr(MetaDataRow row)
             : base(row)
@@ -24,30 +24,30 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (reference == null && netheader.TablesHeap.HasTable(MetaDataTableType.Property))
+                if (_reference == null && _netheader.TablesHeap.HasTable(MetaDataTableType.Property))
                 {
-                    MetaDataTable propertyTable = netheader.TablesHeap.GetTable(MetaDataTableType.Property);
-                    uint index =  Convert.ToUInt32(metadatarow._parts[0]);
+                    MetaDataTable propertyTable = _netheader.TablesHeap.GetTable(MetaDataTableType.Property);
+                    uint index =  Convert.ToUInt32(_metadatarow._parts[0]);
                     if (index < propertyTable.AmountOfRows)
-                        reference = propertyTable.Members[index] as PropertyDefinition;
+                        _reference = propertyTable.Members[index] as PropertyDefinition;
                 }
-                return reference;
+                return _reference;
             }
             set
             {
-                reference = value;
-                metadatarow._parts[0] = value.TableIndex;
+                _reference = value;
+                _metadatarow._parts[0] = value.TableIndex;
             }
         }
 
         public override void ClearCache()
         {
-            reference = null;
+            _reference = null;
         }
 
         public override void LoadCache()
         {
-            reference = Reference;
+            _reference = Reference;
         }
     }
 }

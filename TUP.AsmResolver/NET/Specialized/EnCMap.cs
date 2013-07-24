@@ -19,7 +19,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint Token
         {
-            get { return Convert.ToUInt32(metadatarow._parts[0]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[0]); }
         }
 
         public override void ClearCache()

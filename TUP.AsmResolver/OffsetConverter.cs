@@ -39,7 +39,7 @@ namespace TUP.AsmResolver
         {
             if (rva == 0)
                 return 0;
-            return rva + TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase;
+            return rva + TargetSection.ParentAssembly._ntHeader.OptionalHeader.ImageBase;
         }
         /// <summary>
         /// Transforms a virtual address to a relative virtual address.
@@ -50,7 +50,7 @@ namespace TUP.AsmResolver
         {
             if (va == 0)
                 return 0;
-            return (uint)(va - TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase);
+            return (uint)(va - TargetSection.ParentAssembly._ntHeader.OptionalHeader.ImageBase);
         }
         /// <summary>
         /// Transforms a relative virtual address to a physical file offset.
@@ -83,7 +83,7 @@ namespace TUP.AsmResolver
         {
             if (fileoffset == 0)
                 return 0;
-            return fileoffset - TargetSection.RawOffset + TargetSection.RVA + TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase;
+            return fileoffset - TargetSection.RawOffset + TargetSection.RVA + TargetSection.ParentAssembly._ntHeader.OptionalHeader.ImageBase;
         }
         /// <summary>
         /// Transforms a virtual address to a physical file offset.
@@ -94,7 +94,7 @@ namespace TUP.AsmResolver
         {
             if (va == 0)
                 return 0;
-            return ((uint)(va - TargetSection.ParentAssembly.ntHeader.OptionalHeader.ImageBase)) - TargetSection.RVA + TargetSection.RawOffset;
+            return ((uint)(va - TargetSection.ParentAssembly._ntHeader.OptionalHeader.ImageBase)) - TargetSection.RVA + TargetSection.RawOffset;
         }
     }
 }

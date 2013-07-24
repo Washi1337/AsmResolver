@@ -95,12 +95,12 @@ namespace TUP.AsmResolver.NET
                     bool isValueType = this.ReadByte() == 0x11;
                     TypeReference reference2 = ReadTypeToken();
                     GenericInstanceType instance = new GenericInstanceType(reference2);
-                    instance.genericArguments = ReadGenericArguments();
+                    instance._genericArguments = ReadGenericArguments();
                     instance.IsValueType = isValueType;
 
                     return instance;
             }
-            return new TypeReference(string.Empty, type.ToString(), null) { netheader = this._netHeader };
+            return new TypeReference(string.Empty, type.ToString(), null) { _netheader = this._netHeader };
 
         }
 

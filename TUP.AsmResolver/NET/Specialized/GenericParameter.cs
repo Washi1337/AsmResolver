@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class GenericParameter : TypeReference
     {
-        internal IGenericParamProvider owner = null;
+        internal IGenericParamProvider _owner = null;
         
         public GenericParameter(MetaDataRow row)
             : base(row)
@@ -27,30 +27,30 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 this._name = string.Format("{0}{1}", owner.ParamType == GenericParamType.Type ? "!" : "!!", index);
             }
-            this.owner = owner;
+            this._owner = owner;
         }
 
         public ushort Index
         {
-            get { return Convert.ToUInt16(metadatarow._parts[0]); }
+            get { return Convert.ToUInt16(_metadatarow._parts[0]); }
             set
             {
-                metadatarow._parts[0] = value;
+                _metadatarow._parts[0] = value;
             }
         }
 
         public GenericParameterAttributes GenericAttributes
         {
-            get { return (GenericParameterAttributes)Convert.ToUInt16(metadatarow._parts[1]); }
+            get { return (GenericParameterAttributes)Convert.ToUInt16(_metadatarow._parts[1]); }
         }
 
         public IGenericParamProvider Owner
         {
             get 
             {
-                if (owner == null && Convert.ToInt32(metadatarow._parts[2]) != 0)
-                    netheader.TablesHeap.TypeOrMethod.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out owner);
-                return owner;
+                if (_owner == null && Convert.ToInt32(_metadatarow._parts[2]) != 0)
+                    _netheader.TablesHeap.TypeOrMethod.TryGetMember(Convert.ToInt32(_metadatarow._parts[2]), out _owner);
+                return _owner;
             }
         }
 
@@ -58,7 +58,7 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get {
                 if (string.IsNullOrEmpty(_name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[3]), out _name);
+                    NETHeader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[3]), out _name);
                 return _name;
             }
         }
@@ -82,7 +82,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public override void LoadCache()
         {
             base.LoadCache();
-            owner = Owner;
+            _owner = Owner;
         }
 
     }

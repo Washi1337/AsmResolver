@@ -25,8 +25,8 @@ namespace TUP.AsmResolver.PE.Readers
         internal NETHeaderReader(NTHeader header, NETHeader parent)
         {
             this.parent = parent;
-            header.assembly.netHeader = parent;
-            image = header.assembly.peImage;
+            header._assembly._netHeader = parent;
+            image = header._assembly._peImage;
             this.ntHeader = header;
             
         }
@@ -37,7 +37,7 @@ namespace TUP.AsmResolver.PE.Readers
             if (ntHeader.IsManagedAssembly)
             {
 
-                image.Stream.Seek(ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Clr].targetOffset.FileOffset, SeekOrigin.Begin);
+                image.Stream.Seek(ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Clr]._targetOffset.FileOffset, SeekOrigin.Begin);
 
                 parent.rawOffset = (uint)image.Position;
                 parent.rawHeader = image.ReadStructure<Structures.IMAGE_COR20_HEADER>();
@@ -59,7 +59,7 @@ namespace TUP.AsmResolver.PE.Readers
 
         void ConstructDirectories()
         {
-            ntHeader.assembly.netHeader.DataDirectories = new DataDirectory[] {
+            ntHeader._assembly._netHeader.DataDirectories = new DataDirectory[] {
              new DataDirectory(DataDirectoryName.NETMetadata, offsetConverter.TargetSection, 0, parent.rawHeader.MetaData),
              new DataDirectory(DataDirectoryName.NETResource, offsetConverter.TargetSection, 0, parent.rawHeader.Resources),
              new DataDirectory(DataDirectoryName.NETStrongName, offsetConverter.TargetSection, 0, parent.rawHeader.StrongNameSignature),
@@ -75,16 +75,16 @@ namespace TUP.AsmResolver.PE.Readers
         {
 
             metadataRva = parent.rawHeader.MetaData.RVA;
-            Section section = Section.GetSectionByRva(ntHeader.assembly, metadataRva);
+            Section section = Section.GetSectionByRva(ntHeader._assembly, metadataRva);
             offsetConverter = new OffsetConverter(section);
             metadataFileOffset = offsetConverter.RvaToFileOffset(metadataRva);//= (uint)new CodeOffsetConverter(header.oheader).RVirtualToFileOffset((int)metadatavirtualoffset);
 
-            metadataHeader1 = ntHeader.assembly.peImage.ReadStructure<Structures.METADATA_HEADER_1>(metadataFileOffset);
+            metadataHeader1 = ntHeader._assembly._peImage.ReadStructure<Structures.METADATA_HEADER_1>(metadataFileOffset);
 
             byte[] versionBytes = image.ReadBytes((int)metadataFileOffset + sizeof(Structures.METADATA_HEADER_1), (int)metadataHeader1.VersionLength);
             metadataVersionString = Encoding.ASCII.GetString(versionBytes).Trim();
 
-            metadataHeader2 = ntHeader.assembly.peImage.ReadStructure<Structures.METADATA_HEADER_2>((int)metadataFileOffset + sizeof(Structures.METADATA_HEADER_1) + metadataHeader1.VersionLength);
+            metadataHeader2 = ntHeader._assembly._peImage.ReadStructure<Structures.METADATA_HEADER_2>((int)metadataFileOffset + sizeof(Structures.METADATA_HEADER_1) + metadataHeader1.VersionLength);
 
             metadataStreamOffset = (uint)metadataFileOffset + (uint)sizeof(Structures.METADATA_HEADER_1) + (uint)metadataHeader1.VersionLength + (uint)sizeof(Structures.METADATA_HEADER_2);
             LoadMetaDataStreams();
@@ -98,10 +98,10 @@ namespace TUP.AsmResolver.PE.Readers
             {
                 long offset = metadataStreamOffset + add + (i * 4);
 
-                Structures.METADATA_STREAM_HEADER streamHeader = ntHeader.assembly.peImage.ReadStructure<Structures.METADATA_STREAM_HEADER>(offset);
+                Structures.METADATA_STREAM_HEADER streamHeader = ntHeader._assembly._peImage.ReadStructure<Structures.METADATA_STREAM_HEADER>(offset);
 
                 long stringOffset = offset + 8;
-                string name = ntHeader.assembly.peImage.ReadASCIIString(stringOffset).Replace("\0","");
+                string name = ntHeader._assembly._peImage.ReadASCIIString(stringOffset).Replace("\0","");
 
                 if (name.Length >= 8)
                     add += 16;
@@ -110,7 +110,7 @@ namespace TUP.AsmResolver.PE.Readers
                 else
                     add += 8;
 
-                parent.streams[i] = GetHeap(ntHeader.assembly.netHeader, (int)offset, streamHeader, name);
+                parent.streams[i] = GetHeap(ntHeader._assembly._netHeader, (int)offset, streamHeader, name);
 
             }
 

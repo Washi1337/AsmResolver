@@ -14,64 +14,64 @@ namespace TUP.AsmResolver
         internal DataDirectory(DataDirectoryName name, Section[] assemblySections, uint offset, Structures.IMAGE_DATA_DIRECTORY rawDataDir)
         {
             
-            this.rawDataDir = rawDataDir;
-            this.name = name;
+            this._rawDataDir = rawDataDir;
+            this._name = name;
             if (rawDataDir.RVA == 0)
             {
-                targetOffset = new Offset(0, 0, 0);
+                _targetOffset = new Offset(0, 0, 0);
             }
             else
             {
-                this.headerOffset = offset;
+                this._headerOffset = offset;
 
-                targetSection = Section.GetSectionByRva(assemblySections, rawDataDir.RVA);
-                if (targetSection == null)
+                _targetSection = Section.GetSectionByRva(assemblySections, rawDataDir.RVA);
+                if (_targetSection == null)
                     this.TargetOffset = new Offset(0, rawDataDir.RVA, 0);
                 else
-                    this.targetOffset = Offset.FromRva(rawDataDir.RVA, assemblySections[0].ParentAssembly);
+                    this._targetOffset = Offset.FromRva(rawDataDir.RVA, assemblySections[0].ParentAssembly);
             }
             
         }
 
         internal DataDirectory(DataDirectoryName name, Section targetSection, uint headerOffset, Structures.IMAGE_DATA_DIRECTORY rawDataDir)
         {
-            this.name = name;
-            this.headerOffset = headerOffset;
-            this.rawDataDir = rawDataDir;
+            this._name = name;
+            this._headerOffset = headerOffset;
+            this._rawDataDir = rawDataDir;
             if (rawDataDir.RVA == 0 || targetSection == null)
             {
-                targetOffset = new Offset(0, 0, 0);
+                _targetOffset = new Offset(0, 0, 0);
             }
             else
             {
-                this.targetOffset = Offset.FromRva(rawDataDir.RVA, targetSection.ParentAssembly);
-                this.targetSection = targetSection;
+                this._targetOffset = Offset.FromRva(rawDataDir.RVA, targetSection.ParentAssembly);
+                this._targetSection = targetSection;
             }
         }
 
-        internal uint headerOffset;
-        internal Offset targetOffset;
-        internal Structures.IMAGE_DATA_DIRECTORY rawDataDir;
-        internal Section targetSection;
-        internal DataDirectoryName name;
+        internal uint _headerOffset;
+        internal Offset _targetOffset;
+        internal Structures.IMAGE_DATA_DIRECTORY _rawDataDir;
+        internal Section _targetSection;
+        internal DataDirectoryName _name;
 
         /// <summary>
         /// Gets the offset the data directory is located.
         /// </summary>
         public uint HeaderOffset
         {
-            get { return headerOffset; }
+            get { return _headerOffset; }
         }
         /// <summary>
         /// Gets the offset the data directory is pointing at.
         /// </summary>
         public Offset TargetOffset
         {
-            get { return targetOffset; }
+            get { return _targetOffset; }
             set
             {
-                rawDataDir.RVA = value.Rva;
-                targetOffset = value;
+                _rawDataDir.RVA = value.Rva;
+                _targetOffset = value;
             }
         }
         /// <summary>
@@ -79,22 +79,22 @@ namespace TUP.AsmResolver
         /// </summary>
         public uint Size
         {
-            get { return rawDataDir.Size; }
-            set { rawDataDir.Size = value; }
+            get { return _rawDataDir.Size; }
+            set { _rawDataDir.Size = value; }
         }
         /// <summary>
         /// Gets the section the data directory is pointing at.
         /// </summary>
         public Section Section
         {
-            get { return targetSection; }
+            get { return _targetSection; }
         }
         /// <summary>
         /// Gets the name of the data directory.
         /// </summary>
         public DataDirectoryName Name
         {
-            get { return name; }
+            get { return _name; }
         }
         /// <summary>
         /// Gets the contents of the data directory.

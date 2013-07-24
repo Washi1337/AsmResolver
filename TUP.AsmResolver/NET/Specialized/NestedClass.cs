@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class NestedClass : MetaDataMember
     {
-        TypeDefinition @class;
-        TypeDefinition enclosingClass;
+        private TypeDefinition _class;
+        private TypeDefinition _enclosingClass;
 
         public NestedClass(MetaDataRow row)
             : base(row)
@@ -18,25 +18,25 @@ namespace TUP.AsmResolver.NET.Specialized
         public NestedClass(TypeDefinition nestedClass, TypeDefinition enclosingClass)
             : base(new MetaDataRow(nestedClass.TableIndex, enclosingClass.TableIndex))
         {
-            this.@class = nestedClass;
-            this.enclosingClass = enclosingClass;
+            this._class = nestedClass;
+            this._enclosingClass = enclosingClass;
         }
 
         public TypeDefinition Class
         {
             get {
-                if (@class == null)
+                if (_class == null)
                 {
-                    MetaDataTable table = netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef);
-                    int index = Convert.ToInt32(metadatarow._parts[0]) - 1;
+                    MetaDataTable table = _netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef);
+                    int index = Convert.ToInt32(_metadatarow._parts[0]) - 1;
                     if (index >= 0 && index < table.Members.Length)
-                        @class = (TypeDefinition)table.Members[index];
+                        _class = (TypeDefinition)table.Members[index];
                 }
-                return @class;
+                return _class;
             }
             set {
-                metadatarow._parts[0] = ProcessPartType(0, Array.IndexOf(netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members, value));
-                @class = value; 
+                _metadatarow._parts[0] = ProcessPartType(0, Array.IndexOf(_netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members, value));
+                _class = value; 
             }
         }
 
@@ -44,18 +44,18 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (enclosingClass == null)
+                if (_enclosingClass == null)
                 {
-                    MetaDataTable table = netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef);
-                    int index = Convert.ToInt32(metadatarow._parts[1]) - 1;
+                    MetaDataTable table = _netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef);
+                    int index = Convert.ToInt32(_metadatarow._parts[1]) - 1;
                     if (index >= 0 && index < table.Members.Length)
-                        enclosingClass = (TypeDefinition)table.Members[index];
+                        _enclosingClass = (TypeDefinition)table.Members[index];
                 }
-                return enclosingClass;
+                return _enclosingClass;
             }
             set { 
-                metadatarow._parts[1] = ProcessPartType(1, Array.IndexOf(netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members, value));
-                enclosingClass = value;
+                _metadatarow._parts[1] = ProcessPartType(1, Array.IndexOf(_netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members, value));
+                _enclosingClass = value;
             }
        
         }
@@ -67,14 +67,14 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            @class = null;
-            enclosingClass = null;
+            _class = null;
+            _enclosingClass = null;
         }
 
         public override void LoadCache()
         {
-            @class = Class;
-            enclosingClass = EnclosingClass;
+            _class = Class;
+            _enclosingClass = EnclosingClass;
         }
     }
 }

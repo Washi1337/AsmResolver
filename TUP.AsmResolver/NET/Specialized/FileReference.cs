@@ -8,8 +8,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class FileReference : MetaDataMember , IStreamProvider
     {
-        Stream stream;
-        string name;
+        Stream _stream;
+        string _name;
 
         public FileReference(MetaDataRow row)
             : base(row)
@@ -19,48 +19,48 @@ namespace TUP.AsmResolver.NET.Specialized
         public FileReference(string name, FileAttributes flags, uint hash)
             : base(new MetaDataRow((uint)flags, 0U, hash))
         {
-            this.name = name;
+            this._name = name;
         }
 
-        public FileAttributes Flags { get { return (FileAttributes)Convert.ToUInt32(metadatarow._parts[0]); } }
+        public FileAttributes Flags { get { return (FileAttributes)Convert.ToUInt32(_metadatarow._parts[0]); } }
 
         public string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[1]), out _name);
+                return _name;
             }
         }
 
-        public uint Hash { get { return Convert.ToUInt32(metadatarow._parts[2]); } }
+        public uint Hash { get { return Convert.ToUInt32(_metadatarow._parts[2]); } }
 
         public Stream Stream
         {
             get {
-                if (stream == null)
+                if (_stream == null)
                 {
-                    string fullpath = netheader.assembly.path.Substring(0, netheader.assembly.path.LastIndexOf('\\') + 1) + Name;
+                    string fullpath = _netheader.assembly._path.Substring(0, _netheader.assembly._path.LastIndexOf('\\') + 1) + Name;
                     if (File.Exists(fullpath))
-                        stream = File.Open(fullpath, FileMode.Open, FileAccess.Read);
+                        _stream = File.Open(fullpath, FileMode.Open, FileAccess.Read);
                 }
-                return stream;
+                return _stream;
             }
         }
 
         public override void ClearCache()
         {
-            if (stream != null)
-                stream.Dispose();
-            stream = null;
-            name = null;
+            if (_stream != null)
+                _stream.Dispose();
+            _stream = null;
+            _name = null;
         }
 
         public override void LoadCache()
         {
-            stream = Stream;
-            name = Name;
+            _stream = Stream;
+            _name = Name;
         }
     }
 }

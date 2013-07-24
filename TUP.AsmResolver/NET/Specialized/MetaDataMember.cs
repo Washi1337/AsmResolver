@@ -16,68 +16,68 @@ namespace TUP.AsmResolver.NET.Specialized
         public MetaDataMember(MetaDataRow row)
         {
             UpdateRowOnRebuild = true;
-            metadatarow = row;
+            _metadatarow = row;
         }
 
-        internal uint metadatatoken;
-        internal MetaDataRow metadatarow;
-        internal MetaDataTableType table;
-        internal NETHeader netheader;
+        internal uint _metadatatoken;
+        internal MetaDataRow _metadatarow;
+        internal MetaDataTableType _table;
+        internal NETHeader _netheader;
 
         public uint MetaDataToken
         {
-            get { return metadatatoken; }
+            get { return _metadatatoken; }
         }
 
         public uint TableIndex
         {
-            get { return (uint)((metadatatoken | (0xFF << 24)) - (0xFF << 24)); }
+            get { return (uint)((_metadatatoken | (0xFF << 24)) - (0xFF << 24)); }
         }
 
         public MetaDataRow MetaDataRow
         {
             get 
             { 
-                return metadatarow; 
+                return _metadatarow; 
             }
             set
             { 
-                metadatarow = value;
-                metadatarow._netHeader = this.NETHeader;
+                _metadatarow = value;
+                _metadatarow._netHeader = this.NETHeader;
             }
         }
 
         public NETHeader NETHeader
         {
-            get { return netheader; }
+            get { return _netheader; }
         }
 
         public MetaDataTableType TableType
         {
-            get { return table; }
+            get { return _table; }
         }
 
         public MetaDataTable Table
         {
             get
             {
-                return netheader.TablesHeap.GetTable(TableType, false);
+                return _netheader.TablesHeap.GetTable(TableType, false);
             }
         }
 
         public ValueType ProcessPartType(int partindex, object value)
         {
-            return Convert.ChangeType(value, metadatarow._parts[partindex].GetType()) as ValueType;
+            return Convert.ChangeType(value, _metadatarow._parts[partindex].GetType()) as ValueType;
         }
 
         public bool HasImage
         {
-            get { return netheader != null; }
+            get { return _netheader != null; }
         }
 
         public bool HasSavedMetaDataRow
         {
-            get { return HasImage && metadatarow._offset != 0; }
+            get { return HasImage && _metadatarow._offset != 0; }
         }
 
         public bool UpdateRowOnRebuild
@@ -88,11 +88,11 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public void ApplyChanges()
         {
-            if (HasSavedMetaDataRow && metadatarow._offset != 0)
+            if (HasSavedMetaDataRow && _metadatarow._offset != 0)
             {
-                byte[] generatedBytes = metadatarow.GenerateBytes();
-                netheader.ParentAssembly.peImage.SetOffset(metadatarow._offset);
-                netheader.ParentAssembly.peImage.Writer.Write(generatedBytes);
+                byte[] generatedBytes = _metadatarow.GenerateBytes();
+                _netheader.ParentAssembly._peImage.SetOffset(_metadatarow._offset);
+                _netheader.ParentAssembly._peImage.Writer.Write(generatedBytes);
 
             }
            // else
@@ -101,7 +101,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public void Dispose()
         {
-            metadatarow = default(MetaDataRow);
+            _metadatarow = default(MetaDataRow);
             ClearCache();
         }
 

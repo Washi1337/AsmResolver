@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class MethodSemantics : MetaDataMember 
     {
-        MethodDefinition method;
-        MetaDataMember association;
+        MethodDefinition _method;
+        MetaDataMember _association;
 
         public MethodSemantics(MetaDataRow row)
             : base(row)
@@ -18,27 +18,27 @@ namespace TUP.AsmResolver.NET.Specialized
         public MethodSemantics(MethodDefinition method, MetaDataMember association, MethodSemanticsAttributes attributes)
             : base(new MetaDataRow((uint)attributes, method.TableIndex, (uint)0))
         {
-            this.method = method;
-            this.association = association;
+            this._method = method;
+            this._association = association;
         }
 
         public MethodSemanticsAttributes Attributes
         {
-            get { return (MethodSemanticsAttributes)Convert.ToUInt16(metadatarow._parts[0]); }
+            get { return (MethodSemanticsAttributes)Convert.ToUInt16(_metadatarow._parts[0]); }
         }
 
         public MethodDefinition Method
         {
             get 
             {
-                if (method == null)
+                if (_method == null)
                 {
-                    MetaDataTable methodtable = netheader.TablesHeap.GetTable(MetaDataTableType.Method);
-                    int index = Convert.ToInt32(metadatarow._parts[1]) - 1;
+                    MetaDataTable methodtable = _netheader.TablesHeap.GetTable(MetaDataTableType.Method);
+                    int index = Convert.ToInt32(_metadatarow._parts[1]) - 1;
                     if (index >= 0 && index < methodtable.Members.Length)
-                        method = (MethodDefinition)methodtable.Members[index];
+                        _method = (MethodDefinition)methodtable.Members[index];
                 }
-                return method;
+                return _method;
             }
         }
 
@@ -46,22 +46,22 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (association == null)
-                    netheader.TablesHeap.HasSemantics.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out association);
-                return association;
+                if (_association == null)
+                    _netheader.TablesHeap.HasSemantics.TryGetMember(Convert.ToInt32(_metadatarow._parts[2]), out _association);
+                return _association;
             }
         }
 
         public override void ClearCache()
         {
-            method = null;
-            association = null;
+            _method = null;
+            _association = null;
         }
 
         public override void LoadCache()
         {
-            method = Method;
-            association = Association;
+            _method = Method;
+            _association = Association;
         }
 
     }

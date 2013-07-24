@@ -7,35 +7,35 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class TypeSpecification : TypeReference , ISpecification
     {
-        private TypeReference originaltype;
+        private TypeReference _originaltype;
 
         public TypeSpecification(MetaDataRow row)
             : this(row.NETHeader.BlobHeap.ReadTypeSignature(Convert.ToUInt32(row._parts[0]), null))
         {
-            metadatarow = row;
+            _metadatarow = row;
         }
 
         public TypeSpecification(TypeReference typeRef)
             : base(default(MetaDataRow))
         {
-            originaltype = typeRef;
-            netheader = typeRef.netheader;
+            _originaltype = typeRef;
+            _netheader = typeRef._netheader;
         }
 
         public MemberReference TransformWith(IGenericContext context)
         {
-            return netheader.BlobHeap.ReadTypeSignature(Signature, context); 
+            return _netheader.BlobHeap.ReadTypeSignature(Signature, context); 
         }
 
         public TypeReference OriginalType
         {
             get
             {
-                if (originaltype == null)
-                    originaltype = netheader.BlobHeap.ReadTypeSignature(Signature, this);
-                return originaltype;
+                if (_originaltype == null)
+                    _originaltype = _netheader.BlobHeap.ReadTypeSignature(Signature, this);
+                return _originaltype;
             }
-            internal set { originaltype = value; }
+            internal set { _originaltype = value; }
         }
 
         public override string Name
@@ -81,7 +81,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get 
             {
                 if (HasSavedMetaDataRow)
-                    return Convert.ToUInt32(metadatarow._parts[0]);
+                    return Convert.ToUInt32(_metadatarow._parts[0]);
                 else
                     return 0;
             }

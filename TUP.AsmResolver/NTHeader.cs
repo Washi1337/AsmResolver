@@ -14,10 +14,10 @@ namespace TUP.AsmResolver
     /// </summary>
     public class NTHeader : IHeader
     {
-        internal PeHeaderReader header;
-        internal FileHeader fheader;
-        internal string file;
-        internal Win32Assembly assembly;
+        internal PeHeaderReader _header;
+        internal FileHeader _fheader;
+        internal string _file;
+        internal Win32Assembly _assembly;
         
         internal NTHeader()
         {
@@ -29,7 +29,7 @@ namespace TUP.AsmResolver
         /// </summary>
         public string FilePath
         {
-            get { return file; }
+            get { return _file; }
         }
         /// <summary>
         /// Gets the File Header representation of the NT Header.
@@ -38,7 +38,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return fheader;
+                return _fheader;
             }
         }
         /// <summary>
@@ -48,7 +48,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return header.optionalHeader;
+                return _header.optionalHeader;
             }
         }
         /// <summary>
@@ -58,7 +58,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return (ImageSignature)header.ntHeadersSignature;
+                return (ImageSignature)_header.ntHeadersSignature;
             }
         }
         /// <summary>
@@ -67,14 +67,14 @@ namespace TUP.AsmResolver
         /// <returns></returns>
          public bool IsManagedAssembly
          {
-             get { return header.ManagedDataAvailable; }
+             get { return _header.ManagedDataAvailable; }
          }
         /// <summary>
         /// Gets the sections of the portable executable file.
         /// </summary>
         public List<Section> Sections
         {
-            get { return header.sections; }
+            get { return _header.sections; }
         }
         /// <summary>
         /// Gets the parent assembly container of the NT header.
@@ -83,7 +83,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembly;
+                return _assembly;
             }
         }
         /// <summary>
@@ -93,7 +93,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return header.ntheaderoffset;
+                return _header.ntheaderoffset;
             }
         }
 
@@ -105,11 +105,11 @@ namespace TUP.AsmResolver
         public static NTHeader FromAssembly(Win32Assembly assembly)
         {
             NTHeader a = new NTHeader();
-            a.assembly = assembly;
-            a.file = assembly.path;
-            a.header = assembly.headerReader;
+            a._assembly = assembly;
+            a._file = assembly._path;
+            a._header = assembly._headerReader;
 
-            a.fheader = FileHeader.FromAssembly(assembly);
+            a._fheader = FileHeader.FromAssembly(assembly);
             
             
             return a;

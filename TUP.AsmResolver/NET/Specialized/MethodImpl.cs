@@ -7,9 +7,9 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class MethodImplementation : MetaDataMember 
     {
-        TypeDefinition @class;
-        MethodReference methodBody;
-        MethodReference methodDeclaration;
+        TypeDefinition _class;
+        MethodReference _methodBody;
+        MethodReference _methodDeclaration;
 
         public MethodImplementation(MetaDataRow row)
             : base(row)
@@ -19,56 +19,56 @@ namespace TUP.AsmResolver.NET.Specialized
         public MethodImplementation(TypeDefinition @class, MethodReference methodDeclaration, MethodReference newMethod)
             : base(new MetaDataRow(@class.TableIndex, 0U, newMethod.TableIndex))
         {
-            this.@class = @class;
-            this.methodDeclaration = methodDeclaration;
-            this.methodBody = newMethod;
+            this._class = @class;
+            this._methodDeclaration = methodDeclaration;
+            this._methodBody = newMethod;
         }
 
         public TypeDefinition Class
         {
             get
             {
-                if (@class == null)
+                if (_class == null)
                 {
-                    int index = Convert.ToInt32(metadatarow._parts[0]);
-                    MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
+                    int index = Convert.ToInt32(_metadatarow._parts[0]);
+                    MetaDataTable table = _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
                     if (index > 0 && index <= table.Members.Length)
-                        @class = table.Members[index - 1] as TypeDefinition;
+                        _class = table.Members[index - 1] as TypeDefinition;
                 }
-                return @class;
+                return _class;
             }
         }
         public MethodReference MethodBody
         {
             get
             {
-                if (methodBody == null)
-                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out methodBody);
-                return methodBody;
+                if (_methodBody == null)
+                    _netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _methodBody);
+                return _methodBody;
             }
         }
         public MethodReference MethodDeclaration
         {
             get
             {
-                if (methodBody == null)
-                    netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out methodDeclaration);
-                return methodDeclaration;
+                if (_methodBody == null)
+                    _netheader.TablesHeap.MethodDefOrRef.TryGetMember(Convert.ToInt32(_metadatarow._parts[2]), out _methodDeclaration);
+                return _methodDeclaration;
             }
         }
 
         public override void ClearCache()
         {
-            @class = null;
-            methodBody = null;
-            methodDeclaration = null;
+            _class = null;
+            _methodBody = null;
+            _methodDeclaration = null;
         }
 
         public override void LoadCache()
         {
-            @class = Class;
-            methodBody = MethodBody;
-            methodDeclaration = MethodDeclaration;
+            _class = Class;
+            _methodBody = MethodBody;
+            _methodDeclaration = MethodDeclaration;
         }
     }
 }

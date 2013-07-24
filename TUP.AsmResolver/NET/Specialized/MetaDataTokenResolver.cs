@@ -11,11 +11,11 @@ namespace TUP.AsmResolver.NET.Specialized
     /// </summary>
     public class MetaDataTokenResolver
     {
-        NETHeader netheader;
+        NETHeader _netheader;
 
         public MetaDataTokenResolver(NETHeader netheader)
         {
-            this.netheader = netheader;
+            this._netheader = netheader;
         }
 
         public object ResolveToken(uint metadataToken)
@@ -39,12 +39,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
             MetaDataTableType tabletype = (MetaDataTableType)(metadataToken >> 0x18);
 
-            if (!netheader.TablesHeap.HasTable(tabletype))
+            if (!_netheader.TablesHeap.HasTable(tabletype))
                 throw new ArgumentException("Table is not present in tables heap.");
 
             uint subtraction = ((uint)tabletype) * 0x1000000;
             uint rowindex = metadataToken - subtraction;
-            return netheader.TablesHeap.GetTable( tabletype).Members[(int)rowindex - 1];
+            return _netheader.TablesHeap.GetTable( tabletype).Members[(int)rowindex - 1];
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace TUP.AsmResolver.NET.Specialized
         public string ResolveString(uint metadataToken)
         {
             uint actualindex = metadataToken - 0x70000000;
-            return netheader.UserStringsHeap.GetStringByOffset(actualindex);
+            return _netheader.UserStringsHeap.GetStringByOffset(actualindex);
             
         }
 

@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class EventMap : MetaDataMember 
     {
-        MemberRange<EventDefinition> eventRange = null;
-        TypeDefinition parent = null;
+        MemberRange<EventDefinition> _eventRange = null;
+        TypeDefinition _parent = null;
 
         public EventMap(MetaDataRow row)
             : base(row)
@@ -18,21 +18,21 @@ namespace TUP.AsmResolver.NET.Specialized
         public EventMap(TypeDefinition parent, uint startingIndex)
             :base(new MetaDataRow(parent.TableIndex, startingIndex))
         {
-            this.parent = parent;
+            this._parent = parent;
         }
 
         public TypeDefinition Parent
         {
             get
             {
-                if (parent == null)
+                if (_parent == null)
                 {
-                    MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
-                    int index = Convert.ToInt32(metadatarow._parts[0]) - 1;
+                    MetaDataTable table = _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
+                    int index = Convert.ToInt32(_metadatarow._parts[0]) - 1;
                     if (index >= 0 && index < table.Members.Length)
-                        parent = table.Members[index] as TypeDefinition;
+                        _parent = table.Members[index] as TypeDefinition;
                 }
-                return parent;
+                return _parent;
             }
         }
 
@@ -40,11 +40,11 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (eventRange == null)
+                if (_eventRange == null)
                 {
-                    eventRange = MemberRange.CreateRange<EventDefinition>(this, 1, netheader.TablesHeap.GetTable(MetaDataTableType.Event, false));
+                    _eventRange = MemberRange.CreateRange<EventDefinition>(this, 1, _netheader.TablesHeap.GetTable(MetaDataTableType.Event, false));
                 }
-                return eventRange.Members;
+                return _eventRange.Members;
 
                 //return Convert.ToUInt32(metadatarow.parts[1]); 
             }
@@ -57,15 +57,15 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {   
-            eventRange = null;
-            parent = null;
+            _eventRange = null;
+            _parent = null;
         }
 
         public override void LoadCache()
         {
-            eventRange = MemberRange.CreateRange<EventDefinition>(this, 1, netheader.TablesHeap.GetTable(MetaDataTableType.Event, false));
-            eventRange.LoadCache();
-            parent = Parent;
+            _eventRange = MemberRange.CreateRange<EventDefinition>(this, 1, _netheader.TablesHeap.GetTable(MetaDataTableType.Event, false));
+            _eventRange.LoadCache();
+            _parent = Parent;
         }
     }
 }

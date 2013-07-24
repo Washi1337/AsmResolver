@@ -11,29 +11,29 @@ namespace TUP.AsmResolver
     /// </summary>
     public class ResourceDirectoryEntry
     {
-        PeImage image;
-        uint offset;
-        internal Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY rawEntry;
-        string customName;
+        private PeImage _image;
+        private uint _offset;
+        private Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY _rawEntry;
+        private string _customName;
         
         internal ResourceDirectoryEntry(PeImage image, uint offset, Structures.IMAGE_RESOURCE_DIRECTORY_ENTRY rawEntry, string customName)
         {
-            this.image = image;
-            this.offset = offset;
-            this.rawEntry = rawEntry;
-            this.customName = customName;
+            this._image = image;
+            this._offset = offset;
+            this._rawEntry = rawEntry;
+            this._customName = customName;
         }
 
         /// <summary>
         /// Gets the native name ID of the directory entry.
         /// </summary>
         public uint NameID { 
-            get { return rawEntry.Name; }
+            get { return _rawEntry.Name; }
             set
             {
-                image.SetOffset(offset);
-                image.Writer.Write(value);
-                rawEntry.Name = value;
+                _image.SetOffset(_offset);
+                _image.Writer.Write(value);
+                _rawEntry.Name = value;
             }
         }
         /// <summary>
@@ -57,7 +57,7 @@ namespace TUP.AsmResolver
             get
             {
                 if (Type == ResourceDirectoryType.CustomNamed)
-                    return customName;
+                    return _customName;
                 else
                     return Type.ToString();
             }
@@ -66,12 +66,12 @@ namespace TUP.AsmResolver
         /// Gets the offset to the contents of this directoy entry. This offset is relative to the resource directory offset.
         /// </summary>
         public uint OffsetToData {
-            get { return rawEntry.OffsetToData; }
+            get { return _rawEntry.OffsetToData; }
             set
             {
-                image.SetOffset(offset + sizeof(uint));
-                image.Writer.Write(value);
-                rawEntry.Name = value;
+                _image.SetOffset(_offset + sizeof(uint));
+                _image.Writer.Write(value);
+                _rawEntry.Name = value;
             }
         }
         /// <summary>

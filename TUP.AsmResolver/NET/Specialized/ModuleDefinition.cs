@@ -7,9 +7,9 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class ModuleDefinition : ModuleReference
     {
-        string name = null;
-        Guid mvid = default(Guid);
-        CustomAttribute[] customAttributes = null;
+        private string _name = null;
+        private Guid _mvid = default(Guid);
+        private CustomAttribute[] _customAttributes = null;
 
         public ModuleDefinition(MetaDataRow row)
             : base(row)
@@ -19,17 +19,17 @@ namespace TUP.AsmResolver.NET.Specialized
         public ModuleDefinition(string name, Guid mvid)
             : base(new MetaDataRow(0U, 0U, 0U, 0U, 0U))
         {
-            this.name = name;
-            this.mvid = mvid;
+            this._name = name;
+            this._mvid = mvid;
         }
 
         public override string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[1]), out _name);
+                return _name;
             }
         }
 
@@ -37,20 +37,20 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (customAttributes == null && netheader.TablesHeap.HasTable(MetaDataTableType.CustomAttribute))
+                if (_customAttributes == null && _netheader.TablesHeap.HasTable(MetaDataTableType.CustomAttribute))
                 {
                     List<CustomAttribute> customattributes = new List<CustomAttribute>();
 
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).Members)
+                    foreach (var member in _netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).Members)
                     {
                         CustomAttribute attribute = member as CustomAttribute;
-                        if (attribute.Parent != null && attribute.Parent.metadatatoken == this.metadatatoken)
+                        if (attribute.Parent != null && attribute.Parent._metadatatoken == this._metadatatoken)
                             customattributes.Add(attribute);
                     }
 
-                    customAttributes = customattributes.ToArray();
+                    _customAttributes = customattributes.ToArray();
                 }
-                return customAttributes;
+                return _customAttributes;
             }
         }
 
@@ -58,9 +58,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (mvid == default(Guid))
-                    mvid = netheader.GuidHeap.GetGuidByOffset(Convert.ToUInt32(metadatarow._parts[2]));
-                return mvid;
+                if (_mvid == default(Guid))
+                    _mvid = _netheader.GuidHeap.GetGuidByOffset(Convert.ToUInt32(_metadatarow._parts[2]));
+                return _mvid;
             }
         }
 
@@ -71,17 +71,17 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            name = null;
-            mvid = default(Guid);
-            customAttributes = null;
+            _name = null;
+            _mvid = default(Guid);
+            _customAttributes = null;
         }
 
         public override void LoadCache()
         {
             base.LoadCache();
-            name = Name;
-            mvid = Mvid;
-            customAttributes = CustomAttributes;
+            _name = Name;
+            _mvid = Mvid;
+            _customAttributes = CustomAttributes;
         }
     }
 }

@@ -25,7 +25,7 @@ namespace TUP.AsmResolver.PE
 
         internal static PeImage LoadFromAssembly(Win32Assembly assembly) 
         {
-            return new PeImage(assembly.path) { ParentAssembly = assembly }; 
+            return new PeImage(assembly._path) { ParentAssembly = assembly }; 
         }
 
         internal PeImage(string file)

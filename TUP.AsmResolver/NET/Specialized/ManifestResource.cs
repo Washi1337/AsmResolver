@@ -8,9 +8,9 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class ManifestResource : MetaDataMember, IStreamProvider
     {
-        Stream stream;
-        string name;
-        MetaDataMember implementation;
+        Stream _stream;
+        string _name;
+        MetaDataMember _implementation;
 
         public ManifestResource(MetaDataRow row)
             : base(row)
@@ -20,38 +20,38 @@ namespace TUP.AsmResolver.NET.Specialized
         public ManifestResource(string name, ManifestResourceAttributes attributes, MetaDataMember implementation, uint offset)
             : base(new MetaDataRow(offset, (uint)attributes, 0U, 0U))
         {
-            this.name = name;
-            this.implementation = implementation;
+            this._name = name;
+            this._implementation = implementation;
         }
 
         public uint Offset
         {
-            get { return Convert.ToUInt32(metadatarow._parts[0]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[0]); }
         }
         
         public Stream Stream
         {
             get
             {
-                if (stream == null )
+                if (_stream == null )
                 {
                        if (Implementation == null)
                        {
-                           netheader.assembly.peImage.SetOffset(netheader.ResourcesDirectory.TargetOffset.FileOffset + Offset);
-                           stream = netheader.assembly.peImage.ReadStream(netheader.assembly.peImage.Reader.ReadInt32());
+                           _netheader.assembly._peImage.SetOffset(_netheader.ResourcesDirectory.TargetOffset.FileOffset + Offset);
+                           _stream = _netheader.assembly._peImage.ReadStream(_netheader.assembly._peImage.Reader.ReadInt32());
                        }
                        else
                        {
                            // TODO: assemblyref contents
                            if (Implementation is FileReference)
                            {
-                               stream = (Implementation as FileReference).Stream;
+                               _stream = (Implementation as FileReference).Stream;
                    
                            }
                        }
                 }
                 
-                return stream;
+                return _stream;
 
 
             }
@@ -59,16 +59,16 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ManifestResourceAttributes Attributes
         {
-            get { return (ManifestResourceAttributes)Convert.ToUInt32(metadatarow._parts[1]); }
+            get { return (ManifestResourceAttributes)Convert.ToUInt32(_metadatarow._parts[1]); }
         }
 
         public string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[2]), out _name);
+                return _name;
             }
         }
 
@@ -76,33 +76,33 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (implementation == null)
+                if (_implementation == null)
                 {
-                    int token = Convert.ToInt32(metadatarow._parts[3]);
+                    int token = Convert.ToInt32(_metadatarow._parts[3]);
                     if (token == 0 || token == 1)
                         return null;
 
-                    netheader.TablesHeap.Implementation.TryGetMember(token, out implementation);
+                    _netheader.TablesHeap.Implementation.TryGetMember(token, out _implementation);
                     
                 }
-                return implementation;
+                return _implementation;
             }
         }
 
         public override void ClearCache()
         {
-            if (stream != null)
-                stream.Dispose();
-            stream = null;
-            name = null;
-            implementation = null;
+            if (_stream != null)
+                _stream.Dispose();
+            _stream = null;
+            _name = null;
+            _implementation = null;
         }
 
         public override void LoadCache()
         {
-            stream = Stream;
-            name = Name;
-            implementation = Implementation;
+            _stream = Stream;
+            _name = Name;
+            _implementation = Implementation;
         }
     }
 }

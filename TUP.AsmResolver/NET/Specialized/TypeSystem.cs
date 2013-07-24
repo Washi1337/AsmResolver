@@ -10,26 +10,26 @@ namespace TUP.AsmResolver.NET.Specialized
     /// </summary>
     public class TypeSystem 
     {
-        AssemblyReference mscorlibref;
-        NETHeader managedHeader;
-        bool iscorlib = false;
+        private AssemblyReference _mscorlibRef;
+        private NETHeader _managedHeader;
+        private bool _iscorlib = false;
+
         private TypeReference CreateCorLibTypeRef(string @namespace, string name, ElementType type)
         {
-            if (iscorlib)
-                return (TypeReference)managedHeader.TablesHeap.GetTable(MetaDataTableType.TypeDef).Members.FirstOrDefault(t => t.ToString() == @namespace + "." + name);
+            if (_iscorlib)
+                return (TypeReference)_managedHeader.TablesHeap.GetTable(MetaDataTableType.TypeDef).Members.FirstOrDefault(t => t.ToString() == @namespace + "." + name);
             else
-                return new TypeReference(@namespace, name, mscorlibref) { netheader = managedHeader, IsElementType = true, _elementType = type };
+                return new TypeReference(@namespace, name, _mscorlibRef) { _netheader = _managedHeader, IsElementType = true, _elementType = type };
         }
 
         internal TypeSystem(NETHeader netheader)
         {
-            this.managedHeader = netheader;
-            if (netheader.ParentAssembly.path.StartsWith(@"C:\Windows\Microsoft.NET\Framework") && netheader.ParentAssembly.path.EndsWith("\\mscorlib.dll"))
-                iscorlib = true;
+            this._managedHeader = netheader;
+            if (netheader.ParentAssembly._path.StartsWith(@"C:\Windows\Microsoft.NET\Framework") && netheader.ParentAssembly._path.EndsWith("\\mscorlib.dll"))
+                _iscorlib = true;
             else
             {
-                mscorlibref = new AssemblyReference("mscorlib", AssemblyAttributes.None, new Version(), AssemblyHashAlgorithm.None, 0 , null) {netheader = netheader };
-                //mscorlibref = netheader.TablesHeap.GetTable( MetaDataTableType.AssemblyRef).Members.First(m => (m as AssemblyReference).Name == "mscorlib") as AssemblyReference;
+                _mscorlibRef = new AssemblyReference("mscorlib", AssemblyAttributes.None, new Version(), AssemblyHashAlgorithm.None, 0 , null) {_netheader = netheader };
             }
             Void = CreateCorLibTypeRef("System", "Void", ElementType.Void);
             IntPtr = CreateCorLibTypeRef("System", "IntPtr", ElementType.I);

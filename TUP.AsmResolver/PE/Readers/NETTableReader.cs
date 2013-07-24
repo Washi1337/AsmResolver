@@ -240,9 +240,9 @@ namespace TUP.AsmResolver.PE.Readers
                                     byte sigtype = tablesHeap.netheader.BlobHeap.binReader.ReadByte();
 
                                     if (sigtype == 0x6)
-                                        members[i] = new FieldReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
+                                        members[i] = new FieldReference(row) { _table = MetaDataTableType.MemberRef, _netheader = tablesHeap.netheader, _metadatarow = row };
                                     else
-                                        members[i] = new NET.Specialized.MethodReference(row) { table = MetaDataTableType.MemberRef, netheader = tablesHeap.netheader, metadatarow = row };
+                                        members[i] = new NET.Specialized.MethodReference(row) { _table = MetaDataTableType.MemberRef, _netheader = tablesHeap.netheader, _metadatarow = row };
 
                                     break;
                                 case MetaDataTableType.Constant:
@@ -348,7 +348,7 @@ namespace TUP.AsmResolver.PE.Readers
                             }
                             if (members.Length > 0)
                             {
-                                members[i].metadatatoken = ConstructMetaDataToken(table.type, i);
+                                members[i]._metadatatoken = ConstructMetaDataToken(table.type, i);
                             }
                         }
                     }
@@ -397,8 +397,8 @@ namespace TUP.AsmResolver.PE.Readers
         internal T CreateMember<T>(BinaryReader reader, byte[] rowSignature, MetaDataTableType table) where T : MetaDataMember
         {
             T member = (T)Activator.CreateInstance(typeof(T), ReadRow(reader, rowSignature));
-            member.table = table;
-            member.netheader = tablesHeap.netheader;
+            member._table = table;
+            member._netheader = tablesHeap.netheader;
             return member;
         }
 

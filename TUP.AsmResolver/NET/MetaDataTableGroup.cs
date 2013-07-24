@@ -102,7 +102,7 @@ namespace TUP.AsmResolver.NET
             if (table == null)
                 throw new ArgumentException("Member does not belong to the metadata table group.");
 
-            uint rowIndex = ((uint)(member.metadatatoken - ((uint)table.Type << 24)));
+            uint rowIndex = ((uint)(member._metadatatoken - ((uint)table.Type << 24)));
             uint tableIndex = (uint)Array.IndexOf(tables, table);
 
             return (rowIndex << bits) | tableIndex;

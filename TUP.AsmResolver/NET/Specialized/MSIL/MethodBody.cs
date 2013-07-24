@@ -12,16 +12,16 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
         }
 
-        NETMethodReader reader;
-        MSILInstruction[] instructions;
+        private NETMethodReader _reader;
+        private MSILInstruction[] _instructions;
 
         public static MethodBody FromMethod(MethodDefinition methodDef)
         {
             MethodBody body = new MethodBody();
             body.Method = methodDef;
-            body.reader = new NETMethodReader(methodDef.netheader.assembly.peImage, body);
+            body._reader = new NETMethodReader(methodDef._netheader.assembly._peImage, body);
             if (body.IsFat)
-                body.reader.ReadFatMethod();
+                body._reader.ReadFatMethod();
             return body;
         }
 
@@ -29,7 +29,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 
         public bool IsFat
         {
-            get { return ((reader.signature & 3) == 3); }
+            get { return ((_reader.signature & 3) == 3); }
         }
 
         public int HeaderSize
@@ -48,9 +48,9 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             get
             {
                 if (IsFat)
-                    return reader.codesize;
+                    return _reader.codesize;
                 else
-                    return (uint)(reader.signature >> 2);
+                    return (uint)(_reader.signature >> 2);
             }
             
         }
@@ -60,7 +60,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             get
             {
                 if (IsFat)
-                    return reader.maxstack;
+                    return _reader.maxstack;
                 else
                     return 8;
             }
@@ -71,7 +71,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             get
             {
                 if (IsFat)
-                    return reader.localvarsig;
+                    return _reader.localvarsig;
                 else
                     return 0;
             }
@@ -82,7 +82,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             get
             {
                 if (IsFat)
-                    return (reader.fatsig & 0x10) == 0x10;
+                    return (_reader.fatsig & 0x10) == 0x10;
                 else
                     return false;
             }
@@ -90,7 +90,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 
         public bool HasExtraSections
         {
-            get { return ((reader.fatsig & 8) == 8); }
+            get { return ((_reader.fatsig & 8) == 8); }
         }
 
         public bool HasVariables
@@ -107,9 +107,9 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             {
                 if (IsFat)
                 {
-                    if (reader.vars == null)
-                        reader.ReadVariables();
-                    return reader.vars;
+                    if (_reader.vars == null)
+                        _reader.ReadVariables();
+                    return _reader.vars;
                 }
                 else
                     return null;
@@ -123,10 +123,10 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
             {
                 if (HasExtraSections)
                 {
-                    if (reader.sections == null)
-                        reader.ReadSections();
+                    if (_reader.sections == null)
+                        _reader.ReadSections();
 
-                    return reader.sections;
+                    return _reader.sections;
                 }
                 else
                     return null;
@@ -145,24 +145,24 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             get
             {
-                if (instructions == null)
+                if (_instructions == null)
                 {
                     MSILDisassembler disassembler = new MSILDisassembler(this);
-                    instructions = disassembler.Disassemble();
+                    _instructions = disassembler.Disassemble();
                 }
-                return instructions;
+                return _instructions;
             }
         }
 
         public void ClearCache()
         {
-            instructions = null;
+            _instructions = null;
         }
 
         public void LoadCache()
         {
-            instructions = Instructions;
-            reader.vars = Variables;
+            _instructions = Instructions;
+            _reader.vars = Variables;
         }
     }
 }

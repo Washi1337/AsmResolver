@@ -7,19 +7,20 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 {
     public class MethodBodySection
     {
-        byte signature;
-        internal List<ExceptionHandler> handlers;
+        private byte _signature;
+        internal List<ExceptionHandler> _handlers;
+
         internal MethodBodySection(byte signature)
         {
-            this.signature = signature;
-            handlers = new List<ExceptionHandler>();
+            this._signature = signature;
+            _handlers = new List<ExceptionHandler>();
         }
 
         public bool IsFat
         {
             get
             {
-                return (signature & 0x40) == 0x40;
+                return (_signature & 0x40) == 0x40;
             }
         }
         public bool IsExceptionHandler
@@ -33,11 +34,11 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             get
             {
-                return (signature & 0x80) == 0x80;
+                return (_signature & 0x80) == 0x80;
             }
         }
         public ExceptionHandler[] ExceptionHandlers
-        { get { return handlers.ToArray(); } }
+        { get { return _handlers.ToArray(); } }
 
     }
 }

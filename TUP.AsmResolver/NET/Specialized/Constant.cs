@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class Constant : MetaDataMember
     {
-        object value;
-        MetaDataMember parent;
+        object _value;
+        MetaDataMember _parent;
 
         public Constant(MetaDataRow row)
             : base(row)
@@ -22,15 +22,15 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ElementType ConstantType
         {
-            get { return (Specialized.ElementType)Convert.ToByte(metadatarow._parts[0]); }
+            get { return (Specialized.ElementType)Convert.ToByte(_metadatarow._parts[0]); }
         }
 
         public MetaDataMember Parent
         {
             get 
             {
-                if (parent != null || netheader.TablesHeap.HasConstant.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out parent))
-                    return parent;
+                if (_parent != null || _netheader.TablesHeap.HasConstant.TryGetMember(Convert.ToInt32(_metadatarow._parts[2]), out _parent))
+                    return _parent;
                 
                 return null;
             }
@@ -38,30 +38,30 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint Signature
         {
-            get { return Convert.ToUInt32(metadatarow._parts[3]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[3]); }
         }
 
         public object Value
         {
             get
             {
-                if (value == null)
-                    value = netheader.BlobHeap.ReadConstantValue(ConstantType, Signature);
-                return value;
+                if (_value == null)
+                    _value = _netheader.BlobHeap.ReadConstantValue(ConstantType, Signature);
+                return _value;
 
             }
         }
 
         public override void ClearCache()
         {
-            value = null;
-            parent = null;
+            _value = null;
+            _parent = null;
         }
 
         public override void LoadCache()
         {
-            value = Value;
-            parent = Parent;
+            _value = Value;
+            _parent = Parent;
         }
     }
 }

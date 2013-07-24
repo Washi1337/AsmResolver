@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class PropertyMap : MetaDataMember
     {
-        MemberRange<PropertyDefinition> propertyRange;
-        TypeDefinition parent;
+        private MemberRange<PropertyDefinition> _propertyRange;
+        private TypeDefinition _parent;
 
         public PropertyMap(MetaDataRow row)
             : base(row)
@@ -24,26 +24,26 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (parent == null)
+                if (_parent == null)
                 {
-                    MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
-                    int index = Convert.ToInt32(metadatarow._parts[0]) - 1;
+                    MetaDataTable table = _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef);
+                    int index = Convert.ToInt32(_metadatarow._parts[0]) - 1;
                     if (index >= 0 && index < table.Members.Length)
-                        parent = table.Members[index] as TypeDefinition;
+                        _parent = table.Members[index] as TypeDefinition;
                 }
-                return parent;
+                return _parent;
             }
         }
         public PropertyDefinition[] Properties
         {
             get
             {
-                if (propertyRange == null)
+                if (_propertyRange == null)
                 {
-                    propertyRange = MemberRange.CreateRange<PropertyDefinition>(this, 1, NETHeader.TablesHeap.GetTable(MetaDataTableType.Property, false));
+                    _propertyRange = MemberRange.CreateRange<PropertyDefinition>(this, 1, NETHeader.TablesHeap.GetTable(MetaDataTableType.Property, false));
 
                 }
-                return propertyRange.Members;
+                return _propertyRange.Members;
 
                 //return Convert.ToUInt32(metadatarow.parts[1]); 
             }
@@ -56,15 +56,15 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            propertyRange = null;
-            parent = null;
+            _propertyRange = null;
+            _parent = null;
         }
 
         public override void LoadCache()
         {
-            propertyRange = MemberRange.CreateRange<PropertyDefinition>(this, 1, NETHeader.TablesHeap.GetTable(MetaDataTableType.Property, false));
-            propertyRange.LoadCache();
-            parent = Parent;
+            _propertyRange = MemberRange.CreateRange<PropertyDefinition>(this, 1, NETHeader.TablesHeap.GetTable(MetaDataTableType.Property, false));
+            _propertyRange.LoadCache();
+            _parent = Parent;
         }
     }
 }

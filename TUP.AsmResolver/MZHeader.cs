@@ -14,7 +14,8 @@ namespace TUP.AsmResolver
         internal MZHeader()
         {
         }
-        internal Win32Assembly assembly;
+
+        internal Win32Assembly _assembly;
         /// <summary>
         /// Gets the Portable Executeable's MZ header by specifing the assembly.
         /// </summary>
@@ -23,7 +24,7 @@ namespace TUP.AsmResolver
         public static MZHeader FromAssembly(Win32Assembly assembly)
         {
             MZHeader a = new MZHeader();
-            a.assembly = assembly;
+            a._assembly = assembly;
             return a;
         }
 
@@ -33,7 +34,7 @@ namespace TUP.AsmResolver
         public ushort PagesInFile
         {
             get
-            { return assembly.headerReader.dosHeader.e_cp; }
+            { return _assembly._headerReader.dosHeader.e_cp; }
         }
         /// <summary>
         /// Gets the offset of the NT header that is specified in the MZ header.
@@ -42,7 +43,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembly.headerReader.dosHeader.e_lfanew;
+                return _assembly._headerReader.dosHeader.e_lfanew;
             }
         }
         /// <summary>
@@ -52,7 +53,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembly.headerReader.dosHeader.e_lfarlc;
+                return _assembly._headerReader.dosHeader.e_lfarlc;
             }
 
         }
@@ -69,7 +70,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembly.peImage.ReadByteTerminatedString(0x4E, 0x24);
+                return _assembly._peImage.ReadByteTerminatedString(0x4E, 0x24);
             }
             set
             {
@@ -81,8 +82,8 @@ namespace TUP.AsmResolver
                 while (bytes.Count < MaxStopMessageLength)
                     bytes.Add(0);
 
-                assembly.peImage.SetOffset(0x4E);
-                assembly.peImage.Writer.Write(bytes.ToArray());
+                _assembly._peImage.SetOffset(0x4E);
+                _assembly._peImage.Writer.Write(bytes.ToArray());
                 
             }
         }
@@ -104,7 +105,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembly;
+                return _assembly;
             }
         }
 

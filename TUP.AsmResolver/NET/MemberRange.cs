@@ -27,7 +27,7 @@ namespace TUP.AsmResolver.NET
 
             range.TargetTable = targetTable;
 
-            int memberIndex = (int)(member.metadatatoken | (0xFF << 24)) - (0xFF << 24);
+            int memberIndex = (int)(member._metadatatoken | (0xFF << 24)) - (0xFF << 24);
             if (member.Table != null)
             {
                 if (memberIndex == member.Table.AmountOfRows)

@@ -41,7 +41,7 @@ namespace TUP.AsmResolver.ASM
         /// <param name="assembly">The assembly to be disassembled.</param>
         public x86Disassembler(Win32Assembly assembly)
         {
-            this.reader = assembly.peImage.Reader;
+            this.reader = assembly._peImage.Reader;
             this.assembly = assembly;
             this.IsDynamic = false;
         }

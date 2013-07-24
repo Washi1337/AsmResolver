@@ -10,9 +10,9 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 {
     public class MSILDisassembler  
     {
-        BinaryReader reader;
-        uint ilOffset;
-        internal static MSILOpCode[] opcodes;
+        private BinaryReader _reader;
+        private uint _ilOffset;
+        internal static MSILOpCode[] _opCodes;
 
         static MSILDisassembler()
         {
@@ -22,10 +22,10 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         private static void LoadOpCodes()
         {
             FieldInfo[] fields = typeof(MSILOpCodes).GetFields();
-            opcodes = new MSILOpCode[fields.Length];
+            _opCodes = new MSILOpCode[fields.Length];
 
             for (int i = 0; i < fields.Length; i++)
-                opcodes[i] = (MSILOpCode)fields[i].GetValue(null);
+                _opCodes[i] = (MSILOpCode)fields[i].GetValue(null);
 
         }
 
@@ -33,12 +33,12 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             MethodBody = body;
             
-            Section section = Section.GetSectionByRva(body.Method.netheader.assembly, body.Method.RVA);
+            Section section = Section.GetSectionByRva(body.Method._netheader.assembly, body.Method.RVA);
 
-            ilOffset = new OffsetConverter(section).RvaToFileOffset(body.Method.RVA) + (uint)body.HeaderSize;
+            _ilOffset = new OffsetConverter(section).RvaToFileOffset(body.Method.RVA) + (uint)body.HeaderSize;
 
-            reader = section.ParentAssembly.peImage.Reader;
-            TokenResolver = new MetaDataTokenResolver(body.Method.netheader);
+            _reader = section.ParentAssembly._peImage.Reader;
+            TokenResolver = new MetaDataTokenResolver(body.Method._netheader);
         }
 
         public MSILDisassembler(byte[] bytes, MetaDataTokenResolver tokenResolver)
@@ -49,7 +49,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         public MSILDisassembler(Stream stream, MetaDataTokenResolver tokenResolver)
         {
             TokenResolver = tokenResolver;
-            reader = new BinaryReader(stream);
+            _reader = new BinaryReader(stream);
         }
 
         /// <summary>
@@ -59,11 +59,11 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {
             get
             {
-                return (int)(reader.BaseStream.Position - ilOffset);
+                return (int)(_reader.BaseStream.Position - _ilOffset);
             }
             set
             {
-                reader.BaseStream.Position = ilOffset + value;
+                _reader.BaseStream.Position = _ilOffset + value;
             }
         }
        
@@ -92,14 +92,14 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         public MSILInstruction[] Disassemble(int startoffset, int length)
         {
             List<MSILInstruction> instructions = new List<MSILInstruction>();
-            reader.BaseStream.Position = ilOffset + startoffset;
+            _reader.BaseStream.Position = _ilOffset + startoffset;
             int currentOffset = 0;
-            while (reader.BaseStream.Position < ilOffset + startoffset + length)
+            while (_reader.BaseStream.Position < _ilOffset + startoffset + length)
             {
                 MSILInstruction instruction = DisassembleNextInstruction();
                 instructions.Add(instruction);
                 currentOffset += instruction.Size;
-                reader.BaseStream.Position = ilOffset + startoffset + currentOffset;
+                _reader.BaseStream.Position = _ilOffset + startoffset + currentOffset;
 
             }
             SetEnclosingInstructions(instructions);
@@ -109,7 +109,7 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 
         public MSILInstruction DisassembleNextInstruction()
         {
-            int currentOffset = (int)(reader.BaseStream.Position - ilOffset);
+            int currentOffset = (int)(_reader.BaseStream.Position - _ilOffset);
             
             MSILOpCode opcode = ReadNextOpCode();
 
@@ -124,15 +124,15 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
         {           
 
             int indexToCheck = 0;
-            byte opcodebyte = reader.ReadByte();
+            byte opcodebyte = _reader.ReadByte();
 
             if (opcodebyte == 0xFE)
             {
                 indexToCheck = 1;
-                opcodebyte = reader.ReadByte();
+                opcodebyte = _reader.ReadByte();
             }
 
-            foreach (MSILOpCode opcode in opcodes)
+            foreach (MSILOpCode opcode in _opCodes)
             {
                 if (opcode.Bytes.Length == indexToCheck + 1 && opcode.Bytes[indexToCheck] == opcodebyte)
                 {
@@ -151,11 +151,11 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 case OperandType.ShortArgument:
                 case OperandType.ShortInstructionTarget:
                 case OperandType.ShortVariable:
-                    return reader.ReadBytes(1);
+                    return _reader.ReadBytes(1);
 
                 case OperandType.Argument:
                 case OperandType.Variable:
-                    return reader.ReadBytes(2);
+                    return _reader.ReadBytes(2);
 
                 case OperandType.Field:
                 case OperandType.Int32:
@@ -166,15 +166,15 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
                 case OperandType.String:
                 case OperandType.Token:
                 case OperandType.Type:
-                    return reader.ReadBytes(4);
+                    return _reader.ReadBytes(4);
 
                 case OperandType.Float64:
                 case OperandType.Int64:
-                    return reader.ReadBytes(8);
+                    return _reader.ReadBytes(8);
 
                 case OperandType.InstructionTable:
-                    byte[] header = reader.ReadBytes(4);
-                    byte[] offsets = reader.ReadBytes(BitConverter.ToInt32(header, 0) * sizeof(int));
+                    byte[] header = _reader.ReadBytes(4);
+                    byte[] offsets = _reader.ReadBytes(BitConverter.ToInt32(header, 0) * sizeof(int));
                     return ASMGlobals.MergeBytes(header, offsets);
             }
             return null;

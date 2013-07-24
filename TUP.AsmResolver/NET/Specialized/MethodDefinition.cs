@@ -7,10 +7,10 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class MethodDefinition : MethodReference
     {
-        MemberRange<ParameterDefinition> paramRange = null;
-        MethodSemantics semantics = null;
-        MSIL.MethodBody body = null;
-        GenericParameter[] genericparams = null;
+        MemberRange<ParameterDefinition> _paramRange = null;
+        MethodSemantics _semantics = null;
+        MSIL.MethodBody _body = null;
+        bool _hasLoadedGenericParameters = false;
         
         public MethodDefinition(MetaDataRow row)
             : base(row)
@@ -25,24 +25,24 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public uint RVA
         {
-            get { return Convert.ToUInt32(metadatarow._parts[0]); }
-            set { metadatarow._parts[0] = value; }
+            get { return Convert.ToUInt32(_metadatarow._parts[0]); }
+            set { _metadatarow._parts[0] = value; }
         }
 
         public MethodImplAttributes ImplementationAttributes
         {
-            get { return (MethodImplAttributes)metadatarow._parts[1]; }
-            set { metadatarow._parts[1] = ((ushort)value); }
+            get { return (MethodImplAttributes)_metadatarow._parts[1]; }
+            set { _metadatarow._parts[1] = ((ushort)value); }
         }
 
         public MethodAttributes Attributes
         {
             get { 
                 
-                MethodAttributes attr = (MethodAttributes)metadatarow._parts[2];
+                MethodAttributes attr = (MethodAttributes)_metadatarow._parts[2];
                 return attr;
             }
-            set { metadatarow._parts[2] = ((ushort)value); }
+            set { _metadatarow._parts[2] = ((ushort)value); }
         }
 
         public override TypeReference DeclaringType
@@ -50,12 +50,12 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 
-                if (declaringType == null)
+                if (_declaringType == null)
                 {
-                    uint relativetoken = this.metadatatoken - (6 << 0x18);
+                    uint relativetoken = this._metadatatoken - (6 << 0x18);
 
                     TypeDefinition lasttypeDef = null;
-                    foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members)
+                    foreach (var member in _netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members)
                     {
 
                         TypeDefinition typeDef = ((TypeDefinition)member);
@@ -63,8 +63,8 @@ namespace TUP.AsmResolver.NET.Specialized
                         {
                             if (typeDef.MethodList > relativetoken && lasttypeDef.MethodList <= relativetoken)
                             {
-                                declaringType = lasttypeDef;
-                                return declaringType;
+                                _declaringType = lasttypeDef;
+                                return _declaringType;
                             }
                         }
 
@@ -73,7 +73,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     if (lasttypeDef != null && lasttypeDef.MethodList <= relativetoken)
                         return lasttypeDef;
                 }
-                return declaringType;
+                return _declaringType;
 
             }
         }
@@ -83,7 +83,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get 
             { 
                 if (string.IsNullOrEmpty(_name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[3]), out _name);
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[3]), out _name);
                 return _name;
             }
         }
@@ -102,7 +102,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (_signature != null)
                     return _signature;
-                _signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow._parts[4]), this);
+                _signature = (MethodSignature)_netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(_metadatarow._parts[4]), this);
                 return _signature;
                 //return Convert.ToUInt32(metadatarow.parts[4]); 
             }
@@ -112,29 +112,30 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (genericparams == null && netheader.TablesHeap.HasTable(MetaDataTableType.GenericParam))
+                if (!_hasLoadedGenericParameters && _netheader.TablesHeap.HasTable(MetaDataTableType.GenericParam))
                 {
                     List<GenericParameter> parameters = new List<GenericParameter>();
                     try
                     {
 
-                        foreach (var member in netheader.TablesHeap.GetTable( MetaDataTableType.GenericParam).Members)
+                        foreach (var member in _netheader.TablesHeap.GetTable( MetaDataTableType.GenericParam).Members)
                         {
                             GenericParameter param = (GenericParameter)member;
                             try
                             {
-                                if (param.Owner != null && param.Owner.MetaDataToken == this.metadatatoken)
+                                if (param.Owner != null && param.Owner.MetaDataToken == this._metadatatoken)
                                     parameters.Add(param);
                             }
                             catch { }
                         }
 
-                        parameters.Clear();
                     }
                     catch { }
-                    genericparams = parameters.ToArray();
+                    _hasLoadedGenericParameters = true;
+                    base._genericParameters = parameters.ToArray();
+                    parameters.Clear();
                 }
-                return genericparams;
+                return base._genericParameters;
             }
         }
 
@@ -151,11 +152,11 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (paramRange == null)
+                if (_paramRange == null)
                 {
-                    paramRange = MemberRange.CreateRange<ParameterDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Param, false));
+                    _paramRange = MemberRange.CreateRange<ParameterDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Param, false));
                 }
-                return paramRange.Members;
+                return _paramRange.Members;
             }
         }
 
@@ -163,20 +164,20 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (semantics == null && netheader.TablesHeap.HasTable(MetaDataTableType.MethodSemantics))
+                if (_semantics == null && _netheader.TablesHeap.HasTable(MetaDataTableType.MethodSemantics))
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics methodSem = member as MethodSemantics;
-                        if (methodSem.Method != null && methodSem.Method.metadatatoken == this.metadatatoken)
+                        if (methodSem.Method != null && methodSem.Method._metadatatoken == this._metadatatoken)
                         {
-                            semantics = methodSem;
+                            _semantics = methodSem;
                             break;
                         }
                     }
                 }
 
-                return semantics;
+                return _semantics;
             }
 
         }
@@ -185,9 +186,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (body == null && RVA != 0)
-                    body = MSIL.MethodBody.FromMethod(this);
-                return body;
+                if (_body == null && RVA != 0)
+                    _body = MSIL.MethodBody.FromMethod(this);
+                return _body;
             }
         }
         
@@ -204,19 +205,21 @@ namespace TUP.AsmResolver.NET.Specialized
         public override void ClearCache()
         {
             base.ClearCache();
-            paramRange = null;
-            semantics = null;
-            body = null;
-            genericparams = null;
+            _paramRange = null;
+            _semantics = null;
+            _body = null;
+            _genericParameters = new GenericParameter[0];
+            _hasLoadedGenericParameters = false;
         }
 
         public override void LoadCache()
         {
             base.LoadCache();
-            paramRange = MemberRange.CreateRange<ParameterDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Param, false));
-            semantics = Semantics;
-            body = Body;
-            genericparams = GenericParameters;
+            _paramRange = MemberRange.CreateRange<ParameterDefinition>(this, 5, NETHeader.TablesHeap.GetTable(MetaDataTableType.Param, false));
+            _semantics = Semantics;
+            _body = Body;
+            _genericParameters = GenericParameters;
+            
         }
     }
 }

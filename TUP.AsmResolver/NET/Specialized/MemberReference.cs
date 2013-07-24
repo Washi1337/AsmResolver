@@ -7,9 +7,9 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public abstract class MemberReference : MetaDataMember
     {
-        PInvokeImplementation pinvokeimpl = null;
-        CustomAttribute[] customAttributes = null;
-        internal TypeReference declaringType = null;
+        PInvokeImplementation _pinvokeimpl = null;
+        CustomAttribute[] _customAttributes = null;
+        internal TypeReference _declaringType = null;
 
         public MemberReference(MetaDataRow row)
             : base(row)
@@ -22,11 +22,11 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (declaringType == null)
+                if (_declaringType == null)
                 {
-                    netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out declaringType);
+                    _netheader.TablesHeap.MemberRefParent.TryGetMember(Convert.ToInt32(_metadatarow._parts[0]), out _declaringType);
                 }
-                return declaringType;
+                return _declaringType;
             }
         }
 
@@ -39,20 +39,20 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (customAttributes == null && netheader.TablesHeap.HasTable(MetaDataTableType.CustomAttribute))
+                if (_customAttributes == null && _netheader.TablesHeap.HasTable(MetaDataTableType.CustomAttribute))
                 {
                     List<CustomAttribute> customattributes = new List<CustomAttribute>();
 
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).Members)
+                    foreach (var member in _netheader.TablesHeap.GetTable(MetaDataTableType.CustomAttribute).Members)
                     {
                         CustomAttribute attribute = member as CustomAttribute;
-                        if (attribute.Parent != null && attribute.Parent.metadatatoken == this.metadatatoken)
+                        if (attribute.Parent != null && attribute.Parent._metadatatoken == this._metadatatoken)
                             customattributes.Add(attribute);
                     }
 
-                    customAttributes = customattributes.ToArray();
+                    _customAttributes = customattributes.ToArray();
                 }
-                return customAttributes;
+                return _customAttributes;
             }
         }
 
@@ -60,19 +60,19 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (pinvokeimpl == null && netheader.TablesHeap.HasTable(MetaDataTableType.ImplMap))
+                if (_pinvokeimpl == null && _netheader.TablesHeap.HasTable(MetaDataTableType.ImplMap))
                 {
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.ImplMap).Members)
+                    foreach (var member in _netheader.TablesHeap.GetTable(MetaDataTableType.ImplMap).Members)
                     {
                         PInvokeImplementation implementation = member as PInvokeImplementation;
-                        if (implementation.Member.metadatatoken == this.metadatatoken)
+                        if (implementation.Member._metadatatoken == this._metadatatoken)
                         {
-                            pinvokeimpl = implementation;
+                            _pinvokeimpl = implementation;
                             break;
                         }
                     }
                 }
-                return pinvokeimpl;
+                return _pinvokeimpl;
             }
         }
 
@@ -86,16 +86,16 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            customAttributes = null;
-            declaringType = null;
-            pinvokeimpl = null;
+            _customAttributes = null;
+            _declaringType = null;
+            _pinvokeimpl = null;
         }
 
         public override void LoadCache()
         {
-            pinvokeimpl = PInvokeImplementation;
-            customAttributes = CustomAttributes;
-            declaringType = DeclaringType;
+            _pinvokeimpl = PInvokeImplementation;
+            _customAttributes = CustomAttributes;
+            _declaringType = DeclaringType;
         }
     }
 }

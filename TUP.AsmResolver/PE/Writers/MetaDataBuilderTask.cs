@@ -79,7 +79,7 @@ namespace TUP.AsmResolver.PE.Writers
 
                 for (uint i = 0; i < keyPair.Value.Length; i++)
                 {
-                    keyPair.Value[i].Instance.metadatatoken = root + (i + 1);
+                    keyPair.Value[i].Instance._metadatatoken = root + (i + 1);
                 }
             }
         }

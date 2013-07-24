@@ -40,7 +40,7 @@ namespace TUP.AsmResolver.NET.Specialized
                     return _resolutionScope;
 
                 MetaDataMember member;
-                netheader.TablesHeap.ResolutionScope.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out member);
+                _netheader.TablesHeap.ResolutionScope.TryGetMember(Convert.ToInt32(_metadatarow._parts[0]), out member);
                 _resolutionScope = member as IResolutionScope;
 
                 return _resolutionScope;
@@ -51,7 +51,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(this._name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out _name);
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[1]), out _name);
                 return this._name;
             }
         }
@@ -61,7 +61,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (HasSavedMetaDataRow)
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out _namespace);
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[2]), out _namespace);
                 return _namespace;
             }
         }

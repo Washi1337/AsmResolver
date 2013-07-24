@@ -8,7 +8,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class SecurityDeclaration : MetaDataMember
     {
-        MetaDataMember parent;
+        private MetaDataMember _parent;
 
         public SecurityDeclaration(MetaDataRow row)
             : base(row)
@@ -22,32 +22,32 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public SecurityAction Action
         {
-            get { return (SecurityAction)Convert.ToUInt16(metadatarow._parts[0]); }
+            get { return (SecurityAction)Convert.ToUInt16(_metadatarow._parts[0]); }
         }
 
         public MetaDataMember Parent
         {
             get
             {
-                if (parent == null)
-                    netheader.TablesHeap.HasDeclSecurity.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out parent);
-                return parent;
+                if (_parent == null)
+                    _netheader.TablesHeap.HasDeclSecurity.TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _parent);
+                return _parent;
             }
         }
 
         public uint PermissionSet
         {
-            get { return Convert.ToUInt32(metadatarow._parts[2]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[2]); }
         }
 
         public override void ClearCache()
         {
-            parent = null;
+            _parent = null;
         }
 
         public override void LoadCache()
         {
-            parent = Parent;
+            _parent = Parent;
         }
     }
 }

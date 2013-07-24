@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class ClassLayout : MetaDataMember
     {
-        TypeDefinition parent;
+        TypeDefinition _parent;
 
         public ClassLayout(MetaDataRow row)
             : base(row)
@@ -17,37 +17,37 @@ namespace TUP.AsmResolver.NET.Specialized
         public ClassLayout(TypeDefinition parent, uint classSize, ushort packingSize)
             :base(new MetaDataRow(packingSize, classSize, parent.TableIndex))
         {
-            this.parent = parent;
+            this._parent = parent;
         }
 
         public ushort PackingSize
         {
-            get { return Convert.ToUInt16(metadatarow._parts[0]); }
+            get { return Convert.ToUInt16(_metadatarow._parts[0]); }
         }
 
         public uint ClassSize
         {
-            get { return Convert.ToUInt32(metadatarow._parts[1]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[1]); }
         }
 
         public TypeDefinition Parent
         {
             get 
             {
-                if (parent == null)
-                    parent = netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef,false).Members[Convert.ToInt32(metadatarow._parts[2])] as TypeDefinition;
-                return parent;
+                if (_parent == null)
+                    _parent = _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef,false).Members[Convert.ToInt32(_metadatarow._parts[2])] as TypeDefinition;
+                return _parent;
             }
         }
 
         public override void ClearCache()
         {
-            this.parent = null;
+            this._parent = null;
         }
 
         public override void LoadCache()
         {
-            this.parent = Parent;
+            this._parent = Parent;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class FieldDefinition : FieldReference
     {
-        Constant constant;
+        Constant _constant;
 
         public FieldDefinition(MetaDataRow row)
             : base(row)
@@ -17,35 +17,35 @@ namespace TUP.AsmResolver.NET.Specialized
         public FieldDefinition(string name, FieldAttributes attributes, uint signature)
             : base(new MetaDataRow((ushort)attributes, 0U, signature))
         {
-            this.name = name;
+            this._name = name;
         }
 
         public FieldAttributes Attributes
         {
-            get { return (FieldAttributes)metadatarow._parts[0]; }
-            set { metadatarow._parts[0] = (ushort)value; }
+            get { return (FieldAttributes)_metadatarow._parts[0]; }
+            set { _metadatarow._parts[0] = (ushort)value; }
         }
 
         public override TypeReference DeclaringType
         {
             get
             {
-                if (declaringType == null)
+                if (_declaringType == null)
                 {
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).Members)
+                    foreach (var member in _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).Members)
                     {
                         TypeDefinition typeDef = member as TypeDefinition;
                         if (typeDef.Fields != null)
                             foreach (FieldDefinition field in typeDef.Fields)
-                                if (field.metadatatoken == this.metadatatoken)
+                                if (field._metadatatoken == this._metadatatoken)
                                 {
-                                    declaringType = typeDef;
+                                    _declaringType = typeDef;
                                     break;
                                 }
                     }
                 }
 
-                return declaringType;
+                return _declaringType;
             }
         }
 
@@ -53,24 +53,24 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (constant == null && Attributes.HasFlag(FieldAttributes.Literal) && netheader.TablesHeap.HasTable(MetaDataTableType.Constant))
-                    foreach (var member in netheader.TablesHeap.GetTable(MetaDataTableType.Constant).Members)
+                if (_constant == null && Attributes.HasFlag(FieldAttributes.Literal) && _netheader.TablesHeap.HasTable(MetaDataTableType.Constant))
+                    foreach (var member in _netheader.TablesHeap.GetTable(MetaDataTableType.Constant).Members)
                     {
                         Constant c = (Constant)member;
-                        if (c.Parent != null && c.Parent.metadatatoken == this.metadatatoken)
+                        if (c.Parent != null && c.Parent._metadatatoken == this._metadatatoken)
                         {
-                            constant = (Constant)member;
+                            _constant = (Constant)member;
                             break;
                         }
                     }
-                return constant;
+                return _constant;
             }
         }
 
         public override void LoadCache()
         {
             base.LoadCache();
-            constant = Constant;
+            _constant = Constant;
         }
 
     }

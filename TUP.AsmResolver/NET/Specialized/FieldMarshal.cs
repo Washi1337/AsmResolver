@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class FieldMarshal : MetaDataMember
     {
-        MetaDataMember parent = null;
+        MetaDataMember _parent = null;
 
         public FieldMarshal(MetaDataRow row)
             : base(row)
@@ -17,35 +17,35 @@ namespace TUP.AsmResolver.NET.Specialized
         public FieldMarshal(MetaDataMember parent, uint nativeType)
             :base(new MetaDataRow((uint)0, nativeType))
         {
-            this.parent = parent;
+            this._parent = parent;
         }
 
         public MetaDataMember Parent
         {
             get
             {
-                if (parent == null)
+                if (_parent == null)
                 {
-                    netheader.TablesHeap.HasFieldMarshall.TryGetMember(Convert.ToInt32(metadatarow._parts[0]), out parent);
+                    _netheader.TablesHeap.HasFieldMarshall.TryGetMember(Convert.ToInt32(_metadatarow._parts[0]), out _parent);
                 }
-                return parent;
+                return _parent;
                 
             }
         }
 
         public uint NativeType
         {
-            get { return Convert.ToUInt32(metadatarow._parts[1]); }
+            get { return Convert.ToUInt32(_metadatarow._parts[1]); }
         }
 
         public override void ClearCache()
         {
-            parent = null;
+            _parent = null;
         }
 
         public override void LoadCache()
         {
-            parent = Parent;
+            _parent = Parent;
         }
     }
 }

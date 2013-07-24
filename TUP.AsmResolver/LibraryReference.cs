@@ -11,14 +11,15 @@ namespace TUP.AsmResolver
     /// </summary>
     public class LibraryReference
     {
-        PeImage image;
-        uint offset;
-        internal Structures.IMAGE_IMPORT_DESCRIPTOR rawDescriptor;
+        private PeImage _image;
+        private uint _offset;
+        internal Structures.IMAGE_IMPORT_DESCRIPTOR _rawDescriptor;
+
         internal LibraryReference(PeImage image, uint offset, Structures.IMAGE_IMPORT_DESCRIPTOR rawDescriptor, string libraryName, ImportMethod[] importMethods)
         {
-            this.image = image;
-            this.offset = offset;
-            this.rawDescriptor = rawDescriptor;
+            this._image = image;
+            this._offset = offset;
+            this._rawDescriptor = rawDescriptor;
             this.LibraryName = libraryName;
             this.ImportMethods = importMethods;
         }
@@ -63,14 +64,14 @@ namespace TUP.AsmResolver
                 string actualpath = "";
                 if (parentAssembly != null)
                 {
-                    string path = parentAssembly.path.Substring(0, parentAssembly.path.LastIndexOf("\\"));
+                    string path = parentAssembly._path.Substring(0, parentAssembly._path.LastIndexOf("\\"));
                     if (File.Exists(path + "\\" + LibraryName))
                     {
                         actualpath = path + "\\" + LibraryName;
                         goto things;
                     }
                 }
-                if (parentAssembly.ntHeader.OptionalHeader.Is32Bit)
+                if (parentAssembly._ntHeader.OptionalHeader.Is32Bit)
                 {
                     if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) + "\\" + LibraryName))
                         actualpath = Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) + "\\" + LibraryName;

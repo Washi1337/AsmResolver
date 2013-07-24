@@ -7,7 +7,7 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class ParameterDefinition : MetaDataMember
     {
-        string name = null;
+        private string _name = null;
 
         public ParameterDefinition(MetaDataRow row)
             : base(row)
@@ -21,21 +21,21 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public ParameterAttributes Attributes
         {
-            get{return (ParameterAttributes)metadatarow._parts[0];}
+            get{return (ParameterAttributes)_metadatarow._parts[0];}
         }
 
         public ushort Sequence
         {
-            get { return Convert.ToUInt16(metadatarow._parts[1]); }
+            get { return Convert.ToUInt16(_metadatarow._parts[1]); }
         }
 
         public string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[2]), out _name);
+                return _name;
             }
         }
 
@@ -52,12 +52,12 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            name = null;
+            _name = null;
         }
 
         public override void LoadCache()
         {
-            name = Name;
+            _name = Name;
         }
     }
 }

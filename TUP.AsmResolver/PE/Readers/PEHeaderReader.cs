@@ -38,7 +38,7 @@ namespace TUP.AsmResolver.PE.Readers
         {
             PeHeaderReader headerreader = new PeHeaderReader();
             headerreader.assembly = assembly;
-            headerreader.image = assembly.peImage;
+            headerreader.image = assembly._peImage;
             return headerreader;
             
         }

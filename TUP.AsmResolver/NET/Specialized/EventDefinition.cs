@@ -7,11 +7,11 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class EventDefinition : MemberReference
     {
-        MethodDefinition addmethod = null;
-        MethodDefinition removemethod = null;
-        string name = null;
-        TypeReference eventType = null;
-        TypeDefinition declaringType = null;
+        MethodDefinition _addmethod = null;
+        MethodDefinition _removemethod = null;
+        string _name = null;
+        TypeReference _eventType = null;
+        TypeDefinition _declaringType = null;
 
         public EventDefinition(MetaDataRow row)
             : base(row)
@@ -21,23 +21,23 @@ namespace TUP.AsmResolver.NET.Specialized
         public EventDefinition(string name, EventAttributes attributes, TypeReference eventType)
             : base(new MetaDataRow((ushort)attributes, 0U, 0U))
         {
-            this.name = name;
-            this.eventType = eventType;
+            this._name = name;
+            this._eventType = eventType;
         }
 
         public EventAttributes Attributes
         {
-            get { return (EventAttributes)Convert.ToUInt16(metadatarow._parts[0]); }
-            set { metadatarow._parts[0] = (ushort)value; }
+            get { return (EventAttributes)Convert.ToUInt16(_metadatarow._parts[0]); }
+            set { _metadatarow._parts[0] = (ushort)value; }
         }
 
         public override string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[1]), out _name);
+                return _name;
             }
         }
 
@@ -45,9 +45,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (eventType == null)
-                    netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(metadatarow._parts[2]), out eventType);
-                return eventType;
+                if (_eventType == null)
+                    _netheader.TablesHeap.TypeDefOrRef.TryGetMember(Convert.ToInt32(_metadatarow._parts[2]), out _eventType);
+                return _eventType;
             }
         }
 
@@ -55,19 +55,19 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (addmethod == null)
+                if (_addmethod == null)
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
-                        if (semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.AddOn) == MethodSemanticsAttributes.AddOn)
+                        if (semantics.Association._metadatatoken == this._metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.AddOn) == MethodSemanticsAttributes.AddOn)
                         {
-                            addmethod = semantics.Method;
+                            _addmethod = semantics.Method;
                             break;
                         }
                     }
                 }
-                return addmethod;
+                return _addmethod;
             }
         }
 
@@ -75,19 +75,19 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (removemethod  == null)
+                if (_removemethod  == null)
                 {
-                    foreach (MetaDataMember member in netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
+                    foreach (MetaDataMember member in _netheader.TablesHeap.GetTable(MetaDataTableType.MethodSemantics).Members)
                     {
                         MethodSemantics semantics = (MethodSemantics)member;
-                        if (semantics.Association.metadatatoken == this.metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.RemoveOn) == MethodSemanticsAttributes.RemoveOn)
+                        if (semantics.Association._metadatatoken == this._metadatatoken && (semantics.Attributes & MethodSemanticsAttributes.RemoveOn) == MethodSemanticsAttributes.RemoveOn)
                         {
-                            removemethod = semantics.Method;
+                            _removemethod = semantics.Method;
                             break;
                         }
                     }
                 }
-                return removemethod;
+                return _removemethod;
             }
         }
 
@@ -110,20 +110,20 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (declaringType == null)
+                if (_declaringType == null)
                 {
-                    MetaDataTable eventMapTable = netheader.TablesHeap.GetTable(MetaDataTableType.EventMap);
+                    MetaDataTable eventMapTable = _netheader.TablesHeap.GetTable(MetaDataTableType.EventMap);
                     foreach (var member in eventMapTable.Members)
                     {
                         EventMap eventMap = member as EventMap;
                         if (eventMap.Events.Contains(this))
                         {
-                            declaringType = eventMap.Parent;
+                            _declaringType = eventMap.Parent;
                             break;
                         }
                     }
                 }
-                return declaringType;
+                return _declaringType;
             }
         }
 
@@ -134,18 +134,18 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            addmethod = null;
-            removemethod = null;
-            name = null;
-            eventType = null;
+            _addmethod = null;
+            _removemethod = null;
+            _name = null;
+            _eventType = null;
         }
 
         public override void LoadCache()
         {
-            addmethod = AddMethod;
-            removemethod = RemoveMethod;
-            name = Name;
-            eventType = EventType;
+            _addmethod = AddMethod;
+            _removemethod = RemoveMethod;
+            _name = Name;
+            _eventType = EventType;
         }
 
     }

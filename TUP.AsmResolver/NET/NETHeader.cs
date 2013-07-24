@@ -70,7 +70,7 @@ namespace TUP.AsmResolver.NET
             NETHeader header = new NETHeader();
             
             header.assembly = assembly;
-            NETHeaderReader reader = new NETHeaderReader(assembly.ntHeader, header);
+            NETHeaderReader reader = new NETHeaderReader(assembly._ntHeader, header);
             header.metadata = new MetaDataHeader(reader);
             reader.LoadData();
             header.TokenResolver = new MetaDataTokenResolver(header);
@@ -96,8 +96,8 @@ namespace TUP.AsmResolver.NET
             set
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_COR20_HEADER)][4];
-                assembly.peImage.SetOffset(targetoffset);
-                assembly.peImage.Writer.Write((uint)value);
+                assembly._peImage.SetOffset(targetoffset);
+                assembly._peImage.Writer.Write((uint)value);
                 rawHeader.Flags = (uint)value;
             }
         }

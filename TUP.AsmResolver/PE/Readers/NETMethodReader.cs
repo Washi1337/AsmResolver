@@ -25,7 +25,7 @@ namespace TUP.AsmResolver.PE.Readers
         MethodBody methodbody;
         internal NETMethodReader(PeImage peImage, MethodBody methodbody)
         {
-            tokenResolver = new MetaDataTokenResolver(peImage.ParentAssembly.netHeader);
+            tokenResolver = new MetaDataTokenResolver(peImage.ParentAssembly._netHeader);
             this.peImage = peImage;
             this.rva = methodbody.Method.RVA;
             this.methodbody = methodbody;
@@ -54,7 +54,7 @@ namespace TUP.AsmResolver.PE.Readers
 
             var sig = (StandAloneSignature)tokenResolver.ResolveMember(methodbody.LocalVarSig);
 
-            vars = methodbody.Method.netheader.BlobHeap.ReadVariableSignature(sig.Signature, methodbody.Method);
+            vars = methodbody.Method._netheader.BlobHeap.ReadVariableSignature(sig.Signature, methodbody.Method);
 
         }
 
@@ -110,12 +110,12 @@ namespace TUP.AsmResolver.PE.Readers
                         peImage.Reader.ReadByte());
 
                 if (handler.Type == ExceptionHandlerType.Catch)
-                    handler.CatchType = (TypeReference)methodbody.Method.netheader.TokenResolver.ResolveMember(BitConverter.ToUInt32(peImage.ReadBytes(4), 0));
+                    handler.CatchType = (TypeReference)methodbody.Method._netheader.TokenResolver.ResolveMember(BitConverter.ToUInt32(peImage.ReadBytes(4), 0));
                 else if (handler.Type == ExceptionHandlerType.Filter)
                     handler.FilterStart = BitConverter.ToInt32(peImage.ReadBytes(4), 0);
                 else
                     peImage.ReadBytes(4);
-                section.handlers.Add(handler);
+                section._handlers.Add(handler);
 
             }
             return section;
@@ -138,15 +138,15 @@ namespace TUP.AsmResolver.PE.Readers
                 if (handler.Type == ExceptionHandlerType.Catch)
                     try
                     {
-                        handler.CatchType = (TypeReference)methodbody.Method.netheader.TokenResolver.ResolveMember(BitConverter.ToUInt32(peImage.ReadBytes(4), 0));
+                        handler.CatchType = (TypeReference)methodbody.Method._netheader.TokenResolver.ResolveMember(BitConverter.ToUInt32(peImage.ReadBytes(4), 0));
                     }
-                    catch { handler.CatchType = methodbody.Method.netheader.TypeSystem.Object; }
+                    catch { handler.CatchType = methodbody.Method._netheader.TypeSystem.Object; }
                     
                 else if (handler.Type == ExceptionHandlerType.Filter)
                     handler.FilterStart = BitConverter.ToInt32(peImage.ReadBytes(4), 0);
                 else
                     peImage.ReadBytes(4);
-                section.handlers.Add(handler);
+                section._handlers.Add(handler);
             }
             return section;
         }

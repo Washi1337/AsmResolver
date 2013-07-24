@@ -12,20 +12,20 @@ namespace TUP.AsmResolver
     /// </summary>
     public class ResourceDataEntry
     {
-        PeImage image;
-        uint offset;
-        uint targetOffset;
-        internal Structures.IMAGE_RESOURCE_DATA_ENTRY rawDataEntry;
+        private PeImage _image;
+        private uint _offset;
+        private uint _targetOffset;
+        internal Structures.IMAGE_RESOURCE_DATA_ENTRY _rawDataEntry;
 
         internal ResourceDataEntry(PeImage image, uint offset, ResourceDirectoryEntry parentEntry, Structures.IMAGE_RESOURCE_DATA_ENTRY rawDataEntry)
         {
-            this.image = image;
-            this.offset = offset;
+            this._image = image;
+            this._offset = offset;
             this.ParentEntry = parentEntry;
-            this.rawDataEntry = rawDataEntry;
+            this._rawDataEntry = rawDataEntry;
 
-            Section resourceSection = Section.GetSectionByRva(image.ParentAssembly, image.ParentAssembly.ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.Rva);
-            targetOffset = OffsetToData - resourceSection.RVA + resourceSection.RawOffset;
+            Section resourceSection = Section.GetSectionByRva(image.ParentAssembly, image.ParentAssembly._ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.Rva);
+            _targetOffset = OffsetToData - resourceSection.RVA + resourceSection.RawOffset;
         }
         /// <summary>
         /// Gets the parent directory entry of the data entry.
@@ -40,12 +40,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public uint OffsetToData
         {
-            get { return rawDataEntry.OffsetToData; }
+            get { return _rawDataEntry.OffsetToData; }
             set
             {
-                image.SetOffset(offset);
-                image.Writer.Write(value);
-                rawDataEntry.OffsetToData = value;
+                _image.SetOffset(_offset);
+                _image.Writer.Write(value);
+                _rawDataEntry.OffsetToData = value;
             }
         }
         /// <summary>
@@ -53,12 +53,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public uint Size
         {
-            get { return rawDataEntry.Size; }
+            get { return _rawDataEntry.Size; }
             set
             {
-                image.SetOffset(Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DATA_ENTRY)][1]);
-                image.Writer.Write(value);
-                rawDataEntry.Size = value;
+                _image.SetOffset(Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DATA_ENTRY)][1]);
+                _image.Writer.Write(value);
+                _rawDataEntry.Size = value;
             }
         }
         /// <summary>
@@ -66,12 +66,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public uint CodePage
         {
-            get { return rawDataEntry.CodePage; }
+            get { return _rawDataEntry.CodePage; }
             set
             {
-                image.SetOffset(Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DATA_ENTRY)][2]);
-                image.Writer.Write(value);
-                rawDataEntry.CodePage = value;
+                _image.SetOffset(Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DATA_ENTRY)][2]);
+                _image.Writer.Write(value);
+                _rawDataEntry.CodePage = value;
             }
         }
         /// <summary>
@@ -89,8 +89,8 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public Stream GetStream(int buffersize)
         {
-            image.SetOffset(targetOffset);
-            return image.ReadStream((int)Size, buffersize);
+            _image.SetOffset(_targetOffset);
+            return _image.ReadStream((int)Size, buffersize);
         }
         /// <summary>
         /// Reads the data and returns it in byte array format.
@@ -98,7 +98,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
         public byte[] GetContents()
         {
-            return image.ReadBytes(targetOffset, (int)Size);
+            return _image.ReadBytes(_targetOffset, (int)Size);
         }
     }
 }

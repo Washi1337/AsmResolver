@@ -36,7 +36,7 @@ namespace TUP.AsmResolver.NET
             this.name = name;
             this.indexsize = 2;
 
-            byte[] contents = netheader.assembly.peImage.ReadBytes(StreamOffset, (int)StreamSize);
+            byte[] contents = netheader.assembly._peImage.ReadBytes(StreamOffset, (int)StreamSize);
             mainStream = new MemoryStream();
             binReader = new BinaryReader(mainStream);
             binWriter = new BinaryWriter(mainStream);
@@ -94,7 +94,7 @@ namespace TUP.AsmResolver.NET
             {
                 name = value;
                 if (HasImage)
-                    netheader.assembly.peImage.Write((int)headeroffset + 8, name, Encoding.ASCII);
+                    netheader.assembly._peImage.Write((int)headeroffset + 8, name, Encoding.ASCII);
             }
         }
     

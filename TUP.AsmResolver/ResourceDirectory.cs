@@ -12,21 +12,21 @@ namespace TUP.AsmResolver
     /// </summary>
     public class ResourceDirectory
     {
-        PeImage image;
-        internal Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory;
-        uint offset;
-        uint fileOffset;
-        ResourceDirectoryEntry[] childEntries;
-        ResourcesReader reader;
+        private PeImage _image;
+        internal Structures.IMAGE_RESOURCE_DIRECTORY _rawDirectory;
+        private uint _offset;
+        private uint _fileOffset;
+        private ResourceDirectoryEntry[] _childEntries;
+        private ResourcesReader _reader;
 
         internal ResourceDirectory(PeImage image, uint offset, ResourcesReader reader, ResourceDirectoryEntry parentEntry, PE.Structures.IMAGE_RESOURCE_DIRECTORY rawDirectory)
         {
-            this.image = image;
+            this._image = image;
             this.ParentEntry = parentEntry;
-            this.offset = offset;
-            this.fileOffset = offset + image.ParentAssembly.ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.FileOffset;
-            this.rawDirectory = rawDirectory;
-            this.reader = reader;
+            this._offset = offset;
+            this._fileOffset = offset + image.ParentAssembly._ntHeader.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource].TargetOffset.FileOffset;
+            this._rawDirectory = rawDirectory;
+            this._reader = reader;
         }
 
 
@@ -45,14 +45,14 @@ namespace TUP.AsmResolver
         {
             get
             {
-                if (childEntries == null)
+                if (_childEntries == null)
                 {
-                    childEntries = reader.ReadChildEntries(offset + (uint)Marshal.SizeOf(rawDirectory), rawDirectory.NumberOfIdEntries + rawDirectory.NumberOfNamedEntries);
-                    if (childEntries == null)
-                        childEntries = new ResourceDirectoryEntry[0];
+                    _childEntries = _reader.ReadChildEntries(_offset + (uint)Marshal.SizeOf(_rawDirectory), _rawDirectory.NumberOfIdEntries + _rawDirectory.NumberOfNamedEntries);
+                    if (_childEntries == null)
+                        _childEntries = new ResourceDirectoryEntry[0];
                 }
                 
-                return childEntries;
+                return _childEntries;
             }
         }
 
@@ -62,12 +62,12 @@ namespace TUP.AsmResolver
         [Obsolete("This value is ignored by the windows loader.")]
         public uint Characteristics
         {
-            get { return rawDirectory.Characteristics; }
+            get { return _rawDirectory.Characteristics; }
             set
             {
-                image.SetOffset(fileOffset);
-                image.Writer.Write(value);
-                rawDirectory.Characteristics = value;
+                _image.SetOffset(_fileOffset);
+                _image.Writer.Write(value);
+                _rawDirectory.Characteristics = value;
             }
         }
         /// <summary>
@@ -76,12 +76,12 @@ namespace TUP.AsmResolver
         [Obsolete("This value is ignored by the windows loader.")]
         public uint TimeStamp
         {
-            get { return rawDirectory.TimeDateStamp; }
+            get { return _rawDirectory.TimeDateStamp; }
             set
             {
-                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][1]);
-                image.Writer.Write(value);
-                rawDirectory.TimeDateStamp = value;
+                _image.SetOffset(_fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][1]);
+                _image.Writer.Write(value);
+                _rawDirectory.TimeDateStamp = value;
             }
         }
         /// <summary>
@@ -90,12 +90,12 @@ namespace TUP.AsmResolver
         [Obsolete("This value is ignored by the windows loader.")]
         public ushort MayorVersion
         {
-            get { return rawDirectory.MajorVersion; }
+            get { return _rawDirectory.MajorVersion; }
             set
             {
-                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][2]);
-                image.Writer.Write(value);
-                rawDirectory.MajorVersion = value;
+                _image.SetOffset(_fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][2]);
+                _image.Writer.Write(value);
+                _rawDirectory.MajorVersion = value;
             }
         }
         /// <summary>
@@ -104,12 +104,12 @@ namespace TUP.AsmResolver
         [Obsolete("This value is ignored by the windows loader.")]
         public ushort MinorVersion
         {
-            get { return rawDirectory.MinorVersion; }
+            get { return _rawDirectory.MinorVersion; }
             set
             {
-                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][3]);
-                image.Writer.Write(value);
-                rawDirectory.MinorVersion = value;
+                _image.SetOffset(_fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][3]);
+                _image.Writer.Write(value);
+                _rawDirectory.MinorVersion = value;
             }
         }
         /// <summary>
@@ -117,12 +117,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public ushort NumberOfNamedEntries
         {
-            get { return rawDirectory.NumberOfNamedEntries; }
+            get { return _rawDirectory.NumberOfNamedEntries; }
             set
             {
-                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][4]);
-                image.Writer.Write(value);
-                rawDirectory.NumberOfNamedEntries = value;
+                _image.SetOffset(_fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][4]);
+                _image.Writer.Write(value);
+                _rawDirectory.NumberOfNamedEntries = value;
             }
         }
         /// <summary>
@@ -130,12 +130,12 @@ namespace TUP.AsmResolver
         /// </summary>
         public ushort NumberOfIdEntries
         {
-            get { return rawDirectory.NumberOfIdEntries; }
+            get { return _rawDirectory.NumberOfIdEntries; }
             set
             {
-                image.SetOffset(fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][5]);
-                image.Writer.Write(value);
-                rawDirectory.NumberOfIdEntries = value;
+                _image.SetOffset(_fileOffset + Structures.DataOffsets[typeof(Structures.IMAGE_RESOURCE_DIRECTORY)][5]);
+                _image.Writer.Write(value);
+                _rawDirectory.NumberOfIdEntries = value;
             }
         }
         /// <summary>

@@ -20,7 +20,7 @@ namespace TUP.AsmResolver.NET.Specialized
             : base(new MetaDataRow(0U, 0U, signature))
         {
             this._name = name;
-            this.declaringType = declaringType;
+            this._declaringType = declaringType;
         }
 
 
@@ -29,7 +29,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (string.IsNullOrEmpty(_name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out _name);
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[1]), out _name);
                 return _name;
             }
         }
@@ -40,7 +40,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (_signature != null)
                     return _signature;
-                _signature = (MethodSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow._parts[2]), this);
+                _signature = (MethodSignature)_netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(_metadatarow._parts[2]), this);
                 return _signature;
                 //return Convert.ToUInt32(metadatarow.parts[2]); 
             }

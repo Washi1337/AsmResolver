@@ -7,8 +7,8 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class FieldReference : MemberReference
     {
-        internal FieldSignature signature = null;
-        internal string name;
+        internal FieldSignature _signature = null;
+        internal string _name;
 
         public FieldReference(MetaDataRow row)
             : base(row)
@@ -18,17 +18,17 @@ namespace TUP.AsmResolver.NET.Specialized
         public FieldReference(string name, TypeReference declaringType, uint signature)
             : base(new MetaDataRow(0U, 0U, signature))
         {
-            this.name = name;
-            this.declaringType = declaringType;
+            this._name = name;
+            this._declaringType = declaringType;
         }
 
         public override string Name
         {
             get
             {
-                if (string.IsNullOrEmpty(name))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[1]), out name);
-                return name;
+                if (string.IsNullOrEmpty(_name))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[1]), out _name);
+                return _name;
             }
         }
         public override string FullName
@@ -50,25 +50,25 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (signature != null)
-                    return signature;
-                signature = (FieldSignature)netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(metadatarow._parts[2]), this.DeclaringType);
-                return signature;
+                if (_signature != null)
+                    return _signature;
+                _signature = (FieldSignature)_netheader.BlobHeap.ReadMemberRefSignature(Convert.ToUInt32(_metadatarow._parts[2]), this.DeclaringType);
+                return _signature;
             }
         }
 
         public override void ClearCache()
         {
-            signature = null;
-            declaringType = null;
-            name = null;
+            _signature = null;
+            _declaringType = null;
+            _name = null;
         }
 
         public override void LoadCache()
         {
-            signature = Signature;
-            declaringType = DeclaringType;
-            name = Name;
+            _signature = Signature;
+            _declaringType = DeclaringType;
+            _name = Name;
         }
     }
 }

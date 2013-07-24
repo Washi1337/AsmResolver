@@ -14,8 +14,8 @@ namespace TUP.AsmResolver
     public class FileHeader : IHeader
     {
 
-        internal Win32Assembly assembly;
-        internal PeHeaderReader header;
+        internal Win32Assembly _assembly;
+        internal PeHeaderReader _headerReader;
 
         /// <summary>
         /// Gets or sets the machine representation of the loaded portable executable.
@@ -25,15 +25,15 @@ namespace TUP.AsmResolver
             get
             {
                 
-                return (Machine)header.fileHeader.Machine;
+                return (Machine)_headerReader.fileHeader.Machine;
 
             }
             set
             {
                 int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][0];
-                assembly.peImage.SetOffset(targetoffset);
-                assembly.Image.Writer.Write((ushort)value);
-                header.fileHeader.Machine = (ushort)value;
+                _assembly._peImage.SetOffset(targetoffset);
+                _assembly.Image.Writer.Write((ushort)value);
+                _headerReader.fileHeader.Machine = (ushort)value;
             }
         }
 
@@ -44,13 +44,13 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return header.fileHeader.NumberOfSections;
+                return _headerReader.fileHeader.NumberOfSections;
             }
             set
             {
-                header.fileHeader.NumberOfSections = value;
-                assembly.peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][1]);
-                assembly.Image.Writer.Write(value);
+                _headerReader.fileHeader.NumberOfSections = value;
+                _assembly._peImage.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][1]);
+                _assembly.Image.Writer.Write(value);
             }
         }
 
@@ -61,7 +61,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return header.TimeStamp;
+                return _headerReader.TimeStamp;
             }
         }
 
@@ -72,13 +72,13 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return header.fileHeader.SizeOfOptionalHeader;
+                return _headerReader.fileHeader.SizeOfOptionalHeader;
             }
             set
             {
-                header.fileHeader.SizeOfOptionalHeader = value;
-                assembly.Image.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][5]);
-                assembly.Image.Writer.Write(value);
+                _headerReader.fileHeader.SizeOfOptionalHeader = value;
+                _assembly.Image.SetOffset(RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][5]);
+                _assembly.Image.Writer.Write(value);
             }
         }
 
@@ -89,14 +89,14 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return (AsmResolver.ExecutableFlags)header.fileHeader.Characteristics;
+                return (AsmResolver.ExecutableFlags)_headerReader.fileHeader.Characteristics;
             }
             set
             {
                 int offset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_FILE_HEADER)][6];
-                assembly.peImage.SetOffset(offset);
-                assembly.peImage.Writer.Write((ushort)value);
-                header.fileHeader.Characteristics = (UInt16)value;
+                _assembly._peImage.SetOffset(offset);
+                _assembly._peImage.Writer.Write((ushort)value);
+                _headerReader.fileHeader.Characteristics = (UInt16)value;
             }
         }
 
@@ -113,8 +113,8 @@ namespace TUP.AsmResolver
         public static FileHeader FromAssembly(Win32Assembly assembly)
         {
             FileHeader a = new FileHeader();
-            a.assembly = assembly;
-            a.header = assembly.headerReader;
+            a._assembly = assembly;
+            a._headerReader = assembly._headerReader;
             return a;
         }
 
@@ -125,7 +125,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return header.fileheaderoffset;
+                return _headerReader.fileheaderoffset;
             }
         }
 
@@ -136,7 +136,7 @@ namespace TUP.AsmResolver
         {
             get
             {
-                return assembly;
+                return _assembly;
             }
         }
     }

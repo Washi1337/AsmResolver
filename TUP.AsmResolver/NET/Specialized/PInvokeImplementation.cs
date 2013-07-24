@@ -7,9 +7,9 @@ namespace TUP.AsmResolver.NET.Specialized
 {
     public class PInvokeImplementation : MetaDataMember 
     {
-        MetaDataMember member=null;
-        string entrypoint = null;
-        ModuleReference importScope = null;
+        private MetaDataMember _member= null;
+        private string _entrypoint = null;
+        private ModuleReference _importScope = null;
 
         public PInvokeImplementation(MetaDataRow row)
             : base(row)
@@ -19,23 +19,23 @@ namespace TUP.AsmResolver.NET.Specialized
         public PInvokeImplementation(MetaDataMember member, PInvokeImplAttributes attributes, ModuleReference moduleRef, string entrypoint)
             : base(new MetaDataRow((uint)attributes, (uint)0, (uint)0, moduleRef.TableIndex))
         {
-            this.member = member;
-            this.importScope = moduleRef;
-            this.entrypoint = entrypoint;
+            this._member = member;
+            this._importScope = moduleRef;
+            this._entrypoint = entrypoint;
         }
 
         public PInvokeImplAttributes Attributes
         {
-            get { return (PInvokeImplAttributes)Convert.ToUInt32(metadatarow._parts[0]); }
+            get { return (PInvokeImplAttributes)Convert.ToUInt32(_metadatarow._parts[0]); }
         }
 
         public MetaDataMember Member
         {
             get
             {
-                if (member == null)
-                    netheader.TablesHeap.MemberForwarded.TryGetMember(Convert.ToInt32(metadatarow._parts[1]), out member);
-                return member;
+                if (_member == null)
+                    _netheader.TablesHeap.MemberForwarded.TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _member);
+                return _member;
             }
         }
 
@@ -43,9 +43,9 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get
             {
-                if (string.IsNullOrEmpty(entrypoint))
-                    netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(metadatarow._parts[2]), out entrypoint);
-                return entrypoint;
+                if (string.IsNullOrEmpty(_entrypoint))
+                    _netheader.StringsHeap.TryGetStringByOffset(Convert.ToUInt32(_metadatarow._parts[2]), out _entrypoint);
+                return _entrypoint;
             }
         }
 
@@ -53,13 +53,13 @@ namespace TUP.AsmResolver.NET.Specialized
         {
             get 
             {
-                if (importScope == null)
+                if (_importScope == null)
                 {
-                    MetaDataTable table = netheader.TablesHeap.GetTable(MetaDataTableType.ModuleRef);
+                    MetaDataTable table = _netheader.TablesHeap.GetTable(MetaDataTableType.ModuleRef);
 
-                    importScope = (ModuleReference)table.Members[Convert.ToInt32(metadatarow._parts[3]) - 1];
+                    _importScope = (ModuleReference)table.Members[Convert.ToInt32(_metadatarow._parts[3]) - 1];
                 }
-                return importScope; 
+                return _importScope; 
             }
         }
 
@@ -70,16 +70,16 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override void ClearCache()
         {
-            member = null;
-            entrypoint = null;
-            importScope = null;
+            _member = null;
+            _entrypoint = null;
+            _importScope = null;
         }
 
         public override void LoadCache()
         {
-            member = Member;
-            entrypoint = Entrypoint;
-            importScope = ImportScope;
+            _member = Member;
+            _entrypoint = Entrypoint;
+            _importScope = ImportScope;
         }
     }
 }

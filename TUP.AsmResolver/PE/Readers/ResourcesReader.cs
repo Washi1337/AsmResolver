@@ -20,11 +20,11 @@ namespace TUP.AsmResolver.PE.Readers
         internal ResourcesReader(NTHeader header)
         {
             this.header = header;
-            this.image = header.assembly.peImage;
+            this.image = header._assembly._peImage;
             resourceDirectory = header.OptionalHeader.DataDirectories[(int)DataDirectoryName.Resource];
-            if (header.assembly.peImage.TrySetOffset(resourceDirectory.TargetOffset.FileOffset))
+            if (header._assembly._peImage.TrySetOffset(resourceDirectory.TargetOffset.FileOffset))
             {
-                stream = header.assembly.peImage.ReadStream((int)resourceDirectory.Size);
+                stream = header._assembly._peImage.ReadStream((int)resourceDirectory.Size);
                 reader = new BinaryReader(stream);
                 ReadRootDirectory();
             }
