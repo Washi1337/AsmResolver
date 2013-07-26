@@ -84,6 +84,11 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public virtual bool IsDefinition
+        {
+            get { return false; }
+        }
+
         public override void ClearCache()
         {
             _customAttributes = null;

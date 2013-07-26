@@ -127,6 +127,26 @@ namespace TUP.AsmResolver.NET
             return reader;
         }
 
+        public bool TryGetBlobReader(uint index, out BlobSignatureReader reader)
+        {
+            reader = null;
+            if (index == 0 || index > StreamSize)
+                return false;
+
+            reader = GetBlobReader(index);
+            return true;
+        }
+
+        public bool TryGetBlobReader(uint index, IGenericContext instance, out BlobSignatureReader reader)
+        {
+            if (TryGetBlobReader(index, out reader))
+            {
+                reader.GenericContext = instance;
+                return true;
+            }
+            return false;
+        }
+
         public uint GetBlobIndex(byte[] blobValue)
         {
             ReadAllBlobs();
@@ -145,51 +165,55 @@ namespace TUP.AsmResolver.NET
         public IMemberSignature ReadMemberRefSignature(uint sig, IGenericContext context)
         {
             IMemberSignature signature = null;
-            using (BlobSignatureReader reader = GetBlobReader(sig, context))
+            BlobSignatureReader reader;
+            if (TryGetBlobReader(sig, context, out reader))
             {
-                byte flag = reader.ReadByte();
+                using (reader)
+                {
+                    byte flag = reader.ReadByte();
 
-                if (flag == 0x6)
-                {
-                    FieldSignature fieldsignature = new FieldSignature();
-                    fieldsignature.ReturnType = reader.ReadTypeReference((ElementType)reader.ReadByte());
-                    signature = fieldsignature;
-                }
-                else
-                {
-                    MethodSignature methodsignature = new MethodSignature();
-                    
-                    if ((flag & 0x20) != 0)
+                    if (flag == 0x6)
                     {
-                        methodsignature.HasThis = true;
-                        flag = (byte)(flag & -33);
+                        FieldSignature fieldsignature = new FieldSignature();
+                        fieldsignature.ReturnType = reader.ReadTypeReference((ElementType)reader.ReadByte());
+                        signature = fieldsignature;
                     }
-                    if ((flag & 0x40) != 0)
+                    else
                     {
-                        methodsignature.ExplicitThis = true;
-                        flag = (byte)(flag & -65);
-                    }
-                    if ((flag & 0x10) != 0)
-                    {
-                        int genericsig = NETGlobals.ReadCompressedInt32(reader);
-                        if (!context.IsDefinition)
+                        MethodSignature methodsignature = new MethodSignature();
+
+                        if ((flag & 0x20) != 0)
                         {
-                            AddMissingGenericParameters(context.Method, genericsig - 1);
+                            methodsignature.HasThis = true;
+                            flag = (byte)(flag & -33);
                         }
-                    }
-                    methodsignature.CallingConvention = (MethodCallingConvention)flag;
+                        if ((flag & 0x40) != 0)
+                        {
+                            methodsignature.ExplicitThis = true;
+                            flag = (byte)(flag & -65);
+                        }
+                        if ((flag & 0x10) != 0)
+                        {
+                            int genericsig = NETGlobals.ReadCompressedInt32(reader);
+                            if (!context.IsDefinition)
+                            {
+                                AddMissingGenericParameters(context.Method, genericsig - 1);
+                            }
+                        }
+                        methodsignature.CallingConvention = (MethodCallingConvention)flag;
 
-                    uint paramCount = NETGlobals.ReadCompressedUInt32(reader);
-                    methodsignature.ReturnType = reader.ReadTypeReference();
-                    
-                    ParameterReference[] parameters = new ParameterReference[paramCount];
-                    for (int i = 0; i < paramCount; i++)
-                    {
-                        parameters[i] = new ParameterReference() { ParameterType = reader.ReadTypeReference((ElementType)reader.ReadByte()) };
-                    }
-                    methodsignature.Parameters = parameters;
+                        uint paramCount = NETGlobals.ReadCompressedUInt32(reader);
+                        methodsignature.ReturnType = reader.ReadTypeReference();
 
-                    signature = methodsignature;
+                        ParameterReference[] parameters = new ParameterReference[paramCount];
+                        for (int i = 0; i < paramCount; i++)
+                        {
+                            parameters[i] = new ParameterReference() { ParameterType = reader.ReadTypeReference((ElementType)reader.ReadByte()) };
+                        }
+                        methodsignature.Parameters = parameters;
+
+                        signature = methodsignature;
+                    }
                 }
             }
             return signature;
@@ -218,24 +242,28 @@ namespace TUP.AsmResolver.NET
         public VariableDefinition[] ReadVariableSignature(uint signature, MethodDefinition parentMethod)
         {
             VariableDefinition[] variables = null;
-            using (BlobSignatureReader reader = GetBlobReader(signature))
+            BlobSignatureReader reader;
+            if (TryGetBlobReader(signature, parentMethod, out reader))
             {
-                reader.GenericContext = parentMethod;
+                using (reader)
+                {
+                    reader.GenericContext = parentMethod;
 
-                byte local_sig = reader.ReadByte();
+                    byte local_sig = reader.ReadByte();
 
-                if (local_sig != 0x7)
-                    throw new ArgumentException("Signature doesn't refer to a valid local variable signature");
+                    if (local_sig != 0x7)
+                        throw new ArgumentException("Signature doesn't refer to a valid local variable signature");
 
-                uint count = NETGlobals.ReadCompressedUInt32(reader);
+                    uint count = NETGlobals.ReadCompressedUInt32(reader);
 
-                if (count == 0)
-                    return null;
+                    if (count == 0)
+                        return null;
 
-                variables = new VariableDefinition[count];
+                    variables = new VariableDefinition[count];
 
-                for (int i = 0; i < count; i++)
-                    variables[i] = new VariableDefinition(i, reader.ReadTypeReference());
+                    for (int i = 0; i < count; i++)
+                        variables[i] = new VariableDefinition(i, reader.ReadTypeReference());
+                }
             }
             return variables;
         }
@@ -243,27 +271,34 @@ namespace TUP.AsmResolver.NET
         public TypeReference ReadTypeSignature(uint signature, IGenericContext paramProvider)
         {
             TypeReference typeRef = null;
-            using (BlobSignatureReader reader = GetBlobReader(signature))
+            BlobSignatureReader reader;
+            if (TryGetBlobReader(signature, paramProvider, out reader))
             {
-                reader.GenericContext = paramProvider;
-                typeRef = reader.ReadTypeReference();
+                using (reader)
+                {
+                    reader.GenericContext = paramProvider;
+                    typeRef = reader.ReadTypeReference();
+                }
             }
-
             return typeRef;
         }
         
         public TypeReference[] ReadGenericArgumentsSignature(uint signature, IGenericContext context)
         {
-            using (BlobSignatureReader reader = GetBlobReader(signature, context))
+            BlobSignatureReader reader;
+            if (TryGetBlobReader(signature, context, out reader))
             {
-                if (reader.ReadByte() == 0xa)
+                using (reader)
                 {
-                    uint count = NETGlobals.ReadCompressedUInt32(reader);
-                    TypeReference[] types = new TypeReference[count];
-                    for (int i = 0; i < count; i++)
-                        types[i] = reader.ReadTypeReference();
+                    if (reader.ReadByte() == 0xa)
+                    {
+                        uint count = NETGlobals.ReadCompressedUInt32(reader);
+                        TypeReference[] types = new TypeReference[count];
+                        for (int i = 0; i < count; i++)
+                            types[i] = reader.ReadTypeReference();
 
-                    return types;
+                        return types;
+                    }
                 }
             }
             throw new ArgumentException("Signature doesn't point to a valid generic arguments signature");
@@ -272,52 +307,56 @@ namespace TUP.AsmResolver.NET
         public object ReadConstantValue(ElementType type, uint signature)
         {
             object value = null;
-            using (BlobSignatureReader reader = GetBlobReader(signature))
+            BlobSignatureReader reader;
+            if (TryGetBlobReader(signature, out reader))
             {
-
-                switch (type)
+                using (reader)
                 {
-                    case ElementType.Boolean:
-                        value = reader.ReadByte() == 1;
-                        break;
-                    case ElementType.Char:
-                        value = (char)reader.ReadUInt16();
-                        break;
-                    case ElementType.String:
-                        value = reader.ReadUtf8String(); //Encoding.Unicode.GetString(reader.ReadBytes((int)reader.BaseStream.Length));
-                        break;
-                    case ElementType.I1:
-                        value =  reader.ReadSByte();
-                        break;
-                    case ElementType.I2:
-                        value =  reader.ReadInt16();
-                        break;
-                    case ElementType.I4:
-                        value =  reader.ReadInt32();
-                        break;
-                    case ElementType.I8:
-                        value =  reader.ReadInt64();
-                        break;
-                    case ElementType.U1:
-                        value =  reader.ReadByte();
-                        break;
-                    case ElementType.U2:
-                        value =  reader.ReadUInt16();
-                        break;
-                    case ElementType.U4:
-                        value =  reader.ReadUInt32();
-                        break;
-                    case ElementType.U8:
-                        value =  reader.ReadUInt64();
-                        break;
-                    case ElementType.R4:
-                        value =  reader.ReadSingle();
-                        break;
-                    case ElementType.R8:
-                        value =  reader.ReadDouble();
-                        break;
-                    default:
-                        throw new ArgumentException("Invalid constant type", "type");
+
+                    switch (type)
+                    {
+                        case ElementType.Boolean:
+                            value = reader.ReadByte() == 1;
+                            break;
+                        case ElementType.Char:
+                            value = (char)reader.ReadUInt16();
+                            break;
+                        case ElementType.String:
+                            value = reader.ReadUtf8String(); //Encoding.Unicode.GetString(reader.ReadBytes((int)reader.BaseStream.Length));
+                            break;
+                        case ElementType.I1:
+                            value = reader.ReadSByte();
+                            break;
+                        case ElementType.I2:
+                            value = reader.ReadInt16();
+                            break;
+                        case ElementType.I4:
+                            value = reader.ReadInt32();
+                            break;
+                        case ElementType.I8:
+                            value = reader.ReadInt64();
+                            break;
+                        case ElementType.U1:
+                            value = reader.ReadByte();
+                            break;
+                        case ElementType.U2:
+                            value = reader.ReadUInt16();
+                            break;
+                        case ElementType.U4:
+                            value = reader.ReadUInt32();
+                            break;
+                        case ElementType.U8:
+                            value = reader.ReadUInt64();
+                            break;
+                        case ElementType.R4:
+                            value = reader.ReadSingle();
+                            break;
+                        case ElementType.R8:
+                            value = reader.ReadDouble();
+                            break;
+                        default:
+                            throw new ArgumentException("Invalid constant type", "type");
+                    }
                 }
             }
             return value;
@@ -326,29 +365,33 @@ namespace TUP.AsmResolver.NET
         public CustomAttributeSignature ReadCustomAttributeSignature(CustomAttribute parent, uint signature)
         {
             CustomAttributeSignature customAttrSig = null;
-            using (BlobSignatureReader reader = GetBlobReader(signature))
+            BlobSignatureReader reader;
+            if (TryGetBlobReader(signature, out reader))
             {
-                ushort sign = reader.ReadUInt16();
-                if (sign != 0x0001)
-                    throw new ArgumentException("Signature doesn't refer to a valid Custom Attribute signature");
-
-
-                int fixedArgCount = 0;
-
-                if (parent.Constructor.Signature != null && parent.Constructor.Signature.Parameters != null)
-                    fixedArgCount = parent.Constructor.Signature.Parameters.Length;
-
-                CustomAttributeArgument[] fixedArgs = new CustomAttributeArgument[fixedArgCount];
-
-                for (int i = 0; i < fixedArgCount; i++)
+                using (reader)
                 {
-                    fixedArgs[i] = new CustomAttributeArgument(reader.ReadArgumentValue(parent.Constructor.Signature.Parameters[i].ParameterType));
+                    ushort sign = reader.ReadUInt16();
+                    if (sign != 0x0001)
+                        throw new ArgumentException("Signature doesn't refer to a valid Custom Attribute signature");
+
+
+                    int fixedArgCount = 0;
+
+                    if (parent.Constructor.Signature != null && parent.Constructor.Signature.Parameters != null)
+                        fixedArgCount = parent.Constructor.Signature.Parameters.Length;
+
+                    CustomAttributeArgument[] fixedArgs = new CustomAttributeArgument[fixedArgCount];
+
+                    for (int i = 0; i < fixedArgCount; i++)
+                    {
+                        fixedArgs[i] = new CustomAttributeArgument(reader.ReadArgumentValue(parent.Constructor.Signature.Parameters[i].ParameterType));
+                    }
+
+                    int namedArgCount = 0;
+                    CustomAttributeArgument[] namedArgs = new CustomAttributeArgument[namedArgCount];
+
+                    customAttrSig = new CustomAttributeSignature(fixedArgs, namedArgs);
                 }
-
-                int namedArgCount = 0;
-                CustomAttributeArgument[] namedArgs = new CustomAttributeArgument[namedArgCount];
-
-                customAttrSig = new CustomAttributeSignature(fixedArgs, namedArgs);
             }
             return customAttrSig;
         }

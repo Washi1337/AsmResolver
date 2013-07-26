@@ -67,6 +67,14 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public override bool IsDefinition
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         public override void LoadCache()
         {
             base.LoadCache();

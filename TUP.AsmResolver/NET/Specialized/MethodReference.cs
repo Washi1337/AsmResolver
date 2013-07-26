@@ -46,11 +46,6 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public virtual bool IsDefinition
-        {
-            get { return false; }
-        }
-
         public virtual bool IsGenericMethod
         {
             get { return false; }

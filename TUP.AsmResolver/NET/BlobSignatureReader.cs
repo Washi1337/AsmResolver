@@ -16,6 +16,11 @@ namespace TUP.AsmResolver.NET
             _netHeader = netHeader;
         }
 
+        public BlobSignatureReader(byte[] bytes, NETHeader netHeader)
+            : this(new MemoryStream(bytes), netHeader)
+        {
+        }
+        
         public IGenericContext GenericContext { get; set; }
 
         public TypeReference ReadTypeReference()
