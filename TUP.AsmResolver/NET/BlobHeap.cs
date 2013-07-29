@@ -222,19 +222,23 @@ namespace TUP.AsmResolver.NET
         public PropertySignature ReadPropertySignature(uint signature, PropertyDefinition parentProperty)
         {
             PropertySignature propertySig = null;
-            using (BlobSignatureReader reader = GetBlobReader(signature))
+            BlobSignatureReader reader;
+            if (TryGetBlobReader(signature, out reader))
             {
-                reader.GenericContext = parentProperty.DeclaringType;
+                using (reader)
+                {
+                    reader.GenericContext = parentProperty.DeclaringType;
 
-                byte flag = reader.ReadByte();
+                    byte flag = reader.ReadByte();
 
-                if ((flag & 8) == 0)
-                    throw new ArgumentException("Signature doesn't refer to a valid property signature.");
+                    if ((flag & 8) == 0)
+                        throw new ArgumentException("Signature doesn't refer to a valid property signature.");
 
-                propertySig = new PropertySignature();
-                propertySig.HasThis = (flag & 0x20) != 0;
-                NETGlobals.ReadCompressedUInt32(reader);
-                propertySig.ReturnType = reader.ReadTypeReference();
+                    propertySig = new PropertySignature();
+                    propertySig.HasThis = (flag & 0x20) != 0;
+                    NETGlobals.ReadCompressedUInt32(reader);
+                    propertySig.ReturnType = reader.ReadTypeReference();
+                }
             }
             return propertySig;
         }
