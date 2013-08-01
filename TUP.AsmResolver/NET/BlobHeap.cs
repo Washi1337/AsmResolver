@@ -13,16 +13,12 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class BlobHeap : MetaDataStream
     {
-
         internal SortedDictionary<uint, byte[]> _readBlobs = new SortedDictionary<uint, byte[]>();
         
-        //MetaDataStream stream)
-            //: base(stream)
         internal BlobHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
             : base(netheader, headeroffset, rawHeader, name)
         {
         }
-
 
         internal override void Initialize()
         {

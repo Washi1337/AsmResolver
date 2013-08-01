@@ -93,7 +93,7 @@ namespace TUP.AsmResolver.NET
         {
             member = null;
 
-            if (index < 0 || index > _rowAmount)
+            if (index <= 0 || index > _rowAmount)
                 return false;
 
             member = Members[index] as T;

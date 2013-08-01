@@ -12,7 +12,7 @@ namespace TUP.AsmResolver.NET
     /// </summary>
     public class MetaDataHeader :IHeader 
     {
-        NETHeaderReader _reader;
+        internal NETHeaderReader _reader;
         internal MetaDataHeader(NETHeaderReader reader)
         {
             this._reader = reader;

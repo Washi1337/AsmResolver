@@ -128,10 +128,58 @@ namespace TUP.AsmResolver.PE.Writers
 
         private Section CreateTextSection(Workspace workspace)
         {
-            return null; //temp
+            Section section;
+            using (MemoryStream sectionStream = new MemoryStream())
+            {
+                using (BinaryWriter sectionWriter = new BinaryWriter(sectionStream))
+                {
+                    // write import address dir space.
+                    sectionWriter.Write(new byte[8]);
+
+                    // write .net header
+                    sectionWriter.WriteStructure(workspace.NewNetHeader._rawHeader);
+
+                    // write method bodies
+                    sectionWriter.Write(workspace.MethodBodyTable.Stream.ToArray());
+
+                    // write resources dir
+                    sectionWriter.Write(Constructor.OriginalAssembly.NETHeader.ResourcesDirectory.GetBytes());
+
+                    // write metadata
+                    WriteMetaData(workspace, sectionWriter);
+
+                    // write import dir
+                }
+
+                section = new Section(".text", 0, sectionStream.ToArray());
+            }
+
+            return section;
         }
 
-        public int Align(int number, int align)
+        private void WriteMetaData(Workspace workspace, BinaryWriter sectionWriter)
+        {                    
+            // write metadata header
+            sectionWriter.WriteStructure(workspace.NewNetHeader.MetaDataHeader._reader.metadataHeader1);
+            sectionWriter.Write(Encoding.ASCII.GetBytes(workspace.NewNetHeader.MetaDataHeader.VersionString));
+            sectionWriter.WriteStructure(workspace.NewNetHeader.MetaDataHeader._reader.metadataHeader2);
+
+            // write metadata stream headers
+            foreach (MetaDataStream stream in workspace.NewNetHeader.MetaDataStreams)
+            {
+                sectionWriter.WriteStructure(stream._streamHeader);
+                sectionWriter.Write(Encoding.ASCII.GetBytes(stream.Name));
+                sectionWriter.Write(new byte[Align(stream.Name.Length + 1, 4)]);
+            }
+
+            // write metadata streams
+            foreach (MetaDataStream stream in workspace.NewNetHeader.MetaDataStreams)
+            {
+                sectionWriter.Write(stream._mainStream.ToArray());
+            }
+        }
+
+        private int Align(int number, int align)
         {
             while (number % align != 0)
                 number++;
