@@ -221,6 +221,8 @@ namespace TUP.AsmResolver.NET
                     return false;
                 if (!HasStream("#Strings"))
                     return false;
+                if (!HasStream("#Blob"))
+                    return false;
 
                 return true;
             }

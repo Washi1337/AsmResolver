@@ -67,7 +67,7 @@ namespace TUP.AsmResolver
         /// <returns></returns>
          public bool IsManagedAssembly
          {
-             get { return _header.ManagedDataAvailable; }
+             get { return _header.datadirectories.Count >= (int)DataDirectoryName.Clr && _header.datadirectories[(int)DataDirectoryName.Clr].Size > 0; }
          }
         /// <summary>
         /// Gets the sections of the portable executable file.

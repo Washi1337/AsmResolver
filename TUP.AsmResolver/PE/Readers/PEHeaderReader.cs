@@ -148,12 +148,7 @@ namespace TUP.AsmResolver.PE.Readers
 
 
         #region Properties
-
-        public bool ManagedDataAvailable
-        {
-            get { return datadirectories[(int)DataDirectoryName.Clr].Size > 0; }
-        }
-
+        
         // Gets if the file header is 32 bit or not
         public bool Is32BitHeader
         {
