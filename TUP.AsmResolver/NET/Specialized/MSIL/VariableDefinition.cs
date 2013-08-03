@@ -7,12 +7,18 @@ namespace TUP.AsmResolver.NET.Specialized.MSIL
 {
     public class VariableDefinition
     {
-
-        internal VariableDefinition(int index, TypeReference type)
+        public VariableDefinition(int index, TypeReference type)
         {
             Index = index;
             VariableType = type;
             Name = "";
+        }
+
+        public VariableDefinition(string name, int index, TypeReference type)
+        {
+            Index = index;
+            VariableType = type;
+            Name = name;
         }
 
         public int Index { get; internal set; }
