@@ -15,14 +15,12 @@ namespace TUP.AsmResolver.NET
         {
             TablesHeap = tableHeap;
             _tablesize = -1;
-            if (createNew)
-                _members = new MetaDataMember[0];
         }
 
         internal int _rowAmount;
         internal long _rowAmountOffset;
         internal int _tablesize;
-        MetaDataMember[] _members;
+        MemberCollection _members;
         internal MetaDataTableType _type;
         
         /// <summary>
@@ -52,13 +50,12 @@ namespace TUP.AsmResolver.NET
         /// <summary>
         /// Gets an array of all members available in the table.
         /// </summary>
-        public MetaDataMember[] Members
+        public MemberCollection Members
         {
             get 
             {
                 if (_members == null)
-                    LoadMembers();
-                
+                    _members = new MemberCollection(this);
                 return _members; 
             }
         }
@@ -93,10 +90,10 @@ namespace TUP.AsmResolver.NET
         {
             member = null;
 
-            if (index <= 0 || index > _rowAmount)
+            if (index <= 1 || index > _rowAmount)
                 return false;
 
-            member = Members[index] as T;
+            member = Members[index - 1] as T;
             if (member == null)
                 return false;
             return true;
@@ -104,32 +101,30 @@ namespace TUP.AsmResolver.NET
 
         public void AddMember(MetaDataMember member)
         {
-            LoadMembers();
-            member._metadatatoken = (uint)(((uint)_type << 24) + Members.Length + 1);
-
-            var mdrow = member.MetaDataRow;
-            mdrow.Offset = 0;
-            member.MetaDataRow = mdrow;
-
-            _rowAmount++;
-            member._netheader = TablesHeap._netheader;
-            Array.Resize(ref _members, Members.Length + 1);
-            Members[Members.Length - 1] = member;
+            //member._metadatatoken = (uint)(((uint)_type << 24) + Members.Count + 1);
+            //
+            //var mdrow = member.MetaDataRow;
+            //mdrow.Offset = 0;
+            //member.MetaDataRow = mdrow;
+            //
+            //_rowAmount++;
+            //member._netheader = TablesHeap._netheader;
+            //Array.Resize(ref _members, Members.Count + 1);
+            //Members[Members.Count - 1] = member;
         }
 
         public void RemoveMember(MetaDataMember member)
         {
-            LoadMembers();
-            uint index = member.TableIndex - 1;
-            member._netheader = null;
-            for (uint i = index; i < Members.Length - 1; i++)
-            {
-                _members[i] = _members[i + 1];
-                _members[i]._metadatatoken--;
-            }
-            Members[_members.Length - 1] = null;
-            _rowAmount--;
-            Array.Resize(ref _members, Members.Length - 1);
+            //uint index = member.TableIndex - 1;
+            //member._netheader = null;
+            //for (uint i = index; i < Members.Count - 1; i++)
+            //{
+            //    _members[i] = _members[i + 1];
+            //    _members[i]._metadatatoken--;
+            //}
+            //Members[_members.Count - 1] = null;
+            //_rowAmount--;
+            //Array.Resize(ref _members, Members.Count - 1);
         }
 
         /// <summary>
@@ -234,11 +229,6 @@ namespace TUP.AsmResolver.NET
                 default:
                     throw new NotSupportedException("Table is not supported by AsmResolver");
             }
-        }
-
-        private void LoadMembers()
-        {
-            _members = TablesHeap._tablereader.ReadMembers(this);
         }
 
         private int GetSignatureSize(byte[] signature)

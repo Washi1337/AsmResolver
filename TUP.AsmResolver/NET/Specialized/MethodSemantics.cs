@@ -33,10 +33,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (_method == null)
                 {
-                    MetaDataTable methodtable = _netheader.TablesHeap.GetTable(MetaDataTableType.Method);
-                    int index = Convert.ToInt32(_metadatarow._parts[1]) - 1;
-                    if (index >= 0 && index < methodtable.Members.Length)
-                        _method = (MethodDefinition)methodtable.Members[index];
+                    _netheader.TablesHeap.GetTable(MetaDataTableType.Method).TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _method);
                 }
                 return _method;
             }
