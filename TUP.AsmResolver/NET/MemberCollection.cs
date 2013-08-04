@@ -10,12 +10,12 @@ namespace TUP.AsmResolver.NET
     public class MemberCollection : IEnumerable<MetaDataMember>, IList<MetaDataMember>
     {
         private MetaDataTable _table;
-        private MetaDataMember[] _members;
+        internal MetaDataMember[] _internalArray;
 
         public MemberCollection(MetaDataTable table)
         {
             _table = table;
-            _members = new MetaDataMember[table.AmountOfRows];
+            _internalArray = new MetaDataMember[table.AmountOfRows];
         }
 
         public int IndexOf(MetaDataMember item)
@@ -37,9 +37,9 @@ namespace TUP.AsmResolver.NET
         {
             get
             {
-                if (_members[index] == null)
-                    _members[index] = _table.TablesHeap._tablereader.ReadMember(_table, index + 1);
-                return _members[index];
+                if (_internalArray[index] == null)
+                    _internalArray[index] = _table.TablesHeap._tablereader.ReadMember(_table, index + 1);
+                return _internalArray[index];
             }
             set
             {
@@ -69,7 +69,7 @@ namespace TUP.AsmResolver.NET
 
         public int Count
         {
-            get { return _members.Length; }
+            get { return _internalArray.Length; }
         }
 
         public bool IsReadOnly

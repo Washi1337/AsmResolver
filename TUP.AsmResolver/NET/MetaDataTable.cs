@@ -254,8 +254,9 @@ namespace TUP.AsmResolver.NET
         public void ApplyChanges()
         {
             if (_members != null)
-                foreach (MetaDataMember member in _members)
-                    member.ApplyChanges();
+                for (int i =0 ; i < _members.Count; i++)
+                    if (_members._internalArray[i] != null)
+                        _members._internalArray[i].ApplyChanges();
         }
        
         /// <summary>
@@ -264,8 +265,9 @@ namespace TUP.AsmResolver.NET
         public void Dispose()
         {
             if (_members != null)
-                foreach (var member in _members)
-                    member.Dispose();
+                for (int i = 0; i < _members.Count; i++)
+                    if (_members._internalArray[i] != null)
+                        _members._internalArray[i].Dispose();
         }
 
         
