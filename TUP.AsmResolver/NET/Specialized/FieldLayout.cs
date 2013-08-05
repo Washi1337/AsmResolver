@@ -30,7 +30,7 @@ namespace TUP.AsmResolver.NET.Specialized
             get
             {
                 if (_field == null)
-                    _field = (FieldDefinition)_netheader.TablesHeap.GetTable(MetaDataTableType.Field).Members[Convert.ToInt32(_metadatarow._parts[1])];
+                    _netheader.TablesHeap.GetTable(MetaDataTableType.Field).TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _field);
                 return _field;
             }
         }
