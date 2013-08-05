@@ -61,9 +61,9 @@ namespace TUP.AsmResolver.PE.Writers
                 {
                     MetaDataTable table = tablesHeap.GetTable(tableType);
 
-                    if (table.Members.Length != 0)
+                    if (table.Members.Count != 0)
                     {
-                        MetaDataMemberInfo[] subMembers = new MetaDataMemberInfo[table.Members.Length];
+                        MetaDataMemberInfo[] subMembers = new MetaDataMemberInfo[table.Members.Count];
 
                         for (int j = 0; j < subMembers.Length; j++)
                         {

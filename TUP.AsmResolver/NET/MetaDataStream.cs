@@ -77,7 +77,7 @@ namespace TUP.AsmResolver.NET
         /// <summary>
         /// Gets the contents in byte array format.
         /// </summary>
-        public byte[] Contents
+        public virtual byte[] Contents
         {
             get
             {

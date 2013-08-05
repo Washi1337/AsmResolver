@@ -241,7 +241,7 @@ namespace AsmResolver
                 if (e.Node.Nodes.Count == 1 && e.Node.Nodes[0].Text == "Loading...")
                 {
                     e.Node.Nodes.Clear();
-                    TreeNode[] subNodes = new TreeNode[table.Members.Length];
+                    TreeNode[] subNodes = new TreeNode[table.Members.Count];
                     for (int i = 0; i < subNodes.Length; i++)
                         subNodes[i] = CreateTreeNode(table.Members[i]);
 

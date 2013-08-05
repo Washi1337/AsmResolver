@@ -17,6 +17,7 @@ namespace TUP.AsmResolver.NET
         internal NETTableReader _tablereader;
         internal MetaDataTable[] _tables;
         internal int _tablecount;
+        internal byte[] _bytes;
 
         internal TablesHeap(NETHeader netheader, int headeroffset, Structures.METADATA_STREAM_HEADER rawHeader, string name)
             : base(netheader, headeroffset, rawHeader, name)
@@ -159,6 +160,15 @@ namespace TUP.AsmResolver.NET
             MaskValid |= ((ulong)1 << (int)type);
         }
 
+        public override byte[] Contents
+        {
+            get
+            {
+                if (_bytes == null)
+                    _bytes = base.Contents;
+                return _bytes;
+            }
+        }
 
         public MetaDataTableGroup TypeDefOrRef;
         public MetaDataTableGroup HasConstant;

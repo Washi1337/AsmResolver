@@ -24,19 +24,13 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public TypeDefinition Class
         {
-            get {
+            get 
+            {
                 if (_class == null)
                 {
-                    MetaDataTable table = _netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef);
-                    int index = Convert.ToInt32(_metadatarow._parts[0]) - 1;
-                    if (index >= 0 && index < table.Members.Length)
-                        _class = (TypeDefinition)table.Members[index];
+                    _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).TryGetMember(Convert.ToInt32(_metadatarow._parts[0]), out _class);
                 }
                 return _class;
-            }
-            set {
-                _metadatarow._parts[0] = ProcessPartType(0, Array.IndexOf(_netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members, value));
-                _class = value; 
             }
         }
 
@@ -46,18 +40,10 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (_enclosingClass == null)
                 {
-                    MetaDataTable table = _netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef);
-                    int index = Convert.ToInt32(_metadatarow._parts[1]) - 1;
-                    if (index >= 0 && index < table.Members.Length)
-                        _enclosingClass = (TypeDefinition)table.Members[index];
+                    _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).TryGetMember(Convert.ToInt32(_metadatarow._parts[1]), out _enclosingClass);
                 }
                 return _enclosingClass;
-            }
-            set { 
-                _metadatarow._parts[1] = ProcessPartType(1, Array.IndexOf(_netheader.TablesHeap.GetTable( MetaDataTableType.TypeDef).Members, value));
-                _enclosingClass = value;
-            }
-       
+            }       
         }
 
         public override string ToString()

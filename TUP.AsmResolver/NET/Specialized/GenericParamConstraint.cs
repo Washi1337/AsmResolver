@@ -28,10 +28,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (_owner == null)
                 {
-                    MetaDataTable table = _netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam);
-                    int index = Convert.ToInt32(_metadatarow._parts[0]) - 1;
-                    if (index > 0 || index < table.Members.Length)
-                        _owner = table.Members[index] as GenericParameter;
+                    _netheader.TablesHeap.GetTable(MetaDataTableType.GenericParam).TryGetMember(Convert.ToInt32(_metadatarow._parts[0]), out _owner);
                 }
                 return _owner;
             }

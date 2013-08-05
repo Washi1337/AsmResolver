@@ -31,10 +31,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (_field == null)
                 {
-                    int index = Convert.ToInt32(_metadatarow._parts[0]);
-                    MetaDataTable table = _netheader.TablesHeap.GetTable(MetaDataTableType.Field);
-                    if (index > 0 && index <= table.Members.Length)
-                        _field = table.Members[index - 1] as FieldDefinition;
+                    _netheader.TablesHeap.GetTable(MetaDataTableType.Field).TryGetMember(Convert.ToInt32(_metadatarow._parts[0]), out _field);
                 }
                 return _field;
             }

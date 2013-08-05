@@ -28,7 +28,7 @@ namespace TUP.AsmResolver.NET.Specialized
             {
                 if (_class == null)
                 {
-                    int token = Convert.ToInt32(_metadatarow._parts[0]) - 1;
+                    int token = Convert.ToInt32(_metadatarow._parts[0]);
                     _netheader.TablesHeap.GetTable(MetaDataTableType.TypeDef).TryGetMember(token, out _class);
                 }
                 return _class;
