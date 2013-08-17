@@ -119,7 +119,7 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public bool HasGenericParameters
         {
-            get { return _genericParameters != null && _genericParameters.Length != 0; }
+            get { return GenericParameters != null && GenericParameters.Length != 0; }
         }
 
         public virtual TypeReference GetElementType()

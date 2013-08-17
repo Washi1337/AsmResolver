@@ -6,12 +6,21 @@ using TUP.AsmResolver.PE.Readers;
 
 namespace TUP.AsmResolver.NET.Specialized
 {
-    public interface IMetaDataMember
+    public interface IMetaDataMember : ICacheProvider, IDisposable, IImageProvider, ICloneable
     {
         uint MetaDataToken { get; }
+        uint TableIndex { get; }
+        MetaDataRow MetaDataRow { get; set; }
+        NETHeader NETHeader { get; }
+        MetaDataTableType TableType { get; }
+        MetaDataTable Table { get; }
+        bool UpdateRowOnRebuild { get; set; }
+        bool HasSavedMetaDataRow { get; }
+
+        void ApplyChanges();
     }
 
-    public abstract class MetaDataMember : IMetaDataMember, IDisposable, ICacheProvider, IImageProvider, ICloneable
+    public abstract class MetaDataMember : IMetaDataMember
     {
         public MetaDataMember(MetaDataRow row)
         {
