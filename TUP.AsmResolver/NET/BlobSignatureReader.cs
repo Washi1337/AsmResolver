@@ -23,9 +23,14 @@ namespace TUP.AsmResolver.NET
         
         public IGenericContext GenericContext { get; set; }
 
+        public ElementType ReadElementType()
+        {
+            return (ElementType)ReadByte();
+        }
+
         public TypeReference ReadTypeReference()
         {
-            return ReadTypeReference((ElementType)this.ReadByte());
+            return ReadTypeReference(ReadElementType());
         }
 
         public TypeReference ReadTypeReference(ElementType type)
@@ -92,6 +97,7 @@ namespace TUP.AsmResolver.NET
                         return typeRef;
                     }
                     break;
+                    
                 case ElementType.ByRef:
                     return new ByReferenceType(ReadTypeReference( (ElementType)this.ReadByte()));
                 case ElementType.Pinned:
@@ -140,7 +146,7 @@ namespace TUP.AsmResolver.NET
             var genericArguments = new TypeReference[number];
 
             for (int i = 0; i < number; i++)
-               genericArguments[i] = ReadTypeReference((ElementType)this.ReadByte());
+                genericArguments[i] = ReadTypeReference();
 
             return genericArguments;
         }
@@ -219,41 +225,7 @@ namespace TUP.AsmResolver.NET
             if (paramType.FullName == "System.Type")
                 return ReadUtf8String();
 
-            switch (paramType._elementType)
-            {
-                case ElementType.I1:
-                    return this.ReadSByte();
-                case ElementType.I2:
-                    return this.ReadInt16();
-                case ElementType.I4:
-                    return this.ReadInt32();
-                case ElementType.I8:
-                    return this.ReadInt64();
-                case ElementType.U1:
-                    return this.ReadByte();
-                case ElementType.U2:
-                    return this.ReadInt16();
-                case ElementType.U4:
-                    return this.ReadInt32();
-                case ElementType.U8:
-                    return this.ReadInt64();
-                case ElementType.R4:
-                    return this.ReadSingle();
-                case ElementType.R8:
-                    return this.ReadDouble();
-                case ElementType.Type:
-                    return ReadUtf8String();
-                case ElementType.String:
-                    return ReadUtf8String();
-                case ElementType.Char:
-                    return this.ReadChar();
-                    throw new NotSupportedException();
-                case ElementType.Boolean:
-                    return this.ReadByte() == 1;
-
-
-            }
-            return null;
+            return ReadPrimitive(paramType._elementType);
         }
 
         public string ReadUtf8String()
@@ -263,6 +235,39 @@ namespace TUP.AsmResolver.NET
                 return string.Empty;
             byte[] rawdata = this.ReadBytes((int)size);
             return Encoding.UTF8.GetString(rawdata);
+        }
+
+        public object ReadPrimitive(ElementType type)
+        {
+            switch (type)
+            {
+                case ElementType.Boolean:
+                    return ReadByte() == 1;
+                case ElementType.Char:
+                    return (char)ReadUInt16();
+                case ElementType.I1:
+                    return ReadSByte();
+                case ElementType.I2:
+                    return ReadInt16();
+                case ElementType.I4:
+                    return ReadInt32();
+                case ElementType.I8:
+                    return ReadInt64();
+                case ElementType.U1:
+                    return ReadByte();
+                case ElementType.U2:
+                    return ReadUInt16();
+                case ElementType.U4:
+                    return ReadUInt32();
+                case ElementType.U8:
+                    return ReadUInt64();
+                case ElementType.R4:
+                    return ReadSingle();
+                case ElementType.R8:
+                    return ReadDouble();
+            }
+
+            return null;
         }
     }
 }

@@ -1911,7 +1911,7 @@
         </member>
         <member name="P:TUP.AsmResolver.NET.NETHeader.EntryPointToken">
             <summary>
-            Gets the EntryPoint Token of the loaded .NET application.
+            Gets or sets the EntryPoint Token of the loaded .NET application.
             </summary>
         </member>
         <member name="P:TUP.AsmResolver.NET.NETHeader.Flags">

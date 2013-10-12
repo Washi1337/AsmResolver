@@ -32,9 +32,9 @@ namespace TUP.AsmResolver.PE.Readers
                 if ((tablesHeap.HeapOffsetSizes & 1) == 1)
                     tablesHeap._netheader.StringsHeap._indexsize = 4;
                 if ((tablesHeap.HeapOffsetSizes & 2) == 2)
-                    tablesHeap._netheader.GuidHeap._indexsize = 4;
+                    tablesHeap._netheader.GuidHeap._indexsize  = 4;
                 if ((tablesHeap.HeapOffsetSizes & 4) == 4)
-                    tablesHeap._netheader.BlobHeap._indexsize = 4;
+                    tablesHeap._netheader.BlobHeap._indexsize  = 4;
 
                 ReadTableHeaders(reader);
             }
@@ -322,6 +322,12 @@ namespace TUP.AsmResolver.PE.Readers
             return type != null;
         }
 
+        private byte GetIndexSize(MetaDataStream stream)
+        {
+            if (stream != null)
+                return stream.IndexSize;
+            return sizeof(ushort);
+        }
 
         private byte GetIndexSize(MetaDataTableType type)
         {
@@ -373,10 +379,10 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] {
                 sizeof(ushort),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.GuidHeap._indexsize,
-                tablesHeap._netheader.GuidHeap._indexsize,
-                tablesHeap._netheader.GuidHeap._indexsize
+                GetIndexSize(tablesHeap._netheader.StringsHeap) ,
+                GetIndexSize(tablesHeap._netheader.GuidHeap),
+                GetIndexSize(tablesHeap._netheader.GuidHeap),
+                GetIndexSize(tablesHeap._netheader.GuidHeap)
             };
 
             return parts;
@@ -386,8 +392,8 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 GetIndexSize(tablesHeap.ResolutionScope),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.StringsHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
             };
 
             return parts;
@@ -396,8 +402,8 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.StringsHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
                 GetIndexSize(tablesHeap.TypeDefOrRef),
                 GetIndexSize(MetaDataTableType.Field),
                 GetIndexSize(MetaDataTableType.Method),
@@ -409,8 +415,8 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
      
             };
 
@@ -432,8 +438,8 @@ namespace TUP.AsmResolver.PE.Readers
                 sizeof(uint),
                 sizeof(ushort),
                 sizeof(ushort),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
                 GetIndexSize(MetaDataTableType.Param),
      
             };
@@ -444,7 +450,7 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[]
             {
-                 tablesHeap._netheader.BlobHeap._indexsize
+                 GetIndexSize(tablesHeap._netheader.BlobHeap)
             };
             return parts;
         }
@@ -453,7 +459,7 @@ namespace TUP.AsmResolver.PE.Readers
             byte[] parts = new byte[] { 
                 sizeof(ushort),
                 sizeof(ushort),
-                tablesHeap._netheader.StringsHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
      
             };
 
@@ -474,8 +480,8 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 GetIndexSize(tablesHeap.MemberRefParent),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.BlobHeap._indexsize
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
+                GetIndexSize(tablesHeap._netheader.BlobHeap)
      
             };
             return parts;
@@ -487,7 +493,7 @@ namespace TUP.AsmResolver.PE.Readers
                 sizeof(byte),
                 sizeof(byte),
                 GetIndexSize(tablesHeap.HasConstant),
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
      
             };
 
@@ -498,7 +504,7 @@ namespace TUP.AsmResolver.PE.Readers
             byte[] parts = new byte[] { 
                 GetIndexSize(tablesHeap.HasCustomAttribute),
                 GetIndexSize(tablesHeap.CustomAttributeType),
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
      
             };
 
@@ -509,7 +515,7 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 GetIndexSize(tablesHeap.HasFieldMarshall),
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
      
             };
 
@@ -521,7 +527,7 @@ namespace TUP.AsmResolver.PE.Readers
             byte[] parts = new byte[] { 
                 sizeof(ushort),
                 GetIndexSize(tablesHeap.HasDeclSecurity),
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
      
             };
 
@@ -551,7 +557,7 @@ namespace TUP.AsmResolver.PE.Readers
         internal byte[] GetStandAloneSigSignature()
         {
             byte[] parts = new byte[] { 
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
             };
 
             return parts;
@@ -570,7 +576,7 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
-                tablesHeap._netheader.StringsHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
                 GetIndexSize(tablesHeap.TypeDefOrRef),
             };
 
@@ -599,8 +605,8 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 sizeof(ushort),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
             };
 
             return parts;
@@ -631,7 +637,7 @@ namespace TUP.AsmResolver.PE.Readers
         internal byte[] GetModuleRefSignature()
         {
             byte[] parts = new byte[] { 
-                tablesHeap._netheader.StringsHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
             };
 
             return parts;
@@ -639,7 +645,7 @@ namespace TUP.AsmResolver.PE.Readers
         internal byte[] GetTypeSpecSignature()
         {
             byte[] parts = new byte[] { 
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
             };
 
             return parts;
@@ -648,7 +654,7 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 GetIndexSize(tablesHeap.MethodDefOrRef),
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
             };
 
             return parts;
@@ -658,7 +664,7 @@ namespace TUP.AsmResolver.PE.Readers
             byte[] parts = new byte[] { 
                 sizeof(ushort),
                 GetIndexSize(tablesHeap.MemberForwarded),
-                tablesHeap._netheader.StringsHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
                 GetIndexSize(MetaDataTableType.ModuleRef),
             };
 
@@ -682,9 +688,9 @@ namespace TUP.AsmResolver.PE.Readers
                 sizeof(ushort),
                 sizeof(ushort),
                 sizeof(uint),
-                tablesHeap._netheader.BlobHeap._indexsize ,
-                tablesHeap._netheader.StringsHeap._indexsize ,
-                tablesHeap._netheader.StringsHeap._indexsize ,
+                GetIndexSize(tablesHeap._netheader.BlobHeap) ,
+                GetIndexSize(tablesHeap._netheader.StringsHeap) ,
+                GetIndexSize(tablesHeap._netheader.StringsHeap) ,
             };
 
             return parts;
@@ -711,10 +717,10 @@ namespace TUP.AsmResolver.PE.Readers
                 sizeof(ushort),
                 sizeof(ushort),
                 sizeof(uint),
-                tablesHeap._netheader.BlobHeap._indexsize ,
-                tablesHeap._netheader.StringsHeap._indexsize ,
-                tablesHeap._netheader.StringsHeap._indexsize ,
-                tablesHeap._netheader.BlobHeap._indexsize ,
+                GetIndexSize(tablesHeap._netheader.BlobHeap) ,
+                GetIndexSize(tablesHeap._netheader.StringsHeap) ,
+                GetIndexSize(tablesHeap._netheader.StringsHeap) ,
+                GetIndexSize(tablesHeap._netheader.BlobHeap) ,
             };
 
             return parts;
@@ -743,8 +749,8 @@ namespace TUP.AsmResolver.PE.Readers
         {
             byte[] parts = new byte[] { 
                 sizeof(uint),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.BlobHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
+                GetIndexSize(tablesHeap._netheader.BlobHeap),
             };
 
             return parts;
@@ -755,8 +761,8 @@ namespace TUP.AsmResolver.PE.Readers
             byte[] parts = new byte[] { 
                 sizeof(uint),
                 sizeof(uint),
-                tablesHeap._netheader.StringsHeap._indexsize,
-                tablesHeap._netheader.StringsHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
                 GetIndexSize(tablesHeap.Implementation),
             };
 
@@ -768,7 +774,7 @@ namespace TUP.AsmResolver.PE.Readers
             byte[] parts = new byte[] { 
                 sizeof(uint),
                 sizeof(uint),
-                tablesHeap._netheader.StringsHeap._indexsize,
+                GetIndexSize(tablesHeap._netheader.StringsHeap),
                 GetIndexSize(tablesHeap.Implementation),
             };
 
@@ -802,7 +808,7 @@ namespace TUP.AsmResolver.PE.Readers
                 sizeof(ushort),
                 sizeof(ushort),
                 GetIndexSize(tablesHeap.TypeOrMethod),
-                tablesHeap._netheader.StringsHeap._indexsize};
+                GetIndexSize(tablesHeap._netheader.StringsHeap)};
             return parts;
 
         }

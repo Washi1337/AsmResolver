@@ -312,51 +312,10 @@ namespace TUP.AsmResolver.NET
             {
                 using (reader)
                 {
-
-                    switch (type)
-                    {
-                        case ElementType.Boolean:
-                            value = reader.ReadByte() == 1;
-                            break;
-                        case ElementType.Char:
-                            value = (char)reader.ReadUInt16();
-                            break;
-                        case ElementType.String:
-                            value = reader.ReadUtf8String(); //Encoding.Unicode.GetString(reader.ReadBytes((int)reader.BaseStream.Length));
-                            break;
-                        case ElementType.I1:
-                            value = reader.ReadSByte();
-                            break;
-                        case ElementType.I2:
-                            value = reader.ReadInt16();
-                            break;
-                        case ElementType.I4:
-                            value = reader.ReadInt32();
-                            break;
-                        case ElementType.I8:
-                            value = reader.ReadInt64();
-                            break;
-                        case ElementType.U1:
-                            value = reader.ReadByte();
-                            break;
-                        case ElementType.U2:
-                            value = reader.ReadUInt16();
-                            break;
-                        case ElementType.U4:
-                            value = reader.ReadUInt32();
-                            break;
-                        case ElementType.U8:
-                            value = reader.ReadUInt64();
-                            break;
-                        case ElementType.R4:
-                            value = reader.ReadSingle();
-                            break;
-                        case ElementType.R8:
-                            value = reader.ReadDouble();
-                            break;
-                        default:
-                            throw new ArgumentException("Invalid constant type", "type");
-                    }
+                    if (type == ElementType.String)
+                        value = Encoding.Unicode.GetString(reader.ReadBytes((int)reader.BaseStream.Length), 0, (int)reader.BaseStream.Length);
+                    else
+                        value = reader.ReadPrimitive(type);
                 }
             }
             return value;

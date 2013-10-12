@@ -80,11 +80,18 @@ namespace TUP.AsmResolver.NET
         }
 
         /// <summary>
-        /// Gets the EntryPoint Token of the loaded .NET application.
+        /// Gets or sets the EntryPoint Token of the loaded .NET application.
         /// </summary>
         public uint EntryPointToken
         {
             get { return _rawHeader.EntryPointToken; }
+            set
+            {
+                int targetoffset = (int)RawOffset + Structures.DataOffsets[typeof(Structures.IMAGE_COR20_HEADER)][5];
+                _assembly._peImage.SetOffset(targetoffset);
+                _assembly._peImage.Writer.Write(value);
+                _rawHeader.EntryPointToken = value;
+            }
         }
 
         /// <summary>
@@ -181,7 +188,7 @@ namespace TUP.AsmResolver.NET
             get
             {
                 if (_guidheap == null)
-                    _guidheap = (GuidHeap)MetaDataStreams.First(t => t._name == "#GUID");
+                    _guidheap = (GuidHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#GUID");
                 return _guidheap;
             }
         }

@@ -148,7 +148,7 @@ namespace TUP.AsmResolver.ASM
         /* 0x65 */
         /* 0x66 */
         /* 0x67 */
-
+        
         public static readonly x86OpCode Push_Dword                = new x86OpCode("PUSH", new byte[] {0x68}, 4, x86OperandType.Dword);
 
         /* 0x69 */
