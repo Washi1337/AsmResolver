@@ -222,7 +222,11 @@ namespace TUP.AsmResolver.NET
 
         public object ReadElement(TypeReference paramType)
         {
+            // TODO: convert string to type ref:
             if (paramType.FullName == "System.Type")
+                return ReadUtf8String();
+
+            if (paramType._elementType == ElementType.String)
                 return ReadUtf8String();
 
             return ReadPrimitive(paramType._elementType);

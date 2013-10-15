@@ -411,7 +411,11 @@ namespace TUP.AsmResolver.ASM
             {
                 actualregister |= (byte)x86Register.Bit8Mask;
             }
-            actualregister |= GetSingleRegisterMask(registersToken);
+            if (instruction.OpCode._operandType.HasFlag(x86OperandType.Register32Or8))
+            {
+                actualregister |= GetSingleRegisterMask(registersToken);
+            }
+
             instruction.operand1 = new Operand((x86Register)actualregister, registerValueType, addition);
         }
 
