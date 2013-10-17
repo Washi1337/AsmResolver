@@ -9,24 +9,31 @@ namespace TUP.AsmResolver.NET.Specialized
     {
         public CustomAttributeArgument(object value)
         {
-            Fixed = true;
+            ArgumentType = CustomAttributeArgumentType.Fixed;
             Value = value;
             Name = string.Empty;
         }
-        public CustomAttributeArgument(object value, string name)
+        public CustomAttributeArgument(object value, string name, CustomAttributeArgumentType type)
         {
-            Fixed = false;
+            ArgumentType = type;
             Value = value;
             Name = name;
         }
-        public bool Fixed { get; internal set; }
+
         public string Name { get; internal set; }
+        public CustomAttributeArgumentType ArgumentType { get; internal set; }
         public object Value { get; internal set; }
 
         public override string ToString()
         {
             return Name + " = " + (Value != null ? Value.ToString() : "null");
         }
+    }
 
+    public enum CustomAttributeArgumentType
+    {
+        Fixed,
+        NamedField,
+        NamedProperty,
     }
 }

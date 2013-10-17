@@ -315,7 +315,7 @@ namespace TUP.AsmResolver.NET
                     if (type == ElementType.String)
                         value = Encoding.Unicode.GetString(reader.ReadBytes((int)reader.BaseStream.Length), 0, (int)reader.BaseStream.Length);
                     else
-                        value = reader.ReadPrimitive(type);
+                        value = reader.ReadPrimitiveValue(type);
                 }
             }
             return value;
@@ -333,21 +333,34 @@ namespace TUP.AsmResolver.NET
                     if (sign != 0x0001)
                         throw new ArgumentException("Signature doesn't refer to a valid Custom Attribute signature");
 
-
                     int fixedArgCount = 0;
 
                     if (parent.Constructor.Signature != null && parent.Constructor.Signature.Parameters != null)
                         fixedArgCount = parent.Constructor.Signature.Parameters.Length;
 
                     CustomAttributeArgument[] fixedArgs = new CustomAttributeArgument[fixedArgCount];
-
+                    bool canReadNamedArgs = true; // temporary solution for skipping named args when fixed args failed.
                     for (int i = 0; i < fixedArgCount; i++)
                     {
                         fixedArgs[i] = new CustomAttributeArgument(reader.ReadArgumentValue(parent.Constructor.Signature.Parameters[i].ParameterType));
+                        if (fixedArgs[i] == null)
+                            canReadNamedArgs = false;
                     }
 
-                    int namedArgCount = 0;
-                    CustomAttributeArgument[] namedArgs = new CustomAttributeArgument[namedArgCount];
+                    CustomAttributeArgument[] namedArgs = null;
+                    if (!reader.EndOfStream && canReadNamedArgs)
+                    {
+                        int namedArgCount = reader.ReadUInt16();
+                        namedArgs = new CustomAttributeArgument[namedArgCount];
+
+                        for (int i = 0; i < namedArgCount; i++)
+                        {
+                            byte argSignature = reader.ReadByte();
+                            TypeReference argType = reader.ReadCustomAttributeFieldOrPropType();
+                            string name = reader.ReadUtf8String();
+                            namedArgs[i] = new CustomAttributeArgument(reader.ReadArgumentValue(argType), name, argSignature == 0x53 ? CustomAttributeArgumentType.NamedField : CustomAttributeArgumentType.NamedProperty);
+                        }
+                    }
 
                     customAttrSig = new CustomAttributeSignature(fixedArgs, namedArgs);
                 }

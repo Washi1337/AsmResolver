@@ -23,6 +23,14 @@ namespace TUP.AsmResolver.NET
         
         public IGenericContext GenericContext { get; set; }
 
+        public bool EndOfStream
+        {
+            get
+            {
+                return BaseStream.Position == BaseStream.Length;
+            }
+        }
+
         public ElementType ReadElementType()
         {
             return (ElementType)ReadByte();
@@ -208,19 +216,19 @@ namespace TUP.AsmResolver.NET
         public object ReadArgumentValue(TypeReference paramType)
         {
             if (!paramType.IsArray || !(paramType as ArrayType).IsVector)
-                return ReadElement(paramType);
+                return ReadElementValue(paramType);
 
             // throw new NotImplementedException("Array constructor values are not supported yet.");
 
             ushort elementcount = this.ReadUInt16();
             object[] elements = new object[elementcount];
             for (int i = 0; i < elementcount; i++)
-                elements[i] = ReadElement((paramType as ArrayType).OriginalType);
+                elements[i] = ReadElementValue((paramType as ArrayType).OriginalType);
 
             return elements;
         }
 
-        public object ReadElement(TypeReference paramType)
+        public object ReadElementValue(TypeReference paramType)
         {
             // TODO: convert string to type ref:
             if (paramType.FullName == "System.Type")
@@ -229,19 +237,20 @@ namespace TUP.AsmResolver.NET
             if (paramType._elementType == ElementType.String)
                 return ReadUtf8String();
 
-            return ReadPrimitive(paramType._elementType);
+            return ReadPrimitiveValue(paramType._elementType);
         }
 
         public string ReadUtf8String()
         {
-            uint size = NETGlobals.ReadCompressedUInt32(this);
-            if (size == 0xFF)
+            if (ReadByte() == 0xFF)
                 return string.Empty;
+            BaseStream.Seek(-1, SeekOrigin.Current);
+            uint size = NETGlobals.ReadCompressedUInt32(this);
             byte[] rawdata = this.ReadBytes((int)size);
             return Encoding.UTF8.GetString(rawdata);
         }
 
-        public object ReadPrimitive(ElementType type)
+        public object ReadPrimitiveValue(ElementType type)
         {
             switch (type)
             {
@@ -272,6 +281,25 @@ namespace TUP.AsmResolver.NET
             }
 
             return null;
+        }
+
+        public TypeReference ReadCustomAttributeFieldOrPropType()
+        {
+            ElementType element = ReadElementType();
+            switch (element)
+            {
+                case ElementType.Type:
+                    return _netHeader.TypeSystem.Type;
+                case ElementType.Boxed:
+                    return _netHeader.TypeSystem.Object;
+                case ElementType.Enum:
+                    string typeName = ReadUtf8String();
+                    //TODO: parse to type ref
+                    return null;
+                case ElementType.SzArray:
+                    return new ArrayType(ReadCustomAttributeFieldOrPropType());
+            }
+            return ReadTypeReference(element);
         }
     }
 }
