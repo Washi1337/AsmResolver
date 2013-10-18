@@ -29,7 +29,10 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public override TypeReference DeclaringType
         {
-            get { return null; }
+            get 
+            {
+                return ResolutionScope as TypeReference;
+            }
         }
 
         public virtual IResolutionScope ResolutionScope
@@ -95,22 +98,61 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public virtual bool IsArray { get; internal set; }
-        public virtual bool IsPointer { get; internal set; }
-        public virtual bool IsByReference { get; internal set; }
-        public virtual bool IsPinned { get; internal set; }
+        public virtual bool IsArray 
+        { 
+            get;
+            internal set;
+        }
+
+        public virtual bool IsPointer 
+        { 
+            get;
+            internal set; 
+        }
+
+        public virtual bool IsByReference 
+        { 
+            get;
+            internal set; 
+        }
+
+        public virtual bool IsPinned 
+        { 
+            get;
+            internal set; 
+        }
+
         public virtual bool IsDefinition
         {
             get;
             internal set;
         }
-        public virtual bool IsGenericInstance { get; internal set; }
+
+        public virtual bool IsGenericInstance 
+        {
+            get; 
+            internal set;
+        }
+
         public virtual bool IsValueType
         {
             get;
             internal set;
         }
-        public virtual bool IsElementType { get; internal set; }
+
+        public virtual bool IsElementType 
+        { 
+            get;
+            internal set; 
+        }
+
+        public virtual bool IsNested
+        {
+            get
+            {
+                return DeclaringType != null;
+            }
+        }
 
         public virtual GenericParameter[] GenericParameters
         {
@@ -125,6 +167,11 @@ namespace TUP.AsmResolver.NET.Specialized
         public virtual TypeReference GetElementType()
         {
             return this;
+        }
+
+        public virtual TypeDefinition Resolve()
+        {
+            return NETHeader.MetaDataResolver.ResolveType(this);
         }
 
         public override void ClearCache()

@@ -228,12 +228,13 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
-        public bool IsNested
-        {
-            get{
-                return Attributes.HasFlag(TypeAttributes.NestedAssembly) || Attributes.HasFlag(TypeAttributes.NestedFamANDAssem) || Attributes.HasFlag(TypeAttributes.NestedFamily) || Attributes.HasFlag(TypeAttributes.NestedFamORAssem) || Attributes.HasFlag(TypeAttributes.NestedPrivate) || Attributes.HasFlag(TypeAttributes.NestedPublic);
-            }
-        }
+        //public override bool IsNested
+        //{
+        //    get
+        //    {
+        //        return Attributes.HasFlag(TypeAttributes.NestedAssembly) || Attributes.HasFlag(TypeAttributes.NestedFamANDAssem) || Attributes.HasFlag(TypeAttributes.NestedFamily) || Attributes.HasFlag(TypeAttributes.NestedFamORAssem) || Attributes.HasFlag(TypeAttributes.NestedPrivate) || Attributes.HasFlag(TypeAttributes.NestedPublic);
+        //    }
+        //}
 
         public override GenericParameter[] GenericParameters
         {
@@ -278,6 +279,11 @@ namespace TUP.AsmResolver.NET.Specialized
         public bool HasInterfaces
         {
             get { return Interfaces != null && Interfaces.Length > 0; }
+        }
+
+        public override TypeDefinition Resolve()
+        {
+            return this;
         }
 
         public override string ToString()

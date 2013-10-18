@@ -342,8 +342,8 @@ namespace TUP.AsmResolver.NET
                     bool canReadNamedArgs = true; // temporary solution for skipping named args when fixed args failed.
                     for (int i = 0; i < fixedArgCount; i++)
                     {
-                        fixedArgs[i] = new CustomAttributeArgument(reader.ReadArgumentValue(parent.Constructor.Signature.Parameters[i].ParameterType));
-                        if (fixedArgs[i] == null)
+                        fixedArgs[i] = new CustomAttributeArgument(reader.ReadCustomAttributeArgumentValue(parent.Constructor.Signature.Parameters[i].ParameterType));
+                        if (fixedArgs[i].Value == null)
                             canReadNamedArgs = false;
                     }
 
@@ -358,7 +358,7 @@ namespace TUP.AsmResolver.NET
                             byte argSignature = reader.ReadByte();
                             TypeReference argType = reader.ReadCustomAttributeFieldOrPropType();
                             string name = reader.ReadUtf8String();
-                            namedArgs[i] = new CustomAttributeArgument(reader.ReadArgumentValue(argType), name, argSignature == 0x53 ? CustomAttributeArgumentType.NamedField : CustomAttributeArgumentType.NamedProperty);
+                            namedArgs[i] = new CustomAttributeArgument(reader.ReadCustomAttributeArgumentValue(argType), name, argSignature == 0x53 ? CustomAttributeArgumentType.NamedField : CustomAttributeArgumentType.NamedProperty);
                         }
                     }
 

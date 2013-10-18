@@ -86,6 +86,11 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public override AssemblyDefinition Resolve()
+        {
+            return this;
+        }
+
         public override string ToString()
         {
             return Name;

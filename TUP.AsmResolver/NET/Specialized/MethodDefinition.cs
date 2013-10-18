@@ -202,6 +202,11 @@ namespace TUP.AsmResolver.NET.Specialized
             get { return Parameters != null && Parameters.Length > 0; }
         }
 
+        public override MethodDefinition Resolve()
+        {
+            return this;
+        }
+
         public override void ClearCache()
         {
             base.ClearCache();

@@ -85,6 +85,11 @@ namespace TUP.AsmResolver.NET.Specialized
             return this;
         }
 
+        public virtual MethodDefinition Resolve()
+        {
+            return NETHeader.MetaDataResolver.ResolveMethod(this);
+        }
+
         public override string ToString()
         {
             return FullName;

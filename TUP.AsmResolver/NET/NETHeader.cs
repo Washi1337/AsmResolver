@@ -58,6 +58,7 @@ namespace TUP.AsmResolver.NET
 
         internal NETHeader()
         {
+            MetaDataResolver = new MetaDataResolver(new AssemblyResolver());
         }
 
         /// <summary>
@@ -191,6 +192,12 @@ namespace TUP.AsmResolver.NET
                     _guidheap = (GuidHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#GUID");
                 return _guidheap;
             }
+        }
+
+        public MetaDataResolver MetaDataResolver
+        {
+            get;
+            set;
         }
 
         /// <summary>

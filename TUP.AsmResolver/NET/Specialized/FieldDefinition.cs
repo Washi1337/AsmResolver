@@ -75,6 +75,11 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public override FieldDefinition Resolve()
+        {
+            return this;
+        }
+
         public override void LoadCache()
         {
             base.LoadCache();

@@ -213,31 +213,45 @@ namespace TUP.AsmResolver.NET
 
         }
         
-        public object ReadArgumentValue(TypeReference paramType)
+        public object ReadCustomAttributeArgumentValue(TypeReference paramType)
         {
             if (!paramType.IsArray || !(paramType as ArrayType).IsVector)
-                return ReadElementValue(paramType);
+                return ReadCustomAttributeArgumentElement(paramType);
 
             // throw new NotImplementedException("Array constructor values are not supported yet.");
 
             ushort elementcount = this.ReadUInt16();
             object[] elements = new object[elementcount];
             for (int i = 0; i < elementcount; i++)
-                elements[i] = ReadElementValue((paramType as ArrayType).OriginalType);
+                elements[i] = ReadCustomAttributeArgumentElement((paramType as ArrayType).OriginalType);
 
             return elements;
         }
 
-        public object ReadElementValue(TypeReference paramType)
+        public object ReadCustomAttributeArgumentElement(TypeReference paramType)
         {
-            // TODO: convert string to type ref:
-            if (paramType.FullName == "System.Type")
-                return ReadUtf8String();
+            if (paramType._elementType == ElementType.None)
+            {
+                // TODO: convert string to type ref:
+                if (paramType.FullName == "System.Type")
+                    return ReadUtf8String();
 
-            if (paramType._elementType == ElementType.String)
-                return ReadUtf8String();
+                var resolvedTypeDef = paramType.Resolve();
+                if (resolvedTypeDef != null)
+                {
+                    var enumType = resolvedTypeDef.GetEnumType();
+                    if (enumType != null)
+                        return ReadCustomAttributeArgumentElement(enumType);
+                }
+                return null;
+            }
+            else
+            {
+                if (paramType._elementType == ElementType.String)
+                    return ReadUtf8String();
 
-            return ReadPrimitiveValue(paramType._elementType);
+                return ReadPrimitiveValue(paramType._elementType);
+            }
         }
 
         public string ReadUtf8String()

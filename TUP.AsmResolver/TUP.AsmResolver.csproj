@@ -62,8 +62,10 @@
     <Compile Include="IDataDirectoryProvider.cs" />
     <Compile Include="NameDemangler.cs" />
     <Compile Include="IImageProvider.cs" />
+    <Compile Include="NET\AssemblyResolver.cs" />
     <Compile Include="NET\MemberCollection.cs" />
     <Compile Include="NET\MemberRange.cs" />
+    <Compile Include="NET\MetaDataResolver.cs" />
     <Compile Include="NET\NETGlobals.cs" />
     <Compile Include="NET\Specialized\ArrayDimension.cs" />
     <Compile Include="NET\BlobSignatureReader.cs" />

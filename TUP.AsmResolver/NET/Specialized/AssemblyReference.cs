@@ -116,6 +116,16 @@ namespace TUP.AsmResolver.NET.Specialized
             get { return (AssemblyHashAlgorithm)Convert.ToUInt32(_metadatarow._parts[8]); }
         }
 
+        public virtual AssemblyDefinition Resolve()
+        {
+            var assembly = NETHeader.MetaDataResolver.AssemblyResolver.Resolve(this);
+            if (assembly != null)
+            {
+                return assembly.NETHeader.TablesHeap.GetTable(MetaDataTableType.Assembly).Members[0] as AssemblyDefinition;
+            }
+            return null;
+        }
+
         public override string ToString()
         {
             return Name;

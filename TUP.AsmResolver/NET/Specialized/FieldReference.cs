@@ -57,6 +57,11 @@ namespace TUP.AsmResolver.NET.Specialized
             }
         }
 
+        public virtual FieldDefinition Resolve()
+        {
+            return NETHeader.MetaDataResolver.ResolveField(this);
+        }
+
         public override void ClearCache()
         {
             _signature = null;

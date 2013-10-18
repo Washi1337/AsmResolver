@@ -3216,7 +3216,7 @@
         </member>
         <member name="T:TUP.AsmResolver.Win32Assembly">
             <summary>
-            Reprensents a Win32 Assembly decompiled in 32-bit assembly code.
+            Reprensents a Win32 Assembly.
             </summary>
         </member>
         <member name="M:TUP.AsmResolver.Win32Assembly.LoadFile(System.String)">

@@ -3,12 +3,29 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TUP.AsmResolver.NET.Specialized;
 
 namespace TUP.AsmResolver.NET
 {
-    internal static class NETGlobals
+    public static class NETGlobals
     {
-        internal static uint ReadCompressedUInt32(BinaryReader reader)
+        public static TypeReference GetEnumType(this TypeDefinition typeDef)
+        {
+            if (typeDef.HasFields)
+            {
+                foreach (var field in typeDef.Fields)
+                {
+                    if (!field.Attributes.HasFlag(FieldAttributes.Static))
+                    {
+                        if (field.Signature != null)
+                            return field.Signature.ReturnType;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public static uint ReadCompressedUInt32(BinaryReader reader)
         {
             // stream.Seek(index, SeekOrigin.Begin);
             byte num = reader.ReadByte();
@@ -23,14 +40,14 @@ namespace TUP.AsmResolver.NET
             return (uint)(((((num & -193) << 0x18) | (reader.ReadByte() << 0x10)) | (reader.ReadByte() << 8)) | reader.ReadByte());
         }
 
-        internal static int ReadCompressedInt32(BinaryReader reader)
+        public static int ReadCompressedInt32(BinaryReader reader)
         {
             int value = (int)ReadCompressedUInt32(reader);
             return (((value & 1) != 0) ? -(value >> 1) : (value >> 1));
 
         }
 
-        internal static void WriteCompressedUInt32(BinaryWriter writer, uint value)
+        public static void WriteCompressedUInt32(BinaryWriter writer, uint value)
         {
             if (value <= 0x7F)
             {
@@ -46,7 +63,7 @@ namespace TUP.AsmResolver.NET
             }
         }
 
-        internal static int GetCompressedUInt32Size(uint value)
+        public static int GetCompressedUInt32Size(uint value)
         {
             if (value <= 0x7F)
             {

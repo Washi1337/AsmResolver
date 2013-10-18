@@ -19,7 +19,7 @@ using TUP.AsmResolver.PE.Writers;
 namespace TUP.AsmResolver
 {
     /// <summary>
-    /// Reprensents a Win32 Assembly decompiled in 32-bit assembly code.
+    /// Reprensents a Win32 Assembly.
     /// </summary>
     public class Win32Assembly : IDisposable
     {
