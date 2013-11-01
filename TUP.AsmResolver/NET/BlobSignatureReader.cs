@@ -118,6 +118,11 @@ namespace TUP.AsmResolver.NET
                     instance.IsValueType = isValueType;
 
                     return instance;
+
+                case ElementType.CModOpt:
+                    return new CustomModifierType(ReadTypeToken(), ReadTypeReference(), false);
+                case ElementType.CModReqD:
+                    return new CustomModifierType(ReadTypeToken(), ReadTypeReference(), true);
             }
             return new TypeReference(string.Empty, type.ToString(), null) { _netheader = this._netHeader };
 

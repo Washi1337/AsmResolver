@@ -17,6 +17,11 @@ namespace TUP.AsmResolver.NET.Specialized
         {
         }
 
+        public AssemblyReference(string name, Version version)
+            : this(name, AssemblyAttributes.None, version, AssemblyHashAlgorithm.None, 0, string.Empty)
+        {
+        }
+
         public AssemblyReference(string name, AssemblyAttributes attributes, Version version, AssemblyHashAlgorithm hashAlgorithm, uint publicKey, string culture)
             : base(new MetaDataRow(
                 (byte)version.Major, (byte)version.Minor, (byte)version.Build, (byte)version.Revision,

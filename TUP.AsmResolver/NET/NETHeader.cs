@@ -135,7 +135,7 @@ namespace TUP.AsmResolver.NET
             {
                 if (_tableheap == null)
                 {
-                    _tableheap = (TablesHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#~" || t._name == "#-");
+                    _tableheap = MetaDataStreams.FirstOrDefault(t => t.Name == "#~" || t.Name == "#-") as TablesHeap;
                 }
 
                 return _tableheap;
@@ -150,7 +150,7 @@ namespace TUP.AsmResolver.NET
             get
             {
                 if (_stringsheap == null)
-                    _stringsheap = (StringsHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#Strings");
+                    _stringsheap = MetaDataStreams.FirstOrDefault(t => t.Name == "#Strings") as StringsHeap;
                 return _stringsheap;
             }
         }
@@ -163,7 +163,7 @@ namespace TUP.AsmResolver.NET
             get
             {
                 if (_usheap == null)
-                    _usheap = (UserStringsHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#US");
+                    _usheap = MetaDataStreams.FirstOrDefault(t => t.Name == "#US") as UserStringsHeap;
                 return _usheap;
             }
         }
@@ -174,9 +174,9 @@ namespace TUP.AsmResolver.NET
         public BlobHeap BlobHeap
         {
             get
-            { 
+            {
                 if (_blobheap == null)
-                    _blobheap = (BlobHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#Blob"); 
+                    _blobheap = MetaDataStreams.FirstOrDefault(t => t.Name == "#Blob") as BlobHeap;
                 return _blobheap;
             }
         }
@@ -189,7 +189,7 @@ namespace TUP.AsmResolver.NET
             get
             {
                 if (_guidheap == null)
-                    _guidheap = (GuidHeap)MetaDataStreams.FirstOrDefault(t => t._name == "#GUID");
+                    _guidheap = MetaDataStreams.FirstOrDefault(t => t.Name == "#GUID") as GuidHeap;
                 return _guidheap;
             }
         }

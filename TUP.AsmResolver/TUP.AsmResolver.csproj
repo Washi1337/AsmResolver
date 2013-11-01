@@ -73,6 +73,7 @@
     <Compile Include="NET\Specialized\IGenericInstance.cs" />
     <Compile Include="NET\Specialized\IGenericParamProvider.cs" />
     <Compile Include="NET\Specialized\MethodPtr.cs" />
+    <Compile Include="NET\Specialized\ModifierType.cs" />
     <Compile Include="NET\Specialized\ObsoleteAssemblyTables.cs" />
     <Compile Include="NET\Specialized\CustomAttributeArgument.cs" />
     <Compile Include="NET\Specialized\CustomAttributeSignature.cs" />
