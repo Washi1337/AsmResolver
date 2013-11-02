@@ -171,6 +171,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public virtual TypeDefinition Resolve()
         {
+            if (NETHeader == null)
+                return null;
             return NETHeader.MetaDataResolver.ResolveType(this);
         }
 

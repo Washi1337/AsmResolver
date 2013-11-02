@@ -123,6 +123,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public virtual AssemblyDefinition Resolve()
         {
+            if (NETHeader == null)
+                return null;
             var assembly = NETHeader.MetaDataResolver.AssemblyResolver.Resolve(this);
             if (assembly != null)
             {

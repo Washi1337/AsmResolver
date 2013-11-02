@@ -87,6 +87,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public virtual MethodDefinition Resolve()
         {
+            if (NETHeader == null)
+                return null;
             return NETHeader.MetaDataResolver.ResolveMethod(this);
         }
 

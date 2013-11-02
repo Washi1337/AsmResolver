@@ -27,7 +27,7 @@ namespace TUP.AsmResolver.NET
             var declaringType = ResolveType(methodRef.DeclaringType);
             methodRef = methodRef.GetElementMethod();
 
-            if (declaringType.HasMethods)
+            if (declaringType != null && declaringType.HasMethods)
             {
                 foreach (var method in declaringType.Methods)
                 {
@@ -37,6 +37,7 @@ namespace TUP.AsmResolver.NET
                     }
                 }
             }
+
             return null;
         }
 
@@ -128,6 +129,8 @@ namespace TUP.AsmResolver.NET
         {
             if (reference1 == null || reference2 == null)
                 return false;
+            if (reference1.Name != reference2.Name)
+                return false;
             if (!TypeRefsAreEqual(reference1.DeclaringType, reference2.DeclaringType))
                 return false;
             if (reference1.Signature == null || reference2.Signature != null)
@@ -141,12 +144,17 @@ namespace TUP.AsmResolver.NET
                 return false;
             if (!TypeRefsAreEqual(reference1.DeclaringType, reference2.DeclaringType))
                 return false;
-            if (reference1.Signature == null || reference2.Signature != null)
+            if (reference1.Name != reference2.Name)
+                return false;
+            if (reference1.Signature == null || reference2.Signature == null)
                 return false;
             if (!TypeRefsAreEqual(reference1.Signature.ReturnType, reference2.Signature.ReturnType))
                 return false;
-            if (reference1.HasGenericParameters != reference2.HasGenericParameters)
-                return false;
+            if (reference1.Signature.HasParameters && reference2.Signature.HasParameters)
+            {
+                if (reference1.Signature.Parameters.Length != reference2.Signature.Parameters.Length)
+                    return false;
+            }
             if (reference1.HasGenericParameters && reference2.HasGenericParameters)
             {
                 if (reference1.GenericParameters.Length != reference2.GenericParameters.Length)

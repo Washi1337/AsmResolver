@@ -59,6 +59,8 @@ namespace TUP.AsmResolver.NET.Specialized
 
         public virtual FieldDefinition Resolve()
         {
+            if (NETHeader == null)
+                return null;
             return NETHeader.MetaDataResolver.ResolveField(this);
         }
 
