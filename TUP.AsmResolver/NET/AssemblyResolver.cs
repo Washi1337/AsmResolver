@@ -82,9 +82,10 @@ namespace TUP.AsmResolver.NET
         private bool TryGetAssemblyGac(string gacDirectory, string name, out Win32Assembly resolvedAssembly)
         {
             resolvedAssembly = null;
-            if (Directory.Exists(gacDirectory))
+            string folder = Path.Combine(gacDirectory, name);
+            if (Directory.Exists(folder))
             {
-                return TryGetAssembly(Directory.GetDirectories(gacDirectory)[0], name, out resolvedAssembly);
+                return TryGetAssembly(Directory.GetDirectories(folder)[0], name, out resolvedAssembly);
             }
             return false;
         }

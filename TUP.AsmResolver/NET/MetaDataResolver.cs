@@ -77,15 +77,16 @@ namespace TUP.AsmResolver.NET
             }
             else
             {
-                if (typeRef.ResolutionScope is AssemblyReference)
-                {
-                    targetAssembly = AssemblyResolver.Resolve(typeRef.ResolutionScope as AssemblyReference);
-                }
-                else if (typeRef.ResolutionScope is AssemblyDefinition)
+                if (typeRef.ResolutionScope is AssemblyDefinition)
                 {
                     targetAssembly = typeRef.ResolutionScope.NETHeader.ParentAssembly;
                 }
-                else
+                else if (typeRef.ResolutionScope is AssemblyReference)
+                {
+                    targetAssembly = AssemblyResolver.Resolve(typeRef.ResolutionScope as AssemblyReference);
+                }
+
+                if (targetAssembly == null)
                 {
                     return null;
                 }
