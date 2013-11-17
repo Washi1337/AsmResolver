@@ -151,10 +151,20 @@ namespace TUP.AsmResolver.NET
                 return false;
             if (!TypeRefsAreEqual(reference1.Signature.ReturnType, reference2.Signature.ReturnType))
                 return false;
+            if (reference1.Signature.HasParameters != reference2.Signature.HasParameters)
+                return false;
             if (reference1.Signature.HasParameters && reference2.Signature.HasParameters)
             {
                 if (reference1.Signature.Parameters.Length != reference2.Signature.Parameters.Length)
                     return false;
+
+                for (int i = 0; i < reference1.Signature.Parameters.Length; i++)
+                {
+                    if (!TypeRefsAreEqual(reference1.Signature.Parameters[i].ParameterType, reference2.Signature.Parameters[i].ParameterType))
+                    {
+                        return false;
+                    }
+                }
             }
             if (reference1.HasGenericParameters && reference2.HasGenericParameters)
             {

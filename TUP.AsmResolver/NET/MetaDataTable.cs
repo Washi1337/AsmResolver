@@ -168,6 +168,9 @@ namespace TUP.AsmResolver.NET
 
                 case MetaDataTableType.ExportedType:
                     return GetSignatureSize(TablesHeap._tablereader.GetExportedTypeSignature());
+
+                case MetaDataTableType.FieldPtr:
+                    return GetSignatureSize(TablesHeap._tablereader.GetFieldPtrSignature());
                 case MetaDataTableType.Field:
                     return GetSignatureSize(TablesHeap._tablereader.GetFieldDefSignature());
                 case MetaDataTableType.FieldLayout:

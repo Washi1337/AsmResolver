@@ -226,6 +226,8 @@ namespace TUP.AsmResolver.PE.Readers
                     row = ReadRow(reader, GetTypeRefSignature()); type = typeof(TypeReference); break;
                 case MetaDataTableType.TypeDef:
                     row = ReadRow(reader, GetTypeDefSignature()); type = typeof(TypeDefinition); break;
+                case MetaDataTableType.FieldPtr:
+                    row = ReadRow(reader, GetFieldPtrSignature()); type = typeof(FieldPtr); break;
                 case MetaDataTableType.Field:
                     row = ReadRow(reader, GetFieldDefSignature()); type = typeof(FieldDefinition); break;
                 case MetaDataTableType.MethodPtr:
@@ -411,6 +413,14 @@ namespace TUP.AsmResolver.PE.Readers
 
             return parts;
         }
+        internal byte[] GetFieldPtrSignature()
+        {
+            byte[] parts = new byte[]
+            {
+                GetIndexSize(MetaDataTableType.Field),
+            };
+            return parts;
+        }
         internal byte[] GetFieldDefSignature()
         {
             byte[] parts = new byte[] { 
@@ -422,7 +432,6 @@ namespace TUP.AsmResolver.PE.Readers
 
             return parts;
         }
-
         internal byte[] GetMethodPtrSignature()
         {
             byte[] parts = new byte[]
@@ -431,7 +440,6 @@ namespace TUP.AsmResolver.PE.Readers
             };
             return parts;
         }
-
         internal byte[] GetMethodDefSignature()
         {
             byte[] parts = new byte[] { 
