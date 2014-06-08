@@ -260,7 +260,7 @@ namespace TUP.AsmResolver.ASM
             switch (instruction.OpCode.GetNormalOperandType())
             {
                 case x86OperandType.Byte:
-                    operandValue = new Operand(instruction.operandbytes[0]);
+                    operandValue = new Operand(instruction.operandbytes[instruction.operandbytes.Length - 1]);
                     break;
                 case x86OperandType.Word:
                     operandValue = new Operand(BitConverter.ToInt16(instruction.operandbytes, 0));
@@ -352,18 +352,29 @@ namespace TUP.AsmResolver.ASM
 
             bool isGroupOpCode = MatchWithOpCodes(instruction.OpCode._opcodeBytes[0]).Length > 1;
 
-            int actualregister = registersToken % 8;
+            var actualregister = (x86Register)(registersToken % 8);
 
             OperandType registerValueType = OperandType.Normal;
             int addition = 0;
             if (registersToken < 0x40)
             {
                 //normal dword pointer
+
+                if (actualregister == x86Register.EBP)
+                {
+                    // 0x5 (EBP) register will be replaced by a memory address.
+                    instruction.operandbytes = reader.ReadBytes(4);
+                    instruction.OpCode._operandLength += 4;
+                    instruction.operand1 = new Operand(BitConverter.ToUInt32(instruction.operandbytes, 0), OperandType.DwordPointer);
+                    return;
+                }
+                
                 if (!isGroupOpCode && registersToken >= 0x8)
                 {
                     ProcessInvalidInstruction(ref instruction);
                     return;
                 }
+
                 registerValueType = OperandType.DwordPointer;
 
             }
@@ -409,11 +420,11 @@ namespace TUP.AsmResolver.ASM
             }
             if (instruction.OpCode._operandType.HasFlag(x86OperandType.Register8))
             {
-                actualregister |= (byte)x86Register.Bit8Mask;
+                actualregister |= x86Register.Bit8Mask;
             }
             if (instruction.OpCode._operandType.HasFlag(x86OperandType.Register32Or8))
             {
-                actualregister |= GetSingleRegisterMask(registersToken);
+                actualregister |= (x86Register)GetSingleRegisterMask(registersToken);
             }
 
             instruction.operand1 = new Operand((x86Register)actualregister, registerValueType, addition);
