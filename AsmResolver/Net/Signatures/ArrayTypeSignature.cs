@@ -1,0 +1,189 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
+using AsmResolver.Net.Metadata;
+
+namespace AsmResolver.Net.Signatures
+{
+    public class ArrayTypeSignature : TypeSignature
+    {
+        public new static ArrayTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        {
+            var signature = new ArrayTypeSignature(TypeSignature.FromReader(header, reader));
+            
+            var rank = reader.ReadCompressedUInt32();
+
+            var numSizes = reader.ReadCompressedUInt32();
+            var sizes = new uint[numSizes];
+            for (int i = 0; i < numSizes; i++)
+                sizes[i] = reader.ReadCompressedUInt32();
+
+            var numLoBounds = reader.ReadCompressedUInt32();
+            var loBounds = new uint[numLoBounds];
+            for (int i = 0; i < numLoBounds; i++)
+                loBounds[i] = reader.ReadCompressedUInt32();
+
+            for (int i = 0; i < rank; i++)
+            {
+                var dimension = new ArrayDimension();
+                if (i < numSizes)
+                    dimension.Size = (int)sizes[i];
+                if (i < numLoBounds)
+                    dimension.LowerBound = (int)loBounds[i];
+                signature.Dimensions.Add(dimension);
+            }
+
+            return signature;
+        }
+        
+        public ArrayTypeSignature(TypeSignature baseType)
+        {
+            if (baseType == null)
+                throw new ArgumentNullException("baseType");
+            BaseType = baseType;
+            Dimensions = new List<ArrayDimension>();
+        }
+
+        public override ElementType ElementType
+        {
+            get { return ElementType.Array; }
+        }
+
+        public TypeSignature BaseType
+        {
+            get;
+            set;
+        }
+
+        public IList<ArrayDimension> Dimensions
+        {
+            get;
+            private set;
+        }
+
+        public override string Name
+        {
+            get { return BaseType.Name + GetDimensionsString(); }
+        }
+
+        public override string Namespace
+        {
+            get { return BaseType.Namespace; }
+        }
+
+        public override IResolutionScope ResolutionScope
+        {
+            get { return BaseType.ResolutionScope; }
+        }
+
+        private string GetDimensionsString()
+        {
+            return "[" + string.Join(",", Dimensions.Select(x =>
+            {
+                if (x.LowerBound.HasValue)
+                {
+                    if (x.Size.HasValue)
+                        return FormatDimensionBounds(x.LowerBound.Value, x.Size.Value);
+                    return x.LowerBound.Value + "...";
+                }
+                if (x.Size.HasValue)
+                    return FormatDimensionBounds(0, x.Size.Value);
+                return string.Empty;
+            })) + "]";
+        }
+
+        private static string FormatDimensionBounds(int low, int size)
+        {
+            return string.Format("{0}...{1}", low, low + size - 1);
+        }
+
+        public override ITypeDescriptor GetElementType()
+        {
+            return BaseType.GetElementType();
+        }
+
+        public bool Validate()
+        {
+            var allowSizes = true;
+            var allowLowBounds = true;
+            foreach (var dimension in Dimensions)
+            {
+                if (dimension.Size.HasValue)
+                {
+                    if (!allowSizes)
+                        return false;
+                }
+                else
+                {
+                    allowSizes = false;
+                }
+                if (dimension.LowerBound.HasValue)
+                {
+                    if (!allowLowBounds)
+                        return false;
+                }
+                else
+                {
+                    allowLowBounds = false;
+                }    
+            }
+            return true;
+        }
+
+        public override uint GetPhysicalLength()
+        {
+            if (!Validate())
+                throw new InvalidOperationException();
+
+            var numSizes = 0u;
+            var numLoBounds = 0u;
+            var sizesAndLoBoundsLength = 0u;
+
+            foreach (var dimension in Dimensions)
+            {
+                if (dimension.Size.HasValue)
+                {
+                    numSizes++;
+                    sizesAndLoBoundsLength += dimension.Size.Value.GetCompressedSize();
+                }
+                if (dimension.LowerBound.HasValue)
+                {
+                    numLoBounds++;
+                    sizesAndLoBoundsLength += dimension.LowerBound.Value.GetCompressedSize();
+                }
+            }
+
+            return sizeof (byte) +
+                   BaseType.GetPhysicalLength() + 
+                   Dimensions.Count.GetCompressedSize() +
+                   numSizes.GetCompressedSize() +
+                   numLoBounds.GetCompressedSize() +
+                   sizesAndLoBoundsLength;
+        }
+
+        public override void Write(WritingContext context)
+        {
+            if (!Validate())
+                throw new InvalidOperationException();
+
+            var writer = context.Writer;
+            writer.WriteByte((byte)ElementType);
+            BaseType.Write(context);
+            writer.WriteCompressedUInt32((uint)Dimensions.Count);
+
+            var sizedDimensions = Dimensions.Where(x => x.Size.HasValue).ToArray();
+            writer.WriteCompressedUInt32((uint)sizedDimensions.Length);
+            foreach (var sizedDimension in sizedDimensions)
+                writer.WriteCompressedUInt32((uint)sizedDimension.Size.Value);
+
+            var boundedDimensions = Dimensions.Where(x => x.LowerBound.HasValue).ToArray();
+            writer.WriteCompressedUInt32((uint)boundedDimensions.Length);
+            foreach (var boundedDimension in boundedDimensions)
+                writer.WriteCompressedUInt32((uint)boundedDimension.LowerBound.Value);
+        }
+    }
+}

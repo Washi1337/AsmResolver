@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{297679AF-68EE-4C15-89F5-8D24CA878911}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{228B5994-1035-4EB0-A095-8D85B6EE1146}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AsmResolver</RootNamespace>
     <AssemblyName>AsmResolver</AssemblyName>
@@ -13,7 +13,6 @@
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,114 +30,221 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Be.Windows.Forms.HexBox, Version=1.4.6.13072, Culture=neutral, PublicKeyToken=e0e5adf0ebc99863, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\Be.Windows.Forms.HexBox.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComboBoxDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ComboBoxDlg.Designer.cs">
-      <DependentUpon>ComboBoxDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DisassemblerControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="HexBoxControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MethodDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MethodDlg.Designer.cs">
-      <DependentUpon>MethodDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="OffsetEditorDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="OffsetEditorDlg.Designer.cs">
-      <DependentUpon>OffsetEditorDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="BaseRelocationBlock.cs" />
+    <Compile Include="BaseRelocationEntry.cs" />
+    <Compile Include="BaseRelocationType.cs" />
+    <Compile Include="Builder\BuildingContext.cs" />
+    <Compile Include="Builder\BuildingParameters.cs" />
+    <Compile Include="Builder\FileSegmentBuilder.cs" />
+    <Compile Include="Builder\ImageImportDirectoryBuilder.cs" />
+    <Compile Include="Collections\Generic\Collection.cs" />
+    <Compile Include="Net\AssemblyResolutionEventArgs.cs" />
+    <Compile Include="Net\AssemblyResolutionException.cs" />
+    <Compile Include="Net\Builder\MetadataBuilder.cs" />
+    <Compile Include="Net\Builder\NetBuildingContext.cs" />
+    <Compile Include="Net\Builder\NetTextBuilder.cs" />
+    <Compile Include="Net\Builder\StartupCodeSegment.cs" />
+    <Compile Include="Builder\ResourceDirectoryBuilder.cs" />
+    <Compile Include="Builder\SectionBuilder.cs" />
+    <Compile Include="Net\Builder\NetAssemblyBuilder.cs" />
+    <Compile Include="Builder\WindowsAssemblyBuilder.cs" />
+    <Compile Include="DataSegment.cs" />
+    <Compile Include="FileSegment.cs" />
+    <Compile Include="HintName.cs" />
+    <Compile Include="IBinaryStreamReader.cs" />
+    <Compile Include="ImageCharacteristics.cs" />
+    <Compile Include="ImageDataDirectory.cs" />
+    <Compile Include="ImageDllCharacteristics.cs" />
+    <Compile Include="ImageImportDirectory.cs" />
+    <Compile Include="ImageRelocationDirectory.cs" />
+    <Compile Include="ImageSymbolExport.cs" />
+    <Compile Include="ImageExportDirectory.cs" />
+    <Compile Include="ImageFileHeader.cs" />
+    <Compile Include="ImageDosHeader.cs" />
+    <Compile Include="ImageSymbolImport.cs" />
+    <Compile Include="ImageMachineType.cs" />
+    <Compile Include="ImageNtHeaders.cs" />
+    <Compile Include="ImageSectionAttributes.cs" />
+    <Compile Include="ImageSectionHeader.cs" />
+    <Compile Include="ImageSubSystem.cs" />
+    <Compile Include="ImageModuleImport.cs" />
+    <Compile Include="ImageSymbolImportCollection.cs" />
+    <Compile Include="IOffsetConverter.cs" />
+    <Compile Include="IBinaryStreamWriter.cs" />
+    <Compile Include="MemoryStreamReader.cs" />
+    <Compile Include="ImageOptionalHeader.cs" />
+    <Compile Include="BinaryStreamWriter.cs" />
+    <Compile Include="Net\BlobStream.cs" />
+    <Compile Include="Net\CustomMetaDataStream.cs" />
+    <Compile Include="Net\GuidStream.cs" />
+    <Compile Include="Net\ImageNetDirectory.cs" />
+    <Compile Include="Net\ImageNetDirectoryFlags.cs" />
+    <Compile Include="Net\IMetadataResolver.cs" />
+    <Compile Include="Net\IndexSize.cs" />
+    <Compile Include="Net\INetAssemblyResolver.cs" />
+    <Compile Include="Net\ITypeDescriptor.cs" />
+    <Compile Include="Net\MetadataStreamHeaderCollection.cs" />
+    <Compile Include="Net\IAssemblyDescriptor.cs" />
+    <Compile Include="Net\INameProvider.cs" />
+    <Compile Include="Net\Metadata\IGenericContext.cs" />
+    <Compile Include="Net\Metadata\MetadataMemberCollection.cs" />
+    <Compile Include="Net\Metadata\MethodSemantics.cs" />
+    <Compile Include="Net\Metadata\ReferenceImporter.cs" />
+    <Compile Include="Net\NetAssemblyFactory.cs" />
+    <Compile Include="Net\Utilities.cs" />
+    <Compile Include="Net\Msil\ExceptionHandlerType.cs" />
+    <Compile Include="Net\Msil\IOperandBuilder.cs" />
+    <Compile Include="Net\Msil\IOperandResolver.cs" />
+    <Compile Include="Net\MetadataHeader.cs" />
+    <Compile Include="Net\MetadataStream.cs" />
+    <Compile Include="Net\MetadataStreamHeader.cs" />
+    <Compile Include="Net\Metadata\AssemblyAttributes.cs" />
+    <Compile Include="Net\Metadata\AssemblyDefinition.cs" />
+    <Compile Include="Net\Metadata\AssemblyHashAlgorithm.cs" />
+    <Compile Include="Net\Metadata\AssemblyOs.cs" />
+    <Compile Include="Net\Metadata\AssemblyProcessor.cs" />
+    <Compile Include="Net\Metadata\AssemblyReference.cs" />
+    <Compile Include="Net\Metadata\AssemblyRefOs.cs" />
+    <Compile Include="Net\Metadata\AssemblyRefProcessor.cs" />
+    <Compile Include="Net\Metadata\ClassLayout.cs" />
+    <Compile Include="Net\Metadata\CodedIndex.cs" />
+    <Compile Include="Net\Metadata\Constant.cs" />
+    <Compile Include="Net\Metadata\CustomAttribute.cs" />
+    <Compile Include="Net\Metadata\ElementType.cs" />
+    <Compile Include="Net\Metadata\EncLog.cs" />
+    <Compile Include="Net\Metadata\EncMap.cs" />
+    <Compile Include="Net\Metadata\EventAttributes.cs" />
+    <Compile Include="Net\Metadata\EventDefinition.cs" />
+    <Compile Include="Net\Metadata\EventMap.cs" />
+    <Compile Include="Net\Metadata\EventPtr.cs" />
+    <Compile Include="Net\Metadata\ExportedType.cs" />
+    <Compile Include="Net\Metadata\FieldAttributes.cs" />
+    <Compile Include="Net\Metadata\FieldDefinition.cs" />
+    <Compile Include="Net\Metadata\FieldLayout.cs" />
+    <Compile Include="Net\Metadata\FieldMarshal.cs" />
+    <Compile Include="Net\Metadata\FieldPtr.cs" />
+    <Compile Include="Net\Metadata\FieldRva.cs" />
+    <Compile Include="Net\Metadata\FileAttributes.cs" />
+    <Compile Include="Net\Metadata\FileDefinition.cs" />
+    <Compile Include="Net\Metadata\GenericParameter.cs" />
+    <Compile Include="Net\Metadata\GenericParameterAttributes.cs" />
+    <Compile Include="Net\Metadata\GenericParameterConstraint.cs" />
+    <Compile Include="Net\Metadata\IDeclaringTypeProvider.cs" />
+    <Compile Include="Net\Metadata\IMemberReference.cs" />
+    <Compile Include="Net\Metadata\InterfaceImplementation.cs" />
+    <Compile Include="Net\Metadata\IndexEncoder.cs" />
+    <Compile Include="Net\Metadata\ManifestResource.cs" />
+    <Compile Include="Net\Metadata\ManifestResourceAttributes.cs" />
+    <Compile Include="Net\Metadata\RangedDefinitionCollection.cs" />
+    <Compile Include="Net\Metadata\MemberReference.cs" />
+    <Compile Include="Net\Metadata\MetadataRow.cs" />
+    <Compile Include="Net\Metadata\MetadataToken.cs" />
+    <Compile Include="Net\Metadata\MetadataTokenType.cs" />
+    <Compile Include="Net\Metadata\MetadataMember.cs" />
+    <Compile Include="Net\Metadata\MetadataTable.cs" />
+    <Compile Include="Net\Metadata\MethodAttributes.cs" />
+    <Compile Include="Net\Metadata\MethodDefinition.cs" />
+    <Compile Include="Net\Metadata\MethodImplAttributes.cs" />
+    <Compile Include="Net\Metadata\MethodImplementation.cs" />
+    <Compile Include="Net\Metadata\MethodPtr.cs" />
+    <Compile Include="Net\Metadata\MethodSemanticsAttributes.cs" />
+    <Compile Include="Net\Metadata\MethodSpecification.cs" />
+    <Compile Include="Net\Metadata\ModuleDefinition.cs" />
+    <Compile Include="Net\Metadata\ModuleReference.cs" />
+    <Compile Include="Net\Metadata\NestedClass.cs" />
+    <Compile Include="Net\Metadata\ParameterAttributes.cs" />
+    <Compile Include="Net\Metadata\ParameterDefinition.cs" />
+    <Compile Include="Net\Metadata\ParamPtr.cs" />
+    <Compile Include="Net\Metadata\PInvokeImplementation.cs" />
+    <Compile Include="Net\Metadata\PInvokeImplementationAttributes.cs" />
+    <Compile Include="Net\Metadata\PropertyAttributes.cs" />
+    <Compile Include="Net\Metadata\PropertyDefinition.cs" />
+    <Compile Include="Net\Metadata\PropertyMap.cs" />
+    <Compile Include="Net\Metadata\PropertyPtr.cs" />
+    <Compile Include="Net\Metadata\SecurityDeclaration.cs" />
+    <Compile Include="Net\Metadata\StandAloneSignature.cs" />
+    <Compile Include="Net\Metadata\TypeAttributes.cs" />
+    <Compile Include="Net\Metadata\TypeDefinition.cs" />
+    <Compile Include="Net\Metadata\TypeReference.cs" />
+    <Compile Include="Net\Metadata\TypeSpecification.cs" />
+    <Compile Include="Net\Msil\ExceptionHandler.cs" />
+    <Compile Include="Net\Msil\MsilFlowControl.cs" />
+    <Compile Include="Net\Msil\MsilAssembler.cs" />
+    <Compile Include="Net\Msil\MsilInstruction.cs" />
+    <Compile Include="Net\Msil\MethodBody.cs" />
+    <Compile Include="Net\Msil\MsilCode.cs" />
+    <Compile Include="Net\Msil\MsilDisassembler.cs" />
+    <Compile Include="Net\Msil\MsilOpCode.cs" />
+    <Compile Include="Net\Msil\MsilOpCodes.cs" />
+    <Compile Include="Net\Msil\MsilOpCodeType.cs" />
+    <Compile Include="Net\Msil\MsilOperandType.cs" />
+    <Compile Include="Net\Msil\MsilStackBehaviour.cs" />
+    <Compile Include="Net\SignatureComparer.cs" />
+    <Compile Include="Net\Signatures\ArrayDimension.cs" />
+    <Compile Include="Net\Signatures\ArrayTypeSignature.cs" />
+    <Compile Include="Net\Signatures\BlobSignature.cs" />
+    <Compile Include="Net\Signatures\BoxedTypeSignature.cs" />
+    <Compile Include="Net\Signatures\ByReferenceTypeSignature.cs" />
+    <Compile Include="Net\Signatures\CustomAttributeArgument.cs" />
+    <Compile Include="Net\Signatures\CustomAttributeNamedArgument.cs" />
+    <Compile Include="Net\Signatures\DataBlobSignature.cs" />
+    <Compile Include="Net\Signatures\ElementSignature.cs" />
+    <Compile Include="Net\Signatures\CustomAttributeSignature.cs" />
+    <Compile Include="Net\Signatures\FieldSignature.cs" />
+    <Compile Include="Net\Signatures\GenericInstanceMethodSignature.cs" />
+    <Compile Include="Net\Signatures\GenericInstanceTypeSignature.cs" />
+    <Compile Include="Net\Signatures\GenericParameterSignature.cs" />
+    <Compile Include="Net\Signatures\IHasTypeSignature.cs" />
+    <Compile Include="Net\Signatures\LocalVariableSignature.cs" />
+    <Compile Include="Net\Signatures\MemberSignature.cs" />
+    <Compile Include="Net\Signatures\MethodSignature.cs" />
+    <Compile Include="Net\Signatures\MsCorLibTypeSignature.cs" />
+    <Compile Include="Net\Signatures\ParameterSignature.cs" />
+    <Compile Include="Net\Signatures\PinnedTypeSignature.cs" />
+    <Compile Include="Net\Signatures\PointerTypeSignature.cs" />
+    <Compile Include="Net\Signatures\PropertySignature.cs" />
+    <Compile Include="Net\Signatures\TypeDefOrRefSignature.cs" />
+    <Compile Include="Net\Signatures\SzArrayTypeSignature.cs" />
+    <Compile Include="Net\Signatures\TypeSignature.cs" />
+    <Compile Include="Net\Signatures\VariableSignature.cs" />
+    <Compile Include="Net\StringStream.cs" />
+    <Compile Include="Net\TableStream.cs" />
+    <Compile Include="Net\TypeSystem.cs" />
+    <Compile Include="Net\UserStringStream.cs" />
+    <Compile Include="PointerSegment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyGridHexConverters.cs" />
-    <Compile Include="PropertyGridDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="PropertyGridDlg.Designer.cs">
-      <DependentUpon>PropertyGridDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PropertyGridUIEditor.cs" />
-    <Compile Include="ResourceControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="TablesControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="TreeBuilder.cs" />
-    <Compile Include="TreeNodeTag.cs" />
-    <Compile Include="TreeNodeType.cs" />
-    <EmbeddedResource Include="ComboBoxDlg.resx">
-      <DependentUpon>ComboBoxDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MethodDlg.resx">
-      <DependentUpon>MethodDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="OffsetEditorDlg.resx">
-      <DependentUpon>OffsetEditorDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="PropertyGridDlg.resx">
-      <DependentUpon>PropertyGridDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
+    <Compile Include="ReadingContext.cs" />
+    <Compile Include="ReadingParameters.cs" />
+    <Compile Include="ImageResourceDataEntry.cs" />
+    <Compile Include="ImageResourceDirectory.cs" />
+    <Compile Include="ImageResourceDirectoryEntry.cs" />
+    <Compile Include="WindowsAssembly.cs" />
+    <Compile Include="WritingContext.cs" />
+    <Compile Include="X86\IX86Formatter.cs" />
+    <Compile Include="X86\MultiByteOpCodes.cs" />
+    <Compile Include="X86\X86Disassembler.cs" />
+    <Compile Include="X86\X86Instruction.cs" />
+    <Compile Include="X86\X86Mnemonic.cs" />
+    <Compile Include="X86\X86OpCode.cs" />
+    <Compile Include="X86\X86AddressingMethod.cs" />
+    <Compile Include="X86\SingleByteOpCodes.cs" />
+    <Compile Include="X86\X86Operand.cs" />
+    <Compile Include="X86\X86OperandSize.cs" />
+    <Compile Include="X86\X86Register.cs" />
+    <Compile Include="X86\X86RegOrMemModifier.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TUP.AsmResolver\TUP.AsmResolver.csproj">
-      <Project>{b1c33316-7181-4c94-a6d4-7c66ca02808d}</Project>
-      <Name>TUP.AsmResolver</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
