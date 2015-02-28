@@ -120,6 +120,11 @@ namespace AsmResolver.Net
             set;
         }
 
+        public IEnumerable<MetadataStream> GetStreams()
+        {
+            return StreamHeaders.Select(x => x.Stream);
+        } 
+
         public MetadataStream GetStream(string name)
         {
             return StreamHeaders.Single(x => x.Name == name).Stream;

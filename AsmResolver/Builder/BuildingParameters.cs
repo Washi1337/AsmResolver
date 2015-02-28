@@ -8,12 +8,12 @@ namespace AsmResolver.Builder
 {
     public class BuildingParameters
     {
-        public BuildingParameters(BinaryStreamWriter writer)
+        public BuildingParameters(IBinaryStreamWriter writer)
         {
             Writer = writer;
         }
 
-        public BinaryStreamWriter Writer
+        public IBinaryStreamWriter Writer
         {
             get;
             private set;

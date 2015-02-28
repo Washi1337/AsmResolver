@@ -13,9 +13,24 @@ namespace AsmResolver
 {
     public class WindowsAssembly : IOffsetConverter
     {
+        public static WindowsAssembly FromFile(string file)
+        {
+            return FromBytes(File.ReadAllBytes(file), new ReadingParameters());
+        }
+
+        public static WindowsAssembly FromBytes(byte[] bytes)
+        {
+            return FromBytes(bytes, new ReadingParameters());
+        }
+
         public static WindowsAssembly FromBytes(byte[] bytes, ReadingParameters parameters)
         {
             return FromReader(new MemoryStreamReader(bytes), parameters);
+        }
+
+        public static WindowsAssembly FromReader(IBinaryStreamReader stream)
+        {
+            return FromReader(stream, new ReadingParameters());
         }
 
         public static WindowsAssembly FromReader(IBinaryStreamReader stream, ReadingParameters parameters)
@@ -236,6 +251,19 @@ namespace AsmResolver
                     sectionHeader =>
                         fileOffset >= sectionHeader.PointerToRawData &&
                         fileOffset < sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData);
+        }
+
+        public void Write(string file)
+        {
+            using (var stream = File.Create(file))
+            {
+                Write(new BuildingParameters(new BinaryStreamWriter(stream)));
+            }
+        }
+
+        public void Write(IBinaryStreamWriter writer)
+        {
+            Write(new BuildingParameters(writer));
         }
 
         public void Write(BuildingParameters parameters)
