@@ -1,9 +1,9 @@
 #AsmResolver
 ---
-AsmResolver is a PE inspection library allowing .NET programmers to read, modify and write executable files. This includes .NET as well as native native images. The library exposes high-level representations of the , while still allowing the user to access low-level structures.
+AsmResolver is a PE inspection library allowing .NET programmers to read, modify and write executable files. This includes .NET as well as native native images. The library exposes high-level representations of the PE, while still allowing the user to access low-level structures.
 
 
-AsmResolver is released under the GPL license.
+AsmResolver is released under the LGPL license.
 
 
 #Quick starters guide
@@ -89,7 +89,7 @@ Adding a stream can be done by using the StreamHeaders property:
 ```csharp
 var header = assembly.NetDirectory.MetadataHeader;
 var stream = new UserStringStream();
-header.StreamHeaders.Add(new MetadataStreamHeader("#Strings", stream));
+header.StreamHeaders.Add(new MetadataStreamHeader("#US", stream));
 ```
 
 ##Accessing metadata tables
