@@ -54,7 +54,8 @@ namespace AsmResolver.Net.Metadata
         {
             var tableIndex = codedIndex & _tableIndexBitMask;
             var rowIndex = codedIndex >> _tableIndexBitCount;
-            return new MetadataToken(_tables[tableIndex], rowIndex);
+            return new MetadataToken(tableIndex >= _tables.Length ? MetadataTokenType.Module : _tables[tableIndex],
+                rowIndex);
         }
     }
 }

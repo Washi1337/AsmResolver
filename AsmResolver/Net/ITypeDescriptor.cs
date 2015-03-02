@@ -9,7 +9,7 @@ namespace AsmResolver.Net
             get;
         }
 
-        ITypeDescriptor DeclaringType
+        ITypeDescriptor DeclaringTypeDescriptor
         {
             get;
         }

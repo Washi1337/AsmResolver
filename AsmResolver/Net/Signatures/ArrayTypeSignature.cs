@@ -15,17 +15,31 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new ArrayTypeSignature(TypeSignature.FromReader(header, reader));
             
-            var rank = reader.ReadCompressedUInt32();
+            uint rank;
+            if (!reader.TryReadCompressedUInt32(out rank))
+                return signature;
 
-            var numSizes = reader.ReadCompressedUInt32();
+            uint numSizes;
+            if (!reader.TryReadCompressedUInt32(out numSizes))
+                return signature;
+
             var sizes = new uint[numSizes];
             for (int i = 0; i < numSizes; i++)
-                sizes[i] = reader.ReadCompressedUInt32();
+            {
+                if (!reader.TryReadCompressedUInt32(out sizes[i]))
+                    return signature;
+            }
 
-            var numLoBounds = reader.ReadCompressedUInt32();
+            uint numLoBounds;
+            if (!reader.TryReadCompressedUInt32(out numLoBounds))
+                return signature;
+
             var loBounds = new uint[numLoBounds];
             for (int i = 0; i < numLoBounds; i++)
-                loBounds[i] = reader.ReadCompressedUInt32();
+            {
+                if (!reader.TryReadCompressedUInt32(out loBounds[i]))
+                    return signature;
+            }
 
             for (int i = 0; i < rank; i++)
             {

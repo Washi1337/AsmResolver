@@ -12,8 +12,12 @@ namespace AsmResolver.Net.Signatures
         public new static TypeDefOrRefSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
             var tableStream = header.GetStream<TableStream>();
+            uint codedIndex;
+            if (!reader.TryReadCompressedUInt32(out codedIndex))
+                return null;
+
             return new TypeDefOrRefSignature((ITypeDefOrRef)tableStream.ResolveMember(
-                tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(reader.ReadCompressedUInt32())));
+                tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(codedIndex)));
         }
 
         public TypeDefOrRefSignature(ITypeDefOrRef type)

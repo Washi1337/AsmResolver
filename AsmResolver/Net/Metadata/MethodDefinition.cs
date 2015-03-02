@@ -98,7 +98,10 @@ namespace AsmResolver.Net.Metadata
             ImplAttributes = (MethodImplAttributes)row.Column2;
             Attributes = (MethodAttributes)row.Column3;
             Name = stringStream.GetStringByOffset(row.Column4);
-            Signature = MethodSignature.FromReader(header, blobStream.CreateBlobReader(row.Column5));
+
+            IBinaryStreamReader blobReader;
+            if (blobStream.TryCreateBlobReader(row.Column5, out blobReader))
+                Signature = MethodSignature.FromReader(header, blobReader);
         }
 
         public uint Rva

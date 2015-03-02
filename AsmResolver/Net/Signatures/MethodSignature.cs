@@ -11,15 +11,25 @@ namespace AsmResolver.Net.Signatures
     {
         public new static MethodSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
+            if (!reader.CanRead(sizeof (byte)))
+                return null;
+
             var signature = new MethodSignature
             {
                 Attributes = (MethodSignatureAttributes)reader.ReadByte()
             };
 
             if (signature.Attributes.HasFlag(MethodSignatureAttributes.Generic))
-                signature.GenericParameterCount = (int)reader.ReadCompressedUInt32();
+            {
+                uint genericParameterCount;
+                if (!reader.TryReadCompressedUInt32(out genericParameterCount))
+                    return signature;
+                signature.GenericParameterCount = (int)genericParameterCount;
+            }
 
-            var parameterCount = reader.ReadCompressedUInt32();
+            uint parameterCount;
+            if (!reader.TryReadCompressedUInt32(out parameterCount))
+                return signature;
 
             signature.ReturnType = TypeSignature.FromReader(header, reader);
             for (int i = 0; i < parameterCount; i++)

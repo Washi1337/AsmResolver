@@ -82,8 +82,8 @@ namespace AsmResolver.Net
                 reference1.Name != reference2.Name)
                 return false;
 
-            return reference1.DeclaringType == null ||
-                   MatchTypes(reference1.DeclaringType, reference2.DeclaringType);
+            return reference1.DeclaringTypeDescriptor == null ||
+                   MatchTypes(reference1.DeclaringTypeDescriptor, reference2.DeclaringTypeDescriptor);
             //return MatchScopes(reference1.ResolutionScope, reference2.ResolutionScope);
         }
 
@@ -199,7 +199,7 @@ namespace AsmResolver.Net
             return false;
         }
 
-        private static bool ByteArrayMatches(byte[] array1, byte[] array2)
+        private static bool ByteArrayMatches(IEnumerable<byte> array1, IList<byte> array2)
         {
             if (array1 == null && array2 == null)
                 return true;

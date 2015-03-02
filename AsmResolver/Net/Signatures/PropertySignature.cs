@@ -16,7 +16,10 @@ namespace AsmResolver.Net.Signatures
                 Attributes = (PropertySignatureAttributes)reader.ReadByte(),
             };
 
-            var paramCount = reader.ReadCompressedUInt32();
+            uint paramCount;
+            if (!reader.TryReadCompressedUInt32(out paramCount))
+                return null;
+
             signature.PropertyType = TypeSignature.FromReader(header, reader);
 
             for (int i = 0; i < paramCount; i++)

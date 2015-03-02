@@ -95,7 +95,7 @@ namespace AsmResolver.Net.Msil
                 body.MaxStack = 8;
             }
             else
-                throw new ArgumentException("Invalid method header signature.");
+                throw new ArgumentException("Invalid method body header signature.");
 
             body._msilReadingContext = context.CreateSubContext(reader.Position, (int)codeSize);
             return body;
@@ -157,8 +157,8 @@ namespace AsmResolver.Net.Msil
                     return _instructions = new List<MsilInstruction>();
                 
                 var disassembler = new MsilDisassembler(_msilReadingContext.Reader, this);
-                _instructions = disassembler.Disassemble();
-                return _instructions;
+                var instructions = disassembler.Disassemble();
+                return _instructions = instructions;
             }
         }
 
@@ -168,12 +168,12 @@ namespace AsmResolver.Net.Msil
             {
                 if (_handlers != null)
                     return _handlers;
-                _handlers = new List<ExceptionHandler>();
+                var handlers = new List<ExceptionHandler>();
 
                 if (_sectionReadingContext != null)
-                    _handlers.AddRange(ReadExceptionHandlers());
+                    handlers.AddRange(ReadExceptionHandlers());
 
-                return _handlers;
+                return _handlers = handlers;
             }
         }
 
@@ -334,6 +334,8 @@ namespace AsmResolver.Net.Msil
 
         ParameterSignature IOperandResolver.ResolveParameter(int index)
         {
+            if (Method.Signature.Attributes.HasFlag(MethodSignatureAttributes.HasThis))
+                index--;
             return Method.Signature.Parameters[index];
         }
     }

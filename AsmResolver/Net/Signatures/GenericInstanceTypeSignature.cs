@@ -13,19 +13,29 @@ namespace AsmResolver.Net.Signatures
         {
             var tableStream = header.GetStream<TableStream>();
 
+            if (!reader.CanRead(sizeof (byte)))
+                return null;
+
             var elementType = (ElementType)reader.ReadByte();
 
-            var type =
-                (ITypeDefOrRef)
-                    tableStream.ResolveMember(
-                        tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(reader.ReadCompressedUInt32()));
+            uint codedIndex;
+            if (!reader.TryReadCompressedUInt32(out codedIndex))
+                return null;
 
-            var signature = new GenericInstanceTypeSignature(type)
+            MetadataMember type;
+            if (!tableStream.TryResolveMember(
+                tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(codedIndex), out type))
+                return null;
+
+            var signature = new GenericInstanceTypeSignature(type as ITypeDefOrRef)
             {
                 IsValueType = elementType == ElementType.ValueType
             };
 
-            var count = reader.ReadCompressedUInt32();
+            uint count;
+            if (!reader.TryReadCompressedUInt32(out count))
+                return signature;
+
             for (int i = 0; i < count; i++)
                 signature.GenericArguments.Add(TypeSignature.FromReader(header, reader));
 

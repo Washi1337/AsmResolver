@@ -35,10 +35,25 @@ namespace AsmResolver.Net
             return reader.ReadBytes((int)reader.Length);
         }
 
+        public bool TryCreateBlobReader(uint offset, out IBinaryStreamReader reader)
+        {
+            try
+            {
+                reader = CreateBlobReader(offset);
+                return true;
+            }
+            catch
+            {
+                reader = null;
+                return false;
+            }
+        }
+
         public IBinaryStreamReader CreateBlobReader(uint offset)
         {
             var reader = _reader.CreateSubReader(_reader.StartPosition + offset);
-            var length = reader.ReadCompressedUInt32();
+            uint length;
+            reader.TryReadCompressedUInt32(out length);
             return reader.CreateSubReader(reader.Position, (int)length);
         }
 

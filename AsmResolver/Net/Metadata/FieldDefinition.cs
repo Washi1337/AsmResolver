@@ -61,6 +61,7 @@ namespace AsmResolver.Net.Metadata
         private TypeDefinition _declaringType;
         private Constant _constant;
         private FieldMarshal _marshal;
+        private FieldRva _rva;
 
         public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.Field), new MetadataRow<ushort, uint, uint>())
@@ -158,6 +159,19 @@ namespace AsmResolver.Net.Metadata
                 return _marshal = table.FirstOrDefault(x => x.Parent == this);
             }
             set { _marshal = value; }
+        }
+
+        public FieldRva FieldRva
+        {
+            get
+            {
+                if (_rva != null || Header == null)
+                    return _rva;
+
+                var table = Header.GetStream<TableStream>().GetTable<FieldRva>();
+                return _rva = table.FirstOrDefault(x => x.Field == this);
+            }
+            set { _rva = value; }
         }
         
         public CustomAttributeCollection CustomAttributes

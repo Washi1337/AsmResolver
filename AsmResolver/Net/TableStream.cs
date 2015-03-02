@@ -251,6 +251,12 @@ namespace AsmResolver.Net
             return (MetadataTable<TElement>)_tables.First(x => x is MetadataTable<TElement>);
         }
 
+        public bool TryResolveMember(MetadataToken token, out MetadataMember member)
+        {
+            var table = GetTable(token.TokenType);
+            return table.TryGetMember((int)(token.Rid - 1), out member);
+        }
+
         public MetadataMember ResolveMember(MetadataToken token)
         {
             var table = GetTable(token.TokenType);

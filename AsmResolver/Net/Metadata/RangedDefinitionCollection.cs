@@ -46,6 +46,9 @@ namespace AsmResolver.Net.Metadata
 
         protected override void Initialize()
         {
+            if (_start == 0 || _start > _table.Count)
+                return;
+
             for (int i = _start; i < _next; i++)
             {
                 Items.Add(_table[i - 1]);

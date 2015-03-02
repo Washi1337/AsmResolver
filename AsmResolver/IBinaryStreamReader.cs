@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
@@ -45,6 +46,11 @@ namespace AsmResolver
 
     public static class BinaryStreamReaderExtensions
     {
+        public static bool CanRead(this IBinaryStreamReader reader, int size)
+        {
+            return (reader.Position - reader.StartPosition) + size <= reader.Length;
+        }
+
         public static IBinaryStreamReader CreateSubReader(this IBinaryStreamReader reader, long address)
         {
             return reader.CreateSubReader(address, (int)(reader.Length - (address - reader.StartPosition)));
@@ -71,7 +77,9 @@ namespace AsmResolver
             if (reader.ReadByte() == 0xFF)
                 return null;
             reader.Position--;
-            var length = reader.ReadCompressedUInt32();
+            uint length;
+            if (!reader.TryReadCompressedUInt32(out length))
+                return null;
             return Encoding.UTF8.GetString(reader.ReadBytes((int)length));
         }
 
@@ -91,13 +99,24 @@ namespace AsmResolver
                           reader.ReadByte());
         }
 
-        public static int ReadCompressedInt32(this IBinaryStreamReader reader)
+        public static bool TryReadCompressedUInt32(this IBinaryStreamReader reader, out uint value)
         {
-            unchecked
+            value = 0;
+            if (!reader.CanRead(sizeof(byte)))
+                return false;
+
+            var firstByte = reader.ReadByte();
+            reader.Position--;
+
+            if (((firstByte & 0x80) == 0 && reader.CanRead(sizeof(byte))) ||
+                ((firstByte & 0x40) == 0 && reader.CanRead(sizeof(ushort))) ||
+                (reader.CanRead(sizeof(uint))))
             {
-                var value = (int)ReadCompressedUInt32(reader);
-                return (((value & 1) != 0) ? -(value >> 1) : (value >> 1));
+                value = ReadCompressedUInt32(reader);
+                return true;
             }
+
+            return false;
         }
 
         public static uint ReadIndex(this IBinaryStreamReader reader, IndexSize size)

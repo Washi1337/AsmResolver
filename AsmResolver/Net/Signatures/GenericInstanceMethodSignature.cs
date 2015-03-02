@@ -10,15 +10,16 @@ namespace AsmResolver.Net.Signatures
     {
         public static GenericInstanceMethodSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            if (reader.ReadByte() != 0x0A)
+            if (!reader.CanRead(sizeof(byte)) || reader.ReadByte() != 0x0A)
                 throw new ArgumentException("Signature does not refer to a valid generic instance method signature.");
 
             var signature = new GenericInstanceMethodSignature();
-            var count = reader.ReadCompressedUInt32();
+            uint count;
+            if (!reader.TryReadCompressedUInt32(out count))
+                return signature;
+
             for (int i = 0; i < count; i++)
-            {
                 signature.GenericArguments.Add(TypeSignature.FromReader(header, reader));
-            }
 
             return signature;
         }

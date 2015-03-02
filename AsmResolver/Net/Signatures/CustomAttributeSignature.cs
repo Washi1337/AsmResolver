@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Signatures
     {
         public static CustomAttributeSignature FromReader(CustomAttribute parent, IBinaryStreamReader reader)
         {
-            if (reader.ReadUInt16() != 0x0001)
+            if (!reader.CanRead(sizeof (ushort)) || reader.ReadUInt16() != 0x0001)
                 throw new ArgumentException("Signature doesn't refer to a valid custom attribute signature.");
 
             var signature = new CustomAttributeSignature();
@@ -29,7 +29,7 @@ namespace AsmResolver.Net.Signatures
                 }
             }
 
-            var namedElementCount = reader.ReadUInt16();
+            var namedElementCount = reader.CanRead(sizeof (ushort)) ? reader.ReadUInt16() : 0;
             for (uint i = 0; i < namedElementCount; i++)
             {
                 signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Header, reader));

@@ -31,7 +31,8 @@ namespace AsmResolver.Net.Metadata
                 {
                     foreach (var item in attributeTable)
                     {
-                        if (GetOwner(item).MetadataToken == _owner.MetadataToken)
+                        var owner = GetOwner(item);
+                        if (owner != null && owner.MetadataToken == _owner.MetadataToken)
                             Items.Add(item);
                     }
                 }

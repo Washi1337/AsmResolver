@@ -39,6 +39,17 @@ namespace AsmResolver.Net.Metadata
 
         public abstract uint GetElementByteCount();
 
+        public bool TryGetMember(int index, out MetadataMember member)
+        {
+            if (index >= 0 && index < Count)
+            {
+                member = GetMember(index);
+                return true;
+            }
+            member = null;
+            return false;
+        }
+
         public abstract MetadataMember GetMember(int index);
 
         internal abstract void SetMemberCount(uint capacity);
@@ -134,6 +145,17 @@ namespace AsmResolver.Net.Metadata
                 item.Header = null;
                 return true;
             }
+            return false;
+        }
+
+        public bool TryGetMember(int index, out TMember member)
+        {
+            if (index >= 0 && index < Count)
+            {
+                member = this[index];
+                return true;
+            }
+            member = null;
             return false;
         }
 

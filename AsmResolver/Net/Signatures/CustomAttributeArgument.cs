@@ -22,7 +22,7 @@ namespace AsmResolver.Net.Signatures
             {
                 var arrayType = ((SzArrayTypeSignature)typeSignature).BaseType;
 
-                var elementCount = reader.ReadUInt32();
+                var elementCount = reader.CanRead(sizeof (uint)) ? reader.ReadUInt32() : uint.MaxValue;
                 if (elementCount != uint.MaxValue)
                 {
                     for (uint i = 0; i < elementCount; i++)

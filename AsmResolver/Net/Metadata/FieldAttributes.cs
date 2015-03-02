@@ -80,6 +80,6 @@ namespace AsmResolver.Net.Metadata
         /// <summary>
         /// Specifies the field has got an RVA.
         /// </summary>
-        HasFieldRVA = 0x0100,
+        HasFieldRva = 0x0100,
     }
 }

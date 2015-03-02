@@ -75,7 +75,11 @@ namespace AsmResolver.Net.Metadata
 
             var resolutionScopeToken = tableStream.GetIndexEncoder(CodedIndex.ResolutionScope).DecodeIndex(row.Column1);
             if (resolutionScopeToken.Rid != 0)
-                ResolutionScope = (IResolutionScope)tableStream.ResolveMember(resolutionScopeToken);
+            {
+                MetadataMember resolutionScope;
+                if (tableStream.TryResolveMember(resolutionScopeToken, out resolutionScope))
+                    ResolutionScope = resolutionScope as IResolutionScope;
+            }
 
             Name = stringStream.GetStringByOffset(row.Column2);
             Namespace = stringStream.GetStringByOffset(row.Column3);
@@ -86,7 +90,7 @@ namespace AsmResolver.Net.Metadata
             get { return ResolutionScope as ITypeDefOrRef; }
         }
 
-        ITypeDescriptor ITypeDescriptor.DeclaringType
+        ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor
         {
             get { return DeclaringType; }
         }
@@ -111,7 +115,12 @@ namespace AsmResolver.Net.Metadata
 
         public virtual string FullName
         {
-            get { return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name; }
+            get
+            {
+                if (DeclaringType != null)
+                    return DeclaringType.FullName + '+' + Name;
+                return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
+            }
         }
 
         public bool IsValueType

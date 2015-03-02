@@ -10,7 +10,10 @@ namespace AsmResolver.Net.Signatures
     {
         public static MemberSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            var flag = reader.ReadByte();
+            if (!reader.CanRead(sizeof(byte)))
+                throw new ArgumentException("Signature doesn't refer to a valid member signature.");
+
+            var flag =  reader.ReadByte();
             reader.Position--;
             if (flag == 0x6)
                 return FieldSignature.FromReader(header, reader);

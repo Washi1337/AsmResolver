@@ -12,7 +12,10 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new CustomAttributeNamedArgument
             {
-                ArgumentMemberType = (CustomAttributeArgumentMemberType)reader.ReadByte(),
+                ArgumentMemberType =
+                    (reader.CanRead(sizeof (byte))
+                        ? (CustomAttributeArgumentMemberType)reader.ReadByte()
+                        : CustomAttributeArgumentMemberType.Field),
                 ArgumentType = TypeSignature.FromReader(header, reader),
                 MemberName = reader.ReadSerString(),
             };

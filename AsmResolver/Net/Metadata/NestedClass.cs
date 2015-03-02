@@ -57,8 +57,12 @@ namespace AsmResolver.Net.Metadata
         {
             var definitionTable = header.GetStream<TableStream>().GetTable<TypeDefinition>();
 
-            Class = definitionTable[(int)(row.Column1 - 1)];
-            EnclosingClass = definitionTable[(int)(row.Column2 - 1)];
+            TypeDefinition type;
+            if (definitionTable.TryGetMember((int)(row.Column1 - 1), out type))
+                Class = type;
+
+            if (definitionTable.TryGetMember((int)(row.Column2 - 1), out type))
+                EnclosingClass = type;
         }
 
         public TypeDefinition Class

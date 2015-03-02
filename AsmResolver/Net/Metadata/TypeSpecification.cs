@@ -65,7 +65,7 @@ namespace AsmResolver.Net.Metadata
             get { return Signature.Namespace; }
         }
 
-        ITypeDescriptor ITypeDescriptor.DeclaringType
+        ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor
         {
             get { return DeclaringType; }
         }
@@ -77,7 +77,12 @@ namespace AsmResolver.Net.Metadata
 
         public virtual string FullName
         {
-            get { return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name; }
+            get
+            {
+                if (DeclaringType != null)
+                    return DeclaringType.FullName + '+' + Name;
+                return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
+            }
         }
 
         public bool IsValueType

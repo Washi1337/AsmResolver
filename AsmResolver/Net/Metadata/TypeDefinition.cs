@@ -75,6 +75,7 @@ namespace AsmResolver.Net.Metadata
         private EventMap _eventMap;
         private NestedClassCollection _nestedClasses;
         private GenericParameterCollection _genericParameters;
+        private ClassLayout _classLayout;
 
         public TypeDefinition(string @namespace, string name, ITypeDefOrRef baseType)
             : base(null, new MetadataToken(MetadataTokenType.TypeDef), new MetadataRow<uint, uint, uint, uint, uint, uint>())
@@ -96,7 +97,11 @@ namespace AsmResolver.Net.Metadata
 
             var baseTypeToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column4);
             if (baseTypeToken.Rid != 0)
-                BaseType = (ITypeDefOrRef)tableStream.ResolveMember(baseTypeToken);
+            {
+                MetadataMember baseType;
+                if (tableStream.TryResolveMember(baseTypeToken, out baseType))
+                    BaseType = baseType as ITypeDefOrRef;
+            }
         }
 
         public TypeAttributes Attributes
@@ -104,7 +109,7 @@ namespace AsmResolver.Net.Metadata
             get;
             set;
         }
-        
+
         public string Name
         {
             get;
@@ -187,7 +192,12 @@ namespace AsmResolver.Net.Metadata
 
         public virtual string FullName
         {
-            get { return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name; }
+            get
+            {
+                if (DeclaringType != null)
+                    return DeclaringType.FullName + '+' + Name;
+                return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
+            }
         }
 
         public TypeDefinition DeclaringType
@@ -209,7 +219,7 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
-        ITypeDescriptor ITypeDescriptor.DeclaringType
+        ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor
         {
             get { return DeclaringType; }
         }
@@ -237,6 +247,18 @@ namespace AsmResolver.Net.Metadata
         public GenericParameterCollection GenericParameters
         {
             get { return _genericParameters ?? (_genericParameters = new GenericParameterCollection(this)); }
+        }
+
+        public ClassLayout ClassLayout
+        {
+            get
+            {
+                if (_classLayout != null || Header == null)
+                    return _classLayout;
+                var table = Header.GetStream<TableStream>().GetTable<ClassLayout>();
+                return _classLayout = table.FirstOrDefault(x => x.Parent == this);
+            }
+            set { _classLayout = value; }
         }
 
         public bool IsNotPublic

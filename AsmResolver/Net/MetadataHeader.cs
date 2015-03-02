@@ -127,13 +127,15 @@ namespace AsmResolver.Net
 
         public MetadataStream GetStream(string name)
         {
-            return StreamHeaders.Single(x => x.Name == name).Stream;
+            var header = StreamHeaders.FirstOrDefault(x => x.Name == name);
+            return header != null ? header.Stream : null;
         }
 
         public TStream GetStream<TStream>()
             where TStream : MetadataStream
         {
-            return (TStream)StreamHeaders.Single(x => x.Stream is TStream).Stream;
+            var header = StreamHeaders.FirstOrDefault(x => x.Stream is TStream);
+            return header != null ? (TStream)header.Stream : null;
         }
 
         public override uint GetPhysicalLength()

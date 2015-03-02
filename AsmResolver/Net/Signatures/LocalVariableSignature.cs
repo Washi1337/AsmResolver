@@ -11,8 +11,7 @@ namespace AsmResolver.Net.Signatures
     {
         public static LocalVariableSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            var localSig = reader.ReadByte();
-            if (localSig != 0x7)
+            if (!reader.CanRead(sizeof(byte)) || reader.ReadByte() != 0x7)
                 throw new ArgumentException("Signature doesn't refer to a valid local variable signature.");
 
             var count = reader.ReadCompressedUInt32();

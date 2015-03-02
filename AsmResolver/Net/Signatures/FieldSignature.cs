@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Signatures
     {
         public new static FieldSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            if (reader.ReadByte() != 0x06)
+            if (!reader.CanRead(sizeof(byte)) || reader.ReadByte() != 0x06)
                 throw new ArgumentException("Signature doesn't refer to a valid field signature.");
             return new FieldSignature
             {
