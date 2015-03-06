@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Services;
 using System.Text;
@@ -151,6 +153,11 @@ namespace AsmResolver.Tests
             var inputStream = new MemoryStreamReader(File.ReadAllBytes(tempPath));
             return WindowsAssembly.FromReader(inputStream,
                 new ReadingParameters());
+        }
+
+        public static void ValidateByteArrays(IEnumerable<byte> array1, IList<byte> array2)
+        {
+            Assert.IsTrue(!array1.Where((t, i) => t != array2[i]).Any());
         }
     }
 }

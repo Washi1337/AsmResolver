@@ -25,7 +25,6 @@ namespace AsmResolver.Net
         }
 
         ITypeDescriptor GetElementType();
-
     }
 
 }

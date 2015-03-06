@@ -16,7 +16,7 @@ namespace AsmResolver.Net.Builder
 
         public TBuffer GetStreamBuffer<TBuffer>() where TBuffer : FileSegment
         {
-            return Builder.TextBuilder.MetadataBuilder.GetStreamBuffer<TBuffer>();
+            return Builder.TextBuilder.Metadata.GetStreamBuffer<TBuffer>();
         }
     }
 

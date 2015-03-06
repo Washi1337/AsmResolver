@@ -52,6 +52,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CustomAttributeTests.cs" />
+    <Compile Include="FieldRvaTests.cs" />
+    <Compile Include="ResourcesTests.cs" />
     <Compile Include="TypeSignatureTests.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

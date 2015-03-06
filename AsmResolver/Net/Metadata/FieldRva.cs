@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AsmResolver.Net.Builder;
+using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Metadata
 {
@@ -50,6 +51,15 @@ namespace AsmResolver.Net.Metadata
 
     public class FieldRva : MetadataMember<MetadataRow<uint, uint>>
     {
+        private byte[] _data;
+
+        public FieldRva(FieldDefinition field, byte[] data)
+            : base(null, new MetadataToken(MetadataTokenType.FieldRva), new MetadataRow<uint, uint>())
+        {
+            Field = field;
+            _data = data;
+        }
+
         internal FieldRva(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
@@ -67,6 +77,65 @@ namespace AsmResolver.Net.Metadata
         {
             get;
             set;
+        }
+
+        public byte[] Data
+        {
+            get
+            {
+                if (_data != null ||
+                    Header == null || 
+                    Header.NetDirectory == null ||
+                    Header.NetDirectory.Assembly == null || 
+                    Header.NetDirectory.Assembly.ReadingContext == null)
+                    return _data;
+
+                var assembly = Header.NetDirectory.Assembly;
+                var reader = assembly.ReadingContext.Reader.CreateSubReader(assembly.RvaToFileOffset(Rva), GetDataSize());
+                return _data = reader.ReadBytes((int)reader.Length);
+            }
+            set { _data = value; }
+        }
+
+        public int GetDataSize()
+        {
+            var signature = Field.Signature;
+            if (signature == null || signature.FieldType == null)
+                return 0;
+
+            var corlibType = signature.FieldType as MsCorLibTypeSignature;
+            if (corlibType != null)
+            {
+                switch (corlibType.ElementType)
+                {
+                    case ElementType.Boolean:
+                    case ElementType.I1:
+                    case ElementType.U1:
+                        return sizeof (byte);
+                    case ElementType.I2:
+                    case ElementType.U2:
+                        return sizeof (ushort);
+                    case ElementType.I4:
+                    case ElementType.U4:
+                        return sizeof (uint);
+                    case ElementType.I8:
+                    case ElementType.U8:
+                        return sizeof (ulong);
+                    case ElementType.I:
+                    case ElementType.U:
+                        // TODO;
+                    default:
+                        return 0;
+                }
+            }
+
+            var typeDefOrRef = signature.FieldType as TypeDefOrRefSignature;
+            if (typeDefOrRef == null)
+                return 0;
+            var definition = typeDefOrRef.Type as TypeDefinition;
+            if (definition == null || definition.ClassLayout == null)
+                return 0;
+            return (int)definition.ClassLayout.ClassSize;
         }
     }
 }

@@ -52,9 +52,12 @@
     <Compile Include="Net\AssemblyResolutionEventArgs.cs" />
     <Compile Include="Net\AssemblyResolutionException.cs" />
     <Compile Include="Net\Builder\MetadataBuilder.cs" />
+    <Compile Include="Net\Builder\MethodBodyTableBuilder.cs" />
     <Compile Include="Net\Builder\NetBuildingContext.cs" />
+    <Compile Include="Net\Builder\NetDataTableBuilder.cs" />
     <Compile Include="Net\Builder\NetTextBuilder.cs" />
-    <Compile Include="Net\Builder\StartupCodeSegment.cs" />
+    <Compile Include="Net\Builder\NetResourceDirectoryBuilder.cs" />
+    <Compile Include="Net\Builder\StartupCodeSegmentBuilder.cs" />
     <Compile Include="Builder\ResourceDirectoryBuilder.cs" />
     <Compile Include="Builder\SectionBuilder.cs" />
     <Compile Include="Net\Builder\NetAssemblyBuilder.cs" />

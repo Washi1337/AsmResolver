@@ -10,7 +10,7 @@ namespace AsmResolver.Builder
 {
     public class ImageImportDirectoryBuilder : FileSegmentBuilder
     {
-        private sealed class NameTableBuilder : FileSegmentBuilder
+        public sealed class NameTableBuilder : FileSegmentBuilder
         {
             private readonly Dictionary<ImageModuleImport, FileSegment> _moduleNameSegments = new Dictionary<ImageModuleImport, FileSegment>();
 
@@ -26,7 +26,7 @@ namespace AsmResolver.Builder
             }
         }
 
-        private sealed class LookupTablesBuilder : FileSegmentBuilder
+        public sealed class LookupTablesBuilder : FileSegmentBuilder
         {
             private readonly Dictionary<ImageModuleImport, LookupTableBuilder> _lookupTableSegments = new Dictionary<ImageModuleImport, LookupTableBuilder>();
             private readonly IOffsetConverter _offsetConverter;
@@ -58,7 +58,7 @@ namespace AsmResolver.Builder
             }
         }
 
-        private sealed class LookupTableBuilder : FileSegmentBuilder
+        public sealed class LookupTableBuilder : FileSegmentBuilder
         {
             private readonly Dictionary<ImageSymbolImport, FileSegment> _lookupSegments = new Dictionary<ImageSymbolImport, FileSegment>();
             private readonly IOffsetConverter _offsetConverter;
@@ -134,11 +134,6 @@ namespace AsmResolver.Builder
                 AppendModuleImport(moduleImport);
             _entryTableBuilder.Segments.Add(new ImageModuleImport());
             base.Build(context);
-        }
-
-        public FileSegmentBuilder GetImportAddressTabeBuilder()
-        {
-            return _addressTablesBuilder;
         }
 
         private void AppendModuleImport(ImageModuleImport moduleImport)

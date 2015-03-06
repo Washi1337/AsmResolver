@@ -55,7 +55,6 @@ namespace AsmResolver.Net.Builder
             foreach (var streamHeader in _header.StreamHeaders)
                 _streamBuilder.AddStream(streamHeader.Stream);
 
-            AppendResourceData(buildingContext.Builder.TextBuilder);
             UpdateTableStreamHeader();
             UpdateMetaDataRows(buildingContext);
 
@@ -72,23 +71,11 @@ namespace AsmResolver.Net.Builder
         {
             return _streamBuilder.GetBuffer<TBuffer>();
         }
-
-        private void AppendResourceData(NetTextBuilder textBuilder)
-        {
-            foreach (var resource in _header.GetStream<TableStream>().GetTable<ManifestResource>())
-            {
-                if (resource.IsEmbedded)
-                {
-                    resource.Offset = textBuilder.AppendResourceData(resource.Data);
-                }
-            }
-        }
-
+        
         public override void UpdateReferences(BuildingContext context)
         {
             base.UpdateReferences(context);
 
-            UpdateMethodBodyAddresses();
             UpdateStreamHeaders();
             UpdateTableStreamHeader();
         }
@@ -98,20 +85,7 @@ namespace AsmResolver.Net.Builder
             var tableStream = _header.GetStream<TableStream>();
             tableStream.ValidBitVector = tableStream.ComputeValidBitVector();
         }
-
-        private void UpdateMethodBodyAddresses()
-        {
-            foreach (var method in _header.GetStream<TableStream>().GetTable<MethodDefinition>())
-            {
-                if (method.MethodBody != null)
-                {
-                    method.Rva =
-                        method.MetadataRow.Column1 =
-                            (uint)_header.NetDirectory.Assembly.FileOffsetToRva(method.MethodBody.StartOffset);
-                }
-            }
-        }
-
+        
         private void UpdateStreamHeaders()
         {
             foreach (var stream in _streamBuilder.GetStreams())

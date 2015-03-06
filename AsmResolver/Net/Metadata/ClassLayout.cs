@@ -52,6 +52,14 @@ namespace AsmResolver.Net.Metadata
 
     public class ClassLayout : MetadataMember<MetadataRow<ushort,uint,uint>>
     {
+        public ClassLayout(TypeDefinition parent, uint classSize, ushort packingSize)
+            : base(null, new MetadataToken(MetadataTokenType.ClassLayout), new MetadataRow<ushort, uint, uint>())
+        {
+            Parent = parent;
+            ClassSize = classSize;
+            PackingSize = packingSize;
+        }
+
         public ClassLayout(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint> row)
             : base(header, token, row)
         {

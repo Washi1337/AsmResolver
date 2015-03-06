@@ -25,6 +25,18 @@ namespace AsmResolver.Builder
             protected set;
         }
 
+        public uint GetSegmentRelativeOffset(FileSegment segment)
+        {
+            uint offset = 0;
+            foreach (var existingSegment in Segments)
+            {
+                if (segment == existingSegment)
+                    return offset;
+                offset += existingSegment.GetPhysicalLength();
+            }
+            return offset;
+        }
+
         public virtual void Build(BuildingContext context)
         {
             foreach (var builder in Segments.OfType<FileSegmentBuilder>())
