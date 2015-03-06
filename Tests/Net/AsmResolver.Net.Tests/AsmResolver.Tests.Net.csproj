@@ -52,6 +52,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CustomAttributeTests.cs" />
+    <Compile Include="FieldMarshalTests.cs" />
     <Compile Include="FieldRvaTests.cs" />
     <Compile Include="ResourcesTests.cs" />
     <Compile Include="TypeSignatureTests.cs" />
@@ -71,10 +72,6 @@
     <ProjectReference Include="..\..\..\AsmResolver\AsmResolver.csproj">
       <Project>{228B5994-1035-4EB0-A095-8D85B6EE1146}</Project>
       <Name>AsmResolver</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Dummies\EmptyMsilConsoleApplication\EmptyMsilConsoleApplication.csproj">
-      <Project>{f4b48ffd-d8e6-4426-9a79-90f6a2fb4ec1}</Project>
-      <Name>EmptyMsilConsoleApplication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

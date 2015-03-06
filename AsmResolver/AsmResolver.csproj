@@ -105,6 +105,14 @@
     <Compile Include="Net\Metadata\MethodSemantics.cs" />
     <Compile Include="Net\Metadata\ReferenceImporter.cs" />
     <Compile Include="Net\NetAssemblyFactory.cs" />
+    <Compile Include="Net\Signatures\ArrayMarshalDescriptor.cs" />
+    <Compile Include="Net\Signatures\CustomMarshalDescriptor.cs" />
+    <Compile Include="Net\Signatures\SafeArrayMarshalDescriptor.cs" />
+    <Compile Include="Net\Signatures\VariantType.cs" />
+    <Compile Include="Net\Signatures\FixedArrayMarshalDescriptor.cs" />
+    <Compile Include="Net\Signatures\MarshalDescriptor.cs" />
+    <Compile Include="Net\Signatures\NativeType.cs" />
+    <Compile Include="Net\Signatures\SimpleMarshalDescriptor.cs" />
     <Compile Include="Net\Utilities.cs" />
     <Compile Include="Net\Msil\ExceptionHandlerType.cs" />
     <Compile Include="Net\Msil\IOperandBuilder.cs" />

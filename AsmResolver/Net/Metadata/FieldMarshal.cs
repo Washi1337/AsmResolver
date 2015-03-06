@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AsmResolver.Net.Builder;
+using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Metadata
 {
@@ -35,7 +36,7 @@ namespace AsmResolver.Net.Metadata
             var row = member.MetadataRow;
 
             row.Column1 = TableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal).EncodeToken(member.Parent.MetadataToken);
-            // TODO: native type
+            row.Column2 = context.GetStreamBuffer<BlobStreamBuffer>().GetBlobOffset(member.MarshalDescriptor);
         }
 
         protected override void WriteMember(WritingContext context, FieldMarshal member)
@@ -49,19 +50,33 @@ namespace AsmResolver.Net.Metadata
     }
     public class FieldMarshal : MetadataMember<MetadataRow<uint, uint>>
     {
+        public FieldMarshal(IHasFieldMarshal parent, MarshalDescriptor marshalDescriptor)
+            : base(null, new MetadataToken(MetadataTokenType.FieldMarshal), new MetadataRow<uint, uint>())
+        {
+            Parent = parent;
+            MarshalDescriptor = marshalDescriptor;
+        }
+
         internal FieldMarshal(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             var tableStream = header.GetStream<TableStream>();
-            
+            var blobStream = header.GetStream<BlobStream>();
+
             var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal).DecodeIndex(row.Column1);
             if (parentToken.Rid != 0)
                 Parent = (IHasFieldMarshal)tableStream.ResolveMember(parentToken);
 
-            // TODO: native type
+            MarshalDescriptor = MarshalDescriptor.FromReader(blobStream.CreateBlobReader(row.Column2));
         }
 
         public IHasFieldMarshal Parent
+        {
+            get;
+            set;
+        }
+
+        public MarshalDescriptor MarshalDescriptor
         {
             get;
             set;
