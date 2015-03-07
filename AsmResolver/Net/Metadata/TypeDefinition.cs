@@ -77,6 +77,11 @@ namespace AsmResolver.Net.Metadata
         private GenericParameterCollection _genericParameters;
         private ClassLayout _classLayout;
 
+        public TypeDefinition(string @namespace, string name)
+            : this(@namespace, name, null)
+        {
+        }
+
         public TypeDefinition(string @namespace, string name, ITypeDefOrRef baseType)
             : base(null, new MetadataToken(MetadataTokenType.TypeDef), new MetadataRow<uint, uint, uint, uint, uint, uint>())
         {

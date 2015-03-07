@@ -89,9 +89,17 @@ namespace AsmResolver
             if (value < 0x80)
                 writer.WriteByte((byte)value);
             else if (value < 0x4000)
-                writer.WriteUInt16((ushort)((value & 0x3FFF) | (1 << 15)));
+            {
+                writer.WriteByte((byte)(0x80 | value >> 8));
+                writer.WriteByte((byte)(value & 0xFF));
+            }
             else
-                writer.WriteUInt32((uint)((value & 0x1FFFFFFF) | (3 << 30)));
+            {
+                writer.WriteByte((byte)(0x80 | 0x40 | value >> 0x18));
+                writer.WriteByte((byte)(value >> 0x10 & 0xFF));
+                writer.WriteByte((byte)(value >> 0x08 & 0xFF));
+                writer.WriteByte((byte)(value & 0xFF));
+            }
         }
 
         public static void WriteIndex(this IBinaryStreamWriter writer, IndexSize indexSize, uint value)

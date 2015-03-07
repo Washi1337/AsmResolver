@@ -107,7 +107,9 @@
     <Compile Include="Net\NetAssemblyFactory.cs" />
     <Compile Include="Net\Signatures\ArrayMarshalDescriptor.cs" />
     <Compile Include="Net\Signatures\CustomMarshalDescriptor.cs" />
+    <Compile Include="Net\Signatures\PermissionSetSignature.cs" />
     <Compile Include="Net\Signatures\SafeArrayMarshalDescriptor.cs" />
+    <Compile Include="Net\Signatures\SecurityAttributeSignature.cs" />
     <Compile Include="Net\Signatures\VariantType.cs" />
     <Compile Include="Net\Signatures\FixedArrayMarshalDescriptor.cs" />
     <Compile Include="Net\Signatures\MarshalDescriptor.cs" />

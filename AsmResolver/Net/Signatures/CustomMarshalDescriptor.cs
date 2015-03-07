@@ -51,15 +51,11 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            var unmanagedTypeLength = Encoding.UTF8.GetByteCount(UnmanagedType);
-            var managedTypeLength = Encoding.UTF8.GetByteCount(ManagedType);
-            var cookieLength = Encoding.UTF8.GetByteCount(Cookie);
-
-            return (uint)(sizeof (byte) +
-                          sizeof(byte) + 38 +
-                          unmanagedTypeLength.GetCompressedSize() + unmanagedTypeLength +
-                          managedTypeLength.GetCompressedSize() + managedTypeLength +
-                          cookieLength.GetCompressedSize() + cookieLength);
+            return sizeof (byte) +
+                   sizeof(byte) + 38 +
+                   UnmanagedType.GetSerStringSize() +
+                   ManagedType.GetSerStringSize() +
+                   Cookie.GetSerStringSize();
 
         }
 

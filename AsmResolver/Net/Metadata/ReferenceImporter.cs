@@ -447,7 +447,6 @@ namespace AsmResolver.Net.Metadata
             if (moduleRef != null)
                 return ImportModule(moduleRef);
 
-            // TODO: support module imports.
             throw new NotSupportedException();
         }
 

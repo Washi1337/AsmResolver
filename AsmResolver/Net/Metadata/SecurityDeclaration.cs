@@ -57,7 +57,14 @@ namespace AsmResolver.Net.Metadata
     {
         private CustomAttributeCollection _customAttributes;
 
-        public SecurityDeclaration(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint> row)
+        public SecurityDeclaration(SecurityAction action, PermissionSetSignature permissionSet)
+            : base(null, new MetadataToken(MetadataTokenType.DeclSecurity), new MetadataRow<ushort, uint, uint>())
+        {
+            Action = action;
+            PermissionSet = permissionSet;
+        }
+
+        internal SecurityDeclaration(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint> row)
             : base(header, token, row)
         {
             Action = (SecurityAction)row.Column1;
@@ -67,7 +74,7 @@ namespace AsmResolver.Net.Metadata
             if (parentToken.Rid != 0)
                 Parent = (IHasSecurityAttribute)tableStream.ResolveMember(parentToken);
 
-            PermissionSet = DataBlobSignature.FromReader(header.GetStream<BlobStream>().CreateBlobReader(row.Column3));
+            PermissionSet = PermissionSetSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3));
         }
 
         public IHasSecurityAttribute Parent
@@ -82,7 +89,7 @@ namespace AsmResolver.Net.Metadata
             set;
         }
 
-        public DataBlobSignature PermissionSet
+        public PermissionSetSignature PermissionSet
         {
             get;
             set;

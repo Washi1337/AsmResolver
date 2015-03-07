@@ -16,11 +16,23 @@ namespace AsmResolver.Net.Signatures
                     (reader.CanRead(sizeof (byte))
                         ? (CustomAttributeArgumentMemberType)reader.ReadByte()
                         : CustomAttributeArgumentMemberType.Field),
-                ArgumentType = TypeSignature.FromReader(header, reader),
+                ArgumentType = TypeSignature.FromReader(header, reader), // TODO: FieldOrProp type.
                 MemberName = reader.ReadSerString(),
             };
             signature.Argument = CustomAttributeArgument.FromReader(header, signature.ArgumentType, reader);
             return signature;
+        }
+
+        public CustomAttributeNamedArgument()
+        {
+        }
+
+        public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType argumentMemberType, TypeSignature argumentType, string memberName, CustomAttributeArgument argument)
+        {
+            ArgumentMemberType = argumentMemberType;
+            ArgumentType = argumentType;
+            MemberName = memberName;
+            Argument = argument;
         }
 
         public CustomAttributeArgumentMemberType ArgumentMemberType

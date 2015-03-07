@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -55,6 +56,7 @@
     <Compile Include="FieldMarshalTests.cs" />
     <Compile Include="FieldRvaTests.cs" />
     <Compile Include="ResourcesTests.cs" />
+    <Compile Include="SecurityAttributeTests.cs" />
     <Compile Include="TypeSignatureTests.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

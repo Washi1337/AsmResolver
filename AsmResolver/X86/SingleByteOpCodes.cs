@@ -12,7 +12,6 @@ namespace AsmResolver.X86
     // ReSharper disable InconsistentNaming
     public static partial class X86OpCodes
     {
-        // TODO: Change to arrays.
         public static readonly X86OpCode[] SingleByteOpCodes = new X86OpCode[0x100];
 
         // TODO: remove None operand values.

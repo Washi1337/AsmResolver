@@ -35,7 +35,7 @@ namespace AsmResolver.Net.Metadata
         protected override void UpdateMember(NetBuildingContext context, FieldRva member)
         {
             var row = member.MetadataRow;
-            row.Column1 = member.Rva; // TODO: update RVA ?
+            row.Column1 = member.Rva;
             row.Column2 = member.Field.MetadataToken.Rid;
         }
 

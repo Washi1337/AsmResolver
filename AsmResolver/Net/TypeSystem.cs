@@ -13,7 +13,7 @@ namespace AsmResolver.Net
         private readonly MetadataHeader _header;
         private readonly bool _isMsCorLib;
         private MetadataTable<TypeDefinition> _typeDefinitions;
-        private readonly AssemblyReference _msCorLibReference;
+
         private MsCorLibTypeSignature _boolean;
         private MsCorLibTypeSignature _byte;
         private MsCorLibTypeSignature _char;
@@ -38,18 +38,24 @@ namespace AsmResolver.Net
         {
             _header = header;
             _isMsCorLib = isMsCorLib;
-            _msCorLibReference = new AssemblyReference("mscorlib", new Version(4, 0, 0, 0)); // TODO, set correct version.
+            MsCorLibReference = new AssemblyReference("mscorlib", new Version(4, 0, 0, 0)); // TODO, set correct version.
  
         }
 
         private MsCorLibTypeSignature CreateSignature(ElementType type, string name, bool isValueType)
         {
             if (!_isMsCorLib)
-                return new MsCorLibTypeSignature(new TypeReference(_msCorLibReference, "System", name), type, isValueType);
+                return new MsCorLibTypeSignature(new TypeReference(MsCorLibReference, "System", name), type, isValueType);
 
             if (_typeDefinitions == null)
                 _typeDefinitions = _header.GetStream<TableStream>().GetTable<TypeDefinition>();
             return new MsCorLibTypeSignature(_typeDefinitions.First(x => x.Name == name), type, isValueType);
+        }
+
+        public AssemblyReference MsCorLibReference
+        {
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Boolean

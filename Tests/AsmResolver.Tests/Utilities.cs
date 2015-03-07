@@ -11,6 +11,7 @@ using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Msil;
 using AsmResolver.Net.Signatures;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using CustomAttributeNamedArgument = AsmResolver.Net.Signatures.CustomAttributeNamedArgument;
 using MethodAttributes = AsmResolver.Net.Metadata.MethodAttributes;
 using MethodBody = AsmResolver.Net.Msil.MethodBody;
 
@@ -18,23 +19,17 @@ namespace AsmResolver.Tests
 {
     public static class Utilities
     {
-        public static void ValidateType(ITypeDefOrRef originalType, ITypeDefOrRef type)
+        public static void ValidateType(ITypeDescriptor originalType, ITypeDescriptor type)
         {
             Assert.AreEqual(originalType.Namespace, type.Namespace);
             Assert.AreEqual(originalType.Name, type.Name);
         }
 
-        public static void ValidateType(Type originalType, TypeSignature type)
+        public static void ValidateType(Type originalType, ITypeDescriptor type)
         {
             Assert.AreEqual(originalType.Namespace, type.Namespace);
             Assert.AreEqual(originalType.Name, type.Name);
             Assert.AreEqual(originalType.IsValueType, type.IsValueType);
-        }
-
-        public static void ValidateType(Type originalType, ITypeDefOrRef type)
-        {
-            Assert.AreEqual(originalType.Namespace, type.Namespace);
-            Assert.AreEqual(originalType.Name, type.Name);
         }
 
         public static void ValidateMethod(MethodInfo originalMethod, MemberReference newReference)
@@ -59,8 +54,8 @@ namespace AsmResolver.Tests
             var builder = new StringBuilder();
             foreach (var instruction in body.Instructions)
             {
-                builder.AppendLine(string.Format("{0}{1}", instruction.OpCode.Name,
-                    instruction.Operand != null ? " " + instruction.OperandToString() : string.Empty));
+                builder.AppendLine(String.Format("{0}{1}", instruction.OpCode.Name,
+                    instruction.Operand != null ? " " + instruction.OperandToString() : String.Empty));
             }
             Assert.IsTrue(code.TrimEnd() == builder.ToString().TrimEnd());
         }
@@ -105,6 +100,22 @@ namespace AsmResolver.Tests
                 Assert.AreEqual(originalSymbol.HintName.Hint, newSymbol.HintName.Hint);
                 Assert.AreEqual(originalSymbol.HintName.Name, newSymbol.HintName.Name); 
             }
+        }
+
+        public static void ValidateArgument(CustomAttributeArgument originalArgument, CustomAttributeArgument argument)
+        {
+            Assert.AreEqual(originalArgument.Elements.Count, argument.Elements.Count);
+            for (int i = 0; i < originalArgument.Elements.Count; i++)
+                Assert.AreEqual(originalArgument.Elements[i].Value, argument.Elements[i].Value);
+        }
+
+        public static void ValidateNamedArgument(CustomAttributeNamedArgument originalArgument,
+            CustomAttributeNamedArgument argument)
+        {
+            Assert.AreEqual(originalArgument.ArgumentMemberType, argument.ArgumentMemberType);
+            Assert.AreEqual(originalArgument.MemberName, argument.MemberName);
+            ValidateType(originalArgument.ArgumentType, argument.ArgumentType);
+            ValidateArgument(originalArgument.Argument, argument.Argument);
         }
 
         public static WindowsAssembly CreateTempNetAssembly()

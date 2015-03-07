@@ -42,7 +42,11 @@ namespace AsmResolver.Collections.Generic
 
         public virtual int Count
         {
-            get { return Items.Count; }
+            get
+            {
+                EnsureIsInitialized(); 
+                return Items.Count;
+            }
         }
 
         public virtual bool IsReadOnly
