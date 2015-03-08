@@ -57,6 +57,7 @@
     <Compile Include="FieldRvaTests.cs" />
     <Compile Include="ResourcesTests.cs" />
     <Compile Include="SecurityAttributeTests.cs" />
+    <Compile Include="TypeNameParserTests.cs" />
     <Compile Include="TypeSignatureTests.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

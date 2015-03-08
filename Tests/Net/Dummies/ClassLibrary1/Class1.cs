@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ClassLibrary1
 {
-    [TypeDescriptorPermission(SecurityAction.Assert)]
+    [TypeDescriptorPermission(SecurityAction.Assert, Flags = TypeDescriptorPermissionFlags.RestrictedRegistrationAccess)]
     public class Class1
     {
         public static void MyMethod()

@@ -16,7 +16,7 @@ namespace AsmResolver.Net.Signatures
                     (reader.CanRead(sizeof (byte))
                         ? (CustomAttributeArgumentMemberType)reader.ReadByte()
                         : CustomAttributeArgumentMemberType.Field),
-                ArgumentType = TypeSignature.FromReader(header, reader), // TODO: FieldOrProp type.
+                ArgumentType = TypeSignature.ReadFieldOrPropType(header, reader),
                 MemberName = reader.ReadSerString(),
             };
             signature.Argument = CustomAttributeArgument.FromReader(header, signature.ArgumentType, reader);
@@ -71,7 +71,7 @@ namespace AsmResolver.Net.Signatures
         {
             var writer = context.Writer;
             writer.WriteByte((byte)ArgumentMemberType);
-            ArgumentType.Write(context);
+            ArgumentType.Write(context); // TODO: write FieldOrPropType instead.
             writer.WriteSerString(MemberName);
             Argument.Write(context);
         }

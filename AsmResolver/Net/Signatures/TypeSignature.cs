@@ -16,8 +16,6 @@ namespace AsmResolver.Net.Signatures
             {
                 case ElementType.Array:
                     return ArrayTypeSignature.FromReader(header, reader);
-                case ElementType.Boolean:
-                    return header.TypeSystem.Boolean;
                 case ElementType.Boxed:
                     return BoxedTypeSignature.FromReader(header, reader);
                 case ElementType.ByRef:
@@ -26,8 +24,6 @@ namespace AsmResolver.Net.Signatures
                     break;
                 case ElementType.CModReqD:
                     break;
-                case ElementType.Char:
-                    return header.TypeSystem.Char;
                 case ElementType.Class:
                     return TypeDefOrRefSignature.FromReader(header, reader);
                 case ElementType.Enum:
@@ -36,16 +32,6 @@ namespace AsmResolver.Net.Signatures
                     break;
                 case ElementType.GenericInst:
                     return GenericInstanceTypeSignature.FromReader(header, reader);
-                case ElementType.I:
-                    return header.TypeSystem.IntPtr;
-                case ElementType.I1:
-                    return header.TypeSystem.SByte;
-                case ElementType.I2:
-                    return header.TypeSystem.Int16;
-                case ElementType.I4:
-                    return header.TypeSystem.Int32;
-                case ElementType.I8:
-                    return header.TypeSystem.Int64;
                 case ElementType.Internal:
                     break;
                 case ElementType.MVar:
@@ -54,36 +40,14 @@ namespace AsmResolver.Net.Signatures
                     break;
                 case ElementType.None:
                     break;
-                case ElementType.Object:
-                    return header.TypeSystem.Object;
                 case ElementType.Pinned:
                     break;
                 case ElementType.Ptr:
                     return PointerTypeSignature.FromReader(header, reader);
-                case ElementType.R4:
-                    return header.TypeSystem.Single;
-                case ElementType.R8:
-                    return header.TypeSystem.Double;
                 case ElementType.Sentinel:
                     break;
-                case ElementType.String:
-                    return header.TypeSystem.String;
                 case ElementType.SzArray:
                     return SzArrayTypeSignature.FromReader(header, reader);
-                case ElementType.Type:
-                    return header.TypeSystem.Type;
-                case ElementType.TypedByRef:
-                    return header.TypeSystem.TypedReference;
-                case ElementType.U:
-                    return header.TypeSystem.UIntPtr;
-                case ElementType.U1:
-                    return header.TypeSystem.Byte;
-                case ElementType.U2:
-                    return header.TypeSystem.UInt16;
-                case ElementType.U4:
-                    return header.TypeSystem.UInt64;
-                case ElementType.U8:
-                    return header.TypeSystem.UInt64;
                 case ElementType.ValueType:
                     var type = TypeDefOrRefSignature.FromReader(header, reader);
                     type.IsValueType = true;
@@ -92,8 +56,31 @@ namespace AsmResolver.Net.Signatures
                     return GenericParameterSignature.FromReader(header, reader, GenericParameterType.Type);
                 case ElementType.Void:
                     return header.TypeSystem.Void;
+                default:
+                    return MsCorLibTypeSignature.FromElementType(header, elementType);
             }
             throw new NotSupportedException();
+        }
+
+        public static TypeSignature ReadFieldOrPropType(MetadataHeader header, IBinaryStreamReader reader)
+        {
+            var elementType = (ElementType)reader.ReadByte();
+            switch (elementType)
+            {
+                case ElementType.Boxed:
+                    return header.TypeSystem.Object;
+                case ElementType.SzArray:
+                    return new SzArrayTypeSignature(ReadFieldOrPropType(header, reader));
+                case ElementType.Enum:
+                    return FromAssemblyQualifiedName(reader.ReadSerString());
+                default:
+                    return MsCorLibTypeSignature.FromElementType(header, elementType);
+            }
+        }
+
+        public static TypeSignature FromAssemblyQualifiedName(string assemblyQualifiedName)
+        {
+            return TypeNameParser.ParseType(assemblyQualifiedName);
         }
 
         public abstract ElementType ElementType

@@ -118,7 +118,7 @@ namespace AsmResolver.Net
             get { return _string ?? (_string = CreateSignature(ElementType.String, "String", false)); }
         }
 
-        public TypeSignature Type
+        public MsCorLibTypeSignature Type
         {
             get { return _type ?? (_type = CreateSignature(ElementType.Type, "Type", false)); }
         }

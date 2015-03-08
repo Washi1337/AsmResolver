@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Services;
+using System.Security.Cryptography;
 using System.Text;
 using AsmResolver.Builder;
 using AsmResolver.Net;
@@ -19,19 +20,33 @@ namespace AsmResolver.Tests
 {
     public static class Utilities
     {
-        public static void ValidateType(ITypeDescriptor originalType, ITypeDescriptor type)
+        public static void ValidateAssembly(IAssemblyDescriptor originalDescriptor, IAssemblyDescriptor descriptor)
         {
-            Assert.AreEqual(originalType.Namespace, type.Namespace);
-            Assert.AreEqual(originalType.Name, type.Name);
+            Assert.AreEqual(originalDescriptor.Name, descriptor.Name);
+            Assert.AreEqual(originalDescriptor.Culture, descriptor.Culture);
+            Assert.AreEqual(originalDescriptor.Version, descriptor.Version);
+            ValidateByteArrays(originalDescriptor.PublicKeyToken, descriptor.PublicKeyToken);
         }
 
-        public static void ValidateType(Type originalType, ITypeDescriptor type)
+        public static void ValidateType(ITypeDescriptor originalType, ITypeDescriptor type)
         {
-            Assert.AreEqual(originalType.Namespace, type.Namespace);
+            if (originalType.DeclaringTypeDescriptor != null)
+                ValidateType(originalType.DeclaringTypeDescriptor, type.DeclaringTypeDescriptor);
+            else 
+                Assert.AreEqual(originalType.Namespace, type.Namespace);
             Assert.AreEqual(originalType.Name, type.Name);
             Assert.AreEqual(originalType.IsValueType, type.IsValueType);
         }
 
+        public static void ValidateType(Type originalType, ITypeDescriptor type)
+        {
+            if (originalType.DeclaringType != null)
+                ValidateType(originalType.DeclaringType, type.DeclaringTypeDescriptor);
+            else
+                Assert.AreEqual(originalType.Namespace, type.Namespace);
+            Assert.AreEqual(originalType.Name, type.Name);
+        }
+        
         public static void ValidateMethod(MethodInfo originalMethod, MemberReference newReference)
         {
             Assert.AreEqual(originalMethod.Name, newReference.Name);
