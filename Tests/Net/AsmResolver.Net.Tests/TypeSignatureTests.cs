@@ -317,7 +317,7 @@ namespace AsmResolver.Tests.Net
             fieldTable.Add(field);
 
             // build and validate.
-            assembly = Utilities.RebuildNetAssembly(assembly, true);
+            assembly = Utilities.RebuildNetAssembly(assembly);
             fieldTable = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>().GetTable<FieldDefinition>();
             field = fieldTable.First(x => x.Name == FieldName);
 

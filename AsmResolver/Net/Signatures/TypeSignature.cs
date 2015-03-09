@@ -45,7 +45,7 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.Ptr:
                     return PointerTypeSignature.FromReader(header, reader);
                 case ElementType.Sentinel:
-                    break;
+                    return SentinelTypeSignature.FromReader(header, reader);
                 case ElementType.SzArray:
                     return SzArrayTypeSignature.FromReader(header, reader);
                 case ElementType.ValueType:
@@ -54,8 +54,6 @@ namespace AsmResolver.Net.Signatures
                     return type;
                 case ElementType.Var:
                     return GenericParameterSignature.FromReader(header, reader, GenericParameterType.Type);
-                case ElementType.Void:
-                    return header.TypeSystem.Void;
                 default:
                     return MsCorLibTypeSignature.FromElementType(header, elementType);
             }

@@ -46,7 +46,7 @@ namespace AsmResolver.Tests
                 Assert.AreEqual(originalType.Namespace, type.Namespace);
             Assert.AreEqual(originalType.Name, type.Name);
         }
-        
+
         public static void ValidateMethod(MethodInfo originalMethod, MemberReference newReference)
         {
             Assert.AreEqual(originalMethod.Name, newReference.Name);
@@ -61,7 +61,18 @@ namespace AsmResolver.Tests
             var originalParameters = originalMethod.GetParameters();
             for (int i = 0; i < originalParameters.Length; i++)
                 ValidateType(originalParameters[i].ParameterType, signature.Parameters[i].ParameterType);
+        }
 
+        public static void ValidateMethodSignature(MethodSignature originalSignature, MethodSignature newSignature)
+        {
+            ValidateType(originalSignature.ReturnType, newSignature.ReturnType);
+            Assert.AreEqual(originalSignature.Attributes, newSignature.Attributes);
+            Assert.AreEqual(originalSignature.Parameters.Count, newSignature.Parameters.Count);
+            for (int i = 0; i < originalSignature.Parameters.Count; i++)
+            {
+                ValidateType(originalSignature.Parameters[i].ParameterType,
+                    newSignature.Parameters[i].ParameterType);
+            }
         }
 
         public static void ValidateCode(string code, MethodBody body)
