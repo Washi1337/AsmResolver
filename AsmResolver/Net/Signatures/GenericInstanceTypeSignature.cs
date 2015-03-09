@@ -11,23 +11,14 @@ namespace AsmResolver.Net.Signatures
     {
         public new static GenericInstanceTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            var tableStream = header.GetStream<TableStream>();
-
             if (!reader.CanRead(sizeof (byte)))
                 return null;
 
             var elementType = (ElementType)reader.ReadByte();
+            
+            var type = ReadTypeDefOrRef(header, reader);
 
-            uint codedIndex;
-            if (!reader.TryReadCompressedUInt32(out codedIndex))
-                return null;
-
-            MetadataMember type;
-            if (!tableStream.TryResolveMember(
-                tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(codedIndex), out type))
-                return null;
-
-            var signature = new GenericInstanceTypeSignature(type as ITypeDefOrRef)
+            var signature = new GenericInstanceTypeSignature(type)
             {
                 IsValueType = elementType == ElementType.ValueType
             };
@@ -105,10 +96,7 @@ namespace AsmResolver.Net.Signatures
             writer.WriteByte((byte)ElementType);
             writer.WriteByte((byte)(IsValueType ? ElementType.ValueType : ElementType.Class));
 
-            var encoder =
-                context.Assembly.NetDirectory.MetadataHeader.GetStream<TableStream>()
-                    .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            writer.WriteCompressedUInt32(encoder.EncodeToken(GenericType.MetadataToken));
+            WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, GenericType);
 
             writer.WriteCompressedUInt32((uint)GenericArguments.Count);
             foreach (var argument in GenericArguments)

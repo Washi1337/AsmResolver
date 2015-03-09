@@ -120,7 +120,7 @@ namespace AsmResolver.Net
 
         public MsCorLibTypeSignature Type
         {
-            get { return _type ?? (_type = CreateSignature(ElementType.Type, "Type", false)); }
+            get { return _type ?? (_type = CreateSignature(ElementType.Type, "BaseType", false)); }
         }
 
         public MsCorLibTypeSignature TypedReference

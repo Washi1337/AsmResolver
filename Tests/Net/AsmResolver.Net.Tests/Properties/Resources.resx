@@ -62,10 +62,10 @@
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
+      <xsd:complexBaseType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
-            <xsd:complexType>
+            <xsd:complexBaseType>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
@@ -73,7 +73,7 @@
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
               <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
+            </xsd:complexBaseType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
@@ -102,7 +102,7 @@
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
-      </xsd:complexType>
+      </xsd:complexBaseType>
     </xsd:element>
   </xsd:schema>
   <resheader name="resmimetype">

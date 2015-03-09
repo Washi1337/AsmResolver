@@ -16,7 +16,7 @@ namespace ClassLibrary1
             Console.WriteLine("Lorem ipsum dolor sit amet.");
         }
 
-        public static int MyField = 3;
+        public static volatile int MyField = 3;
 
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = 8)]
         public static byte[] MarshalAsArrayField;

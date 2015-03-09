@@ -21,9 +21,9 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.ByRef:
                     return ByReferenceTypeSignature.FromReader(header, reader);
                 case ElementType.CModOpt:
-                    break;
+                    return OptionalModifierSignature.FromReader(header, reader);
                 case ElementType.CModReqD:
-                    break;
+                    return RequiredModifierSignature.FromReader(header, reader);
                 case ElementType.Class:
                     return TypeDefOrRefSignature.FromReader(header, reader);
                 case ElementType.Enum:
@@ -41,7 +41,7 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.None:
                     break;
                 case ElementType.Pinned:
-                    break;
+                    return PinnedTypeSignature.FromReader(header, reader);
                 case ElementType.Ptr:
                     return PointerTypeSignature.FromReader(header, reader);
                 case ElementType.Sentinel:
@@ -62,6 +62,11 @@ namespace AsmResolver.Net.Signatures
             throw new NotSupportedException();
         }
 
+        public static TypeSignature FromAssemblyQualifiedName(string assemblyQualifiedName)
+        {
+            return TypeNameParser.ParseType(assemblyQualifiedName);
+        }
+
         public static TypeSignature ReadFieldOrPropType(MetadataHeader header, IBinaryStreamReader reader)
         {
             var elementType = (ElementType)reader.ReadByte();
@@ -78,9 +83,27 @@ namespace AsmResolver.Net.Signatures
             }
         }
 
-        public static TypeSignature FromAssemblyQualifiedName(string assemblyQualifiedName)
+        protected static ITypeDefOrRef ReadTypeDefOrRef(MetadataHeader header, IBinaryStreamReader reader)
         {
-            return TypeNameParser.ParseType(assemblyQualifiedName);
+            var tableStream = header.GetStream<TableStream>();
+
+            uint codedIndex;
+            if (!reader.TryReadCompressedUInt32(out codedIndex))
+                return null;
+
+            MetadataMember type;
+            tableStream.TryResolveMember(tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .DecodeIndex(codedIndex), out type);
+            
+            return type as ITypeDefOrRef;
+        }
+
+        protected static void WriteTypeDefOrRef(MetadataHeader header, IBinaryStreamWriter writer, ITypeDefOrRef type)
+        {
+            var encoder =
+                header.GetStream<TableStream>()
+                    .GetIndexEncoder(CodedIndex.TypeDefOrRef);
+            writer.WriteCompressedUInt32(encoder.EncodeToken(type.MetadataToken));
         }
 
         public abstract ElementType ElementType

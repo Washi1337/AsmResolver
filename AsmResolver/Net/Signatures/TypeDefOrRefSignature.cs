@@ -11,13 +11,8 @@ namespace AsmResolver.Net.Signatures
     {
         public new static TypeDefOrRefSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            var tableStream = header.GetStream<TableStream>();
-            uint codedIndex;
-            if (!reader.TryReadCompressedUInt32(out codedIndex))
-                return null;
-
-            return new TypeDefOrRefSignature((ITypeDefOrRef)tableStream.ResolveMember(
-                tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(codedIndex)));
+            var type = ReadTypeDefOrRef(header, reader);
+            return type == null ? null : new TypeDefOrRefSignature(type);
         }
 
         public TypeDefOrRefSignature(ITypeDefOrRef type)
@@ -71,10 +66,7 @@ namespace AsmResolver.Net.Signatures
             var writer = context.Writer;
             writer.WriteByte((byte)ElementType);
 
-            var encoder =
-                context.Assembly.NetDirectory.MetadataHeader.GetStream<TableStream>()
-                    .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            writer.WriteCompressedUInt32(encoder.EncodeToken(Type.MetadataToken));
+            WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, Type);
 
         }
     }

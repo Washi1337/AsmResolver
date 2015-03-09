@@ -22,8 +22,8 @@ namespace AsmResolver.Net.Metadata
         // end layout mask
         // Use this mask to retrieve class semantics information.
         ClassSemanticsMask = 0x00000060,
-        Class = 0x00000000, // Type is a class.
-        Interface = 0x00000020, // Type is an interface.
+        Class = 0x00000000, // BaseType is a class.
+        Interface = 0x00000020, // BaseType is an interface.
         // end semantics mask
         // Special semantics in addition to class semantics.
         Abstract = 0x00000080, // Class is abstract
