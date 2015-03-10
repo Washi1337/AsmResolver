@@ -61,7 +61,7 @@ namespace AsmResolver.Net.Metadata
             writer.WriteIndex(TableStream.StringIndexSize, row.Column3);
             writer.WriteIndex(TableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).IndexSize, row.Column4);
             writer.WriteIndex(TableStream.GetTable<FieldDefinition>().IndexSize, row.Column5);
-            writer.WriteIndex(TableStream.GetTable<MethodDefinition>().IndexSize, row.Column5);
+            writer.WriteIndex(TableStream.GetTable<MethodDefinition>().IndexSize, row.Column6);
         }
     }
 

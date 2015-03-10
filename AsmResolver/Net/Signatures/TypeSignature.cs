@@ -26,20 +26,12 @@ namespace AsmResolver.Net.Signatures
                     return RequiredModifierSignature.FromReader(header, reader);
                 case ElementType.Class:
                     return TypeDefOrRefSignature.FromReader(header, reader);
-                case ElementType.Enum:
-                    break;
                 case ElementType.FnPtr:
                     break;
                 case ElementType.GenericInst:
                     return GenericInstanceTypeSignature.FromReader(header, reader);
-                case ElementType.Internal:
-                    break;
-                case ElementType.MVar:
-                    return GenericParameterSignature.FromReader(header, reader, GenericParameterType.Method);
-                case ElementType.Modifier:
-                    break;
-                case ElementType.None:
-                    break;
+               case ElementType.MVar:
+                     return GenericParameterSignature.FromReader(header, reader, GenericParameterType.Method);
                 case ElementType.Pinned:
                     return PinnedTypeSignature.FromReader(header, reader);
                 case ElementType.Ptr:
