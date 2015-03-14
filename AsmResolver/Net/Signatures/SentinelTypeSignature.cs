@@ -7,7 +7,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class SentinelTypeSignature : TypeSignature
+    public class SentinelTypeSignature : TypeSpecificationSignature
     {
         public new static SentinelTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
@@ -15,14 +15,8 @@ namespace AsmResolver.Net.Signatures
         }
 
         public SentinelTypeSignature(TypeSignature baseType)
+            : base(baseType)
         {
-            BaseType = baseType;
-        }
-
-        public TypeSignature BaseType
-        {
-            get;
-            set;
         }
 
         public override ElementType ElementType
@@ -30,31 +24,5 @@ namespace AsmResolver.Net.Signatures
             get { return ElementType.Sentinel; }
         }
 
-        public override string Name
-        {
-            get { return BaseType.Name; }
-        }
-
-        public override string Namespace
-        {
-            get { return BaseType.Namespace; }
-        }
-
-        public override IResolutionScope ResolutionScope
-        {
-            get { return BaseType.ResolutionScope; }
-        }
-
-        public override uint GetPhysicalLength()
-        {
-            return sizeof (byte)
-                   + BaseType.GetPhysicalLength();
-        }
-
-        public override void Write(WritingContext context)
-        {
-            context.Writer.WriteByte((byte)ElementType);
-            BaseType.Write(context);
-        }
     }
 }

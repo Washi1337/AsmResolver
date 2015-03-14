@@ -7,7 +7,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class OptionalModifierSignature : TypeSignature
+    public class OptionalModifierSignature : TypeSpecificationSignature
     {
         public new static OptionalModifierSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
@@ -16,9 +16,9 @@ namespace AsmResolver.Net.Signatures
         }
 
         public OptionalModifierSignature(ITypeDefOrRef modifierType, TypeSignature baseType)
+            : base(baseType)
         {
             ModifierType = modifierType;
-            BaseType = baseType;
         }
 
         public override ElementType ElementType
@@ -32,32 +32,11 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public TypeSignature BaseType
-        {
-            get;
-            set;
-        }
-
         public override string Name
         {
             get { return BaseType.Name + string.Format(" modopt({0})", BaseType.FullName); }
         }
-
-        public override string Namespace
-        {
-            get { return BaseType.Namespace; }
-        }
-
-        public override IResolutionScope ResolutionScope
-        {
-            get { return BaseType.ResolutionScope; }
-        }
-
-        public override ITypeDescriptor GetElementType()
-        {
-            return BaseType.GetElementType();
-        }
-
+        
         public override uint GetPhysicalLength()
         {
             var encoder = ModifierType.Header.GetStream<TableStream>()

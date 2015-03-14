@@ -116,6 +116,7 @@
     <Compile Include="Net\Signatures\SecurityAttributeSignature.cs" />
     <Compile Include="Net\Signatures\SentinelTypeSignature.cs" />
     <Compile Include="Net\Signatures\TypeNameParser.cs" />
+    <Compile Include="Net\Signatures\TypeSpecificationSignature.cs" />
     <Compile Include="Net\Signatures\VariantType.cs" />
     <Compile Include="Net\Signatures\FixedArrayMarshalDescriptor.cs" />
     <Compile Include="Net\Signatures\MarshalDescriptor.cs" />

@@ -7,7 +7,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class SzArrayTypeSignature : TypeSignature
+    public class SzArrayTypeSignature : TypeSpecificationSignature
     {
         public new static SzArrayTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
@@ -15,10 +15,8 @@ namespace AsmResolver.Net.Signatures
         }
 
         public SzArrayTypeSignature(TypeSignature baseType)
+            : base(baseType)
         {
-            if (baseType == null)
-                throw new ArgumentNullException("baseType");
-            BaseType = baseType;
         }
 
         public override ElementType ElementType
@@ -26,42 +24,10 @@ namespace AsmResolver.Net.Signatures
             get { return ElementType.SzArray; }
         }
 
-        public TypeSignature BaseType
-        {
-            get;
-            set;
-        }
-
         public override string Name
         {
             get { return BaseType.Name + "[]"; }
         }
-
-        public override string Namespace
-        {
-            get { return BaseType.Namespace; }
-        }
-
-        public override IResolutionScope ResolutionScope
-        {
-            get { return BaseType.ResolutionScope; }
-        }
-
-        public override ITypeDescriptor GetElementType()
-        {
-            return BaseType.GetElementType();
-        }
-
-        public override uint GetPhysicalLength()
-        {
-            return sizeof(byte) +
-                   BaseType.GetPhysicalLength();
-        }
-
-        public override void Write(WritingContext context)
-        {
-            context.Writer.WriteByte((byte)ElementType);
-            BaseType.Write(context);
-        }
+        
     }
 }

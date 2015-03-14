@@ -9,7 +9,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class ArrayTypeSignature : TypeSignature
+    public class ArrayTypeSignature : TypeSpecificationSignature
     {
         public new static ArrayTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
@@ -53,24 +53,16 @@ namespace AsmResolver.Net.Signatures
 
             return signature;
         }
-        
+
         public ArrayTypeSignature(TypeSignature baseType)
+            : base(baseType)
         {
-            if (baseType == null)
-                throw new ArgumentNullException("baseType");
-            BaseType = baseType;
             Dimensions = new List<ArrayDimension>();
         }
 
         public override ElementType ElementType
         {
             get { return ElementType.Array; }
-        }
-
-        public TypeSignature BaseType
-        {
-            get;
-            set;
         }
 
         public IList<ArrayDimension> Dimensions
@@ -83,17 +75,7 @@ namespace AsmResolver.Net.Signatures
         {
             get { return BaseType.Name + GetDimensionsString(); }
         }
-
-        public override string Namespace
-        {
-            get { return BaseType.Namespace; }
-        }
-
-        public override IResolutionScope ResolutionScope
-        {
-            get { return BaseType.ResolutionScope; }
-        }
-
+        
         private string GetDimensionsString()
         {
             return "[" + string.Join(",", Dimensions.Select(x =>
@@ -113,11 +95,6 @@ namespace AsmResolver.Net.Signatures
         private static string FormatDimensionBounds(int low, int size)
         {
             return string.Format("{0}...{1}", low, low + size - 1);
-        }
-
-        public override ITypeDescriptor GetElementType()
-        {
-            return BaseType.GetElementType();
         }
 
         public bool Validate()

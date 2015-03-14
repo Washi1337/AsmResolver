@@ -7,7 +7,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class PinnedTypeSignature : TypeSignature
+    public class PinnedTypeSignature : TypeSpecificationSignature
     {
         public new static PinnedTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
@@ -15,43 +15,15 @@ namespace AsmResolver.Net.Signatures
         }
 
         public PinnedTypeSignature(TypeSignature baseType)
+            : base(baseType)
         {
-            if (baseType == null)
-                throw new ArgumentNullException("baseType");
-            BaseType = baseType;
         }
 
         public override ElementType ElementType
         {
             get { return ElementType.Pinned; }
         }
-
-        public TypeSignature BaseType
-        {
-            get;
-            set;
-        }
-
-        public override string Name
-        {
-            get { return BaseType.Name; }
-        }
-
-        public override string Namespace
-        {
-            get { return BaseType.Namespace; }
-        }
-
-        public override IResolutionScope ResolutionScope
-        {
-            get { return BaseType.ResolutionScope; }
-        }
-
-        public override ITypeDescriptor GetElementType()
-        {
-            return BaseType.GetElementType();
-        }
-
+        
         public override uint GetPhysicalLength()
         {
             return sizeof (byte) +
