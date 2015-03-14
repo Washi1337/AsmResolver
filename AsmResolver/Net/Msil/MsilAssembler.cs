@@ -67,13 +67,13 @@ namespace AsmResolver.Net.Msil
                     break;
 
                 case MsilOperandType.InlineBrTarget:
-                    _writer.WriteInt32(((MsilInstruction)instruction.Operand).Offset - instruction.Offset +
-                                       instruction.Size);
+                    _writer.WriteInt32(((MsilInstruction)instruction.Operand).Offset -
+                        (instruction.Offset + instruction.Size));
                     break;
 
                 case MsilOperandType.ShortInlineBrTarget:
-                    _writer.WriteSByte((sbyte)(((MsilInstruction)instruction.Operand).Offset - instruction.Offset +
-                                               instruction.Size));
+                    _writer.WriteSByte((sbyte)(((MsilInstruction)instruction.Operand).Offset - 
+                        (instruction.Offset + instruction.Size)));
                     break;
 
                 case MsilOperandType.InlineField:
@@ -93,7 +93,11 @@ namespace AsmResolver.Net.Msil
                     break;
 
                 case MsilOperandType.InlineSwitch:
-                    throw new NotSupportedException();
+                    var targets = (MsilInstruction[])instruction.Operand;
+                    _writer.WriteInt32(targets.Length);
+                    foreach (var target in targets)
+                        _writer.WriteInt32(target.Offset - (instruction.Offset + instruction.Size));
+                    break;
 
                 case MsilOperandType.InlineNone:
                     break;

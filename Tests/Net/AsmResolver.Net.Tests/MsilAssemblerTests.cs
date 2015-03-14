@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AsmResolver.Net;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Msil;
@@ -85,6 +86,83 @@ namespace AsmResolver.Tests.Net
             var operand = methodTable[0].MethodBody.Instructions[0].Operand;
             Assert.IsInstanceOfType(operand, typeof(string));
             Assert.AreEqual(testConstant, operand);
+        }
+
+        [TestMethod]
+        public void BranchTest()
+        {
+            // set up temp assembly.
+            var assembly = Utilities.CreateTempNetAssembly();
+            var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            var methodTable = tableStream.GetTable<MethodDefinition>();
+
+            // write code.
+            var body = methodTable[0].MethodBody;
+            body.Instructions.Clear();
+
+            var target = MsilInstruction.Create(MsilOpCodes.Nop);
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Nop));
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Br, target));
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Nop));
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Nop));
+            body.Instructions.Add(target);
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Ret));
+
+            body.CalculateOffsets();
+            int offset = target.Offset;
+
+            // build and validate.
+            assembly = Utilities.RebuildNetAssembly(assembly);
+            methodTable = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>().GetTable<MethodDefinition>();
+
+            var operand = methodTable[0].MethodBody.Instructions[1].Operand;
+            Assert.IsInstanceOfType(operand, typeof(MsilInstruction));
+            Assert.AreEqual(((MsilInstruction)operand).Offset, offset);
+        }
+
+        [TestMethod]
+        public void SwitchTest()
+        {
+            // set up temp assembly.
+            var assembly = Utilities.CreateTempNetAssembly();
+            var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            var methodTable = tableStream.GetTable<MethodDefinition>();
+
+            // write code.
+            var body = methodTable[0].MethodBody;
+            body.Instructions.Clear();
+
+            var targets = new[]
+            {
+                MsilInstruction.Create(MsilOpCodes.Nop),
+                MsilInstruction.Create(MsilOpCodes.Nop),
+                MsilInstruction.Create(MsilOpCodes.Nop),
+                MsilInstruction.Create(MsilOpCodes.Nop),
+            };
+            var end = MsilInstruction.Create(MsilOpCodes.Ret);
+
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Ldc_I4_1));
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Switch, targets));
+            foreach (var target in targets)
+            {
+                body.Instructions.Add(target);
+                body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Br, end));
+            }
+
+            body.Instructions.Add(end);
+
+            body.CalculateOffsets();
+
+            // build and validate.
+            assembly = Utilities.RebuildNetAssembly(assembly);
+            methodTable = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>().GetTable<MethodDefinition>();
+
+            var operand = methodTable[0].MethodBody.Instructions[1].Operand;
+            Assert.IsInstanceOfType(operand, typeof(MsilInstruction[]));
+            var newTargets = (MsilInstruction[])operand;
+            Assert.AreEqual(targets.Length, newTargets.Length);
+            for (int i = 0; i < targets.Length; i++)
+                Assert.AreEqual(targets[i].Offset, newTargets[i].Offset);
         }
     }
 }

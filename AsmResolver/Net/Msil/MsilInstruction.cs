@@ -81,7 +81,7 @@ namespace AsmResolver.Net.Msil
 
         public static MsilInstruction Create(MsilOpCode code, IList<MsilInstruction> operand)
         {
-            if (code.OperandType != MsilOperandType.InlineString)
+            if (code.OperandType != MsilOperandType.InlineSwitch)
                 throw new ArgumentException("Opcode does not accept an instruction array operand.", "code");
             return new MsilInstruction(0, code, operand);
         }
