@@ -6,25 +6,8 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net.Signatures
 {
-    public abstract class MemberSignature : BlobSignature, IHasTypeSignature
+    public abstract class MemberSignature : CallingConventionSignature, IHasTypeSignature
     {
-        public static MemberSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
-        {
-            if (!reader.CanRead(sizeof(byte)))
-                throw new ArgumentException("Signature doesn't refer to a valid member signature.");
-
-            var flag =  reader.ReadByte();
-            reader.Position--;
-            if (flag == 0x6)
-                return FieldSignature.FromReader(header, reader);
-            return MethodSignature.FromReader(header,reader);
-        }
-
-        public abstract bool IsMethod
-        {
-            get;
-        }
-
         protected abstract TypeSignature TypeSignature
         {
             get;
@@ -34,7 +17,5 @@ namespace AsmResolver.Net.Signatures
         {
             get { return TypeSignature; }
         }
-
-
     }
 }

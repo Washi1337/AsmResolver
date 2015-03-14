@@ -44,7 +44,7 @@ namespace AsmResolver.Net.Metadata
         Forwarder = 0x00200000, // This ExportedType is a type forwarder.
         // Flags reserved for runtime use.
         ReservedMask = 0x00040800,
-        RTSpecialName = 0x00000800, // Runtime should check name encoding.
+        RuntimeSpecialName = 0x00000800, // Runtime should check name encoding.
         HasSecurity = 0x00040000, // Class has security associate with it.
     }
 }

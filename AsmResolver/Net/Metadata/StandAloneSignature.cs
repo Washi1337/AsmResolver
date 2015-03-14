@@ -31,7 +31,8 @@ namespace AsmResolver.Net.Metadata
 
         protected override void UpdateMember(NetBuildingContext context, StandAloneSignature member)
         {
-            member.MetadataRow.Column1 = context.GetStreamBuffer<BlobStreamBuffer>().GetBlobOffset(member.Signature);
+            var buffer = context.GetStreamBuffer<BlobStreamBuffer>();
+            member.MetadataRow.Column1 = buffer.GetBlobOffset(member.Signature);
         }
 
         protected override void WriteMember(WritingContext context, StandAloneSignature member)
@@ -44,13 +45,21 @@ namespace AsmResolver.Net.Metadata
     {
         private CustomAttributeCollection _customAttributes;
 
+        public StandAloneSignature(CallingConventionSignature signature)
+            : base(null, new MetadataToken(MetadataTokenType.StandAloneSig), new MetadataRow<uint>())
+        {
+            Signature = signature;
+        }
+
         internal StandAloneSignature(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            Signature = DataBlobSignature.FromReader(header.GetStream<BlobStream>().CreateBlobReader(row.Column1));
+            IBinaryStreamReader reader;
+            if (header.GetStream<BlobStream>().TryCreateBlobReader(row.Column1, out reader))
+                Signature = CallingConventionSignature.FromReader(header, reader);
         }
 
-        public BlobSignature Signature
+        public CallingConventionSignature Signature
         {
             get;
             set;

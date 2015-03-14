@@ -110,7 +110,7 @@ namespace AsmResolver.Net.Metadata
             var signature = new MethodSignature(ImportTypeSignature(returnType));
             
             if (!method.IsStatic)
-                signature.Attributes |= MethodSignatureAttributes.HasThis;
+                signature.Attributes |= CallingConventionAttributes.HasThis;
           
             foreach (var parameter in method.GetParameters())
                 signature.Parameters.Add(

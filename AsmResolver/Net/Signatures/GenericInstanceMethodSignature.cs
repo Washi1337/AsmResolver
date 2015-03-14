@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class GenericInstanceMethodSignature : BlobSignature
+    public class GenericInstanceMethodSignature : CallingConventionSignature
     {
-        public static GenericInstanceMethodSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static GenericInstanceMethodSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            if (!reader.CanRead(sizeof(byte)) || reader.ReadByte() != 0x0A)
-                throw new ArgumentException("Signature does not refer to a valid generic instance method signature.");
+            var signature = new GenericInstanceMethodSignature()
+            {
+                Attributes = (CallingConventionAttributes)reader.ReadByte()
+            };
 
-            var signature = new GenericInstanceMethodSignature();
             uint count;
             if (!reader.TryReadCompressedUInt32(out count))
                 return signature;

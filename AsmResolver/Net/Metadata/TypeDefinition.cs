@@ -336,32 +336,32 @@ namespace AsmResolver.Net.Metadata
 
         public bool IsAbstract
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.Abstract); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.Abstract, value); }
+            get { return Attributes.HasFlag(TypeAttributes.Abstract); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.Abstract, value); }
         }
 
         public bool IsSealed
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.Sealed); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.Sealed, value); }
+            get { return Attributes.HasFlag(TypeAttributes.Sealed); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.Sealed, value); }
         }
 
         public bool IsSpecialName
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.SpecialName); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.SpecialName, value); }
+            get { return Attributes.HasFlag(TypeAttributes.SpecialName); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.SpecialName, value); }
         }
 
         public bool IsImport
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.Import); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.Import, value); }
+            get { return Attributes.HasFlag(TypeAttributes.Import); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.Import, value); }
         }
 
         public bool IsSerializable
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.Serializable); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.Serializable, value); }
+            get { return Attributes.HasFlag(TypeAttributes.Serializable); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.Serializable, value); }
         }
 
         public bool IsAnsiClass
@@ -396,26 +396,26 @@ namespace AsmResolver.Net.Metadata
 
         public bool IsBeforeFieldInit
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.BeforeFieldInit); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.BeforeFieldInit, value); }
+            get { return Attributes.HasFlag(TypeAttributes.BeforeFieldInit); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.BeforeFieldInit, value); }
         }
 
         public bool IsForwarder
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.Forwarder); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.Forwarder, value); }
+            get { return Attributes.HasFlag(TypeAttributes.Forwarder); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.Forwarder, value); }
         }
 
         public bool IsRuntimeSpecialName
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.RTSpecialName); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.RTSpecialName, value); }
+            get { return Attributes.HasFlag(TypeAttributes.RuntimeSpecialName); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.RuntimeSpecialName, value); }
         }
 
         public bool HasSecurity
         {
-            get { return ((uint)Attributes).GetAttribute((uint)TypeAttributes.HasSecurity); }
-            set { Attributes = (TypeAttributes)((uint)Attributes).SetAttribute((uint)TypeAttributes.HasSecurity, value); }
+            get { return Attributes.HasFlag(TypeAttributes.HasSecurity); }
+            set { Attributes = Attributes.SetFlag(TypeAttributes.HasSecurity, value); }
         }
         
         public bool IsEnum

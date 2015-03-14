@@ -56,7 +56,7 @@ namespace AsmResolver.Tests
             var signature = (MethodSignature)newReference.Signature;
 
             ValidateType(originalMethod.ReturnType, signature.ReturnType);
-            Assert.IsTrue(originalMethod.IsStatic == !signature.Attributes.HasFlag(MethodSignatureAttributes.HasThis));
+            Assert.IsTrue(originalMethod.IsStatic == !signature.Attributes.HasFlag(CallingConventionAttributes.HasThis));
 
             var originalParameters = originalMethod.GetParameters();
             for (int i = 0; i < originalParameters.Length; i++)

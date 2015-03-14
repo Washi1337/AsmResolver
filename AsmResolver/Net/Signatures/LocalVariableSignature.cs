@@ -7,16 +7,17 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class LocalVariableSignature : BlobSignature
+    public class LocalVariableSignature : CallingConventionSignature
     {
-        public static LocalVariableSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static LocalVariableSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            if (!reader.CanRead(sizeof(byte)) || reader.ReadByte() != 0x7)
-                throw new ArgumentException("Signature doesn't refer to a valid local variable signature.");
-
+            var signature = new LocalVariableSignature()
+            {
+                Attributes = (CallingConventionAttributes)reader.ReadByte()
+            };
+            
             var count = reader.ReadCompressedUInt32();
 
-            var signature = new LocalVariableSignature();
             for (int i = 0; i < count; i++)
                 signature.Variables.Add(VariableSignature.FromReader(header, reader));
             return signature;

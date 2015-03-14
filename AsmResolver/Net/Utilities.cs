@@ -66,19 +66,16 @@ namespace AsmResolver.Net
             return (self & ~(mask & attribute));
         }
 
-        public static bool GetAttribute(this uint self, uint attribute)
-        {
-            return (self & attribute) == attribute;
-        }
-
-        public static uint SetAttribute(this uint self, uint attribute, bool value)
-        {
-            return (self & ~attribute) | (value ? attribute : 0);
-        }
-
         public static string ToHexString(this byte[] self)
         {
             return string.Concat(self.Select(x => x.ToString("x2")));
+        }
+
+        public static TEnum SetFlag<TEnum>(this Enum self, TEnum flag, bool value)
+        {
+            return (TEnum)Convert.ChangeType(
+                    Convert.ToUInt64(self) & ~Convert.ToUInt64(flag) | (value ? Convert.ToUInt64(flag) : 0),
+                    typeof(TEnum));
         }
     }
 }

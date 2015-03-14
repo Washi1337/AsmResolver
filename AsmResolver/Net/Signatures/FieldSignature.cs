@@ -11,10 +11,9 @@ namespace AsmResolver.Net.Signatures
     {
         public new static FieldSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            if (!reader.CanRead(sizeof(byte)) || reader.ReadByte() != 0x06)
-                throw new ArgumentException("Signature doesn't refer to a valid field signature.");
             return new FieldSignature
             {
+                Attributes = (CallingConventionAttributes)reader.ReadByte(),
                 FieldType = TypeSignature.FromReader(header, reader),
             };
         }
@@ -33,11 +32,6 @@ namespace AsmResolver.Net.Signatures
         {
             get;
             set;
-        }
-
-        public override bool IsMethod
-        {
-            get { return false; }
         }
 
         protected override TypeSignature TypeSignature

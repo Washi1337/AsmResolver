@@ -260,50 +260,50 @@ namespace AsmResolver.Net.Metadata
 
         public bool IsStatic
         {
-            get { return ((uint)Attributes).GetAttribute((uint)MethodAttributes.Static); }
-            set { Attributes = (MethodAttributes)((uint)Attributes).SetAttribute((uint)MethodAttributes.Static, value); }
+            get { return Attributes.HasFlag(MethodAttributes.Static); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.Static, value); }
         }
 
         public bool IsFinal
         {
-            get { return ((uint)Attributes).GetAttribute((uint)MethodAttributes.Final); }
-            set { Attributes = (MethodAttributes)((uint)Attributes).SetAttribute((uint)MethodAttributes.Final, value); }
+            get { return Attributes.HasFlag(MethodAttributes.Static); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.Static, value); }
         }
 
         public bool IsVirtual
         {
-            get { return ((uint)Attributes).GetAttribute((uint)MethodAttributes.Virtual); }
-            set { Attributes = (MethodAttributes)((uint)Attributes).SetAttribute((uint)MethodAttributes.Virtual, value); }
+            get { return Attributes.HasFlag(MethodAttributes.Virtual); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.Virtual, value); }
         }
 
         public bool IsHideBySig
         {
-            get { return ((uint)Attributes).GetAttribute((uint)MethodAttributes.HideBySig); }
-            set { Attributes = (MethodAttributes)((uint)Attributes).SetAttribute((uint)MethodAttributes.HideBySig, value); }
+            get { return Attributes.HasFlag(MethodAttributes.HideBySig); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.HideBySig, value); }
         }
 
         public bool IsAbstract
         {
-            get { return ((uint)Attributes).GetAttribute((uint)MethodAttributes.Abstract); }
-            set { Attributes = (MethodAttributes)((uint)Attributes).SetAttribute((uint)MethodAttributes.Abstract, value); }
+            get { return Attributes.HasFlag(MethodAttributes.Abstract); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.Abstract, value); }
         }
 
         public bool IsSpecialName
         {
-            get { return ((uint)Attributes).GetAttribute((uint)MethodAttributes.SpecialName); }
-            set { Attributes = (MethodAttributes)((uint)Attributes).SetAttribute((uint)MethodAttributes.SpecialName, value); }
+            get { return Attributes.HasFlag(MethodAttributes.SpecialName); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.SpecialName, value); }
         }
 
         public bool IsRuntimeSpecialName
         {
-            get { return ((uint)Attributes).GetAttribute((uint)MethodAttributes.RuntimeSpecialName); }
-            set { Attributes = (MethodAttributes)((uint)Attributes).SetAttribute((uint)MethodAttributes.RuntimeSpecialName, value); }
+            get { return Attributes.HasFlag(MethodAttributes.RuntimeSpecialName); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.RuntimeSpecialName, value); }
         }
 
         public bool HasSecurity
         {
-            get { return ((uint)Attributes).GetAttribute((uint)MethodAttributes.HasSecurity); }
-            set { Attributes = (MethodAttributes)((uint)Attributes).SetAttribute((uint)MethodAttributes.HasSecurity, value); }
+            get { return Attributes.HasFlag(MethodAttributes.HasSecurity); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.HasSecurity, value); }
         }
 
         public bool IsConstructor

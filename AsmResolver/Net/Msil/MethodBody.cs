@@ -40,7 +40,10 @@ namespace AsmResolver.Net.Msil
 
             public int GetVariableIndex(VariableSignature variable)
             {
-                return _owner.LocalVarSignature.Variables.IndexOf(variable);
+                var localVarSig = _owner.Signature != null ? _owner.Signature.Signature as LocalVariableSignature : null;
+                if (localVarSig == null)
+                    throw new InvalidOperationException("Method body does not have a valid local variable signature.");
+                return localVarSig.Variables.IndexOf(variable);
             }
 
             public int GetParameterIndex(ParameterSignature parameter)
@@ -76,11 +79,10 @@ namespace AsmResolver.Net.Msil
                 {
                     var header = method.Header;
                     var tableStream = header.GetStream<TableStream>();
-                    var blobStream = header.GetStream<BlobStream>();
 
-                    var signature = (StandAloneSignature)tableStream.ResolveMember(new MetadataToken(localVarSig));
-                    body._localVarSig = LocalVariableSignature.FromReader(header,
-                        blobStream.CreateBlobReader(signature.MetadataRow.Column1));
+                    MetadataMember signature;
+                    tableStream.TryResolveMember(new MetadataToken(localVarSig), out signature);
+                    body.Signature = signature as StandAloneSignature;
                 }
 
                 if (hasSections)
@@ -105,7 +107,6 @@ namespace AsmResolver.Net.Msil
         private ReadingContext _msilReadingContext;
         private ReadingContext _sectionReadingContext;
         private List<ExceptionHandler> _handlers;
-        private LocalVariableSignature _localVarSig;
 
         public MethodBody(MethodDefinition method)
         {
@@ -135,16 +136,18 @@ namespace AsmResolver.Net.Msil
         {
             get
             {
+                var localVarSig = Signature == null ? null : Signature.Signature as LocalVariableSignature;
                 return MaxStack > 8 ||
                        GetCodeSize() >= 64 ||
-                       LocalVarSignature.Variables.Count > 0 ||
+                       (localVarSig != null && localVarSig.Variables.Count > 0) ||
                        ExceptionHandlers.Count > 0;
             }
         }
 
-        public LocalVariableSignature LocalVarSignature
+        public StandAloneSignature Signature
         {
-            get { return _localVarSig ?? (_localVarSig = new LocalVariableSignature()); }
+            get;
+            set;
         }
 
         public IList<MsilInstruction> Instructions
@@ -223,7 +226,10 @@ namespace AsmResolver.Net.Msil
 
         public uint GetCodeSize()
         {
-            return (uint)Instructions.Sum(x => x.Size);
+            var sum = 0;
+            foreach (MsilInstruction x in Instructions)
+                sum += x.Size;
+            return (uint)sum;
         }
 
         public override uint GetPhysicalLength()
@@ -233,6 +239,7 @@ namespace AsmResolver.Net.Msil
 
             foreach (var handler in ExceptionHandlers)
             {
+                handler.IsFat = IsFat;
                 size += sizeof (uint) + handler.GetPhysicalLength();
             }
 
@@ -270,6 +277,7 @@ namespace AsmResolver.Net.Msil
                                             (InitLocals ? 0x10 : 0) | 0x3003));
                 writer.WriteUInt16((ushort)MaxStack);
                 writer.WriteUInt32(GetCodeSize());
+                writer.WriteUInt32(Signature.MetadataToken.ToUInt32());
             }
             else
             {
@@ -329,12 +337,15 @@ namespace AsmResolver.Net.Msil
 
         VariableSignature IOperandResolver.ResolveVariable(int index)
         {
-            return LocalVarSignature.Variables[index];
+            var localVarSig = Signature != null ? Signature.Signature as LocalVariableSignature : null;
+            if (localVarSig == null)
+                return null;
+            return localVarSig.Variables[index];
         }
 
         ParameterSignature IOperandResolver.ResolveParameter(int index)
         {
-            if (Method.Signature.Attributes.HasFlag(MethodSignatureAttributes.HasThis))
+            if (Method.Signature.Attributes.HasFlag(CallingConventionAttributes.HasThis))
                 index--;
             return Method.Signature.Parameters[index];
         }

@@ -229,8 +229,8 @@ namespace AsmResolver.Net.Metadata
 
         public bool IsStatic
         {
-            get { return ((uint)Attributes).GetAttribute((uint)FieldAttributes.Static); }
-            set { Attributes = (FieldAttributes)((uint)Attributes).SetAttribute((uint)FieldAttributes.Static, value); }
+            get { return Attributes.HasFlag(FieldAttributes.Static); }
+            set { Attributes = Attributes.SetFlag(FieldAttributes.Static, value); }
         }
 
         private bool GetFieldAccessAttribute(FieldAttributes attribute)

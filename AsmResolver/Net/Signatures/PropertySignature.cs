@@ -7,13 +7,13 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class PropertySignature : BlobSignature, IHasTypeSignature
+    public class PropertySignature : CallingConventionSignature, IHasTypeSignature
     {
-        public static PropertySignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static PropertySignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
             var signature = new PropertySignature
             {
-                Attributes = (PropertySignatureAttributes)reader.ReadByte(),
+                Attributes = (CallingConventionAttributes)reader.ReadByte(),
             };
 
             uint paramCount;
@@ -31,12 +31,6 @@ namespace AsmResolver.Net.Signatures
         public PropertySignature()
         {
             Parameters = new List<ParameterSignature>();
-        }
-
-        public PropertySignatureAttributes Attributes
-        {
-            get;
-            set;
         }
 
         public TypeSignature PropertyType
@@ -73,12 +67,5 @@ namespace AsmResolver.Net.Signatures
             foreach (var parameter in Parameters)
                 parameter.Write(context);
         }
-    }
-
-    [Flags]
-    public enum PropertySignatureAttributes
-    {
-        None = 0,
-        HasThis = 0x20,
     }
 }

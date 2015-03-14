@@ -16,10 +16,10 @@ namespace AsmResolver.Net.Signatures
 
             var signature = new MethodSignature
             {
-                Attributes = (MethodSignatureAttributes)reader.ReadByte()
+                Attributes = (CallingConventionAttributes)reader.ReadByte()
             };
 
-            if (signature.Attributes.HasFlag(MethodSignatureAttributes.Generic))
+            if (signature.Attributes.HasFlag(CallingConventionAttributes.GenericInstance))
             {
                 uint genericParameterCount;
                 if (!reader.TryReadCompressedUInt32(out genericParameterCount))
@@ -50,18 +50,7 @@ namespace AsmResolver.Net.Signatures
         {
             ReturnType = returnType;
         }
-
-        public override bool IsMethod
-        {
-            get { return true; }
-        }
-
-        public MethodSignatureAttributes Attributes
-        {
-            get;
-            set;
-        }
-
+        
         public int GenericParameterCount
         {
             get;
@@ -88,7 +77,7 @@ namespace AsmResolver.Net.Signatures
         public override uint GetPhysicalLength()
         {
             return (uint)(sizeof (byte) +
-                          (Attributes.HasFlag(MethodSignatureAttributes.Generic) ? sizeof (byte) : 0) +
+                          (Attributes.HasFlag(CallingConventionAttributes.GenericInstance) ? sizeof (byte) : 0) +
                           Parameters.Count.GetCompressedSize() +
                           ReturnType.GetPhysicalLength() +
                           Parameters.Sum(x => x.GetPhysicalLength()));
@@ -99,7 +88,7 @@ namespace AsmResolver.Net.Signatures
             var writer = context.Writer;
             writer.WriteByte((byte)Attributes);
 
-            if (Attributes.HasFlag(MethodSignatureAttributes.Generic))
+            if (Attributes.HasFlag(CallingConventionAttributes.GenericInstance))
                 writer.WriteCompressedUInt32((uint)GenericParameterCount);
 
             writer.WriteCompressedUInt32((uint)Parameters.Count);
@@ -109,21 +98,5 @@ namespace AsmResolver.Net.Signatures
         }
     }
 
-    [Flags]
-    public enum MethodSignatureAttributes
-    {
-        HasThis = 0x20,
-        ExplicitThis = 0x40,
-        
-        Default = 0x0,
-        C = 0x1,
-        StdCall = 0x2,
-        ThisCall = 0x3,
-        FastCall = 0x4,
-        VarArg = 0x5,
-
-        Generic = 0x10,
-
-        Sentinel = 0x41, // TODO: support sentinel types.
-    }
+  
 }

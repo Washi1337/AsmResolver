@@ -78,7 +78,7 @@ namespace AsmResolver.Net.Metadata
                 Parent = (IMemberRefParent)tableStream.ResolveMember(parentToken);
 
             Name = header.GetStream<StringStream>().GetStringByOffset(row.Column2);
-            Signature = MemberSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3));
+            Signature = CallingConventionSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3)) as MemberSignature;
         }
 
         public IMemberRefParent Parent

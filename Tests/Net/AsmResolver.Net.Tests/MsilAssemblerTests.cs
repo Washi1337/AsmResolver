@@ -3,6 +3,7 @@ using System.Linq;
 using AsmResolver.Net;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Msil;
+using AsmResolver.Net.Signatures;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AsmResolver.Tests.Net
@@ -163,6 +164,60 @@ namespace AsmResolver.Tests.Net
             Assert.AreEqual(targets.Length, newTargets.Length);
             for (int i = 0; i < targets.Length; i++)
                 Assert.AreEqual(targets[i].Offset, newTargets[i].Offset);
+        }
+
+        [TestMethod]
+        public void VariablesTest()
+        {
+            // set up temp assembly.
+            var assembly = Utilities.CreateTempNetAssembly();
+            var typeSystem = assembly.NetDirectory.MetadataHeader.TypeSystem;
+            var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            var methodTable = tableStream.GetTable<MethodDefinition>();
+            var signatureTable = tableStream.GetTable<StandAloneSignature>();
+
+            var variable = new VariableSignature(typeSystem.String);
+            var variable2 = new VariableSignature(typeSystem.Int32);
+
+            // create localvarsig.
+            var localVarSig = new LocalVariableSignature();
+            localVarSig.Variables.Add(variable);
+            localVarSig.Variables.Add(variable2);
+            var signature = new StandAloneSignature(localVarSig);
+            signatureTable.Add(signature);
+
+            // write code.
+            var body = methodTable[0].MethodBody;
+            body.Signature = signature;
+
+            body.Instructions.Clear();
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Ldloc, variable));
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Pop));
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Ldloc, variable2));
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Pop));
+            body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Ret));
+
+            // build and validate.
+            assembly = Utilities.RebuildNetAssembly(assembly);
+            methodTable = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>().GetTable<MethodDefinition>();
+            var newBody = methodTable[0].MethodBody;
+
+            Assert.IsNotNull(newBody.Signature);
+            Assert.IsInstanceOfType(newBody.Signature.Signature, typeof(LocalVariableSignature));
+
+            var newLocalVarSig = (LocalVariableSignature)newBody.Signature.Signature;
+            Assert.AreEqual(localVarSig.Variables.Count, newLocalVarSig.Variables.Count);
+
+            for (int i = 0; i < localVarSig.Variables.Count; i++)
+                Utilities.ValidateType(localVarSig.Variables[i].VariableType, newLocalVarSig.Variables[i].VariableType);
+
+            Assert.IsInstanceOfType(newBody.Instructions[0].Operand, typeof(VariableSignature));
+            Utilities.ValidateType(variable.VariableType,
+                ((VariableSignature)newBody.Instructions[0].Operand).VariableType);
+
+            Assert.IsInstanceOfType(newBody.Instructions[2].Operand, typeof(VariableSignature));
+            Utilities.ValidateType(variable2.VariableType,
+                ((VariableSignature)newBody.Instructions[2].Operand).VariableType);
         }
     }
 }

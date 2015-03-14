@@ -45,5 +45,10 @@ namespace AsmResolver.Net.Builder
             }
             base.UpdateReferences(context);
         }
+
+        public override uint GetPhysicalLength()
+        {
+            return (uint)(Segments[Segments.Count - 1].StartOffset + Segments[Segments.Count - 1].GetPhysicalLength());
+        }
     }
 }
