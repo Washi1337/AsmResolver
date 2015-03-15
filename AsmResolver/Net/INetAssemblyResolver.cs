@@ -123,11 +123,14 @@ namespace AsmResolver.Net
 
         protected virtual string GetFilePath(IAssemblyDescriptor descriptor)
         {
-            foreach (var gacDirectory in GacDirectories)
+            if (descriptor.PublicKeyToken != null)
             {
-                var filePath = gacDirectory.GetFilePath(descriptor);
-                if (File.Exists(filePath))
-                    return filePath;
+                foreach (var gacDirectory in GacDirectories)
+                {
+                    var filePath = gacDirectory.GetFilePath(descriptor);
+                    if (File.Exists(filePath))
+                        return filePath;
+                }
             }
 
             foreach (var directory in SearchDirectories)

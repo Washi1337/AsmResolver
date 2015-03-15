@@ -48,7 +48,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public class MethodSpecification : MetadataMember<MetadataRow<uint, uint>>, IMemberReference
+    public class MethodSpecification : MetadataMember<MetadataRow<uint, uint>>, ICallableMemberReference
     {
         private GenericInstanceMethodSignature _signature;
         private string _fullName;
@@ -86,6 +86,11 @@ namespace AsmResolver.Net.Metadata
                 _signature = value;
                 _fullName = null;
             }
+        }
+
+        CallingConventionSignature ICallableMemberReference.Signature
+        {
+            get { return Method.Signature; }
         }
 
         public string Name

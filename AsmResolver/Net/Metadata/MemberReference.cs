@@ -53,7 +53,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public class MemberReference : MetadataMember<MetadataRow<uint, uint, uint>>, ICustomAttributeType
+    public class MemberReference : MetadataMember<MetadataRow<uint, uint, uint>>, ICustomAttributeType, ICallableMemberReference
     {
         private CustomAttributeCollection _customAttributes;
         private string _fullName;
@@ -115,6 +115,11 @@ namespace AsmResolver.Net.Metadata
                 _signature = value;
                 _fullName = null;
             }
+        }
+
+        CallingConventionSignature ICallableMemberReference.Signature
+        {
+            get { return Signature; }
         }
 
         public CustomAttributeCollection CustomAttributes

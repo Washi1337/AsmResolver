@@ -52,7 +52,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public class FieldDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, IHasConstant, IHasFieldMarshal, IMemberForwarded, ICollectionItem
+    public class FieldDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>,ICallableMemberReference, IHasConstant, IHasFieldMarshal, IMemberForwarded, ICollectionItem
     {
         private string _name;
         private string _fullName;
@@ -133,6 +133,11 @@ namespace AsmResolver.Net.Metadata
                 _signature = value;
                 _fullName = null;
             }
+        }
+
+        CallingConventionSignature ICallableMemberReference.Signature
+        {
+            get { return _signature; }
         }
 
         public Constant Constant

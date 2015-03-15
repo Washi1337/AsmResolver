@@ -7,7 +7,6 @@ namespace AsmResolver.Net.Builder
     public class NetTextBuilder : FileSegmentBuilder
     {
         private readonly ImageNetDirectory _directory;
-        private readonly StartupCodeSegmentBuilder _startupCode;
 
         public NetTextBuilder(ImageNetDirectory directory)
         {
@@ -19,7 +18,7 @@ namespace AsmResolver.Net.Builder
             // strongname
             Segments.Add(Metadata = new MetadataBuilder(directory.MetadataHeader));
             Segments.Add(MethodBodyTableBuilder = new MethodBodyTableBuilder());
-            Segments.Add(_startupCode = new StartupCodeSegmentBuilder());
+            Segments.Add(new StartupCodeSegmentBuilder());
         }
 
         public MetadataBuilder Metadata

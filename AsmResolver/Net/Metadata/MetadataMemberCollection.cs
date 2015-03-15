@@ -167,4 +167,22 @@ namespace AsmResolver.Net.Metadata
             item.Owner = owner;
         }
     }
+
+    public class InterfaceImplementationCollection : MetadataMemberCollection<TypeDefinition, InterfaceImplementation>
+    {
+        public InterfaceImplementationCollection(TypeDefinition owner)
+            : base(owner)
+        {
+        }
+
+        protected override TypeDefinition GetOwner(InterfaceImplementation item)
+        {
+            return item.Class;
+        }
+
+        protected override void SetOwner(InterfaceImplementation item, TypeDefinition owner)
+        {
+            item.Class = owner;
+        }
+    }
 }

@@ -8,7 +8,7 @@ namespace AsmResolver.Net.Signatures
 {
     public abstract class CallingConventionSignature : BlobSignature
     {
-        private const CallingConventionAttributes SignatureTypeMask = (CallingConventionAttributes)0x1F;
+        private const CallingConventionAttributes SignatureTypeMask = (CallingConventionAttributes)0xF;
 
         public static CallingConventionSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
@@ -33,7 +33,7 @@ namespace AsmResolver.Net.Signatures
                 case CallingConventionAttributes.Field:
                     return FieldSignature.FromReader(header, reader);
             }
-            return null;
+            throw new NotSupportedException();
         }
 
         protected CallingConventionSignature()
@@ -71,6 +71,12 @@ namespace AsmResolver.Net.Signatures
             get { return (Attributes & SignatureTypeMask) == CallingConventionAttributes.GenericInstance; }
         }
 
+        public bool IsGeneric
+        {
+            get { return Attributes.HasFlag(CallingConventionAttributes.Generic); }
+            set { Attributes = Attributes.SetFlag(CallingConventionAttributes.Generic, value); }
+        }
+
         public bool HasThis
         {
             get { return Attributes.HasFlag(CallingConventionAttributes.HasThis); }
@@ -99,12 +105,12 @@ namespace AsmResolver.Net.Signatures
         ThisCall = 0x3,
         FastCall = 0x4,
         VarArg = 0x5,
-
         Field = 0x6,
         Local = 0x7,
         Property = 0x8,
-        GenericInstance = 0x0A,
+        GenericInstance = 0xA,
 
+        Generic = 0x10,
         HasThis = 0x20,
         ExplicitThis = 0x40,
         Sentinel = 0x41, // TODO: support sentinel types.

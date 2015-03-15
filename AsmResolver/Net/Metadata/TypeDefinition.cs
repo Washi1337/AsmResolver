@@ -75,6 +75,7 @@ namespace AsmResolver.Net.Metadata
         private EventMap _eventMap;
         private NestedClassCollection _nestedClasses;
         private GenericParameterCollection _genericParameters;
+        private InterfaceImplementationCollection _interfaces;
         private ClassLayout _classLayout;
 
         public TypeDefinition(string @namespace, string name)
@@ -254,6 +255,11 @@ namespace AsmResolver.Net.Metadata
             get { return _genericParameters ?? (_genericParameters = new GenericParameterCollection(this)); }
         }
 
+        public InterfaceImplementationCollection Interfaces
+        {
+            get { return _interfaces ?? (_interfaces = new InterfaceImplementationCollection(this)); }
+        }
+
         public ClassLayout ClassLayout
         {
             get
@@ -304,14 +310,14 @@ namespace AsmResolver.Net.Metadata
 
         public bool IsNestedFamilyAndAssembly
         {
-            get { return GetTypeAccessAttribute(TypeAttributes.NestedFamANDAssem); }
-            set { SetTypeAccessAttribute(TypeAttributes.NestedFamANDAssem, value); }
+            get { return GetTypeAccessAttribute(TypeAttributes.NestedFamilyAndAssembly); }
+            set { SetTypeAccessAttribute(TypeAttributes.NestedFamilyAndAssembly, value); }
         }
 
         public bool IsNestedFamilyOrAssembly
         {
-            get { return GetTypeAccessAttribute(TypeAttributes.NestedFamORAssem); }
-            set { SetTypeAccessAttribute(TypeAttributes.NestedFamORAssem, value); }
+            get { return GetTypeAccessAttribute(TypeAttributes.NestedFamilyOrAssembly); }
+            set { SetTypeAccessAttribute(TypeAttributes.NestedFamilyOrAssembly, value); }
         }
 
         public bool IsClass

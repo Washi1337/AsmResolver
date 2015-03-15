@@ -19,7 +19,7 @@ namespace AsmResolver.Net.Signatures
                 Attributes = (CallingConventionAttributes)reader.ReadByte()
             };
 
-            if (signature.Attributes.HasFlag(CallingConventionAttributes.GenericInstance))
+            if (signature.IsGeneric)
             {
                 uint genericParameterCount;
                 if (!reader.TryReadCompressedUInt32(out genericParameterCount))

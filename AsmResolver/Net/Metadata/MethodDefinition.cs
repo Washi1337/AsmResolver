@@ -63,7 +63,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public class MethodDefinition : MetadataMember<MetadataRow<uint, ushort, ushort, uint, uint, uint>>, IHasSecurityAttribute, IMemberForwarded, IGenericParameterProvider, IMemberRefParent, ICustomAttributeType, ICollectionItem, IGenericContext
+    public class MethodDefinition : MetadataMember<MetadataRow<uint, ushort, ushort, uint, uint, uint>>, ICallableMemberReference, IHasSecurityAttribute, IMemberForwarded, IGenericParameterProvider, IMemberRefParent, ICustomAttributeType, ICollectionItem, IGenericContext
     {
         private string _name;
         private string _fullName;
@@ -163,6 +163,11 @@ namespace AsmResolver.Net.Metadata
                 _signature = value;
                 _fullName = null;
             }
+        }
+
+        CallingConventionSignature ICallableMemberReference.Signature
+        {
+            get { return _signature; }
         }
 
         MemberSignature IMethodDefOrRef.Signature

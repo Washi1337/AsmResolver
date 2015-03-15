@@ -1,8 +1,18 @@
-﻿namespace AsmResolver.Net.Metadata
+﻿using AsmResolver.Net.Signatures;
+
+namespace AsmResolver.Net.Metadata
 {
     public interface IMemberReference : IFullNameProvider, IHasCustomAttribute
     {
         ITypeDefOrRef DeclaringType
+        {
+            get;
+        }
+    }
+
+    public interface ICallableMemberReference : IMemberReference
+    {
+        CallingConventionSignature Signature
         {
             get;
         }
