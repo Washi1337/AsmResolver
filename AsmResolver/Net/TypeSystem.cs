@@ -38,14 +38,20 @@ namespace AsmResolver.Net
         {
             _header = header;
             _isMsCorLib = isMsCorLib;
-            MsCorLibReference = new AssemblyReference("mscorlib", new Version(4, 0, 0, 0)); // TODO, set correct version.
+            MsCorLibReference = new AssemblyReference(new ReflectionAssemblyNameWrapper(typeof(object).Assembly.GetName()))
+            {
+                Header = header,
+            }; // TODO, set correct version.
  
         }
 
         private MsCorLibTypeSignature CreateSignature(ElementType type, string name, bool isValueType)
         {
             if (!_isMsCorLib)
-                return new MsCorLibTypeSignature(new TypeReference(MsCorLibReference, "System", name), type, isValueType);
+                return new MsCorLibTypeSignature(new TypeReference(MsCorLibReference, "System", name)
+                {
+                    Header = _header
+                }, type, isValueType);
 
             if (_typeDefinitions == null)
                 _typeDefinitions = _header.GetStream<TableStream>().GetTable<TypeDefinition>();

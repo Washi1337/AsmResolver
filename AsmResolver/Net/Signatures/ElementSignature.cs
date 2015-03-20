@@ -45,9 +45,6 @@ namespace AsmResolver.Net.Signatures
                     return reader.ReadUInt64();
                 case ElementType.String:
                     return reader.ReadSerString();
-                case ElementType.Type:
-                    // TODO: resolve type
-                    return reader.ReadSerString(); 
                 case ElementType.Object:
                     // TODO: boxed values
                     break;
@@ -58,6 +55,8 @@ namespace AsmResolver.Net.Signatures
                         throw new MemberResolutionException(typeSignature);
                     return ReadValue(header, enumTypeDef.GetEnumUnderlyingType(), reader);
             }
+            if (typeSignature.IsTypeOf("System", "Type"))
+                return reader.ReadSerString();
             throw new NotSupportedException();
         }
 

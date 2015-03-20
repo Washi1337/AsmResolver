@@ -13,7 +13,7 @@ namespace AsmResolver.Net
 {
     public interface INetAssemblyResolver
     {
-        AssemblyDefinition ResolveAssembly(IAssemblyDescriptor info);
+        AssemblyDefinition ResolveAssembly(IAssemblyDescriptor descriptor);
     }
 
     public class DefaultNetAssemblyResolver : INetAssemblyResolver
@@ -74,16 +74,16 @@ namespace AsmResolver.Net
             set;
         }
 
-        public AssemblyDefinition ResolveAssembly(IAssemblyDescriptor info)
+        public AssemblyDefinition ResolveAssembly(IAssemblyDescriptor descriptor)
         {
             AssemblyDefinition definition;
-            if (_cachedAssemblies.TryGetValue(info, out definition))
+            if (_cachedAssemblies.TryGetValue(descriptor, out definition))
                 return definition;
 
-            var path = GetFilePath(info);
+            var path = GetFilePath(descriptor);
             if (!string.IsNullOrEmpty(path))
             {
-                var assembly = WindowsAssembly.FromBytes(File.ReadAllBytes(path), new ReadingParameters());
+                var assembly = ReadAssembly(path);
                 if (assembly.NetDirectory != null && assembly.NetDirectory.MetadataHeader != null)
                 {
                     var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
@@ -95,22 +95,22 @@ namespace AsmResolver.Net
                         {
 
                             definition = assemblyTable[0];
-                            _cachedAssemblies.Add(info, definition);
+                            _cachedAssemblies.Add(descriptor, definition);
                             return definition;
                         }
                     }
                 }
             }
 
-            definition = OnAssemblyResolutionFailed(new AssemblyResolutionEventArgs(info));
+            definition = OnAssemblyResolutionFailed(new AssemblyResolutionEventArgs(descriptor));
             if (definition == null)
             {
                 if (ThrowOnNotFound)
-                    throw new AssemblyResolutionException(info);
+                    throw new AssemblyResolutionException(descriptor);
             }
             else
             {
-                _cachedAssemblies.Add(info, definition);
+                _cachedAssemblies.Add(descriptor, definition);
             }
 
             return definition;
@@ -143,6 +143,11 @@ namespace AsmResolver.Net
             }
 
             return null;
+        }
+
+        protected virtual WindowsAssembly ReadAssembly(string filePath)
+        {
+            return WindowsAssembly.FromBytes(File.ReadAllBytes(filePath), new ReadingParameters());
         }
 
         protected virtual AssemblyDefinition OnAssemblyResolutionFailed(AssemblyResolutionEventArgs e)

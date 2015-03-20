@@ -22,6 +22,7 @@ namespace AsmResolver.Net.Msil
 	        Size = (flags >> 22 & 3);
 	        Op1 = (byte)((ushort)value >> 8);
 	        Op2 = (byte)value;
+            Code = value;
 	        FlowControl = (MsilFlowControl)(flags >> 5 & 15);
 	        // m_endsUncondJmpBlk = ((flags & 16777216) != 0);
 	        // m_stackChange = flags >> 28;
@@ -30,6 +31,12 @@ namespace AsmResolver.Net.Msil
                 MsilOpCodes.SingleByteOpCodes[Op2] = this;
             else
                 MsilOpCodes.MultiByteOpCodes[Op2] = this;
+        }
+
+        public MsilCode Code
+        {
+            get;
+            set;
         }
 
         public string Name
