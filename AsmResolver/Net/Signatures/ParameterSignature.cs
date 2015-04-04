@@ -13,7 +13,7 @@ namespace AsmResolver.Net.Signatures
         {
             return new ParameterSignature
             {
-                ParameterType = TypeSignature.FromReader(header, reader)
+                ParameterType = TypeSignature.FromReader(header, reader),
             };
         }
 

@@ -107,6 +107,7 @@ namespace AsmResolver.Net.Msil
         private ReadingContext _msilReadingContext;
         private ReadingContext _sectionReadingContext;
         private List<ExceptionHandler> _handlers;
+        private ParameterSignature _thisParameter;
 
         public MethodBody(MethodDefinition method)
         {
@@ -118,6 +119,16 @@ namespace AsmResolver.Net.Msil
         {
             get;
             private set;
+        }
+
+        public ParameterSignature ThisParameter
+        {
+            get
+            {
+                if (_thisParameter != null)
+                    return _thisParameter;
+                return _thisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
+            }
         }
 
         public bool InitLocals
@@ -346,7 +357,11 @@ namespace AsmResolver.Net.Msil
         ParameterSignature IOperandResolver.ResolveParameter(int index)
         {
             if (Method.Signature.Attributes.HasFlag(CallingConventionAttributes.HasThis))
+            {
+                if (index == 0)
+                    return ThisParameter;
                 index--;
+            }
             return Method.Signature.Parameters[index];
         }
     }

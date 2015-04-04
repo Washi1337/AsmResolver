@@ -97,7 +97,7 @@ namespace AsmResolver.Net.Metadata
 
         public ITypeDefOrRef DeclaringType
         {
-            get { return null; }
+            get { return ResolutionScope as ITypeDefOrRef; }
         }
 
         public CustomAttributeCollection CustomAttributes
