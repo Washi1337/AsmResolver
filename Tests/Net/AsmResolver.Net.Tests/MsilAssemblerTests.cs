@@ -198,7 +198,7 @@ namespace AsmResolver.Tests.Net
             body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Ret));
 
             // build and validate.
-            assembly = Utilities.RebuildNetAssembly(assembly);
+            assembly = Utilities.RebuildNetAssembly(assembly, true);
             methodTable = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>().GetTable<MethodDefinition>();
             var newBody = methodTable[0].MethodBody;
 

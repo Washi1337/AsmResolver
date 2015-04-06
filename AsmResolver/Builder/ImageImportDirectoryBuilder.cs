@@ -14,6 +14,12 @@ namespace AsmResolver.Builder
         {
             private readonly Dictionary<ImageModuleImport, FileSegment> _moduleNameSegments = new Dictionary<ImageModuleImport, FileSegment>();
 
+            public void AddHintNameSegment(HintName hintName)
+            {
+                if (!Segments.Contains(hintName))
+                    Segments.Add(hintName);
+            }
+
             public FileSegment GetModuleNameSegment(ImageModuleImport moduleImport)
             {
                 FileSegment segment;
@@ -31,13 +37,17 @@ namespace AsmResolver.Builder
             private readonly Dictionary<ImageModuleImport, LookupTableBuilder> _lookupTableSegments = new Dictionary<ImageModuleImport, LookupTableBuilder>();
             private readonly IOffsetConverter _offsetConverter;
             private readonly NameTableBuilder _nameTableBuilder;
-            private readonly bool _is32Bit;
 
-            public LookupTablesBuilder(IOffsetConverter offsetConverter, NameTableBuilder nameTableBuilder, bool is32Bit)
+            public LookupTablesBuilder(IOffsetConverter offsetConverter, NameTableBuilder nameTableBuilder)
             {
                 _offsetConverter = offsetConverter;
                 _nameTableBuilder = nameTableBuilder;
-                _is32Bit = is32Bit;
+            }
+
+            public bool Is32Bit
+            {
+                get;
+                set;
             }
 
             public LookupTableBuilder GetModuleLookupSegment(ImageModuleImport moduleImport)
@@ -45,7 +55,10 @@ namespace AsmResolver.Builder
                 LookupTableBuilder segment;
                 if (!_lookupTableSegments.TryGetValue(moduleImport, out segment))
                 {
-                    segment = new LookupTableBuilder(_offsetConverter, _nameTableBuilder, _is32Bit);
+                    segment = new LookupTableBuilder(_offsetConverter, _nameTableBuilder)
+                    {
+                        Is32Bit = Is32Bit
+                    };
 
                     foreach (var symbolImport in moduleImport.SymbolImports)
                         segment.GetLookupSegment(symbolImport);
@@ -63,13 +76,17 @@ namespace AsmResolver.Builder
             private readonly Dictionary<ImageSymbolImport, FileSegment> _lookupSegments = new Dictionary<ImageSymbolImport, FileSegment>();
             private readonly IOffsetConverter _offsetConverter;
             private readonly NameTableBuilder _nameTableBuilder;
-            private readonly bool _is32Bit;
 
-            public LookupTableBuilder(IOffsetConverter offsetConverter, NameTableBuilder nameTableBuilder, bool is32Bit)
+            public bool Is32Bit
+            {
+                get;
+                set;
+            }
+
+            public LookupTableBuilder(IOffsetConverter offsetConverter, NameTableBuilder nameTableBuilder)
             {
                 _offsetConverter = offsetConverter;
                 _nameTableBuilder = nameTableBuilder;
-                _is32Bit = is32Bit;
             }
 
             public FileSegment GetLookupSegment(ImageSymbolImport symbolImport)
@@ -78,14 +95,14 @@ namespace AsmResolver.Builder
                 if (!_lookupSegments.TryGetValue(symbolImport, out segment))
                 {
                     if (symbolImport.IsImportByOrdinal)
-                        segment = DataSegment.CreateNativeInteger(symbolImport.Lookup, _is32Bit);
+                        segment = DataSegment.CreateNativeInteger(symbolImport.Lookup, Is32Bit);
                     else if (symbolImport.HintName != null)
                     {
-                        _nameTableBuilder.Segments.Add(symbolImport.HintName);
-                        segment = new PointerSegment(symbolImport.HintName, _offsetConverter, _is32Bit);
+                        _nameTableBuilder.AddHintNameSegment(symbolImport.HintName);
+                        segment = new PointerSegment(symbolImport.HintName, _offsetConverter, Is32Bit);
                     }
                     else
-                        segment = DataSegment.CreateNativeInteger(0, _is32Bit);
+                        segment = DataSegment.CreateNativeInteger(0, Is32Bit);
 
                     _lookupSegments.Add(symbolImport, segment);
                     Segments.Add(segment);
@@ -96,40 +113,43 @@ namespace AsmResolver.Builder
 
         private readonly FileSegmentBuilder _entryTableBuilder;
         private readonly LookupTablesBuilder _lookupTablesBuilder;
-        private readonly LookupTablesBuilder _addressTablesBuilder;
         private readonly NameTableBuilder _nameTableBuilder;
-        private readonly NetAssemblyBuilder _builder;
         private readonly IOffsetConverter _offsetConverter;
         private readonly ImageImportDirectory _directory;
 
-        public ImageImportDirectoryBuilder(NetAssemblyBuilder builder, IOffsetConverter offsetConverter, ImageImportDirectory directory)
+        public ImageImportDirectoryBuilder(IOffsetConverter offsetConverter, ImageImportDirectory directory)
         {
-            if (builder == null)
-                throw new ArgumentNullException("builder");
             if (offsetConverter == null)
                 throw new ArgumentNullException("offsetConverter");
             if (directory == null)
                 throw new ArgumentNullException("directory");
 
-            _builder = builder;
             _offsetConverter = offsetConverter;
             _directory = directory;
-
-            var is32Bit = _builder.Assembly.NtHeaders.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
-
+            
             _entryTableBuilder = new FileSegmentBuilder();
             _nameTableBuilder = new NameTableBuilder();
-            _lookupTablesBuilder = new LookupTablesBuilder(_offsetConverter, _nameTableBuilder, is32Bit);
-            _addressTablesBuilder = new LookupTablesBuilder(_offsetConverter, _nameTableBuilder, is32Bit);
+            _lookupTablesBuilder = new LookupTablesBuilder(_offsetConverter, _nameTableBuilder);
+            AddressTablesBuilder = new LookupTablesBuilder(_offsetConverter, _nameTableBuilder);
 
-            Segments.Add(_addressTablesBuilder);
+            //Segments.Add(_addressTablesBuilder);
             Segments.Add(_entryTableBuilder);
             Segments.Add(_lookupTablesBuilder);
             Segments.Add(_nameTableBuilder);
         }
 
+        public LookupTablesBuilder AddressTablesBuilder
+        {
+            get;
+            private set;
+        }
+
         public override void Build(BuildingContext context)
         {
+            var is32Bit = context.Assembly.NtHeaders.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
+            _lookupTablesBuilder.Is32Bit = is32Bit;
+            AddressTablesBuilder.Is32Bit = is32Bit;
+
             foreach (var moduleImport in _directory.ModuleImports)
                 AppendModuleImport(moduleImport);
             _entryTableBuilder.Segments.Add(new ImageModuleImport());
@@ -140,27 +160,27 @@ namespace AsmResolver.Builder
         {
             _entryTableBuilder.Segments.Add(moduleImport);
             _lookupTablesBuilder.GetModuleLookupSegment(moduleImport);
-            _addressTablesBuilder.GetModuleLookupSegment(moduleImport);
+            AddressTablesBuilder.GetModuleLookupSegment(moduleImport);
             _nameTableBuilder.GetModuleNameSegment(moduleImport);
         }
 
         public override void UpdateReferences(BuildingContext context)
         {
             UpdateTableRvas();
-            UpdateDataDirectories();
+            UpdateDataDirectories(context);
             base.UpdateReferences(context);
         }
 
-        private void UpdateDataDirectories()
+        private void UpdateDataDirectories(BuildingContext context)
         {
-            var optionalHeader = _builder.Assembly.NtHeaders.OptionalHeader;
+            var optionalHeader = context.Assembly.NtHeaders.OptionalHeader;
             var importDirectory = optionalHeader.DataDirectories[ImageDataDirectory.ImportDirectoryIndex];
             importDirectory.VirtualAddress = (uint)_offsetConverter.FileOffsetToRva(_entryTableBuilder.StartOffset);
-            importDirectory.Size = _entryTableBuilder.GetPhysicalLength();
+            importDirectory.Size = this.GetPhysicalLength();
 
             var iatDirectory = optionalHeader.DataDirectories[ImageDataDirectory.IatDirectoryIndex];
-            iatDirectory.VirtualAddress = (uint)_offsetConverter.FileOffsetToRva(_addressTablesBuilder.StartOffset);
-            iatDirectory.Size = _addressTablesBuilder.GetPhysicalLength();
+            iatDirectory.VirtualAddress = (uint)_offsetConverter.FileOffsetToRva(AddressTablesBuilder.StartOffset);
+            iatDirectory.Size = AddressTablesBuilder.GetPhysicalLength();
         }
 
         private void UpdateTableRvas()
@@ -169,8 +189,9 @@ namespace AsmResolver.Builder
             {
                 module.NameRva = (uint)_offsetConverter.FileOffsetToRva(_nameTableBuilder.GetModuleNameSegment(module).StartOffset);
                 module.ImportLookupTableRva = (uint)_offsetConverter.FileOffsetToRva(_lookupTablesBuilder.GetModuleLookupSegment(module).StartOffset);
-                module.ImportAddressTableRva = (uint)_offsetConverter.FileOffsetToRva(_addressTablesBuilder.GetModuleLookupSegment(module).StartOffset);
+                module.ImportAddressTableRva = (uint)_offsetConverter.FileOffsetToRva(AddressTablesBuilder.GetModuleLookupSegment(module).StartOffset);
             }
         }
+
     }
 }

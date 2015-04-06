@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net.Msil
 {
-    public struct MsilOpCode
+    public struct MsilOpCode : IEquatable<MsilOpCode>
     {
         // taken from System.Reflection.Emit.OpCode
 
@@ -96,6 +96,23 @@ namespace AsmResolver.Net.Msil
         public override string ToString()
         {
             return Name;
+        }
+
+        public bool Equals(MsilOpCode other)
+        {
+            return Code == other.Code;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            return obj is MsilOpCode && Equals((MsilOpCode)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)Code;
         }
     }
 }

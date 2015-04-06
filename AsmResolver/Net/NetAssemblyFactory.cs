@@ -63,6 +63,10 @@ namespace AsmResolver.Net
             optionalHeader.SizeOfHeapReserve = 0x100000;
             optionalHeader.SizeOfHeapCommit = 0x1000;
             optionalHeader.NumberOfRvaAndSizes = 0x10;
+            optionalHeader.DllCharacteristics = ImageDllCharacteristics.DynamicBase | 
+                ImageDllCharacteristics.NxCompat |
+                ImageDllCharacteristics.NoSeh |
+                ImageDllCharacteristics.TerminalServerAware;
 
             for (int i = 0; i < 0x10; i++)
                 optionalHeader.DataDirectories.Add(new ImageDataDirectory());

@@ -45,9 +45,9 @@ namespace AsmResolver.Net.Builder
                         _sectionBuilders[i].Header.StartOffset = _sectionBuilders[i - 1].Header.StartOffset + _sectionBuilders[i - 1].Header.GetPhysicalLength();
 
                     _sectionBuilders[i].StartOffset = fileAddress;
+                    _sectionBuilders[i].UpdateOffsets(context);
                     fileAddress += _sectionBuilders[i].GetPhysicalLength();
 
-                    _sectionBuilders[i].UpdateOffsets(context);
                 }
             }
             
@@ -106,9 +106,8 @@ namespace AsmResolver.Net.Builder
             _textSectionBuilder.Header.Attributes = ImageSectionAttributes.MemoryExecute |
                                                     ImageSectionAttributes.MemoryRead |
                                                     ImageSectionAttributes.ContentCode;
-
-            _textSectionBuilder.Segments.Add(new ImageImportDirectoryBuilder(this, _textSectionBuilder.Header, Assembly.ImportDirectory));
             _textSectionBuilder.Segments.Add(TextBuilder = new NetTextBuilder(Assembly.NetDirectory));
+
 
             if (Assembly.RootResourceDirectory != null)
             {
@@ -225,7 +224,7 @@ namespace AsmResolver.Net.Builder
                 relocDirectory.VirtualAddress = _relocSectionBuilder.Header.VirtualAddress;
                 relocDirectory.Size = _relocSectionBuilder.Header.VirtualSize;
             }
-
+            
             var netDirectory =
                 Assembly.NtHeaders.OptionalHeader.DataDirectories[ImageDataDirectory.ClrDirectoryIndex];
             netDirectory.VirtualAddress = (uint)Assembly.FileOffsetToRva(Assembly.NetDirectory.StartOffset);

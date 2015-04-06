@@ -11,14 +11,25 @@ namespace AsmResolver.Net.Builder
         public NetTextBuilder(ImageNetDirectory directory)
         {
             _directory = directory;
-            
-            Segments.Add(_directory);
+
+            ImportBuilder = new ImageImportDirectoryBuilder(directory.Assembly, directory.Assembly.ImportDirectory);
+
+            Segments.Add(ImportBuilder.AddressTablesBuilder);
+            Segments.Add(directory);
+            Segments.Add(MethodBodyTableBuilder = new MethodBodyTableBuilder());
             Segments.Add(NetResourceDirectoryBuilder = new NetResourceDirectoryBuilder());
             Segments.Add(DataBuilder = new NetDataTableBuilder());
             // strongname
             Segments.Add(Metadata = new MetadataBuilder(directory.MetadataHeader));
-            Segments.Add(MethodBodyTableBuilder = new MethodBodyTableBuilder());
-            Segments.Add(new StartupCodeSegmentBuilder());
+
+            if (directory.Assembly.DebugDirectory != null)
+            {
+                Segments.Add(directory.Assembly.DebugDirectory);
+                Segments.Add(directory.Assembly.DebugDirectory.Data);
+            }
+
+            Segments.Add(ImportBuilder);
+            Segments.Add(StartupCode = new StartupCodeSegmentBuilder());
         }
 
         public MetadataBuilder Metadata
@@ -45,6 +56,24 @@ namespace AsmResolver.Net.Builder
             private set;
         }
 
+        public ImageImportDirectoryBuilder ImportBuilder
+        {
+            get;
+            private set;
+        }
+
+        public StartupCodeSegmentBuilder StartupCode
+        {
+            get;
+            private set;
+        }
+
+        public override void Build(BuildingContext context)
+        {
+            foreach (var segment in Segments.OfType<FileSegmentBuilder>().Reverse())
+                segment.Build(context);
+        }
+
         public override void UpdateOffsets(BuildingContext context)
         {
             if (NetResourceDirectoryBuilder.Segments.Count == 0)
@@ -54,8 +83,31 @@ namespace AsmResolver.Net.Builder
 
         public override void UpdateReferences(BuildingContext context)
         {
+            UpdateDebugDirectory();
             UpdateMetaDataDirectories();
             base.UpdateReferences(context);
+        }
+
+        private void UpdateDebugDirectory()
+        {
+            var assembly = _directory.Assembly;
+
+            var debugDataDirectory =
+                assembly.NtHeaders.OptionalHeader.DataDirectories[ImageDataDirectory.DebugDirectoryIndex];
+
+            if (assembly.DebugDirectory == null)
+            {
+                debugDataDirectory.VirtualAddress = 0;
+                debugDataDirectory.Size = 0;
+            }
+            else
+            {
+                debugDataDirectory.VirtualAddress = (uint)assembly.FileOffsetToRva(assembly.DebugDirectory.StartOffset);
+                debugDataDirectory.Size = assembly.DebugDirectory.GetPhysicalLength();
+                assembly.DebugDirectory.PointerToRawData = (uint)assembly.DebugDirectory.Data.StartOffset;
+                assembly.DebugDirectory.AddressOfRawData =
+                    (uint)assembly.FileOffsetToRva(assembly.DebugDirectory.Data.StartOffset);
+            }
         }
 
         private void UpdateMetaDataDirectories()

@@ -288,7 +288,7 @@ namespace AsmResolver.Net.Msil
                                             (InitLocals ? 0x10 : 0) | 0x3003));
                 writer.WriteUInt16((ushort)MaxStack);
                 writer.WriteUInt32(GetCodeSize());
-                writer.WriteUInt32(Signature.MetadataToken.ToUInt32());
+                writer.WriteUInt32(Signature == null ? 0 : Signature.MetadataToken.ToUInt32());
             }
             else
             {

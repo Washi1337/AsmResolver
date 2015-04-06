@@ -149,7 +149,7 @@ namespace AsmResolver.Net
 
         public override uint GetPhysicalLength()
         {
-            return _length;
+            return Align(_length, 4);
         }
 
         public override void Write(WritingContext context)
@@ -164,6 +164,8 @@ namespace AsmResolver.Net
             }
 
             writer.WriteByte(0);
+
+            writer.WriteZeroes((int)(Align(_length, 4) - _length));
         }
     }
 }

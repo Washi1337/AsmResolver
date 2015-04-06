@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -73,9 +74,31 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            if (Value is string)
-                return ((Value as string).GetSerStringSize());
-            return (uint)Marshal.SizeOf(Value);
+            if (Value == null)
+                throw new NotSupportedException();
+
+            switch(Type.GetTypeCode(Value.GetType()))
+            {
+                case TypeCode.Boolean:
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                    return sizeof (byte);
+                case TypeCode.Char:
+                case TypeCode.Int16:
+                case TypeCode.UInt16:
+                    return sizeof (ushort);
+                case TypeCode.Single:
+                case TypeCode.Int32:
+                case TypeCode.UInt32:
+                    return sizeof(uint);
+                case TypeCode.Double:
+                case TypeCode.Int64:
+                case TypeCode.UInt64:
+                    return sizeof (ulong);
+                case TypeCode.String:
+                    return ((Value as string).GetSerStringSize());
+            }
+            throw new NotSupportedException();
         }
 
         public override void Write(WritingContext context)

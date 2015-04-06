@@ -11,6 +11,19 @@ namespace AsmResolver.Net.Msil
         public static readonly MsilOpCode[] SingleByteOpCodes = new MsilOpCode[256];
         public static readonly MsilOpCode[] MultiByteOpCodes = new MsilOpCode[256];
 
+        public static MsilOpCode GetOpCode(MsilCode code)
+        {
+            var value = (int)code;
+            if ((value & 0xFE00) == 0xFE00)
+                return MultiByteOpCodes[value & 0xFF];
+            return SingleByteOpCodes[value & 0xFF];
+        }
+
+        public static MsilOpCode GetOpCode(string name)
+        {
+            return SingleByteOpCodes.Concat(MultiByteOpCodes).First(x => x.Name == name);
+        }
+
         // taken from the System.Reflection.Emit.OpCodes class (except for InlineArgument opcodes).
         // ReSharper disable InconsistentNaming
 
