@@ -86,6 +86,7 @@ namespace AsmResolver
         private ImageRelocationDirectory _relocDirectory;
         private ImageDosHeader _dosHeader;
         private ImageNtHeaders _ntHeaders;
+        private ImageDebugDirectory _debugDirectory;
 
         public WindowsAssembly()
         {
@@ -217,6 +218,25 @@ namespace AsmResolver
                 if (value != null)
                     _netDirectory.Assembly = this;
             }
+        }
+
+        public ImageDebugDirectory DebugDirectory
+        {
+            get
+            {
+                if (_debugDirectory != null)
+                    return _debugDirectory;
+
+                if (ReadingContext != null)
+                {
+                    var context = CreateDataDirectoryContext(ReadingContext, ImageDataDirectory.DebugDirectoryIndex);
+                    if (context != null)
+                        return _debugDirectory = ImageDebugDirectory.FromReadingContext(context);
+                }
+
+                return null;
+            }
+            set { _debugDirectory = value; }
         }
 
         public long RvaToFileOffset(long rva)

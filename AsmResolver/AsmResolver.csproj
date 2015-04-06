@@ -49,6 +49,7 @@
     <Compile Include="Builder\FileSegmentBuilder.cs" />
     <Compile Include="Builder\ImageImportDirectoryBuilder.cs" />
     <Compile Include="Collections\Generic\Collection.cs" />
+    <Compile Include="ImageDebugDirectory.cs" />
     <Compile Include="Net\AssemblyResolutionEventArgs.cs" />
     <Compile Include="Net\AssemblyResolutionException.cs" />
     <Compile Include="Net\Builder\MetadataBuilder.cs" />
