@@ -15,9 +15,6 @@ namespace AsmResolver
             var application = context.Assembly;
             var reader = context.Reader;
 
-            var dataDirectory =
-                application.NtHeaders.OptionalHeader.DataDirectories[ImageDataDirectory.ExportDirectoryIndex];
-
             var directory = new ImageExportDirectory
             {
                 _readingContext = context,
@@ -134,22 +131,35 @@ namespace AsmResolver
                 var reader = _readingContext.Reader;
 
                 var addressReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfFunctions));
-                var nameOrdinalReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfNameOrdinals));
-                var nameRvaReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfNames));
+
+                var nameOrdinalReader = AddressOfNameOrdinals != 0
+                    ? reader.CreateSubReader(application.RvaToFileOffset(AddressOfNameOrdinals))
+                    : null;
+
+                var nameRvaReader = AddressOfNames != 0
+                    ? reader.CreateSubReader(application.RvaToFileOffset(AddressOfNames))
+                    : null;
             
                 for (int i = 0; i < NumberOfFunctions; i++)
                 {
                     var export = new ImageSymbolExport()
                     {
                         Rva = addressReader.ReadUInt32(),
-                        NameOrdinal = nameOrdinalReader.ReadUInt16(),
-                        NameRva = nameRvaReader.ReadUInt32(),
                     };
 
-                    // TODO: set IsForwarder and ForwarderName properties.
+                    if (i >= NumberOfFunctions - NumberOfNames)
+                    {
+                        if (nameOrdinalReader != null)
+                            export.NameOrdinal = nameOrdinalReader.ReadUInt16();
 
-                    var nameReader = reader.CreateSubReader(application.RvaToFileOffset(export.NameRva));
-                    export.Name = nameReader.ReadAsciiString();
+                        if (nameRvaReader != null)
+                        {
+                            export.NameRva = nameRvaReader.ReadUInt32();
+                            // TODO: set IsForwarder and ForwarderName properties.
+                            var nameReader = reader.CreateSubReader(application.RvaToFileOffset(export.NameRva.Value));
+                            export.Name = nameReader.ReadAsciiString();
+                        }
+                    }
 
                     _exports.Add(export);
                 }
