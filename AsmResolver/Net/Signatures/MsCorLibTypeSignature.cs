@@ -46,7 +46,7 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.U2:
                     return header.TypeSystem.UInt16;
                 case ElementType.U4:
-                    return header.TypeSystem.UInt64;
+                    return header.TypeSystem.UInt32;
                 case ElementType.U8:
                     return header.TypeSystem.UInt64;
                 case ElementType.Void:
