@@ -38,9 +38,6 @@ namespace AsmResolver.Net.Msil
                 case ExceptionHandlerType.Filter:
                     handler.FilterStart = methodBody.GetInstructionByOffset((int)classTokenOrFilterOffset);
                     break;
-                default:
-                    reader.Position += sizeof (uint);
-                    break;
             }
 
             return handler;

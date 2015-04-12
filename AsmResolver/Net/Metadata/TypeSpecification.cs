@@ -39,9 +39,15 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public class TypeSpecification : MetadataMember<MetadataRow<uint>>, ITypeDefOrRef, IMemberRefParent
+    public class TypeSpecification : MetadataMember<MetadataRow<uint>>, ITypeDefOrRef
     {
         private CustomAttributeCollection _customAttributes;
+
+        public TypeSpecification(TypeSignature signature)
+            : base(null, new MetadataToken(MetadataTokenType.TypeSpec), new MetadataRow<uint>())
+        {
+            Signature = signature;
+        }
 
         internal TypeSpecification(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
@@ -109,6 +115,23 @@ namespace AsmResolver.Net.Metadata
                 _customAttributes = new CustomAttributeCollection(this);
                 return _customAttributes;
             }
+        }
+
+        public TypeDefinition Resolve()
+        {
+            if (Header == null || Header.MetadataResolver == null)
+                throw new MemberResolutionException(this);
+            return Header.MetadataResolver.ResolveType(this);
+        }
+
+        IMetadataMember IResolvable.Resolve()
+        {
+            return Resolve();
+        }
+
+        public override string ToString()
+        {
+            return Signature.ToString();
         }
     }
 }

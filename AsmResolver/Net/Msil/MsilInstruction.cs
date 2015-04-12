@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -198,13 +199,13 @@ namespace AsmResolver.Net.Msil
                 case MsilOperandType.InlineSig:
                 case MsilOperandType.InlineTok:
                 case MsilOperandType.InlineType:
-                    return Operand.ToString();
+                    return Convert.ToString(Operand, CultureInfo.InvariantCulture);
 
                 case MsilOperandType.InlineString:
                     return string.Format("\"{0}\"", Operand);
 
                 case MsilOperandType.InlineSwitch:
-                    return string.Join(",", ((MsilInstruction[])Operand).Select(x => "IL_" + x.Offset.ToString("X4")));
+                    return string.Join(", ", ((MsilInstruction[])Operand).Select(x => "IL_" + x.Offset.ToString("X4")));
                 case MsilOperandType.InlineBrTarget:
                 case MsilOperandType.ShortInlineBrTarget:
                     return "IL_" + ((MsilInstruction)Operand).Offset.ToString("X4");
