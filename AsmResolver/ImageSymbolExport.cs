@@ -20,7 +20,7 @@ namespace AsmResolver
             set;
         }
 
-        public ushort? NameOrdinal
+        public ushort NameOrdinal
         {
             get;
             set;
@@ -46,9 +46,9 @@ namespace AsmResolver
 
         public override string ToString()
         {
-            return string.Format("Rva: {0:X8}, NameOrdinal: {1}, Name: {2}", 
+            return string.Format("Rva: {0:X8}, NameOrdinal: {1:X4}, Name: {2}", 
                 Rva,
-                NameOrdinal.HasValue ? NameOrdinal.Value.ToString("X") : "null",
+                NameOrdinal,
                 Name ?? "null");
         }
     }

@@ -130,42 +130,82 @@ namespace AsmResolver
                 var application = _readingContext.Assembly;
                 var reader = _readingContext.Reader;
 
-                var addressReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfFunctions));
 
-                var nameOrdinalReader = AddressOfNameOrdinals != 0
-                    ? reader.CreateSubReader(application.RvaToFileOffset(AddressOfNameOrdinals))
-                    : null;
+                var addresses = ReadAddresses(reader, application);
+                var ordinalRvaTable = ReadOrdinalRvaTable(reader, application);
 
-                var nameRvaReader = AddressOfNames != 0
-                    ? reader.CreateSubReader(application.RvaToFileOffset(AddressOfNames))
-                    : null;
-            
-                for (int i = 0; i < NumberOfFunctions; i++)
+                for (ushort i = 0; i < addresses.Length; i++)
                 {
                     var export = new ImageSymbolExport()
                     {
-                        Rva = addressReader.ReadUInt32(),
+                        Rva = addresses[i],
+                        NameOrdinal = i
                     };
 
-                    if (i >= NumberOfFunctions - NumberOfNames)
+                    uint rva;
+                    if (ordinalRvaTable.TryGetValue(i, out rva))
                     {
-                        if (nameOrdinalReader != null)
-                            export.NameOrdinal = nameOrdinalReader.ReadUInt16();
-
-                        if (nameRvaReader != null)
-                        {
-                            export.NameRva = nameRvaReader.ReadUInt32();
-                            // TODO: set IsForwarder and ForwarderName properties.
-                            var nameReader = reader.CreateSubReader(application.RvaToFileOffset(export.NameRva.Value));
-                            export.Name = nameReader.ReadAsciiString();
-                        }
+                        export.NameRva = rva;
+                        var nameReader = reader.CreateSubReader(application.RvaToFileOffset(export.NameRva.Value));
+                        export.Name = nameReader.ReadAsciiString();
                     }
 
+                    // TODO: set IsForwarder and ForwarderName properties.
                     _exports.Add(export);
                 }
 
+              // for (int i = 0; i < NumberOfFunctions; i++)
+              // {
+              //     var export = new ImageSymbolExport()
+              //     {
+              //         Rva = addressReader.ReadUInt32(),
+              //     };
+              //
+              //     if (i >= NumberOfFunctions - NumberOfNames)
+              //     {
+              //         if (nameOrdinalReader != null)
+              //             export.NameOrdinal = nameOrdinalReader.ReadUInt16();
+              //
+              //         if (nameRvaReader != null)
+              //         {
+              //             export.NameRva = nameRvaReader.ReadUInt32();
+              //             // TODO: set IsForwarder and ForwarderName properties.
+              //             var nameReader = reader.CreateSubReader(application.RvaToFileOffset(export.NameRva.Value));
+              //             export.Name = nameReader.ReadAsciiString();
+              //         }
+              //     }
+              //
+              //     _exports.Add(export);
+              // }
+
                 return _exports;
             }
+        }
+
+        private Dictionary<ushort, uint> ReadOrdinalRvaTable(IBinaryStreamReader reader, WindowsAssembly application)
+        {
+            var dictionary = new Dictionary<ushort, uint>();
+            if (NumberOfNames > 0)
+            {
+                var nameOrdinalReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfNameOrdinals));
+                var nameRvaReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfNames));
+
+                for (int i = 0; i < NumberOfNames; i++)
+                    dictionary.Add(nameOrdinalReader.ReadUInt16(), nameRvaReader.ReadUInt32());
+            }
+            return dictionary;
+        }
+
+        private uint[] ReadAddresses(IBinaryStreamReader reader, WindowsAssembly application)
+        {
+            var addressReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfFunctions));
+            var addresses = new uint[NumberOfFunctions];
+
+            for (int i = 0; i < NumberOfFunctions; i++)
+            {
+                addresses[i] = addressReader.ReadUInt32();
+            }
+            return addresses;
         }
 
         public override uint GetPhysicalLength()
