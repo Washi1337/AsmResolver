@@ -5,7 +5,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net
 {
-    public interface IAssemblyDescriptor : IFullNameProvider
+    public interface IAssemblyDescriptor : IFullNameProvider, IResolvable
     {
         string Culture
         {

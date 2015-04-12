@@ -139,7 +139,19 @@ namespace AsmResolver.Net
                    MatchMemberSignatures(reference1.Signature, reference2.Signature);
         }
 
-        public bool MatchMemberSignatures(MemberSignature signature1, MemberSignature signature2)
+        public bool MatchMembers(ICallableMemberReference reference1, ICallableMemberReference reference2)
+        {
+            if (reference1 == null && reference2 == null)
+                return true;
+            if (reference1 == null || reference2 == null)
+                return false;
+
+            return reference1.Name == reference2.Name &&
+                   MatchParents(reference1.DeclaringType, reference2.DeclaringType) &&
+                   MatchMemberSignatures(reference1.Signature, reference2.Signature);
+        }
+
+        public bool MatchMemberSignatures(CallingConventionSignature signature1, CallingConventionSignature signature2)
         {
             if (signature1 == null && signature2 == null)
                 return true;

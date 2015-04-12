@@ -10,7 +10,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public interface ICallableMemberReference : IMemberReference
+    public interface ICallableMemberReference : IMemberReference, IResolvable
     {
         CallingConventionSignature Signature
         {

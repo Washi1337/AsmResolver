@@ -43,5 +43,10 @@ namespace AsmResolver.Net.Metadata
         {
             get { return _assemblyName.GetPublicKeyToken(); }
         }
+
+        public IMetadataMember Resolve()
+        {
+            throw new NotSupportedException();
+        }
     }
 }

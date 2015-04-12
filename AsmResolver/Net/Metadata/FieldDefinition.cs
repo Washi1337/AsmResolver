@@ -52,7 +52,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public class FieldDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>,ICallableMemberReference, IHasConstant, IHasFieldMarshal, IMemberForwarded, ICollectionItem
+    public class FieldDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, ICallableMemberReference, IHasConstant, IHasFieldMarshal, IMemberForwarded, ICollectionItem
     {
         private string _name;
         private string _fullName;
@@ -238,6 +238,12 @@ namespace AsmResolver.Net.Metadata
             set { Attributes = Attributes.SetFlag(FieldAttributes.Static, value); }
         }
 
+        public bool IsLiteral
+        {
+            get { return Attributes.HasFlag(FieldAttributes.Literal); }
+            set { Attributes = Attributes.SetFlag(FieldAttributes.Literal, value); }
+        }
+
         private bool GetFieldAccessAttribute(FieldAttributes attribute)
         {
             return ((uint)Attributes).GetMaskedAttribute((uint)FieldAttributes.FieldAccessMask,
@@ -253,6 +259,11 @@ namespace AsmResolver.Net.Metadata
         public override string ToString()
         {
             return FullName;
+        }
+
+        IMetadataMember IResolvable.Resolve()
+        {
+            return this;
         }
     }
 }

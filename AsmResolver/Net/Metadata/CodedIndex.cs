@@ -42,7 +42,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public interface ITypeDefOrRef : IMemberReference, IMemberRefParent, ITypeDescriptor
+    public interface ITypeDefOrRef : IMemberReference, IMemberRefParent, ITypeDescriptor, IResolvable
     {
     }
 
@@ -90,7 +90,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public interface IMethodDefOrRef : IMemberReference
+    public interface IMethodDefOrRef : IMemberReference, IResolvable
     {
         MemberSignature Signature
         {

@@ -149,5 +149,17 @@ namespace AsmResolver.Net.Metadata
         {
             return FullName;
         }
+
+        public TypeDefinition Resolve()
+        {
+            if (Header == null || Header.MetadataResolver == null)
+                throw new MemberResolutionException(this);
+            return Header.MetadataResolver.ResolveType(this);
+        }
+
+        IMetadataMember IResolvable.Resolve()
+        {
+            return Resolve();
+        }
     }
 }

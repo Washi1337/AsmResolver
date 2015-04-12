@@ -127,5 +127,16 @@ namespace AsmResolver.Net.Metadata
         {
             get { return _customAttributes ?? (_customAttributes = new CustomAttributeCollection(this)); }
         }
+
+
+        public MethodDefinition Resolve()
+        {
+            return (MethodDefinition)Method.Resolve();
+        }
+
+        IMetadataMember IResolvable.Resolve()
+        {
+            return Resolve();
+        }
     }
 }

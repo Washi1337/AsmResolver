@@ -102,6 +102,7 @@
     <Compile Include="Net\IAssemblyDescriptor.cs" />
     <Compile Include="Net\INameProvider.cs" />
     <Compile Include="Net\Metadata\IGenericContext.cs" />
+    <Compile Include="Net\Metadata\IResolvable.cs" />
     <Compile Include="Net\Metadata\MetadataMemberCollection.cs" />
     <Compile Include="Net\Metadata\MethodSemantics.cs" />
     <Compile Include="Net\Metadata\ReferenceImporter.cs" />

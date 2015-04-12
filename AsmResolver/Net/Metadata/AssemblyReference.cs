@@ -200,6 +200,18 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        public AssemblyDefinition Resolve()
+        {
+            if (Header == null)
+                throw new AssemblyResolutionException(this);
+            return Header.MetadataResolver.AssemblyResolver.ResolveAssembly(this);
+        }
+
+        IMetadataMember IResolvable.Resolve()
+        {
+            return Resolve();
+        }
+
         public override string ToString()
         {
             return FullName;

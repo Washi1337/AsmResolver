@@ -219,6 +219,11 @@ namespace AsmResolver.Net.Metadata
             return FullName;
         }
 
+        IMetadataMember IResolvable.Resolve()
+        {
+            return this;
+        }
+
         private static byte[] ComputePublicKeyToken(byte[] key, AssemblyHashAlgorithm algorithm)
         {
             System.Security.Cryptography.HashAlgorithm hashAlgorithm;

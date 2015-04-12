@@ -74,6 +74,7 @@ namespace AsmResolver.Net.Metadata
         private MethodBody _body;
         private TypeDefinition _declaringType;
         private GenericParameterCollection _genericParameters;
+        private PInvokeImplementation _pinvokeImplementation;
 
         public MethodDefinition(string name, MethodAttributes attributes, MethodSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.Method), new MetadataRow<uint, ushort, ushort, uint, uint, uint>())
@@ -221,6 +222,19 @@ namespace AsmResolver.Net.Metadata
             get { return _genericParameters ?? (_genericParameters = new GenericParameterCollection(this)); }
         }
 
+        public PInvokeImplementation PInvokeImplementation
+        {
+            get
+            {
+                if (_pinvokeImplementation != null || Header == null)
+                    return _pinvokeImplementation;
+
+                return _pinvokeImplementation = Header.GetStream<TableStream>()
+                    .GetTable<PInvokeImplementation>()
+                    .FirstOrDefault(x => x.MemberForwarded == this);
+            }
+        }
+
         object ICollectionItem.Owner
         {
             get { return DeclaringType; }
@@ -331,6 +345,11 @@ namespace AsmResolver.Net.Metadata
         public override string ToString()
         {
             return FullName;
+        }
+
+        public IMetadataMember Resolve()
+        {
+            return this;
         }
 
         IGenericParameterProvider IGenericContext.Type

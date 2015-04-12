@@ -460,6 +460,11 @@ namespace AsmResolver.Net.Metadata
             return FullName;
         }
 
+        IMetadataMember IResolvable.Resolve()
+        {
+            return this;
+        }
+
         IGenericParameterProvider IGenericContext.Type
         {
             get { return this; }
