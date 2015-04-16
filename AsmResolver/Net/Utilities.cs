@@ -43,6 +43,11 @@ namespace AsmResolver.Net
                 var assembly = scope as IAssemblyDescriptor;
                 if (assembly != null)
                     return assembly;
+                
+                var module = scope as ModuleDefinition;
+                if (module != null)
+                    return module.Header.GetStream<TableStream>().GetTable<AssemblyDefinition>()[0];
+
                 var type = scope as ITypeDefOrRef;
                 if (type == null)
                     return null;

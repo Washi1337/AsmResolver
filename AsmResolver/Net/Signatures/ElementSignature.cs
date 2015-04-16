@@ -47,18 +47,20 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.String:
                     return reader.ReadSerString();
                 case ElementType.Object:
-                    // TODO: boxed values
-                    break;
+                case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
                     var enumTypeDef = header.MetadataResolver.ResolveType(typeSignature);
                     if (enumTypeDef == null)
                         throw new MemberResolutionException(typeSignature);
-                    return ReadValue(header, enumTypeDef.GetEnumUnderlyingType(), reader);
+
+                    if (enumTypeDef.IsEnum)
+                        return ReadValue(header, enumTypeDef.GetEnumUnderlyingType(), reader);
+                    break;
             }
             if (typeSignature.IsTypeOf("System", "Type"))
                 return reader.ReadSerString();
-            throw new NotSupportedException();
+            throw new NotSupportedException("Unsupported element type " + typeSignature.ElementType);
         }
 
         public ElementSignature(object value)

@@ -10,63 +10,75 @@ namespace AsmResolver.Net.Signatures
 {
     public static class TypeNameParser
     {
-        public static TypeSignature ParseType(string name)
+        public static TypeSignature ParseType(MetadataHeader header, string name)
         {
             int position = 0;
-            var type = ReadTypeSignature(name, ref position);
+            var defaultScope = header.GetStream<TableStream>().GetTable<ModuleDefinition>()[0];
+            var type = ReadTypeSignature(defaultScope, name, ref position);
+            
+            if (position >= name.Length)
+                return type;
+
             position++;
             SkipSpaces(name, ref position);
             
             var elementType = ((TypeReference)type.GetElementType());
             while (elementType.DeclaringType != null)
                 elementType = (TypeReference)elementType.DeclaringType;
+
+            if (position >= name.Length)
+                return type;
+
             elementType.ResolutionScope = ReadAssemblyReference(name, ref position);
 
             return type;
         }
 
-        private static TypeSignature ReadTypeSignature(string name, ref int position)
+        private static TypeSignature ReadTypeSignature(IResolutionScope scope, string name, ref int position)
         {
             TypeSignature type = null;
-            while (name[position] != ',')
+            while (position < name.Length && name[position] != ',')
             {
-                type = ReadTypeSignature(ReadTypeDefOrRefSignature(name, ref position), name, ref position);
+                type = ReadTypeSignature(ReadTypeDefOrRefSignature(scope, name, ref position), name, ref position);
             }
             return type;
         }
 
         private static TypeSignature ReadTypeSignature(TypeSignature elementType, string name, ref int position)
         {
-            switch (name[position])
+            if (position < name.Length)
             {
-                case '*':
-                    return new PointerTypeSignature(elementType);
-                case '&':
-                    return new ByReferenceTypeSignature(elementType);
-                case '[':
-                    position++;
-                    if (name[position] == ']')
-                    {
+                switch (name[position])
+                {
+                    case '*':
+                        return new PointerTypeSignature(elementType);
+                    case '&':
+                        return new ByReferenceTypeSignature(elementType);
+                    case '[':
                         position++;
-                        return new SzArrayTypeSignature(elementType);
-                    }
+                        if (name[position] == ']')
+                        {
+                            position++;
+                            return new SzArrayTypeSignature(elementType);
+                        }
 
-                    // TODO: support generic types + generic instances.
-                    break;
+                        // TODO: support generic types + generic instances.
+                        break;
+                }
             }
             return elementType;
         }
 
-        private static TypeDefOrRefSignature ReadTypeDefOrRefSignature(string name, ref int position)
+        private static TypeDefOrRefSignature ReadTypeDefOrRefSignature(IResolutionScope scope, string name, ref int position)
         {
             TypeReference type = null;
 
             while (position < name.Length)
             {
                 var typeName = ReadTypeName(name, ref position);
-                type = CreateTypeReference(type, typeName);
-
-                if (name[position] == '+')
+                type = CreateTypeReference(type ?? scope, typeName);
+                
+                if (position < name.Length && name[position] == '+')
                     position++;
                 else
                     break;
@@ -99,12 +111,12 @@ namespace AsmResolver.Net.Signatures
             return builder.ToString();
         }
 
-        private static TypeReference CreateTypeReference(TypeReference declaringType, string fullName)
+        private static TypeReference CreateTypeReference(IResolutionScope scope, string fullName)
         {
             var dotIndex = fullName.LastIndexOf('.');
             return dotIndex == -1
-                ? new TypeReference(declaringType, string.Empty, fullName)
-                : new TypeReference(declaringType, fullName.Remove(dotIndex), fullName.Substring(dotIndex + 1));
+                ? new TypeReference(scope, string.Empty, fullName)
+                : new TypeReference(scope, fullName.Remove(dotIndex), fullName.Substring(dotIndex + 1));
         }
 
         private static AssemblyReference ReadAssemblyReference(string name, ref int position)

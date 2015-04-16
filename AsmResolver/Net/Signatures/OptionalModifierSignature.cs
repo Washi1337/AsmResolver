@@ -34,7 +34,7 @@ namespace AsmResolver.Net.Signatures
 
         public override string Name
         {
-            get { return BaseType.Name + string.Format(" modopt({0})", BaseType.FullName); }
+            get { return BaseType.Name + string.Format(" modopt({0})", ModifierType.FullName); }
         }
         
         public override uint GetPhysicalLength()

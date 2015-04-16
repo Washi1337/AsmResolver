@@ -52,9 +52,9 @@ namespace AsmResolver.Net.Signatures
             throw new NotSupportedException();
         }
 
-        public static TypeSignature FromAssemblyQualifiedName(string assemblyQualifiedName)
+        public static TypeSignature FromAssemblyQualifiedName(MetadataHeader header, string assemblyQualifiedName)
         {
-            return TypeNameParser.ParseType(assemblyQualifiedName);
+            return TypeNameParser.ParseType(header, assemblyQualifiedName);
         }
 
         public static TypeSignature ReadFieldOrPropType(MetadataHeader header, IBinaryStreamReader reader)
@@ -67,7 +67,7 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(ReadFieldOrPropType(header, reader));
                 case ElementType.Enum:
-                    return FromAssemblyQualifiedName(reader.ReadSerString());
+                    return FromAssemblyQualifiedName(header, reader.ReadSerString());
                 default:
                     return MsCorLibTypeSignature.FromElementType(header, elementType);
             }
