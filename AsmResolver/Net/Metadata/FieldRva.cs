@@ -51,20 +51,36 @@ namespace AsmResolver.Net.Metadata
 
     public class FieldRva : MetadataMember<MetadataRow<uint, uint>>
     {
-        private byte[] _data;
+        private readonly LazyValue<byte[]> _data;
+        private readonly LazyValue<FieldDefinition> _field;
 
         public FieldRva(FieldDefinition field, byte[] data)
             : base(null, new MetadataToken(MetadataTokenType.FieldRva), new MetadataRow<uint, uint>())
         {
-            Field = field;
-            _data = data;
+            _field = new LazyValue<FieldDefinition>(field);
+            _data = new LazyValue<byte[]>(data);
         }
 
         internal FieldRva(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             Rva = row.Column1;
-            Field = header.GetStream<TableStream>().GetTable<FieldDefinition>()[(int)(row.Column2 - 1)];
+
+            _field = new LazyValue<FieldDefinition>(() => 
+                header.GetStream<TableStream>().GetTable<FieldDefinition>()[(int)(row.Column2 - 1)]);
+
+            _data = new LazyValue<byte[]>(() =>
+            {
+                // if (Header == null ||
+                //     Header.NetDirectory == null ||
+                //     Header.NetDirectory.Assembly == null ||
+                //     Header.NetDirectory.Assembly.ReadingContext == null)
+                //     return null;
+
+                var assembly = Header.NetDirectory.Assembly;
+                var reader = assembly.ReadingContext.Reader.CreateSubReader(assembly.RvaToFileOffset(Rva), GetDataSize());
+                return reader.ReadBytes((int)reader.Length);
+            });
         }
 
         public uint Rva
@@ -75,26 +91,14 @@ namespace AsmResolver.Net.Metadata
 
         public FieldDefinition Field
         {
-            get;
-            set;
+            get { return _field.Value; }
+            set { _field.Value = value; }
         }
 
         public byte[] Data
         {
-            get
-            {
-                if (_data != null ||
-                    Header == null || 
-                    Header.NetDirectory == null ||
-                    Header.NetDirectory.Assembly == null || 
-                    Header.NetDirectory.Assembly.ReadingContext == null)
-                    return _data;
-
-                var assembly = Header.NetDirectory.Assembly;
-                var reader = assembly.ReadingContext.Reader.CreateSubReader(assembly.RvaToFileOffset(Rva), GetDataSize());
-                return _data = reader.ReadBytes((int)reader.Length);
-            }
-            set { _data = value; }
+            get { return _data.Value; }
+            set { _data.Value = value; }
         }
 
         public int GetDataSize()

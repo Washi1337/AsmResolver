@@ -13,7 +13,7 @@ namespace AsmResolver.Net.Signatures
         public static TypeSignature ParseType(MetadataHeader header, string name)
         {
             int position = 0;
-            var defaultScope = header.GetStream<TableStream>().GetTable<ModuleDefinition>()[0];
+            var defaultScope = header == null ? null : header.GetStream<TableStream>().GetTable<ModuleDefinition>()[0];
             var type = ReadTypeSignature(defaultScope, name, ref position);
             
             if (position >= name.Length)

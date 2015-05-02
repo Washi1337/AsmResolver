@@ -58,15 +58,18 @@ namespace AsmResolver.Net.Metadata
 
     public class ManifestResource : MetadataMember<MetadataRow<uint, uint, uint, uint>>, IHasCustomAttribute
     {
+        private readonly LazyValue<byte[]> _data;
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<IImplementation> _implementation;
         private CustomAttributeCollection _customAttributes;
-        private byte[] _data;
 
         public ManifestResource(string name, ManifestResourceAttributes attributes, byte[] data)
             : base(null, new MetadataToken(MetadataTokenType.ManifestResource), new MetadataRow<uint, uint, uint, uint>())
         {
-            Name = name;
             Attributes = attributes;
-            Data = data;
+            _name = new LazyValue<string>(name);
+            _data = new LazyValue<byte[]>(data);
+            _implementation = new LazyValue<IImplementation>();
         }
 
         internal ManifestResource(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint, uint> row)
@@ -76,11 +79,19 @@ namespace AsmResolver.Net.Metadata
 
             Offset = row.Column1;
             Attributes = (ManifestResourceAttributes)row.Column2;
-            Name = header.GetStream<StringStream>().GetStringByOffset(row.Column3);
 
-            var implementationToken = tableStream.GetIndexEncoder(CodedIndex.Implementation).DecodeIndex(row.Column4);
-            if (implementationToken.Rid != 0)
-                Implementation = (IImplementation)tableStream.ResolveMember(implementationToken);
+            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column3));
+            _implementation = new LazyValue<IImplementation>(() =>
+            {
+                var implementationToken = tableStream.GetIndexEncoder(CodedIndex.Implementation)
+                    .DecodeIndex(row.Column4);
+                return implementationToken.Rid != 0
+                    ? (IImplementation)tableStream.ResolveMember(implementationToken)
+                    : null;
+            });
+            _data = new LazyValue<byte[]>(() => Implementation == null && Header != null
+                ? Header.NetDirectory.GetResourceData(Offset)
+                : null);
         }
 
         public uint Offset
@@ -97,14 +108,14 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set { _name.Value = value; }
         }
 
         public IImplementation Implementation
         {
-            get;
-            set;
+            get { return _implementation.Value; }
+            set { _implementation.Value = value; }
         }
 
         public bool IsEmbedded
@@ -114,15 +125,8 @@ namespace AsmResolver.Net.Metadata
 
         public byte[] Data
         {
-            get
-            {
-                if (_data != null)
-                    return _data;
-                if (Implementation == null && Header != null)
-                    return _data = Header.NetDirectory.GetResourceData(Offset);
-                return null;
-            }
-            set { _data = value; }
+            get { return _data.Value; }
+            set { _data.Value = value; }
         }
 
         public CustomAttributeCollection CustomAttributes

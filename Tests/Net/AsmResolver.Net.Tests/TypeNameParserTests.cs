@@ -17,7 +17,7 @@ namespace AsmResolver.Tests.Net
         public void SimpleType()
         {
             var type = typeof(string);
-            var typeReference = TypeNameParser.ParseType(type.AssemblyQualifiedName);
+            var typeReference = TypeNameParser.ParseType(null, type.AssemblyQualifiedName);
 
             Utilities.ValidateType(type, typeReference);
             Utilities.ValidateAssembly(new ReflectionAssemblyNameWrapper(type.Assembly.GetName()),
@@ -28,7 +28,7 @@ namespace AsmResolver.Tests.Net
         public void NestedType()
         {
             var type = typeof(DebuggableAttribute.DebuggingModes);
-            var typeReference = TypeNameParser.ParseType(type.AssemblyQualifiedName);
+            var typeReference = TypeNameParser.ParseType(null, type.AssemblyQualifiedName);
 
             Utilities.ValidateType(type, typeReference);
             Utilities.ValidateAssembly(new ReflectionAssemblyNameWrapper(type.Assembly.GetName()),
@@ -39,7 +39,7 @@ namespace AsmResolver.Tests.Net
         public void ArrayType()
         {
             var type = typeof(string[]);
-            var typeReference = TypeNameParser.ParseType(type.AssemblyQualifiedName);
+            var typeReference = TypeNameParser.ParseType(null, type.AssemblyQualifiedName);
             Utilities.ValidateType(type, typeReference);
         }
 
@@ -47,7 +47,7 @@ namespace AsmResolver.Tests.Net
         public void PointerType()
         {
             var type = typeof(string).MakePointerType();
-            var typeReference = TypeNameParser.ParseType(type.AssemblyQualifiedName);
+            var typeReference = TypeNameParser.ParseType(null, type.AssemblyQualifiedName);
             Utilities.ValidateType(type, typeReference);
         }
     }

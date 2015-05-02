@@ -58,13 +58,16 @@ namespace AsmResolver.Net.Metadata
     public class TypeReference : MetadataMember<MetadataRow<uint, uint, uint>>, ITypeDefOrRef, IResolutionScope
     {
         private CustomAttributeCollection _customAttributes;
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<string> _namespace;
+        private string _fullName;
 
         public TypeReference(IResolutionScope resolutionScope, string @namespace, string name)
             : base(null, new MetadataToken(MetadataTokenType.TypeRef), new MetadataRow<uint, uint, uint>())
         {
             ResolutionScope = resolutionScope;
-            Namespace = @namespace;
-            Name = name;
+            _namespace = new LazyValue<string>(@namespace);
+            _name = new LazyValue<string>(name);
         }
 
         internal TypeReference(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint> row)
@@ -81,8 +84,8 @@ namespace AsmResolver.Net.Metadata
                     ResolutionScope = resolutionScope as IResolutionScope;
             }
 
-            Name = stringStream.GetStringByOffset(row.Column2);
-            Namespace = stringStream.GetStringByOffset(row.Column3);
+            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
+            _namespace = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column3));
         }
 
         public ITypeDefOrRef DeclaringType
@@ -103,23 +106,33 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set
+            {
+                _name.Value = value;
+                _fullName = null;
+            }
         }
 
         public string Namespace
         {
-            get;
-            set;
+            get { return _namespace.Value; }
+            set
+            {
+                _namespace.Value = value;
+                _fullName = null;
+            }
         }
 
         public virtual string FullName
         {
             get
             {
+                if (_fullName != null)
+                    return _fullName;
                 if (DeclaringType != null)
-                    return DeclaringType.FullName + '+' + Name;
-                return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
+                    return _fullName = DeclaringType.FullName + '+' + Name;
+                return _fullName = string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
             }
         }
 

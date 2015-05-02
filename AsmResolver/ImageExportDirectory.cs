@@ -154,30 +154,6 @@ namespace AsmResolver
                     _exports.Add(export);
                 }
 
-              // for (int i = 0; i < NumberOfFunctions; i++)
-              // {
-              //     var export = new ImageSymbolExport()
-              //     {
-              //         Rva = addressReader.ReadUInt32(),
-              //     };
-              //
-              //     if (i >= NumberOfFunctions - NumberOfNames)
-              //     {
-              //         if (nameOrdinalReader != null)
-              //             export.NameOrdinal = nameOrdinalReader.ReadUInt16();
-              //
-              //         if (nameRvaReader != null)
-              //         {
-              //             export.NameRva = nameRvaReader.ReadUInt32();
-              //             // TODO: set IsForwarder and ForwarderName properties.
-              //             var nameReader = reader.CreateSubReader(application.RvaToFileOffset(export.NameRva.Value));
-              //             export.Name = nameReader.ReadAsciiString();
-              //         }
-              //     }
-              //
-              //     _exports.Add(export);
-              // }
-
                 return _exports;
             }
         }

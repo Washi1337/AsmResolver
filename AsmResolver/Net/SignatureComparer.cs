@@ -77,7 +77,7 @@ namespace AsmResolver.Net
                 return true;
             if (reference1 == null || reference2 == null)
                 return false;
-
+            
             if (reference1.Namespace != reference2.Namespace ||
                 reference1.Name != reference2.Name)
                 return false;

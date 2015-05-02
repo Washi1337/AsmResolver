@@ -55,17 +55,18 @@ namespace AsmResolver.Net.Metadata
 
     public class MemberReference : MetadataMember<MetadataRow<uint, uint, uint>>, ICustomAttributeType, ICallableMemberReference
     {
-        private CustomAttributeCollection _customAttributes;
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<MemberSignature> _signature;
+        private readonly LazyValue<IMemberRefParent> _parent;
         private string _fullName;
-        private string _name;
-        private MemberSignature _signature;
+        private CustomAttributeCollection _customAttributes;
 
         public MemberReference(IMemberRefParent parent, string name, MemberSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.MemberRef), new MetadataRow<uint, uint, uint>())
         {
-            Parent = parent;
-            Name = name;
-            Signature = signature;
+            _parent = new LazyValue<IMemberRefParent>(parent);
+            _name = new LazyValue<string>(name);
+            _signature = new LazyValue<MemberSignature>(signature);
         }
 
         internal MemberReference(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint> row)
@@ -73,26 +74,30 @@ namespace AsmResolver.Net.Metadata
         {
             var tableStream = header.GetStream<TableStream>();
 
-            var parentToken = tableStream.GetIndexEncoder(CodedIndex.MemberRefParent).DecodeIndex(row.Column1);
-            if (parentToken.Rid != 0)
-                Parent = (IMemberRefParent)tableStream.ResolveMember(parentToken);
+            _parent = new LazyValue<IMemberRefParent>(() =>
+            {
+                var parentToken = tableStream.GetIndexEncoder(CodedIndex.MemberRefParent).DecodeIndex(row.Column1);
+                return parentToken.Rid != 0 ? (IMemberRefParent)tableStream.ResolveMember(parentToken) : null;
+            });
 
-            Name = header.GetStream<StringStream>().GetStringByOffset(row.Column2);
-            Signature = CallingConventionSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3)) as MemberSignature;
+            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column2));
+
+            _signature = new LazyValue<MemberSignature>(() => 
+                CallingConventionSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3)) as MemberSignature);
         }
 
         public IMemberRefParent Parent
         {
-            get;
-            set;
+            get { return _parent.Value; }
+            set { _parent.Value = value; }
         }
 
         public string Name
         {
-            get { return _name; }
+            get { return _name.Value; }
             set
             {
-                _name = value;
+                _name.Value = value;
                 _fullName = null;
             }
         }
@@ -109,10 +114,10 @@ namespace AsmResolver.Net.Metadata
 
         public MemberSignature Signature
         {
-            get { return _signature; }
+            get { return _signature.Value; }
             set
             {
-                _signature = value;
+                _signature.Value = value;
                 _fullName = null;
             }
         }

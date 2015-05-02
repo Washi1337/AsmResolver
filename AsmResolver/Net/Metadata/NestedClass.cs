@@ -52,29 +52,40 @@ namespace AsmResolver.Net.Metadata
 
     public class NestedClass : MetadataMember<MetadataRow<uint, uint>>
     {
+        private readonly LazyValue<TypeDefinition> _class;
+        private readonly LazyValue<TypeDefinition> _enclosingClass;
+
         internal NestedClass(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             var definitionTable = header.GetStream<TableStream>().GetTable<TypeDefinition>();
 
-            TypeDefinition type;
-            if (definitionTable.TryGetMember((int)(row.Column1 - 1), out type))
-                Class = type;
+            _class = new LazyValue<TypeDefinition>(() =>
+            {
+                TypeDefinition type;
+                definitionTable.TryGetMember((int)(row.Column1 - 1), out type);
+                return type;
+            });
 
-            if (definitionTable.TryGetMember((int)(row.Column2 - 1), out type))
-                EnclosingClass = type;
+            _enclosingClass = new LazyValue<TypeDefinition>(() =>
+            {
+                TypeDefinition type;
+                definitionTable.TryGetMember((int)(row.Column2 - 1), out type);
+                return type;
+            });
+
         }
 
         public TypeDefinition Class
         {
-            get;
-            set;
+            get { return _class.Value; }
+            set { _class.Value = value; }
         }
 
         public TypeDefinition EnclosingClass
         {
-            get;
-            set;
+            get { return _enclosingClass.Value; }
+            set { _enclosingClass.Value = value; }
         }
     }
 }

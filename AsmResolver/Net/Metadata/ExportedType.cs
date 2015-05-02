@@ -57,6 +57,9 @@ namespace AsmResolver.Net.Metadata
 
     public class ExportedType : MetadataMember<MetadataRow<uint, uint, uint, uint, uint>>, IImplementation, IHasCustomAttribute
     {
+        private readonly LazyValue<string> _typeName;
+        private readonly LazyValue<string> _typeNamespace;
+        private readonly LazyValue<IImplementation> _implementation;
         private CustomAttributeCollection _customAttributes;
 
         internal ExportedType(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint, uint, uint> row)
@@ -67,12 +70,16 @@ namespace AsmResolver.Net.Metadata
 
             Attributes = (TypeAttributes)row.Column1;
             TypeDefId = row.Column2;
-            TypeName = stringStream.GetStringByOffset(row.Column3);
-            TypeNamespace = stringStream.GetStringByOffset(row.Column4);
-
-            var implementationToken = tableStream.GetIndexEncoder(CodedIndex.Implementation).DecodeIndex(row.Column5);
-            if (implementationToken.Rid != 0)
-                Implementation = (IImplementation)tableStream.ResolveMember(implementationToken);
+            _typeName = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column3));
+            _typeNamespace = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column4));
+            _implementation = new LazyValue<IImplementation>(() =>
+            {
+                var implementationToken = tableStream.GetIndexEncoder(CodedIndex.Implementation)
+                    .DecodeIndex(row.Column5);
+                return implementationToken.Rid != 0
+                    ? Implementation = (IImplementation)tableStream.ResolveMember(implementationToken)
+                    : null;
+            });
         }
 
         public TypeAttributes Attributes
@@ -89,20 +96,20 @@ namespace AsmResolver.Net.Metadata
 
         public string TypeName
         {
-            get;
-            set;
+            get { return _typeName.Value; }
+            set { _typeName.Value = value; }
         }
 
         public string TypeNamespace
         {
-            get;
-            set;
+            get { return _typeNamespace.Value; }
+            set { _typeNamespace.Value = value; }
         }
 
         public IImplementation Implementation
         {
-            get;
-            set;
+            get { return _implementation.Value; }
+            set { _implementation.Value = value; }
         }
 
         public CustomAttributeCollection CustomAttributes

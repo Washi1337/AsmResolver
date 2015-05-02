@@ -50,11 +50,14 @@ namespace AsmResolver.Net.Metadata
     }
     public class FieldMarshal : MetadataMember<MetadataRow<uint, uint>>
     {
+        private readonly LazyValue<IHasFieldMarshal> _parent;
+        private readonly LazyValue<MarshalDescriptor> _marshalDescriptor;
+
         public FieldMarshal(IHasFieldMarshal parent, MarshalDescriptor marshalDescriptor)
             : base(null, new MetadataToken(MetadataTokenType.FieldMarshal), new MetadataRow<uint, uint>())
         {
-            Parent = parent;
-            MarshalDescriptor = marshalDescriptor;
+            _parent = new LazyValue<IHasFieldMarshal>(parent);
+            _marshalDescriptor = new LazyValue<MarshalDescriptor>(marshalDescriptor);
         }
 
         internal FieldMarshal(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
@@ -63,23 +66,26 @@ namespace AsmResolver.Net.Metadata
             var tableStream = header.GetStream<TableStream>();
             var blobStream = header.GetStream<BlobStream>();
 
-            var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal).DecodeIndex(row.Column1);
-            if (parentToken.Rid != 0)
-                Parent = (IHasFieldMarshal)tableStream.ResolveMember(parentToken);
+            _parent = new LazyValue<IHasFieldMarshal>(() =>
+            {
+                var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal).DecodeIndex(row.Column1);
+                return parentToken.Rid != 0 ? (IHasFieldMarshal)tableStream.ResolveMember(parentToken) : null;
+            });
 
-            MarshalDescriptor = MarshalDescriptor.FromReader(blobStream.CreateBlobReader(row.Column2));
+            _marshalDescriptor = new LazyValue<MarshalDescriptor>(() => 
+                MarshalDescriptor.FromReader(blobStream.CreateBlobReader(row.Column2)));
         }
 
         public IHasFieldMarshal Parent
         {
-            get;
-            set;
+            get { return _parent.Value; }
+            set { _parent.Value = value; }
         }
 
         public MarshalDescriptor MarshalDescriptor
         {
-            get;
-            set;
+            get { return _marshalDescriptor.Value; }
+            set { _marshalDescriptor.Value = value; }
         }
     }
 }

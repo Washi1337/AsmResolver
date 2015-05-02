@@ -40,16 +40,19 @@ namespace AsmResolver.Net.Metadata
 
     public class FieldPtr : MetadataMember<MetadataRow<uint>>
     {
-        public FieldPtr(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
+        private readonly LazyValue<FieldDefinition> _field;
+
+        internal FieldPtr(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            Field = header.GetStream<TableStream>().GetTable<FieldDefinition>()[(int)(row.Column1 - 1)];
+            _field = new LazyValue<FieldDefinition>(() => 
+                header.GetStream<TableStream>().GetTable<FieldDefinition>()[(int)(row.Column1 - 1)]);
         }
 
         public FieldDefinition Field
         {
-            get;
-            set;
+            get { return _field.Value; }
+            set { _field.Value = value; }
         }
     }
 }

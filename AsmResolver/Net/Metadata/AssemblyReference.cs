@@ -83,20 +83,22 @@ namespace AsmResolver.Net.Metadata
     {
         private CustomAttributeCollection _customAttributes;
         private Version _version;
-        private string _name;
-        private string _culture;
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<string> _culture;
         private string _fullName;
-        private DataBlobSignature _publicKey;
+        private readonly LazyValue<DataBlobSignature> _publicKey;
+        private readonly LazyValue<DataBlobSignature> _hashValue;
 
         public AssemblyReference(IAssemblyDescriptor info)
             : base(
                 null, new MetadataToken(MetadataTokenType.AssemblyRef),
                 new MetadataRow<ushort, ushort, ushort, ushort, uint, uint, uint, uint, uint>())
         {
-            Name = info.Name;
+            _name = new LazyValue<string>(info.Name);
             Version = info.Version;
-            Culture = info.Culture;
-            PublicKey = info.PublicKeyToken == null ? null : new DataBlobSignature(info.PublicKeyToken);
+            _culture = new LazyValue<string>(info.Culture);
+            _publicKey = new LazyValue<DataBlobSignature>(info.PublicKeyToken == null ? null : new DataBlobSignature(info.PublicKeyToken));
+            _hashValue = new LazyValue<DataBlobSignature>();
         }
 
         public AssemblyReference(string name, Version version)
@@ -104,8 +106,11 @@ namespace AsmResolver.Net.Metadata
                 null, new MetadataToken(MetadataTokenType.AssemblyRef),
                 new MetadataRow<ushort, ushort, ushort, ushort, uint, uint, uint, uint, uint>())
         {
-            Name = name;
-            Version = version;
+            _name = new LazyValue<string>(name);
+            _version = version;
+            _culture = new LazyValue<string>();
+            _publicKey = new LazyValue<DataBlobSignature>();
+            _hashValue = new LazyValue<DataBlobSignature>();
         }
 
         internal AssemblyReference(MetadataHeader header, MetadataToken token, MetadataRow<ushort, ushort, ushort, ushort, uint, uint, uint, uint, uint> row)
@@ -116,13 +121,12 @@ namespace AsmResolver.Net.Metadata
 
             Version = new Version(row.Column1, row.Column2, row.Column3, row.Column4);
             Attributes = (AssemblyAttributes)row.Column5;
-            PublicKey = row.Column6 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column6));
-            Name = stringStream.GetStringByOffset(row.Column7);
-            Culture = stringStream.GetStringByOffset(row.Column8);
-            HashValue = row.Column9 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column9));
+            _publicKey = new LazyValue<DataBlobSignature>(() => row.Column6 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column6)));
+            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column7));
+            _culture = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column8));
+            _hashValue = new LazyValue<DataBlobSignature>(() => row.Column9 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column9)));
         }
-
-
+        
         public Version Version
         {
             get { return _version; }
@@ -141,10 +145,10 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get { return _name; }
+            get { return _name.Value; }
             set
             {
-                _name = value;
+                _name.Value = value;
                 _fullName = null;
             }
         }
@@ -161,26 +165,26 @@ namespace AsmResolver.Net.Metadata
 
         public string Culture
         {
-            get { return _culture; }
+            get { return _culture.Value; }
             set
             {
-                _culture = value;
+                _culture.Value = value;
                 _fullName = null;
             }
         }
 
         public DataBlobSignature HashValue
         {
-            get;
-            set;
+            get { return _hashValue.Value; }
+            set { _hashValue.Value = value; }
         }
 
         public DataBlobSignature PublicKey
         {
-            get { return _publicKey; }
+            get { return _publicKey.Value; }
             set
             {
-                _publicKey = value;
+                _publicKey.Value = value;
                 _fullName = null;
             }
         }

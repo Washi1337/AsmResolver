@@ -50,40 +50,42 @@ namespace AsmResolver.Net.Metadata
 
     public class MethodSpecification : MetadataMember<MetadataRow<uint, uint>>, ICallableMemberReference
     {
-        private GenericInstanceMethodSignature _signature;
+        private readonly LazyValue<IMethodDefOrRef> _method;
+        private readonly LazyValue<GenericInstanceMethodSignature> _signature;
         private string _fullName;
         private CustomAttributeCollection _customAttributes;
-        private IMethodDefOrRef _method;
 
         internal MethodSpecification(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             var tableStream = header.GetStream<TableStream>();
 
-            var methodToken = tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef).DecodeIndex(row.Column1);
-            if (methodToken.Rid != 0)
-                Method = (IMethodDefOrRef)tableStream.ResolveMember(methodToken);
+            _method = new LazyValue<IMethodDefOrRef>(() =>
+            {
+                var methodToken = tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef).DecodeIndex(row.Column1);
+                return methodToken.Rid != 0 ? (IMethodDefOrRef)tableStream.ResolveMember(methodToken) : null;
+            });
 
-            Signature = GenericInstanceMethodSignature.FromReader(header,
-                header.GetStream<BlobStream>().CreateBlobReader(row.Column2));
+            _signature = new LazyValue<GenericInstanceMethodSignature>(() =>
+                GenericInstanceMethodSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column2)));
         }
 
         public IMethodDefOrRef Method
         {
-            get { return _method; }
+            get { return _method.Value; }
             set
             {
-                _method = value;
+                _method.Value = value;
                 _fullName = null;
             }
         }
 
         public GenericInstanceMethodSignature Signature
         {
-            get { return _signature; }
+            get { return _signature.Value; }
             set
             {
-                _signature = value;
+                _signature.Value = value;
                 _fullName = null;
             }
         }

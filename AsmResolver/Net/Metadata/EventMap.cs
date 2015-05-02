@@ -49,25 +49,26 @@ namespace AsmResolver.Net.Metadata
 
     public class EventMap : MetadataMember<MetadataRow<uint, uint>>
     {
+        private readonly LazyValue<TypeDefinition> _parent;
         private RangedDefinitionCollection<EventDefinition> _events;
 
         public EventMap(TypeDefinition parent)
             : base(null, new MetadataToken(MetadataTokenType.EventMap), new MetadataRow<uint, uint>())
         {
-            Parent = parent;
+            _parent = new LazyValue<TypeDefinition>(parent);
         }
 
         internal EventMap(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             var tableStream = header.GetStream<TableStream>();
-            Parent = tableStream.GetTable<TypeDefinition>()[(int)row.Column1 - 1];
+            _parent = new LazyValue<TypeDefinition>(() => tableStream.GetTable<TypeDefinition>()[(int)row.Column1 - 1]);
         }
 
         public TypeDefinition Parent
         {
-            get;
-            set;
+            get { return _parent.Value; }
+            set { _parent.Value = value; }
         }
 
         public RangedDefinitionCollection<EventDefinition> Events

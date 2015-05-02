@@ -35,7 +35,7 @@ namespace AsmResolver.X86
             set;
         }
 
-        public int Correction
+        public object Correction
         {
             get;
             set;

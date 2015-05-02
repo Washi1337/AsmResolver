@@ -81,6 +81,17 @@ namespace AsmResolver.X86
 
         public abstract string FormatFword(ulong value);
 
+        public string FormatCorrection(object value)
+        {
+            if (value == null)
+                return string.Empty;
+            if (value is sbyte)
+                return FormatCorrection((sbyte)value);
+            if (value is int)
+                return FormatCorrection((int)value);
+            throw new NotSupportedException();
+        }
+
         public abstract string FormatCorrection(sbyte value);
 
         public abstract string FormatCorrection(int value);

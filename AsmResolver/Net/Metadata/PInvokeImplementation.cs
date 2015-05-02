@@ -57,6 +57,10 @@ namespace AsmResolver.Net.Metadata
 
     public class PInvokeImplementation : MetadataMember<MetadataRow<ushort,uint,uint,uint>>
     {
+        private readonly LazyValue<IMemberForwarded> _memberForwarded;
+        private readonly LazyValue<string> _importName;
+        private readonly LazyValue<ModuleReference> _importScope;
+
         internal PInvokeImplementation(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint, uint> row)
             : base(header, token, row)
         {
@@ -64,12 +68,16 @@ namespace AsmResolver.Net.Metadata
 
             Attributes = (PInvokeImplementationAttributes)row.Column1;
 
-            var memberForwardedToken = tableStream.GetIndexEncoder(CodedIndex.MemberForwarded).DecodeIndex(row.Column2);
-            if (memberForwardedToken.Rid != 0)
-                MemberForwarded = (IMemberForwarded)tableStream.ResolveMember(memberForwardedToken);
+            _memberForwarded = new LazyValue<IMemberForwarded>(() =>
+            {
+                var memberForwardedToken = tableStream.GetIndexEncoder(CodedIndex.MemberForwarded).DecodeIndex(row.Column2);
+                return memberForwardedToken.Rid != 0
+                    ? (IMemberForwarded)tableStream.ResolveMember(memberForwardedToken)
+                    : null;
+            });
 
-            ImportName = header.GetStream<StringStream>().GetStringByOffset(row.Column3);
-            ImportScope = tableStream.GetTable<ModuleReference>()[(int)(row.Column4 - 1)];
+            _importName = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column3));
+            _importScope = new LazyValue<ModuleReference>(() => tableStream.GetTable<ModuleReference>()[(int)(row.Column4 - 1)]);
         }
 
         public PInvokeImplementationAttributes Attributes
@@ -80,20 +88,20 @@ namespace AsmResolver.Net.Metadata
 
         public IMemberForwarded MemberForwarded
         {
-            get;
-            set;
+            get { return _memberForwarded.Value; }
+            set { _memberForwarded.Value = value; }
         }
 
         public string ImportName
         {
-            get;
-            set;
+            get { return _importName.Value; }
+            set { _importName.Value = value; }
         }
 
         public ModuleReference ImportScope
         {
-            get;
-            set;
+            get { return _importScope.Value; }
+            set { _importScope.Value = value; }
         }
     }
 }

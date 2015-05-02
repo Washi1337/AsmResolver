@@ -8,6 +8,10 @@ namespace AsmResolver.X86
 {
     public class X86Instruction
     {
+        public X86Instruction()
+        {
+        }
+
         internal X86Instruction(long offset)
         {
             Offset = offset;

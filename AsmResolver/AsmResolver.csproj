@@ -50,6 +50,7 @@
     <Compile Include="Builder\ImageImportDirectoryBuilder.cs" />
     <Compile Include="Collections\Generic\Collection.cs" />
     <Compile Include="ImageDebugDirectory.cs" />
+    <Compile Include="LazyValue.cs" />
     <Compile Include="Net\AssemblyResolutionEventArgs.cs" />
     <Compile Include="Net\AssemblyResolutionException.cs" />
     <Compile Include="Net\Builder\MetadataBuilder.cs" />
@@ -255,6 +256,7 @@
     <Compile Include="WritingContext.cs" />
     <Compile Include="X86\IX86Formatter.cs" />
     <Compile Include="X86\MultiByteOpCodes.cs" />
+    <Compile Include="X86\X86Assembler.cs" />
     <Compile Include="X86\X86Disassembler.cs" />
     <Compile Include="X86\X86Instruction.cs" />
     <Compile Include="X86\X86Mnemonic.cs" />

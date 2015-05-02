@@ -53,6 +53,8 @@ namespace AsmResolver.Net.Metadata
 
     public class EventDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, IHasSemantics, ICollectionItem
     {
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<ITypeDefOrRef> _eventType;
         private CustomAttributeCollection _customAttributes;
         private EventMap _eventMap;
         private MethodSemanticsCollection _semantics;
@@ -61,12 +63,14 @@ namespace AsmResolver.Net.Metadata
             : base(header, token, row)
         {
             Attributes = (EventAttributes)row.Column1;
-            Name = header.GetStream<StringStream>().GetStringByOffset(row.Column2);
+            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column2));
 
-            var tableStream = header.GetStream<TableStream>();
-            var eventTypeToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column3);
-            if (eventTypeToken.Rid != 0)
-                EventType = (ITypeDefOrRef)tableStream.ResolveMember(eventTypeToken);
+            _eventType = new LazyValue<ITypeDefOrRef>(() =>
+            {
+                var tableStream = header.GetStream<TableStream>();
+                var eventTypeToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column3);
+                return eventTypeToken.Rid != 0 ? (ITypeDefOrRef)tableStream.ResolveMember(eventTypeToken) : null;
+            });
         }
 
         public EventAttributes Attributes
@@ -77,10 +81,10 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set { _name.Value = value; }
         }
-        
+
         public string FullName
         {
             get
@@ -117,8 +121,8 @@ namespace AsmResolver.Net.Metadata
 
         public ITypeDefOrRef EventType
         {
-            get;
-            set;
+            get { return _eventType.Value; }
+            set { _eventType.Value = value; }
         }
 
         public MethodSemanticsCollection Semantics

@@ -55,17 +55,23 @@ namespace AsmResolver.Net.Metadata
 
     public class MethodSemantics : MetadataMember<MetadataRow<ushort, uint, uint>>
     {
+        private readonly LazyValue<MethodDefinition> _method;
+        private readonly LazyValue<IHasSemantics> _association;
+
         internal MethodSemantics(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint> row)
             : base(header, token, row)
         {
-            Attributes = (MethodSemanticsAttributes)row.Column1;
-
             var tableStream = header.GetStream<TableStream>();
-            Method = tableStream.GetTable<MethodDefinition>()[(int)(row.Column2 - 1)];
 
-            var associationToken = tableStream.GetIndexEncoder(CodedIndex.HasSemantics).DecodeIndex(row.Column3);
-            if (associationToken.Rid != 0)
-                Association = (IHasSemantics)tableStream.ResolveMember(associationToken);
+            Attributes = (MethodSemanticsAttributes)row.Column1;
+            
+            _method = new LazyValue<MethodDefinition>(() => tableStream.GetTable<MethodDefinition>()[(int)(row.Column2 - 1)]);
+
+            _association = new LazyValue<IHasSemantics>(() =>
+            {
+                var associationToken = tableStream.GetIndexEncoder(CodedIndex.HasSemantics).DecodeIndex(row.Column3);
+                return associationToken.Rid != 0 ? (IHasSemantics)tableStream.ResolveMember(associationToken) : null;
+            });
         }
 
         public MethodSemanticsAttributes Attributes
@@ -76,14 +82,14 @@ namespace AsmResolver.Net.Metadata
 
         public MethodDefinition Method
         {
-            get;
-            set;
+            get { return _method.Value; }
+            set { _method.Value = value; }
         }
 
         public IHasSemantics Association
         {
-            get;
-            set;
+            get { return _association.Value; }
+            set { _association.Value = value; }
         }
     }
 }

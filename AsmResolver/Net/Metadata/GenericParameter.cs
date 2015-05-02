@@ -57,6 +57,9 @@ namespace AsmResolver.Net.Metadata
 
     public class GenericParameter : MetadataMember<MetadataRow<ushort, ushort, uint, uint>>
     {
+        private readonly LazyValue<IGenericParameterProvider> _owner;
+        private readonly LazyValue<string> _name;
+
         internal GenericParameter(MetadataHeader header, MetadataToken token, MetadataRow<ushort, ushort, uint, uint> row)
             : base(header, token, row)
         {
@@ -65,11 +68,13 @@ namespace AsmResolver.Net.Metadata
             Index = row.Column1;
             Attributes = (GenericParameterAttributes)row.Column2;
 
-            var ownerToken = tableStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef).DecodeIndex(row.Column3);
-            if (ownerToken.Rid != 0)
-                Owner = (IGenericParameterProvider)tableStream.ResolveMember(ownerToken);
+            _owner = new LazyValue<IGenericParameterProvider>(() =>
+            {
+                var ownerToken = tableStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef).DecodeIndex(row.Column3);
+                return ownerToken.Rid != 0 ? (IGenericParameterProvider)tableStream.ResolveMember(ownerToken) : null;
+            });
 
-            Name = header.GetStream<StringStream>().GetStringByOffset(row.Column4);
+            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column4));
         }
 
         public int Index
@@ -86,14 +91,14 @@ namespace AsmResolver.Net.Metadata
 
         public IGenericParameterProvider Owner
         {
-            get;
-            set;
+            get { return _owner.Value; }
+            set { _owner.Value = value; }
         }
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set { _name.Value = value; }
         }
     }
 }

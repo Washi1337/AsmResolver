@@ -57,39 +57,49 @@ namespace AsmResolver.Net.Metadata
 
     public class MethodImplementation : MetadataMember<MetadataRow<uint, uint, uint>>
     {
+        private readonly LazyValue<TypeDefinition> _class;
+        private readonly LazyValue<IMethodDefOrRef> _methodBody;
+        private readonly LazyValue<IMethodDefOrRef> _methodDeclaration;
+
         internal MethodImplementation(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint> row)
             : base(header, token, row)
         {
             var tableStream = header.GetStream<TableStream>();
             var encoder = tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
 
-            Class = tableStream.GetTable<TypeDefinition>()[(int)row.Column1 - 1];
+            _class = new LazyValue<TypeDefinition>(() => tableStream.GetTable<TypeDefinition>()[(int)row.Column1 - 1]);
 
-            var methodBodyToken = encoder.DecodeIndex(row.Column2);
-            if (methodBodyToken.Rid != 0)
-                MethodBody = (IMethodDefOrRef)tableStream.ResolveMember(methodBodyToken);
+            _methodBody = new LazyValue<IMethodDefOrRef>(() =>
+            {
+                var methodBodyToken = encoder.DecodeIndex(row.Column2);
+                return methodBodyToken.Rid != 0 ? (IMethodDefOrRef)tableStream.ResolveMember(methodBodyToken) : null;
+            });
 
-            var methodDeclarationToken = encoder.DecodeIndex(row.Column3);
-            if (methodDeclarationToken.Rid != 0)
-                MethodDeclaration = (IMethodDefOrRef)tableStream.ResolveMember(methodDeclarationToken);
+            _methodDeclaration = new LazyValue<IMethodDefOrRef>(() =>
+            {
+                var methodDeclarationToken = encoder.DecodeIndex(row.Column3);
+                return methodDeclarationToken.Rid != 0
+                    ? (IMethodDefOrRef)tableStream.ResolveMember(methodDeclarationToken)
+                    : null;
+            });
         }
 
         public TypeDefinition Class
         {
-            get;
-            set;
+            get { return _class.Value; }
+            set { _class.Value = value; }
         }
 
         public IMethodDefOrRef MethodBody
         {
-            get;
-            set;
+            get { return _methodBody.Value; }
+            set { _methodBody.Value = value; }
         }
 
         public IMethodDefOrRef MethodDeclaration
         {
-            get;
-            set;
+            get { return _methodDeclaration.Value; }
+            set { _methodDeclaration.Value = value; }
         }
     }
 }

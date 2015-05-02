@@ -48,11 +48,14 @@ namespace AsmResolver.Net.Metadata
 
     public class AssemblyRefProcessor : MetadataMember<MetadataRow<uint,uint>>
     {
+        private readonly LazyValue<AssemblyReference> _reference;
+
         internal AssemblyRefProcessor(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             Processor = row.Column1;
-            Reference = header.GetStream<TableStream>().GetTable<AssemblyReference>()[(int)(row.Column1 - 1)];
+            _reference = new LazyValue<AssemblyReference>(() => 
+                header.GetStream<TableStream>().GetTable<AssemblyReference>()[(int)(row.Column1 - 1)]);
         }
 
         public uint Processor
@@ -63,8 +66,8 @@ namespace AsmResolver.Net.Metadata
 
         public AssemblyReference Reference
         {
-            get;
-            set;
+            get { return _reference.Value; }
+            set { _reference.Value = value; }
         }
     }
 }

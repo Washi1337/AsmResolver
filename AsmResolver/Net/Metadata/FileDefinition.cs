@@ -55,14 +55,17 @@ namespace AsmResolver.Net.Metadata
 
     public class FileDefinition : MetadataMember<MetadataRow<uint, uint, uint>>, IImplementation, IHasCustomAttribute
     {
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<DataBlobSignature> _hashValue;
         private CustomAttributeCollection _customAttributes;
 
         internal FileDefinition(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint> row)
             : base(header, token, row)
         {
             Attributes = (FileAttributes)row.Column1;
-            Name = header.GetStream<StringStream>().GetStringByOffset(row.Column1);
-            HashValue = DataBlobSignature.FromReader(header.GetStream<BlobStream>().CreateBlobReader(row.Column3));
+            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column1));
+            _hashValue = new LazyValue<DataBlobSignature>(() => 
+                DataBlobSignature.FromReader(header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
         }
 
         public FileAttributes Attributes
@@ -73,14 +76,14 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set { _name.Value = value; }
         }
 
         public DataBlobSignature HashValue
         {
-            get;
-            set;
+            get { return _hashValue.Value; }
+            set { _hashValue.Value = value; }
         }
 
         public CustomAttributeCollection CustomAttributes

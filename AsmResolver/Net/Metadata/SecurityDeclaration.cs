@@ -55,13 +55,16 @@ namespace AsmResolver.Net.Metadata
 
     public class SecurityDeclaration : MetadataMember<MetadataRow<ushort,uint,uint>>, IHasCustomAttribute
     {
+        private readonly LazyValue<IHasSecurityAttribute> _parent;
+        private readonly LazyValue<PermissionSetSignature> _permissionSet;
         private CustomAttributeCollection _customAttributes;
 
         public SecurityDeclaration(SecurityAction action, PermissionSetSignature permissionSet)
             : base(null, new MetadataToken(MetadataTokenType.DeclSecurity), new MetadataRow<ushort, uint, uint>())
         {
             Action = action;
-            PermissionSet = permissionSet;
+            _parent = new LazyValue<IHasSecurityAttribute>();
+            _permissionSet = new LazyValue<PermissionSetSignature>(permissionSet);
         }
 
         internal SecurityDeclaration(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint> row)
@@ -70,17 +73,21 @@ namespace AsmResolver.Net.Metadata
             Action = (SecurityAction)row.Column1;
 
             var tableStream = header.GetStream<TableStream>();
-            var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasDeclSecurity).DecodeIndex(row.Column2);
-            if (parentToken.Rid != 0)
-                Parent = (IHasSecurityAttribute)tableStream.ResolveMember(parentToken);
 
-            PermissionSet = PermissionSetSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3));
+            _parent = new LazyValue<IHasSecurityAttribute>(() =>
+            {
+                var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasDeclSecurity).DecodeIndex(row.Column2);
+                return parentToken.Rid != 0 ? (IHasSecurityAttribute)tableStream.ResolveMember(parentToken) : null;
+            });
+
+            _permissionSet = new LazyValue<PermissionSetSignature>(() => 
+                PermissionSetSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
         }
 
         public IHasSecurityAttribute Parent
         {
-            get;
-            set;
+            get { return _parent.Value; }
+            set { _parent.Value = value; }
         }
 
         public SecurityAction Action
@@ -91,8 +98,8 @@ namespace AsmResolver.Net.Metadata
 
         public PermissionSetSignature PermissionSet
         {
-            get;
-            set;
+            get { return _permissionSet.Value; }
+            set { _permissionSet.Value = value; }
         }
 
         public CustomAttributeCollection CustomAttributes

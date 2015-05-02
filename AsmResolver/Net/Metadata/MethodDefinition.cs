@@ -65,9 +65,9 @@ namespace AsmResolver.Net.Metadata
 
     public class MethodDefinition : MetadataMember<MetadataRow<uint, ushort, ushort, uint, uint, uint>>, ICallableMemberReference, IHasSecurityAttribute, IMemberForwarded, IGenericParameterProvider, IMemberRefParent, ICustomAttributeType, ICollectionItem, IGenericContext
     {
-        private string _name;
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<MethodSignature> _signature;
         private string _fullName;
-        private MethodSignature _signature;
         private CustomAttributeCollection _customAttributes;
         private SecurityDeclarationCollection _securityDeclarations;
         private RangedDefinitionCollection<ParameterDefinition> _parameters;
@@ -84,9 +84,9 @@ namespace AsmResolver.Net.Metadata
             if (signature == null)
                 throw new ArgumentNullException("signature");
 
-            Name = name;
+            _name = new LazyValue<string>(name);
             Attributes = attributes;
-            Signature = signature;
+            _signature = new LazyValue<MethodSignature>(signature);
         }
 
         internal MethodDefinition(MetadataHeader header, MetadataToken token, MetadataRow<uint, ushort, ushort, uint, uint, uint> row)
@@ -98,11 +98,11 @@ namespace AsmResolver.Net.Metadata
             Rva = row.Column1;
             ImplAttributes = (MethodImplAttributes)row.Column2;
             Attributes = (MethodAttributes)row.Column3;
-            Name = stringStream.GetStringByOffset(row.Column4);
-
+            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column4));
+            
             IBinaryStreamReader blobReader;
             if (blobStream.TryCreateBlobReader(row.Column5, out blobReader))
-                Signature = MethodSignature.FromReader(header, blobReader);
+                _signature = new LazyValue<MethodSignature>(() => MethodSignature.FromReader(header, blobReader));
         }
 
         public uint Rva
@@ -125,10 +125,10 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get { return _name; }
+            get { return _name.Value; }
             set
             {
-                _name = value;
+                _name.Value = value;
                 _fullName = null;
             }
         }
@@ -158,17 +158,17 @@ namespace AsmResolver.Net.Metadata
 
         public MethodSignature Signature
         {
-            get { return _signature; }
+            get { return _signature.Value; }
             set
             {
-                _signature = value;
+                _signature.Value = value;
                 _fullName = null;
             }
         }
 
         CallingConventionSignature ICallableMemberReference.Signature
         {
-            get { return _signature; }
+            get { return Signature; }
         }
 
         MemberSignature IMethodDefOrRef.Signature

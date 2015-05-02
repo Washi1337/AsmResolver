@@ -40,16 +40,18 @@ namespace AsmResolver.Net.Metadata
 
     public class ParamPtr : MetadataMember<MetadataRow<uint>>
     {
+        private readonly LazyValue<ParameterDefinition> _parameter;
+
         public ParamPtr(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            Parameter = header.GetStream<TableStream>().GetTable<ParameterDefinition>()[(int)(row.Column1 - 1)];
+            _parameter = new LazyValue<ParameterDefinition>(() => header.GetStream<TableStream>().GetTable<ParameterDefinition>()[(int)(row.Column1 - 1)]);
         }
 
         public ParameterDefinition Parameter
         {
-            get;
-            set;
+            get { return _parameter.Value; }
+            set { _parameter.Value = value; }
         }
     }
 }

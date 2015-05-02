@@ -57,11 +57,16 @@ namespace AsmResolver.Net.Metadata
 
     public class CustomAttribute : MetadataMember<MetadataRow<uint, uint, uint>>
     {
+        private readonly LazyValue<IHasCustomAttribute> _parent;
+        private readonly LazyValue<ICustomAttributeType> _constructor;
+        private readonly LazyValue<CustomAttributeSignature> _signature;
+
         public CustomAttribute(ICustomAttributeType constructor, CustomAttributeSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.CustomAttribute), new MetadataRow<uint, uint, uint>())
         {
-            Constructor = constructor;
-            Signature = signature;
+            _parent = new LazyValue<IHasCustomAttribute>();
+            _constructor = new LazyValue<ICustomAttributeType>(constructor);
+            _signature = new LazyValue<CustomAttributeSignature>(signature);
         }
 
         internal CustomAttribute(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint> row)
@@ -69,34 +74,38 @@ namespace AsmResolver.Net.Metadata
         {
             var tableStream = header.GetStream<TableStream>();
 
-            var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasCustomAttribute).DecodeIndex(row.Column1);
-            if (parentToken.Rid != 0)
-                Parent = (IHasCustomAttribute)tableStream.ResolveMember(parentToken);
+            _parent = new LazyValue<IHasCustomAttribute>(() =>
+            {
+                var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasCustomAttribute).DecodeIndex(row.Column1);
+                return parentToken.Rid != 0 ? (IHasCustomAttribute)tableStream.ResolveMember(parentToken) : null;
+            });
 
-            var ctorToken = tableStream.GetIndexEncoder(CodedIndex.CustomAttributeType).DecodeIndex(row.Column2);
-            if (ctorToken.Rid != 0)
-                Constructor = (ICustomAttributeType)tableStream.ResolveMember(ctorToken);
+            _constructor = new LazyValue<ICustomAttributeType>(() =>
+            {
+                var ctorToken = tableStream.GetIndexEncoder(CodedIndex.CustomAttributeType).DecodeIndex(row.Column2);
+                return ctorToken.Rid != 0 ? (ICustomAttributeType)tableStream.ResolveMember(ctorToken) : null;
+            });
 
-            Signature = CustomAttributeSignature.FromReader(this,
-                Header.GetStream<BlobStream>().CreateBlobReader(MetadataRow.Column3));
+            _signature = new LazyValue<CustomAttributeSignature>(() => CustomAttributeSignature.FromReader(this,
+                Header.GetStream<BlobStream>().CreateBlobReader(MetadataRow.Column3)));
         }
 
         public IHasCustomAttribute Parent
         {
-            get;
-            internal set;
+            get { return _parent.Value; }
+            internal set { _parent.Value = value; }
         }
 
         public ICustomAttributeType Constructor
         {
-            get;
-            set;
+            get { return _constructor.Value; }
+            set { _constructor.Value = value; }
         }
 
         public CustomAttributeSignature Signature
         {
-            get;
-            set;
+            get { return _signature.Value; }
+            set { _signature.Value = value; }
         }
     }
 }

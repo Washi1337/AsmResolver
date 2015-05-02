@@ -40,16 +40,18 @@ namespace AsmResolver.Net.Metadata
 
     public class MethodPtr : MetadataMember<MetadataRow<uint>>
     {
+        private readonly LazyValue<MethodDefinition> _method;
+
         public MethodPtr(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            Method = header.GetStream<TableStream>().GetTable<MethodDefinition>()[(int)(row.Column1 -1)];
+            _method = new LazyValue<MethodDefinition>(() => header.GetStream<TableStream>().GetTable<MethodDefinition>()[(int)(row.Column1 -1)]);
         }
 
         public MethodDefinition Method
         {
-            get;
-            set;
+            get { return _method.Value; }
+            set { _method.Value = value; }
         }
     }
 }

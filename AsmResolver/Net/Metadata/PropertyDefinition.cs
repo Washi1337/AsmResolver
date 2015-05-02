@@ -51,18 +51,19 @@ namespace AsmResolver.Net.Metadata
 
     public class PropertyDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, IHasConstant, IHasSemantics, ICollectionItem
     {
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<PropertySignature> _signature;
         private CustomAttributeCollection _customAttributes;
         private PropertyMap _propertyMap;
         private string _fullName;
-        private PropertySignature _signature;
         private MethodSemanticsCollection _semantics;
 
         internal PropertyDefinition(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint> row)
             : base(header, token, row)
         {
             Attributes = (PropertyAttributes)row.Column1;
-            Name = header.GetStream<StringStream>().GetStringByOffset(row.Column2);
-            Signature = PropertySignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3));
+            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column2));
+            _signature = new LazyValue<PropertySignature>(() => PropertySignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
         }
 
         public PropertyAttributes Attributes
@@ -73,8 +74,12 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set
+            {
+                _name.Value = value;
+                _fullName = null;
+            }
         }
 
         public string FullName
@@ -89,10 +94,10 @@ namespace AsmResolver.Net.Metadata
 
         public PropertySignature Signature
         {
-            get { return _signature; }
+            get { return _signature.Value; }
             set
             {
-                _signature = value;
+                _signature.Value = value;
                 _fullName = null;
             }
         }

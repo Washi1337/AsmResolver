@@ -51,16 +51,17 @@ namespace AsmResolver.Net.Metadata
 
     public class ParameterDefinition : MetadataMember<MetadataRow<ushort, ushort,uint>>, IHasConstant, IHasCustomAttribute, IHasFieldMarshal, ICollectionItem
     {
+        private readonly LazyValue<string> _name;
         private CustomAttributeCollection _customAttributes;
 
-        public ParameterDefinition(MetadataHeader header, MetadataToken token, MetadataRow<ushort, ushort, uint> row)
+        internal ParameterDefinition(MetadataHeader header, MetadataToken token, MetadataRow<ushort, ushort, uint> row)
             : base(header, token, row)
         {
             var stringStream = header.GetStream<StringStream>();
 
             Attributes = (ParameterAttributes)row.Column1;
             Sequence = row.Column2;
-            Name = stringStream.GetStringByOffset(row.Column3);
+            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column3));
         }
 
         public ParameterAttributes Attributes
@@ -77,10 +78,11 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set { _name.Value = value; }
         }
 
+        // todo:
         public Constant Constant
         {
             get;
@@ -104,6 +106,7 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        // todo:
         public FieldMarshal FieldMarshal
         {
             get;

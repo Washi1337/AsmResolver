@@ -50,27 +50,32 @@ namespace AsmResolver.Net.Metadata
 
     public class GenericParameterConstraint : MetadataMember<MetadataRow<uint, uint>>
     {
+        private readonly LazyValue<GenericParameter> _owner;
+        private readonly LazyValue<ITypeDefOrRef> _constraint;
+
         internal GenericParameterConstraint(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             var tableStream = header.GetStream<TableStream>();
-            Owner = tableStream.GetTable<GenericParameter>()[(int)(row.Column1 - 1)];
+            _owner = new LazyValue<GenericParameter>(() => tableStream.GetTable<GenericParameter>()[(int)(row.Column1 - 1)]);
 
-            var constraintToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column2);
-            if (constraintToken.Rid != 0)
-                Constraint = (ITypeDefOrRef)tableStream.ResolveMember(constraintToken);
+            _constraint = new LazyValue<ITypeDefOrRef>(() =>
+            {
+                var constraintToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column2);
+                return constraintToken.Rid != 0 ? (ITypeDefOrRef)tableStream.ResolveMember(constraintToken) : null;
+            });
         }
 
         public GenericParameter Owner
         {
-            get;
-            set;
+            get { return _owner.Value; }
+            set { _owner.Value = value; }
         }
 
         public ITypeDefOrRef Constraint
         {
-            get;
-            set;
+            get { return _constraint.Value; }
+            set { _constraint.Value = value; }
         }
     }
 }

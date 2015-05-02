@@ -51,24 +51,25 @@ namespace AsmResolver.Net.Metadata
     public class PropertyMap : MetadataMember<MetadataRow<uint, uint>>
     {
         private RangedDefinitionCollection<PropertyDefinition> _properties;
+        private readonly LazyValue<TypeDefinition> _parent;
 
         public PropertyMap(TypeDefinition parent)
             : base(null, new MetadataToken(MetadataTokenType.PropertyMap), new MetadataRow<uint, uint>())
         {
-            Parent = parent;
+            _parent = new LazyValue<TypeDefinition>(parent);
         }
 
         internal PropertyMap(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             var tableStream = header.GetStream<TableStream>();
-            Parent = tableStream.GetTable<TypeDefinition>()[(int)row.Column1 - 1];
+            _parent = new LazyValue<TypeDefinition>(() => tableStream.GetTable<TypeDefinition>()[(int)row.Column1 - 1]);
         }
 
         public TypeDefinition Parent
         {
-            get;
-            private set;
+            get { return _parent.Value; }
+            set { _parent.Value = value; }
         }
 
         public RangedDefinitionCollection<PropertyDefinition> Properties

@@ -50,13 +50,15 @@ namespace AsmResolver.Net.Metadata
 
     public class FieldLayout : MetadataMember<MetadataRow<uint,uint>>
     {
+        private readonly LazyValue<FieldDefinition> _field;
+
         internal FieldLayout(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint> row)
             : base(header, token, row)
         {
             Offset = row.Column1;
 
             var tableStream = header.GetStream<TableStream>();
-            Field = tableStream.GetTable<FieldDefinition>()[(int)(row.Column2 - 1)];
+            _field = new LazyValue<FieldDefinition>(() => tableStream.GetTable<FieldDefinition>()[(int)(row.Column2 - 1)]);
         }
 
         public uint Offset
@@ -67,8 +69,8 @@ namespace AsmResolver.Net.Metadata
 
         public FieldDefinition Field
         {
-            get;
-            set;
+            get { return _field.Value; }
+            set { _field.Value = value; }
         }
     }
 }

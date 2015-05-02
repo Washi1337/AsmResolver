@@ -41,24 +41,26 @@ namespace AsmResolver.Net.Metadata
 
     public class TypeSpecification : MetadataMember<MetadataRow<uint>>, ITypeDefOrRef
     {
+        private readonly LazyValue<TypeSignature> _signature;
         private CustomAttributeCollection _customAttributes;
 
         public TypeSpecification(TypeSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.TypeSpec), new MetadataRow<uint>())
         {
-            Signature = signature;
+            _signature = new LazyValue<TypeSignature>(signature);
         }
 
         internal TypeSpecification(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            Signature = TypeSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column1));
+            _signature = new LazyValue<TypeSignature>(() => 
+                TypeSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column1)));
         }
 
         public TypeSignature Signature
         {
-            get;
-            set;
+            get { return _signature.Value; }
+            set { _signature.Value = value; }
         }
 
         public string Name

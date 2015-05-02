@@ -40,24 +40,25 @@ namespace AsmResolver.Net.Metadata
 
     public class ModuleReference : MetadataMember<MetadataRow<uint>>, IHasCustomAttribute, IMemberRefParent, IResolutionScope
     {
+        private readonly LazyValue<string> _name;
         private CustomAttributeCollection _customAttributes;
 
         public ModuleReference(string name)
             : base(null, new MetadataToken(MetadataTokenType.ModuleRef), new MetadataRow<uint>())
         {
-            Name = name;
+            _name = new LazyValue<string>(name);
         }
 
         internal ModuleReference(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            Name = header.GetStream<StringStream>().GetStringByOffset(row.Column1);
+            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column1));
         }
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set { _name.Value = value; }
         }
 
         public CustomAttributeCollection CustomAttributes

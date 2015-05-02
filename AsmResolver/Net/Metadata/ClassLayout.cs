@@ -52,10 +52,12 @@ namespace AsmResolver.Net.Metadata
 
     public class ClassLayout : MetadataMember<MetadataRow<ushort,uint,uint>>
     {
+        private readonly LazyValue<TypeDefinition> _parent;
+
         public ClassLayout(TypeDefinition parent, uint classSize, ushort packingSize)
             : base(null, new MetadataToken(MetadataTokenType.ClassLayout), new MetadataRow<ushort, uint, uint>())
         {
-            Parent = parent;
+            _parent = new LazyValue<TypeDefinition>(parent);
             ClassSize = classSize;
             PackingSize = packingSize;
         }
@@ -67,7 +69,7 @@ namespace AsmResolver.Net.Metadata
             ClassSize = row.Column2;
 
             var tableStream = header.GetStream<TableStream>();
-            Parent = tableStream.GetTable<TypeDefinition>()[(int)(row.Column3- 1)];
+            _parent = new LazyValue<TypeDefinition>(() => tableStream.GetTable<TypeDefinition>()[(int)(row.Column3 - 1)]);
         }
 
         public ushort PackingSize
@@ -84,8 +86,8 @@ namespace AsmResolver.Net.Metadata
 
         public TypeDefinition Parent
         {
-            get;
-            set;
+            get { return _parent.Value; }
+            set { _parent.Value = value; }
         }
     }
 }

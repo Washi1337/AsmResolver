@@ -67,6 +67,9 @@ namespace AsmResolver.Net.Metadata
 
     public class TypeDefinition : MetadataMember<MetadataRow<uint, uint, uint, uint, uint, uint>>, ITypeDefOrRef, IHasSecurityAttribute, IGenericParameterProvider, IGenericContext
     {
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<string> _namespace;
+        private readonly LazyValue<ITypeDefOrRef> _baseType;
         private CustomAttributeCollection _customAttributes;
         private SecurityDeclarationCollection _securityDeclarations;
         private RangedDefinitionCollection<FieldDefinition> _fields;
@@ -77,6 +80,7 @@ namespace AsmResolver.Net.Metadata
         private GenericParameterCollection _genericParameters;
         private InterfaceImplementationCollection _interfaces;
         private ClassLayout _classLayout;
+        private string _fullName;
 
         public TypeDefinition(string @namespace, string name)
             : this(@namespace, name, null)
@@ -86,9 +90,9 @@ namespace AsmResolver.Net.Metadata
         public TypeDefinition(string @namespace, string name, ITypeDefOrRef baseType)
             : base(null, new MetadataToken(MetadataTokenType.TypeDef), new MetadataRow<uint, uint, uint, uint, uint, uint>())
         {
-            Namespace = @namespace;
-            Name = name;
-            BaseType = baseType;
+            _namespace = new LazyValue<string>(@namespace);
+            _name = new LazyValue<string>(name);
+            _baseType = new LazyValue<ITypeDefOrRef>(baseType);
         }
 
         internal TypeDefinition(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint, uint, uint, uint> row)
@@ -98,16 +102,20 @@ namespace AsmResolver.Net.Metadata
             var tableStream = header.GetStream<TableStream>();
 
             Attributes = (TypeAttributes)row.Column1;
-            Name = stringStream.GetStringByOffset(row.Column2);
-            Namespace = stringStream.GetStringByOffset(row.Column3);
 
-            var baseTypeToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column4);
-            if (baseTypeToken.Rid != 0)
+            _name = _namespace = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
+            _namespace = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column3));
+            _baseType = new LazyValue<ITypeDefOrRef>(() =>
             {
-                MetadataMember baseType;
-                if (tableStream.TryResolveMember(baseTypeToken, out baseType))
-                    BaseType = baseType as ITypeDefOrRef;
-            }
+                var baseTypeToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column4);
+                if (baseTypeToken.Rid != 0)
+                {
+                    MetadataMember baseType;
+                    if (tableStream.TryResolveMember(baseTypeToken, out baseType))
+                        return baseType as ITypeDefOrRef;
+                }
+                return null;
+            });
         }
 
         public TypeAttributes Attributes
@@ -118,14 +126,22 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set
+            {
+                _name.Value = value;
+                _fullName = null;
+            }
         }
 
         public string Namespace
         {
-            get;
-            set;
+            get { return _namespace.Value; }
+            set
+            {
+                _namespace.Value = value;
+                _fullName = null;
+            }
         }
 
         public IResolutionScope ResolutionScope
@@ -146,8 +162,8 @@ namespace AsmResolver.Net.Metadata
 
         public ITypeDefOrRef BaseType
         {
-            get;
-            set;
+            get { return _baseType.Value; }
+            set { _baseType.Value = value; }
         }
 
         public RangedDefinitionCollection<FieldDefinition> Fields
@@ -200,9 +216,11 @@ namespace AsmResolver.Net.Metadata
         {
             get
             {
+                if (_fullName != null)
+                    return _fullName;
                 if (DeclaringType != null)
-                    return DeclaringType.FullName + '+' + Name;
-                return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
+                    return _fullName = DeclaringType.FullName + '+' + Name;
+                return _fullName = string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
             }
         }
 

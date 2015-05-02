@@ -40,16 +40,19 @@ namespace AsmResolver.Net.Metadata
 
     public class PropertyPtr : MetadataMember<MetadataRow<uint>>
     {
+        private readonly LazyValue<PropertyDefinition> _property;
+
         internal PropertyPtr(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            Property = header.GetStream<TableStream>().GetTable<PropertyDefinition>()[(int)(row.Column1 - 1)];
+            _property = new LazyValue<PropertyDefinition>(() => 
+                header.GetStream<TableStream>().GetTable<PropertyDefinition>()[(int)(row.Column1 - 1)]);
         }
 
         public PropertyDefinition Property
         {
-            get;
-            set;
+            get { return _property.Value; }
+            set { _property.Value = value; }
         }
     }
 }

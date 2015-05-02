@@ -54,9 +54,9 @@ namespace AsmResolver.Net.Metadata
 
     public class FieldDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, ICallableMemberReference, IHasConstant, IHasFieldMarshal, IMemberForwarded, ICollectionItem
     {
-        private string _name;
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<FieldSignature> _signature;
         private string _fullName;
-        private FieldSignature _signature;
         private CustomAttributeCollection _customAttributes;
         private TypeDefinition _declaringType;
         private Constant _constant;
@@ -71,9 +71,9 @@ namespace AsmResolver.Net.Metadata
             if (signature == null)
                 throw new ArgumentNullException("signature");
 
-            Name = name;
+            _name = new LazyValue<string>(name);
             Attributes = attributes;
-            Signature = signature;
+            _signature = new LazyValue<FieldSignature>(signature);
         }
 
         internal FieldDefinition(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint> row)
@@ -82,8 +82,9 @@ namespace AsmResolver.Net.Metadata
             var stringStream = header.GetStream<StringStream>();
 
             Attributes = (FieldAttributes)row.Column1;
-            Name = stringStream.GetStringByOffset(row.Column2);
-            Signature = FieldSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3));
+            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
+            _signature = new LazyValue<FieldSignature>(() => 
+                FieldSignature.FromReader(header, header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
         }
 
         public FieldAttributes Attributes
@@ -94,10 +95,10 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get { return _name; }
+            get { return _name.Value; }
             set
             {
-                _name = value;
+                _name.Value = value;
                 _fullName = null;
             }
         }
@@ -127,17 +128,17 @@ namespace AsmResolver.Net.Metadata
 
         public FieldSignature Signature
         {
-            get { return _signature; }
+            get { return _signature.Value; }
             set
             {
-                _signature = value;
+                _signature.Value = value;
                 _fullName = null;
             }
         }
 
         CallingConventionSignature ICallableMemberReference.Signature
         {
-            get { return _signature; }
+            get { return Signature; }
         }
 
         public Constant Constant

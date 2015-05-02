@@ -65,12 +65,19 @@ namespace AsmResolver.Net.Metadata
 
     public class ModuleDefinition : MetadataMember<MetadataRow<ushort, uint, uint, uint, uint>>, IHasCustomAttribute, IResolutionScope
     {
+        private readonly LazyValue<string> _name;
+        private readonly LazyValue<Guid> _mvid;
+        private readonly LazyValue<Guid> _encId;
+        private readonly LazyValue<Guid> _encBaseId;
         private CustomAttributeCollection _customAttributes;
 
         public ModuleDefinition(string name)
             : base(null, new MetadataToken(MetadataTokenType.Module), new MetadataRow<ushort, uint, uint, uint, uint>())
         {
-            Name = name;
+            _name = new LazyValue<string>(name);
+            _mvid = new LazyValue<Guid>();
+            _encId = new LazyValue<Guid>();
+            _encBaseId = new LazyValue<Guid>();
         }
 
         public ModuleDefinition(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint, uint, uint> row)
@@ -80,10 +87,10 @@ namespace AsmResolver.Net.Metadata
             var guidStream = header.GetStream<GuidStream>();
 
             Generation = row.Column1;
-            Name = stringStream.GetStringByOffset(row.Column2);
-            Mvid = guidStream.GetGuidByOffset(row.Column3);
-            EncId = guidStream.GetGuidByOffset(row.Column4);
-            EncBaseId = guidStream.GetGuidByOffset(row.Column5);
+           _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
+           _mvid = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column3));
+           _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
+           _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
         }
 
         public ushort Generation
@@ -94,26 +101,26 @@ namespace AsmResolver.Net.Metadata
 
         public string Name
         {
-            get;
-            set;
+            get { return _name.Value; }
+            set { _name.Value = value; }
         }
 
         public Guid Mvid
         {
-            get;
-            set;
+            get { return _mvid.Value; }
+            set { _mvid.Value = value; }
         }
 
         public Guid EncId
         {
-            get;
-            set;
+            get { return _encId.Value; }
+            set { _encId.Value = value; }
         }
 
         public Guid EncBaseId
         {
-            get;
-            set;
+            get { return _encBaseId.Value; }
+            set { _encBaseId.Value = value; }
         }
 
         public CustomAttributeCollection CustomAttributes

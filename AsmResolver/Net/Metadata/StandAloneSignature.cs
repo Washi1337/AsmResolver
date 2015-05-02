@@ -44,25 +44,31 @@ namespace AsmResolver.Net.Metadata
     public class StandAloneSignature : MetadataMember<MetadataRow<uint>>, IHasCustomAttribute
     {
         private CustomAttributeCollection _customAttributes;
+        private readonly LazyValue<CallingConventionSignature> _signature;
 
         public StandAloneSignature(CallingConventionSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.StandAloneSig), new MetadataRow<uint>())
         {
-            Signature = signature;
+            _signature = new LazyValue<CallingConventionSignature>(signature);
         }
 
         internal StandAloneSignature(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            IBinaryStreamReader reader;
-            if (header.GetStream<BlobStream>().TryCreateBlobReader(row.Column1, out reader))
-                Signature = CallingConventionSignature.FromReader(header, reader);
+
+            _signature = new LazyValue<CallingConventionSignature>(() =>
+            {
+                IBinaryStreamReader reader;
+                return header.GetStream<BlobStream>().TryCreateBlobReader(row.Column1, out reader)
+                    ? CallingConventionSignature.FromReader(header, reader)
+                    : null;
+            });
         }
 
         public CallingConventionSignature Signature
         {
-            get;
-            set;
+            get { return _signature.Value; }
+            set { _signature.Value = value; }
         }
 
         public CustomAttributeCollection CustomAttributes

@@ -13,6 +13,8 @@ namespace AsmResolver.X86
 
         public X86Disassembler(IBinaryStreamReader reader)
         {
+            if (reader == null)
+                throw new ArgumentNullException("reader");
             _reader = reader;
         }
 
@@ -46,7 +48,7 @@ namespace AsmResolver.X86
             switch (code1)
             {
                 case 0x0F:
-                    return X86OpCodes.MultiByteOpCodes[code1];
+                    return X86OpCodes.MultiByteOpCodes[_reader.ReadByte()];
 
                 default:
                     return X86OpCodes.SingleByteOpCodes[code1];
@@ -229,7 +231,7 @@ namespace AsmResolver.X86
             var correction = new X86ScaledIndex
             {
                 Register = GetRegisterFromToken((byte)((token >> 3) & 7), X86RegisterSize.Dword),
-                Multiplier = (int)Math.Pow(2, (token >> 6) & 3)
+                Multiplier = 1 << ((token >> 6) & 3), // 2 ^ ((token >> 6) & 3)
             };
 
             // ESP scales are ignored.

@@ -56,16 +56,23 @@ namespace AsmResolver.Net.Metadata
 
     public class Constant : MetadataMember<MetadataRow<byte, byte, uint, uint>>
     {
-        public Constant(MetadataHeader header, MetadataToken token, MetadataRow<byte, byte, uint, uint> row)
+        private readonly LazyValue<IHasConstant> _parent;
+        private readonly LazyValue<DataBlobSignature> _value;
+
+        internal Constant(MetadataHeader header, MetadataToken token, MetadataRow<byte, byte, uint, uint> row)
             : base(header, token, row)
         {
             ConstantType = (ElementType)row.Column1;
 
-            var tableStream = header.GetStream<TableStream>();
-            var hasConstantToken = tableStream.GetIndexEncoder(CodedIndex.HasConstant).DecodeIndex(row.Column3);
-            if (hasConstantToken.Rid != 0)
-                Parent = (IHasConstant)tableStream.ResolveMember(hasConstantToken);
-            Value = DataBlobSignature.FromReader(header.GetStream<BlobStream>().CreateBlobReader(row.Column4));
+            _parent = new LazyValue<IHasConstant>(() =>
+            {
+                var tableStream = header.GetStream<TableStream>();
+                var hasConstantToken = tableStream.GetIndexEncoder(CodedIndex.HasConstant).DecodeIndex(row.Column3);
+                return hasConstantToken.Rid != 0 ? (IHasConstant)tableStream.ResolveMember(hasConstantToken) : null;
+            });
+
+            _value = new LazyValue<DataBlobSignature>(() => 
+                DataBlobSignature.FromReader(header.GetStream<BlobStream>().CreateBlobReader(row.Column4)));
         }
 
         public ElementType ConstantType
@@ -76,14 +83,14 @@ namespace AsmResolver.Net.Metadata
 
         public IHasConstant Parent
         {
-            get;
-            set;
+            get { return _parent.Value; }
+            set { _parent.Value = value; }
         }
 
         public DataBlobSignature Value
         {
-            get;
-            set;
+            get { return _value.Value; }
+            set { _value.Value = value; }
         }
     }
 }

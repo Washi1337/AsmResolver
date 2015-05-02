@@ -40,16 +40,19 @@ namespace AsmResolver.Net.Metadata
 
     public class EventPtr : MetadataMember<MetadataRow<uint>>
     {
+        private readonly LazyValue<EventDefinition> _event;
+
         internal EventPtr(MetadataHeader header, MetadataToken token, MetadataRow<uint> row)
             : base(header, token, row)
         {
-            Event = header.GetStream<TableStream>().GetTable<EventDefinition>()[(int)(row.Column1 - 1)];
+            _event = new LazyValue<EventDefinition>(() => 
+                header.GetStream<TableStream>().GetTable<EventDefinition>()[(int)(row.Column1 - 1)]);
         }
 
         public EventDefinition Event
         {
-            get;
-            set;
+            get { return _event.Value; }
+            set { _event.Value = value; }
         }
     }
 }
