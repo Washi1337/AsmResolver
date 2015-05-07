@@ -224,20 +224,20 @@ namespace AsmResolver.X86
             // http://ref.x86asm.net/coder32.html#sib_byte_32
 
             // SIB-byte:
-            //  mul | scaled_reg | reg2
+            //  mul | scaled_reg | reg
             // -----+------------+-------
-            //  7 6 |   5 4 3    | (2 1 0)
+            //  7 6 |   5 4 3    | 2 1 0
 
-            var correction = new X86ScaledIndex
+            var scaledIndex = new X86ScaledIndex
             {
                 Register = GetRegisterFromToken((byte)((token >> 3) & 7), X86RegisterSize.Dword),
-                Multiplier = 1 << ((token >> 6) & 3), // 2 ^ ((token >> 6) & 3)
+                Multiplier = 1 << ((token >> 6) & 3),
             };
 
             // ESP scales are ignored.
-            if (correction.Register != X86Register.Esp)
-                operand.ScaledIndex = correction;
-
+            if (scaledIndex.Register != X86Register.Esp)
+                operand.ScaledIndex = scaledIndex;
+            
             operand.Value = GetRegisterFromToken((byte)(token & 0x7), X86RegisterSize.Dword);
            
         }

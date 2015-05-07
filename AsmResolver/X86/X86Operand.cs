@@ -66,6 +66,21 @@ namespace AsmResolver.X86
 
     public class X86ScaledIndex
     {
+        public X86ScaledIndex()
+        {
+        }
+
+        public X86ScaledIndex(X86Register register)
+            : this(register, 1)
+        {
+        }
+
+        public X86ScaledIndex(X86Register register, int multiplier)
+        {
+            Register = register;
+            Multiplier = multiplier;
+        }
+
         public X86Register Register
         {
             get;

@@ -54,16 +54,27 @@ namespace AsmResolver.X86
                 case X86AddressingMethod.MemoryAddress:
                 case X86AddressingMethod.DirectAddress:
                 case X86AddressingMethod.ImmediateData:
+                {
                     WriteNumber(operand.Value, size);
                     break;
+                }
                 case X86AddressingMethod.RegisterOrMemoryAddress:
-                    if (!(operand.Value is X86Register))
+                {
+                    if ((operand.ScaledIndex != null) ||
+                        (operand.Value is X86Register && (X86Register)operand.Value == X86Register.Esp))
+                        _writer.WriteByte(ComputeRegOrMemSibToken(operand));
+                    else if (!(operand.Value is X86Register))
                         WriteNumber(operand.Value, X86OperandSize.Dword);
                     break;
+                }
                 case X86AddressingMethod.RelativeOffset:
+                {
                     break;
-                default: 
+                }
+                default:
+                {
                     return;
+                }
             }
 
             if (operand.Correction != null)
@@ -125,29 +136,24 @@ namespace AsmResolver.X86
         }
 
         private static byte ComputeRegOrMemToken(X86Operand operand)
-        {
+        {            
+            // Mechanism:
+           // http://ref.x86asm.net/coder32.html#modrm_byte_32
+
+            // ModR/M byte:
+            //  mod | reg/mem | (reg2)
+            // -----+---------+-------
+            //  7 6 |  5 4 3  | (2 1 0)
+
             var modifier = DetermineRegOrMemModifier(operand);
             var token = (byte)((byte)modifier << 6);
 
-            if (operand.Value is X86Register)
+            if (operand.ScaledIndex != null)
+                token |= ComputeRegisterToken(X86Register.Esp);
+            else if (operand.Value is X86Register)
                 token |= ComputeRegisterToken((X86Register)operand.Value);
             else
                 return ComputeRegisterToken(X86Register.Ebp);
-
-            switch (modifier)
-            {
-                case X86RegOrMemModifier.RegisterPointer:
-                    break;
-                case X86RegOrMemModifier.RegisterDispShortPointer:
-                    token |= 0x40;
-                    break;
-                case X86RegOrMemModifier.RegisterDispLongPointer:
-                    token |= 0x80;
-                    break;
-                case X86RegOrMemModifier.RegisterOnly:
-                    token |= 0xC0;
-                    break;
-            }
 
             return token;
         }
@@ -173,5 +179,44 @@ namespace AsmResolver.X86
 
             throw new ArgumentException("Operand is not a valid RegOrMem operand.", "operand");
         }
+
+        private static byte ComputeRegOrMemSibToken(X86Operand operand)
+        {
+            // Mechanism:
+            // http://ref.x86asm.net/coder32.html#sib_byte_32
+
+            // SIB-byte:
+            //  mul | scaled_reg | reg
+            // -----+------------+-------
+            //  7 6 |   5 4 3    | 2 1 0
+
+            var token = ComputeRegisterToken((X86Register)operand.Value);
+
+            if (operand.ScaledIndex == null)
+                token |= 0x20;
+            else
+            {
+                token |= (byte)(ComputeRegisterToken(operand.ScaledIndex.Register) << 3);
+                switch (operand.ScaledIndex.Multiplier)
+                {
+                    case 1:
+                        break;
+                    case 2:
+                        token |= 0x40;
+                        break;
+                    case 4:
+                        token |= 0x80;
+                        break;
+                    case 8:
+                        token |= 0xC0;
+                        break;
+                    default:
+                        throw new ArgumentException("Operand has an invalid scaled index multiplier.", "operand");
+                }
+            }
+
+            return token;
+        }
+
     }
 }

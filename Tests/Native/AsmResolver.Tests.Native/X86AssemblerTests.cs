@@ -32,23 +32,10 @@ namespace AsmResolver.Tests.Native
 
         [TestMethod]
         public void RegOrMem8_Reg8_SIB()
-        {
-            
-        }
+        { 
+            var body = CreateRegOrMemSibTestInstructions(X86OpCodes.Add_RegOrMem8_Reg8, X86Mnemonic.Add).ToArray();
 
-        private static void TestAssembler(IReadOnlyList<X86Instruction> instructions)
-        {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "test.bin");
-            using (var stream = File.Create(path))
-            {
-                var writer = new BinaryStreamWriter(stream);
-                var assembler = new X86Assembler(writer);
-
-                foreach (var instruction in instructions)
-                    assembler.Write(instruction);
-            }
-
-            ValidateCode(instructions, File.ReadAllBytes(path));
+            TestAssembler(body);
         }
 
         private static IEnumerable<X86Instruction> CreateRegOrMemTestInstructions(X86OpCode opcode, X86Mnemonic mnemonic, bool flippedOperands)
@@ -60,7 +47,7 @@ namespace AsmResolver.Tests.Native
                     for (int register1Index = 0; register1Index < 8; register1Index++)
                     {
                         var operand1 = new X86Operand((X86Register)register1Index | X86Register.Eax,
-                                X86OperandType.BytePointer);
+                            X86OperandType.BytePointer);
                         var operand2 = new X86Operand((X86Register)register2Index, X86OperandType.Normal);
 
                         var instruction = new X86Instruction()
@@ -104,6 +91,64 @@ namespace AsmResolver.Tests.Native
                     }
                 }
             }
+        }
+
+        private static IEnumerable<X86Instruction> CreateRegOrMemSibTestInstructions(X86OpCode opcode, X86Mnemonic mnemonic)
+        {
+            for (int operandType = 0; operandType < 3; operandType++)
+            {
+                for (int multiplier = 1; multiplier < 16; multiplier*=2)
+                {
+                    for (int scaledRegIndex = 0; scaledRegIndex < 8; scaledRegIndex++)
+                    {
+                        if (scaledRegIndex == 4)
+                            continue;
+
+                        var operand1 = new X86Operand(X86Register.Eax,
+                            X86OperandType.BytePointer)
+                        {
+                            ScaledIndex = new X86ScaledIndex((X86Register)scaledRegIndex | X86Register.Eax, multiplier)
+                        };
+                        
+                        var operand2 = new X86Operand(X86Register.Al, X86OperandType.Normal);
+
+                        var instruction = new X86Instruction()
+                        {
+                            OpCode = opcode,
+                            Mnemonic = mnemonic,
+                            Operand1 = operand1,
+                            Operand2 = operand2,
+                        };
+
+                        switch (operandType)
+                        {
+                            case 1:
+                                operand1.Correction = 1;
+                                break;
+                            case 2:
+                                operand1.Correction = 0x1337;
+                                break;
+                        }
+                        
+                        yield return instruction;
+                    }
+                }
+            }
+        }
+
+        private static void TestAssembler(IReadOnlyList<X86Instruction> instructions)
+        {
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "test.bin");
+            using (var stream = File.Create(path))
+            {
+                var writer = new BinaryStreamWriter(stream);
+                var assembler = new X86Assembler(writer);
+
+                foreach (var instruction in instructions)
+                    assembler.Write(instruction);
+            }
+
+            ValidateCode(instructions, File.ReadAllBytes(path));
         }
 
 

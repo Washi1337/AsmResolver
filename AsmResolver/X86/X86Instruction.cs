@@ -8,6 +8,8 @@ namespace AsmResolver.X86
 {
     public class X86Instruction
     {
+        private static FasmX86Formatter _formatter = new FasmX86Formatter();
+
         public X86Instruction()
         {
         }
@@ -49,14 +51,7 @@ namespace AsmResolver.X86
 
         public override string ToString()
         {
-            var operandString = string.Empty;
-            if (Operand1 != null)
-            {
-                operandString = Operand2 != null ? 
-                    string.Format("{0}, {1}", Operand1, Operand2) :
-                    Operand1.ToString();
-            }
-            return string.Format("{0:X8}: {1}{2}", Offset, Mnemonic, operandString);
+            return string.Format("{0:X8}: {1}", Offset, _formatter.FormatInstruction(this));
         }
     }
 }
