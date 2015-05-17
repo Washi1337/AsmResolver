@@ -261,7 +261,7 @@
     <Compile Include="X86\X86Instruction.cs" />
     <Compile Include="X86\X86Mnemonic.cs" />
     <Compile Include="X86\X86OpCode.cs" />
-    <Compile Include="X86\X86AddressingMethod.cs" />
+    <Compile Include="X86\X86OperandType.cs" />
     <Compile Include="X86\SingleByteOpCodes.cs" />
     <Compile Include="X86\X86Operand.cs" />
     <Compile Include="X86\X86OperandSize.cs" />

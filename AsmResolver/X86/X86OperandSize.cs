@@ -3,16 +3,10 @@
     public enum X86OperandSize 
     {
         None,
+        Byte,
         WordOrDword,
         Word,
-        Byte,
-        PackedBcd,
         Dword,
-        DwordInt,
-        Dqword,
-        DwordOrQword,
-        Dreal,
-        Ereal,
         Fword
     }
 }

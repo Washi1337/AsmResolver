@@ -28,65 +28,81 @@ namespace AsmResolver.X86
 
             if (opcode.HasRegisterToken)
             {
-                var token = (byte)(ComputeRegisterTokenPart(opcode.AddressingMethods1[mnemonicIndex],
+                var token = (byte)(ComputeRegisterTokenPart(opcode.OperandTypes1[mnemonicIndex],
                                         opcode.OperandSizes1[mnemonicIndex], instruction.Operand1) |
-                                   ComputeRegisterTokenPart(opcode.AddressingMethods2[mnemonicIndex],
+                                   ComputeRegisterTokenPart(opcode.OperandTypes2[mnemonicIndex],
                                        opcode.OperandSizes2[mnemonicIndex], instruction.Operand2));
+
+                if (opcode.HasOpCodeModifier)
+                {
+                    token |= (byte)(mnemonicIndex << 3);
+                }
+
                 _writer.WriteByte(token);
             }
 
             if (instruction.Operand1 != null)
             {
-                WriteOperand(opcode.AddressingMethods1[mnemonicIndex],
+                WriteOperand(opcode.OperandTypes1[mnemonicIndex],
                     opcode.OperandSizes1[mnemonicIndex], instruction.Operand1);
                 if (instruction.Operand2 != null)
                 {
-                    WriteOperand(opcode.AddressingMethods2[mnemonicIndex],
+                    WriteOperand(opcode.OperandTypes2[mnemonicIndex],
                         opcode.OperandSizes2[mnemonicIndex], instruction.Operand2);
                 }
             }
         }
 
-        private void WriteOperand(X86AddressingMethod method, X86OperandSize size, X86Operand operand)
+        private void WriteOperand(X86OperandType method, X86OperandSize size, X86Operand operand)
+        {
+            WriteOperandValue(method, size, operand);
+            WriteOperandOffset(operand.OffsetType, operand.Offset);
+        }
+
+        private void WriteOperandValue(X86OperandType method, X86OperandSize size, X86Operand operand)
         {
             switch (method)
             {
-                case X86AddressingMethod.MemoryAddress:
-                case X86AddressingMethod.DirectAddress:
-                case X86AddressingMethod.ImmediateData:
+                case X86OperandType.MemoryAddress:
+                case X86OperandType.DirectAddress:
+                case X86OperandType.ImmediateData:
                 {
                     WriteNumber(operand.Value, size);
                     break;
                 }
-                case X86AddressingMethod.RegisterOrMemoryAddress:
+                case X86OperandType.RegisterOrMemoryAddress:
                 {
                     if ((operand.ScaledIndex != null) ||
-                        (operand.Value is X86Register && (X86Register)operand.Value == X86Register.Esp))
+                        (operand.OperandUsage != X86OperandUsage.Normal && operand.Value is X86Register &&
+                         (X86Register)operand.Value == X86Register.Esp))
                         _writer.WriteByte(ComputeRegOrMemSibToken(operand));
                     else if (!(operand.Value is X86Register))
                         WriteNumber(operand.Value, X86OperandSize.Dword);
                     break;
                 }
-                case X86AddressingMethod.RelativeOffset:
+                case X86OperandType.RelativeOffset:
                 {
+                    WriteNumber(Convert.ToUInt32(operand.Value) - (_writer.Position + sizeof (sbyte)), size);
                     break;
                 }
-                default:
-                {
-                    return;
-                }
             }
+        }
 
-            if (operand.Correction != null)
+        private void WriteOperandOffset(X86OffsetType type, int offset)
+        {
+            switch (type)
             {
-                if (operand.Correction is sbyte)
-                    _writer.WriteSByte((sbyte)operand.Correction);
-                else if (operand.Correction is int)
-                    _writer.WriteInt32((int)operand.Correction);
-                else
-                    throw new ArgumentException("Operand correction is invalid.");
+                case X86OffsetType.None:
+                    break;
+                case X86OffsetType.Short:
+                    _writer.WriteSByte((sbyte)offset);
+                    break;
+                case X86OffsetType.Long:
+                    _writer.WriteInt32(offset);
+                    break;
+                default:
+                    throw new NotSupportedException("Unrecognized or unsupported offset type.");
             }
-            
         }
 
         private void WriteNumber(object value, X86OperandSize size)
@@ -94,13 +110,23 @@ namespace AsmResolver.X86
             switch (size)
             {
                 case X86OperandSize.Byte:
-                    _writer.WriteByte(Convert.ToByte(value));
+                    if (value is sbyte || value is short || value is int || value is long)
+                        _writer.WriteSByte(Convert.ToSByte(value));
+                    else
+                        _writer.WriteByte(Convert.ToByte(value));
                     break;
                 case X86OperandSize.Word:
-                    _writer.WriteUInt16(Convert.ToUInt16(value));
+                    if (value is sbyte || value is short || value is int || value is long)
+                        _writer.WriteInt16(Convert.ToInt16(value));
+                    else
+                        _writer.WriteUInt16(Convert.ToUInt16(value));
                     break;
+                case X86OperandSize.WordOrDword:
                 case X86OperandSize.Dword:
-                    _writer.WriteUInt32(Convert.ToUInt32(value));
+                    if (value is sbyte || value is short || value is int || value is long)
+                        _writer.WriteInt32(Convert.ToInt32(value));
+                    else
+                        _writer.WriteUInt32(Convert.ToUInt32(value));
                     break;
                 default:
                     throw new NotSupportedException();
@@ -113,21 +139,20 @@ namespace AsmResolver.X86
             // todo: multibyte opcodes.
         }
         
-        private static byte ComputeRegisterTokenPart(X86AddressingMethod method, X86OperandSize size, X86Operand operand)
+        private static byte ComputeRegisterTokenPart(X86OperandType method, X86OperandSize size, X86Operand operand)
         {
             switch (method)
             {
-                case X86AddressingMethod.Register:
+                case X86OperandType.Register:
                 {
                     return (byte)(ComputeRegisterToken((X86Register)operand.Value) << 3);
                 }
-                case X86AddressingMethod.RegisterOrMemoryAddress:
+                case X86OperandType.RegisterOrMemoryAddress:
                 {
                     return ComputeRegOrMemToken(operand);
                 }
             }
-
-            throw new ArgumentException(string.Format("Cannot compute a register token from a {0} addressing method.", method));
+            return 0;
         }
 
         private static byte ComputeRegisterToken(X86Register register)
@@ -162,16 +187,18 @@ namespace AsmResolver.X86
         {
             if (operand.Value is X86Register)
             {
-                if (operand.Correction == null)
+                switch (operand.OffsetType)
                 {
-                    return operand.OperandType == X86OperandType.Normal
-                        ? X86RegOrMemModifier.RegisterOnly
-                        : X86RegOrMemModifier.RegisterPointer;
+                    case X86OffsetType.None:
+                        return operand.OperandUsage == X86OperandUsage.Normal
+                            ? X86RegOrMemModifier.RegisterOnly
+                            : X86RegOrMemModifier.RegisterPointer;
+                    case X86OffsetType.Short:
+                        return X86RegOrMemModifier.RegisterDispShortPointer;
+                    case X86OffsetType.Long:
+                        return X86RegOrMemModifier.RegisterDispLongPointer;
                 }
-
-                return operand.Correction is sbyte
-                    ? X86RegOrMemModifier.RegisterDispShortPointer
-                    : X86RegOrMemModifier.RegisterDispLongPointer;
+                throw new NotSupportedException("Unsupported or unrecognized operand offset type.");
             }
 
             if (operand.Value is uint)

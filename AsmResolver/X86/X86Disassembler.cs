@@ -32,10 +32,10 @@ namespace AsmResolver.X86
             var mnemonicIndex = instruction.OpCode.HasOpCodeModifier ? (registerToken >> 3) & 7 : 0;
             instruction.Mnemonic = instruction.OpCode.Mnemonics[mnemonicIndex];
 
-            instruction.Operand1 = ReadOperand(instruction.OpCode.AddressingMethods1[mnemonicIndex],
+            instruction.Operand1 = ReadOperand(instruction.OpCode.OperandTypes1[mnemonicIndex],
                 instruction.OpCode.OperandSizes1[mnemonicIndex], instruction.OpCode.Op1, registerToken);
 
-            instruction.Operand2 = ReadOperand(instruction.OpCode.AddressingMethods2[mnemonicIndex],
+            instruction.Operand2 = ReadOperand(instruction.OpCode.OperandTypes2[mnemonicIndex],
                 instruction.OpCode.OperandSizes2[mnemonicIndex], instruction.OpCode.Op1, registerToken);
 
             return instruction;
@@ -55,50 +55,49 @@ namespace AsmResolver.X86
             }
         }
 
-        private X86Operand ReadOperand(X86AddressingMethod method, X86OperandSize size, byte opcode, byte registerToken)
+        private X86Operand ReadOperand(X86OperandType method, X86OperandSize size, byte opcode, byte registerToken)
         {
-            var offset = _reader.Position;
             switch (method)
             {
-                case X86AddressingMethod.OpCodeRegister:
+                case X86OperandType.OpCodeRegister:
                     return new X86Operand(GetRegisterFromToken((byte)(opcode & 7), GetRegisterSize(size)));
 
-                case X86AddressingMethod.Register:
+                case X86OperandType.Register:
                     return new X86Operand(GetRegisterFromToken((byte)((registerToken >> 3) & 7),
                         GetRegisterSize(size)));
 
-                case X86AddressingMethod.RegisterOrMemoryAddress:
+                case X86OperandType.RegisterOrMemoryAddress:
                     return GetRegOrMemOperand32(registerToken, size);
 
-                case X86AddressingMethod.ImmediateData:
+                case X86OperandType.ImmediateData:
                     return new X86Operand(ReadImmediateData(size));
 
-                case X86AddressingMethod.MemoryAddress:
-                    return new X86Operand(_reader.ReadUInt32(), GetOperandType(size));
+                case X86OperandType.MemoryAddress:
+                    return new X86Operand(GetOperandType(size), _reader.ReadUInt32());
 
-                case X86AddressingMethod.RegisterAl:
+                case X86OperandType.RegisterAl:
                     return new X86Operand(X86Register.Al);
 
-                case X86AddressingMethod.RegisterCl:
+                case X86OperandType.RegisterCl:
                     return new X86Operand(X86Register.Cl);
 
-                case X86AddressingMethod.RegisterDx:
+                case X86OperandType.RegisterDx:
                     return new X86Operand(X86Register.Dx);
 
-                case X86AddressingMethod.RegisterEax:
+                case X86OperandType.RegisterEax:
                     return new X86Operand(X86Register.Eax);
                     
-                case X86AddressingMethod.ImmediateOne:
+                case X86OperandType.ImmediateOne:
                     return new X86Operand(1);
 
-                case X86AddressingMethod.RelativeOffset:
+                case X86OperandType.RelativeOffset:
                     return new X86Operand((ulong)(Convert.ToInt64(ReadSignedImmediateData(size)) + _reader.Position));
 
-                case X86AddressingMethod.None:
+                case X86OperandType.None:
                     return null;
 
             }
-            throw new NotSupportedException();
+            throw new NotSupportedException("Unrecognized or unsupported addressing method.");
         }
 
         private object ReadSignedImmediateData(X86OperandSize size)
@@ -151,18 +150,18 @@ namespace AsmResolver.X86
             throw new ArgumentException();
         }
 
-        private static X86OperandType GetOperandType(X86OperandSize size)
+        private static X86OperandUsage GetOperandType(X86OperandSize size)
         {
             switch (size)
             {
                 case X86OperandSize.Byte:
-                    return X86OperandType.BytePointer;
+                    return X86OperandUsage.BytePointer;
                 case X86OperandSize.Dword:
-                    return X86OperandType.DwordPointer;
+                    return X86OperandUsage.DwordPointer;
                 case X86OperandSize.WordOrDword:
-                    return X86OperandType.DwordPointer; // TODO: use operand-size override opcode
+                    return X86OperandUsage.DwordPointer; // TODO: use operand-size override opcode
                 case X86OperandSize.Fword:
-                    return X86OperandType.FwordPointer;
+                    return X86OperandUsage.FwordPointer;
             }
             throw new ArgumentException();
         }
@@ -184,13 +183,13 @@ namespace AsmResolver.X86
             if (modifier == X86RegOrMemModifier.RegisterOnly)
             {
                 operand.Value = GetRegisterFromToken((byte)(registerToken & 0x7), GetRegisterSize(size));
-                operand.OperandType = X86OperandType.Normal;
+                operand.OperandUsage = X86OperandUsage.Normal;
                 return operand;
             }
 
             // Register-pointer operands are always 32-bit registers.
             var register = GetRegisterFromToken((byte)(registerToken & 0x7), X86RegisterSize.Dword);
-            operand.OperandType = GetOperandType(size);
+            operand.OperandUsage = GetOperandType(size);
             operand.Value = register;
 
             // EBP register is replaced by a direct address.
@@ -208,10 +207,12 @@ namespace AsmResolver.X86
             switch (modifier)
             {
                 case X86RegOrMemModifier.RegisterDispShortPointer:
-                    operand.Correction = _reader.ReadSByte();
+                    operand.Offset = _reader.ReadSByte();
+                    operand.OffsetType = X86OffsetType.Short;
                     break;
                 case X86RegOrMemModifier.RegisterDispLongPointer:
-                    operand.Correction = _reader.ReadInt32();
+                    operand.Offset = _reader.ReadInt32();
+                    operand.OffsetType = X86OffsetType.Long;
                     break;
             }
 

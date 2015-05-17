@@ -37,6 +37,12 @@ namespace AsmResolver.Tests.Native
         }
 
         [TestMethod]
+        public void RelativeOffsets()
+        {
+            TestDisassembler(Properties.Resources.RelativeOffsets, Properties.Resources.RelativeOffsets_source);
+        }
+
+        [TestMethod]
         public void OpCodeRegisterToken()
         {
             TestDisassembler(Properties.Resources.OpCodeRegisterToken, Properties.Resources.OpCodeRegisterToken_source);

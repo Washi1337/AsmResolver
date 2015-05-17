@@ -29,13 +29,13 @@ namespace AsmResolver.X86
             Mnemonics = mnemonics;
             HasRegisterToken = hasRegisterToken;
 
-            var method1 = (X86AddressingMethod)((operandsValue >> 0x18) & 0xFF);
+            var method1 = (X86OperandType)((operandsValue >> 0x18) & 0xFF);
             var size1 = (X86OperandSize)((operandsValue >> 0x10) & 0xFF);
-            var method2 = (X86AddressingMethod)((operandsValue >> 0x08) & 0xFF);
+            var method2 = (X86OperandType)((operandsValue >> 0x08) & 0xFF);
             var size2 = (X86OperandSize)(operandsValue & 0xFF);
 
-            AddressingMethods1 = Enumerable.Repeat(method1, mnemonics.Length).ToArray();
-            AddressingMethods2 = Enumerable.Repeat(method2, mnemonics.Length).ToArray();
+            OperandTypes1 = Enumerable.Repeat(method1, mnemonics.Length).ToArray();
+            OperandTypes2 = Enumerable.Repeat(method2, mnemonics.Length).ToArray();
             OperandSizes1 = Enumerable.Repeat(size1, mnemonics.Length).ToArray();
             OperandSizes2 = Enumerable.Repeat(size2, mnemonics.Length).ToArray();
 
@@ -47,8 +47,8 @@ namespace AsmResolver.X86
                 X86OpCodes.SingleByteOpCodes[Op1] = this;
         }
 
-        internal X86OpCode(X86Mnemonic[] mnemonics, uint opcodeValue, X86AddressingMethod[] methods1, X86OperandSize[] sizes1,
-            X86AddressingMethod[] methods2, X86OperandSize[] sizes2)
+        internal X86OpCode(X86Mnemonic[] mnemonics, uint opcodeValue, X86OperandType[] operandTypes1, X86OperandSize[] sizes1,
+            X86OperandType[] operandTypes2, X86OperandSize[] sizes2)
             : this()
         {
             Prefix = (byte)((opcodeValue >> 0x18) & 0xFF);
@@ -56,8 +56,8 @@ namespace AsmResolver.X86
             Op1 = (byte)((opcodeValue >> 0x08) & 0xFF);
             Op2 = (byte)(opcodeValue & 0xFF);
             Mnemonics = mnemonics;
-            AddressingMethods1 = methods1;
-            AddressingMethods2 = methods2;
+            OperandTypes1 = operandTypes1;
+            OperandTypes2 = operandTypes2;
             OperandSizes1 = sizes1;
             OperandSizes2 = sizes2;
 
@@ -112,7 +112,7 @@ namespace AsmResolver.X86
             private set;
         }
 
-        public X86AddressingMethod[] AddressingMethods1
+        public X86OperandType[] OperandTypes1
         {
             get;
             private set;
@@ -130,7 +130,7 @@ namespace AsmResolver.X86
             private set;
         }
 
-        public X86AddressingMethod[] AddressingMethods2
+        public X86OperandType[] OperandTypes2
         {
             get;
             private set;

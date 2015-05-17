@@ -39,15 +39,15 @@ namespace AsmResolver.X86
 
         public virtual string FormatOperand(X86Operand operand)
         {
-            string prefix = FormatOperandTypePrefix(operand.OperandType);
+            string prefix = FormatOperandTypePrefix(operand.OperandUsage);
 
             var formattedValue = FormatValue(operand.Value);
-            var formattedCorrection = FormatCorrection(operand.Correction);
+            var formattedOffset = FormatOffset(operand.Offset);
             var formattedScaledIndex = operand.ScaledIndex != null ? '+' + operand.ScaledIndex.ToString() : string.Empty;
 
             return prefix == null
                 ? formattedValue
-                : string.Format("{0} [{1}{2}{3}]", prefix, formattedValue, formattedScaledIndex, formattedCorrection);
+                : string.Format("{0} [{1}{2}{3}]", prefix, formattedValue, formattedScaledIndex, formattedOffset);
         }
 
         private string FormatValue(object value)
@@ -69,7 +69,7 @@ namespace AsmResolver.X86
             throw new NotSupportedException();
         }
 
-        public abstract string FormatOperandTypePrefix(X86OperandType operandType);
+        public abstract string FormatOperandTypePrefix(X86OperandUsage operandUsage);
 
         public abstract string FormatRegister(X86Register value);
 
@@ -80,38 +80,25 @@ namespace AsmResolver.X86
         public abstract string FormatDword(uint value);
 
         public abstract string FormatFword(ulong value);
-
-        public string FormatCorrection(object value)
-        {
-            if (value == null)
-                return string.Empty;
-            if (value is sbyte)
-                return FormatCorrection((sbyte)value);
-            if (value is int)
-                return FormatCorrection((int)value);
-            throw new NotSupportedException();
-        }
-
-        public abstract string FormatCorrection(sbyte value);
-
-        public abstract string FormatCorrection(int value);
+        
+        public abstract string FormatOffset(int value);
     }
 
     public class FasmX86Formatter : X86Formatter
     {
-        public override string FormatOperandTypePrefix(X86OperandType operandType)
+        public override string FormatOperandTypePrefix(X86OperandUsage operandUsage)
         {
-            switch (operandType)
+            switch (operandUsage)
             {
-                case X86OperandType.Normal:
+                case X86OperandUsage.Normal:
                     return null;
-                case X86OperandType.BytePointer:
+                case X86OperandUsage.BytePointer:
                     return "byte";
-                case X86OperandType.WordPointer:
+                case X86OperandUsage.WordPointer:
                     return "word";
-                case X86OperandType.DwordPointer:
+                case X86OperandUsage.DwordPointer:
                     return "dword";
-                case X86OperandType.FwordPointer:
+                case X86OperandUsage.FwordPointer:
                     return "fword";
             }
             throw new ArgumentException();
@@ -142,14 +129,7 @@ namespace AsmResolver.X86
             return "0x" + value.ToString("X");
         }
 
-        public override string FormatCorrection(sbyte value)
-        {
-            if (value == 0)
-                return string.Empty;
-            return (value < 0 ? '-' : '+') + "0x" + Math.Abs(value).ToString("X");
-        }
-
-        public override string FormatCorrection(int value)
+        public override string FormatOffset(int value)
         {
             if (value == 0)
                 return string.Empty;

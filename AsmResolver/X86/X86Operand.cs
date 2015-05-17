@@ -6,21 +6,52 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.X86
 {
+    public enum X86OffsetType
+    {
+        None = 0,
+        Short = 1,
+        Long = 4,
+    }
+
     public class X86Operand
     {
-        public X86Operand()
+        internal X86Operand()
         {
         }
 
         public X86Operand(object value)
+            : this(X86OperandUsage.Normal, value)
         {
-            Value = value;
         }
 
-        public X86Operand(object value, X86OperandType operandType)
+        public X86Operand(X86OperandUsage operandUsage, object value)
+            : this(operandUsage, value, null, 0, X86OffsetType.None)
         {
+        }
+
+        public X86Operand(X86OperandUsage operandUsage, object value, int offset)
+            : this(operandUsage, value, null, offset, offset >= sbyte.MinValue && offset <= sbyte.MaxValue ? X86OffsetType.Short : X86OffsetType.Long)
+        {
+        }
+
+        public X86Operand(X86OperandUsage operandUsage, object value, X86ScaledIndex scaledIndex)
+            : this(operandUsage, value, scaledIndex, 0, X86OffsetType.None)
+        {
+        }
+
+        public X86Operand(X86OperandUsage operandUsage, object value, X86ScaledIndex scaledIndex, int offset, X86OffsetType offsetType)
+        {
+            OperandUsage = operandUsage;
             Value = value;
-            OperandType = operandType;
+            ScaledIndex = scaledIndex;
+            Offset = offset;
+            OffsetType = offsetType;
+        }
+
+        public X86OperandUsage OperandUsage
+        {
+            get;
+            set;
         }
 
         public object Value
@@ -35,13 +66,13 @@ namespace AsmResolver.X86
             set;
         }
 
-        public object Correction
+        public int Offset
         {
             get;
             set;
         }
 
-        public X86OperandType OperandType
+        public X86OffsetType OffsetType
         {
             get;
             set;
@@ -49,15 +80,15 @@ namespace AsmResolver.X86
 
         public override string ToString()
         {
-            switch (OperandType)
+            switch (OperandUsage)
             {
-                case X86OperandType.Normal:
+                case X86OperandUsage.Normal:
                     return Value.ToString();
-                case X86OperandType.BytePointer:
+                case X86OperandUsage.BytePointer:
                     return string.Format("byte [{0}]", Value);
-                case X86OperandType.DwordPointer:
+                case X86OperandUsage.DwordPointer:
                     return string.Format("dword [{0}]", Value);
-                case X86OperandType.FwordPointer:
+                case X86OperandUsage.FwordPointer:
                     return string.Format("fword [{0}]", Value);
             }
             throw new NotSupportedException();
@@ -101,7 +132,7 @@ namespace AsmResolver.X86
         }
     }
 
-    public enum X86OperandType
+    public enum X86OperandUsage
     {
         Normal,
         BytePointer,

@@ -58,11 +58,13 @@
     <Compile Include="X86AssemblerTests.cs" />
     <Compile Include="X86DisassemblerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="X86SizeComputationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +73,7 @@
     <None Include="Resources\Reg8_RegOrMem8.bin" />
     <None Include="Resources\RegOrMem8_Reg8.bin" />
     <None Include="Resources\RegOrMem8_Reg8_sib.bin" />
+    <None Include="Resources\RelativeOffsets.bin" />
     <None Include="Resources\TestConsoleApplication.exe" />
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +99,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\OpCodeRegisterToken.asm" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RelativeOffsets.asm" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

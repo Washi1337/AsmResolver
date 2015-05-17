@@ -38,6 +38,14 @@ namespace AsmResolver.Tests.Native
             TestAssembler(body);
         }
 
+        [TestMethod]
+        public void OpCodeRegisterToken()
+        {
+            var body = CreateOpCodeRegisterTokenTestInstructions().ToArray();
+
+            TestAssembler(body);
+        }
+
         private static IEnumerable<X86Instruction> CreateRegOrMemTestInstructions(X86OpCode opcode, X86Mnemonic mnemonic, bool flippedOperands)
         {  
             for (int operandType = 0; operandType < 3; operandType++)
@@ -46,9 +54,9 @@ namespace AsmResolver.Tests.Native
                 {
                     for (int register1Index = 0; register1Index < 8; register1Index++)
                     {
-                        var operand1 = new X86Operand((X86Register)register1Index | X86Register.Eax,
-                            X86OperandType.BytePointer);
-                        var operand2 = new X86Operand((X86Register)register2Index, X86OperandType.Normal);
+                        var operand1 = new X86Operand(X86OperandUsage.BytePointer,
+                            (X86Register)register1Index | X86Register.Eax);
+                        var operand2 = new X86Operand(X86OperandUsage.Normal, (X86Register)register2Index);
 
                         var instruction = new X86Instruction()
                         {
@@ -81,10 +89,12 @@ namespace AsmResolver.Tests.Native
                         switch (operandType)
                         {
                             case 1:
-                                operand1.Correction = (sbyte)1;
+                                operand1.Offset = 1;
+                                operand1.OffsetType = X86OffsetType.Short;
                                 break;
                             case 2:
-                                operand1.Correction = 0x1337;
+                                operand1.Offset = 0x1337;
+                                operand1.OffsetType = X86OffsetType.Long;
                                 break;
                         }
                         yield return instruction;
@@ -104,13 +114,10 @@ namespace AsmResolver.Tests.Native
                         if (scaledRegIndex == 4)
                             continue;
 
-                        var operand1 = new X86Operand(X86Register.Eax,
-                            X86OperandType.BytePointer)
-                        {
-                            ScaledIndex = new X86ScaledIndex((X86Register)scaledRegIndex | X86Register.Eax, multiplier)
-                        };
-                        
-                        var operand2 = new X86Operand(X86Register.Al, X86OperandType.Normal);
+                        var operand1 = new X86Operand(X86OperandUsage.BytePointer, X86Register.Eax,
+                            new X86ScaledIndex((X86Register)scaledRegIndex | X86Register.Eax, multiplier));
+
+                        var operand2 = new X86Operand(X86OperandUsage.Normal, X86Register.Al);
 
                         var instruction = new X86Instruction()
                         {
@@ -123,10 +130,12 @@ namespace AsmResolver.Tests.Native
                         switch (operandType)
                         {
                             case 1:
-                                operand1.Correction = 1;
+                                operand1.Offset = 1;
+                                operand1.OffsetType = X86OffsetType.Short;
                                 break;
                             case 2:
-                                operand1.Correction = 0x1337;
+                                operand1.Offset = 0x1337;
+                                operand1.OffsetType = X86OffsetType.Long;
                                 break;
                         }
                         
@@ -135,6 +144,26 @@ namespace AsmResolver.Tests.Native
                 }
             }
         }
+
+        private static IEnumerable<X86Instruction> CreateOpCodeRegisterTokenTestInstructions()
+        {
+            var opcode = X86OpCodes.Arithmetic_RegOrMem8_Imm8;
+            for (int index = 0; index < opcode.Mnemonics.Length; index++)
+            {
+                var mnemonic = opcode.Mnemonics[index];
+
+                var instruction = new X86Instruction()
+                {
+                    OpCode = opcode,
+                    Mnemonic = mnemonic,
+                    Operand1 = new X86Operand(X86OperandUsage.BytePointer, 0x1337u),
+                    Operand2 = new X86Operand((byte)index),
+                };
+
+                yield return instruction;
+            }
+        }
+
 
         private static void TestAssembler(IReadOnlyList<X86Instruction> instructions)
         {
@@ -150,8 +179,7 @@ namespace AsmResolver.Tests.Native
 
             ValidateCode(instructions, File.ReadAllBytes(path));
         }
-
-
+        
         private static void ValidateCode(IReadOnlyList<X86Instruction> originalBody, byte[] assemblerOutput)
         {
             var formatter = new FasmX86Formatter();

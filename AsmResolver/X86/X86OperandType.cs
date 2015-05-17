@@ -2,7 +2,7 @@
 {
     // Reference: http://ref.x86asm.net/
 
-    public enum X86AddressingMethod
+    public enum X86OperandType
     {
         None,
         DirectAddress,
