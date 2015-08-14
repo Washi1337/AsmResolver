@@ -8,6 +8,7 @@ using AsmResolver.Builder;
 using AsmResolver.Net.Builder;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
+using AsmResolver.X86;
 
 namespace AsmResolver.Net.Msil
 {
@@ -52,7 +53,7 @@ namespace AsmResolver.Net.Msil
             }
         }
 
-        public static MethodBody FromReader(MethodDefinition method, ReadingContext context)
+        public static MethodBody FromReadingContext(MethodDefinition method, ReadingContext context)
         {
             var reader = context.Reader;
             var body = new MethodBody(method)

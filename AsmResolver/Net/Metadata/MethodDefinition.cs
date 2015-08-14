@@ -196,13 +196,13 @@ namespace AsmResolver.Net.Metadata
                 if (_body != null)
                     return _body;
 
-                if (Rva == 0)
+                if (Rva == 0 || IsNative)
                     return null;
 
                 var application = Header.NetDirectory.Assembly;
                 var offset = application.RvaToFileOffset(Rva);
                 var context = application.ReadingContext.CreateSubContext(offset);
-                return _body = MethodBody.FromReader(this, context);
+                return _body = MethodBody.FromReadingContext(this, context);
             }
             set { _body = value; }
         }
@@ -325,6 +325,42 @@ namespace AsmResolver.Net.Metadata
             set { Attributes = Attributes.SetFlag(MethodAttributes.HasSecurity, value); }
         }
 
+        public bool IsIL
+        {
+            get { return GetMethodCodeTypeAttribute(MethodImplAttributes.IL); }
+            set { SetMethodCodeTypeAttribute(MethodImplAttributes.IL, value); }
+        }
+
+        public bool IsNative
+        {
+            get { return GetMethodCodeTypeAttribute(MethodImplAttributes.Native); }
+            set { SetMethodCodeTypeAttribute(MethodImplAttributes.Native, value); }
+        }
+
+        public bool IsOPTIL
+        {
+            get { return GetMethodCodeTypeAttribute(MethodImplAttributes.OPTIL); }
+            set { SetMethodCodeTypeAttribute(MethodImplAttributes.OPTIL, value); }
+        }
+
+        public bool IsRuntime
+        {
+            get { return GetMethodCodeTypeAttribute(MethodImplAttributes.Runtime); }
+            set { SetMethodCodeTypeAttribute(MethodImplAttributes.Runtime, value); }
+        }
+
+        public bool IsManaged
+        {
+            get { return !IsUnmanaged; }
+            set { IsUnmanaged = !value; }
+        }
+
+        public bool IsUnmanaged
+        {
+            get { return ImplAttributes.HasFlag(MethodImplAttributes.Unmanaged); }
+            set { ImplAttributes = ImplAttributes.SetFlag(MethodImplAttributes.Unmanaged, value); }
+        }
+
         public bool IsConstructor
         {
             get { return IsRuntimeSpecialName && IsSpecialName && (Name == ".ctor" || Name == ".cctor"); }
@@ -339,6 +375,18 @@ namespace AsmResolver.Net.Metadata
         private void SetMethodAccessAttribute(MethodAttributes attribute, bool value)
         {
             Attributes = (MethodAttributes)((uint)Attributes).SetMaskedAttribute((uint)MethodAttributes.MemberAccessMask,
+                (uint)attribute, value);
+        }
+
+        private bool GetMethodCodeTypeAttribute(MethodImplAttributes attribute)
+        {
+            return ((uint)Attributes).GetMaskedAttribute((uint)MethodImplAttributes.CodeTypeMask,
+                (uint)attribute);
+        }
+
+        private void SetMethodCodeTypeAttribute(MethodImplAttributes attribute, bool value)
+        {
+            ImplAttributes = (MethodImplAttributes)((uint)Attributes).SetMaskedAttribute((uint)MethodImplAttributes.CodeTypeMask,
                 (uint)attribute, value);
         }
 

@@ -28,9 +28,9 @@ namespace AsmResolver.Net.Metadata
         {
             get
             {
-                return string.IsNullOrEmpty(_assemblyName.CultureName)
+                return string.IsNullOrEmpty(_assemblyName.CultureInfo.Name)
                     ? "neutral"
-                    : _assemblyName.CultureName;
+                    : _assemblyName.CultureInfo.Name;
             }
         }
 

@@ -3,11 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AsmResolver.Collections.Generic;
 
 namespace AsmResolver
 {
     public class DataSegment : FileSegment
     {
+        public static DataSegment FromReadingContext(ReadingContext context)
+        {
+            return new DataSegment(context.Reader.ReadBytes(
+                (int)(context.Reader.Length - (context.Reader.Position - context.Reader.StartPosition))));
+        }
+
         public static DataSegment CreateAsciiString(string value, bool useTerminator)
         {
             var stringBytes = Encoding.ASCII.GetBytes(value);
@@ -26,6 +33,12 @@ namespace AsmResolver
         public static DataSegment CreateBuffer(int length)
         {
             return new DataSegment(new byte[length]);
+        }
+
+        public DataSegment()
+            : this(new byte[0])
+        {
+            
         }
 
         public DataSegment(byte[] data)
