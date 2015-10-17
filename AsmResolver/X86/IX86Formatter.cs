@@ -39,6 +39,8 @@ namespace AsmResolver.X86
 
         public virtual string FormatOperand(X86Operand operand)
         {
+            if (operand == null)
+                return string.Empty;
             string prefix = FormatOperandTypePrefix(operand.OperandUsage);
 
             var formattedValue = FormatValue(operand.Value);
@@ -64,11 +66,11 @@ namespace AsmResolver.X86
                 case TypeCode.UInt32:
                     return FormatDword((uint)value);
                 case TypeCode.UInt64:
-                    return FormatDword(Convert.ToUInt32(value)); // TODO: qwords
+                    return FormatQword((ulong)value); // TODO: qwords
             }
             throw new NotSupportedException();
         }
-
+        
         public abstract string FormatOperandTypePrefix(X86OperandUsage operandUsage);
 
         public abstract string FormatRegister(X86Register value);
@@ -80,7 +82,9 @@ namespace AsmResolver.X86
         public abstract string FormatDword(uint value);
 
         public abstract string FormatFword(ulong value);
-        
+
+        public abstract string FormatQword(ulong value);
+
         public abstract string FormatOffset(int value);
     }
 
@@ -125,6 +129,11 @@ namespace AsmResolver.X86
         }
 
         public override string FormatFword(ulong value)
+        {
+            return "0x" + value.ToString("X");
+        }
+
+        public override string FormatQword(ulong value)
         {
             return "0x" + value.ToString("X");
         }

@@ -79,7 +79,7 @@ namespace AsmResolver.Net.Msil
                 case MsilOperandType.InlineTok:
                 case MsilOperandType.InlineType:
                 case MsilOperandType.InlineString:
-                    return reader.ReadUInt32();
+                    return new MetadataToken(reader.ReadUInt32());
 
                 case MsilOperandType.InlineSwitch:
                     var offsets = new int[reader.ReadUInt32()];
@@ -98,18 +98,24 @@ namespace AsmResolver.Net.Msil
             {
                 case MsilOperandType.InlineArgument:
                 case MsilOperandType.ShortInlineArgument:
-                    current.Operand = _resolver.ResolveParameter(Convert.ToInt32(current.Operand));
+                    var parameter = _resolver.ResolveParameter(Convert.ToInt32(current.Operand));
+                    if (parameter != null)
+                        current.Operand = parameter;
                     break;
 
                 case MsilOperandType.InlineVar:
                 case MsilOperandType.ShortInlineVar:
-                    current.Operand = _resolver.ResolveVariable(Convert.ToInt32(current.Operand));
+                    var variable = _resolver.ResolveVariable(Convert.ToInt32(current.Operand));
+                    if (variable != null)
+                        current.Operand = variable;
                     break;
 
                 case MsilOperandType.ShortInlineBrTarget:
                 case MsilOperandType.InlineBrTarget:
-                    current.Operand = instructions.FirstOrDefault(
+                    var targetInstruction = instructions.FirstOrDefault(
                         x => x.Offset == nextOffset + Convert.ToInt32(current.Operand));
+                    if (targetInstruction != null)
+                        current.Operand = targetInstruction;
                     break;
 
                 case MsilOperandType.InlineField:
@@ -117,11 +123,15 @@ namespace AsmResolver.Net.Msil
                 case MsilOperandType.InlineSig:
                 case MsilOperandType.InlineTok:
                 case MsilOperandType.InlineType:
-                    current.Operand = _resolver.ResolveMember(new MetadataToken((uint)current.Operand));
+                    var member = _resolver.ResolveMember((MetadataToken)current.Operand);
+                    if (member != null)
+                        current.Operand = member;
                     break;
 
                 case MsilOperandType.InlineString:
-                    current.Operand = _resolver.ResolveString((uint)current.Operand);
+                    var stringValue = _resolver.ResolveString(((MetadataToken)current.Operand).ToUInt32());
+                    if (stringValue != null)
+                        current.Operand = stringValue;
                     break;
 
                 case MsilOperandType.InlineSwitch:
