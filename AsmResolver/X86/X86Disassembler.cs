@@ -12,10 +12,22 @@ namespace AsmResolver.X86
         private readonly IBinaryStreamReader _reader;
 
         public X86Disassembler(IBinaryStreamReader reader)
+            : this(reader, 0)
+        {
+        }
+
+        public X86Disassembler(IBinaryStreamReader reader, long baseAddress)
         {
             if (reader == null)
                 throw new ArgumentNullException("reader");
             _reader = reader;
+            BaseAddress = baseAddress;
+        }
+
+        public long BaseAddress
+        {
+            get;
+            private set;
         }
 
         public X86Instruction ReadNextInstruction()

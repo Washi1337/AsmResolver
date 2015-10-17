@@ -79,7 +79,7 @@ namespace AsmResolver.Net.Msil
                 case MsilOperandType.InlineTok:
                 case MsilOperandType.InlineType:
                 case MsilOperandType.InlineString:
-                    return reader.ReadUInt32();
+                    return new MetadataToken(reader.ReadUInt32());
 
                 case MsilOperandType.InlineSwitch:
                     var offsets = new int[reader.ReadUInt32()];
@@ -108,8 +108,10 @@ namespace AsmResolver.Net.Msil
 
                 case MsilOperandType.ShortInlineBrTarget:
                 case MsilOperandType.InlineBrTarget:
-                    current.Operand = instructions.FirstOrDefault(
-                        x => x.Offset == nextOffset + Convert.ToInt32(current.Operand));
+                    var targetOffset = nextOffset + Convert.ToInt32(current.Operand);
+                    var targetInstruction = instructions.FirstOrDefault(x => x.Offset == targetOffset);
+                    if (targetInstruction != null)
+                        current.Operand = targetInstruction;
                     break;
 
                 case MsilOperandType.InlineField:
@@ -117,11 +119,13 @@ namespace AsmResolver.Net.Msil
                 case MsilOperandType.InlineSig:
                 case MsilOperandType.InlineTok:
                 case MsilOperandType.InlineType:
-                    current.Operand = _resolver.ResolveMember(new MetadataToken((uint)current.Operand));
+                    var member = _resolver.ResolveMember((MetadataToken)current.Operand);
+                    if (member != null)
+                        current.Operand = member;
                     break;
 
                 case MsilOperandType.InlineString:
-                    current.Operand = _resolver.ResolveString((uint)current.Operand);
+                    current.Operand = _resolver.ResolveString(((MetadataToken)current.Operand).ToUInt32());
                     break;
 
                 case MsilOperandType.InlineSwitch:

@@ -64,7 +64,7 @@ namespace AsmResolver.X86
                 case TypeCode.UInt32:
                     return FormatDword((uint)value);
                 case TypeCode.UInt64:
-                    return FormatDword(Convert.ToUInt32(value)); // TODO: qwords
+                    return FormatQword((ulong)value);
             }
             throw new NotSupportedException();
         }
@@ -80,7 +80,9 @@ namespace AsmResolver.X86
         public abstract string FormatDword(uint value);
 
         public abstract string FormatFword(ulong value);
-        
+
+        public abstract string FormatQword(ulong value);
+
         public abstract string FormatOffset(int value);
     }
 
@@ -125,6 +127,11 @@ namespace AsmResolver.X86
         }
 
         public override string FormatFword(ulong value)
+        {
+            return "0x" + value.ToString("X");
+        }
+
+        public override string FormatQword(ulong value)
         {
             return "0x" + value.ToString("X");
         }
