@@ -189,25 +189,38 @@ namespace AsmResolver.Net.Msil
                 case MsilOperandType.ShortInlineVar:
                     // TODO: return index
 
-                case MsilOperandType.InlineField:
                 case MsilOperandType.InlineR:
                 case MsilOperandType.ShortInlineR:
                 case MsilOperandType.InlineI:
                 case MsilOperandType.InlineI8:
                 case MsilOperandType.ShortInlineI:
+                    return Convert.ToString(Operand, CultureInfo.InvariantCulture);
+
+                case MsilOperandType.InlineField:
                 case MsilOperandType.InlineMethod:
                 case MsilOperandType.InlineSig:
                 case MsilOperandType.InlineTok:
                 case MsilOperandType.InlineType:
-                    return Convert.ToString(Operand, CultureInfo.InvariantCulture);
+                    var member = Operand as IMetadataMember;
+                    return member != null
+                        ? member.ToString()
+                        : "TOKEN<0x" + ((MetadataToken) Operand) + ">";
 
                 case MsilOperandType.InlineString:
+<<<<<<< HEAD
                     if (Operand is string)
                         return string.Format("\"{0}\"", Operand);
                     return ((MetadataToken)Operand).ToUInt32().ToString("X8");
                     
+=======
+                    return Operand is string
+                        ? string.Format("\"{0}\"", Operand)
+                        : "TOKEN<0x" + ((MetadataToken) Operand) + ">";
+
+>>>>>>> faada8329dfb380749f6aa3bc3084bd2d3cab6e8
                 case MsilOperandType.InlineSwitch:
                     return string.Join(", ", ((MsilInstruction[])Operand).Select(x => "IL_" + x.Offset.ToString("X4")));
+
                 case MsilOperandType.InlineBrTarget:
                 case MsilOperandType.ShortInlineBrTarget:
                     return "IL_" + ((MsilInstruction)Operand).Offset.ToString("X4");

@@ -32,7 +32,7 @@ namespace AsmResolver.X86
 
         public X86Instruction ReadNextInstruction()
         {
-            var instruction = new X86Instruction(_reader.Position)
+            var instruction = new X86Instruction(BaseAddress + _reader.Position)
             {
                 OpCode = ReadOpcode()
             };
@@ -103,7 +103,7 @@ namespace AsmResolver.X86
                     return new X86Operand(1);
 
                 case X86OperandType.RelativeOffset:
-                    return new X86Operand((ulong)(Convert.ToInt64(ReadSignedImmediateData(size)) + _reader.Position));
+                    return new X86Operand((ulong)(Convert.ToInt64(ReadSignedImmediateData(size)) + BaseAddress + _reader.Position));
 
                 case X86OperandType.None:
                     return null;

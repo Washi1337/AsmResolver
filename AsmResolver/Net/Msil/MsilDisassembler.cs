@@ -98,18 +98,27 @@ namespace AsmResolver.Net.Msil
             {
                 case MsilOperandType.InlineArgument:
                 case MsilOperandType.ShortInlineArgument:
-                    current.Operand = _resolver.ResolveParameter(Convert.ToInt32(current.Operand));
+                    var parameter = _resolver.ResolveParameter(Convert.ToInt32(current.Operand));
+                    if (parameter != null)
+                        current.Operand = parameter;
                     break;
 
                 case MsilOperandType.InlineVar:
                 case MsilOperandType.ShortInlineVar:
-                    current.Operand = _resolver.ResolveVariable(Convert.ToInt32(current.Operand));
+                    var variable = _resolver.ResolveVariable(Convert.ToInt32(current.Operand));
+                    if (variable != null)
+                        current.Operand = variable;
                     break;
 
                 case MsilOperandType.ShortInlineBrTarget:
                 case MsilOperandType.InlineBrTarget:
+<<<<<<< HEAD
                     var targetOffset = nextOffset + Convert.ToInt32(current.Operand);
                     var targetInstruction = instructions.FirstOrDefault(x => x.Offset == targetOffset);
+=======
+                    var targetInstruction = instructions.FirstOrDefault(
+                        x => x.Offset == nextOffset + Convert.ToInt32(current.Operand));
+>>>>>>> faada8329dfb380749f6aa3bc3084bd2d3cab6e8
                     if (targetInstruction != null)
                         current.Operand = targetInstruction;
                     break;
@@ -125,7 +134,13 @@ namespace AsmResolver.Net.Msil
                     break;
 
                 case MsilOperandType.InlineString:
+<<<<<<< HEAD
                     current.Operand = _resolver.ResolveString(((MetadataToken)current.Operand).ToUInt32());
+=======
+                    var stringValue = _resolver.ResolveString(((MetadataToken)current.Operand).ToUInt32());
+                    if (stringValue != null)
+                        current.Operand = stringValue;
+>>>>>>> faada8329dfb380749f6aa3bc3084bd2d3cab6e8
                     break;
 
                 case MsilOperandType.InlineSwitch:
