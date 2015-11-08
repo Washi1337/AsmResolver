@@ -380,13 +380,13 @@ namespace AsmResolver.Net.Metadata
 
         private bool GetMethodCodeTypeAttribute(MethodImplAttributes attribute)
         {
-            return ((uint)Attributes).GetMaskedAttribute((uint)MethodImplAttributes.CodeTypeMask,
+            return ((uint)ImplAttributes).GetMaskedAttribute((uint)MethodImplAttributes.CodeTypeMask,
                 (uint)attribute);
         }
 
         private void SetMethodCodeTypeAttribute(MethodImplAttributes attribute, bool value)
         {
-            ImplAttributes = (MethodImplAttributes)((uint)Attributes).SetMaskedAttribute((uint)MethodImplAttributes.CodeTypeMask,
+            ImplAttributes = (MethodImplAttributes)((uint)ImplAttributes).SetMaskedAttribute((uint)MethodImplAttributes.CodeTypeMask,
                 (uint)attribute, value);
         }
 

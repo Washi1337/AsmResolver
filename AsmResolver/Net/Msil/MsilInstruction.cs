@@ -202,8 +202,10 @@ namespace AsmResolver.Net.Msil
                     return Convert.ToString(Operand, CultureInfo.InvariantCulture);
 
                 case MsilOperandType.InlineString:
-                    return string.Format("\"{0}\"", Operand);
-
+                    if (Operand is string)
+                        return string.Format("\"{0}\"", Operand);
+                    return ((MetadataToken)Operand).ToUInt32().ToString("X8");
+                    
                 case MsilOperandType.InlineSwitch:
                     return string.Join(", ", ((MsilInstruction[])Operand).Select(x => "IL_" + x.Offset.ToString("X4")));
                 case MsilOperandType.InlineBrTarget:
