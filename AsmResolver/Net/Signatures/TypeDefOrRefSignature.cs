@@ -7,7 +7,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class TypeDefOrRefSignature : TypeSignature
+    public class TypeDefOrRefSignature : TypeSignature, IResolvable
     {
         public new static TypeDefOrRefSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
@@ -68,6 +68,11 @@ namespace AsmResolver.Net.Signatures
 
             WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, Type);
 
+        }
+
+        public IMetadataMember Resolve()
+        {
+            return Type.Resolve();
         }
     }
 }

@@ -7,7 +7,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public sealed class MsCorLibTypeSignature : TypeSignature
+    public sealed class MsCorLibTypeSignature : TypeSignature, IResolvable
     {
         public static MsCorLibTypeSignature FromElementType(MetadataHeader header, ElementType elementType)
         {
@@ -98,6 +98,11 @@ namespace AsmResolver.Net.Signatures
         public override void Write(WritingContext context)
         {
             context.Writer.WriteByte((byte)ElementType);
+        }
+
+        public IMetadataMember Resolve()
+        {
+            return Type.Resolve();
         }
     }
 }
