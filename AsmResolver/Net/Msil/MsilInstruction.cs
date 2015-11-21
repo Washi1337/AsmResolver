@@ -207,17 +207,9 @@ namespace AsmResolver.Net.Msil
                         : "TOKEN<0x" + ((MetadataToken) Operand) + ">";
 
                 case MsilOperandType.InlineString:
-<<<<<<< HEAD
-                    if (Operand is string)
-                        return string.Format("\"{0}\"", Operand);
-                    return ((MetadataToken)Operand).ToUInt32().ToString("X8");
-                    
-=======
                     return Operand is string
                         ? string.Format("\"{0}\"", Operand)
                         : "TOKEN<0x" + ((MetadataToken) Operand) + ">";
-
->>>>>>> faada8329dfb380749f6aa3bc3084bd2d3cab6e8
                 case MsilOperandType.InlineSwitch:
                     return string.Join(", ", ((MsilInstruction[])Operand).Select(x => "IL_" + x.Offset.ToString("X4")));
 

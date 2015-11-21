@@ -66,11 +66,7 @@ namespace AsmResolver.X86
                 case TypeCode.UInt32:
                     return FormatDword((uint)value);
                 case TypeCode.UInt64:
-<<<<<<< HEAD
                     return FormatQword((ulong)value);
-=======
-                    return FormatQword((ulong)value); // TODO: qwords
->>>>>>> faada8329dfb380749f6aa3bc3084bd2d3cab6e8
             }
             throw new NotSupportedException();
         }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22823.1
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver", "AsmResolver\AsmResolver.csproj", "{228B5994-1035-4EB0-A095-8D85B6EE1146}"
 EndProject
@@ -16,6 +16,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestLibrary", "Tests\Native\Dummies\TestLibrary\TestLibrary.vcxproj", "{6D39C18D-02A3-4F52-8C27-C7495E032285}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Tests.Net", "Tests\Net\AsmResolver.Net.Tests\AsmResolver.Tests.Net.csproj", "{7B683AF9-5D54-4CF6-AE82-9B19D8CEFB2B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8CCC6CB1-5753-4487-85B1-9FA35BB735F2} = {8CCC6CB1-5753-4487-85B1-9FA35BB735F2}
+		{EE8795DB-1B7A-4D78-8021-FD8CBCC52720} = {EE8795DB-1B7A-4D78-8021-FD8CBCC52720}
+		{F4B48FFD-D8E6-4426-9A79-90F6A2FB4EC1} = {F4B48FFD-D8E6-4426-9A79-90F6A2FB4EC1}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dummies", "Dummies", "{719E7608-8AC8-49BD-BE5E-AFC1B464EC64}"
 EndProject
@@ -26,6 +31,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsilConsoleApplication", "Tests\Net\Dummies\MsilConsoleApplication\MsilConsoleApplication.csproj", "{8CCC6CB1-5753-4487-85B1-9FA35BB735F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Tests.Native", "Tests\Native\AsmResolver.Tests.Native\AsmResolver.Tests.Native.csproj", "{51B5469E-D457-4E50-A14E-EC111481B37B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{195F5719-09F4-4663-8913-3EAA8A7CED74} = {195F5719-09F4-4663-8913-3EAA8A7CED74}
+		{6D39C18D-02A3-4F52-8C27-C7495E032285} = {6D39C18D-02A3-4F52-8C27-C7495E032285}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dummies", "Dummies", "{091C6286-22F5-4407-BD17-805F157F2165}"
 EndProject
