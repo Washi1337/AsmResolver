@@ -103,6 +103,9 @@
   <ItemGroup>
     <None Include="Resources\RelativeOffsets.asm" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MixedModeApplication.exe" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
@@ -126,6 +129,7 @@
   <PropertyGroup>
     <PreBuildEvent>copy "$(ProjectDir)\..\Dummies\TestConsoleApplication\bin\Debug\TestConsoleApplication.exe" "$(ProjectDir)\Resources\TestConsoleApplication.exe"
 copy "$(ProjectDir)\..\Dummies\TestLibrary\bin\Debug\TestLibrary.dll" "$(ProjectDir)\Resources\TestLibrary.dll"
+copy "$(ProjectDir)\..\Dummies\MixedModeApplication\bin\Debug\MixedModeApplication.exe" "$(ProjectDir)\Resources\MixedModeApplication.exe"
 copy "$(ProjectDir)\..\Dummies\X86Binaries\RegOrMem8_Reg8\*.asm" "$(ProjectDir)\Resources\"
 copy "$(ProjectDir)\..\Dummies\X86Binaries\RegOrMem8_Reg8\*.bin" "$(ProjectDir)\Resources\"
 copy "$(ProjectDir)\..\Dummies\X86Binaries\Misc\*.asm" "$(ProjectDir)\Resources\"

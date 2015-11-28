@@ -260,6 +260,7 @@
     <Compile Include="X86\X86Assembler.cs" />
     <Compile Include="X86\X86Disassembler.cs" />
     <Compile Include="X86\X86Instruction.cs" />
+    <Compile Include="X86\X86MethodBody.cs" />
     <Compile Include="X86\X86Mnemonic.cs" />
     <Compile Include="X86\X86OpCode.cs" />
     <Compile Include="X86\X86OperandType.cs" />
