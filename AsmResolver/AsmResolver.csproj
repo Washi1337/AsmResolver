@@ -113,6 +113,7 @@
     <Compile Include="Net\Signatures\ArrayMarshalDescriptor.cs" />
     <Compile Include="Net\Signatures\CallingConventionSignature.cs" />
     <Compile Include="Net\Signatures\CustomMarshalDescriptor.cs" />
+    <Compile Include="Net\Signatures\FunctionPointerTypeSignature.cs" />
     <Compile Include="Net\Signatures\OptionalModifierSignature.cs" />
     <Compile Include="Net\Signatures\PermissionSetSignature.cs" />
     <Compile Include="Net\Signatures\RequiredModifierSignature.cs" />

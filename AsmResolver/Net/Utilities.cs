@@ -15,11 +15,16 @@ namespace AsmResolver.Net
             var methodSignature = signature as MethodSignature;
 
             var parameterString = methodSignature != null
-                ? '(' + string.Join(", ", methodSignature.Parameters.Select(x => x.ParameterType.FullName)) + ')'
+                ? "(" + methodSignature.Parameters.Select(x => x.ParameterType).GetTypeArrayString() + ")"
                 : string.Empty;
 
             return string.Format("{0} {1}::{2}{3}",
                 signature.TypeSignature.FullName, reference.DeclaringType.FullName, reference.Name, parameterString);
+        }
+
+        internal static string GetTypeArrayString(this IEnumerable<ITypeDescriptor> types)
+        {
+            return string.Join(", ", types.Select(x => x.FullName));
         }
 
         public static bool IsTypeOf(this ITypeDescriptor type, string @namespace, string name)

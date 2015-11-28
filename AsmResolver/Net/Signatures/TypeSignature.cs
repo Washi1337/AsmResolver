@@ -27,7 +27,7 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.Class:
                     return TypeDefOrRefSignature.FromReader(header, reader);
                 case ElementType.FnPtr:
-                    break;
+                    return FunctionPointerTypeSignature.FromReader(header, reader);
                 case ElementType.GenericInst:
                     return GenericInstanceTypeSignature.FromReader(header, reader);
                case ElementType.MVar:
