@@ -19,7 +19,10 @@ namespace AsmResolver.Net.Builder
             Segments.Add(MethodBodyTableBuilder = new MethodBodyTableBuilder());
             Segments.Add(NetResourceDirectoryBuilder = new NetResourceDirectoryBuilder());
             Segments.Add(DataBuilder = new NetDataTableBuilder());
-            // strongname
+
+            if (directory.StrongNameData != null)
+                Segments.Add(directory.StrongNameData);
+
             Segments.Add(Metadata = new MetadataBuilder(directory.MetadataHeader));
 
             if (directory.Assembly.DebugDirectory != null)
@@ -115,6 +118,13 @@ namespace AsmResolver.Net.Builder
             _directory.MetaDataDirectory.VirtualAddress =
                 (uint)_directory.Assembly.FileOffsetToRva(Metadata.StartOffset);
             _directory.MetaDataDirectory.Size = Metadata.GetPhysicalLength();
+
+            if (_directory.StrongNameData != null)
+            {
+                _directory.StrongNameSignatureDirectory.VirtualAddress =
+                    (uint) _directory.Assembly.FileOffsetToRva(_directory.StrongNameData.StartOffset);
+                _directory.StrongNameSignatureDirectory.Size = _directory.StrongNameData.GetPhysicalLength();
+            }
 
             if (NetResourceDirectoryBuilder.Segments.Count > 0)
             {

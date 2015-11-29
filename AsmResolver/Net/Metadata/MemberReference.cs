@@ -109,7 +109,20 @@ namespace AsmResolver.Net.Metadata
 
         public ITypeDefOrRef DeclaringType
         {
-            get { return Parent as ITypeDefOrRef; }
+            get
+            {
+                var declaringType = Parent as ITypeDefOrRef;
+                if (declaringType != null)
+                    return declaringType;
+
+                var method = Parent as MethodDefinition;
+                if (method != null)
+                    return method.DeclaringType;
+                
+                // TODO: handle modulereference parent
+
+                return null;
+            }
         }
 
         public MemberSignature Signature

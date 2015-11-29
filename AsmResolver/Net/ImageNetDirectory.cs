@@ -37,6 +37,7 @@ namespace AsmResolver.Net
 
         private ReadingContext _readingContext;
         private MetadataHeader _metaDataHeader;
+        private DataSegment _strongNameData;
 
         public ImageNetDirectory()
         {
@@ -147,6 +148,21 @@ namespace AsmResolver.Net
                 _metaDataHeader.NetDirectory = this;
                 return _metaDataHeader;
             }
+        }
+
+        public DataSegment StrongNameData
+        {
+            get
+            {
+                if (_strongNameData != null || StrongNameSignatureDirectory.VirtualAddress == 0)
+                    return _strongNameData;
+
+                var context = _readingContext.CreateSubContext(
+                    _readingContext.Assembly.RvaToFileOffset(StrongNameSignatureDirectory.VirtualAddress),
+                    (int) StrongNameSignatureDirectory.Size);
+                return _strongNameData = DataSegment.FromReadingContext(context);
+            }
+            set { _strongNameData = value; }
         }
 
         public byte[] GetResourceData(uint offset)
