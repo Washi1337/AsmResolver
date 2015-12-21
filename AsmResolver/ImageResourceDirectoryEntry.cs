@@ -22,11 +22,18 @@ namespace AsmResolver
                 NameId = reader.ReadUInt32(),
                 OffsetToData = reader.ReadUInt32(),
             };
-
-            var usesName = (entry.NameId >> 31) == 1; // TODO: get/set resource name
+            
             entry.HasData = (entry.OffsetToData >> 31) == 0;
 
-            var actualDataOffset = entry.OffsetToData & ~(1 << 31);
+            uint actualDataOffset = entry.OffsetToData & ~(1 << 31);
+
+            entry.HasName = (entry.NameId >> 31) == 1;
+            if (entry.HasName)
+            {
+                entry._nameReadingContext =
+                    context.CreateSubContext(context.Assembly.RvaToFileOffset(resourceDirectory.VirtualAddress) +
+                                             (entry.NameId & ~(1 << 31)));
+            }
 
             entry._dataReadingContext =
                 context.CreateSubContext(context.Assembly.RvaToFileOffset(resourceDirectory.VirtualAddress) +
@@ -35,8 +42,10 @@ namespace AsmResolver
         }
 
         private ReadingContext _dataReadingContext;
+        private ReadingContext _nameReadingContext;
         private ImageResourceDirectory _subDirectory;
         private ImageResourceDataEntry _dataEntry;
+        private string _name;
 
         private ImageResourceDirectoryEntry()
         {
@@ -61,8 +70,20 @@ namespace AsmResolver
 
         public string Name
         {
-            get;
-            set;
+            get
+            {
+                if (_name == null && _nameReadingContext != null)
+                {
+                    ushort length = _nameReadingContext.Reader.ReadUInt16();
+                    _name = Encoding.Unicode.GetString(_nameReadingContext.Reader.ReadBytes(length * 2));
+                }
+                return _name;
+            }
+            set
+            {
+                _name = value;
+                _nameReadingContext = null;
+            }
         }
 
         public uint OffsetToData

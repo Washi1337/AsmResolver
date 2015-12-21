@@ -7,7 +7,7 @@ using AsmResolver.Builder;
 
 namespace AsmResolver
 {
-    public class ImageImportDirectory
+    public class ImageImportDirectory  : FileSegment
     {
         public static ImageImportDirectory FromReadingContext(ReadingContext context)
         {
@@ -42,6 +42,17 @@ namespace AsmResolver
                 return _imports;
             }
         }
-        
+
+        public override uint GetPhysicalLength()
+        {
+            return (uint)((ModuleImports.Count + 1) * 5 * sizeof (uint));
+        }
+
+        public override void Write(WritingContext context)
+        {
+            foreach (var moduleImport in ModuleImports)
+                moduleImport.Write(context);
+            new ImageModuleImport().Write(context);
+        }
     }
 }
