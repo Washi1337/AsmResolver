@@ -68,7 +68,7 @@ namespace AsmResolver.Net.Metadata
         }
 
         public abstract void UpdateRows(NetBuildingContext context);
-
+        
     }
 
     public abstract class MetadataTable<TMember> : MetadataTable, ICollection<TMember>
