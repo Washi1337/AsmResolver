@@ -2,6 +2,9 @@
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents the DOS header of a windows assembly image.
+    /// </summary>
     public class ImageDosHeader : FileSegment
     {
         private readonly byte[] _defaultDosHeader = 
@@ -20,6 +23,9 @@ namespace AsmResolver
 	        0x6D, 0x6F, 0x64, 0x65, 0x2E, 0x0D, 0x0D, 0x0A, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
+        /// <summary>
+        /// The valid byte sequence any DOS header should start with. This byte sequence reads "MZ" when converted to ASCII characters.
+        /// </summary>
         public const ushort ValidMagicValue = 0x5A4D; 
 
         internal static ImageDosHeader FromReadingContext(ReadingContext context)
@@ -38,12 +44,18 @@ namespace AsmResolver
             return header;
         }
 
+        /// <summary>
+        /// Gets the magic header the DOS header starts with. Generally this is equal to <see cref="ValidMagicValue"/>.
+        /// </summary>
         public ushort Magic
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the offset to the NT headers in the windows image.
+        /// </summary>
         public uint Lfanew
         {
             get;

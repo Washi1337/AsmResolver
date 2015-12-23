@@ -8,6 +8,9 @@ using AsmResolver;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a resource directory entry in the resource data directory of a windows assembly image.
+    /// </summary>
     public class ImageResourceDirectoryEntry : FileSegment
     {
         internal static ImageResourceDirectoryEntry FromReadingContext(ReadingContext context)
@@ -56,18 +59,27 @@ namespace AsmResolver
             NameId = nameId;
         }
 
+        /// <summary>
+        /// Gets or sets the ID or the relative virtual address of the name of the resource directory entry.
+        /// </summary>
         public uint NameId
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets a value indicating a custom name is used for the resource directory entry.
+        /// </summary>
         public bool HasName
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets (if available) or sets the name of the resource directory entry.
+        /// </summary>
         public string Name
         {
             get
@@ -86,18 +98,27 @@ namespace AsmResolver
             }
         }
 
+        /// <summary>
+        /// Gets or sets the offset relative to the start of the start of resource data directory to the data.
+        /// </summary>
         public uint OffsetToData
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the directory entry is supplied with data or not. If <c>True</c>, the <see cref="DataEntry"/> property is non-null. If <c>False</c>, the <see cref="SubDirectory"/> is non-null.
+        /// </summary>
         public bool HasData
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the sub directory defined by the resource directory entry, or null if the entry specifies a data entry.
+        /// </summary>
         public ImageResourceDirectory SubDirectory
         {
             get
@@ -120,6 +141,9 @@ namespace AsmResolver
             }
         }
 
+        /// <summary>
+        /// Gets or sets the data entry defined by the resource directory entry, or null if the entry specifies a sub directory.
+        /// </summary>
         public ImageResourceDataEntry DataEntry
         {
             get

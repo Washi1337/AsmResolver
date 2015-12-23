@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents the debug data directory in a windows assembly image.
+    /// </summary>
     public class ImageDebugDirectory : FileSegment
     {
         public static ImageDebugDirectory FromReadingContext(ReadingContext context)
@@ -30,54 +33,81 @@ namespace AsmResolver
         private ReadingContext _dataReadingContext;
         private DataSegment _data;
 
+        /// <summary>
+        /// Gets or sets the characteristics of the directory.
+        /// </summary>
         public uint Characteristics
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the raw time stamp value of the directory.
+        /// </summary>
         public uint TimeDateStamp
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the major version of the directory.
+        /// </summary>
         public ushort MajorVersion
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the minor version of the directory.
+        /// </summary>
         public ushort MinorVersion
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the format of the information of the directory.
+        /// </summary>
         public DebugInformationFormat Type
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the data of the directory.
+        /// </summary>
         public uint SizeOfData
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the relative virtual address of the raw data.
+        /// </summary>
         public uint AddressOfRawData
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the absolute file offset of the raw data.
+        /// </summary>
         public uint PointerToRawData
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the debugging data.
+        /// </summary>
         public DataSegment Data
         {
             get

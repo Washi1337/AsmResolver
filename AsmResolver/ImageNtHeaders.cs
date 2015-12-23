@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents the NT headers in a windows assembly image.
+    /// </summary>
     public class ImageNtHeaders : FileSegment
     {
         private ImageOptionalHeader _optionalHeader;
@@ -24,18 +27,27 @@ namespace AsmResolver
             };
         }
 
+        /// <summary>
+        /// Gets or sets the signature of the NT headers.
+        /// </summary>
         public uint Signature
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the file header of the windows assembly image.
+        /// </summary>
         public ImageFileHeader FileHeader
         {
             get { return _fileHeader ?? (_fileHeader = new ImageFileHeader()); }
             private set { _fileHeader = value; }
         }
 
+        /// <summary>
+        /// Gets the optional header (either 32-bit or 64-bit) of the windows assembly image.
+        /// </summary>
         public ImageOptionalHeader OptionalHeader
         {
             get { return _optionalHeader ?? (_optionalHeader = new ImageOptionalHeader()); }

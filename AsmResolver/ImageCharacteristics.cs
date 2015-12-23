@@ -2,6 +2,9 @@
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Provides valid attributes for describing a windows image.
+    /// </summary>
     [Flags]
     public enum ImageCharacteristics : ushort
     {

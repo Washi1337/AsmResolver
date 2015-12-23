@@ -7,6 +7,9 @@ using AsmResolver.Builder;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents the import data directory in a windows assembly image.
+    /// </summary>
     public class ImageImportDirectory  : FileSegment
     {
         public static ImageImportDirectory FromReadingContext(ReadingContext context)
@@ -20,6 +23,9 @@ namespace AsmResolver
         private List<ImageModuleImport> _imports;
         private ReadingContext _readingContext;
 
+        /// <summary>
+        /// Gets a list of modules imported by the image.
+        /// </summary>
         public IList<ImageModuleImport> ModuleImports
         {
             get

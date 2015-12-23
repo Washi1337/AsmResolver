@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents the relocations data directory in a windows assembly image.
+    /// </summary>
     public class ImageRelocationDirectory : FileSegment
     {
         public static ImageRelocationDirectory FromReadingContext(ReadingContext context)
@@ -30,6 +33,9 @@ namespace AsmResolver
             Blocks = new List<BaseRelocationBlock>();
         }
 
+        /// <summary>
+        /// Gets the fixup blocks defined in the data directory.
+        /// </summary>
         public IList<BaseRelocationBlock> Blocks
         {
             get;
