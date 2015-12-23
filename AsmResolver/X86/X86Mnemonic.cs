@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.X86
 {
+    /// <summary>
+    /// Provides valid mnemonics of an x86 instruction.
+    /// </summary>
     public enum X86Mnemonic : ushort
     {
         Unknown,

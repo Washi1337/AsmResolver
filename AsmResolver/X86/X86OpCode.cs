@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace AsmResolver.X86
 {
+    /// <summary>
+    /// Represents an x86 instruction opcode.
+    /// </summary>
     public struct X86OpCode
     {
         internal X86OpCode(X86Mnemonic mnemonic, byte opcode, uint operandsValue, bool hasRegisterToken)

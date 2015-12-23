@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.X86
 {
+    /// <summary>
+    /// Provides valid offset types for x86 operands.
+    /// </summary>
     public enum X86OffsetType
     {
         None = 0,
@@ -13,6 +16,9 @@ namespace AsmResolver.X86
         Long = 4,
     }
 
+    /// <summary>
+    /// Represents an operand in an x86 instruction.
+    /// </summary>
     public class X86Operand
     {
         internal X86Operand()
@@ -48,30 +54,45 @@ namespace AsmResolver.X86
             OffsetType = offsetType;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating how the value of the operand is being used.
+        /// </summary>
         public X86OperandUsage OperandUsage
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the value of the operand.
+        /// </summary>
         public object Value
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the scaled index of the operand.
+        /// </summary>
         public X86ScaledIndex ScaledIndex
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the offset added to the value.
+        /// </summary>
         public int Offset
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the type of the offset.
+        /// </summary>
         public X86OffsetType OffsetType
         {
             get;
@@ -95,6 +116,9 @@ namespace AsmResolver.X86
         }
     }
 
+    /// <summary>
+    /// Represents a scaled index in an x86 operand.
+    /// </summary>
     public class X86ScaledIndex
     {
         public X86ScaledIndex()
@@ -112,12 +136,18 @@ namespace AsmResolver.X86
             Multiplier = multiplier;
         }
 
+        /// <summary>
+        /// Gets or sets the register to use.
+        /// </summary>
         public X86Register Register
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the constant the value of the register should be multiplied with. Valid values are 1, 2, 4 and 8.
+        /// </summary>
         public int Multiplier
         {
             get;
@@ -132,6 +162,9 @@ namespace AsmResolver.X86
         }
     }
 
+    /// <summary>
+    /// Provides valid usages for x86 operands.
+    /// </summary>
     public enum X86OperandUsage
     {
         Normal,

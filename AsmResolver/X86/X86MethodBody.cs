@@ -6,6 +6,9 @@ using AsmResolver.Builder;
 
 namespace AsmResolver.X86
 {
+    /// <summary>
+    /// Represents a chunk of x86 instructions.
+    /// </summary>
     public class X86MethodBody : FileSegment
     {
         public static X86MethodBody FromReadingContext(ReadingContext context)
@@ -18,6 +21,9 @@ namespace AsmResolver.X86
         private List<X86Instruction> _instructions;
         private ReadingContext _readingContext;
         
+        /// <summary>
+        /// Gets the instructions in the method body.
+        /// </summary>
         public IList<X86Instruction> Instructions
         {
             get
