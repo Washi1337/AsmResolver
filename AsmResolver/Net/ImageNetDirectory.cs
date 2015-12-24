@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Represents a .NET data directory header (COR20 header) in a windows assembly image.
+    /// </summary>
     public class ImageNetDirectory : FileSegment
     {
         internal static ImageNetDirectory FromReadingContext(ReadingContext context)
@@ -20,7 +23,7 @@ namespace AsmResolver.Net
                 Cb = reader.ReadUInt32(),
                 MajorRuntimeVersion = reader.ReadUInt16(),
                 MinorRuntimeVersion = reader.ReadUInt16(),
-                MetaDataDirectory = ImageDataDirectory.FromReadingContext(context),
+                MetadataDirectory = ImageDataDirectory.FromReadingContext(context),
                 Flags = (ImageNetDirectoryFlags)reader.ReadUInt32(),
                 EntryPointToken = reader.ReadUInt32(),
                 ResourcesDirectory = ImageDataDirectory.FromReadingContext(context),
@@ -41,7 +44,7 @@ namespace AsmResolver.Net
 
         public ImageNetDirectory()
         {
-            MetaDataDirectory = new ImageDataDirectory();
+            MetadataDirectory = new ImageDataDirectory();
             ResourcesDirectory = new ImageDataDirectory();
             StrongNameSignatureDirectory = new ImageDataDirectory();
             CodeManagerTableDirectory = new ImageDataDirectory();
@@ -50,84 +53,126 @@ namespace AsmResolver.Net
             ManagedNativeHeaderDirectory = new ImageDataDirectory();
         }
 
+        /// <summary>
+        /// Gets the assembly defining the .NET header.
+        /// </summary>
         public WindowsAssembly Assembly
         {
             get;
             internal set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the .NET data directory header.
+        /// </summary>
         public uint Cb
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the major runtime version number.
+        /// </summary>
         public ushort MajorRuntimeVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the minor runtime version number.
+        /// </summary>
         public ushort MinorRuntimeVersion
         {
             get;
             set;
         }
 
-        public ImageDataDirectory MetaDataDirectory
+        /// <summary>
+        /// Gets the metadata data directory header.
+        /// </summary>
+        public ImageDataDirectory MetadataDirectory
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets or sets the attributes of the .NET data directory, specifying properties of the .net assembly image.
+        /// </summary>
         public ImageNetDirectoryFlags Flags
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the metadata token to the managed entrypoint or relative virtual address of the unmanaged entrypoint.
+        /// </summary>
         public uint EntryPointToken
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the managed resources data directory header.
+        /// </summary>
         public ImageDataDirectory ResourcesDirectory
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the strong name signature data directory header.
+        /// </summary>
         public ImageDataDirectory StrongNameSignatureDirectory
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the code manager table data directory header.
+        /// </summary>
         public ImageDataDirectory CodeManagerTableDirectory
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the custom vtable fixups data directory header.
+        /// </summary>
         public ImageDataDirectory VTableFixupsDirectory
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the export address table data directory header.
+        /// </summary>
         public ImageDataDirectory ExportAddressTableJumpsDirectory
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the managed native header data directory header.
+        /// </summary>
         public ImageDataDirectory ManagedNativeHeaderDirectory
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the metadata header of the .NET data directory.
+        /// </summary>
         public MetadataHeader MetadataHeader
         {
             get
@@ -140,7 +185,7 @@ namespace AsmResolver.Net
 
                 var context =
                     _readingContext.CreateSubContext(
-                        _readingContext.Assembly.RvaToFileOffset(MetaDataDirectory.VirtualAddress));
+                        _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
                 if (context == null)
                     return _metaDataHeader = new MetadataHeader(this);
                 
@@ -150,6 +195,9 @@ namespace AsmResolver.Net
             }
         }
 
+        /// <summary>
+        /// Gets or sets the strong name of the .NET assembly image.
+        /// </summary>
         public DataSegment StrongNameData
         {
             get
@@ -165,6 +213,11 @@ namespace AsmResolver.Net
             set { _strongNameData = value; }
         }
 
+        /// <summary>
+        /// Gets the managed resource data at the given offset.
+        /// </summary>
+        /// <param name="offset">The offset of the managed resource to get.</param>
+        /// <returns>The raw data of the managed resource.</returns>
         public byte[] GetResourceData(uint offset)
         {
             if (_readingContext == null || ResourcesDirectory.VirtualAddress == 0)
@@ -183,7 +236,7 @@ namespace AsmResolver.Net
 
         public override uint GetPhysicalLength()
         {
-            var dirLength = MetaDataDirectory.GetPhysicalLength();
+            var dirLength = MetadataDirectory.GetPhysicalLength();
             return 1 * sizeof (uint) +
                    2 * sizeof (ushort) +
                    1 * dirLength +
@@ -197,7 +250,7 @@ namespace AsmResolver.Net
             writer.WriteUInt32(Cb);
             writer.WriteUInt16(MajorRuntimeVersion);
             writer.WriteUInt16(MinorRuntimeVersion);
-            MetaDataDirectory.Write(context);
+            MetadataDirectory.Write(context);
             writer.WriteUInt32((uint)Flags);
             writer.WriteUInt32(EntryPointToken);
             ResourcesDirectory.Write(context);

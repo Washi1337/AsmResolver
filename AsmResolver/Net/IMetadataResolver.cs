@@ -8,20 +8,44 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Provides methods for resolving metadata member references.
+    /// </summary>
     public interface IMetadataResolver
     {
+        /// <summary>
+        /// Gets the assembly resolver used to resolve the assembly declaring the metadata reference.
+        /// </summary>
         INetAssemblyResolver AssemblyResolver
         {
             get;
         }
 
+        /// <summary>
+        /// Resolves a reference to a type.
+        /// </summary>
+        /// <param name="type">The type reference to resolve.</param>
+        /// <returns>The resolved type.</returns>
         TypeDefinition ResolveType(ITypeDescriptor type);
 
+        /// <summary>
+        /// Resolves a reference to a method.
+        /// </summary>
+        /// <param name="reference">The method reference to resolve.</param>
+        /// <returns>The resolved method.</returns>
         MethodDefinition ResolveMethod(MemberReference reference);
 
+        /// <summary>
+        /// Resolves a reference to a field.
+        /// </summary>
+        /// <param name="reference">The field reference to resolve.</param>
+        /// <returns>The resolved field.</returns>
         FieldDefinition ResolveField(MemberReference reference);
     }
 
+    /// <summary>
+    /// Provides a default mechanism for resolving member references.
+    /// </summary>
     public class DefaultMetadataResolver : IMetadataResolver
     {
         private readonly SignatureComparer _signatureComparer = new SignatureComparer();
@@ -40,6 +64,9 @@ namespace AsmResolver.Net
             private set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the resolver should throw an exception when a member could not be resolved.
+        /// </summary>
         public bool ThrowOnNotFound
         {
             get;

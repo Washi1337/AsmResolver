@@ -11,13 +11,27 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Provides methods for resolving .NET assemblies.
+    /// </summary>
     public interface INetAssemblyResolver
     {
+        /// <summary>
+        /// Resolves a reference to a .NET assembly.
+        /// </summary>
+        /// <param name="descriptor">The assembly to resolve.</param>
+        /// <returns>The resolved assembly.</returns>
         AssemblyDefinition ResolveAssembly(IAssemblyDescriptor descriptor);
     }
 
+    /// <summary>
+    /// Provides a default assembly resolution mechanism for .NET assemblies.
+    /// </summary>
     public class DefaultNetAssemblyResolver : INetAssemblyResolver
     {
+        /// <summary>
+        /// Gets the standard GAC directories used to search for assemblies registered in windows.
+        /// </summary>
         public static GacDirectory[] GacDirectories
         {
             get;
@@ -62,12 +76,18 @@ namespace AsmResolver.Net
                 SearchDirectories.Add(directory);
         }
 
+        /// <summary>
+        /// Gets a list of directories to search for assemblies.
+        /// </summary>
         public IList<string> SearchDirectories
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the resolver should throw an exception when an assembly could not be resolved.
+        /// </summary>
         public bool ThrowOnNotFound
         {
             get;
@@ -116,11 +136,19 @@ namespace AsmResolver.Net
             return definition;
         }
 
+        /// <summary>
+        /// Clears the assembly resolution cache.
+        /// </summary>
         public void ClearCache()
         {
             _cachedAssemblies.Clear();
         }
 
+        /// <summary>
+        /// Gets the file path to the assembly file that was described by the given assembly descriptor.
+        /// </summary>
+        /// <param name="descriptor">The assembly to resolve.</param>
+        /// <returns>The path to the assembly file.</returns>
         protected virtual string GetFilePath(IAssemblyDescriptor descriptor)
         {
             if (descriptor.PublicKeyToken != null)
@@ -145,11 +173,21 @@ namespace AsmResolver.Net
             return null;
         }
 
+        /// <summary>
+        /// Reads a windows assembly image from the specified file path.
+        /// </summary>
+        /// <param name="filePath">The file path to the assembly to read.</param>
+        /// <returns>The assembly that was read.</returns>
         protected virtual WindowsAssembly ReadAssembly(string filePath)
         {
             return WindowsAssembly.FromBytes(File.ReadAllBytes(filePath), new ReadingParameters());
         }
 
+        /// <summary>
+        /// Fires when an assembly could not be resolved, providing the availability to extend the assembly resolver.
+        /// </summary>
+        /// <param name="e">The event arguments associated with this event.</param>
+        /// <returns>The assembly that was resolved, or null if none could be found.</returns>
         protected virtual AssemblyDefinition OnAssemblyResolutionFailed(AssemblyResolutionEventArgs e)
         {
             if (AssemblyResolutionFailed != null)
@@ -158,6 +196,9 @@ namespace AsmResolver.Net
         }
     }
 
+    /// <summary>
+    /// Represents a directory in the GAC.
+    /// </summary>
     public class GacDirectory
     {
         public GacDirectory(string path, string folderPrefix)
