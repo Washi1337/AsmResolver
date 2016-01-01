@@ -8,6 +8,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Represents a blob storage stream (#Blob) in a .NET assembly image.
+    /// </summary>
     public class BlobStream : MetadataStream<BlobStreamBuffer>
     {
         internal static BlobStream FromReadingContext(ReadingContext context)
@@ -26,6 +29,11 @@ namespace AsmResolver.Net
             _reader = reader;
         }
 
+        /// <summary>
+        /// Gets the blob at the given index.
+        /// </summary>
+        /// <param name="offset">The index of the blob to get.</param>
+        /// <returns>The raw blob data.</returns>
         public byte[] GetBlobByOffset(uint offset)
         {
             if (offset == 0)
@@ -34,7 +42,13 @@ namespace AsmResolver.Net
             var reader = CreateBlobReader(offset);
             return reader.ReadBytes((int)reader.Length);
         }
-
+        
+        /// <summary>
+        /// Tries to create a new blob reader starting at the given offset.
+        /// </summary>
+        /// <param name="offset">The index of the blob to read.</param>
+        /// <param name="reader">The reader that was created.</param>
+        /// <returns><c>True</c> if the reader was created successfully, false otherwise.</returns>
         public bool TryCreateBlobReader(uint offset, out IBinaryStreamReader reader)
         {
             try
@@ -49,6 +63,11 @@ namespace AsmResolver.Net
             }
         }
 
+        /// <summary>
+        /// Creates a new blob reader starting at the given offset.
+        /// </summary>
+        /// <param name="offset">The index of the blob to read.</param>
+        /// <returns>The blob reader.</returns>
         public IBinaryStreamReader CreateBlobReader(uint offset)
         {
             var reader = _reader.CreateSubReader(_reader.StartPosition + offset);
@@ -57,6 +76,10 @@ namespace AsmResolver.Net
             return reader.CreateSubReader(reader.Position, (int)length);
         }
 
+        /// <summary>
+        /// Creates a new buffer for constructing a new blob storage stream.
+        /// </summary>
+        /// <returns></returns>
         public override BlobStreamBuffer CreateBuffer()
         {
             return new BlobStreamBuffer();
@@ -74,6 +97,9 @@ namespace AsmResolver.Net
 
     }
 
+    /// <summary>
+    /// Represents a buffer for constructing new blob metadata streams.
+    /// </summary>
     public class BlobStreamBuffer : FileSegment
     {
         private readonly Dictionary<BlobSignature, uint> _signatureOffsetMapping = new Dictionary<BlobSignature, uint>();
@@ -84,6 +110,11 @@ namespace AsmResolver.Net
             _length = 1;
         }
 
+        /// <summary>
+        /// Gets or creates a new index for the given blob signature.
+        /// </summary>
+        /// <param name="signature">The blob signature to get the index from.</param>
+        /// <returns>The index.</returns>
         public uint GetBlobOffset(BlobSignature signature)
         {
             if (signature == null)

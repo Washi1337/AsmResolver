@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Represents a GUID storage stream (#GUID) in a .NET assembly image.
+    /// </summary>
     public class GuidStream : MetadataStream<GuidStreamBuffer>
     {
         internal static GuidStream FromReadingContext(ReadingContext context)
@@ -26,6 +29,11 @@ namespace AsmResolver.Net
             _reader = reader;
         }
 
+        /// <summary>
+        /// Gets the GUID at the given index.
+        /// </summary>
+        /// <param name="offset">The index of the GUID to get.</param>
+        /// <returns>The GUID.</returns>
         public Guid GetGuidByOffset(uint offset)
         {
             if (offset == 0)
@@ -46,6 +54,10 @@ namespace AsmResolver.Net
             return guid;
         }
 
+        /// <summary>
+        /// Enumerates all GUIDs in the storage stream.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<Guid> EnumerateGuids()
         {
             if (_hasReadAllGuids)
@@ -66,19 +78,10 @@ namespace AsmResolver.Net
             _hasReadAllGuids = true;
         }
 
-        // public uint GetGuidOffset(Guid guid)
-        // {
-        //     if (!_hasReadAllGuids)
-        //         EnumerateGuids().ToArray();
-        // 
-        //     if (_cachedGuids.ContainsValue(guid))
-        //         return _cachedGuids.First(x => x.Value == guid).Key;
-        //     var offset = _length;
-        //     _cachedGuids.Add(offset, guid);
-        //     _length += 16;
-        //     return offset;
-        // }
-
+        /// <summary>
+        /// Creates a new buffer for constructing a new GUID storage stream.
+        /// </summary>
+        /// <returns></returns>
         public override GuidStreamBuffer CreateBuffer()
         {
             return new GuidStreamBuffer();
@@ -96,11 +99,19 @@ namespace AsmResolver.Net
         }
     }
 
+    /// <summary>
+    /// Represents a buffer for constructing a new GUID metadata stream.
+    /// </summary>
     public class GuidStreamBuffer : FileSegment
     {
         private readonly Dictionary<Guid, uint> _guidOffsetMapping = new Dictionary<Guid, uint>();
         private uint _length;
 
+        /// <summary>
+        /// Gets or creates a new index for the given GUID.
+        /// </summary>
+        /// <param name="guid">The GUID to get the index from.</param>
+        /// <returns>The index.</returns>
         public uint GetGuidOffset(Guid guid)
         {
             if (guid == default(Guid))

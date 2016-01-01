@@ -130,7 +130,7 @@ namespace AsmResolver.Net
         }
 
         /// <summary>
-        /// 
+        /// Gets the metadata header the stream header is defined in.
         /// </summary>
         public MetadataHeader MetadataHeader
         {
@@ -141,14 +141,6 @@ namespace AsmResolver.Net
         public override uint GetPhysicalLength()
         {
             var length = Align((uint)(Encoding.ASCII.GetByteCount(Name) + 1), 4);
-            //if (length < 4)
-            //    length = 4;
-            //else if (length < 8)
-            //    length = 8;
-            //else if (length < 12)
-            //    length = 12;
-            //else if (length < 16)
-            //    length = 16;
             return (uint)(2 * sizeof (uint) + length);
         }
 
