@@ -25,7 +25,7 @@ namespace AsmResolver.Net.Metadata
         protected override MethodSemantics ReadMember(MetadataToken token, ReadingContext context)
         {
             var reader = context.Reader;
-            return new MethodSemantics(TableStream.StreamHeader.MetaDataHeader, token, new MetadataRow<ushort, uint, uint>()
+            return new MethodSemantics(TableStream.StreamHeader.MetadataHeader, token, new MetadataRow<ushort, uint, uint>()
             {
                 Column1 = reader.ReadUInt16(),
                 Column2 = reader.ReadIndex(TableStream.GetTable<MethodDefinition>().IndexSize),

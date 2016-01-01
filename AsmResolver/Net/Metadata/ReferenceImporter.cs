@@ -28,7 +28,7 @@ namespace AsmResolver.Net.Metadata
                 throw new ArgumentNullException("tableStreamBuffer");
             _tableStreamBuffer = tableStreamBuffer;
             _signatureComparer = signatureComparer;
-            _typeSystem = tableStreamBuffer.StreamHeader.MetaDataHeader.TypeSystem;
+            _typeSystem = tableStreamBuffer.StreamHeader.MetadataHeader.TypeSystem;
         }
 
         #region Assembly

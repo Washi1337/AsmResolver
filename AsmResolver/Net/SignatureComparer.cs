@@ -9,8 +9,17 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Provides methods for comparing symbols in a .NET assembly.
+    /// </summary>
     public class SignatureComparer
     {
+        /// <summary>
+        /// Determines whether two assembly descriptors are considered equal according to their signature.
+        /// </summary>
+        /// <param name="info1">The first assembly to compare.</param>
+        /// <param name="info2">The second assembly to compare.</param>
+        /// <returns><c>True</c> if the assemblies are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchAssemblies(IAssemblyDescriptor info1, IAssemblyDescriptor info2)
         {
             if (info1 == null && info2 == null)
@@ -24,6 +33,12 @@ namespace AsmResolver.Net
                    ByteArrayMatches(info1.PublicKeyToken, info2.PublicKeyToken);
         }
 
+        /// <summary>
+        /// Determines whether two scope descriptors are considered equal according to their signature.
+        /// </summary>
+        /// <param name="scope1">The first scope to compare.</param>
+        /// <param name="scope2">The second scope to compare.</param>
+        /// <returns><c>True</c> if the scope are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchScopes(IResolutionScope scope1, IResolutionScope scope2)
         {
             if (scope1 == null && scope2 == null)
@@ -50,6 +65,12 @@ namespace AsmResolver.Net
             return false;
         }
 
+        /// <summary>
+        /// Determines whether two module references are considered equal according to their signature.
+        /// </summary>
+        /// <param name="reference1">The first module to compare.</param>
+        /// <param name="reference2">The second module to compare.</param>
+        /// <returns><c>True</c> if the module references are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchModules(ModuleReference reference1, ModuleReference reference2)
         {
             if (reference1 == null && reference2 == null)
@@ -60,6 +81,12 @@ namespace AsmResolver.Net
             return reference1.Name == reference2.Name;
         }
 
+        /// <summary>
+        /// Determines whether two module definitions are considered equal according to their signature.
+        /// </summary>
+        /// <param name="module1">The first module to compare.</param>
+        /// <param name="module2">The second module to compare.</param>
+        /// <returns><c>True</c> if the module definitions are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchModules(ModuleDefinition module1, ModuleDefinition module2)
         {
             if (module1 == null && module2 == null)
@@ -70,7 +97,13 @@ namespace AsmResolver.Net
             return module1.Name == module2.Name &&
                    module1.Mvid == module2.Mvid;
         }
-        
+
+        /// <summary>
+        /// Determines whether two type descriptors are considered equal according to their signature.
+        /// </summary>
+        /// <param name="reference1">The first type to compare.</param>
+        /// <param name="reference2">The second type to compare.</param>
+        /// <returns><c>True</c> if the type descriptors are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchTypes(ITypeDescriptor reference1, ITypeDescriptor reference2)
         {
             if (reference1 == null && reference2 == null)
@@ -87,6 +120,12 @@ namespace AsmResolver.Net
             //return MatchScopes(reference1.ResolutionScope, reference2.ResolutionScope);
         }
 
+        /// <summary>
+        /// Determines whether two enumerations of type signatures are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="types1">The first type enumeration to compare.</param>
+        /// <param name="types2">The second type enumeration to compare.</param>
+        /// <returns><c>True</c> if the type enumerations are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchManyTypes(IEnumerable<TypeSignature> types1, IEnumerable<TypeSignature> types2)
         {
             if (types1 == null && types2 == null)
@@ -103,18 +142,30 @@ namespace AsmResolver.Net
             return !types1Array.Where((t, i) => !MatchTypes(t, types2Array[i])).Any();
         }
 
-        public bool MatchMembers(FieldDefinition method, MemberReference reference)
+        /// <summary>
+        /// Determines whether a field definition is considered equal to a member reference according to their signatures.
+        /// </summary>
+        /// <param name="field">The field definition to compare.</param>
+        /// <param name="reference">The member reference to compare.</param>
+        /// <returns><c>True</c> if the members are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchMembers(FieldDefinition field, MemberReference reference)
         {
-            if (method == null && reference == null)
+            if (field == null && reference == null)
                 return true;
-            if (method == null || reference == null)
+            if (field == null || reference == null)
                 return false;
 
-            return method.Name == reference.Name &&
-                   MatchParents(method.DeclaringType, reference.Parent) &&
-                   MatchMemberSignatures(method.Signature, reference.Signature);
+            return field.Name == reference.Name &&
+                   MatchParents(field.DeclaringType, reference.Parent) &&
+                   MatchMemberSignatures(field.Signature, reference.Signature);
         }
 
+        /// <summary>
+        /// Determines whether a method definition is considered equal to a member reference according to their signatures.
+        /// </summary>
+        /// <param name="method">The field definition to compare.</param>
+        /// <param name="reference">The member reference to compare.</param>
+        /// <returns><c>True</c> if the members are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchMembers(MethodDefinition method, MemberReference reference)
         {
             if (method == null && reference == null)
@@ -127,6 +178,12 @@ namespace AsmResolver.Net
                    MatchMemberSignatures(method.Signature, reference.Signature);
         }
 
+        /// <summary>
+        /// Determines whether two member references are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="reference1">The first reference to compare.</param>
+        /// <param name="reference2">The second reference to compare.</param>
+        /// <returns><c>True</c> if the members are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchMembers(MemberReference reference1, MemberReference reference2)
         {
             if (reference1 == null && reference2 == null)
@@ -139,6 +196,12 @@ namespace AsmResolver.Net
                    MatchMemberSignatures(reference1.Signature, reference2.Signature);
         }
 
+        /// <summary>
+        /// Determines whether two callable member references are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="reference1">The first reference to compare.</param>
+        /// <param name="reference2">The second reference to compare.</param>
+        /// <returns><c>True</c> if the members are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchMembers(ICallableMemberReference reference1, ICallableMemberReference reference2)
         {
             if (reference1 == null && reference2 == null)
@@ -151,6 +214,12 @@ namespace AsmResolver.Net
                    MatchMemberSignatures(reference1.Signature, reference2.Signature);
         }
 
+        /// <summary>
+        /// Determines whether two member signatures are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="signature1">The first signature to compare.</param>
+        /// <param name="signature2">The second signature to compare.</param>
+        /// <returns><c>True</c> if the signatures are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchMemberSignatures(CallingConventionSignature signature1, CallingConventionSignature signature2)
         {
             if (signature1 == null && signature2 == null)
@@ -168,7 +237,13 @@ namespace AsmResolver.Net
 
             return false;
         }
-
+        
+        /// <summary>
+        /// Determines whether two field signatures are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="signature1">The first signature to compare.</param>
+        /// <param name="signature2">The second signature to compare.</param>
+        /// <returns><c>True</c> if the signatures are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchFieldSignatures(FieldSignature signature1, FieldSignature signature2)
         {
             if (signature1 == null && signature2 == null)
@@ -178,7 +253,13 @@ namespace AsmResolver.Net
 
             return MatchTypes(signature1.FieldType, signature2.FieldType);
         }
-
+        
+        /// <summary>
+        /// Determines whether two method signatures are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="signature1">The first signature to compare.</param>
+        /// <param name="signature2">The second signature to compare.</param>
+        /// <returns><c>True</c> if the signatures are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchMethodSignatures(MethodSignature signature1, MethodSignature signature2)
         {
             if (signature1 == null && signature2 == null)
@@ -193,6 +274,12 @@ namespace AsmResolver.Net
                        signature2.Parameters.Select(x => x.ParameterType));
         }
 
+        /// <summary>
+        /// Determines whether two member parents are considered equal according to their signature.
+        /// </summary>
+        /// <param name="parent1">The first member parent to compare.</param>
+        /// <param name="parent2">The second member parent to compare.</param>
+        /// <returns><c>True</c> if the parents are considered equal, <c>False</c> otherwise.</returns>
         public bool MatchParents(IMemberRefParent parent1, IMemberRefParent parent2)
         {
             if (parent1 == null && parent2 == null)
