@@ -8,6 +8,9 @@ using Microsoft.Win32;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents an export directory in a windows assembly image.
+    /// </summary>
     public class ImageExportDirectory : FileSegment
     {
         internal static ImageExportDirectory FromReadingContext(ReadingContext context)
@@ -43,78 +46,117 @@ namespace AsmResolver
         private ReadingContext _readingContext;
         private List<ImageSymbolExport> _exports;
         
+        /// <summary>
+        /// Gets or sets the characteristics of the export directory. Currently not used.
+        /// </summary>
         public uint Characteristics
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the raw time stamp value of the export directory.
+        /// </summary>
         public uint TimeDateStamp
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the major version of the export directory.
+        /// </summary>
         public ushort MajorVersion
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the minor version of the export directory.
+        /// </summary>
         public ushort MinorVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address to the name of the export directory.
+        /// </summary>
         public uint NameRva
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the ordinal base of the export directory.
+        /// </summary>
         public uint OrdinalBase
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the number of functions defined in the export directory.
+        /// </summary>
         public uint NumberOfFunctions
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the number of named functions defined in the export directory.
+        /// </summary>
         public uint NumberOfNames
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address of the functions table.
+        /// </summary>
         public uint AddressOfFunctions
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the relative virtual address of the function names table.
+        /// </summary>
         public uint AddressOfNames
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the relative virtual address of the name ordinals table.
+        /// </summary>
         public uint AddressOfNameOrdinals
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the name of the export direcotry.
+        /// </summary>
         public string Name
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the symbol exports the windows assembly image defines.
+        /// </summary>
         public IList<ImageSymbolExport> Exports
         {
             get

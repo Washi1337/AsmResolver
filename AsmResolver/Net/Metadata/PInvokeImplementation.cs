@@ -61,6 +61,21 @@ namespace AsmResolver.Net.Metadata
         private readonly LazyValue<string> _importName;
         private readonly LazyValue<ModuleReference> _importScope;
 
+        public PInvokeImplementation(string moduleName, string importName, PInvokeImplementationAttributes attributes)
+            : this(new ModuleReference(moduleName), importName, attributes)
+        {
+
+        }
+
+        public PInvokeImplementation(ModuleReference importScope, string importName, PInvokeImplementationAttributes attributes)
+            : base(null, new MetadataToken(MetadataTokenType.ImplMap), new MetadataRow<ushort, uint, uint, uint>())
+        {
+            _memberForwarded = new LazyValue<IMemberForwarded>();
+            _importScope = new LazyValue<ModuleReference>(importScope);
+            _importName = new LazyValue<string>(importName);
+            Attributes = attributes;
+        }
+
         internal PInvokeImplementation(MetadataHeader header, MetadataToken token, MetadataRow<ushort, uint, uint, uint> row)
             : base(header, token, row)
         {

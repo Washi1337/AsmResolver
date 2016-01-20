@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents the file header of a windows assembly image.
+    /// </summary>
     public class ImageFileHeader : FileSegment
     {
         internal static ImageFileHeader FromReadingContext(ReadingContext context)
@@ -24,42 +27,63 @@ namespace AsmResolver
             };
         }
 
+        /// <summary>
+        /// Gets or sets the machine the image is compiled for.
+        /// </summary>
         public ImageMachineType Machine
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the number of sections defined in the image.
+        /// </summary>
         public ushort NumberOfSections
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the time stamp of the image.
+        /// </summary>
         public uint TimeDateStamp
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the absolute file offset to the symbol table.
+        /// </summary>
         public uint PointerToSymbolTable
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the number of symbols defined in the image.
+        /// </summary>
         public uint NumberOfSymbols
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the size of the optional header.
+        /// </summary>
         public ushort SizeOfOptionalHeader
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the characteristics of the image.
+        /// </summary>
         public ImageCharacteristics Characteristics
         {
             get;

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.X86
 {
+    /// <summary>
+    /// Represents an x86 instruction.
+    /// </summary>
     public class X86Instruction
     {
         private static readonly FasmX86Formatter _formatter = new FasmX86Formatter();
@@ -19,30 +22,45 @@ namespace AsmResolver.X86
             Offset = offset;
         }
 
+        /// <summary>
+        /// Gets or sets the offset the instruction is located at. This offset can be relative or absolute.
+        /// </summary>
         public long Offset
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the opcode being used by the instruction.
+        /// </summary>
         public X86OpCode OpCode
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the mnemonic of the opcode that is being used by the instruction.
+        /// </summary>
         public X86Mnemonic Mnemonic
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the first operand of the instruction.
+        /// </summary>
         public X86Operand Operand1
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the second operand of the instruction.
+        /// </summary>
         public X86Operand Operand2
         {
             get;
@@ -54,6 +72,10 @@ namespace AsmResolver.X86
             return string.Format("{0:X8}: {1}", Offset, _formatter.FormatInstruction(this));
         }
 
+        /// <summary>
+        /// Computes the size (in bytes) of the instruction.
+        /// </summary>
+        /// <returns>The size of the instruction in bytes.</returns>
         public int ComputeSize()
         {
             int size = 1; // TODO: multi-byte opcodes.

@@ -115,9 +115,9 @@ namespace AsmResolver.Net.Builder
 
         private void UpdateMetaDataDirectories()
         {
-            _directory.MetaDataDirectory.VirtualAddress =
+            _directory.MetadataDirectory.VirtualAddress =
                 (uint)_directory.Assembly.FileOffsetToRva(Metadata.StartOffset);
-            _directory.MetaDataDirectory.Size = Metadata.GetPhysicalLength();
+            _directory.MetadataDirectory.Size = Metadata.GetPhysicalLength();
 
             if (_directory.StrongNameData != null)
             {

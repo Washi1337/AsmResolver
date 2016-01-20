@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.X86
 {
+    /// <summary>
+    /// Provides a mechanism for assembling x86 instructions into bytes.
+    /// </summary>
     public class X86Assembler
     {
         private readonly IBinaryStreamWriter _writer;
@@ -17,6 +20,10 @@ namespace AsmResolver.X86
             _writer = writer;
         }
 
+        /// <summary>
+        /// Writes an instruction to the output stream.
+        /// </summary>
+        /// <param name="instruction">The instruction to write.</param>
         public void Write(X86Instruction instruction)
         {
             var opcode = instruction.OpCode;

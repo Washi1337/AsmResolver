@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a 32-bit or 64-bit optional header in a windows assembly image.
+    /// </summary>
     public class ImageOptionalHeader : FileSegment
     {
 
@@ -83,186 +86,279 @@ namespace AsmResolver
             DataDirectories = new List<ImageDataDirectory>();
         }
         
+        /// <summary>
+        /// Gets or sets the magic optional header signature, determining whether the image is a PE32 (32-bit) or a PE32+ (64-bit) assembly image.
+        /// </summary>
         public OptionalHeaderMagic Magic
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the major linker version used to link the windows assembly image.
+        /// </summary>
         public byte MajorLinkerVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the minor linker version used to link the windows assembly image.
+        /// </summary>
         public byte MinorLinkerVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the total amount of bytes the code sections use.
+        /// </summary>
         public uint SizeOfCode
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the total amount of bytes the initialized data sections use.
+        /// </summary>
         public uint SizeOfInitializedData
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the total amount of bytes the uninitialized data sections use.
+        /// </summary>
         public uint SizeOfUninitializedData
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address to the entrypoint of the windows assembly image.
+        /// </summary>
         public uint AddressOfEntrypoint
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address to the begin of the code section, when loaded into memory.
+        /// </summary>
         public uint BaseOfCode
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address to the begin of the data section, when loaded into memory.
+        /// </summary>
         public uint BaseOfData
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the preferred address of the first byte of the image when loaded into memory. Must be a multiple of 64,000.
+        /// </summary>
         public ulong ImageBase
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the alignment of the sections when loaded into memory. Must be greater or equal to <see cref="FileAlignment"/>. Default is the page size for the architecture.
+        /// </summary>
         public uint SectionAlignment
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the alignment of the raw data of sections in the image file. Must be a power of 2 between 512 and 64,000.
+        /// </summary>
         public uint FileAlignment
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the minimum major version of the operating system required to run the windows assembly image.
+        /// </summary>
         public ushort MajorOperatingSystemVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the minimum minor version of the operating system required to run the windows assembly image.
+        /// </summary>
         public ushort MinorOperatingSystemVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the major image version.
+        /// </summary>
         public ushort MajorImageVersion
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the minor image version.
+        /// </summary>
         public ushort MinorImageVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the major version of the subsystem.
+        /// </summary>
         public ushort MajorSubsystemVersion
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the minor version of the subsystem.
+        /// </summary>
         public ushort MinorSubsystemVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Reserved, should be zero.
+        /// </summary>
         public uint Win32VersionValue
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size in bytes of the windows assembly image, including all headers. Must be a multiple of <see cref="SectionAlignment"/>.
+        /// </summary>
         public uint SizeOfImage
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the headers of the windows assembly image, including the DOS-, PE- and section headers, rounded to <see cref="FileAlignment"/>.
+        /// </summary>
         public uint SizeOfHeaders
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the checksum of the windows assembly image.
+        /// </summary>
         public uint CheckSum
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the subsystem to use when running the windows assembly image.
+        /// </summary>
         public ImageSubSystem Subsystem
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the dynamic linked library characteristics of the windows assembly image.
+        /// </summary>
         public ImageDllCharacteristics DllCharacteristics
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the stack to reserve.
+        /// </summary>
         public ulong SizeOfStackReserve
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the stack to commit.
+        /// </summary>
         public ulong SizeOfStackCommit
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the heap to reserve.
+        /// </summary>
         public ulong SizeOfHeapReserve
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the heap to commit.
+        /// </summary>
         public ulong SizeOfHeapCommit
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Obsolete.
+        /// </summary>
         public uint LoaderFlags
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the number of data directory headers defined in the optional header.
+        /// </summary>
         public uint NumberOfRvaAndSizes
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the data directory headers defined in the optional header.
+        /// </summary>
         public IList<ImageDataDirectory> DataDirectories
         {
             get;
@@ -357,10 +453,19 @@ namespace AsmResolver
             writer.WriteBytes(new byte[start + context.Assembly.NtHeaders.FileHeader.SizeOfOptionalHeader - writer.Position]);
         }
     }
-
+    
+    /// <summary>
+    /// Provides valid values for the optional header magic.
+    /// </summary>
     public enum OptionalHeaderMagic : ushort
     {
+        /// <summary>
+        /// The windows assembly image is a 32-bit assembly.
+        /// </summary>
         Pe32 = 0x010B,
+        /// <summary>
+        /// The windows assembly image is a 64-bit assembly.
+        /// </summary>
         Pe32Plus = 0x020B,
     }
 }

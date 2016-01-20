@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a directory in the native resources data directory of a windows assembly image.
+    /// </summary>
     public class ImageResourceDirectory : FileSegment
     {
         internal static ImageResourceDirectory FromReadingContext(ReadingContext context)
@@ -39,40 +42,61 @@ namespace AsmResolver
             Entries = new List<ImageResourceDirectoryEntry>();
         }
 
+        /// <summary>
+        /// Reserved.
+        /// </summary>
         public uint Characteristics
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the raw time stamp the resource data was created by the resource compiler.
+        /// </summary>
         public uint TimeDateStamp
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the major version of the resource.
+        /// </summary>
         public ushort MajorVersion
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the minor version of the resource.
+        /// </summary>
         public ushort MinorVersion
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the number of named entries defined in the directory.
+        /// </summary>
         public ushort NamedEntriesCount
         {
             get { return (ushort)Entries.Count(x => x.HasName); }
         }
 
+        /// <summary>
+        /// Gets the number of non-named entries defined in the directory.
+        /// </summary>
         public ushort IdEntriesCount
         {
             get { return (ushort)Entries.Count(x => !x.HasName); }
         }
 
+        /// <summary>
+        /// Gets the entries defined in the directory.
+        /// </summary>
         public IList<ImageResourceDirectoryEntry> Entries
         {
             get;

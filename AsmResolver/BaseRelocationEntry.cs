@@ -1,5 +1,8 @@
 ﻿namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a fixup entry in a base relocation block.
+    /// </summary>
     public class BaseRelocationEntry : FileSegment
     {
         internal static BaseRelocationEntry FromReadingContext(ReadingContext context)
@@ -14,12 +17,18 @@
             Offset = offset;
         }
 
+        /// <summary>
+        /// Gets or sets the type of fixup to be applied.
+        /// </summary>
         public BaseRelocationType Type
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the offset relative to the <see cref="BaseRelocationBlock.PageRva"/> where the fixup is to be applied. 
+        /// </summary>
         public ushort Offset
         {
             get;

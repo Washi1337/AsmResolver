@@ -11,28 +11,58 @@ using AsmResolver.Net.Builder;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a windows assembly image.
+    /// </summary>
     public class WindowsAssembly : IOffsetConverter
     {
+        /// <summary>
+        /// Reads a windows assembly image from a file.
+        /// </summary>
+        /// <param name="file">The path of the file to read.</param>
+        /// <returns>The assembly representing the executable file.</returns>
         public static WindowsAssembly FromFile(string file)
         {
             return FromBytes(File.ReadAllBytes(file), new ReadingParameters());
         }
 
+        /// <summary>
+        /// Reads a windows assembly image from the given byte array.
+        /// </summary>
+        /// <param name="bytes">The bytes to read the assembly from.</param>
+        /// <returns>The assembly representing the executable.</returns>
         public static WindowsAssembly FromBytes(byte[] bytes)
         {
             return FromBytes(bytes, new ReadingParameters());
         }
 
+        /// <summary>
+        /// Reads a windows assembly image from the given byte array, using the specified reading parameters.
+        /// </summary>
+        /// <param name="bytes">The bytes to read the assembly from.</param>
+        /// <param name="parameters">The extra parameters the reading procedure should use to read the assembly.</param>
+        /// <returns>The assembly representing the executable.</returns>
         public static WindowsAssembly FromBytes(byte[] bytes, ReadingParameters parameters)
         {
             return FromReader(new MemoryStreamReader(bytes), parameters);
         }
 
+        /// <summary>
+        /// Reads a windows assembly image from a binary stream.
+        /// </summary>
+        /// <param name="stream">The stream reader to use for reading the assembly.</param>
+        /// <returns>The assembly representing the executable.</returns>
         public static WindowsAssembly FromReader(IBinaryStreamReader stream)
         {
             return FromReader(stream, new ReadingParameters());
         }
 
+        /// <summary>
+        /// Reads a windows assembly image from a binary stream, using the specified reading parameters.
+        /// </summary>
+        /// <param name="stream">The stream reader to use for reading the assembly.</param>
+        /// <param name="parameters">The extra parameters the reading procedure should use to read the assembly.</param>
+        /// <returns>The assembly representing the executable.</returns>
         public static WindowsAssembly FromReader(IBinaryStreamReader stream, ReadingParameters parameters)
         {
             return FromReadingContext(new ReadingContext()
@@ -41,7 +71,7 @@ namespace AsmResolver
                 Parameters = parameters,
             });
         }
-
+        
         internal static WindowsAssembly FromReadingContext(ReadingContext context)
         {
             var reader = context.Reader;
@@ -88,33 +118,51 @@ namespace AsmResolver
         private ImageNtHeaders _ntHeaders;
         private ImageDebugDirectory _debugDirectory;
 
+        /// <summary>
+        /// Creates a new empty windows assembly image.
+        /// </summary>
         public WindowsAssembly()
         {
             SectionHeaders = new List<ImageSectionHeader>();
         }
 
+        /// <summary>
+        /// Gets the reading context that was used to read the assembly, or null if the assembly was created.
+        /// </summary>
         public ReadingContext ReadingContext
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the DOS header of the assembly.
+        /// </summary>
         public ImageDosHeader DosHeader
         {
             get { return _dosHeader ?? (_dosHeader = new ImageDosHeader()); }
         }
 
+        /// <summary>
+        /// Gets the NT headers of the assembly.
+        /// </summary>
         public ImageNtHeaders NtHeaders
         {
             get { return _ntHeaders ?? (_ntHeaders = new ImageNtHeaders()); }
         }
 
+        /// <summary>
+        /// Gets the section headers defined in the assembly.
+        /// </summary>
         public IList<ImageSectionHeader> SectionHeaders
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the import directory of the assembly.
+        /// </summary>
         public ImageImportDirectory ImportDirectory
         {
             get
@@ -133,6 +181,9 @@ namespace AsmResolver
             }
         }
 
+        /// <summary>
+        /// Gets or sets the export directory of the assembly, if available.
+        /// </summary>
         public ImageExportDirectory ExportDirectory
         {
             get
@@ -152,6 +203,9 @@ namespace AsmResolver
             set { _exportDirectory = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the relocation directory of the assembly, if available.
+        /// </summary>
         public ImageRelocationDirectory RelocationDirectory
         {
             get
@@ -171,6 +225,9 @@ namespace AsmResolver
             set { _relocDirectory = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the root of the native resources directory of the assembly.
+        /// </summary>
         public ImageResourceDirectory RootResourceDirectory
         {
             get
@@ -190,6 +247,9 @@ namespace AsmResolver
             set { _resourceDirectory = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the managed .NET directory header (COR20 header) of the assembly.
+        /// </summary>
         public ImageNetDirectory NetDirectory
         {
             get
@@ -220,6 +280,9 @@ namespace AsmResolver
             }
         }
 
+        /// <summary>
+        /// Gets or sets the debugging information directory of the assembly.
+        /// </summary>
         public ImageDebugDirectory DebugDirectory
         {
             get
@@ -238,7 +301,7 @@ namespace AsmResolver
             }
             set { _debugDirectory = value; }
         }
-
+        
         public long RvaToFileOffset(long rva)
         {
             var section = GetSectionHeaderByRva(rva);
@@ -255,6 +318,11 @@ namespace AsmResolver
             return section.FileOffsetToRva(fileOffset);
         }
 
+        /// <summary>
+        /// Determines the image section the given relative virtual address (RVA) is located at.
+        /// </summary>
+        /// <param name="rva">The relative virtual address to check.</param>
+        /// <returns>The section the <paramref name="rva"/> is located.</returns>
         public ImageSectionHeader GetSectionHeaderByRva(long rva)
         {
             return
@@ -264,6 +332,11 @@ namespace AsmResolver
                         rva < sectionHeader.VirtualAddress + sectionHeader.VirtualSize);
         }
 
+        /// <summary>
+        /// Determines the image section the given absolute file offset is located at.
+        /// </summary>
+        /// <param name="fileOffset">The absolute file offset to check.</param>
+        /// <returns>The section the <paramref name="fileOffset"/> is located.</returns>
         public ImageSectionHeader GetSectionHeaderByFileOffset(long fileOffset)
         {
             return
@@ -273,6 +346,10 @@ namespace AsmResolver
                         fileOffset < sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData);
         }
 
+        /// <summary>
+        /// Rebuilds and writes the assembly to a specific file path.
+        /// </summary>
+        /// <param name="file">The file path to write the image to.</param>
         public void Write(string file)
         {
             using (var stream = File.Create(file))
@@ -281,11 +358,19 @@ namespace AsmResolver
             }
         }
 
+        /// <summary>
+        /// Rebuilds and writes the assembly to a specific binary stream.
+        /// </summary>
+        /// <param name="writer">The writer to write the image to.</param>
         public void Write(IBinaryStreamWriter writer)
         {
             Write(new BuildingParameters(writer));
         }
 
+        /// <summary>
+        /// Rebuilds and writes the assembly to a destination, using the specified building parameters.
+        /// </summary>
+        /// <param name="parameters">The parameters to use for building the assembly image.</param>
         public void Write(BuildingParameters parameters)
         {
             var builder = new NetAssemblyBuilder(this, parameters);

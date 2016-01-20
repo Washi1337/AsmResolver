@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Represents a string storage stream (#Strings) in a .NET assembly image.
+    /// </summary>
     public class StringStream : MetadataStream<StringStreamBuffer>
     {
 
@@ -28,6 +31,11 @@ namespace AsmResolver.Net
             _reader = reader;
         }
 
+        /// <summary>
+        /// Gets the string at the given offset.
+        /// </summary>
+        /// <param name="offset">The offset of the string to get.</param>
+        /// <returns>The string.</returns>
         public string GetStringByOffset(uint offset)
         {
             if (offset == 0)
@@ -55,6 +63,10 @@ namespace AsmResolver.Net
             return value;
         }
 
+        /// <summary>
+        /// Enumerates all strings stored in the stream.
+        /// </summary>
+        /// <returns>The strings stored in the stream.</returns>
         public IEnumerable<string> EnumerateStrings()
         {
             return _hasReadAllStrings ? _cachedStrings.Values : GetStringsEnumerator();
@@ -72,22 +84,10 @@ namespace AsmResolver.Net
             _hasReadAllStrings = true;
         }
 
-        // public uint GetStringOffset(string value)
-        // {
-        //     if (string.IsNullOrEmpty(value))
-        //         return 0;
-        // 
-        //     if (!_hasReadAllStrings)
-        //     {
-        //         EnumerateStrings().ToArray();
-        //         SortCachedStrings();
-        //     }
-        // 
-        //     if (_cachedStrings.ContainsValue(value))
-        //         return _cachedStrings.First(x => x.Value == value).Key;
-        //     throw new ArgumentException("String value is not present in the string stream.");
-        // }
-
+        /// <summary>
+        /// Creates a new buffer for constructing a new strings storage stream.
+        /// </summary>
+        /// <returns></returns>
         public override StringStreamBuffer CreateBuffer()
         {
             return new StringStreamBuffer();
@@ -123,6 +123,9 @@ namespace AsmResolver.Net
         }
     }
 
+    /// <summary>
+    /// Represents a buffer for constructing a new strings metadata stream.
+    /// </summary>
     public class StringStreamBuffer : FileSegment
     {
         private readonly Dictionary<string, uint> _stringOffsetMapping = new Dictionary<string, uint>();
@@ -133,6 +136,11 @@ namespace AsmResolver.Net
             _length = 1;
         }
 
+        /// <summary>
+        /// Gets or creates a new index for the given string.
+        /// </summary>
+        /// <param name="value">The string to get the offset from.</param>
+        /// <returns>The index.</returns>
         public uint GetStringOffset(string value)
         {
             if (string.IsNullOrEmpty(value))

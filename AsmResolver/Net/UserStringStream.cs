@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Represents a user-defined strings storage stream (#US) in a .NET assembly image.
+    /// </summary>
     public class UserStringStream : MetadataStream<UserStringStreamBuffer>
     {
 
@@ -29,6 +32,11 @@ namespace AsmResolver.Net
             _length = (uint)reader.Length;
         }
 
+        /// <summary>
+        /// Gets the string at the given offset.
+        /// </summary>
+        /// <param name="offset">The offset of the string to get.</param>
+        /// <returns>The string.</returns>
         public string GetStringByOffset(uint offset)
         {
             if (offset == 0)
@@ -60,6 +68,10 @@ namespace AsmResolver.Net
             return value;
         }
 
+        /// <summary>
+        /// Enumerates all strings stored in the stream.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<string> EnumerateStrings()
         {
             if (_hasReadAllStrings)
@@ -82,21 +94,11 @@ namespace AsmResolver.Net
 
             _hasReadAllStrings = true;
         }
-
-       //public uint GetStringOffset(string value)
-       //{
-       //    if (!_hasReadAllStrings)
-       //        EnumerateStrings().ToArray();
-       //
-       //    if (_cachedStrings.ContainsValue(value))
-       //        return _cachedStrings.First(x => x.Value == value).Key;
-       //
-       //    var offset = _length;
-       //    _cachedStrings.Add(offset, value);
-       //    _length += (uint)Encoding.Unicode.GetByteCount(value) + 1;
-       //    return offset;
-       //}
-
+        
+        /// <summary>
+        /// Creates a new buffer for constructing a new user-strings storage stream.
+        /// </summary>
+        /// <returns></returns>
         public override UserStringStreamBuffer CreateBuffer()
         {
             return new UserStringStreamBuffer();
@@ -121,6 +123,9 @@ namespace AsmResolver.Net
         }
     }
 
+    /// <summary>
+    /// Represents a buffer for constructing a new user-defined strings metadata stream.
+    /// </summary>
     public class UserStringStreamBuffer : FileSegment
     {
         private readonly Dictionary<string, uint> _stringOffsetMapping = new Dictionary<string, uint>();
@@ -131,6 +136,11 @@ namespace AsmResolver.Net
             _length = 1;
         }
 
+        /// <summary>
+        /// Gets or creates a new index for the given string.
+        /// </summary>
+        /// <param name="value">The string to get the index from.</param>
+        /// <returns>The index.</returns>
         public uint GetStringOffset(string value)
         {
             uint offset;

@@ -129,6 +129,7 @@ namespace AsmResolver.Builder
 
         private void AddDirectory(ImageResourceDirectory directory, int level)
         {
+            // TODO: add entry names
             _directoryTablesBuilder.AddResourceDirectory(directory, level);
             foreach (var entry in directory.Entries)
             {

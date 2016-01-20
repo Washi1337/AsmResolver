@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a data directory header in a windows assembly image.
+    /// </summary>
     public class ImageDataDirectory : FileSegment
     {
         public const int ExportDirectoryIndex = 0;
@@ -36,12 +39,18 @@ namespace AsmResolver
             };
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address (RVA) of the directory.
+        /// </summary>
         public uint VirtualAddress
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the directory.
+        /// </summary>
         public uint Size
         {
             get;

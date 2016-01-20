@@ -54,6 +54,14 @@ namespace AsmResolver.Net.Metadata
         private readonly LazyValue<string> _name;
         private CustomAttributeCollection _customAttributes;
 
+        public ParameterDefinition(int sequence, string name, ParameterAttributes attributes)
+            : base(null, new MetadataToken(MetadataTokenType.Param), new MetadataRow<ushort, ushort, uint>())
+        {
+            _name = new LazyValue<string>(name);
+            Sequence = sequence;
+            Attributes = attributes;
+        }
+
         internal ParameterDefinition(MetadataHeader header, MetadataToken token, MetadataRow<ushort, ushort, uint> row)
             : base(header, token, row)
         {

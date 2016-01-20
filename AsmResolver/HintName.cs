@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a hint-name pair defined in the import data directory.
+    /// </summary>
     public class HintName : FileSegment
     {
         internal static HintName FromReadingContext(ReadingContext context)
@@ -37,12 +40,18 @@ namespace AsmResolver
             Name = name;
         }
 
+        /// <summary>
+        /// Gets or sets the hint number of the symbol.
+        /// </summary>
         public ushort Hint
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the name of the symbol.
+        /// </summary>
         public string Name
         {
             get;

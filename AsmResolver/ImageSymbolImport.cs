@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a symbol imported by a windows assembly image.
+    /// </summary>
     public class ImageSymbolImport
     {
         internal static ImageSymbolImport FromReadingContext(ReadingContext context)
@@ -49,41 +52,64 @@ namespace AsmResolver
             Ordinal = ordinal;
         }
 
+        /// <summary>
+        /// Gets the raw value of the symbol import.
+        /// </summary>
         public ulong Lookup
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets or sets the ordinal of the symbol import.
+        /// </summary>
         public ushort Ordinal
         {
             get { return (ushort)(!IsImportByOrdinal ? 0 : (Lookup & 0xFFFF)); }
             set { Lookup = unchecked((ulong)(long.MinValue | value)); }
         }
 
+        /// <summary>
+        /// Gets the relative virtual address of the hint-name entry used by the symbol import.
+        /// </summary>
         public uint HintNameRva
         {
             get { return (uint)(IsImportByOrdinal ? 0 : (Lookup & 0x7FFFFFFFF)); }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the symbol should be imported by ordinal instead of by hint-name.
+        /// </summary>
         public bool IsImportByOrdinal
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the hint-name pair of the symbol.
+        /// </summary>
         public HintName HintName
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the imported module definining the symbol.
+        /// </summary>
         public ImageModuleImport Module
         {
             get;
             internal set;
         }
 
+        /// <summary>
+        /// Determines the import address to use for the symbol.
+        /// </summary>
+        /// <param name="is32Bit">Specifies whether the address should be a 32-bit or 64-bit address.</param>
+        /// <returns></returns>
         public ulong GetTargetAddress(bool is32Bit)
         {
             if (Module == null)

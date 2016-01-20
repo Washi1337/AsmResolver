@@ -19,7 +19,7 @@ namespace AsmResolver.Net.Metadata
 
         public MetadataHeader Header
         {
-            get { return TableStream != null ? TableStream.StreamHeader.MetaDataHeader : null; }
+            get { return TableStream != null ? TableStream.StreamHeader.MetadataHeader : null; }
         }
 
         public abstract MetadataTokenType TokenType
@@ -68,7 +68,7 @@ namespace AsmResolver.Net.Metadata
         }
 
         public abstract void UpdateRows(NetBuildingContext context);
-
+        
     }
 
     public abstract class MetadataTable<TMember> : MetadataTable, ICollection<TMember>
@@ -120,7 +120,7 @@ namespace AsmResolver.Net.Metadata
         public void Add(TMember item)
         {
             _members.Add(item);
-            item.Header = TableStream.StreamHeader.MetaDataHeader;
+            item.Header = TableStream.StreamHeader.MetadataHeader;
         }
 
         public void Clear()

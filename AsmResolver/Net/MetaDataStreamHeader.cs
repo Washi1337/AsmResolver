@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Represents a metadata storage stream header in a .NET assembly image.
+    /// </summary>
     public class MetadataStreamHeader : FileSegment
     {
         internal static MetadataStreamHeader FromReadingContext(ReadingContext context)
@@ -45,24 +48,36 @@ namespace AsmResolver.Net
             Stream = stream;
         }
 
+        /// <summary>
+        /// Gets or sets the offset to the raw data, relative to the start of the metadata data directory.
+        /// </summary>
         public uint Offset
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the raw data.
+        /// </summary>
         public uint Size
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the name of the metadata stream.
+        /// </summary>
         public string Name
         {
             get;
             set;
         }
-
+        
+        /// <summary>
+        /// Gets or sets the metadata stream associated with the header.
+        /// </summary>
         public MetadataStream Stream
         {
             get
@@ -114,7 +129,10 @@ namespace AsmResolver.Net
             }
         }
 
-        public MetadataHeader MetaDataHeader
+        /// <summary>
+        /// Gets the metadata header the stream header is defined in.
+        /// </summary>
+        public MetadataHeader MetadataHeader
         {
             get;
             internal set;
@@ -123,14 +141,6 @@ namespace AsmResolver.Net
         public override uint GetPhysicalLength()
         {
             var length = Align((uint)(Encoding.ASCII.GetByteCount(Name) + 1), 4);
-            //if (length < 4)
-            //    length = 4;
-            //else if (length < 8)
-            //    length = 8;
-            //else if (length < 12)
-            //    length = 12;
-            //else if (length < 16)
-            //    length = 16;
             return (uint)(2 * sizeof (uint) + length);
         }
 

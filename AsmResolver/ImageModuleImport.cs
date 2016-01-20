@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a module in the import data directory of a windows assembly image.
+    /// </summary>
     public class ImageModuleImport : FileSegment
     {
         internal static ImageModuleImport FromReadingContext(ReadingContext context)
@@ -49,36 +45,54 @@ namespace AsmResolver
             Name = name;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address (RVA) of the import lookup table.
+        /// </summary>
         public uint ImportLookupTableRva
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the raw time stamp
+        /// </summary>
         public uint TimeDateStamp
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the index of the first forwarder reference.
+        /// </summary>
         public uint ForwarderChain
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address of the name.
+        /// </summary>
         public uint NameRva
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address of the import address table.
+        /// </summary>
         public uint ImportAddressTableRva
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the module import is empty and is therefore used as a stop delimeter in the import directory.
+        /// </summary>
         public bool IsEmpty
         {
             get
@@ -91,6 +105,9 @@ namespace AsmResolver
             }
         }
 
+        /// <summary>
+        /// Gets the symbols defined in the module that are being imported by the image.
+        /// </summary>
         public ImageSymbolImportCollection SymbolImports
         {
             get
@@ -115,12 +132,21 @@ namespace AsmResolver
             }
         }
 
+        /// <summary>
+        /// Gets or sets the name of the module.
+        /// </summary>
         public string Name
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Determines the import address to use for a specific function.
+        /// </summary>
+        /// <param name="import">The imported symbol to get the address from.</param>
+        /// <param name="is32Bit">Specifies whether the address should be a 32-bit or 64-bit address.</param>
+        /// <returns></returns>
         public ulong GetSymbolImportAddress(ImageSymbolImport import, bool is32Bit)
         {
             int index = SymbolImports.IndexOf(import);

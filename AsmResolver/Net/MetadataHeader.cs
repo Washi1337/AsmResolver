@@ -7,6 +7,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net
 {
+    /// <summary>
+    /// Represents the header to the .NET metadata in a windows assembly image.
+    /// </summary>
     public class MetadataHeader : FileSegment
     {
         private TypeSystem _typeSystem;
@@ -51,12 +54,18 @@ namespace AsmResolver.Net
             NetDirectory = directory;
         }
 
+        /// <summary>
+        /// Gets the parent .NET data directory.
+        /// </summary>
         public ImageNetDirectory NetDirectory
         {
             get;
             internal set;
         }
 
+        /// <summary>
+        /// Gets or sets the signature of the metadata header. Must be 0x424A5342 (BSJB).
+        /// </summary>
         public uint Signature
         {
             get;
@@ -75,36 +84,54 @@ namespace AsmResolver.Net
             set;
         }
 
+        /// <summary>
+        /// Reserved. Must be zero.
+        /// </summary>
         public uint Reserved
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the length of the <see cref="VersionString"/> field.
+        /// </summary>
         public uint VersionLength
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the version of the .NET framework that the .net assembly image targets.
+        /// </summary>
         public string VersionString
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Reserved. Should be zero.
+        /// </summary>
         public ushort Flags
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets a list of all stream headers defined in the metadata data directory.
+        /// </summary>
         public IList<MetadataStreamHeader> StreamHeaders
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets a collection of references to default primitive types defined in mscorlib.dll.
+        /// </summary>
         public TypeSystem TypeSystem
         {
             get
@@ -114,23 +141,40 @@ namespace AsmResolver.Net
             }
         }
 
+        /// <summary>
+        /// Gets or sets the metadata resolver that will be used when <see cref="IResolvable.Resolve"/> is called on a specific member reference.
+        /// </summary>
         public IMetadataResolver MetadataResolver
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets all metadata heap streams defined in the metadata data directory.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<MetadataStream> GetStreams()
         {
             return StreamHeaders.Select(x => x.Stream);
         } 
 
+        /// <summary>
+        /// Gets the first occuring metadata heap stream with the given name.
+        /// </summary>
+        /// <param name="name">The name of the stream to get.</param>
+        /// <returns></returns>
         public MetadataStream GetStream(string name)
         {
             var header = StreamHeaders.FirstOrDefault(x => x.Name == name);
             return header != null ? header.Stream : null;
         }
 
+        /// <summary>
+        /// Gets the first occuring metadata heap stream that inherits from the given type argument.
+        /// </summary>
+        /// <typeparam name="TStream">The type of the metadata stream.</typeparam>
+        /// <returns></returns>
         public TStream GetStream<TStream>()
             where TStream : MetadataStream
         {

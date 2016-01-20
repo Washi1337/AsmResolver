@@ -2,6 +2,9 @@
 
 namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a base relocation block in the relocation data directory.
+    /// </summary>
     public class BaseRelocationBlock : FileSegment
     {
         internal static BaseRelocationBlock FromReadingContext(ReadingContext context)
@@ -25,17 +28,26 @@ namespace AsmResolver
             PageRva = pageRva;
         }
 
+        /// <summary>
+        /// Gets or sets the relative virtual address of where the fixup needs to be applied.
+        /// </summary>
         public uint PageRva
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the total number of bytes in the fixup block.
+        /// </summary>
         public uint BlockSize
         {
             get { return _entries == null ? _blockSize : GetPhysicalLength(); }
         }
 
+        /// <summary>
+        /// Gets the base relocation entries defined in the fixup block.
+        /// </summary>
         public IList<BaseRelocationEntry> Entries
         {
             get

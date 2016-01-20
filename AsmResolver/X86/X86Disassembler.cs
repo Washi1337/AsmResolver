@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.X86
 {
+    /// <summary>
+    /// Provides a mechanism for disassembling bytes to x86 instructions.
+    /// </summary>
     public class X86Disassembler
     {
         private readonly IBinaryStreamReader _reader;
@@ -24,12 +27,19 @@ namespace AsmResolver.X86
             BaseAddress = baseAddress;
         }
 
+        /// <summary>
+        /// Gets the base address.
+        /// </summary>
         public long BaseAddress
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Disassembles the next instruction of the input stream.
+        /// </summary>
+        /// <returns>The disassembled instruction.</returns>
         public X86Instruction ReadNextInstruction()
         {
             var instruction = new X86Instruction(BaseAddress + _reader.Position)

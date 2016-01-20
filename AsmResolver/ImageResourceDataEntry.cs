@@ -1,5 +1,8 @@
 ﻿namespace AsmResolver
 {
+    /// <summary>
+    /// Represents a data entry in a resource directory of a windows assembly image.
+    /// </summary>
     public class ImageResourceDataEntry : FileSegment
     {
         internal static ImageResourceDataEntry FromReadingContext(ReadingContext context)
@@ -32,30 +35,45 @@
             Data = data;
         }
 
+        /// <summary>
+        /// Gets or sets the offset to the data, relative to the start of the resource data directory.
+        /// </summary>
         public uint OffsetToData
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the size (in bytes) of the data.
+        /// </summary>
         public uint Size
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the code page used to decode code point values within the resource data. Typically, the code page would be the Unicode code page.
+        /// </summary>
         public uint CodePage
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Reserved, must be zero.
+        /// </summary>
         public uint Reserved
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the data in the data entry.
+        /// </summary>
         public byte[] Data
         {
             get

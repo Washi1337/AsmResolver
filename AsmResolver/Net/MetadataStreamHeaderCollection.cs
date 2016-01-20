@@ -17,7 +17,7 @@ namespace AsmResolver.Net
         {
             if (item == null)
                 throw new ArgumentNullException("item");
-            if (item.MetaDataHeader != null)
+            if (item.MetadataHeader != null)
                 throw new InvalidOperationException(
                     "Cannot add a stream header to the assembly that has already been added to another assembly.");
         }
@@ -25,7 +25,7 @@ namespace AsmResolver.Net
         protected override void ClearItems()
         {
             foreach (var item in Items)
-                item.MetaDataHeader = null;
+                item.MetadataHeader = null;
             base.ClearItems();
         }
 
@@ -33,12 +33,12 @@ namespace AsmResolver.Net
         {
             AssertItemHasNoOwner(item);
             base.InsertItem(index, item);
-            item.MetaDataHeader = _owner;
+            item.MetadataHeader = _owner;
         }
 
         protected override void RemoveItem(int index)
         {
-            Items[index].MetaDataHeader = null;
+            Items[index].MetadataHeader = null;
             base.RemoveItem(index);
         }
 
@@ -46,7 +46,7 @@ namespace AsmResolver.Net
         {
             AssertItemHasNoOwner(item);
             base.SetItem(index, item);
-            item.MetaDataHeader = _owner;
+            item.MetadataHeader = _owner;
         }
     }
 }
