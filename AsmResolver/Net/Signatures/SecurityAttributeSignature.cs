@@ -46,11 +46,13 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
+            uint argumentsSize = (uint)NamedArguments.Sum(x => x.GetPhysicalLength());
             return (uint)(TypeName.GetSerStringSize() +
                           (NamedArguments.Count == 0
                               ? 2 * sizeof (byte)
                               : NamedArguments.Count.GetCompressedSize() +
-                                NamedArguments.Sum(x => x.GetPhysicalLength())));
+                                argumentsSize.GetCompressedSize() +
+                                argumentsSize));
         }
 
         public override void Write(WritingContext context)
