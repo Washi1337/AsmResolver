@@ -86,11 +86,14 @@ namespace AsmResolver.Net.Metadata
         {
             get
             {
-                if (_members[index] == null && _readingContext != null)
+                lock (_members)
                 {
-                    var context =
-                        _readingContext.CreateSubContext(_readingContext.Reader.StartPosition + (index * GetElementByteCount()));
-                    _members[index] = ReadMember(new MetadataToken(TokenType, (uint)(index + 1)), context);
+                    if (_members[index] == null && _readingContext != null)
+                    {
+                        var context =
+                            _readingContext.CreateSubContext(_readingContext.Reader.StartPosition + (index * GetElementByteCount()));
+                        _members[index] = ReadMember(new MetadataToken(TokenType, (uint) (index + 1)), context);
+                    }
                 }
                 return _members[index];
             }

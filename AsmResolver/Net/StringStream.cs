@@ -43,7 +43,10 @@ namespace AsmResolver.Net
 
             var reader = _reader.CreateSubReader(_reader.StartPosition);
             reader.Position += offset;
-            return ReadString(reader);
+            lock (_cachedStrings)
+            {
+                return ReadString(reader);
+            }
         }
 
         protected string ReadString(IBinaryStreamReader reader)
@@ -76,9 +79,12 @@ namespace AsmResolver.Net
         {
             var reader = _reader.CreateSubReader(_reader.StartPosition, (int)_reader.Length);
             reader.Position++;
-            while (reader.Position < reader.StartPosition + reader.Length)
+            lock (_cachedStrings)
             {
-                yield return ReadString(reader);
+                while (reader.Position < reader.StartPosition + reader.Length)
+                {
+                    yield return ReadString(reader);
+                }
             }
 
             _hasReadAllStrings = true;

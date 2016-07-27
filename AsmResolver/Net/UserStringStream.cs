@@ -11,7 +11,6 @@ namespace AsmResolver.Net
     /// </summary>
     public class UserStringStream : MetadataStream<UserStringStreamBuffer>
     {
-
         internal static UserStringStream FromReadingContext(ReadingContext context)
         {
             return new UserStringStream(context.Reader);
@@ -43,7 +42,10 @@ namespace AsmResolver.Net
                 return string.Empty;
             var reader = _reader.CreateSubReader(_reader.StartPosition);
             reader.Position += offset;
-            return ReadString(reader);
+            lock (_cachedStrings)
+            {
+                return ReadString(reader);
+            }
         }
 
         protected string ReadString(IBinaryStreamReader reader)
@@ -59,12 +61,12 @@ namespace AsmResolver.Net
                 if (length <= 0)
                     return string.Empty;
 
-                value = Encoding.Unicode.GetString(reader.ReadBytes((int)length - 1));
+                value = Encoding.Unicode.GetString(reader.ReadBytes((int) length - 1));
                 reader.Position++;
 
                 _cachedStrings.Add(offset, value);
             }
-
+            
             return value;
         }
 
@@ -85,11 +87,14 @@ namespace AsmResolver.Net
             var reader = _reader.CreateSubReader(_reader.StartPosition, (int)_reader.Length);
             reader.Position++;
 
-            while (reader.Position < reader.StartPosition + reader.Length)
+            lock (_cachedStrings)
             {
-                var value = ReadString(reader);
-                if (!string.IsNullOrEmpty(value))
-                    yield return value;
+                while (reader.Position < reader.StartPosition + reader.Length)
+                {
+                    var value = ReadString(reader);
+                    if (!string.IsNullOrEmpty(value))
+                        yield return value;
+                }
             }
 
             _hasReadAllStrings = true;

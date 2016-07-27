@@ -38,13 +38,16 @@ namespace AsmResolver.Net
         {
             if (offset == 0)
                 return Guid.Empty;
-            return ReadGuid(_reader.CreateSubReader(_reader.StartPosition + offset - 1));
+            lock (_cachedGuids)
+            {
+                return ReadGuid(_reader.CreateSubReader(_reader.StartPosition + offset - 1));
+            }
         }
 
         private Guid ReadGuid(IBinaryStreamReader reader)
         {
             Guid guid;
-            var offset = (uint)(reader.Position - reader.StartPosition) + 1;
+            var offset = (uint) (reader.Position - reader.StartPosition) + 1;
 
             if (!_cachedGuids.TryGetValue(offset, out guid))
                 _cachedGuids.Add(offset, guid = new Guid(reader.ReadBytes(16)));
