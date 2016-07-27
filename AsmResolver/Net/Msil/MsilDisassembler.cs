@@ -54,7 +54,7 @@ namespace AsmResolver.Net.Msil
 
                 case MsilOperandType.InlineArgument:
                 case MsilOperandType.InlineVar:
-                    return reader.ReadInt16();
+                    return reader.ReadUInt16();
 
                 case MsilOperandType.InlineI:
                 case MsilOperandType.InlineBrTarget:
@@ -62,6 +62,8 @@ namespace AsmResolver.Net.Msil
 
                 case MsilOperandType.ShortInlineArgument:
                 case MsilOperandType.ShortInlineVar:
+                    return reader.ReadByte();
+
                 case MsilOperandType.ShortInlineBrTarget:
                 case MsilOperandType.ShortInlineI:
                     return reader.ReadSByte();
