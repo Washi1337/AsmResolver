@@ -247,6 +247,7 @@
     <Compile Include="Net\TableStream.cs" />
     <Compile Include="Net\TypeSystem.cs" />
     <Compile Include="Net\UserStringStream.cs" />
+    <Compile Include="Net\VTablesDirectory.cs" />
     <Compile Include="PointerSegment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReadingContext.cs" />

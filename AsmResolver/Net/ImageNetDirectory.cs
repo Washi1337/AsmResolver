@@ -41,6 +41,7 @@ namespace AsmResolver.Net
         private ReadingContext _readingContext;
         private MetadataHeader _metaDataHeader;
         private DataSegment _strongNameData;
+        private VTablesDirectory _vtablesDirectory;
 
         public ImageNetDirectory()
         {
@@ -183,9 +184,8 @@ namespace AsmResolver.Net
                 if (_readingContext == null)
                     return _metaDataHeader = new MetadataHeader(this);
 
-                var context =
-                    _readingContext.CreateSubContext(
-                        _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
+                var context = _readingContext.CreateSubContext(
+                    _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
                 if (context == null)
                     return _metaDataHeader = new MetadataHeader(this);
                 
@@ -211,6 +211,29 @@ namespace AsmResolver.Net
                 return _strongNameData = DataSegment.FromReadingContext(context);
             }
             set { _strongNameData = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the VTable fixups directory of the .NET assembly image.
+        /// </summary>
+        public VTablesDirectory VTablesDirectory
+        {
+            get
+            {
+                if (_vtablesDirectory != null)
+                    return _vtablesDirectory;
+
+                if (_readingContext != null)
+                {
+                    var context = _readingContext.CreateSubContext(
+                        _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
+                    if (context != null)
+                        return _vtablesDirectory = VTablesDirectory.FromReadingContext(context);
+                }
+
+                return null;
+            }
+            set { _vtablesDirectory = value; }
         }
 
         /// <summary>
