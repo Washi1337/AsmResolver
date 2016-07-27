@@ -51,7 +51,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public class EventDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, IHasSemantics, ICollectionItem
+    public class EventDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, IHasSemantics, IResolvable, ICollectionItem
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<ITypeDefOrRef> _eventType;
@@ -149,6 +149,11 @@ namespace AsmResolver.Net.Metadata
         {
             get { return EventMap; }
             set { _eventMap = value as EventMap; }
+        }
+
+        public IMetadataMember Resolve()
+        {
+            return this;
         }
     }
 }

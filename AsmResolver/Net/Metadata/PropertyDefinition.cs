@@ -49,7 +49,7 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
-    public class PropertyDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, IHasConstant, IHasSemantics, ICollectionItem
+    public class PropertyDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, ICallableMemberReference, IHasConstant, IHasSemantics, ICollectionItem
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<PropertySignature> _signature;
@@ -100,6 +100,11 @@ namespace AsmResolver.Net.Metadata
                 _signature.Value = value;
                 _fullName = null;
             }
+        }
+
+        CallingConventionSignature ICallableMemberReference.Signature
+        {
+            get { return Signature; }
         }
 
         public PropertyMap PropertyMap
@@ -174,6 +179,11 @@ namespace AsmResolver.Net.Metadata
         {
             get { return PropertyMap; }
             set { _propertyMap = value as PropertyMap; }
+        }
+
+        public IMetadataMember Resolve()
+        {
+            return this;
         }
     }
 }
