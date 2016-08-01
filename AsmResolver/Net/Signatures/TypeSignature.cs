@@ -111,7 +111,7 @@ namespace AsmResolver.Net.Signatures
             get;
         }
 
-        public ITypeDescriptor DeclaringTypeDescriptor
+        public virtual ITypeDescriptor DeclaringTypeDescriptor
         {
             get { return ResolutionScope as ITypeDescriptor; }
         }

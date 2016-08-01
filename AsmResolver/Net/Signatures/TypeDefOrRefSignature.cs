@@ -43,6 +43,11 @@ namespace AsmResolver.Net.Signatures
             get { return Type.Namespace; }
         }
 
+        public override ITypeDescriptor DeclaringTypeDescriptor
+        {
+            get { return Type.DeclaringTypeDescriptor; }
+        }
+
         public override IResolutionScope ResolutionScope
         {
             get { return Type.ResolutionScope; }
