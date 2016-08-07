@@ -49,8 +49,9 @@ namespace AsmResolver.Net.Metadata
             var row = member.MetadataRow;
 
             writer.WriteByte(row.Column1);
-            writer.WriteIndex(TableStream.GetIndexEncoder(CodedIndex.HasConstant).IndexSize, row.Column2);
-            writer.WriteIndex(TableStream.BlobIndexSize, row.Column3);
+            writer.WriteByte(row.Column2);
+            writer.WriteIndex(TableStream.GetIndexEncoder(CodedIndex.HasConstant).IndexSize, row.Column3);
+            writer.WriteIndex(TableStream.BlobIndexSize, row.Column4);
         }
     }
 
