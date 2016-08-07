@@ -11,7 +11,7 @@ namespace AsmResolver.X86
     /// </summary>
     public enum X86Mnemonic : ushort
     {
-        Unknown,
+        Db,
         Add,
         Push,
         Pop,
