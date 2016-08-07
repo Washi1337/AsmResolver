@@ -77,7 +77,7 @@ namespace AsmResolver.Net.Signatures
         public override uint GetPhysicalLength()
         {
             return (uint)(sizeof (byte) +
-                          (Attributes.HasFlag(CallingConventionAttributes.GenericInstance) ? sizeof (byte) : 0) +
+                          (IsGeneric ? GenericParameterCount.GetCompressedSize() : 0) +
                           Parameters.Count.GetCompressedSize() +
                           ReturnType.GetPhysicalLength() +
                           Parameters.Sum(x => x.GetPhysicalLength()));
@@ -88,7 +88,7 @@ namespace AsmResolver.Net.Signatures
             var writer = context.Writer;
             writer.WriteByte((byte)Attributes);
 
-            if (Attributes.HasFlag(CallingConventionAttributes.GenericInstance))
+            if (IsGeneric)
                 writer.WriteCompressedUInt32((uint)GenericParameterCount);
 
             writer.WriteCompressedUInt32((uint)Parameters.Count);
