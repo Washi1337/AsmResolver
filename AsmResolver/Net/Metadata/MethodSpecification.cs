@@ -99,7 +99,7 @@ namespace AsmResolver.Net.Metadata
         {
             get
             {
-                return Method.Name + '<' + string.Join(", ", Signature.GenericArguments.Select(x => x.FullName)) + '>';
+                return Method.Name;
             }
         }
 
@@ -116,7 +116,7 @@ namespace AsmResolver.Net.Metadata
                           ((MethodSignature)Method.Signature).Parameters.Select(x => x.ParameterType.FullName)) + ')'
                     : string.Empty;
 
-                return _fullName = Method.DeclaringType.FullName + "::" + Name + parameterString;
+                return _fullName = Method.DeclaringType.FullName + "::" + Name + '<' + string.Join(", ", Signature.GenericArguments.Select(x => x.FullName)) + '>' + parameterString;
             }
         }
 

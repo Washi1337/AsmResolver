@@ -60,12 +60,20 @@ namespace AsmResolver.Net.Signatures
 
         public override string Name
         {
-            get { return GenericType.Name + '<' + string.Join(", ", GenericArguments.Select(x => x.FullName)) + '>'; }
+            get { return GenericType.Name; }
         }
 
         public override string Namespace
         {
             get { return GenericType.Namespace; }
+        }
+
+        public override string FullName
+        {
+            get
+            {
+                return base.FullName +'<' + string.Join(", ", GenericArguments.Select(x => x.FullName)) + '>';
+            }
         }
 
         public override IResolutionScope ResolutionScope
