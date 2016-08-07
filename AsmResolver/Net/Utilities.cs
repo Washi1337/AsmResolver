@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using AsmResolver.Net.Metadata;
@@ -84,8 +85,8 @@ namespace AsmResolver.Net
         public static TEnum SetFlag<TEnum>(this Enum self, TEnum flag, bool value)
         {
             return (TEnum)Convert.ChangeType(
-                    Convert.ToUInt64(self) & ~Convert.ToUInt64(flag) | (value ? Convert.ToUInt64(flag) : 0),
-                    typeof(TEnum));
+                (Convert.ToUInt64(self) & ~Convert.ToUInt64(flag)) | (value ? Convert.ToUInt64(flag) : 0), 
+                typeof(TEnum).GetEnumUnderlyingType());
         }
     }
 }
