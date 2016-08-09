@@ -145,6 +145,24 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        public MethodDefinition AddMethod
+        {
+            get
+            {
+                var semantic = Semantics.FirstOrDefault(x => x.Attributes.HasFlag(MethodSemanticsAttributes.AddOn));
+                return semantic != null ? semantic.Method : null;
+            }
+        }
+
+        public MethodDefinition RemoveMethod
+        {
+            get
+            {
+                var semantic = Semantics.FirstOrDefault(x => x.Attributes.HasFlag(MethodSemanticsAttributes.RemoveOn));
+                return semantic != null ? semantic.Method : null;
+            }
+        }
+
         object ICollectionItem.Owner
         {
             get { return EventMap; }
