@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("AsmResolver")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("PE reader and editor. Native headers and resources, .NET metadata and disassemblers (x86 and msil).")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("JerreS")]
 [assembly: AssemblyProduct("AsmResolver")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCopyright("Copyright © JerreS 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

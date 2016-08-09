@@ -1,5 +1,8 @@
-AsmResolver.Tests.Native/Resources/
-AsmResolver.Tests.Net/Resources/
+Tests/AsmResolver.Tests.Native/Resources/
+Tests/AsmResolver.Tests.Net/Resources/
+*.nupkg
+*.VC.opendb
+*.VC.db
 
 #################
 ## Eclipse

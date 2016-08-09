@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/JerreS/AsmResolver/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/JerreS/AsmResolver</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>Copyright $author$ 2016</copyright>
+    <tags>.NET assembly inspector editor MSIL x86 disassembler assembler metadata</tags>
+  </metadata>
+</package>

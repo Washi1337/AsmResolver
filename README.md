@@ -1,5 +1,6 @@
 #AsmResolver
----
+[![Build status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/project/JerreS/asmresolver)
+
 AsmResolver is a PE inspection library allowing .NET programmers to read, modify and write executable files. This includes .NET as well as native native images. The library exposes high-level representations of the PE, while still allowing the user to access low-level structures.
 
 
@@ -7,7 +8,6 @@ AsmResolver is released under the LGPL license.
 
 
 #Quick starters guide
----
 ##Reading an assembly
 Opening an assembly can be done by specifying a file path:
 ```csharp
