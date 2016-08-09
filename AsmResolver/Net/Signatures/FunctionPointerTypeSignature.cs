@@ -8,7 +8,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class FunctionPointerTypeSignature : TypeSignature
     {
-        public static FunctionPointerTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static FunctionPointerTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
             return new FunctionPointerTypeSignature(MethodSignature.FromReader(header, reader));
         }
