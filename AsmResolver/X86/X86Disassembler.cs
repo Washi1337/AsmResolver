@@ -42,8 +42,9 @@ namespace AsmResolver.X86
         /// <returns>The disassembled instruction.</returns>
         public X86Instruction ReadNextInstruction()
         {
+            long offset = BaseAddress + _reader.Position;
             byte code1 = _reader.ReadByte();
-            var instruction = new X86Instruction(BaseAddress + _reader.Position)
+            var instruction = new X86Instruction(offset)
             {
                 OpCode = ReadOpcode(code1)
             };
