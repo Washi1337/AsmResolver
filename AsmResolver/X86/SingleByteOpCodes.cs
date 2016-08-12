@@ -856,11 +856,11 @@ namespace AsmResolver.X86
 
         public static readonly X86OpCode Les_Reg1632_MemOrReg1632 = new X86OpCode(X86Mnemonic.Les, 0xC4,
             ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, false);
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, true);
 
         public static readonly X86OpCode Lds_Reg1632_MemOrReg1632 = new X86OpCode(X86Mnemonic.Lds, 0xC5,
             ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, false);
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, true);
 
         public static readonly X86OpCode Mov_RegOrMem8_Imm8 = new X86OpCode(new X86Mnemonic[]
         {

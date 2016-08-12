@@ -42,13 +42,17 @@ namespace AsmResolver.X86
         /// <returns>The disassembled instruction.</returns>
         public X86Instruction ReadNextInstruction()
         {
+            byte code1 = _reader.ReadByte();
             var instruction = new X86Instruction(BaseAddress + _reader.Position)
             {
-                OpCode = ReadOpcode()
+                OpCode = ReadOpcode(code1)
             };
 
             if (instruction.OpCode.Mnemonics == null)
+            {
+                instruction.Operand1 = new X86Operand(code1);
                 return instruction;
+            }
 
             var registerToken = instruction.OpCode.HasRegisterToken ? _reader.ReadByte() : (byte)0;
             var mnemonicIndex = instruction.OpCode.HasOpCodeModifier ? (registerToken >> 3) & 7 : 0;
@@ -63,10 +67,8 @@ namespace AsmResolver.X86
             return instruction;
         }
 
-        private X86OpCode ReadOpcode()
+        private X86OpCode ReadOpcode(byte code1)
         {
-            var code1 = _reader.ReadByte();
-
             switch (code1)
             {
                 case 0x0F:
