@@ -9,6 +9,16 @@ namespace AsmResolver.Net.Msil
 {
     public struct MsilOpCode : IEquatable<MsilOpCode>
     {
+        public static bool operator ==(MsilOpCode a, MsilOpCode b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(MsilOpCode a, MsilOpCode b)
+        {
+            return !a.Equals(b);
+        }
+
         // taken from System.Reflection.Emit.OpCode
 
         internal MsilOpCode(MsilCode value, int flags)
@@ -36,7 +46,7 @@ namespace AsmResolver.Net.Msil
         public MsilCode Code
         {
             get;
-            set;
+            private set;
         }
 
         public string Name

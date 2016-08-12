@@ -23,7 +23,6 @@ namespace AsmResolver.Net.Msil
             {
                 StartOffset = offset,
                 IsFat = fatFormat,
-                MethodBody = methodBody,
                 TryStart = methodBody.GetInstructionByOffset(tryOffset),
                 TryEnd = methodBody.GetInstructionByOffset(tryOffset + tryLength),
                 HandlerStart = methodBody.GetInstructionByOffset(handlerOffset),
@@ -41,15 +40,9 @@ namespace AsmResolver.Net.Msil
             }
 
             return handler;
-        }
+        } 
 
-        public MethodBody MethodBody
-        {
-            get;
-            internal set;
-        }
-
-        private ExceptionHandler(ExceptionHandlerType handlerType)
+        public ExceptionHandler(ExceptionHandlerType handlerType)
         {
             HandlerType = handlerType;
         }
