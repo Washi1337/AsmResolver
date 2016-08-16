@@ -116,9 +116,11 @@ namespace AsmResolver.Net.Metadata
                         return sizeof (ushort);
                     case ElementType.I4:
                     case ElementType.U4:
+                    case ElementType.R4:
                         return sizeof (uint);
                     case ElementType.I8:
                     case ElementType.U8:
+                    case ElementType.R8:
                         return sizeof (ulong);
                     case ElementType.I:
                     case ElementType.U:
@@ -141,13 +143,16 @@ namespace AsmResolver.Net.Metadata
         {
             var arrayType = type as SzArrayTypeSignature;
             if (arrayType != null)
-                return InterpretAsArray(arrayType.BaseType.ElementType);
+                return InterpretAsArray(arrayType.BaseType);
             return InterpretData(type.ElementType);
         }
 
         public IEnumerable InterpretAsArray(TypeSignature elementType)
         {
-            return InterpretAsArray(elementType.ElementType);
+            var corlibType = Header.TypeSystem.GetMscorlibType(elementType);
+            if (corlibType == null)
+                ThrowUnsupportedElementType(elementType);
+            return InterpretAsArray(corlibType.ElementType);
         }
 
         public IEnumerable InterpretAsArray(ElementType elementType)
@@ -183,8 +188,18 @@ namespace AsmResolver.Net.Metadata
                     return reader.ReadUInt32();
                 case ElementType.U8:
                     return reader.ReadUInt64();
+                case ElementType.R4:
+                    return reader.ReadSingle();
+                case ElementType.R8:
+                    return reader.ReadDouble();
             }
 
+            ThrowUnsupportedElementType(elementType);
+            return null;
+        }
+
+        private static void ThrowUnsupportedElementType(object elementType)
+        {
             throw new NotSupportedException("Invalid or unsupported element type " + elementType + ".");
         }
     }

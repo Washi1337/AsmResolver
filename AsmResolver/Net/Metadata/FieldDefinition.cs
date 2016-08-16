@@ -167,17 +167,27 @@ namespace AsmResolver.Net.Metadata
             set { _marshal = value; }
         }
 
+        public bool HasFieldRva
+        {
+            get { return Attributes.HasFlag(FieldAttributes.HasFieldRva); }
+            set { Attributes.SetFlag(FieldAttributes.HasFieldRva, value); }
+        }
+
         public FieldRva FieldRva
         {
             get
             {
-                if (_rva != null || Header == null)
+                if (_rva != null || Header == null || !HasFieldRva)
                     return _rva;
 
                 var table = Header.GetStream<TableStream>().GetTable<FieldRva>();
                 return _rva = table.FirstOrDefault(x => x.Field == this);
             }
-            set { _rva = value; }
+            set
+            {
+                _rva = value;
+                HasFieldRva = value != null;
+            }
         }
         
         public CustomAttributeCollection CustomAttributes

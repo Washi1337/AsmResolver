@@ -41,16 +41,27 @@ namespace AsmResolver.Net.Signatures
         }
 
         public MethodSignature()
+            : this(Enumerable.Empty<ParameterSignature>(), null)
         {
-            Parameters = new List<ParameterSignature>();
         }
 
         public MethodSignature(TypeSignature returnType)
-            : this()
+            : this(Enumerable.Empty<ParameterSignature>(), returnType)
         {
             ReturnType = returnType;
         }
-        
+
+        public MethodSignature(IEnumerable<TypeSignature> parameters, TypeSignature returnType)
+            : this(parameters.Select(x => new ParameterSignature(x)), returnType)
+        {
+        }
+
+        public MethodSignature(IEnumerable<ParameterSignature> parameters, TypeSignature returnType)
+        {
+            Parameters = new List<ParameterSignature>(parameters);
+            ReturnType = returnType;
+        }
+
         public int GenericParameterCount
         {
             get;

@@ -14,48 +14,99 @@ namespace AsmResolver.Net
         private readonly bool _isMsCorLib;
         private MetadataTable<TypeDefinition> _typeDefinitions;
 
-        private MsCorLibTypeSignature _boolean;
-        private MsCorLibTypeSignature _byte;
-        private MsCorLibTypeSignature _char;
-        private MsCorLibTypeSignature _double;
-        private MsCorLibTypeSignature _intPtr;
-        private MsCorLibTypeSignature _int16;
-        private MsCorLibTypeSignature _int32;
-        private MsCorLibTypeSignature _int64;
-        private MsCorLibTypeSignature _object;
-        private MsCorLibTypeSignature _sbyte;
-        private MsCorLibTypeSignature _single;
-        private MsCorLibTypeSignature _string;
-        private MsCorLibTypeSignature _type;
-        private MsCorLibTypeSignature _typedReference;
-        private MsCorLibTypeSignature _uIntPtr;
-        private MsCorLibTypeSignature _uint16;
-        private MsCorLibTypeSignature _uint32;
-        private MsCorLibTypeSignature _uint64;
-        private MsCorLibTypeSignature _void;
+        private readonly IDictionary<string, MsCorLibTypeSignature> _typesByName = new Dictionary<string, MsCorLibTypeSignature>();
+        private readonly IDictionary<ElementType, MsCorLibTypeSignature> _typesByElementType = new Dictionary<ElementType, MsCorLibTypeSignature>();
 
         public TypeSystem(MetadataHeader header, bool isMsCorLib)
         {
             _header = header;
             _isMsCorLib = isMsCorLib;
-            MsCorLibReference = new AssemblyReference(new ReflectionAssemblyNameWrapper(typeof(object).Assembly.GetName()))
+
+            if (!isMsCorLib)
             {
-                Header = header,
-            }; // TODO, set correct version.
- 
+                MsCorLibReference = header.GetStream<TableStream>().GetTable<AssemblyReference>().FirstOrDefault(x => x.Name == "mscorlib");
+                if (MsCorLibReference == null)
+                {
+                    MsCorLibReference = new AssemblyReference(new ReflectionAssemblyNameWrapper(typeof(object).Assembly.GetName()))
+                    {
+                        Header = header,
+                        Culture = "neutral",
+                        Version = new Version(header.VersionString[1] - 48, 0, 0, 0)
+                    };
+                }
+            }
+            
+            Boolean = CreateSignature(ElementType.Boolean, "Boolean", true);
+            SByte = CreateSignature(ElementType.I1, "SByte", true);
+            Int16 = CreateSignature(ElementType.I2, "Int16", true);
+            Int32 = CreateSignature(ElementType.I4, "Int32", true);
+            Int64 = CreateSignature(ElementType.I8, "Int64", true);
+            IntPtr = CreateSignature(ElementType.I, "IntPtr", true);
+            Byte = CreateSignature(ElementType.U1, "Byte", true);
+            UInt16 = CreateSignature(ElementType.U2, "UInt16", true);
+            UInt32 = CreateSignature(ElementType.U4, "UInt32", true);
+            UInt64 = CreateSignature(ElementType.U8, "UInt64", true);
+            UIntPtr = CreateSignature(ElementType.U, "UIntPtr", true);
+            Single = CreateSignature(ElementType.R4, "Single", true);
+            Double = CreateSignature(ElementType.R8, "Double", true);
+            Object = CreateSignature(ElementType.Object, "Object", false);
+            Char = CreateSignature(ElementType.Char, "Char", true);
+            String = CreateSignature(ElementType.String, "String", false);
+            Type = CreateSignature(ElementType.Type, "Type", false);
+            TypedReference = CreateSignature(ElementType.TypedByRef, "TypedReference", true);
+            Void = CreateSignature(ElementType.Void, "Void", true);
+        }
+
+        public MsCorLibTypeSignature GetMscorlibType(ElementType elementType)
+        {
+            MsCorLibTypeSignature signature;
+            _typesByElementType.TryGetValue(elementType, out signature);
+            return signature;
+        }
+
+        public MsCorLibTypeSignature GetMscorlibType(string name)
+        {
+            MsCorLibTypeSignature signature;
+            _typesByName.TryGetValue(name, out signature);
+            return signature;
+        }
+
+        public MsCorLibTypeSignature GetMscorlibType(ITypeDescriptor type)
+        {
+            SignatureComparer comparer = new SignatureComparer();
+            MsCorLibTypeSignature signature;
+
+            if (!comparer.MatchAssemblies(type.ResolutionScope.GetAssembly(), MsCorLibReference)
+                || type.Namespace != "System"
+                || !_typesByName.TryGetValue(type.Name, out signature))
+            {
+                return null;
+            }
+
+            return signature;
         }
 
         private MsCorLibTypeSignature CreateSignature(ElementType type, string name, bool isValueType)
         {
-            if (!_isMsCorLib)
-                return new MsCorLibTypeSignature(new TypeReference(MsCorLibReference, "System", name)
+            MsCorLibTypeSignature signature;
+
+            if (_isMsCorLib)
+            {
+                if (_typeDefinitions == null)
+                    _typeDefinitions = _header.GetStream<TableStream>().GetTable<TypeDefinition>();
+                signature= new MsCorLibTypeSignature(_typeDefinitions.First(x => x.Name == name), type, isValueType);
+            }
+            else
+            {
+                signature = new MsCorLibTypeSignature(new TypeReference(MsCorLibReference, "System", name)
                 {
                     Header = _header
                 }, type, isValueType);
+            }
 
-            if (_typeDefinitions == null)
-                _typeDefinitions = _header.GetStream<TableStream>().GetTable<TypeDefinition>();
-            return new MsCorLibTypeSignature(_typeDefinitions.First(x => x.Name == name), type, isValueType);
+            _typesByName[name] = signature;
+            _typesByElementType[type] = signature;
+            return signature;
         }
 
         public AssemblyReference MsCorLibReference
@@ -66,97 +117,116 @@ namespace AsmResolver.Net
 
         public MsCorLibTypeSignature Boolean
         {
-            get { return _boolean ?? (_boolean = CreateSignature(ElementType.Boolean, "Boolean", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Byte
         {
-            get { return _byte ?? (_byte = CreateSignature(ElementType.U1, "Byte", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Char
         {
-            get { return _char ?? (_char = CreateSignature(ElementType.Char, "Char", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Double
         {
-            get { return _double ?? (_double = CreateSignature(ElementType.R8, "Double", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature IntPtr
         {
-            get { return _intPtr ?? (_intPtr = CreateSignature(ElementType.I, "IntPtr", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Int16
         {
-            get { return _int16 ?? (_int16 = CreateSignature(ElementType.I2, "Int16", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Int32
         {
-            get { return _int32 ?? (_int32 = CreateSignature(ElementType.I4, "Int32", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Int64
         {
-            get { return _int64 ?? (_int64 = CreateSignature(ElementType.I8, "Int64", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Object
         {
-            get { return _object ?? (_object = CreateSignature(ElementType.Object, "Object", false)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature SByte
         {
-            get { return _sbyte ?? (_sbyte = CreateSignature(ElementType.I1, "SByte", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Single
         {
-            get { return _single ?? (_single = CreateSignature(ElementType.R4, "Single", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature String
         {
-            get { return _string ?? (_string = CreateSignature(ElementType.String, "String", false)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Type
         {
-            get { return _type ?? (_type = CreateSignature(ElementType.Type, "BaseType", false)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature TypedReference
         {
-            get { return _typedReference ?? (_typedReference = CreateSignature(ElementType.TypedByRef, "TypedReference", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature UIntPtr
         {
-            get { return _uIntPtr ?? (_uIntPtr = CreateSignature(ElementType.U, "UIntPtr", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature UInt16
         {
-            get { return _uint16 ?? (_uint16 = CreateSignature(ElementType.U2, "UInt16", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature UInt32
         {
-            get { return _uint32 ?? (_uint32 = CreateSignature(ElementType.U4, "UInt32", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature UInt64
         {
-            get { return _uint64 ?? (_uint64 = CreateSignature(ElementType.U8, "UInt64", true)); }
+            get;
+            private set;
         }
 
         public MsCorLibTypeSignature Void
         {
-            get { return _void ?? (_void = CreateSignature(ElementType.Void, "Void", true)); }
+            get;
+            private set;
         }
     }
 }

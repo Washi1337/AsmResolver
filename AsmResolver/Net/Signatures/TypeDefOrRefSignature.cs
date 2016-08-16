@@ -16,10 +16,16 @@ namespace AsmResolver.Net.Signatures
         }
 
         public TypeDefOrRefSignature(ITypeDefOrRef type)
+            : this(type, false)
+        {
+        }
+
+        public TypeDefOrRefSignature(ITypeDefOrRef type, bool isValueType)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
             Type = type;
+            IsValueType = isValueType;
         }
 
         public override ElementType ElementType
