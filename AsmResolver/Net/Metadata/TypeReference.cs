@@ -138,8 +138,11 @@ namespace AsmResolver.Net.Metadata
 
         public bool IsValueType
         {
-            get;
-            set;
+            get
+            {
+                var definition = Resolve();
+                return definition != null && definition.IsValueType;
+            }
         }
         
         public ITypeDescriptor GetElementType()
