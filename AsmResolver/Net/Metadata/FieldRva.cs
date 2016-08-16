@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -71,12 +72,6 @@ namespace AsmResolver.Net.Metadata
 
             _data = new LazyValue<byte[]>(() =>
             {
-                // if (Header == null ||
-                //     Header.NetDirectory == null ||
-                //     Header.NetDirectory.Assembly == null ||
-                //     Header.NetDirectory.Assembly.ReadingContext == null)
-                //     return null;
-
                 var assembly = Header.NetDirectory.Assembly;
                 var reader = assembly.ReadingContext.Reader.CreateSubReader(assembly.RvaToFileOffset(Rva), GetDataSize());
                 return reader.ReadBytes((int)reader.Length);
@@ -140,6 +135,57 @@ namespace AsmResolver.Net.Metadata
             if (definition == null || definition.ClassLayout == null)
                 return 0;
             return (int)definition.ClassLayout.ClassSize;
+        }
+
+        public object InterpretData(TypeSignature type)
+        {
+            var arrayType = type as SzArrayTypeSignature;
+            if (arrayType != null)
+                return InterpretAsArray(arrayType.BaseType.ElementType);
+            return InterpretData(type.ElementType);
+        }
+
+        public IEnumerable InterpretAsArray(TypeSignature elementType)
+        {
+            return InterpretAsArray(elementType.ElementType);
+        }
+
+        public IEnumerable InterpretAsArray(ElementType elementType)
+        {
+            var reader = new MemoryStreamReader(Data);
+            while (reader.Position < reader.Length)
+                yield return ReadElement(reader, elementType);
+        }
+
+        public object InterpretData(ElementType elementType)
+        {
+            var reader = new MemoryStreamReader(Data);
+            return ReadElement(reader, elementType);
+        }
+
+        private static object ReadElement(IBinaryStreamReader reader, ElementType elementType)
+        {
+            switch (elementType)
+            {
+                case ElementType.I1:
+                    return reader.ReadSByte();
+                case ElementType.I2:
+                    return reader.ReadInt16();
+                case ElementType.I4:
+                    return reader.ReadInt32();
+                case ElementType.I8:
+                    return reader.ReadInt64();
+                case ElementType.U1:
+                    return reader.ReadByte();
+                case ElementType.U2:
+                    return reader.ReadUInt16();
+                case ElementType.U4:
+                    return reader.ReadUInt32();
+                case ElementType.U8:
+                    return reader.ReadUInt64();
+            }
+
+            throw new NotSupportedException("Invalid or unsupported element type " + elementType + ".");
         }
     }
 }
