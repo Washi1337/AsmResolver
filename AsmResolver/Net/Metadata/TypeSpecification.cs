@@ -85,12 +85,7 @@ namespace AsmResolver.Net.Metadata
 
         public virtual string FullName
         {
-            get
-            {
-                if (DeclaringType != null)
-                    return DeclaringType.FullName + '+' + Name;
-                return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
-            }
+            get { return Signature.FullName; }
         }
 
         public bool IsValueType
@@ -133,7 +128,7 @@ namespace AsmResolver.Net.Metadata
 
         public override string ToString()
         {
-            return Signature.ToString();
+            return Signature.FullName;
         }
     }
 }

@@ -173,5 +173,10 @@ namespace AsmResolver.Net.Metadata
         {
             return this;
         }
+
+        public override string ToString()
+        {
+            return FullName;
+        }
     }
 }
