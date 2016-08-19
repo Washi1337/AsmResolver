@@ -100,5 +100,10 @@ namespace AsmResolver.Net.Metadata
             get { return _name.Value; }
             set { _name.Value = value; }
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

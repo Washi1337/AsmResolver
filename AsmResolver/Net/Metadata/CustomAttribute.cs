@@ -107,5 +107,10 @@ namespace AsmResolver.Net.Metadata
             get { return _signature.Value; }
             set { _signature.Value = value; }
         }
+
+        public override string ToString()
+        {
+            return Constructor.ToString();
+        }
     }
 }
