@@ -339,7 +339,9 @@ namespace AsmResolver.Net.Msil
 
         MetadataMember IOperandResolver.ResolveMember(MetadataToken token)
         {
-            return Method.Header.GetStream<TableStream>().ResolveMember(token);
+            MetadataMember result;
+            Method.Header.GetStream<TableStream>().TryResolveMember(token, out result);
+            return result;
         }
 
         string IOperandResolver.ResolveString(uint token)
@@ -350,7 +352,7 @@ namespace AsmResolver.Net.Msil
         VariableSignature IOperandResolver.ResolveVariable(int index)
         {
             var localVarSig = Signature != null ? Signature.Signature as LocalVariableSignature : null;
-            if (localVarSig == null)
+            if (localVarSig == null && index >= 0 && index < localVarSig.Variables.Count)
                 return null;
             return localVarSig.Variables[index];
         }

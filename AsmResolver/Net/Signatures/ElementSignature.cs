@@ -59,7 +59,7 @@ namespace AsmResolver.Net.Signatures
                     break;
             }
             if (typeSignature.IsTypeOf("System", "Type"))
-                return reader.ReadSerString();
+                return TypeSignature.FromAssemblyQualifiedName(header, reader.ReadSerString());
             throw new NotSupportedException("Unsupported element type " + typeSignature.ElementType);
         }
 

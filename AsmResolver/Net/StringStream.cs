@@ -12,7 +12,6 @@ namespace AsmResolver.Net
     /// </summary>
     public class StringStream : MetadataStream<StringStreamBuffer>
     {
-
         internal static StringStream FromReadingContext(ReadingContext context)
         {
             return new StringStream(context.Reader);
@@ -30,7 +29,7 @@ namespace AsmResolver.Net
         {
             _reader = reader;
         }
-
+        
         /// <summary>
         /// Gets the string at the given offset.
         /// </summary>
@@ -38,7 +37,7 @@ namespace AsmResolver.Net
         /// <returns>The string.</returns>
         public string GetStringByOffset(uint offset)
         {
-            if (offset == 0)
+            if (offset == 0 || offset >= _reader.Length)
                 return string.Empty;
 
             var reader = _reader.CreateSubReader(_reader.StartPosition);

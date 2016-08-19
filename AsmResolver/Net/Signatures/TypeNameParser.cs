@@ -114,9 +114,12 @@ namespace AsmResolver.Net.Signatures
         private static TypeReference CreateTypeReference(IResolutionScope scope, string fullName)
         {
             var dotIndex = fullName.LastIndexOf('.');
-            return dotIndex == -1
+            var type = dotIndex == -1
                 ? new TypeReference(scope, string.Empty, fullName)
                 : new TypeReference(scope, fullName.Remove(dotIndex), fullName.Substring(dotIndex + 1));
+            if (scope != null)
+                type.Header = scope.Header;
+            return type;
         }
 
         private static AssemblyReference ReadAssemblyReference(string name, ref int position)

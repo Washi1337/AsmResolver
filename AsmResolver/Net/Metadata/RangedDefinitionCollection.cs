@@ -40,8 +40,8 @@ namespace AsmResolver.Net.Metadata
         {
             _owner = owner;
             _table = table;
-            _start = start;
-            _next = next;
+            _start = Math.Min(start, table.Count + 1);
+            _next = Math.Min(next, table.Count + 1);
         }
 
         protected override void Initialize()
