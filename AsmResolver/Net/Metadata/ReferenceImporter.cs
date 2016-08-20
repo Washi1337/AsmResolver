@@ -49,16 +49,38 @@ namespace AsmResolver.Net.Metadata
 
         #endregion
 
+        public IMemberReference ImportReference(IMemberReference reference)
+        {
+            var type = reference as ITypeDefOrRef;
+            if (type != null)
+                return ImportType(type);
+
+            var method = reference as MethodDefinition;
+            if (method != null)
+                return ImportMethod(method);
+
+            var field = reference as FieldDefinition;
+            if (field != null)
+                return ImportField(field);
+
+            throw new NotSupportedException("Invalid or unsupported reference.");
+        }
+
         #region Type
         
         public ITypeDefOrRef ImportType(Type type)
         {
-            // TODO: support more complex type references.
-
             IResolutionScope resolutionScope = type.IsNested
                 ? (IResolutionScope)ImportType(type.DeclaringType)
                 : ImportAssembly(type.Assembly.GetName());
 
+            if (type.IsArray)
+                return ImportType(new TypeSpecification(ImportArrayOrSzArrayTypeSignature(type)));
+            else if (type.IsPointer)
+                return ImportType(new TypeSpecification(ImportPointerTypeSignature(type)));
+            else if (type.IsByRef)
+                return ImportType(new TypeSpecification(ImportByRefTypeSignature(type)));
+            
             return ImportType(new TypeReference(
                 resolutionScope,
                 type.IsNested ? string.Empty : type.Namespace, 
@@ -70,6 +92,14 @@ namespace AsmResolver.Net.Metadata
             var typeRef = type as TypeReference;
             if (typeRef != null)
                 return ImportType(typeRef);
+
+            var typeDef = type as TypeDefinition;
+            if (typeDef != null)
+                return ImportType(typeDef);
+
+            var typeSpec = type as TypeSpecification;
+            if (typeSpec != null)
+                return ImportType(typeSpec);
 
             throw new NotSupportedException();
         }
@@ -88,37 +118,111 @@ namespace AsmResolver.Net.Metadata
 
         public ITypeDefOrRef ImportType(TypeDefinition definition)
         {
-            throw new NotImplementedException();
+            if (definition.Header == _tableStreamBuffer.StreamHeader.MetadataHeader)
+                return definition;
+
+            var resolutionScope = definition.DeclaringType != null
+                ? (IResolutionScope) ImportType(definition.DeclaringType)
+                : ImportAssembly(_tableStreamBuffer.GetTable<AssemblyDefinition>().First());        
+
+            return ImportType(new TypeReference(
+                resolutionScope,
+                definition.Namespace,
+                definition.Name));
         }
 
         public ITypeDefOrRef ImportType(TypeSpecification specification)
         {
-            throw new NotImplementedException();
+            var table = _tableStreamBuffer.GetTable<TypeSpecification>();
+            var newSpecification = table.FirstOrDefault(x => _signatureComparer.MatchTypes(x, specification));
+            if (newSpecification == null)
+            {
+                newSpecification = new TypeSpecification(ImportTypeSignature(specification.Signature));
+                table.Add(newSpecification);
+            }
+            return newSpecification;
         }
 
         #endregion
 
-        #region Member references
+        #region Field
 
-        public MemberReference ImportMember(MethodBase method)
+        public MemberReference ImportField(FieldInfo field)
+        {
+            var signature = new FieldSignature(ImportTypeSignature(field.FieldType));
+            if (!field.IsStatic)
+                signature.Attributes |= CallingConventionAttributes.HasThis;
+
+            var declaringType = ImportType(field.DeclaringType);
+
+            return ImportMember(new MemberReference(declaringType, field.Name, signature));
+        }
+
+        public IMemberReference ImportField(FieldDefinition definition)
+        {
+            if (definition.Header == _tableStreamBuffer.StreamHeader.MetadataHeader)
+                return definition;
+
+            var table = _tableStreamBuffer.GetTable<MemberReference>();
+            var newReference = table.FirstOrDefault(x => _signatureComparer.MatchMembers(x, definition));
+            if (newReference == null)
+            {
+                newReference = new MemberReference(
+                    ImportType(definition.DeclaringType),
+                    definition.Name,
+                    ImportFieldSignature(definition.Signature));
+                table.Add(newReference);
+            }
+            return newReference;
+        }
+
+        #endregion
+
+        #region Method
+
+        public MemberReference ImportMethod(MethodBase method)
         {
             // TODO: support generic instance methods.
             if (method.IsGenericMethod)
                 throw new NotSupportedException();
 
-            var returnType = method.IsConstructor ? typeof(void) : ((MethodInfo)method).ReturnType;
+            var returnType = method.IsConstructor ? typeof(void) : ((MethodInfo) method).ReturnType;
             var signature = new MethodSignature(ImportTypeSignature(returnType));
-            
+
             if (!method.IsStatic)
                 signature.Attributes |= CallingConventionAttributes.HasThis;
-          
+
             foreach (var parameter in method.GetParameters())
+            {
                 signature.Parameters.Add(
                     new ParameterSignature(ImportTypeSignature(parameter.ParameterType)));
+            }
 
             var reference = new MemberReference(ImportType(method.DeclaringType), method.Name, signature);
             return ImportMember(reference);
         }
+
+        public IMemberReference ImportMethod(MethodDefinition definition)
+        {
+            if (definition.Header == _tableStreamBuffer.StreamHeader.MetadataHeader)
+                return definition;
+
+            var table = _tableStreamBuffer.GetTable<MemberReference>();
+            var newReference = table.FirstOrDefault(x => _signatureComparer.MatchMembers(x, definition));
+            if (newReference == null)
+            {
+                newReference = new MemberReference(
+                    ImportType(definition.DeclaringType), 
+                    definition.Name, 
+                    ImportMethodSignature(definition.Signature));
+                table.Add(newReference);
+            }
+            return newReference;
+        }
+
+        #endregion
+
+        #region Member references
 
         public MemberReference ImportMember(MemberReference reference)
         {
@@ -203,36 +307,59 @@ namespace AsmResolver.Net.Metadata
             if (signature is MsCorLibTypeSignature)
                 return signature;
 
-            var arrayTypeSignature = signature as ArrayTypeSignature;
-            if (arrayTypeSignature != null)
-                return ImportArrayTypeSignature(arrayTypeSignature);
+            var typeDefOrRef = signature as TypeDefOrRefSignature;
+            if (typeDefOrRef != null)
+                return ImportTypeDefOrRefSignature(typeDefOrRef);
 
-            var szArrayTypeSignature = signature as SzArrayTypeSignature;
-            if (szArrayTypeSignature != null)
-                return ImportSzArrayTypeSignature(szArrayTypeSignature);
+            var corlibType = signature as MsCorLibTypeSignature;
+            if (corlibType != null)
+                return ImportCorlibTypeSignature(corlibType);
 
-            var boxedTypeSignature = signature as BoxedTypeSignature;
-            if (boxedTypeSignature != null)
-                return ImportBoxedTypeSignature(boxedTypeSignature);
+            var arrayType = signature as ArrayTypeSignature;
+            if (arrayType != null)
+                return ImportArrayTypeSignature(arrayType);
 
-            var byRefTypeSignature = signature as ByReferenceTypeSignature;
-            if (byRefTypeSignature != null)
-                return ImportByRefTypeSignature(byRefTypeSignature);
+            var boxedType = signature as BoxedTypeSignature;
+            if (boxedType != null)
+                return ImportBoxedTypeSignature(boxedType);
 
-            var pointerTypeSignature = signature as PointerTypeSignature;
-            if (pointerTypeSignature != null)
-                return ImportPointerTypeSignature(pointerTypeSignature);
+            var byRefType = signature as ByReferenceTypeSignature;
+            if (byRefType != null)
+                return ImportByRefTypeSignature(byRefType);
 
-            var genericTypeSignature = signature as GenericInstanceTypeSignature;
-            if (genericTypeSignature != null)
-                return ImportGenericInstanceTypeSignature(genericTypeSignature);
+            var functionPtrType = signature as FunctionPointerTypeSignature;
+            if (functionPtrType != null)
+                return ImportFunctionPointerTypeSignature(functionPtrType);
 
-            var typeDefOrRefSignature = signature as TypeDefOrRefSignature;
-            if (typeDefOrRefSignature != null)
-                return ImportTypeDefOrRefSignature(typeDefOrRefSignature);
+            var genericType = signature as GenericInstanceTypeSignature;
+            if (genericType != null)
+                return ImportGenericInstanceTypeSignature(genericType);
 
-            // TODO: support more type signatures.
-            throw new NotSupportedException();
+            var modOptType = signature as OptionalModifierSignature;
+            if (modOptType != null)
+                return ImportOptionalModifierSignature(modOptType);
+
+            var pinnedType = signature as PinnedTypeSignature;
+            if (pinnedType != null)
+                return ImportPinnedTypeSignature(pinnedType);
+
+            var pointerType = signature as PointerTypeSignature;
+            if (pointerType != null)
+                return ImportPointerTypeSignature(pointerType);
+
+            var modReqType = signature as RequiredModifierSignature;
+            if (modReqType != null)
+                return ImportRequiredModifierSignature(modReqType);
+
+            var sentinelType = signature as SentinelTypeSignature;
+            if (sentinelType != null)
+                return ImportSentinelTypeSignature(sentinelType);
+
+            var szArrayType = signature as SzArrayTypeSignature;
+            if (szArrayType != null)
+                return ImportSzArrayTypeSignature(szArrayType);
+            
+            throw new NotSupportedException("Invalid or unsupported type signature.");
         }
 
         #region Array
@@ -300,37 +427,21 @@ namespace AsmResolver.Net.Metadata
         }
 
         #endregion
+        
+        #region Corlib
 
-        #region SzArray
-
-        private SzArrayTypeSignature ImportSzArrayTypeSignature(Type arrayType)
+        private TypeSignature ImportCorlibTypeSignature(MsCorLibTypeSignature corlibType)
         {
-            return new SzArrayTypeSignature(ImportTypeSignature(arrayType.GetElementType()));
-        }
-
-        private SzArrayTypeSignature ImportSzArrayTypeSignature(SzArrayTypeSignature signature)
-        {
-            return new SzArrayTypeSignature(ImportTypeSignature(signature.BaseType));
+            return _tableStreamBuffer.StreamHeader.MetadataHeader.TypeSystem.GetMscorlibType(corlibType);
         }
 
         #endregion
 
-        #region Pointer
+        #region FnPtr
 
-        private PointerTypeSignature ImportPointerTypeSignature(Type pointerType)
+        private FunctionPointerTypeSignature ImportFunctionPointerTypeSignature(FunctionPointerTypeSignature functionPtrType)
         {
-            return new PointerTypeSignature(ImportTypeSignature(pointerType.GetElementType()))
-            {
-                IsValueType = pointerType.IsValueType
-            };
-        }
-
-        private PointerTypeSignature ImportPointerTypeSignature(PointerTypeSignature signature)
-        {
-            return new PointerTypeSignature(ImportTypeSignature(signature.BaseType))
-            {
-                IsValueType = signature.IsValueType
-            };
+            return new FunctionPointerTypeSignature(ImportMethodSignature(functionPtrType.Signature));
         }
 
         #endregion
@@ -360,6 +471,79 @@ namespace AsmResolver.Net.Metadata
         }
 
         #endregion
+
+        #region Optional modifier
+        
+        private OptionalModifierSignature ImportOptionalModifierSignature(OptionalModifierSignature modOptType)
+        {
+            return new OptionalModifierSignature(ImportType(modOptType.ModifierType), ImportTypeSignature(modOptType.BaseType));
+        }
+
+        #endregion
+
+        #region Pinned
+
+        private PinnedTypeSignature ImportPinnedTypeSignature(PinnedTypeSignature pinnedType)
+        {
+            return new PinnedTypeSignature(ImportTypeSignature(pinnedType.BaseType));
+        }
+
+        #endregion
+
+        #region Pointer
+
+        private PointerTypeSignature ImportPointerTypeSignature(Type pointerType)
+        {
+            return new PointerTypeSignature(ImportTypeSignature(pointerType.GetElementType()))
+            {
+                IsValueType = pointerType.IsValueType
+            };
+        }
+
+        private PointerTypeSignature ImportPointerTypeSignature(PointerTypeSignature signature)
+        {
+            return new PointerTypeSignature(ImportTypeSignature(signature.BaseType))
+            {
+                IsValueType = signature.IsValueType
+            };
+        }
+
+        #endregion
+
+        #region Required modifier
+
+        private RequiredModifierSignature ImportRequiredModifierSignature(RequiredModifierSignature modReqType)
+        {
+            return new RequiredModifierSignature(ImportType(modReqType.ModifierType), ImportTypeSignature(modReqType.BaseType));
+        }
+
+        #endregion
+
+        #region Sentinel 
+
+        private SentinelTypeSignature ImportSentinelTypeSignature(SentinelTypeSignature sentinelType)
+        {
+            return new SentinelTypeSignature(ImportTypeSignature(sentinelType.BaseType));
+        }
+
+        #endregion
+
+        #region SzArray
+
+        private SzArrayTypeSignature ImportSzArrayTypeSignature(Type arrayType)
+        {
+            return new SzArrayTypeSignature(ImportTypeSignature(arrayType.GetElementType()));
+        }
+
+        private SzArrayTypeSignature ImportSzArrayTypeSignature(SzArrayTypeSignature signature)
+        {
+            return new SzArrayTypeSignature(ImportTypeSignature(signature.BaseType));
+        }
+
+        #endregion
+
+
+        
 
         #region TypeDefOrRef
 

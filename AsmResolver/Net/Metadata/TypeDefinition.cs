@@ -93,6 +93,7 @@ namespace AsmResolver.Net.Metadata
             _namespace = new LazyValue<string>(@namespace);
             _name = new LazyValue<string>(name);
             _baseType = new LazyValue<ITypeDefOrRef>(baseType);
+            MetadataRow.Column5 = MetadataRow.Column6 = 1;
         }
 
         internal TypeDefinition(MetadataHeader header, MetadataToken token, MetadataRow<uint, uint, uint, uint, uint, uint> row)

@@ -37,7 +37,7 @@ namespace AsmResolver.Tests.Net
             signature.FixedArguments.Add(new CustomAttributeArgument(typeSystem.String, new ElementSignature("Lorem ipsum dolor sit amet.")));
             signature.FixedArguments.Add(new CustomAttributeArgument(typeSystem.Boolean, new ElementSignature(true)));
 
-            var attribute = new CustomAttribute(importer.ImportMember(typeof(ObsoleteAttribute).GetConstructor(new Type[]
+            var attribute = new CustomAttribute(importer.ImportMethod(typeof(ObsoleteAttribute).GetConstructor(new Type[]
                 {
                     typeof(string),
                     typeof(bool)
@@ -80,7 +80,7 @@ namespace AsmResolver.Tests.Net
                 new CustomAttributeArgument(importer.ImportTypeSignature(typeof(DebuggableAttribute.DebuggingModes)),
                     new ElementSignature((int)DebuggableAttribute.DebuggingModes.Default)));
         
-            var attribute = new CustomAttribute(importer.ImportMember(typeof(DebuggableAttribute).GetConstructor(new Type[]
+            var attribute = new CustomAttribute(importer.ImportMethod(typeof(DebuggableAttribute).GetConstructor(new Type[]
                 {
                     typeof(DebuggableAttribute.DebuggingModes)
                 })), signature);
@@ -138,7 +138,7 @@ namespace AsmResolver.Tests.Net
                     Argument = new CustomAttributeArgument(typeSystem.Boolean, new ElementSignature(propertyValue))
                 });
 
-            var attribute = new CustomAttribute(importer.ImportMember(typeof(XmlAttributeAttribute).GetConstructor(new Type[]
+            var attribute = new CustomAttribute(importer.ImportMethod(typeof(XmlAttributeAttribute).GetConstructor(new Type[]
                 {
                     typeof(string)
                 })), signature);

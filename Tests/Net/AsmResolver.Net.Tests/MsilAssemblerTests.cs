@@ -25,11 +25,11 @@ namespace AsmResolver.Tests.Net
             {
                 typeof(int)
             });
-            var newWriteLine = importer.ImportMember(originalWriteLine);
+            var newWriteLine = importer.ImportMethod(originalWriteLine);
             Utilities.ValidateMethod(originalWriteLine, newWriteLine);
 
             var originalReadKey = typeof(Console).GetMethod("ReadKey", Type.EmptyTypes);
-            var newReadKey = importer.ImportMember(originalReadKey);
+            var newReadKey = importer.ImportMethod(originalReadKey);
             Utilities.ValidateMethod(originalReadKey, newReadKey);
 
             // write code.
@@ -71,12 +71,12 @@ namespace AsmResolver.Tests.Net
             body.Instructions.Clear();
             body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Ldstr, testConstant));
             body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Call,
-                importer.ImportMember(typeof(Console).GetMethod("WriteLine", new Type[]
+                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new Type[]
                     {
                         typeof(string)
                     }))));
             body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Call,
-                importer.ImportMember(typeof(Console).GetMethod("ReadKey", Type.EmptyTypes))));
+                importer.ImportMethod(typeof(Console).GetMethod("ReadKey", Type.EmptyTypes))));
             body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Pop));
             body.Instructions.Add(MsilInstruction.Create(MsilOpCodes.Ret));
 

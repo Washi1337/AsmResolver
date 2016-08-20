@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <Choose>
@@ -55,6 +56,7 @@
     <Compile Include="CustomAttributeTests.cs" />
     <Compile Include="FieldMarshalTests.cs" />
     <Compile Include="FieldRvaTests.cs" />
+    <Compile Include="ReferenceImporterTests.cs" />
     <Compile Include="ResourcesTests.cs" />
     <Compile Include="SecurityAttributeTests.cs" />
     <Compile Include="TypeNameParserTests.cs" />

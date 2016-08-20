@@ -13,11 +13,11 @@ namespace AsmResolver.Net.Signatures
         }
 
         public ArrayDimension(int size)
+            : this(size, null)
         {
-            Size = size;
         }
 
-        public ArrayDimension(int size, int lowerBound)
+        public ArrayDimension(int? size, int? lowerBound)
         {
             Size = size;
             LowerBound = lowerBound;
