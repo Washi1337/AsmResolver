@@ -41,11 +41,7 @@ namespace AsmResolver.Net.Signatures
 
         public override string FullName
         {
-            get
-            {
-                return Signature.ReturnType.FullName + " *("
-                       + Signature.Parameters.Select(x => x.ParameterType).GetTypeArrayString() + ")";
-            }
+            get { return Signature.ToString(); }
         }
 
         public override IResolutionScope ResolutionScope

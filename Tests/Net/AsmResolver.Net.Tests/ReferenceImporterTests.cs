@@ -261,7 +261,7 @@ namespace AsmResolver.Tests.Net
             Assert.AreNotSame(signature, newSignature,
                 "Imported signature is the same object as original.");
 
-            Assert.IsTrue(_comparer.MatchTypes(signature, newSignature),
+            Assert.IsTrue(_comparer.MatchTypes((TypeSignature) signature, newSignature),
                 "Imported signature does not match original.");
 
             Assert.IsTrue(tableStream.GetTable<TypeReference>().FirstOrDefault(x => _comparer.MatchTypes(x, signature.Type)) != null,

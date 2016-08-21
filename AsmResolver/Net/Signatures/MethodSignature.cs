@@ -107,6 +107,13 @@ namespace AsmResolver.Net.Signatures
             foreach (var parameter in Parameters)
                 parameter.Write(context);
         }
+
+        public override string ToString()
+        {
+            return (HasThis ? "instance " : "") 
+                + ReturnType.FullName 
+                + " *(" + Parameters.Select(x => x.ParameterType).GetTypeArrayString() + ")";
+        }
     }
 
   

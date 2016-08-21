@@ -101,23 +101,427 @@ namespace AsmResolver.Net
         /// <summary>
         /// Determines whether two type descriptors are considered equal according to their signature.
         /// </summary>
-        /// <param name="reference1">The first type to compare.</param>
-        /// <param name="reference2">The second type to compare.</param>
+        /// <param name="type1">The first type to compare.</param>
+        /// <param name="type2">The second type to compare.</param>
         /// <returns><c>True</c> if the type descriptors are considered equal, <c>False</c> otherwise.</returns>
-        public bool MatchTypes(ITypeDescriptor reference1, ITypeDescriptor reference2)
+        public bool MatchTypes(ITypeDescriptor type1, ITypeDescriptor type2)
         {
-            if (reference1 == null && reference2 == null)
+            if (type1 == null && type2 == null)
                 return true;
-            if (reference1 == null || reference2 == null)
-                return false;
-            
-            if (reference1.Namespace != reference2.Namespace ||
-                reference1.Name != reference2.Name)
+            if (type1 == null || type2 == null)
                 return false;
 
-            return reference1.DeclaringTypeDescriptor == null ||
-                   MatchTypes(reference1.DeclaringTypeDescriptor, reference2.DeclaringTypeDescriptor);
-            //return MatchScopes(reference1.ResolutionScope, reference2.ResolutionScope);
+            var typeDefOrRef = type1 as ITypeDefOrRef;
+            if (typeDefOrRef != null)
+                return MatchTypes(typeDefOrRef, type2);
+
+            var typeSig = type1 as TypeSignature;
+            if (typeSig != null)
+                return MatchTypes(typeSig, type2);
+
+            return false;
+        }
+     
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="type1">The first type to compare.</param>
+        /// <param name="type2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(ITypeDefOrRef type1, ITypeDefOrRef type2)
+        {
+            if (type1 == null && type2 == null)
+                return true;
+            if (type1 == null || type2 == null)
+                return false;
+
+            var reference1 = type1 as TypeReference;
+            var reference2 = type2 as TypeReference;
+            if (reference1 != null && reference2 != null
+                && !MatchScopes(reference1.ResolutionScope, reference2.ResolutionScope))
+                return false;               
+
+            return type1.Namespace == type2.Namespace
+                && type1.Name == type2.Name
+                && MatchTypes(type1.DeclaringType, type2.DeclaringType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="descriptor">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(TypeSignature signature1, ITypeDescriptor descriptor)
+        {
+            if (signature1 == null && descriptor == null)
+                return true;
+            if (signature1 == null || descriptor == null)
+                return false;
+
+            var signature2 = descriptor as TypeSignature;
+            if (signature2 != null)
+                return MatchTypes(signature1, signature2);
+
+            var typeDefOrRefSig = signature1 as TypeDefOrRefSignature;
+            if (typeDefOrRefSig != null)
+                return MatchTypes(typeDefOrRefSig, descriptor);
+
+            var corlibType = signature1 as MsCorLibTypeSignature;
+            if (corlibType != null)
+                return MatchTypes(corlibType, descriptor);
+
+            return false;
+        }
+        
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(TypeSignature signature1, TypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            var typeDefOrRef = signature1 as TypeDefOrRefSignature;
+            if (typeDefOrRef != null)
+                return MatchTypes(typeDefOrRef, (ITypeDescriptor) signature2);
+
+            var corlibType = signature1 as MsCorLibTypeSignature;
+            if (corlibType != null)
+                return MatchTypes(corlibType, (ITypeDescriptor) signature2);
+
+            var arrayType = signature1 as ArrayTypeSignature;
+            if (arrayType != null)
+                return MatchTypes(arrayType, signature2 as ArrayTypeSignature);
+
+            var boxedType = signature1 as BoxedTypeSignature;
+            if (boxedType != null)
+                return MatchTypes(boxedType, signature2 as BoxedTypeSignature);
+
+            var byRefType = signature1 as ByReferenceTypeSignature;
+            if (byRefType != null)
+                return MatchTypes(byRefType, signature2 as ByReferenceTypeSignature);
+
+            var functionPtrType = signature1 as FunctionPointerTypeSignature;
+            if (functionPtrType != null)
+                return MatchTypes(functionPtrType, signature2 as FunctionPointerTypeSignature);
+
+            var genericType = signature1 as GenericInstanceTypeSignature;
+            if (genericType != null)
+                return MatchTypes(genericType, signature2 as GenericInstanceTypeSignature);
+
+            var modOptType = signature1 as OptionalModifierSignature;
+            if (modOptType != null)
+                return MatchTypes(modOptType, signature2 as OptionalModifierSignature);
+
+            var pinnedType = signature1 as PinnedTypeSignature;
+            if (pinnedType != null)
+                return MatchTypes(pinnedType, signature2 as PinnedTypeSignature);
+
+            var pointerType = signature1 as PointerTypeSignature;
+            if (pointerType != null)
+                return MatchTypes(pointerType, signature2 as PointerTypeSignature);
+
+            var modReqType = signature1 as RequiredModifierSignature;
+            if (modReqType != null)
+                return MatchTypes(modReqType, signature2 as RequiredModifierSignature);
+
+            var sentinelType = signature1 as SentinelTypeSignature;
+            if (sentinelType != null)
+                return MatchTypes(sentinelType, signature2 as SentinelTypeSignature);
+
+            var szArrayType = signature1 as SzArrayTypeSignature;
+            if (szArrayType != null)
+                return MatchTypes(szArrayType, signature2 as SzArrayTypeSignature);
+
+            return false;
+        }
+      
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(ArrayTypeSignature signature1, ArrayTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.BaseType, signature2.BaseType)
+                && signature1.Dimensions.Count == signature2.Dimensions.Count
+                && signature1.Dimensions.Where((d, i) => MatchArrayDimensions(d, signature2.Dimensions[i])).Count() == signature1.Dimensions.Count;
+        }
+
+        /// <summary>
+        /// Determines whether two array dimensions are considered equal according to their signature.
+        /// </summary>
+        /// <param name="dimension1">The first dimension to compare.</param>
+        /// <param name="dimension2">The second dimension to compare.</param>
+        /// <returns><c>True</c> if the dimensions are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchArrayDimensions(ArrayDimension dimension1, ArrayDimension dimension2)
+        {
+            if (dimension1 == null && dimension2 == null)
+                return true;
+            if (dimension1 == null || dimension2 == null)
+                return false;
+
+            return dimension1.Size == dimension2.Size
+                && dimension1.LowerBound == dimension2.LowerBound;
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(BoxedTypeSignature signature1, BoxedTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.BaseType, signature2.BaseType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(ByReferenceTypeSignature signature1, ByReferenceTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.BaseType, signature2.BaseType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(FunctionPointerTypeSignature signature1, FunctionPointerTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchMemberSignatures(signature1.Signature, signature2.Signature);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(GenericInstanceTypeSignature signature1, GenericInstanceTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.GenericType, signature2.GenericType)
+                && MatchManyTypes(signature1.GenericArguments, signature2.GenericArguments);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(OptionalModifierSignature signature1, OptionalModifierSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.ModifierType, signature2.ModifierType)
+                && MatchTypes(signature1.BaseType, signature2.BaseType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(PinnedTypeSignature signature1, PinnedTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.BaseType, signature2.BaseType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(PointerTypeSignature signature1, PointerTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.BaseType, signature2.BaseType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(RequiredModifierSignature signature1, RequiredModifierSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.ModifierType, signature2.ModifierType)
+                && MatchTypes(signature1.BaseType, signature2.BaseType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(SentinelTypeSignature signature1, SentinelTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.BaseType, signature2.BaseType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(SzArrayTypeSignature signature1, SzArrayTypeSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return MatchTypes(signature1.BaseType, signature2.BaseType);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="descriptor">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(TypeDefOrRefSignature signature1, ITypeDescriptor descriptor)
+        {
+            if (signature1 == null && descriptor == null)
+                return true;
+            if (signature1 == null || descriptor == null)
+                return false;
+
+            var signature2 = descriptor as TypeDefOrRefSignature;
+            if (signature2 != null)
+                return MatchTypes(signature1.Type, signature2.Type);
+
+            var corlibType = descriptor as MsCorLibTypeSignature;
+            if (corlibType != null)
+                return MatchTypes(signature1.Type, corlibType.Type);
+
+            var typeDefOrRef = descriptor as ITypeDefOrRef;
+            if (typeDefOrRef != null)
+                return MatchTypes(signature1.Type, typeDefOrRef);
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="descriptor">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(MsCorLibTypeSignature signature1, ITypeDescriptor descriptor)
+        {
+            if (signature1 == null && descriptor == null)
+                return true;
+            if (signature1 == null || descriptor == null)
+                return false;
+
+            var signature2 = descriptor as TypeDefOrRefSignature;
+            if (signature2 != null)
+                return MatchTypes(signature1.Type, signature2.Type);
+
+            var corlibType = descriptor as MsCorLibTypeSignature;
+            if (corlibType != null)
+                return signature1.ElementType == corlibType.ElementType;
+
+            var typeDefOrRef = descriptor as ITypeDefOrRef;
+            if (typeDefOrRef != null)
+                return MatchTypes(signature1.Type, typeDefOrRef);
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="reference1">The first type to compare.</param>
+        /// <param name="descriptor">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(ITypeDefOrRef reference1, ITypeDescriptor descriptor)
+        {
+            if (reference1 == null && descriptor == null)
+                return true;
+            if (reference1 == null || descriptor == null)
+                return false;
+
+            var signature2 = descriptor as TypeDefOrRefSignature;
+            if (signature2 != null)
+                return MatchTypes(reference1, signature2.Type);
+
+            var corlibType = descriptor as MsCorLibTypeSignature;
+            if (corlibType != null)
+                return MatchTypes(reference1, corlibType.Type);
+
+            var typeDefOrRef = descriptor as ITypeDefOrRef;
+            if (typeDefOrRef != null)
+                return MatchTypes(reference1, typeDefOrRef);
+
+            return false;
         }
 
         /// <summary>
@@ -140,6 +544,48 @@ namespace AsmResolver.Net
                 return false;
 
             return !types1Array.Where((t, i) => !MatchTypes(t, types2Array[i])).Any();
+        }
+       
+        /// <summary>
+        /// Determines whether two callable member references are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="reference1">The first reference to compare.</param>
+        /// <param name="reference2">The second reference to compare.</param>
+        /// <returns><c>True</c> if the members are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchMembers(IMemberReference reference1, IMemberReference reference2)
+        {
+            if (reference1 == null && reference2 == null)
+                return true;
+            if (reference1 == null || reference2 == null)
+                return false;
+
+            var callable = reference1 as ICallableMemberReference;
+            if (callable != null)
+                return MatchMembers(callable, reference2 as ICallableMemberReference);
+
+            var type = reference1 as ITypeDefOrRef;
+            if (type != null)
+                return MatchMembers(type, reference1 as ITypeDefOrRef);
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether two callable member references are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="reference1">The first reference to compare.</param>
+        /// <param name="reference2">The second reference to compare.</param>
+        /// <returns><c>True</c> if the members are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchMembers(ICallableMemberReference reference1, ICallableMemberReference reference2)
+        {
+            if (reference1 == null && reference2 == null)
+                return true;
+            if (reference1 == null || reference2 == null)
+                return false;
+
+            return reference1.Name == reference2.Name &&
+                   MatchParents(reference1.DeclaringType, reference2.DeclaringType) &&
+                   MatchMemberSignatures(reference1.Signature, reference2.Signature);
         }
 
         /// <summary>
@@ -195,25 +641,7 @@ namespace AsmResolver.Net
                    MatchParents(reference1.Parent, reference2.Parent) &&
                    MatchMemberSignatures(reference1.Signature, reference2.Signature);
         }
-
-        /// <summary>
-        /// Determines whether two callable member references are considered equal according to their signatures.
-        /// </summary>
-        /// <param name="reference1">The first reference to compare.</param>
-        /// <param name="reference2">The second reference to compare.</param>
-        /// <returns><c>True</c> if the members are considered equal, <c>False</c> otherwise.</returns>
-        public bool MatchMembers(ICallableMemberReference reference1, ICallableMemberReference reference2)
-        {
-            if (reference1 == null && reference2 == null)
-                return true;
-            if (reference1 == null || reference2 == null)
-                return false;
-
-            return reference1.Name == reference2.Name &&
-                   MatchParents(reference1.DeclaringType, reference2.DeclaringType) &&
-                   MatchMemberSignatures(reference1.Signature, reference2.Signature);
-        }
-
+        
         /// <summary>
         /// Determines whether two member signatures are considered equal according to their signatures.
         /// </summary>
@@ -250,8 +678,9 @@ namespace AsmResolver.Net
                 return true;
             if (signature1 == null || signature2 == null)
                 return false;
-
-            return MatchTypes(signature1.FieldType, signature2.FieldType);
+            
+            return signature1.Attributes == signature2.Attributes
+                && MatchTypes(signature1.FieldType, signature2.FieldType);
         }
         
         /// <summary>
