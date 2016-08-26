@@ -215,6 +215,10 @@ namespace AsmResolver.Net
             if (genericType != null)
                 return MatchTypes(genericType, signature2 as GenericInstanceTypeSignature);
 
+            var genericParam = signature1 as GenericParameterSignature;
+            if (genericParam != null)
+                return MatchTypes(genericParam, signature2 as GenericParameterSignature);
+
             var modOptType = signature1 as OptionalModifierSignature;
             if (modOptType != null)
                 return MatchTypes(modOptType, signature2 as OptionalModifierSignature);
@@ -340,6 +344,23 @@ namespace AsmResolver.Net
 
             return MatchTypes(signature1.GenericType, signature2.GenericType)
                 && MatchManyTypes(signature1.GenericArguments, signature2.GenericArguments);
+        }
+
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="signature1">The first type to compare.</param>
+        /// <param name="signature2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchTypes(GenericParameterSignature signature1, GenericParameterSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return signature1.Index == signature2.Index
+                && signature1.ElementType == signature2.ElementType;
         }
 
         /// <summary>
@@ -543,7 +564,13 @@ namespace AsmResolver.Net
             if (types1Array.Length != types2Array.Length)
                 return false;
 
-            return !types1Array.Where((t, i) => !MatchTypes(t, types2Array[i])).Any();
+            for (int i =0; i < types1Array.Length; i++)
+            {
+                if (!MatchTypes(types1Array[i], types2Array[i]))
+                    return false;
+            }
+
+            return true;
         }
        
         /// <summary>
