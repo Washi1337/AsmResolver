@@ -63,6 +63,10 @@ namespace AsmResolver.Net.Metadata
             if (field != null)
                 return ImportField(field);
 
+            var member = reference as MemberReference;
+            if (member != null)
+                return ImportMember(member);
+
             throw new NotSupportedException("Invalid or unsupported reference.");
         }
 
@@ -123,7 +127,7 @@ namespace AsmResolver.Net.Metadata
 
             var resolutionScope = definition.DeclaringType != null
                 ? (IResolutionScope) ImportType(definition.DeclaringType)
-                : ImportAssembly(_tableStreamBuffer.GetTable<AssemblyDefinition>().First());        
+                : ImportAssembly(definition.Header.GetStream<TableStream>().GetTable<AssemblyDefinition>().First());        
 
             return ImportType(new TypeReference(
                 resolutionScope,
