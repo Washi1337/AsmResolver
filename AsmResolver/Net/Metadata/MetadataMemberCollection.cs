@@ -168,6 +168,24 @@ namespace AsmResolver.Net.Metadata
         }
     }
 
+    public class GenericParameterConstraintCollection : MetadataMemberCollection<GenericParameter, GenericParameterConstraint>
+    {
+        public GenericParameterConstraintCollection(GenericParameter owner)
+            : base(owner)
+        {
+        }
+
+        protected override GenericParameter GetOwner(GenericParameterConstraint item)
+        {
+            return item.Owner;
+        }
+
+        protected override void SetOwner(GenericParameterConstraint item, GenericParameter owner)
+        {
+            item.Owner = owner;
+        }
+    }
+
     public class InterfaceImplementationCollection : MetadataMemberCollection<TypeDefinition, InterfaceImplementation>
     {
         public InterfaceImplementationCollection(TypeDefinition owner)

@@ -59,6 +59,7 @@ namespace AsmResolver.Net.Metadata
     {
         private readonly LazyValue<IGenericParameterProvider> _owner;
         private readonly LazyValue<string> _name;
+        private GenericParameterConstraintCollection _constraints;
 
         internal GenericParameter(MetadataHeader header, MetadataToken token, MetadataRow<ushort, ushort, uint, uint> row)
             : base(header, token, row)
@@ -99,6 +100,11 @@ namespace AsmResolver.Net.Metadata
         {
             get { return _name.Value; }
             set { _name.Value = value; }
+        }
+
+        public GenericParameterConstraintCollection Constraints
+        {
+            get { return _constraints ?? (_constraints = new GenericParameterConstraintCollection(this)); }
         }
 
         public override string ToString()
