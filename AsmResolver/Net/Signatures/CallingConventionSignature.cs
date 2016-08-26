@@ -22,6 +22,7 @@ namespace AsmResolver.Net.Signatures
                 case CallingConventionAttributes.ExplicitThis:
                 case CallingConventionAttributes.FastCall:
                 case CallingConventionAttributes.StdCall:
+                case CallingConventionAttributes.ThisCall:
                 case CallingConventionAttributes.VarArg:
                     return MethodSignature.FromReader(header, reader);
                 case CallingConventionAttributes.Property:
