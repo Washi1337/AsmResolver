@@ -52,6 +52,31 @@ namespace AsmResolver.Net.Metadata
 
         public abstract MetadataMember GetMember(int index);
 
+        public MetadataMember GetMemberByKey(int columnIndex, uint key)
+        {
+            if (Count == 0)
+                return null;
+
+            int left = 0;
+            int right = Count - 1;
+           
+            while (left <= right)
+            {
+                int m = (left + right) / 2;
+                var member = GetMember(m);
+                uint current = Convert.ToUInt32(member.MetadataRow.GetAllColumns().ElementAt(columnIndex));
+
+                if (current > key)
+                    right = m - 1;
+                else if (current < key)
+                    left = m + 1;
+                else
+                    return member;
+            }
+
+            return null;
+        }
+
         internal abstract void SetMemberCount(uint capacity);
 
         internal abstract void SetReadingContext(ReadingContext readingContext);
@@ -67,8 +92,7 @@ namespace AsmResolver.Net.Metadata
                 GetMember(i).MetadataToken = new MetadataToken(TokenType, (uint)(i + 1));
         }
 
-        public abstract void UpdateRows(NetBuildingContext context);
-        
+        public abstract void UpdateRows(NetBuildingContext context);        
     }
 
     public abstract class MetadataTable<TMember> : MetadataTable, ICollection<TMember>
