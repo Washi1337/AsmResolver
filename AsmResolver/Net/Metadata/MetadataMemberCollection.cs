@@ -12,9 +12,33 @@ namespace AsmResolver.Net.Metadata
         where TItem : MetadataMember
     {
         private readonly TOwner _owner;
+        private readonly IndexEncoder _indexEncoder;
+        private readonly int _columnIndex;
 
-        internal MetadataMemberCollection(TOwner owner)
+        internal MetadataMemberCollection(CodedIndex codedIndex, int columnIndex, TOwner owner)
+            : this (null, columnIndex, owner)
         {
+            if (_owner.Header != null)
+            {
+                var stream = _owner.Header.GetStream<TableStream>();
+                _indexEncoder = stream.GetIndexEncoder(codedIndex);
+            }
+        }
+
+        internal MetadataMemberCollection(MetadataTokenType tokenType, int columnIndex, TOwner owner)
+            : this(null, columnIndex, owner)
+        {
+            if (_owner.Header != null)
+            {
+                var stream = _owner.Header.GetStream<TableStream>();
+                _indexEncoder = new IndexEncoder(stream, tokenType);
+            }
+        }
+
+        internal MetadataMemberCollection(IndexEncoder encoder, int columnIndex, TOwner owner)
+        {
+            _indexEncoder = encoder;
+            _columnIndex = columnIndex;
             _owner = owner;
         }
 
@@ -24,16 +48,28 @@ namespace AsmResolver.Net.Metadata
 
         protected override void Initialize()
         {
-            if (_owner.Header != null)
+            if (_owner.Header != null && _indexEncoder != null)
             {
-                var attributeTable = _owner.Header.GetStream<TableStream>().GetTable<TItem>();
+                var stream = _owner.Header.GetStream<TableStream>();
+                var attributeTable = stream.GetTable<TItem>();
                 if (attributeTable != null)
                 {
-                    foreach (var item in attributeTable)
+                    uint key = _indexEncoder.EncodeToken(_owner.MetadataToken);
+                    var member = attributeTable.GetMemberByKey(_columnIndex, key);
+
+                    if (member != null)
                     {
-                        var owner = GetOwner(item);
-                        if (owner != null && owner.MetadataToken == _owner.MetadataToken)
+                        int startIndex = (int) member.MetadataToken.Rid - 1;
+                        while (startIndex > 0 && Convert.ToUInt32(attributeTable[startIndex - 1].MetadataRow.GetAllColumns().ElementAt(_columnIndex)) == key)
+                            startIndex--;
+                        
+                        for (int index = startIndex; index < attributeTable.Count; index++)
+                        {
+                            var item = attributeTable[index];
+                            if (Convert.ToUInt32(item.MetadataRow.GetAllColumns().ElementAt(_columnIndex)) != key)
+                                break;
                             Items.Add(item);
+                        }
                     }
                 }
             }
@@ -81,7 +117,7 @@ namespace AsmResolver.Net.Metadata
     public class CustomAttributeCollection : MetadataMemberCollection<IHasCustomAttribute, CustomAttribute>
     {
         public CustomAttributeCollection(IHasCustomAttribute owner)
-            : base(owner)
+            : base(CodedIndex.HasCustomAttribute, 0, owner)
         {
         }
 
@@ -99,7 +135,7 @@ namespace AsmResolver.Net.Metadata
     public class MethodSemanticsCollection : MetadataMemberCollection<IHasSemantics, MethodSemantics>
     {
         public MethodSemanticsCollection(IHasSemantics owner)
-            : base(owner)
+            : base(CodedIndex.HasSemantics, 2, owner)
         {
         }
 
@@ -117,7 +153,7 @@ namespace AsmResolver.Net.Metadata
     public class NestedClassCollection : MetadataMemberCollection<TypeDefinition, NestedClass>
     {
         public NestedClassCollection(TypeDefinition owner)
-            : base(owner)
+            : base(MetadataTokenType.TypeDef, 1, owner)
         {
         }
 
@@ -135,7 +171,7 @@ namespace AsmResolver.Net.Metadata
     public class SecurityDeclarationCollection : MetadataMemberCollection<IHasSecurityAttribute, SecurityDeclaration>
     {
         public SecurityDeclarationCollection(IHasSecurityAttribute owner)
-            : base(owner)
+            : base(CodedIndex.HasDeclSecurity, 1, owner)
         {
         }
 
@@ -153,7 +189,7 @@ namespace AsmResolver.Net.Metadata
     public class GenericParameterCollection : MetadataMemberCollection<IGenericParameterProvider, GenericParameter>
     {
         public GenericParameterCollection(IGenericParameterProvider owner)
-            : base(owner)
+            : base(CodedIndex.TypeOrMethodDef, 2, owner)
         {
         }
 
@@ -171,7 +207,7 @@ namespace AsmResolver.Net.Metadata
     public class GenericParameterConstraintCollection : MetadataMemberCollection<GenericParameter, GenericParameterConstraint>
     {
         public GenericParameterConstraintCollection(GenericParameter owner)
-            : base(owner)
+            : base(MetadataTokenType.GenericParam, 0, owner)
         {
         }
 
@@ -189,7 +225,7 @@ namespace AsmResolver.Net.Metadata
     public class InterfaceImplementationCollection : MetadataMemberCollection<TypeDefinition, InterfaceImplementation>
     {
         public InterfaceImplementationCollection(TypeDefinition owner)
-            : base(owner)
+            : base(MetadataTokenType.TypeDef, 0, owner)
         {
         }
 
@@ -199,6 +235,24 @@ namespace AsmResolver.Net.Metadata
         }
 
         protected override void SetOwner(InterfaceImplementation item, TypeDefinition owner)
+        {
+            item.Class = owner;
+        }
+    }
+
+    public class MethodImplementationCollection : MetadataMemberCollection<TypeDefinition, MethodImplementation>
+    {
+        public MethodImplementationCollection(TypeDefinition owner)
+            : base(MetadataTokenType.TypeDef, 0, owner)
+        {
+        }
+
+        protected override TypeDefinition GetOwner(MethodImplementation item)
+        {
+            return item.Class;
+        }
+
+        protected override void SetOwner(MethodImplementation item, TypeDefinition owner)
         {
             item.Class = owner;
         }

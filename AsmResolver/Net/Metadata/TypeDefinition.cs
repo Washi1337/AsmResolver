@@ -79,6 +79,7 @@ namespace AsmResolver.Net.Metadata
         private NestedClassCollection _nestedClasses;
         private GenericParameterCollection _genericParameters;
         private InterfaceImplementationCollection _interfaces;
+        private MethodImplementationCollection _methodImplementations;
         private ClassLayout _classLayout;
         private string _fullName;
 
@@ -277,6 +278,11 @@ namespace AsmResolver.Net.Metadata
         public InterfaceImplementationCollection Interfaces
         {
             get { return _interfaces ?? (_interfaces = new InterfaceImplementationCollection(this)); }
+        }
+
+        public MethodImplementationCollection MethodImplementations
+        {
+            get { return _methodImplementations ?? (_methodImplementations = new MethodImplementationCollection(this)); }
         }
 
         public ClassLayout ClassLayout
