@@ -361,6 +361,42 @@ namespace AsmResolver.Net.Metadata
             set { ImplAttributes = ImplAttributes.SetFlag(MethodImplAttributes.Unmanaged, value); }
         }
 
+        public bool IsForwardRef
+        {
+            get { return ImplAttributes.HasFlag(MethodImplAttributes.ForwardRef); }
+            set { ImplAttributes = ImplAttributes.SetFlag(MethodImplAttributes.ForwardRef, value); }
+        }
+
+        public bool NoOptimization
+        {
+            get { return ImplAttributes.HasFlag(MethodImplAttributes.NoOptimization); }
+            set { ImplAttributes = ImplAttributes.SetFlag(MethodImplAttributes.NoOptimization, value); }
+        }
+
+        public bool PreserveSig
+        {
+            get { return ImplAttributes.HasFlag(MethodImplAttributes.PreserveSig); }
+            set { ImplAttributes = ImplAttributes.SetFlag(MethodImplAttributes.PreserveSig, value); }
+        }
+
+        public bool IsInternalCall
+        {
+            get { return ImplAttributes.HasFlag(MethodImplAttributes.InternalCall); }
+            set { ImplAttributes = ImplAttributes.SetFlag(MethodImplAttributes.InternalCall, value); }
+        }
+
+        public bool IsSynchronized
+        {
+            get { return ImplAttributes.HasFlag(MethodImplAttributes.Synchronized); }
+            set { ImplAttributes = ImplAttributes.SetFlag(MethodImplAttributes.Synchronized, value); }
+        }
+
+        public bool NoInlining
+        {
+            get { return ImplAttributes.HasFlag(MethodImplAttributes.NoInlining); }
+            set { ImplAttributes = ImplAttributes.SetFlag(MethodImplAttributes.NoInlining, value); }
+        }
+
         public bool IsConstructor
         {
             get { return IsRuntimeSpecialName && IsSpecialName && (Name == ".ctor" || Name == ".cctor"); }
