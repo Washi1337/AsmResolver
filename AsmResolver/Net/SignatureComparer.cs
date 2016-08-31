@@ -690,6 +690,10 @@ namespace AsmResolver.Net
             if (methodSignature != null)
                 return MatchMethodSignatures(methodSignature, signature2 as MethodSignature);
 
+            var propertySignature = signature1 as PropertySignature;
+            if (propertySignature != null)
+                return MatchPropertySignatures(propertySignature, signature2 as PropertySignature);
+
             return false;
         }
         
@@ -726,6 +730,25 @@ namespace AsmResolver.Net
             return signature1.Attributes == signature2.Attributes &&
                    signature1.GenericParameterCount == signature2.GenericParameterCount &&
                    MatchTypes(signature1.ReturnType, signature2.ReturnType) &&
+                   MatchManyTypes(signature1.Parameters.Select(x => x.ParameterType),
+                       signature2.Parameters.Select(x => x.ParameterType));
+        }
+
+        /// <summary>
+        /// Determines whether two property signatures are considered equal according to their signatures.
+        /// </summary>
+        /// <param name="signature1">The first signature to compare.</param>
+        /// <param name="signature2">The second signature to compare.</param>
+        /// <returns><c>True</c> if the signatures are considered equal, <c>False</c> otherwise.</returns>
+        public bool MatchPropertySignatures(PropertySignature signature1, PropertySignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+            
+            return signature1.Attributes == signature2.Attributes &&
+                   MatchTypes(signature1.PropertyType, signature2.PropertyType) &&
                    MatchManyTypes(signature1.Parameters.Select(x => x.ParameterType),
                        signature2.Parameters.Select(x => x.ParameterType));
         }
