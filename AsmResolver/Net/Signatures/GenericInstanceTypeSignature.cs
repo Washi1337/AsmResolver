@@ -7,7 +7,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class GenericInstanceTypeSignature : TypeSignature
+    public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
         public new static GenericInstanceTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {

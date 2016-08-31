@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class GenericInstanceMethodSignature : CallingConventionSignature
+    public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
         public new static GenericInstanceMethodSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
