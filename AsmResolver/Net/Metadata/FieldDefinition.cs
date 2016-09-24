@@ -255,6 +255,12 @@ namespace AsmResolver.Net.Metadata
             set { Attributes = Attributes.SetFlag(FieldAttributes.Literal, value); }
         }
 
+        public bool IsInitOnly
+        {
+            get { return Attributes.HasFlag(FieldAttributes.InitOnly); }
+            set { Attributes = Attributes.SetFlag(FieldAttributes.InitOnly, value); }
+        }
+
         private bool GetFieldAccessAttribute(FieldAttributes attribute)
         {
             return ((uint)Attributes).GetMaskedAttribute((uint)FieldAttributes.FieldAccessMask,
