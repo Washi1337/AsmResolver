@@ -236,6 +236,283 @@ namespace AsmResolver.Net.Msil
             }
         }
 
+        public void ExpandMacros()
+        {
+            foreach (var instruction in Instructions)
+                ExpandMacro(instruction);
+        }
+
+        private void ExpandMacro(MsilInstruction instruction)
+        {
+            switch (instruction.OpCode.Code)
+            {
+                case MsilCode.Br_S:
+                    instruction.OpCode = MsilOpCodes.Br;
+                    break;
+                case MsilCode.Leave_S:
+                    instruction.OpCode = MsilOpCodes.Leave;
+                    break;
+                case MsilCode.Brfalse_S:
+                    instruction.OpCode = MsilOpCodes.Brfalse;
+                    break;
+                case MsilCode.Brtrue_S:
+                    instruction.OpCode = MsilOpCodes.Brtrue;
+                    break;
+                case MsilCode.Beq_S:
+                    instruction.OpCode = MsilOpCodes.Beq;
+                    break;
+                case MsilCode.Bge_S:
+                    instruction.OpCode = MsilOpCodes.Bge;
+                    break;
+                case MsilCode.Bge_Un_S:
+                    instruction.OpCode = MsilOpCodes.Bge_Un;
+                    break;
+                case MsilCode.Bgt_S:
+                    instruction.OpCode = MsilOpCodes.Bgt;
+                    break;
+                case MsilCode.Bgt_Un_S:
+                    instruction.OpCode = MsilOpCodes.Bgt_Un;
+                    break;
+                case MsilCode.Ble_S:
+                    instruction.OpCode = MsilOpCodes.Ble;
+                    break;
+                case MsilCode.Ble_Un_S:
+                    instruction.OpCode = MsilOpCodes.Ble_Un;
+                    break;
+                case MsilCode.Blt_S:
+                    instruction.OpCode = MsilOpCodes.Blt;
+                    break;
+                case MsilCode.Blt_Un_S:
+                    instruction.OpCode = MsilOpCodes.Blt_Un;
+                    break;
+                case MsilCode.Bne_Un_S:
+                    instruction.OpCode = MsilOpCodes.Bne_Un;
+                    break;
+
+                case MsilCode.Ldloc_S:
+                    instruction.OpCode = MsilOpCodes.Ldloc;
+                    break;
+
+                case MsilCode.Ldloca_S:
+                    instruction.OpCode = MsilOpCodes.Ldloca;
+                    break;
+
+                case MsilCode.Ldloc_0:
+                case MsilCode.Ldloc_1:
+                case MsilCode.Ldloc_2:
+                case MsilCode.Ldloc_3:
+                    instruction.Operand = ((IOperandResolver) this).ResolveVariable(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
+                    instruction.OpCode = MsilOpCodes.Ldloc;
+                    break;
+
+                case MsilCode.Stloc_S:
+                    instruction.OpCode = MsilOpCodes.Stloc;
+                    break;
+
+                case MsilCode.Stloc_0:
+                case MsilCode.Stloc_1:
+                case MsilCode.Stloc_2:
+                case MsilCode.Stloc_3:
+                    instruction.Operand = ((IOperandResolver) this).ResolveVariable(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
+                    instruction.OpCode = MsilOpCodes.Stloc;
+                    break;
+
+                case MsilCode.Ldarg_S:
+                    instruction.OpCode = MsilOpCodes.Ldarg;
+                    break;
+
+                case MsilCode.Ldarga_S:
+                    instruction.OpCode = MsilOpCodes.Ldarga;
+                    break;
+
+                case MsilCode.Ldarg_0:
+                case MsilCode.Ldarg_1:
+                case MsilCode.Ldarg_2:
+                case MsilCode.Ldarg_3:
+                    instruction.Operand = ((IOperandResolver) this).ResolveParameter(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
+                    instruction.OpCode = MsilOpCodes.Ldarg;
+                    break;
+
+                case MsilCode.Starg_S:
+                    instruction.OpCode = MsilOpCodes.Starg;
+                    break;
+
+                case MsilCode.Ldc_I4_0:
+                case MsilCode.Ldc_I4_1:
+                case MsilCode.Ldc_I4_2:
+                case MsilCode.Ldc_I4_3:
+                case MsilCode.Ldc_I4_4:
+                case MsilCode.Ldc_I4_5:
+                case MsilCode.Ldc_I4_6:
+                case MsilCode.Ldc_I4_7:
+                case MsilCode.Ldc_I4_8:
+                    instruction.Operand = instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48;
+                    instruction.OpCode = MsilOpCodes.Ldc_I4;
+                    break;
+                case MsilCode.Ldc_I4_S:
+                    instruction.OpCode = MsilOpCodes.Ldc_I4;
+                    break;
+                case MsilCode.Ldc_I4_M1:
+                    instruction.OpCode = MsilOpCodes.Ldc_I4;
+                    instruction.Operand = -1;
+                    break;
+            }
+        }
+
+        public void OptimizeMacros()
+        {
+            CalculateOffsets();
+            foreach (var instruction in Instructions)
+                OptimizeMacro(instruction);
+        }
+
+        private void OptimizeMacro(MsilInstruction instruction)
+        {
+            switch (instruction.OpCode.OperandType)
+            {
+                case MsilOperandType.InlineBrTarget:
+                    TryOptimizeBranch(instruction);
+                    break;
+                case MsilOperandType.InlineVar:
+                    TryOptimizeVariable(instruction);
+                    break;
+                case MsilOperandType.InlineArgument:
+                    TryOptimizeArgument(instruction);
+                    break;
+            }
+
+            if (instruction.OpCode.Code == MsilCode.Ldc_I4)
+                TryOptimizeLdc(instruction);
+        }
+
+        private void TryOptimizeBranch(MsilInstruction instruction)
+        {
+            MsilInstruction operand = instruction.Operand as MsilInstruction;
+            int relativeOperand = operand.Offset - (instruction.Offset + 2);
+            if (operand == null || relativeOperand < sbyte.MinValue || relativeOperand > sbyte.MaxValue)
+                return;
+            switch (instruction.OpCode.Code)
+            {
+                case MsilCode.Br:
+                    instruction.OpCode = MsilOpCodes.Br_S;
+                    break;
+                case MsilCode.Leave:
+                    instruction.OpCode = MsilOpCodes.Leave_S;
+                    break;
+                case MsilCode.Brfalse:
+                    instruction.OpCode = MsilOpCodes.Brfalse_S;
+                    break;
+                case MsilCode.Brtrue:
+                    instruction.OpCode = MsilOpCodes.Brtrue_S;
+                    break;
+                case MsilCode.Beq:
+                    instruction.OpCode = MsilOpCodes.Beq_S;
+                    break;
+                case MsilCode.Bge:
+                    instruction.OpCode = MsilOpCodes.Bge_S;
+                    break;
+                case MsilCode.Bge_Un:
+                    instruction.OpCode = MsilOpCodes.Bge_Un_S;
+                    break;
+                case MsilCode.Bgt:
+                    instruction.OpCode = MsilOpCodes.Bgt_S;
+                    break;
+                case MsilCode.Bgt_Un:
+                    instruction.OpCode = MsilOpCodes.Bgt_Un_S;
+                    break;
+                case MsilCode.Ble:
+                    instruction.OpCode = MsilOpCodes.Ble_S;
+                    break;
+                case MsilCode.Ble_Un:
+                    instruction.OpCode = MsilOpCodes.Ble_Un_S;
+                    break;
+                case MsilCode.Blt:
+                    instruction.OpCode = MsilOpCodes.Blt_S;
+                    break;
+                case MsilCode.Blt_Un:
+                    instruction.OpCode = MsilOpCodes.Blt_Un_S;
+                    break;
+                case MsilCode.Bne_Un:
+                    instruction.OpCode = MsilOpCodes.Bne_Un_S;
+                    break;
+            }
+        }
+
+        private void TryOptimizeVariable(MsilInstruction instruction)
+        {
+            var variable = instruction.Operand as VariableSignature;
+            var localVarSig = Signature != null ? Signature.Signature as LocalVariableSignature : null;
+            if (localVarSig == null || variable == null)
+                return;
+            int index = localVarSig.Variables.IndexOf(variable);
+            if (index < 0 || index > byte.MaxValue)
+                return;
+
+            switch (instruction.OpCode.Code)
+            {
+                case MsilCode.Ldloc:
+                    if (index <= 3)
+                    {
+                        instruction.OpCode = MsilOpCodes.SingleByteOpCodes[MsilOpCodes.Ldloc_0.Op2 + index];
+                        instruction.Operand = null;
+                    }
+                    else
+                    {
+                        instruction.OpCode = MsilOpCodes.Ldloc_S;
+                    }
+                    break;
+                case MsilCode.Ldloca:
+                    instruction.OpCode = MsilOpCodes.Ldloca_S;
+                    break;
+                case MsilCode.Starg:
+                    instruction.OpCode = MsilOpCodes.Starg_S;
+                    break;
+            }
+        }
+
+        private void TryOptimizeArgument(MsilInstruction instruction)
+        {
+            var parameter = instruction.Operand as ParameterSignature;
+            if (Method == null || Method.Signature == null || parameter == null)
+                return;
+            int index = Method.Signature.Parameters.IndexOf(parameter);
+            if (index < 0 || index > byte.MaxValue)
+                return;
+
+            switch (instruction.OpCode.Code)
+            {
+                case MsilCode.Ldarg:
+                    if (index <= 3)
+                    {
+                        instruction.OpCode = MsilOpCodes.SingleByteOpCodes[MsilOpCodes.Ldarg_0.Op2 + index];
+                        instruction.Operand = null;
+                    }
+                    else
+                    {
+                        instruction.OpCode = MsilOpCodes.Ldarg_S;
+                    }
+                    break;
+                case MsilCode.Ldarga:
+                    instruction.OpCode = MsilOpCodes.Ldarga_S;
+                    break;
+            }
+        }
+
+        private void TryOptimizeLdc(MsilInstruction instruction)
+        {
+            int value = (int) instruction.Operand;
+            if (value >= -1 && value <= 8)
+            {
+                instruction.OpCode = MsilOpCodes.SingleByteOpCodes[MsilOpCodes.Ldc_I4_0.Op2 + value];
+                instruction.Operand = null;
+            }
+            else if (value >= sbyte.MinValue && value <= sbyte.MaxValue)
+            {
+                instruction.OpCode = MsilOpCodes.Ldc_I4_S;
+                instruction.Operand = Convert.ToSByte(value);
+            }
+        }
+
         public uint GetCodeSize()
         {
             var sum = 0;
@@ -243,6 +520,7 @@ namespace AsmResolver.Net.Msil
                 sum += x.Size;
             return (uint)sum;
         }
+
 
         public override uint GetPhysicalLength()
         {

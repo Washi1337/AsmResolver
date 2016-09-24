@@ -178,6 +178,9 @@ namespace AsmResolver.Net.Msil
 
         public string OperandToString()
         {
+            if (Operand == null)
+                return string.Empty;
+
             switch (OpCode.OperandType)
             {
                 case MsilOperandType.InlineNone:
