@@ -285,8 +285,8 @@ namespace AsmResolver.Net.Metadata
 
         public bool IsFinal
         {
-            get { return Attributes.HasFlag(MethodAttributes.Static); }
-            set { Attributes = Attributes.SetFlag(MethodAttributes.Static, value); }
+            get { return Attributes.HasFlag(MethodAttributes.Final); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.Final, value); }
         }
 
         public bool IsVirtual
