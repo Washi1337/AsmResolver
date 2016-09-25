@@ -240,6 +240,7 @@ namespace AsmResolver.Net.Msil
         {
             foreach (var instruction in Instructions)
                 ExpandMacro(instruction);
+            CalculateOffsets();
         }
 
         private void ExpandMacro(MsilInstruction instruction)
@@ -364,6 +365,7 @@ namespace AsmResolver.Net.Msil
             CalculateOffsets();
             foreach (var instruction in Instructions)
                 OptimizeMacro(instruction);
+            CalculateOffsets();
         }
 
         private void OptimizeMacro(MsilInstruction instruction)
@@ -464,8 +466,16 @@ namespace AsmResolver.Net.Msil
                 case MsilCode.Ldloca:
                     instruction.OpCode = MsilOpCodes.Ldloca_S;
                     break;
-                case MsilCode.Starg:
-                    instruction.OpCode = MsilOpCodes.Starg_S;
+                case MsilCode.Stloc:
+                    if (index <= 3)
+                    {
+                        instruction.OpCode = MsilOpCodes.SingleByteOpCodes[MsilOpCodes.Stloc_0.Op2 + index];
+                        instruction.Operand = null;
+                    }
+                    else
+                    {
+                        instruction.OpCode = MsilOpCodes.Stloc_S;
+                    }
                     break;
             }
         }
