@@ -25,6 +25,7 @@ namespace AsmResolver.Net.Signatures
 
         public FieldSignature(TypeSignature fieldType)
         {
+            Attributes = CallingConventionAttributes.Field;
             FieldType = fieldType;
         }
 

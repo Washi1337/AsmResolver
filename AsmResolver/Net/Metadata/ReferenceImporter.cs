@@ -273,7 +273,10 @@ namespace AsmResolver.Net.Metadata
 
         public FieldSignature ImportFieldSignature(FieldSignature signature)
         {
-            return new FieldSignature(ImportTypeSignature(signature.FieldType));
+            return new FieldSignature(ImportTypeSignature(signature.FieldType))
+            {
+                Attributes = signature.Attributes
+            };
         }
 
         #endregion

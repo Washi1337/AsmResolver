@@ -17,5 +17,10 @@ namespace AsmResolver.Net.Signatures
         {
             get { return TypeSignature; }
         }
+
+        public override string ToString()
+        {
+            return (HasThis ? "instance " : string.Empty) + TypeSignature.FullName;
+        }
     }
 }
