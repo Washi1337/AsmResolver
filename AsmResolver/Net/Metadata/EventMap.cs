@@ -42,7 +42,7 @@ namespace AsmResolver.Net.Metadata
             var writer = context.Writer;
             var row = member.MetadataRow;
 
-            writer.WriteUInt32(row.Column1);
+            writer.WriteIndex(TableStream.GetTable<TypeDefinition>().IndexSize, row.Column1);
             writer.WriteIndex(TableStream.GetTable<EventDefinition>().IndexSize, row.Column2);
         }
     }
