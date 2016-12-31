@@ -604,6 +604,8 @@ namespace AsmResolver.Net.Msil
             var useFatFormat = ExceptionHandlers.Any(x => x.IsFatFormatRequired);
             var writer = context.Writer;
 
+            writer.Align(4);
+
             writer.WriteByte((byte)(0x01 | (useFatFormat ? 0x40 : 0)));
             if (useFatFormat)
             {

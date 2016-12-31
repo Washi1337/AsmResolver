@@ -222,5 +222,16 @@ namespace AsmResolver
             else
                 writer.WriteUInt32(value);
         }
+
+        /// <summary>
+        /// Aligns the writer to a specified boundary.
+        /// </summary>
+        /// <param name="writer">The writer to align.</param>
+        /// <param name="align">The boundary to use.</param>
+        public static void Align(this IBinaryStreamWriter writer, int align)
+        {
+            align--;
+            writer.WriteZeroes((((int)writer.Position + align) & ~align) - (int)writer.Position);
+        }
     }
 }
