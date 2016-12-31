@@ -47,6 +47,7 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.String:
                     return reader.ReadSerString();
                 case ElementType.Object:
+                    return ReadValue(header, TypeSignature.ReadFieldOrPropType(header, reader), reader);
                 case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
@@ -100,6 +101,11 @@ namespace AsmResolver.Net.Signatures
                 case TypeCode.String:
                     return ((Value as string).GetSerStringSize());
             }
+
+            var typeSignature = Value as TypeSignature;
+            if (typeSignature != null)
+                return TypeNameBuilder.GetAssemblyQualifiedName(typeSignature).GetSerStringSize();
+            
             throw new NotSupportedException();
         }
 
@@ -150,7 +156,15 @@ namespace AsmResolver.Net.Signatures
                 case TypeCode.UInt64:
                     writer.WriteUInt64((ulong)Value);
                     break;
+                default:
+                    var typeSignature = Value as TypeSignature;
+                    if (typeSignature != null)
+                        writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(typeSignature));
+                    else
+                        throw new NotSupportedException();
+                    break;
             }
+
         }
     }
 }

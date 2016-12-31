@@ -96,7 +96,7 @@ namespace AsmResolver.Net.Signatures
         {
             return string.Format("{0}...{1}", low, low + size - 1);
         }
-
+        
         public bool Validate()
         {
             var allowSizes = true;

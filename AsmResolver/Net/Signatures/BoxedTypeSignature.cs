@@ -23,6 +23,5 @@ namespace AsmResolver.Net.Signatures
         {
             get { return ElementType.Boxed; }
         }
-        
     }
 }

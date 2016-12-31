@@ -28,6 +28,5 @@ namespace AsmResolver.Net.Signatures
         {
             get { return BaseType.Name + '&'; }
         }
-
     }
 }

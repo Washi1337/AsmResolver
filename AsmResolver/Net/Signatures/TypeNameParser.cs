@@ -144,7 +144,9 @@ namespace AsmResolver.Net.Signatures
                         culture = ReadPropertyValue(name, ref position);
                         break;
                     case "publickeytoken":
-                        token = HexToByteArray(ReadPropertyValue(name, ref position));
+                        var value = ReadPropertyValue(name, ref position);
+                        if (value != "null")
+                            token = HexToByteArray(value);
                         break;
                     default:
                         throw new FormatException();

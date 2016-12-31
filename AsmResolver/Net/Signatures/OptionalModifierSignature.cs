@@ -36,7 +36,7 @@ namespace AsmResolver.Net.Signatures
         {
             get { return BaseType.Name + string.Format(" modopt({0})", ModifierType.FullName); }
         }
-        
+
         public override uint GetPhysicalLength()
         {
             var encoder = ModifierType.Header.GetStream<TableStream>()

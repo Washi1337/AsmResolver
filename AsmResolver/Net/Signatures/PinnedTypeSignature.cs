@@ -23,7 +23,7 @@ namespace AsmResolver.Net.Signatures
         {
             get { return ElementType.Pinned; }
         }
-        
+
         public override uint GetPhysicalLength()
         {
             return sizeof (byte) +
