@@ -34,7 +34,7 @@ namespace AsmResolver.Net.Metadata
         protected override void UpdateMember(NetBuildingContext context, MethodSpecification member)
         {
             var row = member.MetadataRow;
-            row.Column1 = member.Method.MetadataToken.Rid;
+            row.Column1 = TableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef).EncodeToken(member.Method.MetadataToken);
             row.Column2 = context.GetStreamBuffer<BlobStreamBuffer>().GetBlobOffset(member.Signature);
         }
 
