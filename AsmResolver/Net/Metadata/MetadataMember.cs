@@ -12,19 +12,32 @@
         public MetadataRow MetadataRow
         {
             get;
-            set;
+            private set;
         }
 
         public MetadataToken MetadataToken
         {
             get;
-            set;
+            internal set;
         }
 
         public MetadataHeader Header
         {
             get;
-            set;
+            internal set;
+        }
+
+        public MetadataTable Table
+        {
+            get
+            {
+                if (Header == null)
+                    return null;
+                var stream = Header.GetStream<TableStream>();
+                if (stream == null)
+                    return null;
+                return stream.GetTable(MetadataToken.TokenType);
+            }
         }
     }
 
@@ -34,7 +47,6 @@
         protected MetadataMember(MetadataHeader header, MetadataToken token, TRow row)
             : base(header, token, row)
         {
-            Header = header;
         }
 
         public new TRow MetadataRow

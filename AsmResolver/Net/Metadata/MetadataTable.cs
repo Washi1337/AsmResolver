@@ -142,6 +142,7 @@ namespace AsmResolver.Net.Metadata
         internal override void SetReadingContext(ReadingContext readingContext)
         {
             _readingContext = readingContext;
+            StartOffset = _readingContext.Reader.StartPosition;
         }
         
         public void Add(TMember item)
