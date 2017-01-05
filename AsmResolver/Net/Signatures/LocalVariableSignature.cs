@@ -13,6 +13,7 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new LocalVariableSignature()
             {
+                StartOffset = reader.Position,
                 Attributes = (CallingConventionAttributes)reader.ReadByte()
             };
             

@@ -4,9 +4,14 @@
     {
         public new static SafeArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new SafeArrayMarshalDescriptor();
+            var descriptor = new SafeArrayMarshalDescriptor()
+            {
+                StartOffset = reader.Position,
+            };
+
             if (reader.CanRead((sizeof (byte))))
                 descriptor.ElementType = (VariantType)reader.ReadByte();
+
             return descriptor;
         }
 

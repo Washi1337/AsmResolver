@@ -6,7 +6,11 @@ namespace AsmResolver.Net.Signatures
     {
         public new static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new FixedArrayMarshalDescriptor();
+            var descriptor = new FixedArrayMarshalDescriptor()
+            {
+                StartOffset = reader.Position,
+            };
+
             uint value;
             if (!reader.TryReadCompressedUInt32(out value))
                 return descriptor;

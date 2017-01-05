@@ -11,7 +11,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static TypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            var elementType = (ElementType)reader.ReadByte();
+            long position = reader.Position;
+            var signature = ReadTypeSignature(header, reader);
+            signature.StartOffset = position;
+            return signature;
+        }
+
+        private static TypeSignature ReadTypeSignature(MetadataHeader header, IBinaryStreamReader reader)
+        {
+            var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
             {
                 case ElementType.Array:
@@ -30,8 +38,8 @@ namespace AsmResolver.Net.Signatures
                     return FunctionPointerTypeSignature.FromReader(header, reader);
                 case ElementType.GenericInst:
                     return GenericInstanceTypeSignature.FromReader(header, reader);
-               case ElementType.MVar:
-                     return GenericParameterSignature.FromReader(header, reader, GenericParameterType.Method);
+                case ElementType.MVar:
+                    return GenericParameterSignature.FromReader(header, reader, GenericParameterType.Method);
                 case ElementType.Pinned:
                     return PinnedTypeSignature.FromReader(header, reader);
                 case ElementType.Ptr:
@@ -49,7 +57,6 @@ namespace AsmResolver.Net.Signatures
                 default:
                     return MsCorLibTypeSignature.FromElementType(header, elementType);
             }
-            throw new NotSupportedException();
         }
 
         public static TypeSignature FromAssemblyQualifiedName(MetadataHeader header, string assemblyQualifiedName)
@@ -129,7 +136,11 @@ namespace AsmResolver.Net.Signatures
 
         public virtual string FullName
         {
-            get { return string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name; }
+            get {
+                return DeclaringTypeDescriptor != null
+                    ? DeclaringTypeDescriptor.FullName + "+" + Name
+                    : (string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name);
+            }
         }
 
         public virtual ITypeDescriptor GetElementType()

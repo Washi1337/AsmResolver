@@ -13,6 +13,7 @@ namespace AsmResolver.Net.Signatures
         {
             return new ParameterSignature
             {
+                StartOffset = reader.Position,
                 ParameterType = TypeSignature.FromReader(header, reader),
             };
         }

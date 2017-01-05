@@ -4,7 +4,8 @@
     {
         public new static ArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new ArrayMarshalDescriptor((NativeType)reader.ReadByte());
+            var descriptor = new ArrayMarshalDescriptor((NativeType) reader.ReadByte());
+
             uint value;
             if (!reader.TryReadCompressedUInt32(out value))
                 return descriptor;

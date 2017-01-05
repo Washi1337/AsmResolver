@@ -11,7 +11,11 @@ namespace AsmResolver.Net.Signatures
     {
         public new static SentinelTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            return new SentinelTypeSignature(TypeSignature.FromReader(header, reader));
+            long position = reader.Position;
+            return new SentinelTypeSignature(TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = position
+            };
         }
 
         public SentinelTypeSignature(TypeSignature baseType)

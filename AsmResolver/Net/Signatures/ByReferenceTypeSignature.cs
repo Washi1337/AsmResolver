@@ -11,7 +11,11 @@ namespace AsmResolver.Net.Signatures
     {
         public new static ByReferenceTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            return new ByReferenceTypeSignature(TypeSignature.FromReader(header, reader));
+            long position = reader.Position;
+            return new ByReferenceTypeSignature(TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = position
+            };
         }
 
         public ByReferenceTypeSignature(TypeSignature baseType)

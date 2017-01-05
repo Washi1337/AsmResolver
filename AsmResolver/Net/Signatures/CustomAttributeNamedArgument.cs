@@ -12,6 +12,7 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new CustomAttributeNamedArgument
             {
+                StartOffset = reader.Position,
                 ArgumentMemberType =
                     (reader.CanRead(sizeof (byte))
                         ? (CustomAttributeArgumentMemberType)reader.ReadByte()

@@ -11,10 +11,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static CustomAttributeSignature FromReader(CustomAttribute parent, IBinaryStreamReader reader)
         {
+            long position = reader.Position;
+
             if (!reader.CanRead(sizeof (ushort)) || reader.ReadUInt16() != 0x0001)
                 throw new ArgumentException("Signature doesn't refer to a valid custom attribute signature.");
 
-            var signature = new CustomAttributeSignature();
+            var signature = new CustomAttributeSignature()
+            {
+                StartOffset = position,
+            };
 
             if (parent.Constructor != null)
             {

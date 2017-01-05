@@ -14,12 +14,15 @@ namespace AsmResolver.Net.Signatures
             if (!reader.CanRead(sizeof (byte)))
                 return null;
 
+            long position = reader.Position;
+
             var elementType = (ElementType)reader.ReadByte();
             
             var type = ReadTypeDefOrRef(header, reader);
 
             var signature = new GenericInstanceTypeSignature(type)
             {
+                StartOffset = position,
                 IsValueType = elementType == ElementType.ValueType
             };
 

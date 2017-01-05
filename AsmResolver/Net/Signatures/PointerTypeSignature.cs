@@ -11,7 +11,11 @@ namespace AsmResolver.Net.Signatures
     {
         public new static PointerTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            return new PointerTypeSignature(TypeSignature.FromReader(header, reader));
+            long position = reader.Position;
+            return new PointerTypeSignature(TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = position
+            };
         }
 
         public PointerTypeSignature(TypeSignature baseType)

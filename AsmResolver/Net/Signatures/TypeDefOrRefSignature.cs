@@ -11,8 +11,12 @@ namespace AsmResolver.Net.Signatures
     {
         public new static TypeDefOrRefSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
+            long position = reader.Position;
             var type = ReadTypeDefOrRef(header, reader);
-            return type == null ? null : new TypeDefOrRefSignature(type);
+            return type == null ? null : new TypeDefOrRefSignature(type)
+            {
+                StartOffset = position
+            };
         }
 
         public TypeDefOrRefSignature(ITypeDefOrRef type)

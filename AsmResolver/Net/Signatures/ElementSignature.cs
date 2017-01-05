@@ -13,7 +13,11 @@ namespace AsmResolver.Net.Signatures
     {
         public static ElementSignature FromReader(MetadataHeader header, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
-            return new ElementSignature(ReadValue(header, typeSignature, reader));
+            long position = reader.Position;
+            return new ElementSignature(ReadValue(header, typeSignature, reader))
+            {
+                StartOffset = position
+            };
         }
 
         private static object ReadValue(MetadataHeader header, TypeSignature typeSignature, IBinaryStreamReader reader)

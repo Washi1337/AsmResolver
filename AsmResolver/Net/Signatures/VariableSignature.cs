@@ -10,7 +10,11 @@ namespace AsmResolver.Net.Signatures
     {
         public static VariableSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            return new VariableSignature(TypeSignature.FromReader(header, reader));
+            long position = reader.Position;
+            return new VariableSignature(TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = position
+            };
         }
 
         public VariableSignature(TypeSignature variableType)

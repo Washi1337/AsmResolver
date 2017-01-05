@@ -11,7 +11,11 @@ namespace AsmResolver.Net.Signatures
     {
         public new static SzArrayTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            return new SzArrayTypeSignature(TypeSignature.FromReader(header, reader));
+            long position = reader.Position;
+            return new SzArrayTypeSignature(TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = position
+            };
         }
 
         public SzArrayTypeSignature(TypeSignature baseType)

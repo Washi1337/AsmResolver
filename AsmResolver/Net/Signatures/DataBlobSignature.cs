@@ -11,7 +11,11 @@ namespace AsmResolver.Net.Signatures
     {
         public static DataBlobSignature FromReader(IBinaryStreamReader reader)
         {
-            return new DataBlobSignature(reader.ReadBytes((int)reader.Length));
+            long position = reader.Position;
+            return new DataBlobSignature(reader.ReadBytes((int) reader.Length))
+            {
+                StartOffset = position
+            };
         }
 
         public DataBlobSignature(byte[] data)

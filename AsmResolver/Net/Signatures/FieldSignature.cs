@@ -13,6 +13,7 @@ namespace AsmResolver.Net.Signatures
         {
             return new FieldSignature
             {
+                StartOffset = reader.Position,
                 Attributes = (CallingConventionAttributes)reader.ReadByte(),
                 FieldType = TypeSignature.FromReader(header, reader),
             };

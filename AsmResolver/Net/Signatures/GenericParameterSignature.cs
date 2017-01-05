@@ -12,10 +12,16 @@ namespace AsmResolver.Net.Signatures
     {
         public static GenericParameterSignature FromReader(MetadataHeader header, IBinaryStreamReader reader, GenericParameterType parameterType)
         {
+            long position = reader.Position;
+
             uint index;
             if (!reader.TryReadCompressedUInt32(out index))
                 return null;
-            return new GenericParameterSignature(parameterType, (int)index);
+
+            return new GenericParameterSignature(parameterType, (int) index)
+            {
+                StartOffset = position
+            };
         }
 
         public GenericParameterSignature(GenericParameterType parameterType, int index)

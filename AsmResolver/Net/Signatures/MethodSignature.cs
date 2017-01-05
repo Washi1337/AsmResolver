@@ -16,6 +16,7 @@ namespace AsmResolver.Net.Signatures
 
             var signature = new MethodSignature
             {
+                StartOffset = reader.Position,
                 Attributes = (CallingConventionAttributes)reader.ReadByte()
             };
 

@@ -11,6 +11,7 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new CustomAttributeArgument()
             {
+                StartOffset = reader.Position,
                 ArgumentType = typeSignature
             };
 

@@ -7,7 +7,10 @@ namespace AsmResolver.Net.Signatures
     {
         public new static CustomMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new CustomMarshalDescriptor();
+            var descriptor = new CustomMarshalDescriptor()
+            {
+                StartOffset = reader.Position
+            };
 
             Guid guid;
             Guid.TryParse(reader.ReadSerString(), out guid);

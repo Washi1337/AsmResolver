@@ -13,7 +13,11 @@ namespace AsmResolver.Net.Signatures
     {
         public new static ArrayTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            var signature = new ArrayTypeSignature(TypeSignature.FromReader(header, reader));
+            long position = reader.Position;
+            var signature = new ArrayTypeSignature(TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = position
+            };
             
             uint rank;
             if (!reader.TryReadCompressedUInt32(out rank))

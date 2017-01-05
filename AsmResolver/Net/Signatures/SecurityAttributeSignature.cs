@@ -9,6 +9,7 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new SecurityAttributeSignature()
             {
+                StartOffset = reader.Position,
                 TypeName = reader.ReadSerString(),
             };
 

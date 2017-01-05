@@ -10,7 +10,11 @@ namespace AsmResolver.Net.Signatures
     {
         public static PermissionSetSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            var signature = new PermissionSetSignature();
+            var signature = new PermissionSetSignature()
+            {
+                StartOffset = reader.Position
+            };
+
             var signatureHeader = reader.ReadByte();
             if (signatureHeader != '.')
                 throw new ArgumentException("Signature doesn't refer to a valid permission set signature.");

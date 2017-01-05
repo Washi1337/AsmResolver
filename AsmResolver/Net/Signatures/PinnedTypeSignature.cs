@@ -11,7 +11,11 @@ namespace AsmResolver.Net.Signatures
     {
         public new static PinnedTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            return new PinnedTypeSignature(TypeSignature.FromReader(header, reader));
+            long position = reader.StartPosition;
+            return new PinnedTypeSignature(TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = reader.Position,
+            };
         }
 
         public PinnedTypeSignature(TypeSignature baseType)

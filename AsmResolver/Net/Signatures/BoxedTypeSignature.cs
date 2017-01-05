@@ -11,7 +11,11 @@ namespace AsmResolver.Net.Signatures
     {
         public new static BoxedTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
-            return new BoxedTypeSignature(TypeSignature.FromReader(header, reader));
+            long position = reader.Position;
+            return new BoxedTypeSignature(TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = position
+            };
         }
 
         public BoxedTypeSignature(TypeSignature baseType)

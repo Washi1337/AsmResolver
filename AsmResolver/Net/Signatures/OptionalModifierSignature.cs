@@ -11,8 +11,12 @@ namespace AsmResolver.Net.Signatures
     {
         public new static OptionalModifierSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
         {
+            long position = reader.Position;
             return new OptionalModifierSignature(ReadTypeDefOrRef(header, reader),
-                TypeSignature.FromReader(header, reader));
+                TypeSignature.FromReader(header, reader))
+            {
+                StartOffset = position
+            };
         }
 
         public OptionalModifierSignature(ITypeDefOrRef modifierType, TypeSignature baseType)
