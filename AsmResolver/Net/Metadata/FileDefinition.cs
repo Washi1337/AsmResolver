@@ -63,7 +63,7 @@ namespace AsmResolver.Net.Metadata
             : base(header, token, row)
         {
             Attributes = (FileAttributes)row.Column1;
-            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column1));
+            _name = new LazyValue<string>(() => header.GetStream<StringStream>().GetStringByOffset(row.Column2));
             _hashValue = new LazyValue<DataBlobSignature>(() => 
                 DataBlobSignature.FromReader(header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
         }
