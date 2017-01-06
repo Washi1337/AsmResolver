@@ -102,11 +102,17 @@ namespace AsmResolver
         private static ReadingContext CreateDataDirectoryContext(ReadingContext context, int directoryIndex)
         {
             var application = context.Assembly;
-            var dataDirectory = application.NtHeaders.OptionalHeader.DataDirectories[directoryIndex];
+            var dataDirectories = application.NtHeaders.OptionalHeader.DataDirectories;
 
-            return dataDirectory.VirtualAddress == 0
-                ? null
-                : context.CreateSubContext(application.RvaToFileOffset(dataDirectory.VirtualAddress));
+            if (directoryIndex >= 0 && directoryIndex < dataDirectories.Count)
+            {
+                var dataDirectory = dataDirectories[directoryIndex];
+
+                if (dataDirectory.VirtualAddress != 0)
+                    return context.CreateSubContext(application.RvaToFileOffset(dataDirectory.VirtualAddress));
+            }
+
+            return null;
         }
 
         private ImageExportDirectory _exportDirectory;

@@ -74,7 +74,11 @@ namespace AsmResolver
             header.LoaderFlags = reader.ReadUInt32();
             header.NumberOfRvaAndSizes = reader.ReadUInt32();
 
-            for (int i = 0; i < header.NumberOfRvaAndSizes; i++)
+            int dataDirectories = context.Parameters.ForceDataDirectoryCount
+                ? context.Parameters.DataDirectoryCount
+                : (int) header.NumberOfRvaAndSizes;
+
+            for (int i = 0; i < dataDirectories; i++)
                 header.DataDirectories.Add(ImageDataDirectory.FromReadingContext(context));
 
             return header;
