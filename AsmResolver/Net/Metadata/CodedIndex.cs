@@ -40,6 +40,11 @@ namespace AsmResolver.Net.Metadata
         {
             get;
         }
+
+        MetadataTable Table
+        {
+            get;
+        }
     }
 
     public interface ITypeDefOrRef : IMemberReference, IMemberRefParent, ITypeDescriptor, IResolvable

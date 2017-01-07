@@ -7,8 +7,12 @@
     {
         internal static BaseRelocationEntry FromReadingContext(ReadingContext context)
         {
+            long offset = context.Reader.Position;
             var value = context.Reader.ReadUInt16();
-            return new BaseRelocationEntry((BaseRelocationType)(value >> 12), (ushort)(value & 0x0FFF));
+            return new BaseRelocationEntry((BaseRelocationType) (value >> 12), (ushort) (value & 0x0FFF))
+            {
+                StartOffset = offset
+            };
         }
 
         public BaseRelocationEntry(BaseRelocationType type, ushort offset)

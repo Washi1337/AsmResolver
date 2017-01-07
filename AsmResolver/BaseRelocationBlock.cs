@@ -10,8 +10,10 @@ namespace AsmResolver
         internal static BaseRelocationBlock FromReadingContext(ReadingContext context)
         {
             var reader = context.Reader;
+            long offset = reader.Position;
             var block = new BaseRelocationBlock(reader.ReadUInt32())
             {
+                StartOffset = offset,
                 _blockSize = reader.ReadUInt32(),
             };
 
