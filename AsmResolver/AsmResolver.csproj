@@ -52,6 +52,7 @@
     <Compile Include="Builder\ImageImportDirectoryBuilder.cs" />
     <Compile Include="Collections\Generic\Collection.cs" />
     <Compile Include="ImageDebugDirectory.cs" />
+    <Compile Include="ImageResourceDirectoryType.cs" />
     <Compile Include="LazyValue.cs" />
     <Compile Include="Net\AssemblyResolutionEventArgs.cs" />
     <Compile Include="Net\AssemblyResolutionException.cs" />
