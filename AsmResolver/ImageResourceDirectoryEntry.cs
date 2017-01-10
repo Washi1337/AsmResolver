@@ -99,6 +99,26 @@ namespace AsmResolver
         }
 
         /// <summary>
+        /// Gets or sets the type of data the resource directory contains.
+        /// </summary>
+        public ImageResourceDirectoryType ResourceType
+        {
+            get
+            {
+                if (HasName)
+                    return ImageResourceDirectoryType.Custom;
+                return (ImageResourceDirectoryType) NameId;
+            }
+            set
+            {
+                if (value == ImageResourceDirectoryType.Custom)
+                    HasName = true;
+                else
+                    NameId = (uint) value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the offset relative to the start of the start of resource data directory to the data.
         /// </summary>
         public uint OffsetToData
@@ -176,5 +196,24 @@ namespace AsmResolver
             writer.WriteUInt32(NameId);
             writer.WriteUInt32(OffsetToData);
         }
+    }
+
+    public enum ImageResourceDirectoryType
+    {
+        Custom = 0,
+        Cursor = 1,
+        Bitmap = 2,
+        Icon = 3,
+        Menu = 4,
+        Dialog = 5,
+        StringTable = 6,
+        FontDirectory = 7,
+        Font = 8,
+        Accelerator = 9,
+        Unformatted = 10,
+        MessageTable = 11,
+        GroupCursor = 12,
+        GroupIcon = 14,
+        VersionInfo = 16
     }
 }
