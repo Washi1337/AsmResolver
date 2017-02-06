@@ -12,7 +12,7 @@
             {
                 StartOffset = reader.Position,
                 OffsetToData = reader.ReadUInt32(),
-                Size = reader.ReadUInt32(),
+                _size = reader.ReadUInt32(),
                 CodePage = reader.ReadUInt32(),
                 Reserved = reader.ReadUInt32(),
 
@@ -25,6 +25,7 @@
 
         private ReadingContext _dataReaderContext;
         private byte[] _data;
+        private uint _size;
 
         private ImageResourceDataEntry()
         {
@@ -49,8 +50,8 @@
         /// </summary>
         public uint Size
         {
-            get;
-            set;
+            get { return _data == null ? _size : (uint) _data.Length; }
+            set { _size = value; }
         }
 
         /// <summary>
