@@ -46,6 +46,12 @@ namespace AsmResolver.Net.Metadata
             Token = row.Column1;
         }
 
+        public EncMap(uint token)
+            : base(null, new MetadataToken(MetadataTokenType.EncMap), new MetadataRow<uint, uint>())
+        {
+            Token = token;
+        }
+
         public uint Token
         {
             get;

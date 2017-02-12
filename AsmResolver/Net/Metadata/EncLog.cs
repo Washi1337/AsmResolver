@@ -55,6 +55,13 @@ namespace AsmResolver.Net.Metadata
             FuncCode = row.Column2;
         }
 
+        public EncLog(uint token, uint funcCode)
+            : base(null, new MetadataToken(MetadataTokenType.EncLog), new MetadataRow<uint, uint>())
+        {
+            Token = token;
+            FuncCode = funcCode;
+        }
+
         public uint Token
         {
             get;
