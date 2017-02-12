@@ -147,10 +147,10 @@ namespace AsmResolver.Builder
 
         public override void UpdateReferences(BuildingContext context)
         {
-            base.UpdateReferences(context);
             _resourceDirectory.VirtualAddress =
                 (uint)_offsetConverter.FileOffsetToRva(_directoryTablesBuilder.StartOffset);
             _resourceDirectory.Size = GetPhysicalLength();
+            base.UpdateReferences(context);
         }
     }
 }
