@@ -127,9 +127,9 @@
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>copy "$(ProjectDir)\..\Dummies\TestConsoleApplication\bin\Debug\TestConsoleApplication.exe" "$(ProjectDir)\Resources\TestConsoleApplication.exe"
-copy "$(ProjectDir)\..\Dummies\TestLibrary\bin\Debug\TestLibrary.dll" "$(ProjectDir)\Resources\TestLibrary.dll"
-copy "$(ProjectDir)\..\Dummies\MixedModeApplication\bin\Debug\MixedModeApplication.exe" "$(ProjectDir)\Resources\MixedModeApplication.exe"
+    <PreBuildEvent>copy "$(ProjectDir)\..\Dummies\TestConsoleApplication\bin\$(ConfigurationName)\TestConsoleApplication.exe" "$(ProjectDir)\Resources\TestConsoleApplication.exe"
+copy "$(ProjectDir)\..\Dummies\TestLibrary\bin\$(ConfigurationName)\TestLibrary.dll" "$(ProjectDir)\Resources\TestLibrary.dll"
+copy "$(ProjectDir)\..\Dummies\MixedModeApplication\bin\$(ConfigurationName)\MixedModeApplication.exe" "$(ProjectDir)\Resources\MixedModeApplication.exe"
 copy "$(ProjectDir)\..\Dummies\X86Binaries\RegOrMem8_Reg8\*.asm" "$(ProjectDir)\Resources\"
 copy "$(ProjectDir)\..\Dummies\X86Binaries\RegOrMem8_Reg8\*.bin" "$(ProjectDir)\Resources\"
 copy "$(ProjectDir)\..\Dummies\X86Binaries\Misc\*.asm" "$(ProjectDir)\Resources\"

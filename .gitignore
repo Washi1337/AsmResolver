@@ -1,5 +1,5 @@
 Tests/Native/AsmResolver.Tests.Native/Resources/
-Tests/Net/AsmResolver.Tests.Net/Resources/
+Tests/Net/AsmResolver.Net.Tests/Resources/
 *.nupkg
 *.VC.opendb
 *.VC.db

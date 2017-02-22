@@ -115,8 +115,8 @@
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>copy "$(ProjectDir)\..\Dummies\EmptyMsilConsoleApplication\bin\Debug\EmptyMsilConsoleApplication.exe" "$(ProjectDir)\Resources\\EmptyMsilConsoleApplication.exe"
-copy "$(ProjectDir)\..\Dummies\MsilConsoleApplication\bin\Debug\MsilConsoleApplication.exe" "$(ProjectDir)\Resources\\MsilConsoleApplication.exe"</PreBuildEvent>
+    <PreBuildEvent>copy "$(ProjectDir)\..\Dummies\EmptyMsilConsoleApplication\bin\$(ConfigurationName)\EmptyMsilConsoleApplication.exe" "$(ProjectDir)\Resources\\EmptyMsilConsoleApplication.exe"
+copy "$(ProjectDir)\..\Dummies\MsilConsoleApplication\bin\$(ConfigurationName)\MsilConsoleApplication.exe" "$(ProjectDir)\Resources\MsilConsoleApplication.exe"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
