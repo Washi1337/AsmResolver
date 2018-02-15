@@ -31,6 +31,7 @@ namespace AsmResolver.Net.Cts
             _publicKey = new LazyValue<DataBlobSignature>(info.PublicKeyToken == null ? null : new DataBlobSignature(info.PublicKeyToken));
             Modules = new DelegatedMemberCollection<AssemblyDefinition, ModuleDefinition>(this, GetModuleOwner, SetModuleOwner);
             AssemblyReferences = new Collection<AssemblyReference>();
+            ModuleReferences = new Collection<ModuleReference>();
         }
 
         public AssemblyDefinition(string name, Version version)
@@ -42,6 +43,7 @@ namespace AsmResolver.Net.Cts
             _publicKey = new LazyValue<DataBlobSignature>();
             Modules = new DelegatedMemberCollection<AssemblyDefinition, ModuleDefinition>(this, GetModuleOwner, SetModuleOwner);
             AssemblyReferences = new Collection<AssemblyReference>();
+            ModuleReferences = new Collection<ModuleReference>();
         }
 
         internal AssemblyDefinition(MetadataImage image, MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint> row)
@@ -59,6 +61,7 @@ namespace AsmResolver.Net.Cts
             _culture = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column9));
             Modules = new TableMemberCollection<AssemblyDefinition, ModuleDefinition>(this, tableStream.GetTable(MetadataTokenType.Module), GetModuleOwner, SetModuleOwner);
             AssemblyReferences = new TableMemberCollection<AssemblyDefinition, AssemblyReference>(this, tableStream.GetTable(MetadataTokenType.AssemblyRef));
+            ModuleReferences = new TableMemberCollection<AssemblyDefinition, ModuleReference>(this, tableStream.GetTable(MetadataTokenType.ModuleRef));
         }
 
         /// <summary>
@@ -183,6 +186,15 @@ namespace AsmResolver.Net.Cts
         /// Gets a collection of dependency assemblies that this assembly references.
         /// </summary>
         public Collection<AssemblyReference> AssemblyReferences
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a collection of dependency modules that this assembly references.
+        /// </summary>
+        public Collection<ModuleReference> ModuleReferences
         {
             get;
             private set;
