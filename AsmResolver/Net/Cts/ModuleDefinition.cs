@@ -104,5 +104,10 @@ namespace AsmResolver.Net.Cts
         {
             type.Module = module;
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

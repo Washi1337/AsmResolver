@@ -44,6 +44,7 @@ namespace AsmResolver.Net.Cts.Collections
             foreach (var row in _table)
             {
                 var member = (TMember) _table.GetMemberFromRow(Owner.Image, row);
+                SetOwner(member, Owner);
                 Items.Add(member);
             }
         }
