@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using System.Runtime.Remoting.Messaging;
 using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts;
@@ -34,6 +35,7 @@ namespace AsmResolver.Net.Metadata
             _name = new LazyValue<string>(name);
             _baseType = new LazyValue<ITypeDefOrRef>(baseType);
             Fields = new DelegatedMemberCollection<TypeDefinition, FieldDefinition>(this, GetFieldOwner, SetFieldOwner);
+            Methods = new DelegatedMemberCollection<TypeDefinition, MethodDefinition>(this, GetMethodOwner, SetMethodOwner);
         }
 
         internal TypeDefinition(MetadataImage image, MetadataRow<TypeAttributes, uint, uint, uint, uint, uint> row)
@@ -60,6 +62,8 @@ namespace AsmResolver.Net.Metadata
 
             Fields = new RangedMemberCollection<TypeDefinition, FieldDefinition>(this,
                 tableStream.GetTable(MetadataTokenType.Field), 4, GetFieldOwner, SetFieldOwner);
+            Methods = new RangedMemberCollection<TypeDefinition, MethodDefinition>(this,
+                tableStream.GetTable(MetadataTokenType.Method), 5, GetMethodOwner, SetMethodOwner);
         }
 
         public TypeAttributes Attributes
@@ -106,11 +110,11 @@ namespace AsmResolver.Net.Metadata
             private set;
         }
 
-        //public Collection<MethodDefinition> Methods
-        //{
-        //    get;
-        //    private set;
-        //}
+        public Collection<MethodDefinition> Methods
+        {
+            get;
+            private set;
+        }
 
         //public PropertyMap PropertyMap
         //{
@@ -443,6 +447,16 @@ namespace AsmResolver.Net.Metadata
         private static void SetFieldOwner(FieldDefinition field, TypeDefinition type)
         {
             field.DeclaringType = type;
+        }
+
+        private static TypeDefinition GetMethodOwner(MethodDefinition method)
+        {
+            return method.DeclaringType;
+        }
+
+        private static void SetMethodOwner(MethodDefinition method, TypeDefinition type)
+        {
+            method.DeclaringType = type;
         }
     }
 }

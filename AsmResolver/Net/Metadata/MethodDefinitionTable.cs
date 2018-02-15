@@ -49,7 +49,7 @@ namespace AsmResolver.Net.Metadata
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new MethodDefinition(image, row);
         }
     }
 }
