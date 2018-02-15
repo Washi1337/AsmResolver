@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class MethodSignature : MemberSignature
     {
-        public new static MethodSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             if (!reader.CanRead(sizeof (byte)))
                 return null;
@@ -32,10 +29,10 @@ namespace AsmResolver.Net.Signatures
             if (!reader.TryReadCompressedUInt32(out parameterCount))
                 return signature;
 
-            signature.ReturnType = TypeSignature.FromReader(header, reader);
+            signature.ReturnType = TypeSignature.FromReader(image, reader);
             for (int i = 0; i < parameterCount; i++)
             {
-                signature.Parameters.Add(ParameterSignature.FromReader(header, reader));
+                signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
             }
 
             return signature;

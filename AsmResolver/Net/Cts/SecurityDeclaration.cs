@@ -32,7 +32,7 @@ namespace AsmResolver.Net.Cts
             });
 
             _permissionSet = new LazyValue<PermissionSetSignature>(() => 
-                PermissionSetSignature.FromReader(tableStream.MetadataHeader, tableStream.MetadataHeader.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
+                PermissionSetSignature.FromReader(image, tableStream.MetadataHeader.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
         }
 
         public IHasSecurityAttribute Parent

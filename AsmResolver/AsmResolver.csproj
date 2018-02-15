@@ -227,7 +227,7 @@
     <Compile Include="Net\SignatureComparer.cs" />
     <Compile Include="Net\StringStream.cs" />
     <Compile Include="Net\TableStream.cs" />
-    <Compile Include="Net\TypeSystem.cs" />
+    <Compile Include="Net\Cts\TypeSystem.cs" />
     <Compile Include="Net\UserStringStream.cs" />
     <Compile Include="Net\VTablesDirectory.cs" />
     <Compile Include="PointerSegment.cs" />

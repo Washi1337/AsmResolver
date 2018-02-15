@@ -26,8 +26,7 @@ namespace AsmResolver.Net.Signatures
                 {
                     foreach (var parameter in methodSignature.Parameters)
                     {
-                        signature.FixedArguments.Add(CustomAttributeArgument.FromReader(parent.Image.Header,
-                            parameter.ParameterType, reader));
+                        signature.FixedArguments.Add(CustomAttributeArgument.FromReader(parent.Image, parameter.ParameterType, reader));
                     }
                 }
             }
@@ -35,7 +34,7 @@ namespace AsmResolver.Net.Signatures
             var namedElementCount = reader.CanRead(sizeof (ushort)) ? reader.ReadUInt16() : 0;
             for (uint i = 0; i < namedElementCount; i++)
             {
-                signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Image.Header, reader));
+                signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Image, reader));
             }
 
             return signature;

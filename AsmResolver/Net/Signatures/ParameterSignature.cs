@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class ParameterSignature : BlobSignature
     {
-        public static ParameterSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static ParameterSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new ParameterSignature
             {
                 StartOffset = reader.Position,
-                ParameterType = TypeSignature.FromReader(header, reader),
+                ParameterType = TypeSignature.FromReader(image, reader),
             };
         }
 

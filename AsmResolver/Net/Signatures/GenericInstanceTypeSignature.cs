@@ -8,7 +8,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
-        public new static GenericInstanceTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static GenericInstanceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             if (!reader.CanRead(sizeof (byte)))
                 return null;
@@ -17,7 +17,7 @@ namespace AsmResolver.Net.Signatures
 
             var elementType = (ElementType)reader.ReadByte();
             
-            var type = ReadTypeDefOrRef(header, reader);
+            var type = ReadTypeDefOrRef(image, reader);
 
             var signature = new GenericInstanceTypeSignature(type)
             {
@@ -30,7 +30,7 @@ namespace AsmResolver.Net.Signatures
                 return signature;
 
             for (int i = 0; i < count; i++)
-                signature.GenericArguments.Add(TypeSignature.FromReader(header, reader));
+                signature.GenericArguments.Add(TypeSignature.FromReader(image, reader));
 
             return signature;
         }
@@ -102,15 +102,17 @@ namespace AsmResolver.Net.Signatures
 
         public override void Write(WritingContext context)
         {
-            var writer = context.Writer;
-            writer.WriteByte((byte)ElementType);
-            writer.WriteByte((byte)(IsValueType ? ElementType.ValueType : ElementType.Class));
+            throw new NotImplementedException();
+            //TODO
+            //var writer = context.Writer;
+            //writer.WriteByte((byte)ElementType);
+            //writer.WriteByte((byte)(IsValueType ? ElementType.ValueType : ElementType.Class));
 
-            WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, GenericType);
+            //WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, GenericType);
 
-            writer.WriteCompressedUInt32((uint)GenericArguments.Count);
-            foreach (var argument in GenericArguments)
-                argument.Write(context);
+            //writer.WriteCompressedUInt32((uint)GenericArguments.Count);
+            //foreach (var argument in GenericArguments)
+            //    argument.Write(context);
         }
     }
 }

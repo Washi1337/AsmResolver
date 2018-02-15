@@ -124,20 +124,7 @@ namespace AsmResolver.Net
             get;
             private set;
         }
-
-        // TODO
-        /// <summary>
-        /// Gets a collection of references to default primitive types defined in mscorlib.dll.
-        /// </summary>
-        //public TypeSystem TypeSystem
-        //{
-        //    get
-        //    {
-        //        return _typeSystem ?? (_typeSystem = new TypeSystem(this,
-        //            GetStream<TableStream>().GetTable<AssemblyDefinition>()[0].Name == "mscorlib"));
-        //    }
-        //}
-
+        
         // TODO
         /// <summary>
         /// Gets or sets the metadata resolver that will be used when <see cref="IResolvable.Resolve"/> is called on a specific member reference.

@@ -6,14 +6,12 @@ namespace AsmResolver.Net.Signatures
 {
     public sealed class MsCorLibTypeSignature : TypeSignature, IResolvable
     {
-        public static MsCorLibTypeSignature FromElementType(MetadataHeader header, ElementType elementType)
+        public static MsCorLibTypeSignature FromElementType(MetadataImage image, ElementType elementType)
         {
-            // TODO
-            throw new NotImplementedException();
-            //var type = header.TypeSystem.GetMscorlibType(elementType);
-            //if (type == null)
-            //    throw new ArgumentException("Element type " + elementType + " is not recognized as a valid corlib type signature.");
-            //return type;
+            var type = image.TypeSystem.GetMscorlibType(elementType);
+            if (type == null)
+                throw new ArgumentException("Element type " + elementType + " is not recognized as a valid corlib type signature.");
+            return type;
         }
 
         private readonly ElementType _elementType;

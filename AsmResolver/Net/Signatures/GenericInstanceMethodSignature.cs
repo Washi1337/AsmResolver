@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
-        public new static GenericInstanceMethodSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static GenericInstanceMethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new GenericInstanceMethodSignature()
             {
@@ -21,7 +19,7 @@ namespace AsmResolver.Net.Signatures
                 return signature;
 
             for (int i = 0; i < count; i++)
-                signature.GenericArguments.Add(TypeSignature.FromReader(header, reader));
+                signature.GenericArguments.Add(TypeSignature.FromReader(image, reader));
 
             return signature;
         }

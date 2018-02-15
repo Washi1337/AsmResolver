@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class VariableSignature : BlobSignature
     {
-        public static VariableSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static VariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            return new VariableSignature(TypeSignature.FromReader(header, reader))
+            return new VariableSignature(TypeSignature.FromReader(image, reader))
             {
                 StartOffset = position
             };

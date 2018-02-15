@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class PointerTypeSignature : TypeSpecificationSignature
     {
-        public new static PointerTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static PointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            return new PointerTypeSignature(TypeSignature.FromReader(header, reader))
+            return new PointerTypeSignature(TypeSignature.FromReader(image, reader))
             {
                 StartOffset = position
             };

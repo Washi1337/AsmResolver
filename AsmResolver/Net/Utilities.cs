@@ -41,24 +41,24 @@ namespace AsmResolver.Net
         //            select field.Signature.FieldType).FirstOrDefault();
         //}
 
-        //public static IAssemblyDescriptor GetAssembly(this IResolutionScope scope)
-        //{
-        //    while (true)
-        //    {
-        //        var assembly = scope as IAssemblyDescriptor;
-        //        if (assembly != null)
-        //            return assembly;
+        public static IAssemblyDescriptor GetAssembly(this IResolutionScope scope)
+        {
+            while (true)
+            {
+                var assembly = scope as IAssemblyDescriptor;
+                if (assembly != null)
+                    return assembly;
 
-        //        var module = scope as ModuleDefinition;
-        //        if (module != null)
-        //            return module.Header.GetStream<TableStream>().GetTable<AssemblyDefinition>()[0];
+                var module = scope as ModuleDefinition;
+                if (module != null)
+                    return module.Image.Assembly;
 
-        //        var type = scope as ITypeDefOrRef;
-        //        if (type == null)
-        //            return null;
-        //        scope = type.ResolutionScope;
-        //    }
-        //}
+                var type = scope as ITypeDefOrRef;
+                if (type == null)
+                    return null;
+                scope = type.ResolutionScope;
+            }
+        }
 
         public static bool GetMaskedAttribute(this uint self, uint mask, uint attribute)
         {

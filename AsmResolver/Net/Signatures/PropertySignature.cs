@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class PropertySignature : CallingConventionSignature, IHasTypeSignature
     {
-        public new static PropertySignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static PropertySignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new PropertySignature
             {
@@ -21,10 +18,10 @@ namespace AsmResolver.Net.Signatures
             if (!reader.TryReadCompressedUInt32(out paramCount))
                 return null;
 
-            signature.PropertyType = TypeSignature.FromReader(header, reader);
+            signature.PropertyType = TypeSignature.FromReader(image, reader);
 
             for (int i = 0; i < paramCount; i++)
-                signature.Parameters.Add(ParameterSignature.FromReader(header, reader));
+                signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
 
             return signature;
         }

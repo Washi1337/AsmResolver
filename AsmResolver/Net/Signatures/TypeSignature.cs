@@ -7,62 +7,62 @@ namespace AsmResolver.Net.Signatures
 {
     public abstract class TypeSignature : BlobSignature, ITypeDescriptor
     {
-        public static TypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            var signature = ReadTypeSignature(header, reader);
+            var signature = ReadTypeSignature(image, reader);
             signature.StartOffset = position;
             return signature;
         }
 
-        private static TypeSignature ReadTypeSignature(MetadataHeader header, IBinaryStreamReader reader)
+        private static TypeSignature ReadTypeSignature(MetadataImage image, IBinaryStreamReader reader)
         {
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
             {
                 case ElementType.Array:
-                    return ArrayTypeSignature.FromReader(header, reader);
+                    return ArrayTypeSignature.FromReader(image, reader);
                 case ElementType.Boxed:
-                    return BoxedTypeSignature.FromReader(header, reader);
+                    return BoxedTypeSignature.FromReader(image, reader);
                 case ElementType.ByRef:
-                    return ByReferenceTypeSignature.FromReader(header, reader);
+                    return ByReferenceTypeSignature.FromReader(image, reader);
                 case ElementType.CModOpt:
-                    return OptionalModifierSignature.FromReader(header, reader);
+                    return OptionalModifierSignature.FromReader(image, reader);
                 case ElementType.CModReqD:
-                    return RequiredModifierSignature.FromReader(header, reader);
+                    return RequiredModifierSignature.FromReader(image, reader);
                 case ElementType.Class:
-                    return TypeDefOrRefSignature.FromReader(header, reader);
+                    return TypeDefOrRefSignature.FromReader(image, reader);
                 case ElementType.FnPtr:
-                    return FunctionPointerTypeSignature.FromReader(header, reader);
+                    return FunctionPointerTypeSignature.FromReader(image, reader);
                 case ElementType.GenericInst:
-                    return GenericInstanceTypeSignature.FromReader(header, reader);
+                    return GenericInstanceTypeSignature.FromReader(image, reader);
                 case ElementType.MVar:
-                    return GenericParameterSignature.FromReader(header, reader, GenericParameterType.Method);
+                    return GenericParameterSignature.FromReader(image, reader, GenericParameterType.Method);
                 case ElementType.Pinned:
-                    return PinnedTypeSignature.FromReader(header, reader);
+                    return PinnedTypeSignature.FromReader(image, reader);
                 case ElementType.Ptr:
-                    return PointerTypeSignature.FromReader(header, reader);
+                    return PointerTypeSignature.FromReader(image, reader);
                 case ElementType.Sentinel:
-                    return SentinelTypeSignature.FromReader(header, reader);
+                    return SentinelTypeSignature.FromReader(image, reader);
                 case ElementType.SzArray:
-                    return SzArrayTypeSignature.FromReader(header, reader);
+                    return SzArrayTypeSignature.FromReader(image, reader);
                 case ElementType.ValueType:
-                    var type = TypeDefOrRefSignature.FromReader(header, reader);
+                    var type = TypeDefOrRefSignature.FromReader(image, reader);
                     type.IsValueType = true;
                     return type;
                 case ElementType.Var:
-                    return GenericParameterSignature.FromReader(header, reader, GenericParameterType.Type);
+                    return GenericParameterSignature.FromReader(image, reader, GenericParameterType.Type);
                 default:
-                    return MsCorLibTypeSignature.FromElementType(header, elementType);
+                    return MsCorLibTypeSignature.FromElementType(image, elementType);
             }
         }
 
-        public static TypeSignature FromAssemblyQualifiedName(MetadataHeader header, string assemblyQualifiedName)
+        public static TypeSignature FromAssemblyQualifiedName(MetadataImage image, string assemblyQualifiedName)
         {
-            return TypeNameParser.ParseType(header, assemblyQualifiedName);
+            return TypeNameParser.ParseType(image, assemblyQualifiedName);
         }
 
-        public static TypeSignature ReadFieldOrPropType(MetadataHeader header, IBinaryStreamReader reader)
+        public static TypeSignature ReadFieldOrPropType(MetadataImage image, IBinaryStreamReader reader)
         {
             var elementType = (ElementType)reader.ReadByte();
             switch (elementType)
@@ -71,34 +71,32 @@ namespace AsmResolver.Net.Signatures
                     // TODO
                     throw new NotImplementedException();
                 case ElementType.SzArray:
-                    return new SzArrayTypeSignature(ReadFieldOrPropType(header, reader));
+                    return new SzArrayTypeSignature(ReadFieldOrPropType(image, reader));
                 case ElementType.Enum:
-                    return FromAssemblyQualifiedName(header, reader.ReadSerString());
+                    return FromAssemblyQualifiedName(image, reader.ReadSerString());
                 default:
-                    return MsCorLibTypeSignature.FromElementType(header, elementType);
+                    return MsCorLibTypeSignature.FromElementType(image, elementType);
             }
         }
 
-        protected static ITypeDefOrRef ReadTypeDefOrRef(MetadataHeader header, IBinaryStreamReader reader)
+        protected static ITypeDefOrRef ReadTypeDefOrRef(MetadataImage image, IBinaryStreamReader reader)
         {
-            var tableStream = header.GetStream<TableStream>();
+            var tableStream = image.Header.GetStream<TableStream>();
 
             uint codedIndex;
             if (!reader.TryReadCompressedUInt32(out codedIndex))
                 return null;
 
-            throw new NotImplementedException();
-            //MetadataMember type;
-            //tableStream.TryResolveRow(tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef)
-            //    .DecodeIndex(codedIndex), out type);
-            
-            //return type as ITypeDefOrRef;
+            IMetadataMember type;
+            image.TryResolveMember(tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(codedIndex), out type);
+
+            return type as ITypeDefOrRef;
         }
 
-        protected static void WriteTypeDefOrRef(MetadataHeader header, IBinaryStreamWriter writer, ITypeDefOrRef type)
+        protected static void WriteTypeDefOrRef(MetadataImage image, IBinaryStreamWriter writer, ITypeDefOrRef type)
         {
             var encoder =
-                header.GetStream<TableStream>()
+                image.Header.GetStream<TableStream>()
                     .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             writer.WriteCompressedUInt32(encoder.EncodeToken(type.MetadataToken));
         }

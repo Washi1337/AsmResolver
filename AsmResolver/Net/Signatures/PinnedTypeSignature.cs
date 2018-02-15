@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class PinnedTypeSignature : TypeSpecificationSignature
     {
-        public new static PinnedTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static PinnedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.StartPosition;
-            return new PinnedTypeSignature(TypeSignature.FromReader(header, reader))
+            return new PinnedTypeSignature(TypeSignature.FromReader(image, reader))
             {
                 StartOffset = reader.Position,
             };

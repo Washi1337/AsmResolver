@@ -17,9 +17,17 @@ namespace AsmResolver.Net.Cts
 
             var table = tableStream.GetTable(MetadataTokenType.Assembly);
             Assembly = (AssemblyDefinition) table.GetMemberFromRow(this, table.GetRow(0));
+
+            TypeSystem = new TypeSystem(this, Assembly.Name == "mscorlib");
         }
 
         public MetadataHeader Header
+        {
+            get;
+            private set;
+        }
+
+        public TypeSystem TypeSystem
         {
             get;
             private set;

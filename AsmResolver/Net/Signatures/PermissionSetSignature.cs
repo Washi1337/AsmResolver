@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class PermissionSetSignature : BlobSignature
     {
-        public static PermissionSetSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static PermissionSetSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new PermissionSetSignature()
             {
@@ -24,7 +23,7 @@ namespace AsmResolver.Net.Signatures
                 return signature;
 
             for (int i = 0; i < attributeCount; i++)
-                signature.Attributes.Add(SecurityAttributeSignature.FromReader(header, reader));
+                signature.Attributes.Add(SecurityAttributeSignature.FromReader(image, reader));
             return signature;
         }
 

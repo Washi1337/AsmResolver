@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -10,7 +7,7 @@ namespace AsmResolver.Net.Signatures
     {
         private const CallingConventionAttributes SignatureTypeMask = (CallingConventionAttributes)0xF;
 
-        public static CallingConventionSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static CallingConventionSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var flag = reader.ReadByte();
             reader.Position--;
@@ -24,15 +21,15 @@ namespace AsmResolver.Net.Signatures
                 case CallingConventionAttributes.StdCall:
                 case CallingConventionAttributes.ThisCall:
                 case CallingConventionAttributes.VarArg:
-                    return MethodSignature.FromReader(header, reader);
+                    return MethodSignature.FromReader(image, reader);
                 case CallingConventionAttributes.Property:
-                    return PropertySignature.FromReader(header, reader);
+                    return PropertySignature.FromReader(image, reader);
                 case CallingConventionAttributes.Local:
-                    return LocalVariableSignature.FromReader(header, reader);
+                    return LocalVariableSignature.FromReader(image, reader);
                 case CallingConventionAttributes.GenericInstance:
-                    return GenericInstanceMethodSignature.FromReader(header, reader);
+                    return GenericInstanceMethodSignature.FromReader(image, reader);
                 case CallingConventionAttributes.Field:
-                    return FieldSignature.FromReader(header, reader);
+                    return FieldSignature.FromReader(image, reader);
             }
             throw new NotSupportedException();
         }

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class CustomAttributeArgument : BlobSignature
     {
-        public static CustomAttributeArgument FromReader(MetadataHeader header, TypeSignature typeSignature, IBinaryStreamReader reader)
+        public static CustomAttributeArgument FromReader(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
             var signature = new CustomAttributeArgument()
             {
@@ -17,7 +18,7 @@ namespace AsmResolver.Net.Signatures
 
             if (typeSignature.ElementType != ElementType.SzArray)
             {
-                signature.Elements.Add(ElementSignature.FromReader(header, typeSignature, reader));
+                signature.Elements.Add(ElementSignature.FromReader(image, typeSignature, reader));
             }
             else
             {
@@ -28,7 +29,7 @@ namespace AsmResolver.Net.Signatures
                 {
                     for (uint i = 0; i < elementCount; i++)
                     {
-                        signature.Elements.Add(ElementSignature.FromReader(header, arrayType, reader));
+                        signature.Elements.Add(ElementSignature.FromReader(image, arrayType, reader));
                     }
                 }
             }

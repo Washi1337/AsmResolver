@@ -40,7 +40,7 @@ namespace AsmResolver.Net.Metadata
             Attributes = row.Column1;
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
             _signature = new LazyValue<FieldSignature>(() => 
-                FieldSignature.FromReader(image.Header, blobStream.CreateBlobReader(row.Column3)));
+                FieldSignature.FromReader(image, blobStream.CreateBlobReader(row.Column3)));
         }
 
         public FieldAttributes Attributes

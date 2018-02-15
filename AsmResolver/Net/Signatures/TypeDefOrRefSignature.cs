@@ -6,10 +6,10 @@ namespace AsmResolver.Net.Signatures
 {
     public class TypeDefOrRefSignature : TypeSignature, IResolvable
     {
-        public new static TypeDefOrRefSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static TypeDefOrRefSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            var type = ReadTypeDefOrRef(header, reader);
+            var type = ReadTypeDefOrRef(image, reader);
             return type == null ? null : new TypeDefOrRefSignature(type)
             {
                 StartOffset = position
@@ -75,10 +75,12 @@ namespace AsmResolver.Net.Signatures
 
         public override void Write(WritingContext context)
         {
-            var writer = context.Writer;
-            writer.WriteByte((byte)ElementType);
+            throw new NotImplementedException();
+            // TODO
+            //var writer = context.Writer;
+            //writer.WriteByte((byte)ElementType);
 
-            WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, Type);
+            //WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, Type);
 
         }
 

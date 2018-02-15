@@ -5,10 +5,10 @@ namespace AsmResolver.Net.Signatures
 {
     public class FunctionPointerTypeSignature : TypeSignature
     {
-        public new static FunctionPointerTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static FunctionPointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            return new FunctionPointerTypeSignature(MethodSignature.FromReader(header, reader))
+            return new FunctionPointerTypeSignature(MethodSignature.FromReader(image, reader))
             {
                 StartOffset = position
             };

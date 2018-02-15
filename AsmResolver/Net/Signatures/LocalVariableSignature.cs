@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class LocalVariableSignature : CallingConventionSignature
     {
-        public new static LocalVariableSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static LocalVariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new LocalVariableSignature()
             {
@@ -20,7 +17,7 @@ namespace AsmResolver.Net.Signatures
             var count = reader.ReadCompressedUInt32();
 
             for (int i = 0; i < count; i++)
-                signature.Variables.Add(VariableSignature.FromReader(header, reader));
+                signature.Variables.Add(VariableSignature.FromReader(image, reader));
             return signature;
         }
 

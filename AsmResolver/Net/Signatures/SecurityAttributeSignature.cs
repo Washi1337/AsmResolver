@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class SecurityAttributeSignature : BlobSignature
     {
-        public static SecurityAttributeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static SecurityAttributeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            var signature = new SecurityAttributeSignature()
+            var signature = new SecurityAttributeSignature
             {
                 StartOffset = reader.Position,
                 TypeName = reader.ReadSerString(),
@@ -23,7 +24,7 @@ namespace AsmResolver.Net.Signatures
                 return signature;
 
             for (int i = 0; i < argumentCount; i++)
-                signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(header, reader));
+                signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(image, reader));
             
             return signature;
         }

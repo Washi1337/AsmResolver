@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace AsmResolver.Net.Signatures
+﻿namespace AsmResolver.Net.Signatures
 {
     public class FixedArrayMarshalDescriptor : MarshalDescriptor
     {
         public new static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new FixedArrayMarshalDescriptor()
+            var descriptor = new FixedArrayMarshalDescriptor
             {
                 StartOffset = reader.Position,
             };

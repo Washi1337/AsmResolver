@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class ArrayTypeSignature : TypeSpecificationSignature
     {
-        public new static ArrayTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            var signature = new ArrayTypeSignature(TypeSignature.FromReader(header, reader))
+            var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader))
             {
                 StartOffset = position
             };

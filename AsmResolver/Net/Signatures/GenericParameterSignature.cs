@@ -6,7 +6,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class GenericParameterSignature : TypeSignature
     {
-        public static GenericParameterSignature FromReader(MetadataHeader header, IBinaryStreamReader reader, GenericParameterType parameterType)
+        public static GenericParameterSignature FromReader(MetadataImage image, IBinaryStreamReader reader, GenericParameterType parameterType)
         {
             long position = reader.Position;
 

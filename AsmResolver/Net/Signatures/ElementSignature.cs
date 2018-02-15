@@ -1,26 +1,21 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class ElementSignature : BlobSignature
     {
-        public static ElementSignature FromReader(MetadataHeader header, TypeSignature typeSignature, IBinaryStreamReader reader)
+        public static ElementSignature FromReader(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            return new ElementSignature(ReadValue(header, typeSignature, reader))
+            return new ElementSignature(ReadValue(image, typeSignature, reader))
             {
                 StartOffset = position
             };
         }
 
-        private static object ReadValue(MetadataHeader header, TypeSignature typeSignature, IBinaryStreamReader reader)
+        private static object ReadValue(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
             switch (typeSignature.ElementType)
             {
@@ -51,7 +46,7 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.String:
                     return reader.ReadSerString();
                 case ElementType.Object:
-                    return ReadValue(header, TypeSignature.ReadFieldOrPropType(header, reader), reader);
+                    return ReadValue(image, TypeSignature.ReadFieldOrPropType(image, reader), reader);
                 case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
@@ -65,9 +60,10 @@ namespace AsmResolver.Net.Signatures
                     //    return ReadValue(header, enumTypeDef.GetEnumUnderlyingType(), reader);
                     //break;
             }
-            // TODO
-            //if (typeSignature.IsTypeOf("System", "Type"))
-            //    return TypeSignature.FromAssemblyQualifiedName(header, reader.ReadSerString());
+
+            if (typeSignature.IsTypeOf("System", "Type"))
+                return TypeSignature.FromAssemblyQualifiedName(image, reader.ReadSerString());
+
             throw new NotSupportedException("Unsupported element type " + typeSignature.ElementType);
         }
 

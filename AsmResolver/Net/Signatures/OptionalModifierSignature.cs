@@ -1,15 +1,16 @@
-﻿using AsmResolver.Net.Cts;
+﻿using System;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class OptionalModifierSignature : TypeSpecificationSignature
     {
-        public new static OptionalModifierSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static OptionalModifierSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            return new OptionalModifierSignature(ReadTypeDefOrRef(header, reader),
-                TypeSignature.FromReader(header, reader))
+            return new OptionalModifierSignature(ReadTypeDefOrRef(image, reader),
+                TypeSignature.FromReader(image, reader))
             {
                 StartOffset = position
             };
@@ -48,10 +49,12 @@ namespace AsmResolver.Net.Signatures
 
         public override void Write(WritingContext context)
         {
-            var writer = context.Writer;
-            writer.WriteByte((byte)ElementType);
-            WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, ModifierType);
-            BaseType.Write(context);
+            throw new NotImplementedException();
+            //TODO
+            //var writer = context.Writer;
+            //writer.WriteByte((byte)ElementType);
+            //WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, ModifierType);
+            //BaseType.Write(context);
         }
     }
 }
