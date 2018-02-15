@@ -55,16 +55,19 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
-                    var enumTypeDef = header.MetadataResolver.ResolveType(typeSignature);
-                    if (enumTypeDef == null)
-                        throw new MemberResolutionException(typeSignature);
+                    // TODO
+                    throw new NotImplementedException();
+                    //var enumTypeDef = header.MetadataResolver.ResolveType(typeSignature);
+                    //if (enumTypeDef == null)
+                    //    throw new MemberResolutionException(typeSignature);
 
-                    if (enumTypeDef.IsEnum)
-                        return ReadValue(header, enumTypeDef.GetEnumUnderlyingType(), reader);
-                    break;
+                    //if (enumTypeDef.IsEnum)
+                    //    return ReadValue(header, enumTypeDef.GetEnumUnderlyingType(), reader);
+                    //break;
             }
-            if (typeSignature.IsTypeOf("System", "Type"))
-                return TypeSignature.FromAssemblyQualifiedName(header, reader.ReadSerString());
+            // TODO
+            //if (typeSignature.IsTypeOf("System", "Type"))
+            //    return TypeSignature.FromAssemblyQualifiedName(header, reader.ReadSerString());
             throw new NotSupportedException("Unsupported element type " + typeSignature.ElementType);
         }
 

@@ -32,6 +32,11 @@ namespace AsmResolver.Net
             internal set;
         }
 
+        public MetadataHeader MetadataHeader
+        {
+            get { return StreamHeader != null ? StreamHeader.MetadataHeader : null; }
+        }
+
         /// <summary>
         /// Gets a value indicating whether the stream can create a buffer to write to.
         /// </summary>

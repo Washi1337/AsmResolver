@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
@@ -11,10 +8,12 @@ namespace AsmResolver.Net.Signatures
     {
         public static MsCorLibTypeSignature FromElementType(MetadataHeader header, ElementType elementType)
         {
-            var type = header.TypeSystem.GetMscorlibType(elementType);
-            if (type == null)
-                throw new ArgumentException("Element type " + elementType + " is not recognized as a valid corlib type signature.");
-            return type;
+            // TODO
+            throw new NotImplementedException();
+            //var type = header.TypeSystem.GetMscorlibType(elementType);
+            //if (type == null)
+            //    throw new ArgumentException("Element type " + elementType + " is not recognized as a valid corlib type signature.");
+            //return type;
         }
 
         private readonly ElementType _elementType;

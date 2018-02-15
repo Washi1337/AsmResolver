@@ -1,20 +1,18 @@
-﻿using System;
-
-namespace AsmResolver.Net
+﻿namespace AsmResolver.Net
 {
-    public class CustomMetaDataStream : MetadataStream
+    public class CustomMetadataStream : MetadataStream
     {
-        internal static CustomMetaDataStream FromReadingContext(ReadingContext context)
+        internal static CustomMetadataStream FromReadingContext(ReadingContext context)
         {
-            return new CustomMetaDataStream(context.Reader.ReadBytes((int)context.Reader.Length));
+            return new CustomMetadataStream(context.Reader.ReadBytes((int)context.Reader.Length));
         }
 
-        public CustomMetaDataStream()
+        public CustomMetadataStream()
         {
             Data = new byte[0];
         }
 
-        public CustomMetaDataStream(byte[] data)
+        public CustomMetadataStream(byte[] data)
         {
             Data = data;
         }

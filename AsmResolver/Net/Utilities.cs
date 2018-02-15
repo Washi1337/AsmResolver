@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
@@ -33,33 +31,34 @@ namespace AsmResolver.Net
             return type.Namespace == @namespace && type.Name == name;
         }
 
-        public static TypeSignature GetEnumUnderlyingType(this TypeDefinition type)
-        {
-            return (from field in type.Fields
-                    where
-                        field.Name == "value__" && field.Attributes.HasFlag(FieldAttributes.Public) &&
-                        field.Signature != null
-                    select field.Signature.FieldType).FirstOrDefault();
-        }
+        // TODO
+        //public static TypeSignature GetEnumUnderlyingType(this TypeDefinition type)
+        //{
+        //    return (from field in type.Fields
+        //            where
+        //                field.Name == "value__" && field.Attributes.HasFlag(FieldAttributes.Public) &&
+        //                field.Signature != null
+        //            select field.Signature.FieldType).FirstOrDefault();
+        //}
 
-        public static IAssemblyDescriptor GetAssembly(this IResolutionScope scope)
-        {
-            while (true)
-            {
-                var assembly = scope as IAssemblyDescriptor;
-                if (assembly != null)
-                    return assembly;
-                
-                var module = scope as ModuleDefinition;
-                if (module != null)
-                    return module.Header.GetStream<TableStream>().GetTable<AssemblyDefinition>()[0];
+        //public static IAssemblyDescriptor GetAssembly(this IResolutionScope scope)
+        //{
+        //    while (true)
+        //    {
+        //        var assembly = scope as IAssemblyDescriptor;
+        //        if (assembly != null)
+        //            return assembly;
 
-                var type = scope as ITypeDefOrRef;
-                if (type == null)
-                    return null;
-                scope = type.ResolutionScope;
-            }
-        }
+        //        var module = scope as ModuleDefinition;
+        //        if (module != null)
+        //            return module.Header.GetStream<TableStream>().GetTable<AssemblyDefinition>()[0];
+
+        //        var type = scope as ITypeDefOrRef;
+        //        if (type == null)
+        //            return null;
+        //        scope = type.ResolutionScope;
+        //    }
+        //}
 
         public static bool GetMaskedAttribute(this uint self, uint mask, uint attribute)
         {
@@ -85,7 +84,7 @@ namespace AsmResolver.Net
         public static TEnum SetFlag<TEnum>(this Enum self, TEnum flag, bool value)
         {
             return (TEnum)Convert.ChangeType(
-                (Convert.ToUInt64(self) & ~Convert.ToUInt64(flag)) | (value ? Convert.ToUInt64(flag) : 0), 
+                (Convert.ToUInt64(self) & ~Convert.ToUInt64(flag)) | (value ? Convert.ToUInt64(flag) : 0),
                 typeof(TEnum).GetEnumUnderlyingType());
         }
     }

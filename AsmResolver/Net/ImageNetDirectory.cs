@@ -41,7 +41,7 @@ namespace AsmResolver.Net
         private ReadingContext _readingContext;
         private MetadataHeader _metaDataHeader;
         private DataSegment _strongNameData;
-        private VTablesDirectory _vtablesDirectory;
+        //private VTablesDirectory _vtablesDirectory;
 
         public ImageNetDirectory()
         {
@@ -213,28 +213,29 @@ namespace AsmResolver.Net
             set { _strongNameData = value; }
         }
 
+        // TODO
         /// <summary>
         /// Gets or sets the VTable fixups directory of the .NET assembly image.
         /// </summary>
-        public VTablesDirectory VTablesDirectory
-        {
-            get
-            {
-                if (_vtablesDirectory != null)
-                    return _vtablesDirectory;
+        //public VTablesDirectory VTablesDirectory
+        //{
+        //    get
+        //    {
+        //        if (_vtablesDirectory != null)
+        //            return _vtablesDirectory;
 
-                if (_readingContext != null)
-                {
-                    var context = _readingContext.CreateSubContext(
-                        _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
-                    if (context != null)
-                        return _vtablesDirectory = VTablesDirectory.FromReadingContext(context);
-                }
+        //        if (_readingContext != null)
+        //        {
+        //            var context = _readingContext.CreateSubContext(
+        //                _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
+        //            if (context != null)
+        //                return _vtablesDirectory = VTablesDirectory.FromReadingContext(context);
+        //        }
 
-                return null;
-            }
-            set { _vtablesDirectory = value; }
-        }
+        //        return null;
+        //    }
+        //    set { _vtablesDirectory = value; }
+        //}
 
         /// <summary>
         /// Gets the managed resource data at the given offset.

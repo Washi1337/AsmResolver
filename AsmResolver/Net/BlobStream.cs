@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using AsmResolver.Builder;
+﻿using System.Collections.Generic;
 using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net

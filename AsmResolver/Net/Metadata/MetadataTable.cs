@@ -2,57 +2,103 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Builder;
-using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Metadata
 {
-    public abstract class MetadataTable : FileSegment
+    /// <summary>
+    /// Represents a single raw metadata table in the metadata table stream (#~ or #-).
+    /// </summary>
+    public abstract class MetadataTable : FileSegment, IEnumerable<MetadataRow>
     {
-        public TableStream TableStream
-        {
-            get;
-            internal set;
-        }
+        private bool _isReadOnly;
 
-        public MetadataHeader Header
-        {
-            get { return TableStream != null ? TableStream.StreamHeader.MetadataHeader : null; }
-        }
-
+        /// <summary>
+        /// Gets the type of rows this table contains.
+        /// </summary>
         public abstract MetadataTokenType TokenType
         {
             get;
         }
 
-        public IndexSize IndexSize
+        /// <summary>
+        /// Gets the table stream the raw metadata table is stored in.
+        /// </summary>
+        public TableStream TableStream
         {
-            get { return Count > ushort.MaxValue ? IndexSize.Long : IndexSize.Short; }
+            get;
+            internal set;
         }
-
+        
+        /// <summary>
+        /// Gets the amount of rows the table has.
+        /// </summary>
         public abstract int Count
         {
             get;
         }
 
-        public abstract uint GetElementByteCount();
+        public bool IsReadOnly
+        {
+            get { return _isReadOnly; }
+            internal set
+            {
+                if (_isReadOnly != value)
+                {
+                    _isReadOnly = value;
+                    OnReadOnlyChanged();
+                }
+            }
+        }
 
-        public bool TryGetMember(int index, out MetadataMember member)
+        /// <summary>
+        /// Gets the size of an index to a single row of the table.
+        /// </summary>
+        public IndexSize IndexSize
+        {
+            get { return Count > ushort.MaxValue ? IndexSize.Long : IndexSize.Short; }
+        }
+
+        /// <summary>
+        /// Gets the amount of bytes a single row consists of in the table.
+        /// </summary>
+        public abstract uint ElementByteCount
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets a particular row using the given zero-based index.
+        /// </summary>
+        /// <param name="index">The zero-based index of the row to get.</param>
+        /// <returns>The row that is stored at this index.</returns>
+        public abstract MetadataRow GetRow(int index);
+
+        /// <summary>
+        /// Tries to get a particular row given the zero-based index, 
+        /// and returns a value indicating whether this was a success or not.
+        /// </summary>
+        /// <param name="index">The zero-based index of the row to get.</param>
+        /// <param name="row">The row that was gotten, or null</param>
+        /// <returns>True if the row was obtained successfully, false otherwise.</returns>
+        public bool TryGetRow(int index, out MetadataRow row)
         {
             if (index >= 0 && index < Count)
             {
-                member = GetMember(index);
+                row = GetRow(index);
                 return true;
             }
-            member = null;
+            row = null;
             return false;
         }
 
-        public abstract MetadataMember GetMember(int index);
-
-        public MetadataMember GetMemberByKey(int columnIndex, uint key)
+        /// <summary>
+        /// Gets a single row in a table by a key. This requires the table to be sorted.
+        /// </summary>
+        /// <param name="keyColumnIndex">The column number to get the key from.</param>
+        /// <param name="key">The key to search.</param>
+        /// <returns>The first row that contains the given key, or null if none was found.</returns>
+        public MetadataRow GetRowByKey(int keyColumnIndex, uint key)
         {
             if (Count == 0)
                 return null;
@@ -63,8 +109,8 @@ namespace AsmResolver.Net.Metadata
             while (left <= right)
             {
                 int m = (left + right) / 2;
-                var member = GetMember(m);
-                uint current = Convert.ToUInt32(member.MetadataRow.GetAllColumns().ElementAt(columnIndex));
+                var member = GetRow(m);
+                uint current = Convert.ToUInt32(member.GetAllColumns().ElementAt(keyColumnIndex));
 
                 if (current > key)
                     right = m - 1;
@@ -77,140 +123,191 @@ namespace AsmResolver.Net.Metadata
             return null;
         }
 
-        internal abstract void SetMemberCount(uint capacity);
+        public abstract IMetadataMember GetMemberFromRow(MetadataImage image, MetadataRow row);
 
-        internal abstract void SetReadingContext(ReadingContext readingContext);
-
-        public override uint GetPhysicalLength()
-        {
-            return (uint)(GetElementByteCount() * Count);
-        }
-
+        /// <summary>
+        /// Updates all the metadata tokens of each row in the table.
+        /// </summary>
         public void UpdateTokens()
         {
             for (int i = 0; i < Count; i++)
-                GetMember(i).MetadataToken = new MetadataToken(TokenType, (uint)(i + 1));
+                GetRow(i).MetadataToken = new MetadataToken(TokenType, (uint)(i + 1));
         }
 
-        public abstract void UpdateRows(NetBuildingContext context);        
+        public override uint GetPhysicalLength()
+        {
+            return (uint)(ElementByteCount * Count);
+        }
+        
+        internal abstract void SetRowCount(uint capacity);
+
+        internal abstract void SetReadingContext(ReadingContext readingContext);
+
+        protected void AssertIsWriteable()
+        {
+            if (IsReadOnly)
+                throw new InvalidOperationException("Table cannot be modified in read-only mode.");
+        }
+
+        protected void AssertIsReadOnly()
+        {
+            if (!IsReadOnly)
+                throw new InvalidOperationException("Operation can only be performed if the table is in read-only mode.");
+        }
+
+        protected abstract IEnumerator<MetadataRow> GetRowsEnumerator();
+
+        IEnumerator<MetadataRow> IEnumerable<MetadataRow>.GetEnumerator()
+        {
+            return GetRowsEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetRowsEnumerator();
+        }
+
+        protected virtual void OnReadOnlyChanged()
+        {
+        }
     }
 
-    public abstract class MetadataTable<TMember> : MetadataTable, ICollection<TMember>
-        where TMember: MetadataMember 
+    public abstract class MetadataTable<TRow> : MetadataTable, ICollection<TRow>
+        where TRow: MetadataRow 
     {
-        private readonly List<TMember> _members;
+        private readonly List<TRow> _rows;
         private ReadingContext _readingContext;
 
         protected MetadataTable()
         {
-            _members = new List<TMember>();
+            _rows = new List<TRow>();
         }
 
-        public TMember this[int index]
+        /// <summary>
+        /// Gets or sets a single metadata row at the given zero-based index.
+        /// </summary>
+        /// <param name="index">The index of the row.</param>
+        /// <returns>The row at the index.</returns>
+        public TRow this[int index]
         {
-            get
+            get { return (TRow) GetRow(index); }
+            set
             {
-                lock (_members)
-                {
-                    if (_members[index] == null && _readingContext != null)
-                    {
-                        var context =
-                            _readingContext.CreateSubContext(_readingContext.Reader.StartPosition + (index * GetElementByteCount()));
-                        _members[index] = ReadMember(new MetadataToken(TokenType, (uint) (index + 1)), context);
-                    }
-                }
-                return _members[index];
+                AssertIsWriteable();
+                _rows[index] = value;
             }
-            set { _members[index] = value; }
         }
 
         public override int Count
         {
-            get { return _members.Count; }
+            get { return _rows.Count; }
         }
 
-        public bool IsReadOnly
+        /// <summary>
+        /// Reads a single row using the given reading context.
+        /// </summary>
+        /// <param name="context">The reading context to use for reading the metadata row.</param>
+        /// <param name="token">The token that is assigned to the metadata row to be read.</param>
+        /// <returns>The metadata row that was read.</returns>
+        protected abstract TRow ReadRow(ReadingContext context, MetadataToken token);
+
+        /// <summary>
+        /// Writes a single row to the output writing context.
+        /// </summary>
+        /// <param name="context">The writing context to use for writing the metadata row to.</param>
+        /// <param name="row">The row to write.</param>
+        protected abstract void WriteRow(WritingContext context, TRow row);
+
+        /// <summary>
+        /// Tries to get a particular row given the zero-based index, 
+        /// and returns a value indicating whether this was a success or not.
+        /// </summary>
+        /// <param name="index">The zero-based index of the row to get.</param>
+        /// <param name="row">The row that was gotten, or null</param>
+        /// <returns>True if the row was obtained successfully, false otherwise.</returns>
+        public bool TryGetMember(int index, out TRow row)
         {
-            get { return false; }
+            MetadataRow r;
+            bool result = TryGetRow(index, out r);
+            row = r as TRow;
+            return result;
         }
 
-        internal override void SetMemberCount(uint capacity)
+        public override MetadataRow GetRow(int index)
         {
-            _members.AddRange(new TMember[capacity]);
+            lock (_rows)
+            {
+                if (_rows[index] == null && _readingContext != null)
+                {
+                    var context = _readingContext.CreateSubContext(
+                        _readingContext.Reader.StartPosition + index * ElementByteCount);
+
+                    var row = ReadRow(context, new MetadataToken(TokenType, (uint)(index + 1)));
+                    row.IsReadOnly = IsReadOnly;
+                    _rows[index] = row;
+                }
+            }
+            return _rows[index];
         }
 
-        internal override void SetReadingContext(ReadingContext readingContext)
+        public sealed override IMetadataMember GetMemberFromRow(MetadataImage image, MetadataRow row)
         {
-            _readingContext = readingContext;
-            StartOffset = _readingContext.Reader.StartPosition;
+            AssertIsReadOnly();
+            IMetadataMember member;
+            if (!image.TryGetCachedMember(row.MetadataToken, out member))
+            {
+                member = CreateMemberFromRow(image, (TRow) row);
+                image.CacheMember(member);
+            }
+            return member;
         }
-        
-        public void Add(TMember item)
+
+        protected abstract IMetadataMember CreateMemberFromRow(MetadataImage image, TRow row);
+
+        public void Add(TRow item)
         {
-            _members.Add(item);
-            item.Header = TableStream.StreamHeader.MetadataHeader;
+            AssertIsWriteable();
+            _rows.Add(item);
         }
 
         public void Clear()
         {
-            _members.Clear();
+            AssertIsWriteable();
+            _rows.Clear();
         }
 
-        public bool Contains(TMember item)
+        public bool Contains(TRow item)
         {
-            return _members.Contains(item);
+            return _rows.Contains(item);
         }
 
-        public void CopyTo(TMember[] array, int arrayIndex)
+        public void CopyTo(TRow[] array, int arrayIndex)
         {
-            _members.CopyTo(array, arrayIndex);
+            _rows.CopyTo(array, arrayIndex);
         }
 
-        public bool Remove(TMember item)
+        public bool Remove(TRow item)
         {
-            if (_members.Remove(item))
+            AssertIsWriteable();
+            if (_rows.Remove(item))
             {
-                item.Header = null;
                 return true;
             }
             return false;
         }
-
-        public bool TryGetMember(int index, out TMember member)
-        {
-            if (index >= 0 && index < Count)
-            {
-                member = this[index];
-                return true;
-            }
-            member = null;
-            return false;
-        }
-
-        public override MetadataMember GetMember(int index)
-        {
-            return this[index];
-        }
-
-        public override void UpdateRows(NetBuildingContext context)
-        {
-            foreach (var member in this)
-                UpdateMember(context, member);
-        }
-
-        protected abstract TMember ReadMember(MetadataToken token, ReadingContext context);
-
-        protected abstract void UpdateMember(NetBuildingContext context, TMember member);
         
-        protected abstract void WriteMember(WritingContext context, TMember member);
-
         public override void Write(WritingContext context)
         {
             foreach (var member in this)
-                WriteMember(context, member);
+                WriteRow(context, member);
         }
 
-        public IEnumerator<TMember> GetEnumerator()
+        protected override IEnumerator<MetadataRow> GetRowsEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<TRow> GetEnumerator()
         {
             for (int i = 0; i < Count; i++)
                 yield return this[i];
@@ -219,6 +316,28 @@ namespace AsmResolver.Net.Metadata
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        protected override void OnReadOnlyChanged()
+        {
+            base.OnReadOnlyChanged();
+            foreach (var row in _rows)
+            {
+                if (row != null)
+                    row.IsReadOnly = IsReadOnly;
+            } 
+        }
+
+        internal override void SetRowCount(uint capacity)
+        {
+            AssertIsWriteable();
+            _rows.AddRange(new TRow[capacity]);
+        }
+
+        internal override void SetReadingContext(ReadingContext readingContext)
+        {
+            _readingContext = readingContext;
+            StartOffset = _readingContext.Reader.StartPosition;
         }
     }
 }

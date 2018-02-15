@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net
 {

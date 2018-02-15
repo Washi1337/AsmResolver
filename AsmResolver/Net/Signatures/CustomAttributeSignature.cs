@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -28,7 +26,7 @@ namespace AsmResolver.Net.Signatures
                 {
                     foreach (var parameter in methodSignature.Parameters)
                     {
-                        signature.FixedArguments.Add(CustomAttributeArgument.FromReader(parent.Header,
+                        signature.FixedArguments.Add(CustomAttributeArgument.FromReader(parent.Image.Header,
                             parameter.ParameterType, reader));
                     }
                 }
@@ -37,7 +35,7 @@ namespace AsmResolver.Net.Signatures
             var namedElementCount = reader.CanRead(sizeof (ushort)) ? reader.ReadUInt16() : 0;
             for (uint i = 0; i < namedElementCount; i++)
             {
-                signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Header, reader));
+                signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Image.Header, reader));
             }
 
             return signature;

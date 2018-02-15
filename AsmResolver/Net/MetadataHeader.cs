@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net
@@ -12,8 +11,6 @@ namespace AsmResolver.Net
     /// </summary>
     public class MetadataHeader : FileSegment
     {
-        private TypeSystem _typeSystem;
-
         internal static MetadataHeader FromReadingContext(ReadingContext context)
         {
             var reader = context.Reader;
@@ -44,7 +41,6 @@ namespace AsmResolver.Net
 
         private MetadataHeader()
         {
-            MetadataResolver = new DefaultMetadataResolver(new DefaultNetAssemblyResolver());
             StreamHeaders = new MetadataStreamHeaderCollection(this);
         }
 
@@ -129,26 +125,28 @@ namespace AsmResolver.Net
             private set;
         }
 
+        // TODO
         /// <summary>
         /// Gets a collection of references to default primitive types defined in mscorlib.dll.
         /// </summary>
-        public TypeSystem TypeSystem
-        {
-            get
-            {
-                return _typeSystem ?? (_typeSystem = new TypeSystem(this,
-                    GetStream<TableStream>().GetTable<AssemblyDefinition>()[0].Name == "mscorlib"));
-            }
-        }
+        //public TypeSystem TypeSystem
+        //{
+        //    get
+        //    {
+        //        return _typeSystem ?? (_typeSystem = new TypeSystem(this,
+        //            GetStream<TableStream>().GetTable<AssemblyDefinition>()[0].Name == "mscorlib"));
+        //    }
+        //}
 
+        // TODO
         /// <summary>
         /// Gets or sets the metadata resolver that will be used when <see cref="IResolvable.Resolve"/> is called on a specific member reference.
         /// </summary>
-        public IMetadataResolver MetadataResolver
-        {
-            get;
-            set;
-        }
+        //public IMetadataResolver MetadataResolver
+        //{
+        //    get;
+        //    set;
+        //}
 
         /// <summary>
         /// Gets all metadata heap streams defined in the metadata data directory.
@@ -180,6 +178,13 @@ namespace AsmResolver.Net
         {
             var header = StreamHeaders.FirstOrDefault(x => x.Stream is TStream);
             return header != null ? (TStream)header.Stream : null;
+        }
+
+        public MetadataImage LockMetadata()
+        {
+            var tableStream = GetStream<TableStream>();
+            tableStream.IsReadOnly = true;
+            return new MetadataImage(this);
         }
 
         public override uint GetPhysicalLength()

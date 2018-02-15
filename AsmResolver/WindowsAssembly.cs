@@ -2,12 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using AsmResolver.Builder;
 using AsmResolver.Net;
-using AsmResolver.Net.Builder;
 
 namespace AsmResolver
 {
@@ -352,39 +347,40 @@ namespace AsmResolver
                         fileOffset < sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData);
         }
 
-        /// <summary>
-        /// Rebuilds and writes the assembly to a specific file path.
-        /// </summary>
-        /// <param name="file">The file path to write the image to.</param>
-        public void Write(string file)
-        {
-            using (var stream = File.Create(file))
-            {
-                Write(new BuildingParameters(new BinaryStreamWriter(stream)));
-            }
-        }
+        // TODO
+        ///// <summary>
+        ///// Rebuilds and writes the assembly to a specific file path.
+        ///// </summary>
+        ///// <param name="file">The file path to write the image to.</param>
+        //public void Write(string file)
+        //{
+        //    using (var stream = File.Create(file))
+        //    {
+        //        Write(new BuildingParameters(new BinaryStreamWriter(stream)));
+        //    }
+        //}
 
-        /// <summary>
-        /// Rebuilds and writes the assembly to a specific binary stream.
-        /// </summary>
-        /// <param name="writer">The writer to write the image to.</param>
-        public void Write(IBinaryStreamWriter writer)
-        {
-            Write(new BuildingParameters(writer));
-        }
+        ///// <summary>
+        ///// Rebuilds and writes the assembly to a specific binary stream.
+        ///// </summary>
+        ///// <param name="writer">The writer to write the image to.</param>
+        //public void Write(IBinaryStreamWriter writer)
+        //{
+        //    Write(new BuildingParameters(writer));
+        //}
 
-        /// <summary>
-        /// Rebuilds and writes the assembly to a destination, using the specified building parameters.
-        /// </summary>
-        /// <param name="parameters">The parameters to use for building the assembly image.</param>
-        public void Write(BuildingParameters parameters)
-        {
-            var builder = new NetAssemblyBuilder(this, parameters);
-            var context = new NetBuildingContext(builder);
-            builder.Build(context);
-            builder.UpdateOffsets(context);
-            builder.UpdateReferences(context);
-            builder.Write(new WritingContext(this, parameters.Writer, context));
-        }
+        ///// <summary>
+        ///// Rebuilds and writes the assembly to a destination, using the specified building parameters.
+        ///// </summary>
+        ///// <param name="parameters">The parameters to use for building the assembly image.</param>
+        //public void Write(BuildingParameters parameters)
+        //{
+        //    var builder = new NetAssemblyBuilder(this, parameters);
+        //    var context = new NetBuildingContext(builder);
+        //    builder.Build(context);
+        //    builder.UpdateOffsets(context);
+        //    builder.UpdateReferences(context);
+        //    builder.Write(new WritingContext(this, parameters.Writer, context));
+        //}
     }
 }

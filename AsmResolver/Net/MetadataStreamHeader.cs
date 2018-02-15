@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace AsmResolver.Net
 {
@@ -38,7 +34,7 @@ namespace AsmResolver.Net
         }
 
         public MetadataStreamHeader(string name)
-            : this(name, new CustomMetaDataStream())
+            : this(name, new CustomMetadataStream())
         {
         }
 
@@ -86,7 +82,7 @@ namespace AsmResolver.Net
                     return _stream;
 
                 if (_readingContext == null)
-                    _stream = new CustomMetaDataStream();
+                    _stream = new CustomMetadataStream();
                 else
                 {
                     var context =
@@ -112,7 +108,7 @@ namespace AsmResolver.Net
                             _stream = BlobStream.FromReadingContext(context);
                             break;
                         default:
-                            _stream = CustomMetaDataStream.FromReadingContext(context);
+                            _stream = CustomMetadataStream.FromReadingContext(context);
                             break;
                     }
                 }

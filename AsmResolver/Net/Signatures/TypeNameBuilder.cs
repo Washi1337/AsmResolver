@@ -6,9 +6,11 @@ namespace AsmResolver.Net.Signatures
     {
         public static string GetAssemblyQualifiedName(TypeSignature signature)
         {
-            string typeName = GetFullName(signature);
-            var assembly = signature.ResolutionScope.GetAssembly();
-            return typeName + ", " + assembly.FullName;
+            // TODO
+            throw new NotImplementedException();
+            //string typeName = GetFullName(signature);
+            //var assembly = signature.ResolutionScope.GetAssembly();
+            //return typeName + ", " + assembly.FullName;
         }
 
         private static string GetFullName(TypeSignature signature)

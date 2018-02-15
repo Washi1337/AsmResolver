@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using System;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
@@ -70,7 +68,8 @@ namespace AsmResolver.Net.Signatures
             switch (elementType)
             {
                 case ElementType.Boxed:
-                    return header.TypeSystem.Object;
+                    // TODO
+                    throw new NotImplementedException();
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(ReadFieldOrPropType(header, reader));
                 case ElementType.Enum:
@@ -88,11 +87,12 @@ namespace AsmResolver.Net.Signatures
             if (!reader.TryReadCompressedUInt32(out codedIndex))
                 return null;
 
-            MetadataMember type;
-            tableStream.TryResolveMember(tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef)
-                .DecodeIndex(codedIndex), out type);
+            throw new NotImplementedException();
+            //MetadataMember type;
+            //tableStream.TryResolveRow(tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef)
+            //    .DecodeIndex(codedIndex), out type);
             
-            return type as ITypeDefOrRef;
+            //return type as ITypeDefOrRef;
         }
 
         protected static void WriteTypeDefOrRef(MetadataHeader header, IBinaryStreamWriter writer, ITypeDefOrRef type)

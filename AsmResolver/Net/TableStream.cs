@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net
@@ -35,7 +32,7 @@ namespace AsmResolver.Net
             var currentOffset = reader.Position + (presentTables.Length * sizeof (uint));
 
             foreach (var table in presentTables)
-                table.SetMemberCount(reader.ReadUInt32());
+                table.SetRowCount(reader.ReadUInt32());
 
             foreach (var table in presentTables)
             {
@@ -49,6 +46,16 @@ namespace AsmResolver.Net
 
             return stream;
         }
+
+        private uint _reserved;
+        private byte _majorVersion;
+        private byte _minorVersion;
+        private byte _heapSizes;
+        private byte _reserved2;
+        private ulong _validBitVector;
+        private ulong _sortedBitVector;
+
+        private readonly IndexEncoder[] _encoders;
 
         private readonly MetadataTable[] _tables = new MetadataTable[45]
         {
@@ -80,7 +87,7 @@ namespace AsmResolver.Net
             new MethodImplementationTable(), 
             new ModuleReferenceTable(), 
             new TypeSpecificationTable(), 
-            new PInvokeImplementationTable(), 
+            new ImplementationMapTable(), 
             new FieldRvaTable(), 
             new EncLogTable(), 
             new EncMapTable(), 
@@ -99,14 +106,14 @@ namespace AsmResolver.Net
             new GenericParameterConstraintTable(),
         };
 
-        private readonly IndexEncoder[] _encoders;
+        private bool _isReadOnly;
 
         public TableStream()
         {
             foreach (var table in _tables)
-                if (table != null)
-                    table.TableStream = this;
-            _encoders = new IndexEncoder[]
+                table.TableStream = this;
+            
+            _encoders = new []
             {
                 new IndexEncoder(this, MetadataTokenType.TypeDef, MetadataTokenType.TypeRef,
                     MetadataTokenType.TypeSpec),
@@ -149,13 +156,31 @@ namespace AsmResolver.Net
             };
         }
 
+        public bool IsReadOnly
+        {
+            get { return _isReadOnly; }
+            internal set
+            {
+                if (_isReadOnly != value)
+                {
+                    _isReadOnly = value;
+                    foreach (var table in _tables)
+                        table.IsReadOnly = value;
+                }
+            }
+        }
+
         /// <summary>
         /// Reserved, should be zero.
         /// </summary>
         public uint Reserved
         {
-            get;
-            set;
+            get { return _reserved; }
+            set
+            {
+                AssertIsWriteable();
+                _reserved = value;
+            }
         }
 
         /// <summary>
@@ -163,17 +188,25 @@ namespace AsmResolver.Net
         /// </summary>
         public byte MajorVersion
         {
-            get;
-            set;
+            get { return _majorVersion; }
+            set
+            {
+                AssertIsWriteable();
+                _majorVersion = value;
+            }
         }
-        
+
         /// <summary>
         /// Gets or sets the minor version of table schemata. Shall be 0.
         /// </summary>
         public byte MinorVersion
         {
-            get;
-            set;
+            get { return _minorVersion; }
+            set
+            {
+                AssertIsWriteable();
+                _minorVersion = value;
+            }
         }
 
         /// <summary>
@@ -181,8 +214,12 @@ namespace AsmResolver.Net
         /// </summary>
         public byte HeapSizes
         {
-            get;
-            set;
+            get { return _heapSizes; }
+            set
+            {
+                AssertIsWriteable();
+                _heapSizes = value;
+            }
         }
 
         /// <summary>
@@ -190,8 +227,12 @@ namespace AsmResolver.Net
         /// </summary>
         public byte Reserved2
         {
-            get;
-            set;
+            get { return _reserved2; }
+            set
+            {
+                AssertIsWriteable();
+                _reserved2 = value;
+            }
         }
 
         /// <summary>
@@ -199,8 +240,12 @@ namespace AsmResolver.Net
         /// </summary>
         public ulong ValidBitVector
         {
-            get;
-            set;
+            get { return _validBitVector; }
+            set
+            {
+                AssertIsWriteable();
+                _validBitVector = value;
+            }
         }
 
         /// <summary>
@@ -208,8 +253,12 @@ namespace AsmResolver.Net
         /// </summary>
         public ulong SortedBitVector
         {
-            get;
-            set;
+            get { return _sortedBitVector; }
+            set
+            {
+                AssertIsWriteable();
+                _sortedBitVector = value;
+            }
         }
 
         /// <summary>
@@ -230,6 +279,7 @@ namespace AsmResolver.Net
 
         private void SetIndexSize(int bit, IndexSize value)
         {
+            AssertIsWriteable();
             var bitmask = 0;
             switch (value)
             {
@@ -293,37 +343,37 @@ namespace AsmResolver.Net
         }
 
         /// <summary>
-        /// Gets a table of a specific member type.
+        /// Gets the table instance given a specific table type.
         /// </summary>
-        /// <typeparam name="TElement">The member type of the table to get.</typeparam>
+        /// <typeparam name="TTable">The table type to get.</typeparam>
         /// <returns>The table.</returns>
-        public MetadataTable<TElement> GetTable<TElement>()
-            where TElement : MetadataMember
+        public TTable GetTable<TTable>()
+            where TTable : MetadataTable
         {
-            return (MetadataTable<TElement>)_tables.First(x => x is MetadataTable<TElement>);
+            return (TTable)_tables.First(x => x is TTable);
         }
 
         /// <summary>
-        /// Tries to resolve a member by a metadata token.
+        /// Tries to resolve a metadata row by a metadata token.
         /// </summary>
         /// <param name="token">The token to resolve.</param>
-        /// <param name="member">The resolved member, or null if resolution failed.</param>
+        /// <param name="member">The resolved metadata row, or null if resolution failed.</param>
         /// <returns><c>True</c> if resolution succeeded, <c>False</c> otherwise.</returns>
-        public bool TryResolveMember(MetadataToken token, out MetadataMember member)
+        public bool TryResolveRow(MetadataToken token, out MetadataRow member)
         {
             var table = GetTable(token.TokenType);
-            return table.TryGetMember((int)(token.Rid - 1), out member);
+            return table.TryGetRow((int)(token.Rid - 1), out member);
         }
 
         /// <summary>
-        /// Resolves a member by a metadata token.
+        /// Resolves a metadata row by a metadata token.
         /// </summary>
         /// <param name="token">The token to resolve.</param>
-        /// <returns>The resolved member.</returns>
-        public MetadataMember ResolveMember(MetadataToken token)
+        /// <returns>The resolved metadata row.</returns>
+        public MetadataRow ResolveRow(MetadataToken token)
         {
             var table = GetTable(token.TokenType);
-            return table.GetMember((int)(token.Rid - 1));
+            return table.GetRow((int)(token.Rid - 1));
         }
 
         public override uint GetPhysicalLength()
@@ -365,6 +415,12 @@ namespace AsmResolver.Net
                 table.Write(context);
 
             writer.WriteUInt32(0);
+        }
+
+        private void AssertIsWriteable()
+        {
+            if (IsReadOnly)
+                throw new InvalidOperationException("Table stream cannot be modified in read-only mode.");
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using AsmResolver.Net;
+using AsmResolver.Net.Metadata;
 
 namespace AsmResolver
 {

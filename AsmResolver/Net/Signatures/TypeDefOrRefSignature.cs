@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
@@ -70,7 +67,7 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            var encoder = Type.Header.GetStream<TableStream>()
+            var encoder = Type.Image.Header.GetStream<TableStream>()
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             return sizeof (byte) +
                    encoder.EncodeToken(Type.MetadataToken).GetCompressedSize();
