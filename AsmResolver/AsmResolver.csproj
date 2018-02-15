@@ -94,6 +94,7 @@
     <Compile Include="Net\Cts\MethodDefinition.cs" />
     <Compile Include="Net\Cts\ModuleDefinition.cs" />
     <Compile Include="Net\Cts\Collections\RangedMemberCollection.cs" />
+    <Compile Include="Net\Cts\ParameterDefinition.cs" />
     <Compile Include="Net\Cts\SecurityDeclaration.cs" />
     <Compile Include="Net\Cts\TypeDefinition.cs" />
     <Compile Include="Net\Cts\TypeReference.cs" />

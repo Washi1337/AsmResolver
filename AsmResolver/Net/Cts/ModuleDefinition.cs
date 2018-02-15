@@ -30,7 +30,6 @@ namespace AsmResolver.Net.Cts
             : base(image, row.MetadataToken)
         {
             var header = image.Header;
-            var tableStream = header.GetStream<TableStream>();
             var stringStream = header.GetStream<StringStream>();
             var guidStream = header.GetStream<GuidStream>();
 
@@ -39,7 +38,7 @@ namespace AsmResolver.Net.Cts
            _mvid = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column3));
            _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
            _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
-            Types = new TableMemberCollection<ModuleDefinition, TypeDefinition>(this, tableStream.GetTable(MetadataTokenType.TypeDef), GetTypeOwner, SetTypeOwner);
+            Types = new TableMemberCollection<ModuleDefinition, TypeDefinition>(this, MetadataTokenType.TypeDef, GetTypeOwner, SetTypeOwner);
         }
 
         public ushort Generation

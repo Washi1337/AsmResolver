@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -12,9 +13,7 @@ namespace AsmResolver.Net.Cts
         private string _fullName;
         private CustomAttributeCollection _customAttributes;
         private SecurityDeclarationCollection _securityDeclarations;
-        //private RangedDefinitionCollection<ParameterDefinition> _parameters;
         //private MethodBody _body;
-        private TypeDefinition _declaringType;
         //private GenericParameterCollection _genericParameters;
         //private PInvokeImplementation _pinvokeImplementation;
 
@@ -29,6 +28,7 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(name);
             Attributes = attributes;
             _signature = new LazyValue<MethodSignature>(signature);
+            Parameters = new DelegatedMemberCollection<MethodDefinition, ParameterDefinition>(this, GetParamOwner, SetParamOwner);
         }
 
         internal MethodDefinition(MetadataImage image, MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
@@ -45,6 +45,8 @@ namespace AsmResolver.Net.Cts
             IBinaryStreamReader blobReader;
             if (blobStream.TryCreateBlobReader(row.Column5, out blobReader))
                 _signature = new LazyValue<MethodSignature>(() => MethodSignature.FromReader(image, blobReader));
+
+            Parameters = new RangedMemberCollection<MethodDefinition,ParameterDefinition>(this, MetadataTokenType.Param, 5, GetParamOwner, SetParamOwner);
         }
 
         public uint Rva
@@ -111,20 +113,13 @@ namespace AsmResolver.Net.Cts
             get { return Signature; }
         }
 
-        // TODO
-        //public RangedDefinitionCollection<ParameterDefinition> Parameters
-        //{
-        //    get
-        //    {
-        //        if (_parameters != null)
-        //            return _parameters;
-        //        return
-        //            _parameters =
-        //                RangedDefinitionCollection<ParameterDefinition>.Create(Header, this,
-        //                    x => (int)x.MetadataRow.Column6);
-        //    }
-        //}
+        public Collection<ParameterDefinition> Parameters
+        {
+            get;
+            private set;
+        }
 
+        // TODO
         //public MethodBody MethodBody
         //{
         //    get
@@ -377,5 +372,15 @@ namespace AsmResolver.Net.Cts
         //{
         //    get { return this; }
         //}
+
+        private static void SetParamOwner(ParameterDefinition param, MethodDefinition method)
+        {
+            param.Method = method;
+        }
+
+        private static MethodDefinition GetParamOwner(ParameterDefinition param)
+        {
+            return param.Method;
+        }
     }
 }

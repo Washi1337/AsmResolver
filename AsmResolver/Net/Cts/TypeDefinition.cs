@@ -60,10 +60,8 @@ namespace AsmResolver.Net.Metadata
                 return null;
             });
 
-            Fields = new RangedMemberCollection<TypeDefinition, FieldDefinition>(this,
-                tableStream.GetTable(MetadataTokenType.Field), 4, GetFieldOwner, SetFieldOwner);
-            Methods = new RangedMemberCollection<TypeDefinition, MethodDefinition>(this,
-                tableStream.GetTable(MetadataTokenType.Method), 5, GetMethodOwner, SetMethodOwner);
+            Fields = new RangedMemberCollection<TypeDefinition, FieldDefinition>(this, MetadataTokenType.Field, 4, GetFieldOwner, SetFieldOwner);
+            Methods = new RangedMemberCollection<TypeDefinition, MethodDefinition>(this, MetadataTokenType.Method, 5, GetMethodOwner, SetMethodOwner);
         }
 
         public TypeAttributes Attributes

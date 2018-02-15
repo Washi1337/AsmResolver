@@ -17,6 +17,11 @@ namespace AsmResolver.Net.Cts.Collections
             _table = table;
         }
 
+        public TableMemberCollection(TOwner owner, MetadataTokenType table, Func<TMember, TOwner> getOwner, Action<TMember, TOwner> setOwner)
+            : this(owner, owner.Image.Header.GetStream<TableStream>().GetTable(table), getOwner, setOwner)
+        {
+        }
+
         public TableMemberCollection(TOwner owner, MetadataTable table, Func<TMember, TOwner> getOwner, Action<TMember, TOwner> setOwner)
             : base(owner)
         {
