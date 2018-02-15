@@ -90,6 +90,7 @@
     <Compile Include="Net\Cts\AssemblyDefinition.cs" />
     <Compile Include="Net\Cts\IResolvable.cs" />
     <Compile Include="Net\Cts\Collections\KeyedMemberCollection.cs" />
+    <Compile Include="Net\Cts\MemberReference.cs" />
     <Compile Include="Net\Cts\MetadataImage.cs" />
     <Compile Include="Net\Cts\MethodDefinition.cs" />
     <Compile Include="Net\Cts\ModuleDefinition.cs" />

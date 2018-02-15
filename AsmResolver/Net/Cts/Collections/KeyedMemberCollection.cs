@@ -55,7 +55,7 @@ namespace AsmResolver.Net.Cts.Collections
                             var item = memberTable.GetRow(index);
                             if (Convert.ToUInt32(item.GetAllColumns()[_keyColumnIndex]) != key)
                                 break;
-                            var member = (TMember) memberTable.GetMemberFromRow(Owner.Image, row);
+                            var member = (TMember) memberTable.GetMemberFromRow(Owner.Image, item);
                             Items.Add(member);
                             SetOwner(member, Owner);
                         }

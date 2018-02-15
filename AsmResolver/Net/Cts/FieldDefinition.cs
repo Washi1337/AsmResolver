@@ -1,12 +1,10 @@
 ﻿using System;
-using AsmResolver.Net.Cts;
 using AsmResolver.Net.Cts.Collections;
+using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
-namespace AsmResolver.Net.Metadata
+namespace AsmResolver.Net.Cts
 {
-  
-
     public class FieldDefinition : MetadataMember<MetadataRow<FieldAttributes, uint, uint>>, ICallableMemberReference, IHasConstant, IHasFieldMarshal, IMemberForwarded
     {
         private readonly LazyValue<string> _name;
