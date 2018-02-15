@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AsmResolver.Net.Cts;
@@ -124,17 +125,18 @@ namespace AsmResolver.Net
             get;
             private set;
         }
-        
-        // TODO
-        /// <summary>
-        /// Gets or sets the metadata resolver that will be used when <see cref="IResolvable.Resolve"/> is called on a specific member reference.
-        /// </summary>
-        //public IMetadataResolver MetadataResolver
-        //{
-        //    get;
-        //    set;
-        //}
 
+        public MetadataImage Image
+        {
+            get;
+            private set;
+        }
+
+        public bool IsLocked
+        {
+            get { return Image != null; }
+        }
+        
         /// <summary>
         /// Gets all metadata heap streams defined in the metadata data directory.
         /// </summary>
@@ -169,9 +171,13 @@ namespace AsmResolver.Net
 
         public MetadataImage LockMetadata()
         {
+            if (Image != null)
+                throw new InvalidOperationException("Cannot lock the metadata after the metadata has already been locked.");
+
             var tableStream = GetStream<TableStream>();
             tableStream.IsReadOnly = true;
-            return new MetadataImage(this);
+            Image = new MetadataImage(this);
+            return Image;
         }
 
         public override uint GetPhysicalLength()

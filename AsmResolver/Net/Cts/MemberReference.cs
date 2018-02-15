@@ -111,14 +111,12 @@ namespace AsmResolver.Net.Cts
 
         public IMetadataMember Resolve()
         {
-            throw new NotImplementedException();
-            // TODO
-            //if (Header == null || Header.MetadataResolver == null || Signature == null)
-            //    throw new MemberResolutionException(this);
+            if (Image == null || Image.MetadataResolver == null || Signature == null)
+                throw new MemberResolutionException(this);
 
-            //return Signature.IsMethod
-            //    ? (IMetadataMember)Header.MetadataResolver.ResolveMethod(this)
-            //    : Header.MetadataResolver.ResolveField(this);
+            return Signature.IsMethod
+                ? (IMetadataMember)Image.MetadataResolver.ResolveMethod(this)
+                : Image.MetadataResolver.ResolveField(this);
         }
     }
 }

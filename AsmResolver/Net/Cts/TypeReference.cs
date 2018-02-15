@@ -118,12 +118,9 @@ namespace AsmResolver.Net.Cts
 
         public TypeDefinition Resolve()
         {
-            throw new NotImplementedException();
-
-            // TODO
-            //if (Image == null || Image.MetadataResolver == null)
-            //    throw new MemberResolutionException(this);
-            //return Header.MetadataResolver.ResolveType(this);
+            if (Image == null || Image.MetadataResolver == null)
+                throw new MemberResolutionException(this);
+            return Image.MetadataResolver.ResolveType(this);
         }
 
         IMetadataMember IResolvable.Resolve()

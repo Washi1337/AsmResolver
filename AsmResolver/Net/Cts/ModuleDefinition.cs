@@ -38,7 +38,7 @@ namespace AsmResolver.Net.Cts
            _mvid = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column3));
            _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
            _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
-            Types = new TableMemberCollection<ModuleDefinition, TypeDefinition>(this, MetadataTokenType.TypeDef, GetTypeOwner, SetTypeOwner);
+            Types = new TableMemberCollection<ModuleDefinition, TypeDefinition>(this, MetadataTokenType.TypeDef, GetTypeOwner, SetTypeOwner); // TODO: filter nested types.
         }
 
         public ushort Generation

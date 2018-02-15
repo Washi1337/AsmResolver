@@ -104,9 +104,9 @@
     <Compile Include="Net\GuidStream.cs" />
     <Compile Include="Net\ImageNetDirectory.cs" />
     <Compile Include="Net\ImageNetDirectoryFlags.cs" />
-    <Compile Include="Net\IMetadataResolver.cs" />
+    <Compile Include="Net\Cts\IMetadataResolver.cs" />
     <Compile Include="Net\IndexSize.cs" />
-    <Compile Include="Net\INetAssemblyResolver.cs" />
+    <Compile Include="Net\Cts\INetAssemblyResolver.cs" />
     <Compile Include="Net\ITypeDescriptor.cs" />
     <Compile Include="Net\MetadataStreamHeaderCollection.cs" />
     <Compile Include="Net\IAssemblyDescriptor.cs" />

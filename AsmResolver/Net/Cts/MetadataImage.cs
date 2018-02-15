@@ -19,6 +19,7 @@ namespace AsmResolver.Net.Cts
             Assembly = (AssemblyDefinition) table.GetMemberFromRow(this, table.GetRow(0));
 
             TypeSystem = new TypeSystem(this, Assembly.Name == "mscorlib");
+            MetadataResolver = new DefaultMetadataResolver(new DefaultNetAssemblyResolver());
         }
 
         public MetadataHeader Header
@@ -31,6 +32,15 @@ namespace AsmResolver.Net.Cts
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Gets or sets the metadata resolver that will be used when <see cref="IResolvable.Resolve"/> is called on a specific member reference.
+        /// </summary>
+        public IMetadataResolver MetadataResolver
+        {
+            get;
+            set;
         }
 
         public AssemblyDefinition Assembly
