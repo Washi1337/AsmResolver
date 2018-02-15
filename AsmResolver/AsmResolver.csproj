@@ -79,6 +79,7 @@
     <Compile Include="ImageOptionalHeader.cs" />
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
+    <Compile Include="Net\Cts\AssemblyReference.cs" />
     <Compile Include="Net\Cts\Collections\DelegatedMemberCollection.cs" />
     <Compile Include="Net\Cts\Collections\MemberCollection.cs" />
     <Compile Include="Net\Cts\Collections\TableMemberCollection.cs" />

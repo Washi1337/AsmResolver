@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using AsmResolver.Collections.Generic;
@@ -31,6 +30,7 @@ namespace AsmResolver.Net.Cts
             _culture = new LazyValue<string>(info.Culture);
             _publicKey = new LazyValue<DataBlobSignature>(info.PublicKeyToken == null ? null : new DataBlobSignature(info.PublicKeyToken));
             Modules = new DelegatedMemberCollection<AssemblyDefinition, ModuleDefinition>(this, GetModuleOwner, SetModuleOwner);
+            AssemblyReferences = new Collection<AssemblyReference>();
         }
 
         public AssemblyDefinition(string name, Version version)
@@ -41,6 +41,7 @@ namespace AsmResolver.Net.Cts
             _culture = new LazyValue<string>();
             _publicKey = new LazyValue<DataBlobSignature>();
             Modules = new DelegatedMemberCollection<AssemblyDefinition, ModuleDefinition>(this, GetModuleOwner, SetModuleOwner);
+            AssemblyReferences = new Collection<AssemblyReference>();
         }
 
         internal AssemblyDefinition(MetadataImage image, MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint> row)
@@ -57,6 +58,7 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column8));
             _culture = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column9));
             Modules = new TableMemberCollection<AssemblyDefinition, ModuleDefinition>(this, tableStream.GetTable(MetadataTokenType.Module), GetModuleOwner, SetModuleOwner);
+            AssemblyReferences = new TableMemberCollection<AssemblyDefinition, AssemblyReference>(this, tableStream.GetTable(MetadataTokenType.AssemblyRef));
         }
 
         /// <summary>
@@ -177,6 +179,15 @@ namespace AsmResolver.Net.Cts
             private set;
         }
 
+        /// <summary>
+        /// Gets a collection of dependency assemblies that this assembly references.
+        /// </summary>
+        public Collection<AssemblyReference> AssemblyReferences
+        {
+            get;
+            private set;
+        }
+
         public override string ToString()
         {
             return FullName;
@@ -189,7 +200,7 @@ namespace AsmResolver.Net.Cts
         
         private static byte[] ComputePublicKeyToken(byte[] key, AssemblyHashAlgorithm algorithm)
         {
-            System.Security.Cryptography.HashAlgorithm hashAlgorithm;
+            HashAlgorithm hashAlgorithm;
             switch (algorithm)
             {
                 case AssemblyHashAlgorithm.Md5:

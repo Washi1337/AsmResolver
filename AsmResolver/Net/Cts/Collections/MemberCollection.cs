@@ -34,14 +34,19 @@ namespace AsmResolver.Net.Cts.Collections
         
         protected override void ClearItems()
         {
-            foreach (var item in Items)
-                SetOwner(item, null);
+            if (Owner != null)
+            {
+                foreach (var item in Items)
+                    SetOwner(item, null);
+            }
+
             base.ClearItems();
         }
 
         protected override void InsertItem(int index, TMember item)
         {
-            AssertHasNoOwner(item);
+            if (Owner != null)
+                AssertHasNoOwner(item);
             base.InsertItem(index, item);
             SetOwner(item, Owner);
         }
@@ -56,7 +61,9 @@ namespace AsmResolver.Net.Cts.Collections
         {
             AssertHasNoOwner(item);
             SetOwner(Items[index], null);
+
             base.SetItem(index, item);
+            
             SetOwner(item, Owner);
         }
     }

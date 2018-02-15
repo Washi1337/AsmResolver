@@ -11,6 +11,12 @@ namespace AsmResolver.Net.Cts.Collections
         private readonly Func<TMember, TOwner> _getOwner;
         private readonly Action<TMember, TOwner> _setOwner;
 
+        public TableMemberCollection(TOwner owner, MetadataTable table)
+            : base(owner)
+        {
+            _table = table;
+        }
+
         public TableMemberCollection(TOwner owner, MetadataTable table, Func<TMember, TOwner> getOwner, Action<TMember, TOwner> setOwner)
             : base(owner)
         {
@@ -30,12 +36,13 @@ namespace AsmResolver.Net.Cts.Collections
         
         protected override TOwner GetOwner(TMember item)
         {
-            return _getOwner(item);
+            return _getOwner != null ? _getOwner(item) : null;
         }
 
         protected override void SetOwner(TMember item, TOwner owner)
         {
-            _setOwner(item, owner);
+            if (_setOwner != null)
+                _setOwner(item, owner);
         }
 
         protected override void Initialize()

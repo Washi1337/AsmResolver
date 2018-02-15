@@ -60,7 +60,7 @@ namespace AsmResolver.Net.Metadata
             MetadataImage image, 
             MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new AssemblyReference(image, row);
         }
     }
     
