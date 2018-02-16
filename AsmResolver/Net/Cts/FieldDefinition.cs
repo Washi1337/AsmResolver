@@ -9,10 +9,9 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<FieldSignature> _signature;
+        private readonly LazyValue<Constant> _constant;
         private string _fullName;
         private CustomAttributeCollection _customAttributes;
-        private TypeDefinition _declaringType;
-        //private Constant _constant;
         //private FieldMarshal _marshal;
         //private FieldRva _rva;
 
@@ -27,18 +26,23 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(name);
             Attributes = attributes;
             _signature = new LazyValue<FieldSignature>(signature);
+            _constant = new LazyValue<Constant>(default(Constant));
         }
 
         internal FieldDefinition(MetadataImage image, MetadataRow<FieldAttributes, uint, uint> row)
             : base(image, row.MetadataToken)
         {
-            var stringStream = image.Header.GetStream<StringStream>();
-            var blobStream = image.Header.GetStream<BlobStream>();
-
             Attributes = row.Column1;
-            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
+            _name = new LazyValue<string>(() => image.Header.GetStream<StringStream>().GetStringByOffset(row.Column2));
             _signature = new LazyValue<FieldSignature>(() => 
-                FieldSignature.FromReader(image, blobStream.CreateBlobReader(row.Column3)));
+                FieldSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
+
+            _constant = new LazyValue<Constant>(() =>
+            {
+                var stream = image.Header.GetStream<TableStream>();
+                var table = stream.GetTable(MetadataTokenType.Constant);
+                table.GetRowByKey()
+            });
         }
 
         public FieldAttributes Attributes
@@ -88,20 +92,13 @@ namespace AsmResolver.Net.Cts
             get { return Signature; }
         }
 
+        public Constant Constant
+        {
+            get { return _constant.Value; }
+            set { _constant.Value = value; }
+        }
+
         // TODO
-        //public Constant Constant
-        //{
-        //    get
-        //    {
-        //        if (_constant != null || Header == null)
-        //            return _constant;
-
-        //        var table = Header.GetStream<TableStream>().GetTable<Constant>();
-        //        return _constant = table.FirstOrDefault(x => x.Parent == this);
-        //    }
-        //    set { _constant = value; }
-        //}
-
         //public FieldMarshal FieldMarshal
         //{
         //    get

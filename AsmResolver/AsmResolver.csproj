@@ -83,6 +83,7 @@
     <Compile Include="Net\Cts\Collections\DelegatedMemberCollection.cs" />
     <Compile Include="Net\Cts\Collections\MemberCollection.cs" />
     <Compile Include="Net\Cts\Collections\TableMemberCollection.cs" />
+    <Compile Include="Net\Cts\Constant.cs" />
     <Compile Include="Net\Cts\CustomAttribute.cs" />
     <Compile Include="Net\Cts\FieldDefinition.cs" />
     <Compile Include="Net\Cts\IMemberReference.cs" />
