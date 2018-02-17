@@ -15,7 +15,8 @@ namespace AsmResolver.Net.Metadata
         private readonly LazyValue<ModuleDefinition> _module;
         private readonly LazyValue<ClassLayout> _classLayout;
         private readonly LazyValue<PropertyMap> _propertyMap;
-        //private EventMap _eventMap;
+        private readonly LazyValue<EventMap> _eventMap;
+        
         //private NestedClassCollection _nestedClasses;
         //private GenericParameterCollection _genericParameters;
         //private InterfaceImplementationCollection _interfaces;
@@ -39,6 +40,7 @@ namespace AsmResolver.Net.Metadata
             _module = new LazyValue<ModuleDefinition>(default(ModuleDefinition));
             _classLayout = new LazyValue<ClassLayout>(default(ClassLayout));
             _propertyMap = new LazyValue<PropertyMap>(default(PropertyMap));
+            _eventMap = new LazyValue<EventMap>(default(EventMap));
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
@@ -84,6 +86,13 @@ namespace AsmResolver.Net.Metadata
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.PropertyMap);
                 var mapRow = table.GetRowByKey(0, row.MetadataToken.Rid);
                 return mapRow != null ? (PropertyMap) table.GetMemberFromRow(image, mapRow) : null;
+            });
+            
+            _eventMap = new LazyValue<EventMap>(() =>
+            {
+                var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.EventMap);
+                var mapRow = table.GetRowByKey(0, row.MetadataToken.Rid);
+                return mapRow != null ? (EventMap) table.GetMemberFromRow(image, mapRow) : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -151,19 +160,12 @@ namespace AsmResolver.Net.Metadata
             get { return _propertyMap.Value; }
             set { _propertyMap.Value = value; }
         }
-
-        //public EventMap EventMap
-        //{
-        //    get
-        //    {
-        //        if (_eventMap != null)
-        //            return _eventMap;
-        //        return Header == null
-        //            ? (_eventMap = new EventMap(this))
-        //            : (_eventMap =
-        //                Header.GetStream<TableStream>().GetTable<EventMap>().FirstOrDefault(x => x.Parent == this));
-        //    }
-        //}
+        
+        public EventMap EventMap
+        {
+            get { return _eventMap.Value; }
+            set { _eventMap.Value = value; }
+        }
 
         public virtual string FullName
         {

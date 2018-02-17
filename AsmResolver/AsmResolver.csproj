@@ -86,6 +86,8 @@
     <Compile Include="Net\Cts\Collections\TableMemberCollection.cs" />
     <Compile Include="Net\Cts\Constant.cs" />
     <Compile Include="Net\Cts\CustomAttribute.cs" />
+    <Compile Include="Net\Cts\EventDefinition.cs" />
+    <Compile Include="Net\Cts\EventMap.cs" />
     <Compile Include="Net\Cts\FieldDefinition.cs" />
     <Compile Include="Net\Cts\FieldMarshal.cs" />
     <Compile Include="Net\Cts\FieldRva.cs" />
