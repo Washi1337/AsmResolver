@@ -7,7 +7,6 @@ namespace AsmResolver.Net.Cts
 {
     public class AssemblyReference : MetadataMember<MetadataRow<ushort,ushort,ushort,ushort,AssemblyAttributes,uint,uint,uint,uint>>, IImplementation, IHasCustomAttribute, IResolutionScope, IAssemblyDescriptor
     {
-        private CustomAttributeCollection _customAttributes;
         private Version _version;
         private readonly LazyValue<string> _name;
         private readonly LazyValue<string> _culture;
@@ -23,6 +22,7 @@ namespace AsmResolver.Net.Cts
             _culture = new LazyValue<string>(info.Culture);
             _publicKey = new LazyValue<DataBlobSignature>(info.PublicKeyToken == null ? null : new DataBlobSignature(info.PublicKeyToken));
             _hashValue = new LazyValue<DataBlobSignature>();
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         public AssemblyReference(string name, Version version)
@@ -33,6 +33,7 @@ namespace AsmResolver.Net.Cts
             _culture = new LazyValue<string>();
             _publicKey = new LazyValue<DataBlobSignature>();
             _hashValue = new LazyValue<DataBlobSignature>();
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         internal AssemblyReference(MetadataImage image, MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint> row)
@@ -47,6 +48,7 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column7));
             _culture = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column8));
             _hashValue = new LazyValue<DataBlobSignature>(() => row.Column9 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column9)));
+            CustomAttributes = new CustomAttributeCollection(this);
         }
         
         public Version Version
@@ -118,12 +120,8 @@ namespace AsmResolver.Net.Cts
 
         public CustomAttributeCollection CustomAttributes
         {
-            get
-            {
-                if (_customAttributes != null)
-                    return _customAttributes;
-                return _customAttributes = new CustomAttributeCollection(this);
-            }
+            get;
+            private set;
         }
 
         public AssemblyDefinition Resolve()

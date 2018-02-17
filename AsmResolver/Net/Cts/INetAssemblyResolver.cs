@@ -36,12 +36,19 @@ namespace AsmResolver.Net.Cts
         {
             var gacDirectories = new List<GacDirectory>();
 
-            gacDirectories.AddRange(
-                GetGacDirectories(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                    "assembly"), false));
-            gacDirectories.AddRange(
-                GetGacDirectories(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                    "Microsoft.NET", "assembly"), true));
+            if (Utilities.IsRunningOnMono())
+            {
+                gacDirectories.AddRange(GetGacDirectories("/usr/lib/mono/gac", true));
+            }
+            else
+            {
+                gacDirectories.AddRange(
+                    GetGacDirectories(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                        "assembly"), false));
+                gacDirectories.AddRange(
+                    GetGacDirectories(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                        "Microsoft.NET", "assembly"), true));
+            }
 
             GacDirectories = gacDirectories.ToArray();
         }

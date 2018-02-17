@@ -6,7 +6,7 @@ namespace AsmResolver.Net.Cts
     public class ParameterDefinition : MetadataMember<MetadataRow<ParameterAttributes, ushort, uint>>, IHasConstant, IHasCustomAttribute, IHasFieldMarshal
     {
         private readonly LazyValue<string> _name;
-        private CustomAttributeCollection _customAttributes;
+        private readonly LazyValue<MethodDefinition> _method;
 
         public ParameterDefinition(int sequence, string name, ParameterAttributes attributes)
             : base(null, new MetadataToken(MetadataTokenType.Param))
@@ -14,16 +14,26 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(name);
             Sequence = sequence;
             Attributes = attributes;
+
+            _method = new LazyValue<MethodDefinition>(default(MethodDefinition));
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         internal ParameterDefinition(MetadataImage image, MetadataRow<ParameterAttributes, ushort, uint> row)
             : base(image, row.MetadataToken)
         {
-            var stringStream = image.Header.GetStream<StringStream>();
-
             Attributes = row.Column1;
             Sequence = row.Column2;
-            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column3));
+            _name = new LazyValue<string>(() => image.Header.GetStream<StringStream>().GetStringByOffset(row.Column3));
+            
+            _method =  new LazyValue<MethodDefinition>(() =>
+            {
+                var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.Method);
+                var methodRow = table.GetRowClosestToKey(5, row.MetadataToken.Rid);
+                return (MethodDefinition) table.GetMemberFromRow(image, methodRow);
+            });
+            
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         public ParameterAttributes Attributes
@@ -59,13 +69,8 @@ namespace AsmResolver.Net.Cts
 
         public CustomAttributeCollection CustomAttributes
         {
-            get
-            {
-                if (_customAttributes != null)
-                    return _customAttributes;
-                _customAttributes = new CustomAttributeCollection(this);
-                return _customAttributes;
-            }
+            get;
+            private set;
         }
 
         // todo:

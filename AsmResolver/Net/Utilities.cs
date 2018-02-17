@@ -87,5 +87,10 @@ namespace AsmResolver.Net
                 (Convert.ToUInt64(self) & ~Convert.ToUInt64(flag)) | (value ? Convert.ToUInt64(flag) : 0),
                 typeof(TEnum).GetEnumUnderlyingType());
         }
+        
+        internal static bool IsRunningOnMono ()
+        {
+            return Type.GetType ("Mono.Runtime") != null;
+        }
     }
 }

@@ -12,8 +12,7 @@ namespace AsmResolver.Net.Metadata
         private readonly LazyValue<string> _name;
         private readonly LazyValue<string> _namespace;
         private readonly LazyValue<ITypeDefOrRef> _baseType;
-        private CustomAttributeCollection _customAttributes;
-        private SecurityDeclarationCollection _securityDeclarations;
+        private readonly LazyValue<ModuleDefinition> _module;
         //private PropertyMap _propertyMap;
         //private EventMap _eventMap;
         //private NestedClassCollection _nestedClasses;
@@ -36,6 +35,10 @@ namespace AsmResolver.Net.Metadata
             _baseType = new LazyValue<ITypeDefOrRef>(baseType);
             Fields = new DelegatedMemberCollection<TypeDefinition, FieldDefinition>(this, GetFieldOwner, SetFieldOwner);
             Methods = new DelegatedMemberCollection<TypeDefinition, MethodDefinition>(this, GetMethodOwner, SetMethodOwner);
+
+            _module = new LazyValue<ModuleDefinition>(default(ModuleDefinition));
+            CustomAttributes = new CustomAttributeCollection(this);
+            SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
 
         internal TypeDefinition(MetadataImage image, MetadataRow<TypeAttributes, uint, uint, uint, uint, uint> row)
@@ -62,6 +65,11 @@ namespace AsmResolver.Net.Metadata
 
             Fields = new RangedMemberCollection<TypeDefinition, FieldDefinition>(this, MetadataTokenType.Field, 4, GetFieldOwner, SetFieldOwner);
             Methods = new RangedMemberCollection<TypeDefinition, MethodDefinition>(this, MetadataTokenType.Method, 5, GetMethodOwner, SetMethodOwner);
+
+            _module = new LazyValue<ModuleDefinition>(() =>
+                (ModuleDefinition) Image.ResolveMember(new MetadataToken(MetadataTokenType.Module, 1)));
+            CustomAttributes = new CustomAttributeCollection(this);
+            SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
 
         public TypeAttributes Attributes
@@ -112,6 +120,12 @@ namespace AsmResolver.Net.Metadata
         {
             get;
             private set;
+        }
+
+        public ModuleDefinition Module
+        {
+            get { return _module.Value; }
+            internal set { _module.Value = value; }
         }
 
         //public PropertyMap PropertyMap
@@ -191,12 +205,14 @@ namespace AsmResolver.Net.Metadata
 
         public CustomAttributeCollection CustomAttributes
         {
-            get { return _customAttributes ?? (_customAttributes = new CustomAttributeCollection(this)); }
+            get;
+            private set;
         }
 
         public SecurityDeclarationCollection SecurityDeclarations
         {
-            get { return _securityDeclarations ?? (_securityDeclarations = new SecurityDeclarationCollection(this)); }
+            get;
+            private set;
         }
 
         // TODO
@@ -392,13 +408,6 @@ namespace AsmResolver.Net.Metadata
                        (BaseType.IsTypeOf("System", "ValueType") || IsEnum);
             }
         }
-
-        public ModuleDefinition Module
-        {
-            get;
-            internal set;
-        }
-
         private bool GetTypeAccessAttribute(TypeAttributes attribute)
         {
             return ((uint)Attributes).GetMaskedAttribute((uint)TypeAttributes.VisibilityMask,

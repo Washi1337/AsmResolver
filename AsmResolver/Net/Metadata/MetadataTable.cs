@@ -109,18 +109,60 @@ namespace AsmResolver.Net.Metadata
             while (left <= right)
             {
                 int m = (left + right) / 2;
-                var member = GetRow(m);
-                uint current = Convert.ToUInt32(member.GetAllColumns().ElementAt(keyColumnIndex));
+                var currentRow = GetRow(m);
+                uint currentKey = Convert.ToUInt32(currentRow.GetAllColumns()[keyColumnIndex]);
 
-                if (current > key)
+                if (currentKey > key)
                     right = m - 1;
-                else if (current < key)
+                else if (currentKey < key)
                     left = m + 1;
                 else
-                    return member;
+                    return currentRow;
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets a single row in a table by a key. This requires the table to be sorted.
+        /// </summary>
+        /// <param name="keyColumnIndex">The column number to get the key from.</param>
+        /// <param name="key">The key to search.</param>
+        /// <returns>The first row that contains the given key, or null if none was found.</returns>
+        public MetadataRow GetRowClosestToKey(int keyColumnIndex, uint key)
+        {
+            if (Count == 0)
+                return null;
+
+            int left = 0;
+            int right = Count - 1;
+            
+            MetadataRow row = null;
+            uint currentKey = 0;
+            
+            while (left <= right)
+            {
+                int m = (left + right) / 2;
+                row = GetRow(m);
+                currentKey = Convert.ToUInt32(row.GetAllColumns()[keyColumnIndex]);
+
+                if (currentKey > key)
+                    right = m - 1;
+                else if (currentKey < key)
+                    left = m + 1;
+                else
+                {
+                    left++;
+                    right++;
+                }
+            }
+
+            if (row != null && currentKey > key)
+            {
+                row = GetRow((int) (row.MetadataToken.Rid - 2));
+            }
+                
+            return row;
         }
 
         public abstract IMetadataMember GetMemberFromRow(MetadataImage image, MetadataRow row);

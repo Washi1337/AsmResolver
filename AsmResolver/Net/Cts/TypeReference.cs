@@ -7,7 +7,6 @@ namespace AsmResolver.Net.Cts
 {
     public class TypeReference : MetadataMember<MetadataRow<uint, uint, uint>>, ITypeDefOrRef, IResolutionScope
     {
-        private CustomAttributeCollection _customAttributes;
         private readonly LazyValue<string> _name;
         private readonly LazyValue<string> _namespace;
         private string _fullName;
@@ -18,6 +17,8 @@ namespace AsmResolver.Net.Cts
             ResolutionScope = resolutionScope;
             _namespace = new LazyValue<string>(@namespace);
             _name = new LazyValue<string>(name);
+            
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         internal TypeReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
@@ -36,6 +37,8 @@ namespace AsmResolver.Net.Cts
 
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
             _namespace = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column3));
+            
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         public ITypeDefOrRef DeclaringType
@@ -102,13 +105,8 @@ namespace AsmResolver.Net.Cts
 
         public CustomAttributeCollection CustomAttributes
         {
-            get
-            {
-                if (_customAttributes != null)
-                    return _customAttributes;
-                _customAttributes = new CustomAttributeCollection(this);
-                return _customAttributes;
-            }
+            get;
+            private set;
         }
 
         public override string ToString()

@@ -12,7 +12,6 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<MemberSignature> _signature;
         private readonly LazyValue<IMemberRefParent> _parent;
         private string _fullName;
-        private CustomAttributeCollection _customAttributes;
 
         public MemberReference(IMemberRefParent parent, string name, MemberSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.MemberRef))
@@ -20,6 +19,7 @@ namespace AsmResolver.Net.Cts
             _parent = new LazyValue<IMemberRefParent>(parent);
             _name = new LazyValue<string>(name);
             _signature = new LazyValue<MemberSignature>(signature);
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         internal MemberReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
@@ -37,6 +37,8 @@ namespace AsmResolver.Net.Cts
 
             _signature = new LazyValue<MemberSignature>(() => 
                 CallingConventionSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column3)) as MemberSignature);
+            
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         public IMemberRefParent Parent
@@ -95,13 +97,8 @@ namespace AsmResolver.Net.Cts
 
         public CustomAttributeCollection CustomAttributes
         {
-            get
-            {
-                if (_customAttributes != null)
-                    return _customAttributes;
-                _customAttributes = new CustomAttributeCollection(this);
-                return _customAttributes;
-            }
+            get;
+            private set;
         }
         
         public override string ToString()

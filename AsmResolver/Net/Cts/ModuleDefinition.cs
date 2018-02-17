@@ -14,7 +14,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<Guid> _mvid;
         private readonly LazyValue<Guid> _encId;
         private readonly LazyValue<Guid> _encBaseId;
-        private CustomAttributeCollection _customAttributes;
+        private readonly LazyValue<AssemblyDefinition> _assembly;
 
         public ModuleDefinition(string name)
             : base(null, new MetadataToken(MetadataTokenType.Module))
@@ -23,7 +23,9 @@ namespace AsmResolver.Net.Cts
             _mvid = new LazyValue<Guid>();
             _encId = new LazyValue<Guid>();
             _encBaseId = new LazyValue<Guid>();
+            _assembly = new LazyValue<AssemblyDefinition>(default(AssemblyDefinition));
             Types = new DelegatedMemberCollection<ModuleDefinition, TypeDefinition>(this, GetTypeOwner, SetTypeOwner);
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         internal ModuleDefinition(MetadataImage image, MetadataRow<ushort, uint, uint, uint, uint> row)
@@ -38,7 +40,9 @@ namespace AsmResolver.Net.Cts
            _mvid = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column3));
            _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
            _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
+            _assembly = new LazyValue<AssemblyDefinition>(() => (AssemblyDefinition) Image.ResolveMember(new MetadataToken(MetadataTokenType.Assembly, 1)));
             Types = new TableMemberCollection<ModuleDefinition, TypeDefinition>(this, MetadataTokenType.TypeDef, GetTypeOwner, SetTypeOwner); // TODO: filter nested types.
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         public ushort Generation
@@ -73,19 +77,14 @@ namespace AsmResolver.Net.Cts
 
         public CustomAttributeCollection CustomAttributes
         {
-            get
-            {
-                if (_customAttributes != null)
-                    return _customAttributes;
-                _customAttributes = new CustomAttributeCollection(this);
-                return _customAttributes;
-            }
+            get;
+            private set;
         }
 
         public AssemblyDefinition Assembly
         {
-            get;
-            internal set;
+            get { return _assembly.Value; }
+            internal set { _assembly.Value = value; }
         }
 
         public Collection<TypeDefinition> Types

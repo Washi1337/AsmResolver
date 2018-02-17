@@ -13,8 +13,6 @@ namespace AsmResolver.Net.Cts
     /// </summary>
     public class AssemblyDefinition : MetadataMember<MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint>>, IHasCustomAttribute, IHasSecurityAttribute, IAssemblyDescriptor
     {
-        private CustomAttributeCollection _customAttributes;
-        private SecurityDeclarationCollection _securityDeclarations;
         private readonly LazyValue<string> _name;
         private readonly LazyValue<string> _culture;
         private readonly LazyValue<DataBlobSignature> _publicKey;
@@ -32,6 +30,7 @@ namespace AsmResolver.Net.Cts
             Modules = new DelegatedMemberCollection<AssemblyDefinition, ModuleDefinition>(this, GetModuleOwner, SetModuleOwner);
             AssemblyReferences = new Collection<AssemblyReference>();
             ModuleReferences = new Collection<ModuleReference>();
+            SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
 
         public AssemblyDefinition(string name, Version version)
@@ -44,6 +43,8 @@ namespace AsmResolver.Net.Cts
             Modules = new DelegatedMemberCollection<AssemblyDefinition, ModuleDefinition>(this, GetModuleOwner, SetModuleOwner);
             AssemblyReferences = new Collection<AssemblyReference>();
             ModuleReferences = new Collection<ModuleReference>();
+            CustomAttributes = new CustomAttributeCollection(this);
+            SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
 
         internal AssemblyDefinition(MetadataImage image, MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint> row)
@@ -62,6 +63,8 @@ namespace AsmResolver.Net.Cts
             Modules = new TableMemberCollection<AssemblyDefinition, ModuleDefinition>(this, tableStream.GetTable(MetadataTokenType.Module), GetModuleOwner, SetModuleOwner);
             AssemblyReferences = new TableMemberCollection<AssemblyDefinition, AssemblyReference>(this, tableStream.GetTable(MetadataTokenType.AssemblyRef));
             ModuleReferences = new TableMemberCollection<AssemblyDefinition, ModuleReference>(this, tableStream.GetTable(MetadataTokenType.ModuleRef));
+            CustomAttributes = new CustomAttributeCollection(this);
+            SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
 
         /// <summary>
@@ -165,12 +168,14 @@ namespace AsmResolver.Net.Cts
 
         public CustomAttributeCollection CustomAttributes
         {
-            get { return _customAttributes ?? (_customAttributes = new CustomAttributeCollection(this)); }
+            get;
+            private set;
         }
 
         public SecurityDeclarationCollection SecurityDeclarations
         {
-            get { return _securityDeclarations ?? (_securityDeclarations = new SecurityDeclarationCollection(this)); }
+            get;
+            private set;
         }
 
         /// <summary>

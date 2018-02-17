@@ -10,8 +10,9 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<string> _name;
         private readonly LazyValue<FieldSignature> _signature;
         private readonly LazyValue<Constant> _constant;
+        private readonly LazyValue<TypeDefinition> _declaringType;
         private string _fullName;
-        private CustomAttributeCollection _customAttributes;
+
         //private FieldMarshal _marshal;
         //private FieldRva _rva;
 
@@ -27,22 +28,38 @@ namespace AsmResolver.Net.Cts
             Attributes = attributes;
             _signature = new LazyValue<FieldSignature>(signature);
             _constant = new LazyValue<Constant>(default(Constant));
+            _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         internal FieldDefinition(MetadataImage image, MetadataRow<FieldAttributes, uint, uint> row)
             : base(image, row.MetadataToken)
         {
             Attributes = row.Column1;
-            _name = new LazyValue<string>(() => image.Header.GetStream<StringStream>().GetStringByOffset(row.Column2));
+            
+            _name = new LazyValue<string>(() => 
+                image.Header.GetStream<StringStream>().GetStringByOffset(row.Column2));
+            
             _signature = new LazyValue<FieldSignature>(() => 
                 FieldSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
 
+            _declaringType = new LazyValue<TypeDefinition>(() =>
+            {
+                var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
+                var typeRow = table.GetRowClosestToKey(4, row.MetadataToken.Rid);
+                return (TypeDefinition) table.GetMemberFromRow(image, typeRow);
+            });
+            
             _constant = new LazyValue<Constant>(() =>
             {
-                var stream = image.Header.GetStream<TableStream>();
-                var table = stream.GetTable(MetadataTokenType.Constant);
-                table.GetRowByKey()
+                var tableStream = image.Header.GetStream<TableStream>();
+                var encoder = tableStream.GetIndexEncoder(CodedIndex.HasConstant);
+                var table = tableStream.GetTable(MetadataTokenType.Constant);
+                var constantRow = table.GetRowByKey(2, encoder.EncodeToken(row.MetadataToken));
+                return constantRow != null ? (Constant) table.GetMemberFromRow(image, constantRow) : null;
             });
+            
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         public FieldAttributes Attributes
@@ -68,8 +85,8 @@ namespace AsmResolver.Net.Cts
 
         public TypeDefinition DeclaringType
         {
-            get;
-            internal set;
+            get { return _declaringType.Value;}
+            internal set { _declaringType.Value = value; }
         }
 
         ITypeDefOrRef IMemberReference.DeclaringType
@@ -138,13 +155,8 @@ namespace AsmResolver.Net.Cts
         
         public CustomAttributeCollection CustomAttributes
         {
-            get
-            {
-                if (_customAttributes != null)
-                    return _customAttributes;
-                _customAttributes = new CustomAttributeCollection(this);
-                return _customAttributes;
-            }
+            get;
+            private set;
         }
         
         public bool IsPrivate

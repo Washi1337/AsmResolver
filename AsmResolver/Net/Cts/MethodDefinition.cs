@@ -10,9 +10,8 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<MethodSignature> _signature;
+        private readonly LazyValue<TypeDefinition> _declaringType;
         private string _fullName;
-        private CustomAttributeCollection _customAttributes;
-        private SecurityDeclarationCollection _securityDeclarations;
         //private MethodBody _body;
         //private GenericParameterCollection _genericParameters;
         //private PInvokeImplementation _pinvokeImplementation;
@@ -29,6 +28,10 @@ namespace AsmResolver.Net.Cts
             Attributes = attributes;
             _signature = new LazyValue<MethodSignature>(signature);
             Parameters = new DelegatedMemberCollection<MethodDefinition, ParameterDefinition>(this, GetParamOwner, SetParamOwner);
+
+            _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            CustomAttributes = new CustomAttributeCollection(this);
+            SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
 
         internal MethodDefinition(MetadataImage image, MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
@@ -47,6 +50,16 @@ namespace AsmResolver.Net.Cts
                 _signature = new LazyValue<MethodSignature>(() => MethodSignature.FromReader(image, blobReader));
 
             Parameters = new RangedMemberCollection<MethodDefinition,ParameterDefinition>(this, MetadataTokenType.Param, 5, GetParamOwner, SetParamOwner);
+
+            _declaringType = new LazyValue<TypeDefinition>(() =>
+            {
+                var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
+                var typeRow = table.GetRowClosestToKey(5, row.MetadataToken.Rid);
+                return (TypeDefinition) table.GetMemberFromRow(image, typeRow);
+            });
+            
+            CustomAttributes = new CustomAttributeCollection(this);
+            SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
 
         public uint Rva
@@ -84,8 +97,8 @@ namespace AsmResolver.Net.Cts
 
         public TypeDefinition DeclaringType
         {
-            get;
-            internal set;
+            get { return _declaringType.Value; }
+            internal set { _declaringType.Value = value; }
         }
 
         ITypeDefOrRef IMemberReference.DeclaringType
@@ -140,12 +153,14 @@ namespace AsmResolver.Net.Cts
 
         public CustomAttributeCollection CustomAttributes
         {
-            get { return _customAttributes ?? (_customAttributes = new CustomAttributeCollection(this)); }
+            get;
+            private set;
         }
 
         public SecurityDeclarationCollection SecurityDeclarations
         {
-            get { return _securityDeclarations ?? (_securityDeclarations = new SecurityDeclarationCollection(this)); }
+            get;
+            private set;
         }
 
         // TODO
