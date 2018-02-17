@@ -16,8 +16,8 @@ namespace AsmResolver.Net.Metadata
         private readonly LazyValue<ClassLayout> _classLayout;
         private readonly LazyValue<PropertyMap> _propertyMap;
         private readonly LazyValue<EventMap> _eventMap;
+        private readonly LazyValue<TypeDefinition> _declaringType;
         
-        //private NestedClassCollection _nestedClasses;
         //private GenericParameterCollection _genericParameters;
         //private InterfaceImplementationCollection _interfaces;
         //private MethodImplementationCollection _methodImplementations;
@@ -41,9 +41,11 @@ namespace AsmResolver.Net.Metadata
             _classLayout = new LazyValue<ClassLayout>(default(ClassLayout));
             _propertyMap = new LazyValue<PropertyMap>(default(PropertyMap));
             _eventMap = new LazyValue<EventMap>(default(EventMap));
+            _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
+            NestedClasses = new NestedClassCollection(this);
         }
 
         internal TypeDefinition(MetadataImage image, MetadataRow<TypeAttributes, uint, uint, uint, uint, uint> row)
@@ -95,8 +97,18 @@ namespace AsmResolver.Net.Metadata
                 return mapRow != null ? (EventMap) table.GetMemberFromRow(image, mapRow) : null;
             });
             
+            _declaringType = new LazyValue<TypeDefinition>(() =>
+            {
+                var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.NestedClass);
+                var nestedClassRow = table.GetRowByKey(0, row.MetadataToken.Rid);
+                return nestedClassRow != null
+                    ? ((NestedClass) table.GetMemberFromRow(image, nestedClassRow)).EnclosingClass
+                    : null;
+            });
+            
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
+            NestedClasses = new NestedClassCollection(this);
         }
 
         public TypeAttributes Attributes
@@ -181,23 +193,8 @@ namespace AsmResolver.Net.Metadata
 
         public TypeDefinition DeclaringType
         {
-            get
-            {
-                // TODO
-                return null;
-                //if (Image == null)
-                //    return null;
-                //var tableStream = Image.Header.GetStream<TableStream>();
-                //if (tableStream == null)
-                //    return null;
-                //var nestedClassTable = tableStream.GetTable<NestedClass>();
-                //if (nestedClassTable == null)
-                //    return null;
-                //var nestedClass = nestedClassTable.FirstOrDefault(x => x.Class == this);
-                //if (nestedClass == null)
-                //    return null;
-                //return nestedClass.EnclosingClass;
-            }
+            get { return _declaringType.Value; }
+            internal set { _declaringType.Value = value; }
         }
 
         ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor
@@ -210,11 +207,11 @@ namespace AsmResolver.Net.Metadata
             get { return DeclaringType; }
         }
 
-        // TODO
-        //public NestedClassCollection NestedClasses
-        //{
-        //    get { return _nestedClasses ?? (_nestedClasses = new NestedClassCollection(this)); }
-        //}
+        public NestedClassCollection NestedClasses
+        {
+            get;
+            private set;
+        }
 
         public CustomAttributeCollection CustomAttributes
         {

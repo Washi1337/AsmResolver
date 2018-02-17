@@ -7,28 +7,28 @@ namespace AsmResolver.Net.Cts.Collections
         where TOwner : class, IMetadataMember
         where TMember : IMetadataMember
     {
-        private readonly MetadataTokenType _table;
+        private readonly MetadataTokenType _itemTable;
         private readonly IndexEncoder _indexEncoder;
         private readonly int _keyColumnIndex;
 
-        internal KeyedMemberCollection(TOwner owner, MetadataTokenType table, CodedIndex codedIndex, int keyColumnIndex)
-            : this (owner, table, null, keyColumnIndex)
+        internal KeyedMemberCollection(TOwner owner, MetadataTokenType itemTable, CodedIndex codedIndex, int keyColumnIndex)
+            : this (owner, itemTable, null, keyColumnIndex)
         {
             if (Owner.Image != null)
                 _indexEncoder = Owner.Image.Header.GetStream<TableStream>().GetIndexEncoder(codedIndex);
         }
 
-        internal KeyedMemberCollection(TOwner owner, MetadataTokenType table, MetadataTokenType tokenType, int keyColumnIndex)
-            : this(owner, table, null, keyColumnIndex)
+        internal KeyedMemberCollection(TOwner owner, MetadataTokenType itemTable, MetadataTokenType ownerTable, int keyColumnIndex)
+            : this(owner, itemTable, null, keyColumnIndex)
         {
             if (Owner.Image != null)
-                _indexEncoder = new IndexEncoder(Owner.Image.Header.GetStream<TableStream>(), tokenType);
+                _indexEncoder = new IndexEncoder(Owner.Image.Header.GetStream<TableStream>(), ownerTable);
         }
 
-        internal KeyedMemberCollection(TOwner owner, MetadataTokenType table, IndexEncoder encoder, int keyColumnIndex)
+        internal KeyedMemberCollection(TOwner owner, MetadataTokenType itemTable, IndexEncoder encoder, int keyColumnIndex)
             : base(owner)
         {
-            _table = table;
+            _itemTable = itemTable;
             _indexEncoder = encoder;
             _keyColumnIndex = keyColumnIndex;
         }
@@ -38,24 +38,24 @@ namespace AsmResolver.Net.Cts.Collections
             if (Owner.Image != null && _indexEncoder != null)
             {
                 var stream = Owner.Image.Header.GetStream<TableStream>();
-                var memberTable = stream.GetTable(_table);
-                if (memberTable != null)
+                var itemTable = stream.GetTable(_itemTable);
+                if (itemTable != null)
                 {
                     uint key = _indexEncoder.EncodeToken(Owner.MetadataToken);
-                    var row = memberTable.GetRowByKey(_keyColumnIndex, key);
+                    var row = itemTable.GetRowByKey(_keyColumnIndex, key);
 
                     if (row != null)
                     {
                         int startIndex = (int) row.MetadataToken.Rid - 1;
-                        while (startIndex > 0 && Convert.ToUInt32(memberTable.GetRow(startIndex - 1).GetAllColumns()[_keyColumnIndex]) == key)
+                        while (startIndex > 0 && Convert.ToUInt32(itemTable.GetRow(startIndex - 1).GetAllColumns()[_keyColumnIndex]) == key)
                             startIndex--;
                         
-                        for (int index = startIndex; index < memberTable.Count; index++)
+                        for (int index = startIndex; index < itemTable.Count; index++)
                         {
-                            var item = memberTable.GetRow(index);
+                            var item = itemTable.GetRow(index);
                             if (Convert.ToUInt32(item.GetAllColumns()[_keyColumnIndex]) != key)
                                 break;
-                            var member = (TMember) memberTable.GetMemberFromRow(Owner.Image, item);
+                            var member = (TMember) itemTable.GetMemberFromRow(Owner.Image, item);
                             Items.Add(member);
                             SetOwner(member, Owner);
                         }
@@ -103,23 +103,23 @@ namespace AsmResolver.Net.Cts.Collections
         }
     }
 
-    //public class NestedClassCollection : MetadataMemberCollection<TypeDefinition, NestedClass>
-    //{
-    //    public NestedClassCollection(TypeDefinition owner)
-    //        : base(MetadataTokenType.TypeDef, 1, owner)
-    //    {
-    //    }
+    public class NestedClassCollection : KeyedMemberCollection<TypeDefinition, NestedClass>
+    {
+        public NestedClassCollection(TypeDefinition owner)
+            : base(owner, MetadataTokenType.NestedClass, MetadataTokenType.TypeDef, 1)
+        {
+        }
 
-    //    protected override TypeDefinition GetOwner(NestedClass item)
-    //    {
-    //        return item.EnclosingClass;
-    //    }
+        protected override TypeDefinition GetOwner(NestedClass item)
+        {
+            return item.EnclosingClass;
+        }
 
-    //    protected override void SetOwner(NestedClass item, TypeDefinition owner)
-    //    {
-    //        item.EnclosingClass = owner;
-    //    }
-    //}
+        protected override void SetOwner(NestedClass item, TypeDefinition owner)
+        {
+            item.EnclosingClass = owner;
+        }
+    }
 
     public class SecurityDeclarationCollection : KeyedMemberCollection<IHasSecurityAttribute, SecurityDeclaration>
     {
