@@ -93,6 +93,8 @@
     <Compile Include="Net\Cts\FieldDefinition.cs" />
     <Compile Include="Net\Cts\FieldMarshal.cs" />
     <Compile Include="Net\Cts\FieldRva.cs" />
+    <Compile Include="Net\Cts\GenericParameter.cs" />
+    <Compile Include="Net\Cts\GenericParameterConstraint.cs" />
     <Compile Include="Net\Cts\IMemberReference.cs" />
     <Compile Include="Net\Cts\IMetadataMember.cs" />
     <Compile Include="Net\Cts\AssemblyDefinition.cs" />
@@ -102,6 +104,7 @@
     <Compile Include="Net\Cts\MetadataImage.cs" />
     <Compile Include="Net\Cts\MethodDefinition.cs" />
     <Compile Include="Net\Cts\MethodSemantics.cs" />
+    <Compile Include="Net\Cts\MethodSpecification.cs" />
     <Compile Include="Net\Cts\ModuleDefinition.cs" />
     <Compile Include="Net\Cts\Collections\RangedMemberCollection.cs" />
     <Compile Include="Net\Cts\ModuleReference.cs" />
@@ -113,6 +116,7 @@
     <Compile Include="Net\Cts\StandAloneSignature.cs" />
     <Compile Include="Net\Cts\TypeDefinition.cs" />
     <Compile Include="Net\Cts\TypeReference.cs" />
+    <Compile Include="Net\Cts\TypeSpecification.cs" />
     <Compile Include="Net\CustomMetadataStream.cs" />
     <Compile Include="Net\GuidStream.cs" />
     <Compile Include="Net\ImageNetDirectory.cs" />

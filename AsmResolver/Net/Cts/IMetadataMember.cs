@@ -137,9 +137,9 @@ namespace AsmResolver.Net.Cts
 
     public interface IGenericParameterProvider : IMemberReference
     {
-        //GenericParameterCollection GenericParameters
-        //{
-        //    get;
-        //}
+        GenericParameterCollection GenericParameters
+        {
+            get;
+        }
     }
 }

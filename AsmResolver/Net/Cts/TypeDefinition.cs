@@ -1,11 +1,8 @@
-﻿
-using System.Collections;
-using System.Runtime.Remoting.Messaging;
-using AsmResolver.Collections.Generic;
-using AsmResolver.Net.Cts;
+﻿using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts.Collections;
+using AsmResolver.Net.Metadata;
 
-namespace AsmResolver.Net.Metadata
+namespace AsmResolver.Net.Cts
 {
     public class TypeDefinition : MetadataMember<MetadataRow<TypeAttributes, uint, uint, uint, uint, uint>>, ITypeDefOrRef, IHasSecurityAttribute, IGenericParameterProvider
     {
@@ -18,7 +15,6 @@ namespace AsmResolver.Net.Metadata
         private readonly LazyValue<EventMap> _eventMap;
         private readonly LazyValue<TypeDefinition> _declaringType;
         
-        //private GenericParameterCollection _genericParameters;
         //private InterfaceImplementationCollection _interfaces;
         //private MethodImplementationCollection _methodImplementations;
         private string _fullName;
@@ -46,6 +42,7 @@ namespace AsmResolver.Net.Metadata
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             NestedClasses = new NestedClassCollection(this);
+            GenericParameters = new GenericParameterCollection(this);
         }
 
         internal TypeDefinition(MetadataImage image, MetadataRow<TypeAttributes, uint, uint, uint, uint, uint> row)
@@ -109,6 +106,7 @@ namespace AsmResolver.Net.Metadata
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             NestedClasses = new NestedClassCollection(this);
+            GenericParameters = new GenericParameterCollection(this);
         }
 
         public TypeAttributes Attributes
@@ -225,12 +223,13 @@ namespace AsmResolver.Net.Metadata
             private set;
         }
 
-        // TODO
-        //public GenericParameterCollection GenericParameters
-        //{
-        //    get { return _genericParameters ?? (_genericParameters = new GenericParameterCollection(this)); }
-        //}
+        public GenericParameterCollection GenericParameters
+        {
+            get;
+            private set;
+        }
 
+        // TODO
         //public InterfaceImplementationCollection Interfaces
         //{
         //    get { return _interfaces ?? (_interfaces = new InterfaceImplementationCollection(this)); }

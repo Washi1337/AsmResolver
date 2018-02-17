@@ -15,7 +15,6 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<TypeDefinition> _declaringType;
         private readonly LazyValue<MethodBody> _methodBody;
         private string _fullName;
-        //private GenericParameterCollection _genericParameters;
         //private PInvokeImplementation _pinvokeImplementation;
 
         public MethodDefinition(string name, MethodAttributes attributes, MethodSignature signature)
@@ -35,6 +34,7 @@ namespace AsmResolver.Net.Cts
             _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
+            GenericParameters = new GenericParameterCollection(this);
         }
 
         internal MethodDefinition(MetadataImage image, MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
@@ -77,6 +77,7 @@ namespace AsmResolver.Net.Cts
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
+            GenericParameters = new GenericParameterCollection(this);
         }
 
         public uint Rva
@@ -173,12 +174,13 @@ namespace AsmResolver.Net.Cts
             private set;
         }
 
-        // TODO
-        //public GenericParameterCollection GenericParameters
-        //{
-        //    get { return _genericParameters ?? (_genericParameters = new GenericParameterCollection(this)); }
-        //}
+        public GenericParameterCollection GenericParameters
+        {
+            get;
+            private set;
+        }
 
+        // TODO
         //public PInvokeImplementation PInvokeImplementation
         //{
         //    get

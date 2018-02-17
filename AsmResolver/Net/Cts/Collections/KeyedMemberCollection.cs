@@ -139,41 +139,41 @@ namespace AsmResolver.Net.Cts.Collections
         }
     }
 
-    //public class GenericParameterCollection : MetadataMemberCollection<IGenericParameterProvider, GenericParameter>
-    //{
-    //    public GenericParameterCollection(IGenericParameterProvider owner)
-    //        : base(CodedIndex.TypeOrMethodDef, 2, owner)
-    //    {
-    //    }
+    public class GenericParameterCollection : KeyedMemberCollection<IGenericParameterProvider, GenericParameter>
+    {
+        public GenericParameterCollection(IGenericParameterProvider owner)
+            : base(owner, MetadataTokenType.GenericParam, CodedIndex.TypeOrMethodDef, 2)
+        {
+        }
 
-    //    protected override IGenericParameterProvider GetOwner(GenericParameter item)
-    //    {
-    //        return item.Owner;
-    //    }
+        protected override IGenericParameterProvider GetOwner(GenericParameter item)
+        {
+            return item.Owner;
+        }
 
-    //    protected override void SetOwner(GenericParameter item, IGenericParameterProvider owner)
-    //    {
-    //        item.Owner = owner;
-    //    }
-    //}
+        protected override void SetOwner(GenericParameter item, IGenericParameterProvider owner)
+        {
+            item.Owner = owner;
+        }
+    }
 
-    //public class GenericParameterConstraintCollection : MetadataMemberCollection<GenericParameter, GenericParameterConstraint>
-    //{
-    //    public GenericParameterConstraintCollection(GenericParameter owner)
-    //        : base(MetadataTokenType.GenericParam, 0, owner)
-    //    {
-    //    }
+    public class GenericParameterConstraintCollection : KeyedMemberCollection<GenericParameter, GenericParameterConstraint>
+    {
+        public GenericParameterConstraintCollection(GenericParameter owner)
+            : base(owner, MetadataTokenType.GenericParamConstraint, MetadataTokenType.GenericParam, 0)
+        {
+        }
 
-    //    protected override GenericParameter GetOwner(GenericParameterConstraint item)
-    //    {
-    //        return item.Owner;
-    //    }
+        protected override GenericParameter GetOwner(GenericParameterConstraint item)
+        {
+            return item.Owner;
+        }
 
-    //    protected override void SetOwner(GenericParameterConstraint item, GenericParameter owner)
-    //    {
-    //        item.Owner = owner;
-    //    }
-    //}
+        protected override void SetOwner(GenericParameterConstraint item, GenericParameter owner)
+        {
+            item.Owner = owner;
+        }
+    }
 
     //public class InterfaceImplementationCollection : MetadataMemberCollection<TypeDefinition, InterfaceImplementation>
     //{
