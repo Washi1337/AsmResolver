@@ -15,8 +15,6 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<FieldMarshal> _fieldMarshal;
         private string _fullName;
 
-        //private FieldMarshal _marshal;
-
         public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.Field))
         {
