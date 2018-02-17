@@ -18,6 +18,12 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        public MetadataRow<uint, uint> FindFieldMarshalOfOwner(MetadataToken ownersToken)
+        {
+            var encoder = TableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal);
+            return (MetadataRow<uint, uint>) GetRowByKey(0, encoder.EncodeToken(ownersToken));
+        }
+
         protected override MetadataRow<uint, uint> ReadRow(ReadingContext context, MetadataToken token)
         {
             var reader = context.Reader;
@@ -37,7 +43,7 @@ namespace AsmResolver.Net.Metadata
         
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new FieldMarshal(image, row);
         }
     }
 }

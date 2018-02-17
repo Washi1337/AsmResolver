@@ -12,6 +12,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<Constant> _constant;
         private readonly LazyValue<TypeDefinition> _declaringType;
         private readonly LazyValue<FieldRva> _fieldRva;
+        private readonly LazyValue<FieldMarshal> _fieldMarshal;
         private string _fullName;
 
         //private FieldMarshal _marshal;
@@ -31,6 +32,7 @@ namespace AsmResolver.Net.Cts
             _constant = new LazyValue<Constant>(default(Constant));
             _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
             _fieldRva = new LazyValue<FieldRva>(default(FieldRva));
+            _fieldMarshal = new LazyValue<FieldMarshal>(default(FieldMarshal));
             
             CustomAttributes = new CustomAttributeCollection(this);
         }
@@ -66,6 +68,13 @@ namespace AsmResolver.Net.Cts
                 var table = tableStream.GetTable(MetadataTokenType.FieldRva);
                 var rvaRow = table.GetRowByKey(1, row.MetadataToken.Rid);
                 return rvaRow != null ? (FieldRva) table.GetMemberFromRow(image, rvaRow) : null;
+            });
+            
+            _fieldMarshal = new LazyValue<FieldMarshal>(() =>
+            {
+                var table = (FieldMarshalTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.FieldMarshal);
+                var marshalRow = table.FindFieldMarshalOfOwner(row.MetadataToken);
+                return marshalRow != null ? (FieldMarshal) table.GetMemberFromRow(image, marshalRow) : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -124,19 +133,11 @@ namespace AsmResolver.Net.Cts
             set { _constant.Value = value; }
         }
 
-        // TODO
-        //public FieldMarshal FieldMarshal
-        //{
-        //    get
-        //    {
-        //        if (_marshal != null || Header == null)
-        //            return _marshal;
-
-        //        var table = Header.GetStream<TableStream>().GetTable<FieldMarshal>();
-        //        return _marshal = table.FirstOrDefault(x => x.Parent == this);
-        //    }
-        //    set { _marshal = value; }
-        //}
+        public FieldMarshal FieldMarshal
+        {
+            get { return _fieldMarshal.Value; }
+            set { _fieldMarshal.Value = value; }
+        }
 
         public bool HasFieldRva
         {

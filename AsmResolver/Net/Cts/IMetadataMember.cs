@@ -79,10 +79,10 @@ namespace AsmResolver.Net.Cts
 
     public interface IHasFieldMarshal : IMetadataMember
     {
-        //FieldMarshal FieldMarshal
-        //{
-        //    get;
-        //}
+        FieldMarshal FieldMarshal
+        {
+            get;
+        }
     }
 
     public interface IHasSecurityAttribute : IMetadataMember

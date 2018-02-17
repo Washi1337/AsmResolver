@@ -8,6 +8,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<string> _name;
         private readonly LazyValue<MethodDefinition> _method;
         private readonly LazyValue<Constant> _constant;
+        private readonly LazyValue<FieldMarshal> _fieldMarshal;
 
         public ParameterDefinition(int sequence, string name, ParameterAttributes attributes)
             : base(null, new MetadataToken(MetadataTokenType.Param))
@@ -18,6 +19,7 @@ namespace AsmResolver.Net.Cts
 
             _method = new LazyValue<MethodDefinition>(default(MethodDefinition));
             _constant = new LazyValue<Constant>(default(Constant));
+            _fieldMarshal = new LazyValue<FieldMarshal>(default(FieldMarshal));
             
             CustomAttributes = new CustomAttributeCollection(this);
         }
@@ -41,6 +43,13 @@ namespace AsmResolver.Net.Cts
                 var table = (ConstantTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.Constant);
                 var constantRow = table.FindConstantOfOwner(row.MetadataToken);
                 return constantRow != null ? (Constant) table.GetMemberFromRow(image, constantRow) : null;
+            });
+            
+            _fieldMarshal = new LazyValue<FieldMarshal>(() =>
+            {
+                var table = (FieldMarshalTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.FieldMarshal);
+                var marshalRow = table.FindFieldMarshalOfOwner(row.MetadataToken);
+                return marshalRow != null ? (FieldMarshal) table.GetMemberFromRow(image, marshalRow) : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -82,12 +91,11 @@ namespace AsmResolver.Net.Cts
             private set;
         }
 
-        // todo:
-        //public FieldMarshal FieldMarshal
-        //{
-        //    get;
-        //    set;
-        //}
+        public FieldMarshal FieldMarshal
+        {
+            get { return _fieldMarshal.Value;}
+            set { _fieldMarshal.Value = value; }
+        }
         
         public override string ToString()
         {

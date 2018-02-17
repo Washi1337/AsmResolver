@@ -87,6 +87,7 @@
     <Compile Include="Net\Cts\Constant.cs" />
     <Compile Include="Net\Cts\CustomAttribute.cs" />
     <Compile Include="Net\Cts\FieldDefinition.cs" />
+    <Compile Include="Net\Cts\FieldMarshal.cs" />
     <Compile Include="Net\Cts\FieldRva.cs" />
     <Compile Include="Net\Cts\IMemberReference.cs" />
     <Compile Include="Net\Cts\IMetadataMember.cs" />
