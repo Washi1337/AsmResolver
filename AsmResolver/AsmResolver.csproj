@@ -97,10 +97,13 @@
     <Compile Include="Net\Cts\MemberReference.cs" />
     <Compile Include="Net\Cts\MetadataImage.cs" />
     <Compile Include="Net\Cts\MethodDefinition.cs" />
+    <Compile Include="Net\Cts\MethodSemantics.cs" />
     <Compile Include="Net\Cts\ModuleDefinition.cs" />
     <Compile Include="Net\Cts\Collections\RangedMemberCollection.cs" />
     <Compile Include="Net\Cts\ModuleReference.cs" />
     <Compile Include="Net\Cts\ParameterDefinition.cs" />
+    <Compile Include="Net\Cts\PropertyDefinition.cs" />
+    <Compile Include="Net\Cts\PropertyMap.cs" />
     <Compile Include="Net\Cts\SecurityDeclaration.cs" />
     <Compile Include="Net\Cts\TypeDefinition.cs" />
     <Compile Include="Net\Cts\TypeReference.cs" />

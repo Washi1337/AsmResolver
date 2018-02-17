@@ -19,6 +19,12 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        public MetadataRow<MethodSemanticsAttributes, uint, uint> FindSemanticsOfOwner(MetadataToken ownersToken)
+        {
+            var encoder = TableStream.GetIndexEncoder(CodedIndex.HasSemantics);
+            return (MetadataRow<MethodSemanticsAttributes, uint, uint>) GetRowByKey(2, encoder.EncodeToken(ownersToken));
+        }
+
         protected override MetadataRow<MethodSemanticsAttributes, uint, uint> ReadRow(ReadingContext context, MetadataToken token)
         {
             var reader = context.Reader;
@@ -40,7 +46,7 @@ namespace AsmResolver.Net.Metadata
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<MethodSemanticsAttributes, uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new MethodSemantics(image, row);
         }
     }
     

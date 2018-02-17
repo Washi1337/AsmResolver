@@ -140,7 +140,7 @@ namespace AsmResolver.Net.Metadata
             MetadataRow row = null;
             uint currentKey = 0;
             
-            while (left <= right)
+            while (left <= right && left < Count)
             {
                 int m = (left + right) / 2;
                 row = GetRow(m);

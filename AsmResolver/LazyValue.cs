@@ -11,7 +11,6 @@ namespace AsmResolver
         private readonly Func<TValue> _getValue;
         private bool _isInitialized;
         private TValue _value;
-        private TValue _originalValue;
 
         public LazyValue()
             : this(default(TValue))
@@ -38,17 +37,8 @@ namespace AsmResolver
             }
             set
             {
-                EnsureIsInitialized();
                 _value = value;
-            }
-        }
-
-        public TValue OriginalValue
-        {
-            get
-            {
-                EnsureIsInitialized();
-                return _originalValue;
+                _isInitialized = true;
             }
         }
 
@@ -60,14 +50,14 @@ namespace AsmResolver
         public void EnsureIsInitialized()
         {
             if (!IsInitialized)
-                _value = _originalValue = _getValue();
+                _value = _getValue();
             _isInitialized = true;
         }
 
         public void Reset()
         {
             _isInitialized = false;
-            _value = _originalValue = default(TValue);
+            _value = default(TValue);
         }
     }
 }

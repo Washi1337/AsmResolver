@@ -85,23 +85,23 @@ namespace AsmResolver.Net.Cts.Collections
         }
     }
 
-    //public class MethodSemanticsCollection : MetadataMemberCollection<IHasSemantics, MethodSemantics>
-    //{
-    //    public MethodSemanticsCollection(IHasSemantics owner)
-    //        : base(CodedIndex.HasSemantics, 2, owner)
-    //    {
-    //    }
+    public class MethodSemanticsCollection : KeyedMemberCollection<IHasSemantics, MethodSemantics>
+    {
+        public MethodSemanticsCollection(IHasSemantics owner)
+            : base(owner, MetadataTokenType.MethodSemantics, CodedIndex.HasSemantics, 2)
+        {
+        }
 
-    //    protected override IHasSemantics GetOwner(MethodSemantics item)
-    //    {
-    //        return item.Association;
-    //    }
+        protected override IHasSemantics GetOwner(MethodSemantics item)
+        {
+            return item.Association;
+        }
 
-    //    protected override void SetOwner(MethodSemantics item, IHasSemantics owner)
-    //    {
-    //        item.Association = owner;
-    //    }
-    //}
+        protected override void SetOwner(MethodSemantics item, IHasSemantics owner)
+        {
+            item.Association = owner;
+        }
+    }
 
     //public class NestedClassCollection : MetadataMemberCollection<TypeDefinition, NestedClass>
     //{

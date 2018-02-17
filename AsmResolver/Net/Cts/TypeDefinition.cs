@@ -14,7 +14,7 @@ namespace AsmResolver.Net.Metadata
         private readonly LazyValue<ITypeDefOrRef> _baseType;
         private readonly LazyValue<ModuleDefinition> _module;
         private readonly LazyValue<ClassLayout> _classLayout;
-        //private PropertyMap _propertyMap;
+        private readonly LazyValue<PropertyMap> _propertyMap;
         //private EventMap _eventMap;
         //private NestedClassCollection _nestedClasses;
         //private GenericParameterCollection _genericParameters;
@@ -38,6 +38,7 @@ namespace AsmResolver.Net.Metadata
 
             _module = new LazyValue<ModuleDefinition>(default(ModuleDefinition));
             _classLayout = new LazyValue<ClassLayout>(default(ClassLayout));
+            _propertyMap = new LazyValue<PropertyMap>(default(PropertyMap));
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
@@ -70,11 +71,19 @@ namespace AsmResolver.Net.Metadata
 
             _module = new LazyValue<ModuleDefinition>(() =>
                 (ModuleDefinition) Image.ResolveMember(new MetadataToken(MetadataTokenType.Module, 1)));
+            
             _classLayout = new LazyValue<ClassLayout>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.ClassLayout);
                 var layoutRow = table.GetRowByKey(2, row.MetadataToken.Rid);
                 return layoutRow != null ? (ClassLayout) table.GetMemberFromRow(image, layoutRow) : null;
+            });
+            
+            _propertyMap = new LazyValue<PropertyMap>(() =>
+            {
+                var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.PropertyMap);
+                var mapRow = table.GetRowByKey(0, row.MetadataToken.Rid);
+                return mapRow != null ? (PropertyMap) table.GetMemberFromRow(image, mapRow) : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -137,18 +146,11 @@ namespace AsmResolver.Net.Metadata
             internal set { _module.Value = value; }
         }
 
-        //public PropertyMap PropertyMap
-        //{
-        //    get
-        //    {
-        //        if (_propertyMap != null)
-        //            return _propertyMap;
-        //        return Header == null
-        //            ? (_propertyMap = new PropertyMap(this))
-        //            : (_propertyMap =
-        //                Header.GetStream<TableStream>().GetTable<PropertyMap>().FirstOrDefault(x => x.Parent == this));
-        //    }
-        //}
+        public PropertyMap PropertyMap
+        {
+            get { return _propertyMap.Value; }
+            set { _propertyMap.Value = value; }
+        }
 
         //public EventMap EventMap
         //{
