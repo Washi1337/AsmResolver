@@ -63,10 +63,10 @@ namespace AsmResolver.Net.Cts
 
     public interface IHasConstant : IMetadataMember
     {
-        //Constant Constant
-        //{
-        //    get;
-        //}
+        Constant Constant
+        {
+            get;
+        }
     }
 
     public interface IHasCustomAttribute : IMetadataMember

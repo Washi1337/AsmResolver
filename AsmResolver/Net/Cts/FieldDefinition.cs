@@ -11,10 +11,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<FieldSignature> _signature;
         private readonly LazyValue<Constant> _constant;
         private readonly LazyValue<TypeDefinition> _declaringType;
+        private readonly LazyValue<FieldRva> _fieldRva;
         private string _fullName;
 
         //private FieldMarshal _marshal;
-        //private FieldRva _rva;
 
         public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.Field))
@@ -27,8 +27,11 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(name);
             Attributes = attributes;
             _signature = new LazyValue<FieldSignature>(signature);
+            
             _constant = new LazyValue<Constant>(default(Constant));
             _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _fieldRva = new LazyValue<FieldRva>(default(FieldRva));
+            
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
@@ -52,11 +55,17 @@ namespace AsmResolver.Net.Cts
             
             _constant = new LazyValue<Constant>(() =>
             {
-                var tableStream = image.Header.GetStream<TableStream>();
-                var encoder = tableStream.GetIndexEncoder(CodedIndex.HasConstant);
-                var table = tableStream.GetTable(MetadataTokenType.Constant);
-                var constantRow = table.GetRowByKey(2, encoder.EncodeToken(row.MetadataToken));
+                var table = (ConstantTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.Constant);
+                var constantRow = table.FindConstantOfOwner(row.MetadataToken);
                 return constantRow != null ? (Constant) table.GetMemberFromRow(image, constantRow) : null;
+            });
+            
+            _fieldRva = new LazyValue<FieldRva>(() =>
+            {
+                var tableStream = image.Header.GetStream<TableStream>();
+                var table = tableStream.GetTable(MetadataTokenType.FieldRva);
+                var rvaRow = table.GetRowByKey(1, row.MetadataToken.Rid);
+                return rvaRow != null ? (FieldRva) table.GetMemberFromRow(image, rvaRow) : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -135,23 +144,11 @@ namespace AsmResolver.Net.Cts
             set { Attributes.SetFlag(FieldAttributes.HasFieldRva, value); }
         }
 
-        // TODO
-        //public FieldRva FieldRva
-        //{
-        //    get
-        //    {
-        //        if (_rva != null || Header == null || !HasFieldRva)
-        //            return _rva;
-
-        //        var table = Header.GetStream<TableStream>().GetTable<FieldRva>();
-        //        return _rva = table.FirstOrDefault(x => x.Field == this);
-        //    }
-        //    set
-        //    {
-        //        _rva = value;
-        //        HasFieldRva = value != null;
-        //    }
-        //}
+        public FieldRva FieldRva
+        {
+            get { return _fieldRva.Value; }
+            set { _fieldRva.Value = value; }
+        }
         
         public CustomAttributeCollection CustomAttributes
         {

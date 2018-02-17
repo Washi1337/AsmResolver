@@ -20,6 +20,12 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        public MetadataRow<ElementType, byte, uint, uint> FindConstantOfOwner(MetadataToken ownersToken)
+        {
+            var encoder = TableStream.GetIndexEncoder(CodedIndex.HasConstant);
+            return (MetadataRow<ElementType, byte, uint, uint>) GetRowByKey(2, encoder.EncodeToken(ownersToken));
+        }
+
         protected override MetadataRow<ElementType, byte, uint, uint> ReadRow(ReadingContext context, MetadataToken token)
         {
             var reader = context.Reader;

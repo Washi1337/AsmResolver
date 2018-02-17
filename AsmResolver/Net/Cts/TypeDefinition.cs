@@ -13,13 +13,13 @@ namespace AsmResolver.Net.Metadata
         private readonly LazyValue<string> _namespace;
         private readonly LazyValue<ITypeDefOrRef> _baseType;
         private readonly LazyValue<ModuleDefinition> _module;
+        private readonly LazyValue<ClassLayout> _classLayout;
         //private PropertyMap _propertyMap;
         //private EventMap _eventMap;
         //private NestedClassCollection _nestedClasses;
         //private GenericParameterCollection _genericParameters;
         //private InterfaceImplementationCollection _interfaces;
         //private MethodImplementationCollection _methodImplementations;
-        //private ClassLayout _classLayout;
         private string _fullName;
 
         public TypeDefinition(string @namespace, string name)
@@ -37,6 +37,8 @@ namespace AsmResolver.Net.Metadata
             Methods = new DelegatedMemberCollection<TypeDefinition, MethodDefinition>(this, GetMethodOwner, SetMethodOwner);
 
             _module = new LazyValue<ModuleDefinition>(default(ModuleDefinition));
+            _classLayout = new LazyValue<ClassLayout>(default(ClassLayout));
+            
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
@@ -68,6 +70,13 @@ namespace AsmResolver.Net.Metadata
 
             _module = new LazyValue<ModuleDefinition>(() =>
                 (ModuleDefinition) Image.ResolveMember(new MetadataToken(MetadataTokenType.Module, 1)));
+            _classLayout = new LazyValue<ClassLayout>(() =>
+            {
+                var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.ClassLayout);
+                var layoutRow = table.GetRowByKey(2, row.MetadataToken.Rid);
+                return layoutRow != null ? (ClassLayout) table.GetMemberFromRow(image, layoutRow) : null;
+            });
+            
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
         }
@@ -231,17 +240,11 @@ namespace AsmResolver.Net.Metadata
         //    get { return _methodImplementations ?? (_methodImplementations = new MethodImplementationCollection(this)); }
         //}
 
-        //public ClassLayout ClassLayout
-        //{
-        //    get
-        //    {
-        //        if (_classLayout != null || Header == null)
-        //            return _classLayout;
-        //        var table = Header.GetStream<TableStream>().GetTable<ClassLayout>();
-        //        return _classLayout = table.FirstOrDefault(x => x.Parent == this);
-        //    }
-        //    set { _classLayout = value; }
-        //}
+        public ClassLayout ClassLayout
+        {
+            get { return _classLayout.Value;}
+            private set { _classLayout.Value = value; }
+        }
 
         public bool IsNotPublic
         {

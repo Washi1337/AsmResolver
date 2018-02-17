@@ -7,6 +7,7 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<MethodDefinition> _method;
+        private readonly LazyValue<Constant> _constant;
 
         public ParameterDefinition(int sequence, string name, ParameterAttributes attributes)
             : base(null, new MetadataToken(MetadataTokenType.Param))
@@ -16,6 +17,8 @@ namespace AsmResolver.Net.Cts
             Attributes = attributes;
 
             _method = new LazyValue<MethodDefinition>(default(MethodDefinition));
+            _constant = new LazyValue<Constant>(default(Constant));
+            
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
@@ -31,6 +34,13 @@ namespace AsmResolver.Net.Cts
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.Method);
                 var methodRow = table.GetRowClosestToKey(5, row.MetadataToken.Rid);
                 return (MethodDefinition) table.GetMemberFromRow(image, methodRow);
+            });
+            
+            _constant = new LazyValue<Constant>(() =>
+            {
+                var table = (ConstantTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.Constant);
+                var constantRow = table.FindConstantOfOwner(row.MetadataToken);
+                return constantRow != null ? (Constant) table.GetMemberFromRow(image, constantRow) : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -54,12 +64,11 @@ namespace AsmResolver.Net.Cts
             set { _name.Value = value; }
         }
 
-        // todo:
-        //public Constant Constant
-        //{
-        //    get;
-        //    set;
-        //}
+        public Constant Constant
+        {
+            get { return _constant.Value;}
+            set { _constant.Value = value; }
+        }
 
         public MethodDefinition Method
         {
