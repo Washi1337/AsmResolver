@@ -79,20 +79,17 @@ namespace AsmResolver.Net.Cts
 
         public MsCorLibTypeSignature GetMscorlibType(ITypeDescriptor type)
         {
-            throw new NotImplementedException();
+            SignatureComparer comparer = new SignatureComparer();
+            MsCorLibTypeSignature signature;
 
-            // TODO
-            //SignatureComparer comparer = new SignatureComparer();
-            //MsCorLibTypeSignature signature;
+            if (!comparer.MatchAssemblies(type.ResolutionScope.GetAssembly(), MsCorLibReference)
+                || type.Namespace != "System"
+                || !_typesByName.TryGetValue(type.Name, out signature))
+            {
+                return null;
+            }
 
-            //if (!comparer.MatchAssemblies(type.ResolutionScope.GetAssembly(), MsCorLibReference)
-            //    || type.Namespace != "System"
-            //    || !_typesByName.TryGetValue(type.Name, out signature))
-            //{
-            //    return null;
-            //}
-
-            //return signature;
+            return signature;
         }
 
         private MsCorLibTypeSignature CreateSignature(ElementType type, string name, bool isValueType)

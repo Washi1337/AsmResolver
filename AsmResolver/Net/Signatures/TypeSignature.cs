@@ -68,8 +68,7 @@ namespace AsmResolver.Net.Signatures
             switch (elementType)
             {
                 case ElementType.Boxed:
-                    // TODO
-                    throw new NotImplementedException();
+                    return image.TypeSystem.Object;
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(ReadFieldOrPropType(image, reader));
                 case ElementType.Enum:

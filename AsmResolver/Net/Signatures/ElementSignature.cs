@@ -50,15 +50,13 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
-                    // TODO
-                    throw new NotImplementedException();
-                    //var enumTypeDef = header.MetadataResolver.ResolveType(typeSignature);
-                    //if (enumTypeDef == null)
-                    //    throw new MemberResolutionException(typeSignature);
+                    var enumTypeDef = image.MetadataResolver.ResolveType(typeSignature);
+                    if (enumTypeDef == null)
+                        throw new MemberResolutionException(typeSignature);
 
-                    //if (enumTypeDef.IsEnum)
-                    //    return ReadValue(header, enumTypeDef.GetEnumUnderlyingType(), reader);
-                    //break;
+                    if (enumTypeDef.IsEnum)
+                        return ReadValue(image, enumTypeDef.GetEnumUnderlyingType(), reader);
+                    break;
             }
 
             if (typeSignature.IsTypeOf("System", "Type"))

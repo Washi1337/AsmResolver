@@ -126,12 +126,9 @@ namespace AsmResolver.Net.Cts
 
         public AssemblyDefinition Resolve()
         {
-            throw new NotImplementedException();
-
-            // TODO
-            //if (Header == null)
-            //    throw new AssemblyResolutionException(this);
-            //return Header.MetadataResolver.AssemblyResolver.ResolveAssembly(this);
+            if (Image == null)
+                throw new AssemblyResolutionException(this);
+            return Image.MetadataResolver.AssemblyResolver.ResolveAssembly(this);
         }
 
         IMetadataMember IResolvable.Resolve()

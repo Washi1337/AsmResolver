@@ -99,10 +99,10 @@ namespace AsmResolver.Net.Cts
 
     public interface IHasSemantics : IMemberReference
     {
-        //MethodSemanticsCollection Semantics
-        //{
-        //    get;
-        //}
+        MethodSemanticsCollection Semantics
+        {
+            get;
+        }
     }
 
     public interface IMethodDefOrRef : IMemberReference, IResolvable

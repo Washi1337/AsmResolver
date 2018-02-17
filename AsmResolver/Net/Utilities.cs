@@ -31,15 +31,14 @@ namespace AsmResolver.Net
             return type.Namespace == @namespace && type.Name == name;
         }
 
-        // TODO
-        //public static TypeSignature GetEnumUnderlyingType(this TypeDefinition type)
-        //{
-        //    return (from field in type.Fields
-        //            where
-        //                field.Name == "value__" && field.Attributes.HasFlag(FieldAttributes.Public) &&
-        //                field.Signature != null
-        //            select field.Signature.FieldType).FirstOrDefault();
-        //}
+        public static TypeSignature GetEnumUnderlyingType(this TypeDefinition type)
+        {
+            return (from field in type.Fields
+                    where
+                        field.Name == "value__" && field.Attributes.HasFlag(FieldAttributes.Public) &&
+                        field.Signature != null
+                    select field.Signature.FieldType).FirstOrDefault();
+        }
 
         public static IAssemblyDescriptor GetAssembly(this IResolutionScope scope)
         {
