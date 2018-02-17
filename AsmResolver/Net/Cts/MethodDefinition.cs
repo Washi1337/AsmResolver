@@ -1,8 +1,10 @@
 ﻿using System;
 using AsmResolver.Collections.Generic;
+using AsmResolver.Net.Cil;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
+using AsmResolver.X86;
 
 namespace AsmResolver.Net.Cts
 {
@@ -11,8 +13,8 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<string> _name;
         private readonly LazyValue<MethodSignature> _signature;
         private readonly LazyValue<TypeDefinition> _declaringType;
+        private readonly LazyValue<MethodBody> _methodBody;
         private string _fullName;
-        //private MethodBody _body;
         //private GenericParameterCollection _genericParameters;
         //private PInvokeImplementation _pinvokeImplementation;
 
@@ -28,7 +30,8 @@ namespace AsmResolver.Net.Cts
             Attributes = attributes;
             _signature = new LazyValue<MethodSignature>(signature);
             Parameters = new DelegatedMemberCollection<MethodDefinition, ParameterDefinition>(this, GetParamOwner, SetParamOwner);
-
+            _methodBody = new LazyValue<MethodBody>(default(MethodBody));
+            
             _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
@@ -51,6 +54,20 @@ namespace AsmResolver.Net.Cts
 
             Parameters = new RangedMemberCollection<MethodDefinition,ParameterDefinition>(this, MetadataTokenType.Param, 5, GetParamOwner, SetParamOwner);
 
+            _methodBody = new LazyValue<MethodBody>(() =>
+            {
+                if (row.Column1 == 0)
+                    return null;
+                
+                var windowsAssembly = image.Header.NetDirectory.Assembly;
+                long fileOffset = windowsAssembly.RvaToFileOffset(row.Column1);
+                var readingContext = windowsAssembly.ReadingContext.CreateSubContext(fileOffset);
+
+                return row.Column2.HasFlag(MethodImplAttributes.IL)
+                    ? (MethodBody) CilMethodBody.FromReadingContext(this, readingContext)
+                    : X86MethodBody.FromReadingContext(readingContext);
+            });
+            
             _declaringType = new LazyValue<TypeDefinition>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
@@ -132,25 +149,18 @@ namespace AsmResolver.Net.Cts
             private set;
         }
 
-        // TODO
-        //public MethodBody MethodBody
-        //{
-        //    get
-        //    {
-        //        if (_body != null)
-        //            return _body;
+        public MethodBody MethodBody
+        {
+            get { return _methodBody.Value; }
+            set { _methodBody.Value = value; }
+        }
 
-        //        if (Rva == 0 || IsNative)
-        //            return null;
-
-        //        var application = Header.NetDirectory.Assembly;
-        //        var offset = application.RvaToFileOffset(Rva);
-        //        var context = application.ReadingContext.CreateSubContext(offset);
-        //        return _body = MethodBody.FromReadingContext(this, context);
-        //    }
-        //    set { _body = value; }
-        //}
-
+        public CilMethodBody CilMethodBody
+        {
+            get { return MethodBody as CilMethodBody; }
+            set { MethodBody = value; }
+        }
+        
         public CustomAttributeCollection CustomAttributes
         {
             get;

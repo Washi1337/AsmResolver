@@ -50,6 +50,7 @@
     <Compile Include="ImageDebugDirectory.cs" />
     <Compile Include="ImageResourceDirectoryType.cs" />
     <Compile Include="LazyValue.cs" />
+    <Compile Include="MethodBody.cs" />
     <Compile Include="Net\AssemblyResolutionEventArgs.cs" />
     <Compile Include="Net\AssemblyResolutionException.cs" />
     <Compile Include="DataSegment.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="ImageOptionalHeader.cs" />
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
+    <Compile Include="Net\Cil\IOperandBuilder.cs" />
     <Compile Include="Net\Cts\AssemblyReference.cs" />
     <Compile Include="Net\Cts\ClassLayout.cs" />
     <Compile Include="Net\Cts\Collections\DelegatedMemberCollection.cs" />
@@ -108,6 +110,7 @@
     <Compile Include="Net\Cts\PropertyDefinition.cs" />
     <Compile Include="Net\Cts\PropertyMap.cs" />
     <Compile Include="Net\Cts\SecurityDeclaration.cs" />
+    <Compile Include="Net\Cts\StandAloneSignature.cs" />
     <Compile Include="Net\Cts\TypeDefinition.cs" />
     <Compile Include="Net\Cts\TypeReference.cs" />
     <Compile Include="Net\CustomMetadataStream.cs" />
@@ -187,6 +190,20 @@
     <Compile Include="Net\Metadata\TypeDefinitionTable.cs" />
     <Compile Include="Net\Metadata\TypeReferenceTable.cs" />
     <Compile Include="Net\Metadata\TypeSpecificationTable.cs" />
+    <Compile Include="Net\Cil\ExceptionHandler.cs" />
+    <Compile Include="Net\Cil\ExceptionHandlerType.cs" />
+    <Compile Include="Net\Cil\IOperandResolver.cs" />
+    <Compile Include="Net\Cil\CilMethodBody.cs" />
+    <Compile Include="Net\Cil\CilAssembler.cs" />
+    <Compile Include="Net\Cil\CilCode.cs" />
+    <Compile Include="Net\Cil\CilDisassembler.cs" />
+    <Compile Include="Net\Cil\CilFlowControl.cs" />
+    <Compile Include="Net\Cil\CilInstruction.cs" />
+    <Compile Include="Net\Cil\CilOpCode.cs" />
+    <Compile Include="Net\Cil\CilOpCodes.cs" />
+    <Compile Include="Net\Cil\CilOpCodeType.cs" />
+    <Compile Include="Net\Cil\CilOperandType.cs" />
+    <Compile Include="Net\Cil\CilStackBehaviour.cs" />
     <Compile Include="Net\NetAssemblyFactory.cs" />
     <Compile Include="Net\Signatures\ArrayDimension.cs" />
     <Compile Include="Net\Signatures\ArrayMarshalDescriptor.cs" />
@@ -268,7 +285,6 @@
     <Compile Include="X86\X86Register.cs" />
     <Compile Include="X86\X86RegOrMemModifier.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

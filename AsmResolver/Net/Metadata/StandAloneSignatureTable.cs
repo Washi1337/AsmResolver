@@ -30,7 +30,7 @@ namespace AsmResolver.Net.Metadata
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<uint> row)
         {
-            throw new System.NotImplementedException();
+            return new StandAloneSignature(image, row);
         }
     }
 }
