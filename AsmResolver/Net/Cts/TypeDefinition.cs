@@ -15,7 +15,6 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<EventMap> _eventMap;
         private readonly LazyValue<TypeDefinition> _declaringType;
         
-        //private InterfaceImplementationCollection _interfaces;
         //private MethodImplementationCollection _methodImplementations;
         private string _fullName;
 
@@ -43,6 +42,8 @@ namespace AsmResolver.Net.Cts
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             NestedClasses = new NestedClassCollection(this);
             GenericParameters = new GenericParameterCollection(this);
+            Interfaces = new InterfaceImplementationCollection(this);
+            MethodImplementations = new MethodImplementationCollection(this);
         }
 
         internal TypeDefinition(MetadataImage image, MetadataRow<TypeAttributes, uint, uint, uint, uint, uint> row)
@@ -107,6 +108,8 @@ namespace AsmResolver.Net.Cts
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             NestedClasses = new NestedClassCollection(this);
             GenericParameters = new GenericParameterCollection(this);
+            Interfaces = new InterfaceImplementationCollection(this);
+            MethodImplementations = new MethodImplementationCollection(this);
         }
 
         public TypeAttributes Attributes
@@ -229,16 +232,17 @@ namespace AsmResolver.Net.Cts
             private set;
         }
 
-        // TODO
-        //public InterfaceImplementationCollection Interfaces
-        //{
-        //    get { return _interfaces ?? (_interfaces = new InterfaceImplementationCollection(this)); }
-        //}
+        public InterfaceImplementationCollection Interfaces
+        {
+            get;
+            private set;
+        }
 
-        //public MethodImplementationCollection MethodImplementations
-        //{
-        //    get { return _methodImplementations ?? (_methodImplementations = new MethodImplementationCollection(this)); }
-        //}
+        public MethodImplementationCollection MethodImplementations
+        {
+            get;
+            private set;
+        }
 
         public ClassLayout ClassLayout
         {

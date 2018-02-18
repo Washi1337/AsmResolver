@@ -1,14 +1,6 @@
 ﻿using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
-/*
- * IMPORTANT
- * 
- * Owner properties need to be declared the other way around as well.
- * In case the user uses ResolveMember before the container list is initialized.
- * 
- */
-
 namespace AsmResolver.Net.Cts
 {
     public class Constant : MetadataMember<MetadataRow<ElementType, byte, uint, uint>>

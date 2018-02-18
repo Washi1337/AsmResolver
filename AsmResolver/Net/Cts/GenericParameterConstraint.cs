@@ -38,7 +38,7 @@ namespace AsmResolver.Net.Cts
         public GenericParameter Owner
         {
             get { return _owner.Value; }
-            set { _owner.Value = value; }
+            internal set { _owner.Value = value; }
         }
 
         public ITypeDefOrRef Constraint

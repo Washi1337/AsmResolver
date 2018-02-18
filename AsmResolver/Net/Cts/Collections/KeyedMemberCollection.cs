@@ -175,39 +175,39 @@ namespace AsmResolver.Net.Cts.Collections
         }
     }
 
-    //public class InterfaceImplementationCollection : MetadataMemberCollection<TypeDefinition, InterfaceImplementation>
-    //{
-    //    public InterfaceImplementationCollection(TypeDefinition owner)
-    //        : base(MetadataTokenType.TypeDef, 0, owner)
-    //    {
-    //    }
+    public class InterfaceImplementationCollection : KeyedMemberCollection<TypeDefinition, InterfaceImplementation>
+    {
+        public InterfaceImplementationCollection(TypeDefinition owner)
+            : base(owner, MetadataTokenType.InterfaceImpl, MetadataTokenType.TypeDef, 0)
+        {
+        }
 
-    //    protected override TypeDefinition GetOwner(InterfaceImplementation item)
-    //    {
-    //        return item.Class;
-    //    }
+        protected override TypeDefinition GetOwner(InterfaceImplementation item)
+        {
+            return item.Class;
+        }
 
-    //    protected override void SetOwner(InterfaceImplementation item, TypeDefinition owner)
-    //    {
-    //        item.Class = owner;
-    //    }
-    //}
+        protected override void SetOwner(InterfaceImplementation item, TypeDefinition owner)
+        {
+            item.Class = owner;
+        }
+    }
 
-    //public class MethodImplementationCollection : MetadataMemberCollection<TypeDefinition, MethodImplementation>
-    //{
-    //    public MethodImplementationCollection(TypeDefinition owner)
-    //        : base(MetadataTokenType.TypeDef, 0, owner)
-    //    {
-    //    }
+    public class MethodImplementationCollection : KeyedMemberCollection<TypeDefinition, MethodImplementation>
+    {
+        public MethodImplementationCollection(TypeDefinition owner)
+            : base(owner, MetadataTokenType.MethodImpl, MetadataTokenType.TypeDef, 0)
+        {
+        }
 
-    //    protected override TypeDefinition GetOwner(MethodImplementation item)
-    //    {
-    //        return item.Class;
-    //    }
+        protected override TypeDefinition GetOwner(MethodImplementation item)
+        {
+            return item.Class;
+        }
 
-    //    protected override void SetOwner(MethodImplementation item, TypeDefinition owner)
-    //    {
-    //        item.Class = owner;
-    //    }
-    //}
+        protected override void SetOwner(MethodImplementation item, TypeDefinition owner)
+        {
+            item.Class = owner;
+        }
+    }
 }

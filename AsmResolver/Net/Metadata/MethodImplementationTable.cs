@@ -43,7 +43,7 @@ namespace AsmResolver.Net.Metadata
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<uint, uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new MethodImplementation(image, row);
         }
     }
     
