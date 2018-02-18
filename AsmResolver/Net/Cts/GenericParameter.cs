@@ -51,7 +51,7 @@ namespace AsmResolver.Net.Cts
         public IGenericParameterProvider Owner
         {
             get { return _owner.Value; }
-            set { _owner.Value = value; }
+            internal set { _owner.Value = value; }
         }
 
         public string Name
