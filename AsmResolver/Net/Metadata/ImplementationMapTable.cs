@@ -20,6 +20,12 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        public MetadataRow<ImplementationMapAttributes, uint, uint, uint> FindImplementationMapOfOwner(MetadataToken ownersToken)
+        {
+            var encodedIndex = TableStream.GetIndexEncoder(CodedIndex.MemberForwarded).EncodeToken(ownersToken);
+            return (MetadataRow<ImplementationMapAttributes, uint, uint, uint>) GetRowByKey(1, encodedIndex);
+        }
+
         protected override MetadataRow<ImplementationMapAttributes, uint, uint, uint> ReadRow(ReadingContext context, MetadataToken token)
         {
             var reader = context.Reader;
@@ -43,7 +49,7 @@ namespace AsmResolver.Net.Metadata
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<ImplementationMapAttributes, uint, uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new ImplementationMap(image, row);
         }
     }
 }

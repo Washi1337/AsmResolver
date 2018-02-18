@@ -14,8 +14,9 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<MethodSignature> _signature;
         private readonly LazyValue<TypeDefinition> _declaringType;
         private readonly LazyValue<MethodBody> _methodBody;
+        private readonly LazyValue<ImplementationMap> _pinvokeMap;
+        
         private string _fullName;
-        //private PInvokeImplementation _pinvokeImplementation;
 
         public MethodDefinition(string name, MethodAttributes attributes, MethodSignature signature)
             : base(null, new MetadataToken(MetadataTokenType.Method))
@@ -30,6 +31,7 @@ namespace AsmResolver.Net.Cts
             _signature = new LazyValue<MethodSignature>(signature);
             Parameters = new DelegatedMemberCollection<MethodDefinition, ParameterDefinition>(this, GetParamOwner, SetParamOwner);
             _methodBody = new LazyValue<MethodBody>(default(MethodBody));
+            _pinvokeMap = new LazyValue<ImplementationMap>(default(ImplementationMap));
             
             _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
             CustomAttributes = new CustomAttributeCollection(this);
@@ -75,6 +77,16 @@ namespace AsmResolver.Net.Cts
                 return (TypeDefinition) table.GetMemberFromRow(image, typeRow);
             });
             
+            _pinvokeMap = new LazyValue<ImplementationMap>(() =>
+            {
+                if (!row.Column3.HasFlag(MethodAttributes.PInvokeImpl)) 
+                    return null;
+                
+                var table = (ImplementationMapTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.ImplMap);
+                var mapRow = table.FindImplementationMapOfOwner(row.MetadataToken);
+                return mapRow != null ? (ImplementationMap) table.GetMemberFromRow(image, mapRow) : null;
+            });
+            
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             GenericParameters = new GenericParameterCollection(this);
@@ -83,7 +95,7 @@ namespace AsmResolver.Net.Cts
         public uint Rva
         {
             get;
-            set;
+            internal set;
         }
 
         public MethodImplAttributes ImplAttributes
@@ -180,19 +192,11 @@ namespace AsmResolver.Net.Cts
             private set;
         }
 
-        // TODO
-        //public PInvokeImplementation PInvokeImplementation
-        //{
-        //    get
-        //    {
-        //        if (_pinvokeImplementation != null || Header == null)
-        //            return _pinvokeImplementation;
-
-        //        return _pinvokeImplementation = Header.GetStream<TableStream>()
-        //            .GetTable<PInvokeImplementation>()
-        //            .FirstOrDefault(x => x.MemberForwarded == this);
-        //    }
-        //}
+        public ImplementationMap PInvokeMap
+        {
+            get { return _pinvokeMap.Value; }
+            set { _pinvokeMap.Value = value; }
+        }
         
         public bool IsPrivate
         {
@@ -276,6 +280,12 @@ namespace AsmResolver.Net.Cts
         {
             get { return Attributes.HasFlag(MethodAttributes.HasSecurity); }
             set { Attributes = Attributes.SetFlag(MethodAttributes.HasSecurity, value); }
+        }
+
+        public bool HasPInvokeImpl
+        {
+            get { return Attributes.HasFlag(MethodAttributes.PInvokeImpl); }
+            set { Attributes = Attributes.SetFlag(MethodAttributes.PInvokeImpl, value); }
         }
 
         public bool IsIL

@@ -98,6 +98,7 @@
     <Compile Include="Net\Cts\IMemberReference.cs" />
     <Compile Include="Net\Cts\IMetadataMember.cs" />
     <Compile Include="Net\Cts\AssemblyDefinition.cs" />
+    <Compile Include="Net\Cts\ImplementationMap.cs" />
     <Compile Include="Net\Cts\InterfaceImplementation.cs" />
     <Compile Include="Net\Cts\IResolvable.cs" />
     <Compile Include="Net\Cts\Collections\KeyedMemberCollection.cs" />
