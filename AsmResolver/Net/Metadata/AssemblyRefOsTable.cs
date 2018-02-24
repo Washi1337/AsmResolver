@@ -15,7 +15,7 @@ namespace AsmResolver.Net.Metadata
                 return sizeof(uint) +
                        sizeof(uint) +
                        sizeof(uint) +
-                       (uint) TableStream.GetTable(TokenType).IndexSize;
+                       (uint) TableStream.GetTable(MetadataTokenType.AssemblyRef).IndexSize;
             }
         }
 
@@ -27,7 +27,7 @@ namespace AsmResolver.Net.Metadata
                 Column1 = reader.ReadUInt32(),
                 Column2 = reader.ReadUInt32(),
                 Column3 = reader.ReadUInt32(),
-                Column4 = reader.ReadIndex(TableStream.GetTable(TokenType).IndexSize)
+                Column4 = reader.ReadIndex(TableStream.GetTable(MetadataTokenType.AssemblyRef).IndexSize)
             };
         }
 
@@ -37,12 +37,12 @@ namespace AsmResolver.Net.Metadata
             writer.WriteUInt32(row.Column1);
             writer.WriteUInt32(row.Column2);
             writer.WriteUInt32(row.Column3);
-            writer.WriteIndex(TableStream.GetTable(TokenType).IndexSize, row.Column4);
+            writer.WriteIndex(TableStream.GetTable(MetadataTokenType.AssemblyRef).IndexSize, row.Column4);
         }
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<uint, uint, uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new AssemblyRefOs(image, row);
         }
     }
     

@@ -12,7 +12,7 @@ namespace AsmResolver.Net.Metadata
         public override uint ElementByteCount
         {
             get { return sizeof(uint) +
-                         (uint)TableStream.GetTable(TokenType).IndexSize;
+                         (uint)TableStream.GetTable(MetadataTokenType.AssemblyRef).IndexSize;
             }
         }
 
@@ -22,7 +22,7 @@ namespace AsmResolver.Net.Metadata
             return new MetadataRow<uint, uint>(token)
             {
                 Column1 = reader.ReadUInt32(),
-                Column2 = reader.ReadIndex(TableStream.GetTable(TokenType).IndexSize)
+                Column2 = reader.ReadIndex(TableStream.GetTable(MetadataTokenType.AssemblyRef).IndexSize)
             };
         }
 
@@ -30,12 +30,12 @@ namespace AsmResolver.Net.Metadata
         {
             var writer = context.Writer;
             writer.WriteUInt32(row.Column1);
-            writer.WriteIndex(TableStream.GetTable(TokenType).IndexSize, row.Column2);
+            writer.WriteIndex(TableStream.GetTable(MetadataTokenType.AssemblyRef).IndexSize, row.Column2);
         }
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new AssemblyRefProcessor(image, row);
         }
     }
     

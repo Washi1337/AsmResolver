@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -22,7 +23,10 @@ namespace AsmResolver.Net.Cts
             _culture = new LazyValue<string>(info.Culture);
             _publicKey = new LazyValue<DataBlobSignature>(info.PublicKeyToken == null ? null : new DataBlobSignature(info.PublicKeyToken));
             _hashValue = new LazyValue<DataBlobSignature>();
+         
             CustomAttributes = new CustomAttributeCollection(this);
+            OperatingSystems = new DelegatedMemberCollection<AssemblyReference, AssemblyRefOs>(this, GetOsOwner, SetOsOwner);
+            Processors = new DelegatedMemberCollection<AssemblyReference, AssemblyRefProcessor>(this, GetProcessorOwner, SetProcessorOwner);
         }
 
         public AssemblyReference(string name, Version version)
@@ -34,6 +38,10 @@ namespace AsmResolver.Net.Cts
             _publicKey = new LazyValue<DataBlobSignature>();
             _hashValue = new LazyValue<DataBlobSignature>();
             CustomAttributes = new CustomAttributeCollection(this);
+            
+            OperatingSystems = new Collection<AssemblyRefOs>();
+            OperatingSystems = new DelegatedMemberCollection<AssemblyReference, AssemblyRefOs>(this, GetOsOwner, SetOsOwner);
+            Processors = new DelegatedMemberCollection<AssemblyReference, AssemblyRefProcessor>(this, GetProcessorOwner, SetProcessorOwner);
         }
 
         internal AssemblyReference(MetadataImage image, MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint> row)
@@ -48,7 +56,10 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column7));
             _culture = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column8));
             _hashValue = new LazyValue<DataBlobSignature>(() => row.Column9 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column9)));
+            
             CustomAttributes = new CustomAttributeCollection(this);
+            OperatingSystems = new TableMemberCollection<AssemblyReference, AssemblyRefOs>(this, MetadataTokenType.AssemblyRefOs, GetOsOwner, SetOsOwner);
+            Processors = new TableMemberCollection<AssemblyReference, AssemblyRefProcessor>(this, MetadataTokenType.AssemblyRefProcessor, GetProcessorOwner, SetProcessorOwner);
         }
         
         public Version Version
@@ -124,6 +135,26 @@ namespace AsmResolver.Net.Cts
             private set;
         }
 
+        /// <summary>
+        /// Gets a collection of operating systems supported by this referenced assembly.  
+        /// </summary>
+        /// <remarks>This collection is no longer used in the newer versions of the .NET framework.</remarks>
+        public Collection<AssemblyRefOs> OperatingSystems
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a collection of processors supported by this referenced assembly.
+        /// </summary>
+        /// <remarks>This collection is no longer used in the newer versions of the .NET framework.</remarks>
+        public Collection<AssemblyRefProcessor> Processors
+        {
+            get;
+            private set;
+        }
+
         public AssemblyDefinition Resolve()
         {
             if (Image == null)
@@ -139,6 +170,26 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return FullName;
+        }
+
+        private static AssemblyReference GetProcessorOwner(AssemblyRefProcessor processor)
+        {
+            return processor.Reference;
+        }
+
+        private static void SetProcessorOwner(AssemblyRefProcessor processor, AssemblyReference reference)
+        {
+            processor.Reference = reference;
+        }
+
+        private static AssemblyReference GetOsOwner(AssemblyRefOs os)
+        {
+            return os.Reference;
+        }
+
+        private static void SetOsOwner(AssemblyRefOs os, AssemblyReference reference)
+        {
+            os.Reference = reference;
         }
     }
 }

@@ -81,7 +81,11 @@
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
     <Compile Include="Net\Cil\IOperandBuilder.cs" />
+    <Compile Include="Net\Cts\AssemblyOs.cs" />
+    <Compile Include="Net\Cts\AssemblyProcessor.cs" />
     <Compile Include="Net\Cts\AssemblyReference.cs" />
+    <Compile Include="Net\Cts\AssemblyRefOs.cs" />
+    <Compile Include="Net\Cts\AssemblyRefProcessor.cs" />
     <Compile Include="Net\Cts\ClassLayout.cs" />
     <Compile Include="Net\Cts\Collections\DelegatedMemberCollection.cs" />
     <Compile Include="Net\Cts\Collections\MemberCollection.cs" />

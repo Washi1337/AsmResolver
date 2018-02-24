@@ -33,6 +33,8 @@ namespace AsmResolver.Net.Cts
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             Resources = new Collection<ManifestResource>();
             Files = new Collection<FileReference>();
+            OperatingSystems = new Collection<AssemblyOs>();
+            Processors = new Collection<AssemblyProcessor>();
         }
 
         public AssemblyDefinition(string name, Version version)
@@ -49,6 +51,8 @@ namespace AsmResolver.Net.Cts
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             Resources = new Collection<ManifestResource>();
             Files = new Collection<FileReference>();
+            OperatingSystems = new Collection<AssemblyOs>();
+            Processors = new Collection<AssemblyProcessor>();
         }
 
         internal AssemblyDefinition(MetadataImage image, MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint> row)
@@ -82,6 +86,12 @@ namespace AsmResolver.Net.Cts
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
+            
+            OperatingSystems = new TableMemberCollection<AssemblyDefinition, AssemblyOs>(
+                this, tableStream.GetTable(MetadataTokenType.AssemblyOs));
+            
+            Processors = new TableMemberCollection<AssemblyDefinition, AssemblyProcessor>(
+                this, tableStream.GetTable(MetadataTokenType.AssemblyProcessor));
         }
 
         /// <summary>
@@ -235,6 +245,26 @@ namespace AsmResolver.Net.Cts
         /// Gets a collection of extra files that this assembly consists of.
         /// </summary>
         public Collection<FileReference> Files
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a collection of operating systems supported by this assembly.
+        /// </summary>
+        /// <remarks>This collection is no longer used in the newer versions of the .NET framework.</remarks>
+        public Collection<AssemblyOs> OperatingSystems
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a collection of processors supported by this assembly.  
+        /// </summary>
+        /// <remarks>This collection is no longer used in the newer versions of the .NET framework.</remarks>
+        public Collection<AssemblyProcessor> Processors
         {
             get;
             private set;
