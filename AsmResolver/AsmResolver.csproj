@@ -91,6 +91,7 @@
     <Compile Include="Net\Cts\EventDefinition.cs" />
     <Compile Include="Net\Cts\EventMap.cs" />
     <Compile Include="Net\Cts\FieldDefinition.cs" />
+    <Compile Include="Net\Cts\FieldLayout.cs" />
     <Compile Include="Net\Cts\FieldMarshal.cs" />
     <Compile Include="Net\Cts\FieldRva.cs" />
     <Compile Include="Net\Cts\GenericParameter.cs" />

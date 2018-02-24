@@ -13,6 +13,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<TypeDefinition> _declaringType;
         private readonly LazyValue<FieldRva> _fieldRva;
         private readonly LazyValue<FieldMarshal> _fieldMarshal;
+        private readonly LazyValue<FieldLayout> _fieldLayout;
         private string _fullName;
 
         public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
@@ -31,6 +32,7 @@ namespace AsmResolver.Net.Cts
             _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
             _fieldRva = new LazyValue<FieldRva>(default(FieldRva));
             _fieldMarshal = new LazyValue<FieldMarshal>(default(FieldMarshal));
+            _fieldLayout = new LazyValue<FieldLayout>(default(FieldLayout));
             
             CustomAttributes = new CustomAttributeCollection(this);
         }
@@ -73,6 +75,13 @@ namespace AsmResolver.Net.Cts
                 var table = (FieldMarshalTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.FieldMarshal);
                 var marshalRow = table.FindFieldMarshalOfOwner(row.MetadataToken);
                 return marshalRow != null ? (FieldMarshal) table.GetMemberFromRow(image, marshalRow) : null;
+            });
+            
+            _fieldLayout = new LazyValue<FieldLayout>(() =>
+            {
+                var table = (FieldLayoutTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.FieldLayout);
+                var layoutRow = table.FindFieldLayoutOfOwner(row.MetadataToken);
+                return layoutRow != null ? (FieldLayout) table.GetMemberFromRow(image, layoutRow) : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -147,6 +156,12 @@ namespace AsmResolver.Net.Cts
         {
             get { return _fieldRva.Value; }
             set { _fieldRva.Value = value; }
+        }
+
+        public FieldLayout FieldLayout
+        {
+            get { return _fieldLayout.Value; }
+            set { _fieldLayout.Value = value; }
         }
         
         public CustomAttributeCollection CustomAttributes

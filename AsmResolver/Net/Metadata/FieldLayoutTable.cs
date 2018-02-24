@@ -18,6 +18,11 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        public MetadataRow<uint, uint> FindFieldLayoutOfOwner(MetadataToken ownersToken)
+        {
+            return (MetadataRow<uint, uint>) GetRowByKey(1, ownersToken.Rid);
+        }
+
         protected override MetadataRow<uint, uint> ReadRow(ReadingContext context, MetadataToken token)
         {
             var reader = context.Reader;
@@ -37,7 +42,7 @@ namespace AsmResolver.Net.Metadata
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new FieldLayout(image, row);
         }
     }
     
