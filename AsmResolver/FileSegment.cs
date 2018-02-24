@@ -21,6 +21,11 @@ namespace AsmResolver
             set;
         }
 
+        public long GetRva(IOffsetConverter converter)
+        {
+            return converter.FileOffsetToRva(StartOffset);
+        }
+
         /// <summary>
         /// Computes the physical length of the segment.
         /// </summary>

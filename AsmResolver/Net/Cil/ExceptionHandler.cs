@@ -5,6 +5,9 @@ namespace AsmResolver.Net.Cil
 {
     public class ExceptionHandler : FileSegment
     {
+        public const int SmallExceptionHandlerSize = 2 * sizeof(byte) + 3 * sizeof(ushort) + sizeof(uint);
+        public const int FatExceptionHandlerSize = 6 * sizeof(uint);
+        
         public static ExceptionHandler FromReader(CilMethodBody cilMethodBody, IBinaryStreamReader reader, bool fatFormat)
         {
             var offset = reader.Position;

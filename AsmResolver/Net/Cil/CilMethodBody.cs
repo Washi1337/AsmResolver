@@ -9,6 +9,62 @@ namespace AsmResolver.Net.Cil
 {
     public class CilMethodBody : MethodBody, IOperandResolver
     {
+        public static int GetMethodBodySize(ReadingContext context)
+        {   
+            var reader = context.Reader;
+            long start = reader.Position;
+            
+            byte bodyHeader = reader.ReadByte();
+            if ((bodyHeader & 0x3) == 0x3)
+            {
+                reader.Position--;
+                
+                ushort fatBodyHeader = reader.ReadUInt16();
+                bool hasSection = (fatBodyHeader & 0x8) == 0x8;
+                int headerSize = (fatBodyHeader >> 12) * 4;
+                
+                reader.Position += sizeof(ushort); // max stack
+                uint codeSize = reader.ReadUInt32();
+                reader.Position += sizeof(uint); // localvarsig
+                reader.Position += codeSize; // cil code.
+                
+                if (hasSection)
+                {
+                    reader.Align(4);
+                    byte sectionHeader;
+                    do
+                    {
+                        sectionHeader = reader.ReadByte();
+                        if ((sectionHeader & 0x01) == 0x01)
+                        {
+                            bool isFat = (sectionHeader & 0x40) == 0x40;
+                            int dataSize = 0;
+                            if (isFat)
+                            {
+                                dataSize = reader.ReadByte() |
+                                           (reader.ReadByte() << 0x08) |
+                                           reader.ReadByte() << 0x10;
+                            }
+                            else
+                            {
+                                dataSize = reader.ReadByte();
+                                reader.ReadUInt16();
+                            }
+
+                            reader.Position += dataSize - 4;
+                        }
+                    } while ((sectionHeader & 0x80) == 0x80);
+                }
+            }
+            else if ((bodyHeader & 0x2) == 0x2)
+            {
+                uint codeSize = (uint)(bodyHeader >> 2);
+                reader.Position += codeSize;
+            }
+
+            return (int) (reader.Position - start);
+        }
+        
         public static CilMethodBody FromReadingContext(MethodDefinition method, ReadingContext context)
         {
             var reader = context.Reader;
@@ -23,10 +79,10 @@ namespace AsmResolver.Net.Cil
             if ((bodyHeader & 0x3) == 0x3)
             {
                 reader.Position--;
-                var fatBodyHeader = reader.ReadUInt16();
-                var headerSize = (fatBodyHeader >> 12) * 4;
+                ushort fatBodyHeader = reader.ReadUInt16();
+                int headerSize = (fatBodyHeader >> 12) * 4;
 
-                var hasSections = (fatBodyHeader & 0x8) == 0x8;
+                bool hasSections = (fatBodyHeader & 0x8) == 0x8;
                 body.InitLocals = (fatBodyHeader & 0x10) == 0x10;
                 body.MaxStack = reader.ReadUInt16();
                 codeSize = reader.ReadUInt32();

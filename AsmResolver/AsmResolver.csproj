@@ -136,6 +136,7 @@
     <Compile Include="Net\IndexSize.cs" />
     <Compile Include="Net\Cts\INetAssemblyResolver.cs" />
     <Compile Include="Net\ITypeDescriptor.cs" />
+    <Compile Include="Net\RvaDataSegment.cs" />
     <Compile Include="Net\MetadataStreamHeaderCollection.cs" />
     <Compile Include="Net\IAssemblyDescriptor.cs" />
     <Compile Include="Net\INameProvider.cs" />

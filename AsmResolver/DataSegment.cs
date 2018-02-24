@@ -51,7 +51,7 @@ namespace AsmResolver
             get;
             set;
         }
-
+        
         public override uint GetPhysicalLength()
         {
             return (uint)Data.Length;

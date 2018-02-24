@@ -8,7 +8,7 @@ using AsmResolver.X86;
 
 namespace AsmResolver.Net.Cts
 {
-    public class MethodDefinition : MetadataMember<MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint>>, ICallableMemberReference, IHasSecurityAttribute, IMemberForwarded, IGenericParameterProvider, IMemberRefParent, ICustomAttributeType
+    public class MethodDefinition : MetadataMember<MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>>, ICallableMemberReference, IHasSecurityAttribute, IMemberForwarded, IGenericParameterProvider, IMemberRefParent, ICustomAttributeType
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<MethodSignature> _signature;
@@ -39,13 +39,12 @@ namespace AsmResolver.Net.Cts
             GenericParameters = new GenericParameterCollection(this);
         }
 
-        internal MethodDefinition(MetadataImage image, MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
+        internal MethodDefinition(MetadataImage image, MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
             : base(image, row.MetadataToken)
         {
             var stringStream = image.Header.GetStream<StringStream>();
             var blobStream = image.Header.GetStream<BlobStream>();
 
-            Rva = row.Column1;
             ImplAttributes = row.Column2;
             Attributes = row.Column3;
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column4));
@@ -58,12 +57,15 @@ namespace AsmResolver.Net.Cts
 
             _methodBody = new LazyValue<MethodBody>(() =>
             {
-                if (row.Column1 == 0)
+                if (row.Column1 == null)
                     return null;
                 
                 var windowsAssembly = image.Header.NetDirectory.Assembly;
-                long fileOffset = windowsAssembly.RvaToFileOffset(row.Column1);
-                var readingContext = windowsAssembly.ReadingContext.CreateSubContext(fileOffset);
+                var readingContext = new ReadingContext()
+                {
+                    Assembly = image.Header.NetDirectory.Assembly,
+                    Reader = row.Column1.CreateReader()
+                };
 
                 return row.Column2.HasFlag(MethodImplAttributes.IL)
                     ? (MethodBody) CilMethodBody.FromReadingContext(this, readingContext)
@@ -91,13 +93,7 @@ namespace AsmResolver.Net.Cts
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             GenericParameters = new GenericParameterCollection(this);
         }
-
-        public uint Rva
-        {
-            get;
-            internal set;
-        }
-
+        
         public MethodImplAttributes ImplAttributes
         {
             get;

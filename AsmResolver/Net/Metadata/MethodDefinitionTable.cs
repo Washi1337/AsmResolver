@@ -1,8 +1,11 @@
-﻿using AsmResolver.Net.Cts;
+﻿using System;
+using System.Data;
+using AsmResolver.Net.Cil;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Metadata
 {
-    public class MethodDefinitionTable : MetadataTable<MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint>>
+    public class MethodDefinitionTable : MetadataTable<MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>>
     {
         public override MetadataTokenType TokenType
         {
@@ -22,13 +25,32 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
-        protected override MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint> ReadRow(ReadingContext context, MetadataToken token)
+        protected override MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> ReadRow(ReadingContext context, MetadataToken token)
         {
             var reader = context.Reader;
-            return new MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint>(token)
+            
+            uint rva = reader.ReadUInt32();
+            var implAttributes = (MethodImplAttributes) reader.ReadUInt16();
+            
+            RvaDataSegment body = null;
+            if (rva != 0)
             {
-                Column1 = reader.ReadUInt32(),                                                      // Rva
-                Column2 = (MethodImplAttributes) reader.ReadUInt16(),                               // ImplAttrbibutes
+                long fileOffset = context.Assembly.RvaToFileOffset(rva);
+                if (implAttributes.HasFlag(MethodImplAttributes.IL))
+                {
+                    int size = CilMethodBody.GetMethodBodySize(context.CreateSubContext(fileOffset));
+                    body = new RvaDataSegment(rva, context.Reader.CreateSubReader(fileOffset, size));
+                }
+                else
+                {
+                    body = new RvaDataSegment(rva, context.Reader.CreateSubReader(fileOffset, 0));
+                }
+            }
+
+            return new MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>(token)
+            {
+                Column1 = body,                                                          
+                Column2 = implAttributes,                                                           // ImplAttrbibutes
                 Column3 = (MethodAttributes) reader.ReadUInt16(),                                   // Attributes
                 Column4 = reader.ReadIndex(TableStream.StringIndexSize),                            // Name
                 Column5 = reader.ReadIndex(TableStream.BlobIndexSize),                              // Signature
@@ -36,18 +58,19 @@ namespace AsmResolver.Net.Metadata
             };
         }
 
-        protected override void WriteRow(WritingContext context, MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
+        protected override void WriteRow(WritingContext context, MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
         {
-            var writer = context.Writer;
-            writer.WriteUInt32(row.Column1);
-            writer.WriteUInt16((ushort) row.Column2);
-            writer.WriteUInt16((ushort) row.Column3);
-            writer.WriteIndex(TableStream.StringIndexSize, row.Column4);
-            writer.WriteIndex(TableStream.BlobIndexSize, row.Column5);
-            writer.WriteIndex(TableStream.GetTable(MetadataTokenType.Param).IndexSize, row.Column6);
+            throw new NotImplementedException();
+//            var writer = context.Writer;
+//            writer.WriteUInt32(row.Column1);
+//            writer.WriteUInt16((ushort) row.Column2);
+//            writer.WriteUInt16((ushort) row.Column3);
+//            writer.WriteIndex(TableStream.StringIndexSize, row.Column4);
+//            writer.WriteIndex(TableStream.BlobIndexSize, row.Column5);
+//            writer.WriteIndex(TableStream.GetTable(MetadataTokenType.Param).IndexSize, row.Column6);
         }
 
-        protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<uint, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
+        protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
         {
             return new MethodDefinition(image, row);
         }
