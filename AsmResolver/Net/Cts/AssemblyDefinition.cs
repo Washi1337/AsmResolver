@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Security.Cryptography;
 using AsmResolver.Collections.Generic;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -65,9 +66,15 @@ namespace AsmResolver.Net.Cts
             HashAlgorithm = row.Column1;
             Version = new Version(row.Column2, row.Column3, row.Column4, row.Column5);
             Attributes = row.Column6;
-            _publicKey = new LazyValue<DataBlobSignature>(() => row.Column7 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column7)));
-            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column8));
-            _culture = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column9));
+            
+            _publicKey = new LazyValue<DataBlobSignature>(() => 
+                row.Column7 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column7)));
+            
+            _name = new LazyValue<string>(() => 
+                stringStream.GetStringByOffset(row.Column8));
+            
+            _culture = new LazyValue<string>(() => 
+                stringStream.GetStringByOffset(row.Column9));
            
             Modules = new TableMemberCollection<AssemblyDefinition, ModuleDefinition>(
                 this, tableStream.GetTable(MetadataTokenType.Module), GetModuleOwner, SetModuleOwner);
@@ -311,6 +318,43 @@ namespace AsmResolver.Net.Cts
         private static void SetModuleOwner(ModuleDefinition module, AssemblyDefinition assembly)
         {
             module.Assembly = assembly;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var row = new MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint>
+            {
+                Column1 = HashAlgorithm,
+                Column2 = (ushort) Version.Major,
+                Column3 = (ushort) Version.Minor,
+                Column4 = (ushort) Version.MajorRevision,
+                Column5 = (ushort) Version.MinorRevision,
+                Column6 = Attributes,
+                Column7 = buffer.BlobStreamBuffer.GetBlobOffset(PublicKey),
+                Column8 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column9 = buffer.StringStreamBuffer.GetStringOffset(Culture)
+            };
+
+            buffer.TableStreamBuffer.GetTable<AssemblyDefinitionTable>().Add(row);
+
+            foreach (var reference in AssemblyReferences)
+                reference.AddToBuffer(buffer);
+            foreach (var reference in ModuleReferences)
+                reference.AddToBuffer(buffer);
+            foreach (var module in Modules)
+                module.AddToBuffer(buffer);
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
+            foreach (var declaration in SecurityDeclarations)
+                declaration.AddToBuffer(buffer);
+            foreach (var resource in Resources)
+                resource.AddToBuffer(buffer);
+            foreach (var file in Files)
+                file.AddToBuffer(buffer);
+            foreach (var os in OperatingSystems)
+                os.AddToBuffer(buffer);
+            foreach (var processor in Processors)
+                processor.AddToBuffer(buffer);
         }
     }
 }

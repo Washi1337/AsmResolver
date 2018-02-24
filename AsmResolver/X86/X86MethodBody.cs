@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using AsmResolver.Net;
+using AsmResolver.Net.Builder;
 
 namespace AsmResolver.X86
 {
@@ -27,17 +30,18 @@ namespace AsmResolver.X86
             {
                 if (_instructions != null)
                     return _instructions;
-                _instructions = new List<X86Instruction>();
+                var instructions = new List<X86Instruction>();
                 if (_readingContext != null)
                 {
                     var disassembler = new X86Disassembler(_readingContext.Reader);
                     while (_readingContext.Reader.Position
                            < _readingContext.Reader.StartPosition + _readingContext.Reader.Length)
                     {
-                        _instructions.Add(disassembler.ReadNextInstruction());
+                        instructions.Add(disassembler.ReadNextInstruction());
                     }
                 }
-                return _instructions;
+
+                return _instructions = instructions;
             }
         }
 
@@ -51,6 +55,18 @@ namespace AsmResolver.X86
             var assembler = new X86Assembler(context.Writer);
             foreach (var instruction in Instructions)
                 assembler.Write(instruction);
+        }
+
+        public override RvaDataSegment CreateDataSegment(MetadataBuffer buffer)
+        {
+            using (var stream = new MemoryStream())
+            {
+                var writer = new BinaryStreamWriter(stream);
+                var assembler = new X86Assembler(writer);
+                foreach (var instruction in Instructions)
+                    assembler.Write(instruction);
+                return new RvaDataSegment(stream.ToArray());
+            }
         }
     }
 }

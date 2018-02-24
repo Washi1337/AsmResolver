@@ -2,8 +2,13 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Metadata
 {
-    public class GenericParameterConstraintTable : MetadataTable<MetadataRow<uint, uint>>
+    public class GenericParameterConstraintTable : SortedMetadataTable<MetadataRow<uint, uint>>
     {
+        public GenericParameterConstraintTable()
+            : base(0)
+        {
+        }
+        
         public override MetadataTokenType TokenType
         {
             get { return MetadataTokenType.GenericParamConstraint; }

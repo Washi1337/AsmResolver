@@ -1,15 +1,12 @@
-﻿ using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AsmResolver.Net
 {
     /// <summary>
     /// Represents a user-defined strings storage stream (#US) in a .NET assembly image.
     /// </summary>
-    public class UserStringStream : MetadataStream<UserStringStreamBuffer>
+    public class UserStringStream : MetadataStream
     {
         internal static UserStringStream FromReadingContext(ReadingContext context)
         {
@@ -25,7 +22,7 @@ namespace AsmResolver.Net
         {
         }
 
-        internal UserStringStream(IBinaryStreamReader reader)
+        public UserStringStream(IBinaryStreamReader reader)
         {
             _reader = reader;
             _length = (uint)reader.Length;
@@ -100,15 +97,6 @@ namespace AsmResolver.Net
             _hasReadAllStrings = true;
         }
         
-        /// <summary>
-        /// Creates a new buffer for constructing a new user-strings storage stream.
-        /// </summary>
-        /// <returns></returns>
-        public override UserStringStreamBuffer CreateBuffer()
-        {
-            return new UserStringStreamBuffer();
-        }
-
         public override uint GetPhysicalLength()
         {
             return Align(_length, 4);
@@ -120,55 +108,6 @@ namespace AsmResolver.Net
             writer.WriteByte(0);
 
             foreach (var value in EnumerateStrings())
-            {
-                writer.WriteCompressedUInt32((uint)Encoding.Unicode.GetByteCount(value) + 1);
-                writer.WriteBytes(Encoding.Unicode.GetBytes(value));
-                writer.WriteByte(0);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Represents a buffer for constructing a new user-defined strings metadata stream.
-    /// </summary>
-    public class UserStringStreamBuffer : FileSegment
-    {
-        private readonly Dictionary<string, uint> _stringOffsetMapping = new Dictionary<string, uint>();
-        private uint _length;
-
-        public UserStringStreamBuffer()
-        {
-            _length = 1;
-        }
-
-        /// <summary>
-        /// Gets or creates a new index for the given string.
-        /// </summary>
-        /// <param name="value">The string to get the index from.</param>
-        /// <returns>The index.</returns>
-        public uint GetStringOffset(string value)
-        {
-            uint offset;
-            if (!_stringOffsetMapping.TryGetValue(value, out offset))
-            {
-                _stringOffsetMapping.Add(value, offset = _length);
-                var byteCount = (uint)Encoding.Unicode.GetByteCount(value) + 1;
-                _length += byteCount.GetCompressedSize() + byteCount;
-            }
-            return offset;
-        }
-
-        public override uint GetPhysicalLength()
-        {
-            return Align(_length, 4);
-        }
-
-        public override void Write(WritingContext context)
-        {
-            var writer = context.Writer;
-            writer.WriteByte(0);
-
-            foreach (var value in _stringOffsetMapping.Keys)
             {
                 writer.WriteCompressedUInt32((uint)Encoding.Unicode.GetByteCount(value) + 1);
                 writer.WriteBytes(Encoding.Unicode.GetBytes(value));

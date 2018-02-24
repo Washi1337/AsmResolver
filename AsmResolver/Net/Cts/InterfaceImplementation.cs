@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts.Collections;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
@@ -56,6 +57,19 @@ namespace AsmResolver.Net.Cts
         {
             get;
             private set;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<InterfaceImplementationTable>().Add(new MetadataRow<uint, uint>
+            {
+                Column1 = Class.MetadataToken.Rid,
+                Column2 = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(Interface.MetadataToken)
+            });
+            
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
         }
     }
 }

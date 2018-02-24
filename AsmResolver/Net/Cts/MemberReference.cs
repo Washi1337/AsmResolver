@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Remoting.Messaging;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -114,6 +115,20 @@ namespace AsmResolver.Net.Cts
             return Signature.IsMethod
                 ? (IMetadataMember)Image.MetadataResolver.ResolveMethod(this)
                 : Image.MetadataResolver.ResolveField(this);
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<MemberReferenceTable>().Add(new MetadataRow<uint, uint, uint>
+            {
+                Column1 = tableStream.GetIndexEncoder(CodedIndex.MemberRefParent).EncodeToken(Parent.MetadataToken),
+                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column3 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
+            });
+
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -109,6 +110,16 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return FullName;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<MethodSpecificationTable>().Add(new MetadataRow<uint, uint>
+            {
+                Column1 = tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef).EncodeToken(Method.MetadataToken),
+                Column2 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
+            });
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
@@ -50,6 +51,16 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return string.Format("({0}) {1}", Constraint, Owner);
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<GenericParameterConstraintTable>().Add(new MetadataRow<uint, uint>
+            {
+                Column1 = Owner.MetadataToken.Rid,
+                Column2 = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(Constraint.MetadataToken)
+            });
         }
     }
 }

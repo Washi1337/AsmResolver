@@ -1,5 +1,6 @@
 ﻿
 using System;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -124,6 +125,20 @@ namespace AsmResolver.Net.Cts
         IMetadataMember IResolvable.Resolve()
         {
             return Resolve();
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<TypeReferenceTable>().Add(new MetadataRow<uint, uint, uint>
+            {
+                Column1 = tableStream.GetIndexEncoder(CodedIndex.ResolutionScope).EncodeToken(ResolutionScope.MetadataToken),
+                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column3 = buffer.StringStreamBuffer.GetStringOffset(Namespace),
+            });
+
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
         }
     }
 }

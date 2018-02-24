@@ -6,7 +6,7 @@ namespace AsmResolver.Net
     /// <summary>
     /// Represents a GUID storage stream (#GUID) in a .NET assembly image.
     /// </summary>
-    public class GuidStream : MetadataStream<GuidStreamBuffer>
+    public class GuidStream : MetadataStream
     {
         internal static GuidStream FromReadingContext(ReadingContext context)
         {
@@ -21,7 +21,7 @@ namespace AsmResolver.Net
         {
         }
 
-        internal GuidStream(IBinaryStreamReader reader)
+        public GuidStream(IBinaryStreamReader reader)
         {
             _reader = reader;
         }
@@ -77,16 +77,7 @@ namespace AsmResolver.Net
 
             _hasReadAllGuids = true;
         }
-
-        /// <summary>
-        /// Creates a new buffer for constructing a new GUID storage stream.
-        /// </summary>
-        /// <returns></returns>
-        public override GuidStreamBuffer CreateBuffer()
-        {
-            return new GuidStreamBuffer();
-        }
-
+        
         public override uint GetPhysicalLength()
         {
             return (uint)_reader.Length;
@@ -96,45 +87,6 @@ namespace AsmResolver.Net
         {
             foreach (var value in EnumerateGuids())
                 context.Writer.WriteBytes(value.ToByteArray());
-        }
-    }
-
-    /// <summary>
-    /// Represents a buffer for constructing a new GUID metadata stream.
-    /// </summary>
-    public class GuidStreamBuffer : FileSegment
-    {
-        private readonly Dictionary<Guid, uint> _guidOffsetMapping = new Dictionary<Guid, uint>();
-        private uint _length;
-
-        /// <summary>
-        /// Gets or creates a new index for the given GUID.
-        /// </summary>
-        /// <param name="guid">The GUID to get the index from.</param>
-        /// <returns>The index.</returns>
-        public uint GetGuidOffset(Guid guid)
-        {
-            if (guid == default(Guid))
-                return 0;
-
-            uint offset;
-            if (!_guidOffsetMapping.TryGetValue(guid, out offset))
-            {
-                _guidOffsetMapping.Add(guid, offset = _length + 1);
-                _length += 16;
-            }
-            return offset;
-        }
-
-        public override uint GetPhysicalLength()
-        {
-            return _length;
-        }
-
-        public override void Write(WritingContext context)
-        {
-            foreach (var guid in _guidOffsetMapping.Keys)
-                context.Writer.WriteBytes(guid.ToByteArray());
         }
     }
 }

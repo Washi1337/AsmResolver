@@ -2,8 +2,13 @@
 
 namespace AsmResolver.Net.Metadata
 {
-    public class ConstantTable : MetadataTable<MetadataRow<ElementType, byte, uint, uint>>
+    public class ConstantTable : SortedMetadataTable<MetadataRow<ElementType, byte, uint, uint>>
     {
+        public ConstantTable()
+            : base(2)
+        {
+        }
+        
         public override MetadataTokenType TokenType
         {
             get { return MetadataTokenType.Constant; }

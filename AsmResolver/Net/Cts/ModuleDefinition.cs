@@ -1,5 +1,6 @@
 ﻿using System;
 using AsmResolver.Collections.Generic;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -106,6 +107,24 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return Name;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<ModuleDefinitionTable>().Add(new MetadataRow<ushort, uint, uint, uint, uint>
+            {
+                Column1 = Generation,
+                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column3 = buffer.GuidStreamBuffer.GetGuidOffset(Mvid),
+                Column4 = buffer.GuidStreamBuffer.GetGuidOffset(EncId),
+                Column5 = buffer.GuidStreamBuffer.GetGuidOffset(EncBaseId)
+            });
+
+            foreach (var type in Types)
+                type.AddToBuffer(buffer);
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
         }
     }
 }

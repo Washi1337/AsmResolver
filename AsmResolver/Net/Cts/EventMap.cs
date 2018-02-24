@@ -1,5 +1,7 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using AsmResolver.Collections.Generic;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -23,8 +25,10 @@ namespace AsmResolver.Net.Cts
             _parent = new LazyValue<TypeDefinition>(() =>
             {
                 var typeTable = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
-                var typeRow = typeTable.GetRow((int) row.Column1 - 1);
-                return (TypeDefinition) typeTable.GetMemberFromRow(image, typeRow);
+                MetadataRow typeRow;
+                return typeTable.TryGetRow((int) row.Column1 - 1, out typeRow)
+                    ? (TypeDefinition) typeTable.GetMemberFromRow(image, typeRow)
+                    : null;
             });
             
             Events = new RangedMemberCollection<EventMap,EventDefinition>(this, MetadataTokenType.Event, 1, GetEventOwner, SetEventOwner);
@@ -50,6 +54,22 @@ namespace AsmResolver.Net.Cts
         private static void SetEventOwner(EventDefinition @event, EventMap owner)
         {
             @event.EventMap = owner;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+
+            foreach (var @event in Events)
+                @event.AddToBuffer(buffer);
+            
+            tableStream.GetTable<EventMapTable>().Add(new MetadataRow<uint, uint>
+            {
+                Column1 = Parent.MetadataToken.Rid,
+                Column2 = Events.Count == 0 
+                    ? (uint) Math.Max(1, tableStream.GetTable(MetadataTokenType.Event).Count) 
+                    : Events[0].MetadataToken.Rid,
+            });
         }
     }
 }

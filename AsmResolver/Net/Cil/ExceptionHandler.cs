@@ -3,7 +3,7 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cil
 {
-    public class ExceptionHandler : FileSegment
+    public class ExceptionHandler
     {
         public const int SmallExceptionHandlerSize = 2 * sizeof(byte) + 3 * sizeof(ushort) + sizeof(uint);
         public const int FatExceptionHandlerSize = 6 * sizeof(uint);
@@ -20,7 +20,6 @@ namespace AsmResolver.Net.Cil
 
             var handler = new ExceptionHandler((ExceptionHandlerType)handerType)
             {
-                StartOffset = offset,
                 IsFat = fatFormat,
                 TryStart = cilMethodBody.GetInstructionByOffset(tryOffset),
                 TryEnd = cilMethodBody.GetInstructionByOffset(tryOffset + tryLength),
@@ -107,21 +106,13 @@ namespace AsmResolver.Net.Cil
             set;
         }
 
-        public override uint GetPhysicalLength()
+        public uint GetPhysicalLength()
         {
-            if (IsFat)
-                return 7 * sizeof (uint);
-            
-            return 2 * sizeof (ushort) +
-                   1 * sizeof (byte) +
-                   1 * sizeof (ushort) +
-                   1 * sizeof (byte) +
-                   2 * sizeof (uint);
+            return IsFat ? FatExceptionHandlerSize : (uint) SmallExceptionHandlerSize;
         }
 
-        public override void Write(WritingContext context)
+        public void Write(IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             if (IsFat)
             {
                 writer.WriteUInt32((uint)HandlerType);

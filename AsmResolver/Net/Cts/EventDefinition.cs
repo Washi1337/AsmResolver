@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -44,6 +45,7 @@ namespace AsmResolver.Net.Cts
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
+            Semantics = new MethodSemanticsCollection(this);
         }
 
         public EventAttributes Attributes
@@ -128,6 +130,22 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return FullName;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<EventDefinitionTable>().Add(new MetadataRow<EventAttributes, uint, uint>
+            {
+                Column1 = Attributes,
+                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column3 = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(EventType.MetadataToken),
+            });
+
+            foreach (var semantics in Semantics)
+                semantics.AddToBuffer(buffer);
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
         }
     }
 }

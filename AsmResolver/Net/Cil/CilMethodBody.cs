@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -539,7 +541,6 @@ namespace AsmResolver.Net.Cil
             return (uint)sum;
         }
 
-
         public override uint GetPhysicalLength()
         {
             var size = IsFat ? 12u : 1u;
@@ -558,88 +559,72 @@ namespace AsmResolver.Net.Cil
         {
             // TODO
             throw new NotImplementedException();
+            
         }
 
-//        public override void Build(BuildingContext context)
-//        {
-//            base.Build(context);
-//
-//            var stringsBuffer = ((NetBuildingContext)context).GetStreamBuffer<UserStringStreamBuffer>();
-//            foreach (var instruction in Instructions)
-//            {
-//                var value = instruction.Operand as string;
-//                if (value != null)
-//                {
-//                    stringsBuffer.GetStringOffset(value);
-//                }
-//            }
-//        }
-//
-//        public override void UpdateReferences(BuildingContext context)
-//        {
-//            base.UpdateReferences(context);
-//            CalculateOffsets();
-//        }
-//
-//        public override void Write(WritingContext context)
-//        {
-//            var writer = context.Writer;
-//
-//            if (IsFat)
-//            {
-//                writer.WriteUInt16((ushort)((ExceptionHandlers.Count > 0 ? 0x8 : 0) |
-//                                            (InitLocals ? 0x10 : 0) | 0x3003));
-//                writer.WriteUInt16((ushort)MaxStack);
-//                writer.WriteUInt32(GetCodeSize());
-//                writer.WriteUInt32(Signature == null ? 0 : Signature.MetadataToken.ToUInt32());
-//            }
-//            else
-//            {
-//                writer.WriteByte((byte)(0x2 | GetCodeSize() << 2));
-//            }
-//
-//            WriteCode(context);
-//
-//            if (ExceptionHandlers.Count > 0)
-//                WriteExceptionHandlers(context);
-//        }
-//
-//        private void WriteCode(WritingContext context)
-//        {
-//            var builder = new MethodBodyOperandBuilder((NetBuildingContext)context.BuildingContext, this);
-//            var assembler = new CilAssembler(builder, context.Writer);
-//
-//            foreach (var instruction in Instructions)
-//                assembler.Write(instruction);
-//        }
-//
-//        private void WriteExceptionHandlers(WritingContext context)
-//        {
-//            var useFatFormat = ExceptionHandlers.Any(x => x.IsFatFormatRequired);
-//            var writer = context.Writer;
-//
-//            writer.Align(4);
-//
-//            writer.WriteByte((byte)(0x01 | (useFatFormat ? 0x40 : 0)));
-//            if (useFatFormat)
-//            {
-//                var byteLength = ExceptionHandlers.Count * 24;
-//                writer.WriteByte((byte)(byteLength & 0xFF));
-//                writer.WriteByte((byte)((byteLength & 0xFF00) >> 0x08));
-//                writer.WriteByte((byte)((byteLength & 0xFF0000) >> 0x10));
-//            }
-//            else
-//            {
-//                writer.WriteByte((byte)(ExceptionHandlers.Count * 12));
-//                writer.WriteUInt16(0);
-//            }
-//
-//            foreach (var handler in ExceptionHandlers)
-//            {
-//                handler.IsFat = useFatFormat;
-//                handler.Write(context);
-//            }
-//        }
+        public override RvaDataSegment CreateDataSegment(MetadataBuffer buffer)
+        {
+            using (var stream = new MemoryStream())
+            {
+                var writer = new BinaryStreamWriter(stream);
+                
+                if (IsFat)
+                {
+                    writer.WriteUInt16((ushort)((ExceptionHandlers.Count > 0 ? 0x8 : 0) |
+                                                (InitLocals ? 0x10 : 0) | 0x3003));
+                    writer.WriteUInt16((ushort)MaxStack);
+                    writer.WriteUInt32(GetCodeSize());
+                    writer.WriteUInt32(Signature == null ? 0 : Signature.MetadataToken.ToUInt32());
+                }
+                else
+                {
+                    writer.WriteByte((byte)(0x2 | GetCodeSize() << 2));
+                }
+    
+                WriteCode(buffer, writer);
+    
+                if (ExceptionHandlers.Count > 0)
+                    WriteExceptionHandlers(writer);
+
+                return new RvaDataSegment(stream.ToArray());
+            }
+        }
+
+        private void WriteCode(MetadataBuffer buffer, IBinaryStreamWriter writer)
+        {
+            var builder = new DefaultOperandBuilder(this, buffer.UserStringStreamBuffer); 
+            var assembler = new CilAssembler(builder, writer);
+
+            foreach (var instruction in Instructions)
+                assembler.Write(instruction);
+        }
+        
+        private void WriteExceptionHandlers(IBinaryStreamWriter writer)
+        {
+            var useFatFormat = ExceptionHandlers.Any(x => x.IsFatFormatRequired);
+
+            writer.Align(4);
+
+            writer.WriteByte((byte)(0x01 | (useFatFormat ? 0x40 : 0)));
+            if (useFatFormat)
+            {
+                var byteLength = ExceptionHandlers.Count * 24;
+                writer.WriteByte((byte)(byteLength & 0xFF));
+                writer.WriteByte((byte)((byteLength & 0xFF00) >> 0x08));
+                writer.WriteByte((byte)((byteLength & 0xFF0000) >> 0x10));
+            }
+            else
+            {
+                writer.WriteByte((byte)(ExceptionHandlers.Count * 12));
+                writer.WriteUInt16(0);
+            }
+
+            foreach (var handler in ExceptionHandlers)
+            {
+                handler.IsFat = useFatFormat;
+                handler.Write(writer);
+            }
+        }
 
         IMetadataMember IOperandResolver.ResolveMember(MetadataToken token)
         {
@@ -672,5 +657,4 @@ namespace AsmResolver.Net.Cil
             return Method.Signature.Parameters[index];
         }
     }
-
 }

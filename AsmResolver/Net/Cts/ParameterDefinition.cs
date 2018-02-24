@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts.Collections;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
@@ -100,6 +101,22 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return Name;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            buffer.TableStreamBuffer.GetTable<ParameterDefinitionTable>().Add(new MetadataRow<ParameterAttributes, ushort, uint>
+            {
+                Column1 = Attributes,
+                Column2 = (ushort) Sequence,
+                Column3 = buffer.StringStreamBuffer.GetStringOffset(Name)
+            });
+
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
+
+            if (FieldMarshal != null)
+                FieldMarshal.AddToBuffer(buffer);
         }
     }
 }

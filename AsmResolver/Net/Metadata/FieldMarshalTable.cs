@@ -2,8 +2,13 @@
 
 namespace AsmResolver.Net.Metadata
 {
-    public class FieldMarshalTable : MetadataTable<MetadataRow<uint, uint>>
+    public class FieldMarshalTable : SortedMetadataTable<MetadataRow<uint, uint>>
     {
+        public FieldMarshalTable()
+            : base(0)
+        {
+        }
+        
         public override MetadataTokenType TokenType
         {
             get{return MetadataTokenType.FieldMarshal; }

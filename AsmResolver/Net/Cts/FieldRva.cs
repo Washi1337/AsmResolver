@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
@@ -160,6 +161,16 @@ namespace AsmResolver.Net.Cts
         private static void ThrowUnsupportedElementType(object elementType)
         {
             throw new NotSupportedException("Invalid or unsupported element type " + elementType + ".");
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<FieldRvaTable>().Add(new MetadataRow<uint, uint>
+            {
+                Column1 = Rva, // TODO: change to RvaDataSegment
+                Column2 = Field.MetadataToken.Rid
+            });
         }
     }
 }

@@ -37,7 +37,7 @@ namespace AsmResolver.Net.Metadata
         {
             get;
         }
-
+        
         public bool IsReadOnly
         {
             get { return _isReadOnly; }
@@ -129,20 +129,21 @@ namespace AsmResolver.Net.Metadata
         /// <param name="keyColumnIndex">The column number to get the key from.</param>
         /// <param name="key">The key to search.</param>
         /// <returns>The first row that contains the given key, or null if none was found.</returns>
-        public MetadataRow GetRowClosestToKey(int keyColumnIndex, uint key)
+        public int GetRowIndexClosestToKey(int keyColumnIndex, uint key)
         {
             if (Count == 0)
-                return null;
+                return -1;
 
             int left = 0;
             int right = Count - 1;
+            int m = 0;
             
             MetadataRow row = null;
             uint currentKey = 0;
             
-            while (left <= right && left < Count)
+            while (left <= right && left < Count && right < Count)
             {
-                int m = (left + right) / 2;
+                m = (left + right) / 2;
                 row = GetRow(m);
                 currentKey = Convert.ToUInt32(row.GetAllColumns()[keyColumnIndex]);
 
@@ -159,10 +160,22 @@ namespace AsmResolver.Net.Metadata
 
             if (row != null && currentKey > key)
             {
-                row = GetRow((int) (row.MetadataToken.Rid - 2));
+                m--;
             }
                 
-            return row;
+            return m;
+        }
+
+        /// <summary>
+        /// Gets a single row in a table by a key. This requires the table to be sorted.
+        /// </summary>
+        /// <param name="keyColumnIndex">The column number to get the key from.</param>
+        /// <param name="key">The key to search.</param>
+        /// <returns>The first row that contains the given key, or null if none was found.</returns>
+        public MetadataRow GetRowClosestToKey(int keyColumnIndex, uint key)
+        {
+            int index = GetRowIndexClosestToKey(keyColumnIndex, key);
+            return index != -1 ? GetRow(index) : null;
         }
 
         public abstract IMetadataMember GetMemberFromRow(MetadataImage image, MetadataRow row);
@@ -306,10 +319,17 @@ namespace AsmResolver.Net.Metadata
 
         protected abstract IMetadataMember CreateMemberFromRow(MetadataImage image, TRow row);
 
-        public void Add(TRow item)
+        protected void InsertRow(int index, TRow row)
         {
             AssertIsWriteable();
-            _rows.Add(item);
+            _rows.Insert(index, row);
+        }
+        
+        public virtual void Add(TRow item)
+        {
+            AssertIsWriteable();
+            item.MetadataToken = new MetadataToken(TokenType, (uint) Count);
+            InsertRow(Count, item);
         }
 
         public void Clear()
@@ -380,6 +400,29 @@ namespace AsmResolver.Net.Metadata
         {
             _readingContext = readingContext;
             StartOffset = _readingContext.Reader.StartPosition;
+        }
+    }
+
+    public abstract class SortedMetadataTable<TRow> : MetadataTable<TRow>
+        where TRow : MetadataRow
+    {
+        protected SortedMetadataTable(int keyColumnIndex)
+        {
+            KeyColumnIndex = keyColumnIndex;
+        }
+        
+        public int KeyColumnIndex
+        {
+            get;
+            private set;
+        }
+        
+        public override void Add(TRow item)
+        {
+            AssertIsWriteable();
+            int index = GetRowIndexClosestToKey(KeyColumnIndex, (uint) item.GetAllColumns()[KeyColumnIndex]);
+            item.MetadataToken = new MetadataToken(TokenType, (uint) (index + 2));
+            InsertRow(index + 1, item);
         }
     }
 }

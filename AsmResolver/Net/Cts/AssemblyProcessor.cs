@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
@@ -19,6 +20,14 @@ namespace AsmResolver.Net.Cts
         {
             get;
             set;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            buffer.TableStreamBuffer.GetTable<AssemblyProcessorTable>().Add(new MetadataRow<uint>
+            {
+                Column1 = Processor
+            });
         }
     }
 }

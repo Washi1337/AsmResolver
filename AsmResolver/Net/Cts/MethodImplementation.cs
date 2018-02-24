@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
@@ -63,6 +64,18 @@ namespace AsmResolver.Net.Cts
         {
             get { return _methodDeclaration.Value; }
             set { _methodDeclaration.Value = value; }
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            var encoder = tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
+            tableStream.GetTable<MethodImplementationTable>().Add(new MetadataRow<uint, uint, uint>
+            {
+                Column1 = Class.MetadataToken.Rid,
+                Column2 = encoder.EncodeToken(MethodBody.MetadataToken),
+                Column3 = encoder.EncodeToken(MethodDeclaration.MetadataToken)
+            });
         }
     }
 }

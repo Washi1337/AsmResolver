@@ -79,7 +79,7 @@ namespace AsmResolver.Net.Signatures
         public override uint GetPhysicalLength()
         {
             if (Value == null)
-                throw new NotSupportedException();
+                return 1;
 
             switch(Type.GetTypeCode(Value.GetType()))
             {
@@ -112,10 +112,14 @@ namespace AsmResolver.Net.Signatures
 
         public override void Write(WritingContext context)
         {
-            if (Value == null)
-                throw new ArgumentNullException();
-
             var writer = context.Writer;
+            
+            if (Value == null)
+            {
+                writer.WriteSerString(null);
+                return;
+            }
+
             switch (Type.GetTypeCode(Value.GetType()))
             {
                 case TypeCode.Boolean:

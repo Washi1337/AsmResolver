@@ -68,6 +68,10 @@ namespace AsmResolver.Net.Cts
         {
             ThrowOnNotFound = true;
             SearchDirectories = new List<string>();
+            if (Utilities.IsRunningOnMono())
+            {
+                SearchDirectories.AddRange(Directory.GetDirectories("/usr/lib/mono"));
+            }
         }
 
         public DefaultNetAssemblyResolver(params string[] directories)
@@ -80,7 +84,7 @@ namespace AsmResolver.Net.Cts
         /// <summary>
         /// Gets a list of directories to search for assemblies.
         /// </summary>
-        public IList<string> SearchDirectories
+        public List<string> SearchDirectories
         {
             get;
             private set;

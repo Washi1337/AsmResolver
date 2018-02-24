@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -244,6 +245,29 @@ namespace AsmResolver.Net.Cts
         IMetadataMember IResolvable.Resolve()
         {
             return this;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<FieldDefinitionTable>().Add(new MetadataRow<FieldAttributes, uint, uint>
+            {
+                Column1 = Attributes,
+                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column3 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
+            });
+
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
+            
+            if (Constant != null)
+                Constant.AddToBuffer(buffer);
+            if (FieldLayout != null)
+                FieldLayout.AddToBuffer(buffer);
+            if (FieldRva != null)
+                FieldRva.AddToBuffer(buffer);
+            if (FieldMarshal != null)
+                FieldMarshal.AddToBuffer(buffer);
         }
     }
 }

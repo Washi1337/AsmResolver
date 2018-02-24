@@ -6,6 +6,10 @@ namespace AsmResolver.Net.Metadata
     {
         private MetadataToken _metadataToken;
 
+        protected MetadataRow()
+        {
+        }
+        
         protected MetadataRow(MetadataToken metadataToken)
         {
             _metadataToken = metadataToken;
@@ -40,6 +44,10 @@ namespace AsmResolver.Net.Metadata
     {
         private T1 _column1;
 
+        public MetadataRow()
+        {
+        }
+        
         public MetadataRow(MetadataToken metadataToken)
             : base(metadataToken)
         {
@@ -67,6 +75,10 @@ namespace AsmResolver.Net.Metadata
     public class MetadataRow<T1, T2> : MetadataRow<T1>
     {
         private T2 _column2;
+
+        public MetadataRow()
+        {
+        }
 
         public MetadataRow(MetadataToken metadataToken)
             : base(metadataToken)
@@ -97,6 +109,10 @@ namespace AsmResolver.Net.Metadata
     {
         private T3 _column3;
 
+        public MetadataRow()
+        {
+        }
+
         public MetadataRow(MetadataToken metadataToken)
             : base(metadataToken)
         {
@@ -126,6 +142,10 @@ namespace AsmResolver.Net.Metadata
     public class MetadataRow<T1, T2, T3, T4> : MetadataRow<T1, T2, T3>
     {
         private T4 _column4;
+
+        public MetadataRow()
+        {
+        }
 
         public MetadataRow(MetadataToken metadataToken)
             : base(metadataToken)
@@ -158,6 +178,10 @@ namespace AsmResolver.Net.Metadata
     {
         private T5 _column5;
 
+        public MetadataRow()
+        {
+        }
+
         public MetadataRow(MetadataToken metadataToken)
             : base(metadataToken)
         {
@@ -189,6 +213,10 @@ namespace AsmResolver.Net.Metadata
     public class MetadataRow<T1, T2, T3, T4, T5, T6> : MetadataRow<T1, T2, T3, T4, T5>
     {
         private T6 _column6;
+
+        public MetadataRow()
+        {
+        }
 
         public MetadataRow(MetadataToken metadataToken)
             : base(metadataToken)
@@ -224,6 +252,10 @@ namespace AsmResolver.Net.Metadata
         private T7 _column7;
         private T8 _column8;
         private T9 _column9;
+
+        public MetadataRow()
+        {
+        }
 
         public MetadataRow(MetadataToken metadataToken)
             : base(metadataToken)

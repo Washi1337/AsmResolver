@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -180,6 +181,34 @@ namespace AsmResolver.Net
             return Image;
         }
 
+        public void UnlockMetadata()
+        {
+            var buffer = new MetadataBuffer();
+            Image.Assembly.AddToBuffer(buffer);
+            foreach (var header in StreamHeaders)
+            {
+                var context = new WritingContext(NetDirectory.Assembly, null);
+                switch (header.Name)
+                {
+                    case "#~":
+                        header.Stream = buffer.TableStreamBuffer;
+                        break;
+                    case "#Blob":
+                        //header.Stream = buffer.BlobStreamBuffer.CreateStream(context);
+                        break;
+                    case "#Strings":
+                        header.Stream = buffer.StringStreamBuffer.CreateStream(context);
+                        break;
+                    case "#US":
+                        header.Stream = buffer.UserStringStreamBuffer.CreateStream(context);
+                        break;
+                    case "#GUID":
+                        header.Stream = buffer.GuidStreamBuffer.CreateStream(context);
+                        break;
+                }
+            }
+        }
+            
         public override uint GetPhysicalLength()
         {
             return (uint)(1 * sizeof (uint) +

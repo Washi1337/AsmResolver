@@ -4,7 +4,7 @@
   {
     internal static CustomMetadataStream FromReadingContext(ReadingContext context)
     {
-      return new CustomMetadataStream(context.Reader.ReadBytes((int)context.Reader.Length));
+      return new CustomMetadataStream(context.Reader.ReadBytes((int) context.Reader.Length));
     }
 
     public CustomMetadataStream()
@@ -25,7 +25,7 @@
 
     public override uint GetPhysicalLength()
     {
-      return (uint)Data.Length;
+      return (uint) Data.Length;
     }
 
     public override void Write(WritingContext context)

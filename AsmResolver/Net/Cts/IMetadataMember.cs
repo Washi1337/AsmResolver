@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -16,6 +17,8 @@ namespace AsmResolver.Net.Cts
         {
             get;
         }
+
+        void AddToBuffer(MetadataBuffer buffer);
     }
 
     public abstract class MetadataMember<TRow> : IMetadataMember
@@ -49,7 +52,9 @@ namespace AsmResolver.Net.Cts
                 _metadataToken = value;
             }
         }
-        
+
+        public abstract void AddToBuffer(MetadataBuffer buffer);
+
         protected void AssertIsWriteable()
         {
             if (IsReadOnly)

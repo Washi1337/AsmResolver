@@ -1,4 +1,5 @@
 ﻿
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -69,6 +70,21 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return Name;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<GenericParameterTable>().Add(new MetadataRow<ushort, GenericParameterAttributes, uint, uint>
+            {
+                Column1 = (ushort) Index,
+                Column2 = Attributes,
+                Column3 = tableStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef).EncodeToken(Owner.MetadataToken),
+                Column4 = buffer.StringStreamBuffer.GetStringOffset(Name),
+            });
+
+            foreach (var constraint in Constraints)
+                constraint.AddToBuffer(buffer);
         }
     }
 }

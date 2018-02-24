@@ -1,4 +1,6 @@
-﻿using AsmResolver.Collections.Generic;
+﻿using System;
+using AsmResolver.Collections.Generic;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -51,6 +53,21 @@ namespace AsmResolver.Net.Cts
         private static void SetPropertyOwner(PropertyDefinition property, PropertyMap owner)
         {
             property.PropertyMap = owner;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            foreach (var property in Properties)
+                property.AddToBuffer(buffer);
+
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<PropertyMapTable>().Add(new MetadataRow<uint, uint>
+            {
+                Column1 = Parent.MetadataToken.Rid,
+                Column2 = Properties.Count == 0 
+                    ? (uint) Math.Min(1, tableStream.GetTable(MetadataTokenType.Property).Count) 
+                    : Properties[0].MetadataToken.Rid
+            });
         }
     }
 }

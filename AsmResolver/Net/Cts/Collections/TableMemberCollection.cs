@@ -53,6 +53,9 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void Initialize()
         {
             base.Initialize();
+            
+            // TODO: remove and lazy initialize members upon access this[index] instead.
+            
             foreach (var row in _table)
             {
                 var member = (TMember) _table.GetMemberFromRow(Owner.Image, row);

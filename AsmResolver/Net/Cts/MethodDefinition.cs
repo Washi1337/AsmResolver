@@ -1,5 +1,6 @@
 ﻿using System;
 using AsmResolver.Collections.Generic;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cil;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
@@ -414,6 +415,33 @@ namespace AsmResolver.Net.Cts
         private static MethodDefinition GetParamOwner(ParameterDefinition param)
         {
             return param.Method;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            foreach (var parameter in Parameters)
+                parameter.AddToBuffer(buffer);
+            
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<MethodDefinitionTable>().Add(new MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>
+            {
+                Column1 = MethodBody != null ? MethodBody.CreateDataSegment(buffer) : null,
+                Column2 = ImplAttributes,
+                Column3 = Attributes,
+                Column4 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column5 = buffer.BlobStreamBuffer.GetBlobOffset(Signature),
+                Column6 = Parameters.Count == 0 ? (uint) Math.Max(1, tableStream.GetTable(MetadataTokenType.Param).Count) : Parameters[0].MetadataToken.Rid
+            });
+
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
+            foreach (var declaration in SecurityDeclarations)
+                declaration.AddToBuffer(buffer);
+            foreach (var parameter in GenericParameters)
+                parameter.AddToBuffer(buffer);
+            if (PInvokeMap != null)
+                PInvokeMap.AddToBuffer(buffer);
+            
         }
     }
 }

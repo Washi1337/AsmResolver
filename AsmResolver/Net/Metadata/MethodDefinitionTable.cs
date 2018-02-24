@@ -60,14 +60,13 @@ namespace AsmResolver.Net.Metadata
 
         protected override void WriteRow(WritingContext context, MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
         {
-            throw new NotImplementedException();
-//            var writer = context.Writer;
-//            writer.WriteUInt32(row.Column1);
-//            writer.WriteUInt16((ushort) row.Column2);
-//            writer.WriteUInt16((ushort) row.Column3);
-//            writer.WriteIndex(TableStream.StringIndexSize, row.Column4);
-//            writer.WriteIndex(TableStream.BlobIndexSize, row.Column5);
-//            writer.WriteIndex(TableStream.GetTable(MetadataTokenType.Param).IndexSize, row.Column6);
+            var writer = context.Writer;
+            writer.WriteUInt32(row.Column1 != null ? row.Column1.Rva : 0);
+            writer.WriteUInt16((ushort) row.Column2);
+            writer.WriteUInt16((ushort) row.Column3);
+            writer.WriteIndex(TableStream.StringIndexSize, row.Column4);
+            writer.WriteIndex(TableStream.BlobIndexSize, row.Column5);
+            writer.WriteIndex(TableStream.GetTable(MetadataTokenType.Param).IndexSize, row.Column6);
         }
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)

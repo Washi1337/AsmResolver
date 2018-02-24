@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
@@ -38,6 +39,15 @@ namespace AsmResolver.Net.Cts
         {
             get { return _field.Value; }
             set { _field.Value = value; }
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            buffer.TableStreamBuffer.GetTable<FieldLayoutTable>().Add(new MetadataRow<uint, uint>
+            {
+                Column1 = Offset,
+                Column2 = Field.MetadataToken.Rid
+            });
         }
     }
 }

@@ -80,6 +80,13 @@
     <Compile Include="ImageOptionalHeader.cs" />
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
+    <Compile Include="Net\Builder\BlobStreamBuffer.cs" />
+    <Compile Include="Net\Builder\GuidStreamBuffer.cs" />
+    <Compile Include="Net\Builder\MetadataBuffer.cs" />
+    <Compile Include="Net\Builder\MetadataStreamBuffer.cs" />
+    <Compile Include="Net\Builder\StringStreamBuffer.cs" />
+    <Compile Include="Net\Builder\UserStringStreamBuffer.cs" />
+    <Compile Include="Net\Cil\DefaultOperandBuilder.cs" />
     <Compile Include="Net\Cil\IOperandBuilder.cs" />
     <Compile Include="Net\Cts\AssemblyOs.cs" />
     <Compile Include="Net\Cts\AssemblyProcessor.cs" />
@@ -136,6 +143,7 @@
     <Compile Include="Net\IndexSize.cs" />
     <Compile Include="Net\Cts\INetAssemblyResolver.cs" />
     <Compile Include="Net\ITypeDescriptor.cs" />
+    <Compile Include="Net\Metadata\SecurityAction.cs" />
     <Compile Include="Net\RvaDataSegment.cs" />
     <Compile Include="Net\MetadataStreamHeaderCollection.cs" />
     <Compile Include="Net\IAssemblyDescriptor.cs" />

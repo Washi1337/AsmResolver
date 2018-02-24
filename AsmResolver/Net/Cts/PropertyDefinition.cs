@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -156,6 +157,23 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return FullName;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            buffer.TableStreamBuffer.GetTable<PropertyDefinitionTable>().Add(new MetadataRow<PropertyAttributes, uint, uint>
+            {
+                Column1 = Attributes,
+                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column3 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
+            });
+
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
+            foreach (var semantics in Semantics)
+                semantics.AddToBuffer(buffer);
+            if (Constant != null)
+                Constant.AddToBuffer(buffer);
         }
     }
 }

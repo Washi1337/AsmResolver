@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts.Collections;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
@@ -41,6 +42,17 @@ namespace AsmResolver.Net.Cts
                     return _customAttributes;
                 return _customAttributes = new CustomAttributeCollection(this);
             }
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            buffer.TableStreamBuffer.GetTable<StandAloneSignatureTable>().Add(new MetadataRow<uint>
+            {
+                Column1 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
+            });
+
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
         }
     }
 }

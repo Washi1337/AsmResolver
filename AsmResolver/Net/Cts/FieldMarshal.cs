@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
@@ -42,6 +43,16 @@ namespace AsmResolver.Net.Cts
         {
             get { return _marshalDescriptor.Value; }
             set { _marshalDescriptor.Value = value; }
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            tableStream.GetTable<FieldMarshalTable>().Add(new MetadataRow<uint, uint>
+            {
+                Column1 = tableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal).EncodeToken(Parent.MetadataToken),
+                Column2 = buffer.BlobStreamBuffer.GetBlobOffset(MarshalDescriptor)
+            });
         }
     }
 }

@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using AsmResolver.Net.Signatures;
-
-namespace AsmResolver.Net
+﻿namespace AsmResolver.Net
 {
     /// <summary>
     /// Represents a blob storage stream (#Blob) in a .NET assembly image.
     /// </summary>
-    public class BlobStream : MetadataStream<BlobStreamBuffer>
+    public class BlobStream : MetadataStream
     {
         internal static BlobStream FromReadingContext(ReadingContext context)
         {
@@ -71,15 +68,6 @@ namespace AsmResolver.Net
             return reader.CreateSubReader(reader.Position, (int)length);
         }
 
-        /// <summary>
-        /// Creates a new buffer for constructing a new blob storage stream.
-        /// </summary>
-        /// <returns></returns>
-        public override BlobStreamBuffer CreateBuffer()
-        {
-            return new BlobStreamBuffer();
-        }
-
         public override uint GetPhysicalLength()
         {
             return (uint)_reader.Length;
@@ -89,57 +77,7 @@ namespace AsmResolver.Net
         {
             context.Writer.WriteBytes(_reader.ReadBytes((int) _reader.Length));
         }
-
     }
 
-    /// <summary>
-    /// Represents a buffer for constructing new blob metadata streams.
-    /// </summary>
-    public class BlobStreamBuffer : FileSegment
-    {
-        private readonly Dictionary<BlobSignature, uint> _signatureOffsetMapping = new Dictionary<BlobSignature, uint>();
-        private uint _length;
-
-        public BlobStreamBuffer()
-        {
-            _length = 1;
-        }
-
-        /// <summary>
-        /// Gets or creates a new index for the given blob signature.
-        /// </summary>
-        /// <param name="signature">The blob signature to get the index from.</param>
-        /// <returns>The index.</returns>
-        public uint GetBlobOffset(BlobSignature signature)
-        {
-            if (signature == null)
-                return 0;
-
-            uint offset;
-            if (!_signatureOffsetMapping.TryGetValue(signature, out offset))
-            {
-                _signatureOffsetMapping.Add(signature, offset = _length);
-                var signatureLength = signature.GetPhysicalLength();
-                _length += signatureLength.GetCompressedSize() + signatureLength;
-            }
-            return offset;
-        }
-
-        public override uint GetPhysicalLength()
-        {
-            return Align(_length, 4);
-        }
-
-        public override void Write(WritingContext context)
-        {
-            var writer = context.Writer;
-            writer.WriteByte(0);
-
-            foreach (var signature in _signatureOffsetMapping.Keys)
-            {
-                writer.WriteCompressedUInt32(signature.GetPhysicalLength());
-                signature.Write(context);
-            }
-        }
-    }
+    
 }

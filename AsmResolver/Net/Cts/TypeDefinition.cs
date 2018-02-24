@@ -1,4 +1,6 @@
-﻿using AsmResolver.Collections.Generic;
+﻿using System;
+using AsmResolver.Collections.Generic;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -15,7 +17,6 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<EventMap> _eventMap;
         private readonly LazyValue<TypeDefinition> _declaringType;
         
-        //private MethodImplementationCollection _methodImplementations;
         private string _fullName;
 
         public TypeDefinition(string @namespace, string name)
@@ -471,6 +472,48 @@ namespace AsmResolver.Net.Cts
         private static void SetMethodOwner(MethodDefinition method, TypeDefinition type)
         {
             method.DeclaringType = type;
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            var tableStream = buffer.TableStreamBuffer;
+            var typeRow = new MetadataRow<TypeAttributes, uint, uint, uint, uint, uint>
+            {
+                Column1 = Attributes,
+                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
+                Column3 = buffer.StringStreamBuffer.GetStringOffset(Namespace),
+                Column4 = BaseType != null ? tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(BaseType.MetadataToken) : 0,
+            };
+            tableStream.GetTable<TypeDefinitionTable>().Add(typeRow);
+            
+            foreach (var method in Methods)
+                method.AddToBuffer(buffer);
+            typeRow.Column6 = Methods.Count == 0
+                ? (uint) Math.Max(1, tableStream.GetTable(MetadataTokenType.Method).Count)
+                : Methods[0].MetadataToken.Rid;
+
+            foreach (var field in Fields)
+                field.AddToBuffer(buffer);
+            typeRow.Column5 = Fields.Count == 0
+                ? (uint) Math.Max(1, tableStream.GetTable(MetadataTokenType.Field).Count)
+                : Fields[0].MetadataToken.Rid;
+
+            foreach (var attribute in CustomAttributes)
+                attribute.AddToBuffer(buffer);
+            foreach (var declaration in SecurityDeclarations)
+                declaration.AddToBuffer(buffer);
+            foreach (var parameter in GenericParameters)
+                parameter.AddToBuffer(buffer);
+            foreach (var @interface in Interfaces)
+                @interface.AddToBuffer(buffer);
+            foreach (var impl in MethodImplementations)
+                impl.AddToBuffer(buffer);
+            if (ClassLayout != null)
+                ClassLayout.AddToBuffer(buffer);
+            if (PropertyMap != null)
+                PropertyMap.AddToBuffer(buffer);
+            if (EventMap != null)
+                EventMap.AddToBuffer(buffer);
         }
     }
 }

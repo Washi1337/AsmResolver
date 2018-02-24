@@ -2,8 +2,13 @@
 
 namespace AsmResolver.Net.Metadata
 {
-    public class CustomAttributeTable : MetadataTable<MetadataRow<uint, uint, uint>>
+    public class CustomAttributeTable : SortedMetadataTable<MetadataRow<uint, uint, uint>>
     {
+        public CustomAttributeTable()
+            : base(0)
+        {
+        }
+        
         public override MetadataTokenType TokenType
         {
             get { return MetadataTokenType.CustomAttribute; }

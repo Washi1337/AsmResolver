@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
@@ -23,8 +24,10 @@ namespace AsmResolver.Net.Cts
             _parent = new LazyValue<TypeDefinition>(() =>
             {
                 var typeTable = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
-                var typeRow = typeTable.GetRow((int) (row.Column3 - 1));
-                return (TypeDefinition) typeTable.GetMemberFromRow(image, typeRow);
+                MetadataRow typeRow;
+                return typeTable.TryGetRow((int) (row.Column3 - 1), out typeRow)
+                    ? (TypeDefinition) typeTable.GetMemberFromRow(image, typeRow)
+                    : null;
             });
         }
 
@@ -44,6 +47,16 @@ namespace AsmResolver.Net.Cts
         {
             get { return _parent.Value; }
             set { _parent.Value = value; }
+        }
+
+        public override void AddToBuffer(MetadataBuffer buffer)
+        {
+            buffer.TableStreamBuffer.GetTable<ClassLayoutTable>().Add(new MetadataRow<ushort, uint, uint>
+            {
+                Column1 = PackingSize,
+                Column2 = ClassSize,
+                Column3 = Parent.MetadataToken.Rid
+            });
         }
     }
 }
