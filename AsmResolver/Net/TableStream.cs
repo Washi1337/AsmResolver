@@ -97,7 +97,7 @@ namespace AsmResolver.Net
             new AssemblyReferenceTable(), 
             new AssemblyRefProcessorTable(), 
             new AssemblyRefOsTable(), 
-            new FileDefinitionTable(), 
+            new FileReferenceTable(), 
             new ExportedTypeTable(), 
             new ManifestResourceTable(), 
             new NestedClassTable(), 

@@ -90,10 +90,12 @@
     <Compile Include="Net\Cts\CustomAttribute.cs" />
     <Compile Include="Net\Cts\EventDefinition.cs" />
     <Compile Include="Net\Cts\EventMap.cs" />
+    <Compile Include="Net\Cts\ExportedType.cs" />
     <Compile Include="Net\Cts\FieldDefinition.cs" />
     <Compile Include="Net\Cts\FieldLayout.cs" />
     <Compile Include="Net\Cts\FieldMarshal.cs" />
     <Compile Include="Net\Cts\FieldRva.cs" />
+    <Compile Include="Net\Cts\FileReference.cs" />
     <Compile Include="Net\Cts\GenericParameter.cs" />
     <Compile Include="Net\Cts\GenericParameterConstraint.cs" />
     <Compile Include="Net\Cts\IMemberReference.cs" />
@@ -160,7 +162,7 @@
     <Compile Include="Net\Metadata\FieldPtrTable.cs" />
     <Compile Include="Net\Metadata\FieldRvaTable.cs" />
     <Compile Include="Net\Metadata\FileAttributes.cs" />
-    <Compile Include="Net\Metadata\FileDefinitionTable.cs" />
+    <Compile Include="Net\Metadata\FileReferenceTable.cs" />
     <Compile Include="Net\Metadata\GenericParameterConstraintTable.cs" />
     <Compile Include="Net\Metadata\GenericParameterTable.cs" />
     <Compile Include="Net\Metadata\GenericParameterAttributes.cs" />

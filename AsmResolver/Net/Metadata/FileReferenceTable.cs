@@ -2,7 +2,7 @@
 
 namespace AsmResolver.Net.Metadata
 {
-    public class FileDefinitionTable : MetadataTable<MetadataRow<FileAttributes, uint, uint>>
+    public class FileReferenceTable : MetadataTable<MetadataRow<FileAttributes, uint, uint>>
     {
         public override MetadataTokenType TokenType
         {
@@ -40,7 +40,7 @@ namespace AsmResolver.Net.Metadata
 
         protected override IMetadataMember CreateMemberFromRow(MetadataImage image, MetadataRow<FileAttributes, uint, uint> row)
         {
-            throw new System.NotImplementedException();
+            return new FileReference(image, row);
         }
     }
     

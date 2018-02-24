@@ -32,6 +32,7 @@ namespace AsmResolver.Net.Cts
             ModuleReferences = new Collection<ModuleReference>();
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             Resources = new Collection<ManifestResource>();
+            Files = new Collection<FileReference>();
         }
 
         public AssemblyDefinition(string name, Version version)
@@ -47,6 +48,7 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             Resources = new Collection<ManifestResource>();
+            Files = new Collection<FileReference>();
         }
 
         internal AssemblyDefinition(MetadataImage image, MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint> row)
@@ -62,13 +64,24 @@ namespace AsmResolver.Net.Cts
             _publicKey = new LazyValue<DataBlobSignature>(() => row.Column7 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column7)));
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column8));
             _culture = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column9));
-            Modules = new TableMemberCollection<AssemblyDefinition, ModuleDefinition>(this, tableStream.GetTable(MetadataTokenType.Module), GetModuleOwner, SetModuleOwner);
-            AssemblyReferences = new TableMemberCollection<AssemblyDefinition, AssemblyReference>(this, tableStream.GetTable(MetadataTokenType.AssemblyRef));
-            ModuleReferences = new TableMemberCollection<AssemblyDefinition, ModuleReference>(this, tableStream.GetTable(MetadataTokenType.ModuleRef));
+           
+            Modules = new TableMemberCollection<AssemblyDefinition, ModuleDefinition>(
+                this, tableStream.GetTable(MetadataTokenType.Module), GetModuleOwner, SetModuleOwner);
+            
+            AssemblyReferences = new TableMemberCollection<AssemblyDefinition, AssemblyReference>(
+                this, tableStream.GetTable(MetadataTokenType.AssemblyRef));
+            
+            ModuleReferences = new TableMemberCollection<AssemblyDefinition, ModuleReference>(
+                this, tableStream.GetTable(MetadataTokenType.ModuleRef));
+            
+            Resources = new TableMemberCollection<AssemblyDefinition, ManifestResource>(
+                this, tableStream.GetTable(MetadataTokenType.ManifestResource));
+            
+            Files = new TableMemberCollection<AssemblyDefinition, FileReference>(
+                this, tableStream.GetTable(MetadataTokenType.File));
+            
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
-            Resources = new TableMemberCollection<AssemblyDefinition, ManifestResource>(this,
-                tableStream.GetTable(MetadataTokenType.ManifestResource));
         }
 
         /// <summary>
@@ -213,6 +226,15 @@ namespace AsmResolver.Net.Cts
         /// Gets a collection of manifest resources that this assembly embeds.
         /// </summary>
         public Collection<ManifestResource> Resources
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a collection of extra files that this assembly consists of.
+        /// </summary>
+        public Collection<FileReference> Files
         {
             get;
             private set;
