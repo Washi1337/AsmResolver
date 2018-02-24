@@ -31,6 +31,7 @@ namespace AsmResolver.Net.Cts
             AssemblyReferences = new Collection<AssemblyReference>();
             ModuleReferences = new Collection<ModuleReference>();
             SecurityDeclarations = new SecurityDeclarationCollection(this);
+            Resources = new Collection<ManifestResource>();
         }
 
         public AssemblyDefinition(string name, Version version)
@@ -45,6 +46,7 @@ namespace AsmResolver.Net.Cts
             ModuleReferences = new Collection<ModuleReference>();
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
+            Resources = new Collection<ManifestResource>();
         }
 
         internal AssemblyDefinition(MetadataImage image, MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint> row)
@@ -65,6 +67,8 @@ namespace AsmResolver.Net.Cts
             ModuleReferences = new TableMemberCollection<AssemblyDefinition, ModuleReference>(this, tableStream.GetTable(MetadataTokenType.ModuleRef));
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
+            Resources = new TableMemberCollection<AssemblyDefinition, ManifestResource>(this,
+                tableStream.GetTable(MetadataTokenType.ManifestResource));
         }
 
         /// <summary>
@@ -200,6 +204,15 @@ namespace AsmResolver.Net.Cts
         /// Gets a collection of dependency modules that this assembly references.
         /// </summary>
         public Collection<ModuleReference> ModuleReferences
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a collection of manifest resources that this assembly embeds.
+        /// </summary>
+        public Collection<ManifestResource> Resources
         {
             get;
             private set;

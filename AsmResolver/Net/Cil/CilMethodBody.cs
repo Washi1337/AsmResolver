@@ -53,20 +53,20 @@ namespace AsmResolver.Net.Cil
             else
                 throw new ArgumentException("Invalid method body header signature.");
 
-            body._msilReadingContext = context.CreateSubContext(reader.Position, (int)codeSize);
+            body._cilReadingContext = context.CreateSubContext(reader.Position, (int)codeSize);
             return body;
         }
 
         private IList<CilInstruction> _instructions; 
-        private ReadingContext _msilReadingContext;
+        private ReadingContext _cilReadingContext;
         private ReadingContext _sectionReadingContext;
         private List<ExceptionHandler> _handlers;
-        private ParameterSignature _thisParameter;
 
         public CilMethodBody(MethodDefinition method)
         {
             Method = method;
             MaxStack = 8;
+            ThisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
         }
 
         public MethodDefinition Method
@@ -77,12 +77,8 @@ namespace AsmResolver.Net.Cil
 
         public ParameterSignature ThisParameter
         {
-            get
-            {
-                if (_thisParameter != null)
-                    return _thisParameter;
-                return _thisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
-            }
+            get;
+            private set;
         }
 
         public bool InitLocals
@@ -121,10 +117,12 @@ namespace AsmResolver.Net.Cil
             {
                 if (_instructions != null)
                     return _instructions;
-                if (_msilReadingContext == null)
+                if (_cilReadingContext == null)
                     return _instructions = new List<CilInstruction>();
-                
-                var disassembler = new CilDisassembler(_msilReadingContext.Reader, this);
+
+                var cilReader = _cilReadingContext.Reader;
+                cilReader.Position = cilReader.StartPosition;
+                var disassembler = new CilDisassembler(cilReader, this);
                 var instructions = disassembler.Disassemble();
                 return _instructions = instructions;
             }
@@ -148,6 +146,7 @@ namespace AsmResolver.Net.Cil
         private IEnumerable<ExceptionHandler> ReadExceptionHandlers()
         {
             var reader = _sectionReadingContext.Reader;
+            reader.Position = reader.StartPosition;
             byte sectionHeader;
             do
             {

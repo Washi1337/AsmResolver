@@ -102,6 +102,7 @@
     <Compile Include="Net\Cts\InterfaceImplementation.cs" />
     <Compile Include="Net\Cts\IResolvable.cs" />
     <Compile Include="Net\Cts\Collections\KeyedMemberCollection.cs" />
+    <Compile Include="Net\Cts\ManifestResource.cs" />
     <Compile Include="Net\Cts\MemberReference.cs" />
     <Compile Include="Net\Cts\MetadataImage.cs" />
     <Compile Include="Net\Cts\MethodDefinition.cs" />

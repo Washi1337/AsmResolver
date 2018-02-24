@@ -87,7 +87,7 @@ namespace AsmResolver.Net
 
         public override void Write(WritingContext context)
         {
-            context.Writer.WriteZeroes((int)_reader.Length);
+            context.Writer.WriteBytes(_reader.ReadBytes((int) _reader.Length));
         }
 
     }
@@ -140,8 +140,6 @@ namespace AsmResolver.Net
                 writer.WriteCompressedUInt32(signature.GetPhysicalLength());
                 signature.Write(context);
             }
-
-
         }
     }
 }
