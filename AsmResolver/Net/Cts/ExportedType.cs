@@ -83,21 +83,5 @@ namespace AsmResolver.Net.Cts
                 return _customAttributes = new CustomAttributeCollection(this);
             }
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<ExportedTypeTable>().Add(new MetadataRow<TypeAttributes, uint, uint, uint, uint>
-            {
-                Column1 = Attributes,
-                Column2 = TypeDefId,
-                Column3 = buffer.StringStreamBuffer.GetStringOffset(Name),
-                Column4 = buffer.StringStreamBuffer.GetStringOffset(Namespace),
-                Column5 = Implementation == null ? 0 : tableStream.GetIndexEncoder(CodedIndex.Implementation).EncodeToken(Implementation.MetadataToken),
-            });
-
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-        }
     }
 }

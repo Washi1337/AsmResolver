@@ -1,3 +1,5 @@
+using AsmResolver.Net.Builder;
+
 namespace AsmResolver.Net.Signatures
 {
     public class SimpleMarshalDescriptor : MarshalDescriptor
@@ -19,9 +21,9 @@ namespace AsmResolver.Net.Signatures
             return sizeof (byte);
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            context.Writer.WriteByte((byte)NativeType);
+            writer.WriteByte((byte)NativeType);
         }
     }
 }

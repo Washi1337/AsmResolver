@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -8,7 +9,6 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new CustomAttributeNamedArgument
             {
-                StartOffset = reader.Position,
                 ArgumentMemberType =
                     (reader.CanRead(sizeof (byte))
                         ? (CustomAttributeArgumentMemberType)reader.ReadByte()
@@ -64,13 +64,12 @@ namespace AsmResolver.Net.Signatures
                    Argument.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)ArgumentMemberType);
-            ArgumentType.Write(context); // TODO: write FieldOrPropType instead.
+            ArgumentType.Write(buffer, writer); // TODO: write FieldOrPropType instead.
             writer.WriteSerString(MemberName);
-            Argument.Write(context);
+            Argument.Write(buffer, writer);
         }
     }
 

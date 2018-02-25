@@ -55,21 +55,5 @@ namespace AsmResolver.Net.Cts
         {
             @event.EventMap = owner;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-
-            foreach (var @event in Events)
-                @event.AddToBuffer(buffer);
-            
-            tableStream.GetTable<EventMapTable>().Add(new MetadataRow<uint, uint>
-            {
-                Column1 = Parent.MetadataToken.Rid,
-                Column2 = Events.Count == 0 
-                    ? (uint) Math.Max(1, tableStream.GetTable(MetadataTokenType.Event).Count) 
-                    : Events[0].MetadataToken.Rid,
-            });
-        }
     }
 }

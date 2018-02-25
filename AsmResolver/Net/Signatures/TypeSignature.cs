@@ -1,5 +1,6 @@
 ﻿
 using System;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -11,7 +12,6 @@ namespace AsmResolver.Net.Signatures
         {
             long position = reader.Position;
             var signature = ReadTypeSignature(image, reader);
-            signature.StartOffset = position;
             return signature;
         }
 
@@ -92,12 +92,10 @@ namespace AsmResolver.Net.Signatures
             return type as ITypeDefOrRef;
         }
 
-        protected static void WriteTypeDefOrRef(MetadataImage image, IBinaryStreamWriter writer, ITypeDefOrRef type)
+        protected static void WriteTypeDefOrRef(MetadataBuffer buffer, IBinaryStreamWriter writer, ITypeDefOrRef type)
         {
-            var encoder =
-                image.Header.GetStream<TableStream>()
-                    .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            writer.WriteCompressedUInt32(encoder.EncodeToken(type.MetadataToken));
+            var encoder = buffer.TableStreamBuffer.GetIndexEncoder(CodedIndex.TypeDefOrRef);
+            writer.WriteCompressedUInt32(encoder.EncodeToken(buffer.TableStreamBuffer.GetTypeToken(type)));
         }
 
         public abstract ElementType ElementType

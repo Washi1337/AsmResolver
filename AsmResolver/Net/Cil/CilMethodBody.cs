@@ -592,7 +592,7 @@ namespace AsmResolver.Net.Cil
 
         private void WriteCode(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var builder = new DefaultOperandBuilder(this, buffer.UserStringStreamBuffer); 
+            var builder = new DefaultOperandBuilder(this, buffer); 
             var assembler = new CilAssembler(builder, writer);
 
             foreach (var instruction in Instructions)

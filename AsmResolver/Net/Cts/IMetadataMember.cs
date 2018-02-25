@@ -17,15 +17,13 @@ namespace AsmResolver.Net.Cts
         {
             get;
         }
-
-        void AddToBuffer(MetadataBuffer buffer);
     }
 
     public abstract class MetadataMember<TRow> : IMetadataMember
         where TRow : MetadataRow
     {
         private MetadataToken _metadataToken;
-
+        
         protected MetadataMember(MetadataImage image, MetadataToken token)
         {
             Image = image;
@@ -46,14 +44,12 @@ namespace AsmResolver.Net.Cts
         public MetadataToken MetadataToken
         {
             get { return _metadataToken; }
-            set
+            internal set
             {
                 AssertIsWriteable();
                 _metadataToken = value;
             }
         }
-
-        public abstract void AddToBuffer(MetadataBuffer buffer);
 
         protected void AssertIsWriteable()
         {

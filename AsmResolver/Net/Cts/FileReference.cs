@@ -58,18 +58,5 @@ namespace AsmResolver.Net.Cts
             get;
             private set;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<FileReferenceTable>().Add(new MetadataRow<FileAttributes, uint, uint>
-            {
-                Column1 = Attributes,
-                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
-                Column3 = buffer.BlobStreamBuffer.GetBlobOffset(HashValue)
-            });
-
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-        }
     }
 }

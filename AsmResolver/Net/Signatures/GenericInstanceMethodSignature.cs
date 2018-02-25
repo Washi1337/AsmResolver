@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
@@ -8,9 +9,8 @@ namespace AsmResolver.Net.Signatures
     {
         public new static GenericInstanceMethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            var signature = new GenericInstanceMethodSignature()
+            var signature = new GenericInstanceMethodSignature
             {
-                StartOffset = reader.Position,
                 Attributes = (CallingConventionAttributes)reader.ReadByte()
             };
 
@@ -42,13 +42,12 @@ namespace AsmResolver.Net.Signatures
                           GenericArguments.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte(0x0A);
             writer.WriteCompressedUInt32((uint)GenericArguments.Count);
             foreach (var argument in GenericArguments)
-                argument.Write(context);
+                argument.Write(buffer, writer);
         }
     }
 }

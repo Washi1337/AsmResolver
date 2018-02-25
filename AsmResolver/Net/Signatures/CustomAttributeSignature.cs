@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
@@ -9,15 +10,10 @@ namespace AsmResolver.Net.Signatures
     {
         public static CustomAttributeSignature FromReader(CustomAttribute parent, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-
             if (!reader.CanRead(sizeof (ushort)) || reader.ReadUInt16() != 0x0001)
                 throw new ArgumentException("Signature doesn't refer to a valid custom attribute signature.");
 
-            var signature = new CustomAttributeSignature()
-            {
-                StartOffset = position,
-            };
+            var signature = new CustomAttributeSignature();
 
             if (parent.Constructor != null)
             {
@@ -66,15 +62,14 @@ namespace AsmResolver.Net.Signatures
                           NamedArguments.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteUInt16(0x0001);
             foreach (var argument in FixedArguments)
-                argument.Write(context);
+                argument.Write(buffer, writer);
             writer.WriteUInt16((ushort)NamedArguments.Count);
             foreach (var argument in NamedArguments)
-                argument.Write(context);
+                argument.Write(buffer, writer);
         }
     }
 }

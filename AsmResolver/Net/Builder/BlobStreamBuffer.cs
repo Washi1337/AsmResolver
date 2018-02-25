@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using AsmResolver.Net.Signatures;
 
@@ -10,10 +11,14 @@ namespace AsmResolver.Net.Builder
     public class BlobStreamBuffer : MetadataStreamBuffer
     {
         private readonly IDictionary<BlobSignature, uint> _signatureOffsetMapping = new Dictionary<BlobSignature, uint>();
+        private readonly MetadataBuffer _parentBuffer;
         private uint _length;
 
-        public BlobStreamBuffer()
+        public BlobStreamBuffer(MetadataBuffer parentBuffer)
         {
+            if (parentBuffer == null) 
+                throw new ArgumentNullException("parentBuffer");
+            _parentBuffer = parentBuffer;
             _length = 1;
         }
 
@@ -47,20 +52,21 @@ namespace AsmResolver.Net.Builder
             return offset;
         }
 
-        public override MetadataStream CreateStream(WritingContext context)
+        public override MetadataStream CreateStream()
         {
             using (var stream = new MemoryStream())
             {
                 var writer = new BinaryStreamWriter(stream);
                 writer.WriteByte(0);
                 
-                var newContext = new WritingContext(context.Assembly, writer);
                 foreach (var signature in _signatureOffsetMapping.Keys)
                 {
                     writer.WriteCompressedUInt32(signature.GetPhysicalLength());
-                    signature.Write(newContext);
+                    signature.Write(_parentBuffer, writer);
                 }
-                
+
+                writer.WriteByte(0);
+                writer.WriteZeroes((int)(FileSegment.Align(_length, 4) - _length));
                 return new BlobStream(new MemoryStreamReader(stream.ToArray()));
             }
         }

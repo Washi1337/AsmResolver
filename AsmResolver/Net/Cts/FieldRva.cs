@@ -162,15 +162,5 @@ namespace AsmResolver.Net.Cts
         {
             throw new NotSupportedException("Invalid or unsupported element type " + elementType + ".");
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<FieldRvaTable>().Add(new MetadataRow<uint, uint>
-            {
-                Column1 = Rva, // TODO: change to RvaDataSegment
-                Column2 = Field.MetadataToken.Rid
-            });
-        }
     }
 }

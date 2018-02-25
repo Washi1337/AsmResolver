@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -11,7 +12,7 @@ namespace AsmResolver.Net.Builder
     {
         private readonly IDictionary<string, uint> _stringOffsetMapping = new Dictionary<string, uint>();
         private uint _length;
-
+        
         public StringStreamBuffer()
         {
             _length = 1;
@@ -46,7 +47,7 @@ namespace AsmResolver.Net.Builder
             return offset;
         }
 
-        public override MetadataStream CreateStream(WritingContext context)
+        public override MetadataStream CreateStream()
         {
             using (var stream = new MemoryStream())
             {

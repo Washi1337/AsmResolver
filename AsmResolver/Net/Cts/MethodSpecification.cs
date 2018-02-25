@@ -111,15 +111,5 @@ namespace AsmResolver.Net.Cts
         {
             return FullName;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<MethodSpecificationTable>().Add(new MetadataRow<uint, uint>
-            {
-                Column1 = tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef).EncodeToken(Method.MetadataToken),
-                Column2 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
-            });
-        }
     }
 }

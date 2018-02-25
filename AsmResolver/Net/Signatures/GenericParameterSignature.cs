@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -8,16 +9,11 @@ namespace AsmResolver.Net.Signatures
     {
         public static GenericParameterSignature FromReader(MetadataImage image, IBinaryStreamReader reader, GenericParameterType parameterType)
         {
-            long position = reader.Position;
-
             uint index;
             if (!reader.TryReadCompressedUInt32(out index))
                 return null;
 
-            return new GenericParameterSignature(parameterType, (int) index)
-            {
-                StartOffset = position
-            };
+            return new GenericParameterSignature(parameterType, (int) index);
         }
 
         public GenericParameterSignature(GenericParameterType parameterType, int index)
@@ -84,9 +80,8 @@ namespace AsmResolver.Net.Signatures
                    Index.GetCompressedSize();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)ElementType);
             writer.WriteCompressedUInt32((uint)Index);
         }

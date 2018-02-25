@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -45,10 +46,10 @@ namespace AsmResolver.Net.Signatures
                    BaseType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            context.Writer.WriteByte((byte)ElementType);
-            BaseType.Write(context);
+            writer.WriteByte((byte)ElementType);
+            BaseType.Write(buffer, writer);
         }
     }
 }

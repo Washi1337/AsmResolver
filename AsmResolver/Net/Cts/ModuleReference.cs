@@ -33,16 +33,5 @@ namespace AsmResolver.Net.Cts
             get;
             private set;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<ModuleReferenceTable>().Add(new MetadataRow<uint>
-            {
-                Column1 = buffer.StringStreamBuffer.GetStringOffset(Name)
-            });
-
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-        }
     }
 }

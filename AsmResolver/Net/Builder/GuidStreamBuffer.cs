@@ -10,7 +10,15 @@ namespace AsmResolver.Net.Builder
     public class GuidStreamBuffer : MetadataStreamBuffer
     {
         private readonly IDictionary<Guid, uint> _guidOffsetMapping = new Dictionary<Guid, uint>();
+        private readonly MetadataBuffer _parentBuffer;
         private uint _length;
+
+        public GuidStreamBuffer(MetadataBuffer parentBuffer)
+        {
+            if (parentBuffer == null) 
+                throw new ArgumentNullException("parentBuffer");
+            _parentBuffer = parentBuffer;
+        }
 
         public override string Name
         {
@@ -41,7 +49,7 @@ namespace AsmResolver.Net.Builder
             return offset;
         }
 
-        public override MetadataStream CreateStream(WritingContext context)
+        public override MetadataStream CreateStream()
         {
             using (var stream = new MemoryStream())
             {

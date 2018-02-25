@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -11,10 +12,7 @@ namespace AsmResolver.Net.Signatures
         public new static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader))
-            {
-                StartOffset = position
-            };
+            var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader));
             
             uint rank;
             if (!reader.TryReadCompressedUInt32(out rank))
@@ -157,14 +155,13 @@ namespace AsmResolver.Net.Signatures
                    sizesAndLoBoundsLength;
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             if (!Validate())
                 throw new InvalidOperationException();
 
-            var writer = context.Writer;
             writer.WriteByte((byte)ElementType);
-            BaseType.Write(context);
+            BaseType.Write(buffer, writer);
             writer.WriteCompressedUInt32((uint)Dimensions.Count);
 
             var sizedDimensions = Dimensions.Where(x => x.Size.HasValue).ToArray();

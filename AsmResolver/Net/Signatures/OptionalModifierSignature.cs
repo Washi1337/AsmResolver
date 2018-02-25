@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -10,10 +11,7 @@ namespace AsmResolver.Net.Signatures
         {
             long position = reader.Position;
             return new OptionalModifierSignature(ReadTypeDefOrRef(image, reader),
-                TypeSignature.FromReader(image, reader))
-            {
-                StartOffset = position
-            };
+                TypeSignature.FromReader(image, reader));
         }
 
         public OptionalModifierSignature(ITypeDefOrRef modifierType, TypeSignature baseType)
@@ -47,14 +45,11 @@ namespace AsmResolver.Net.Signatures
                    BaseType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            throw new NotImplementedException();
-            //TODO
-            //var writer = context.Writer;
-            //writer.WriteByte((byte)ElementType);
-            //WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, ModifierType);
-            //BaseType.Write(context);
+            writer.WriteByte((byte)ElementType);
+            WriteTypeDefOrRef(buffer, writer, ModifierType);
+            BaseType.Write(buffer, writer);
         }
     }
 }

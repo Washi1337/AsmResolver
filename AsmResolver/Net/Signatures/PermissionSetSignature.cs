@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
@@ -9,11 +10,8 @@ namespace AsmResolver.Net.Signatures
     {
         public static PermissionSetSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            var signature = new PermissionSetSignature()
-            {
-                StartOffset = reader.Position
-            };
-
+            var signature = new PermissionSetSignature();
+            
             var signatureHeader = reader.ReadByte();
             if (signatureHeader != '.')
                 throw new ArgumentException("Signature doesn't refer to a valid permission set signature.");
@@ -45,13 +43,12 @@ namespace AsmResolver.Net.Signatures
                           Attributes.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)'.');
             writer.WriteCompressedUInt32((uint)Attributes.Count);
             foreach (var attribute in Attributes)
-                attribute.Write(context);
+                attribute.Write(buffer, writer);
         }
     }
 }

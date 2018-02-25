@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -12,7 +13,6 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new CustomAttributeArgument()
             {
-                StartOffset = reader.Position,
                 ArgumentType = typeSignature
             };
 
@@ -80,16 +80,15 @@ namespace AsmResolver.Net.Signatures
                         : sizeof(uint) + Elements.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             if (ArgumentType.ElementType != ElementType.SzArray)
-                Elements[0].Write(context);
+                Elements[0].Write(buffer, writer);
             else
             {
                 writer.WriteUInt32((uint)Elements.Count);
                 foreach (var element in Elements)
-                    element.Write(context);
+                    element.Write(buffer, writer);
             }
         }
     }

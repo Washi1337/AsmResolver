@@ -21,13 +21,5 @@ namespace AsmResolver.Net.Cts
             get;
             set;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<AssemblyProcessorTable>().Add(new MetadataRow<uint>
-            {
-                Column1 = Processor
-            });
-        }
     }
 }

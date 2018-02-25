@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -21,7 +22,6 @@ namespace AsmResolver.Net.Signatures
 
             var signature = new GenericInstanceTypeSignature(type)
             {
-                StartOffset = position,
                 IsValueType = elementType == ElementType.ValueType
             };
 
@@ -100,19 +100,16 @@ namespace AsmResolver.Net.Signatures
                           GenericArguments.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            throw new NotImplementedException();
-            //TODO
-            //var writer = context.Writer;
-            //writer.WriteByte((byte)ElementType);
-            //writer.WriteByte((byte)(IsValueType ? ElementType.ValueType : ElementType.Class));
+            writer.WriteByte((byte)ElementType);
+            writer.WriteByte((byte)(IsValueType ? ElementType.ValueType : ElementType.Class));
 
-            //WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, GenericType);
+            WriteTypeDefOrRef(buffer, writer, GenericType);
 
-            //writer.WriteCompressedUInt32((uint)GenericArguments.Count);
-            //foreach (var argument in GenericArguments)
-            //    argument.Write(context);
+            writer.WriteCompressedUInt32((uint)GenericArguments.Count);
+            foreach (var argument in GenericArguments)
+                argument.Write(buffer, writer);
         }
     }
 }

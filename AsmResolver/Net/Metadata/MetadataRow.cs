@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace AsmResolver.Net.Metadata
 {
@@ -37,6 +38,11 @@ namespace AsmResolver.Net.Metadata
         {
             if (IsReadOnly)
                 throw new InvalidOperationException("Metadata row cannot be modified in read-only mode.");
+        }
+
+        protected bool Equals(MetadataRow other)
+        {
+            return GetAllColumns().SequenceEqual(other.GetAllColumns());
         }
     }
 

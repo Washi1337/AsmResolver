@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -8,7 +9,6 @@ namespace AsmResolver.Net.Signatures
         {
             return new FieldSignature
             {
-                StartOffset = reader.Position,
                 Attributes = (CallingConventionAttributes)reader.ReadByte(),
                 FieldType = TypeSignature.FromReader(image, reader),
             };
@@ -42,11 +42,10 @@ namespace AsmResolver.Net.Signatures
                    FieldType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte(0x06);
-            FieldType.Write(context);
+            FieldType.Write(buffer, writer);
         }
     }
 }

@@ -256,7 +256,7 @@ namespace AsmResolver.Net.Cts
             get;
             private set;
         }
-
+        
         /// <summary>
         /// Gets a collection of operating systems supported by this assembly.
         /// </summary>
@@ -318,43 +318,6 @@ namespace AsmResolver.Net.Cts
         private static void SetModuleOwner(ModuleDefinition module, AssemblyDefinition assembly)
         {
             module.Assembly = assembly;
-        }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var row = new MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint>
-            {
-                Column1 = HashAlgorithm,
-                Column2 = (ushort) Version.Major,
-                Column3 = (ushort) Version.Minor,
-                Column4 = (ushort) Version.MajorRevision,
-                Column5 = (ushort) Version.MinorRevision,
-                Column6 = Attributes,
-                Column7 = buffer.BlobStreamBuffer.GetBlobOffset(PublicKey),
-                Column8 = buffer.StringStreamBuffer.GetStringOffset(Name),
-                Column9 = buffer.StringStreamBuffer.GetStringOffset(Culture)
-            };
-
-            buffer.TableStreamBuffer.GetTable<AssemblyDefinitionTable>().Add(row);
-
-            foreach (var reference in AssemblyReferences)
-                reference.AddToBuffer(buffer);
-            foreach (var reference in ModuleReferences)
-                reference.AddToBuffer(buffer);
-            foreach (var module in Modules)
-                module.AddToBuffer(buffer);
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-            foreach (var declaration in SecurityDeclarations)
-                declaration.AddToBuffer(buffer);
-            foreach (var resource in Resources)
-                resource.AddToBuffer(buffer);
-            foreach (var file in Files)
-                file.AddToBuffer(buffer);
-            foreach (var os in OperatingSystems)
-                os.AddToBuffer(buffer);
-            foreach (var processor in Processors)
-                processor.AddToBuffer(buffer);
         }
     }
 }

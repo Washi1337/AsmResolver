@@ -7,11 +7,7 @@ namespace AsmResolver.Net.Signatures
     {
         public new static SentinelTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new SentinelTypeSignature(TypeSignature.FromReader(image, reader))
-            {
-                StartOffset = position
-            };
+            return new SentinelTypeSignature(TypeSignature.FromReader(image, reader));
         }
 
         public SentinelTypeSignature(TypeSignature baseType)

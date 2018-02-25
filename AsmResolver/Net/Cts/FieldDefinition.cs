@@ -15,6 +15,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<FieldRva> _fieldRva;
         private readonly LazyValue<FieldMarshal> _fieldMarshal;
         private readonly LazyValue<FieldLayout> _fieldLayout;
+        private readonly LazyValue<ImplementationMap> _pinvokeMap;
         private string _fullName;
 
         public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
@@ -34,6 +35,7 @@ namespace AsmResolver.Net.Cts
             _fieldRva = new LazyValue<FieldRva>(default(FieldRva));
             _fieldMarshal = new LazyValue<FieldMarshal>(default(FieldMarshal));
             _fieldLayout = new LazyValue<FieldLayout>(default(FieldLayout));
+            _pinvokeMap = new LazyValue<ImplementationMap>(default(ImplementationMap));
             
             CustomAttributes = new CustomAttributeCollection(this);
         }
@@ -83,6 +85,16 @@ namespace AsmResolver.Net.Cts
                 var table = (FieldLayoutTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.FieldLayout);
                 var layoutRow = table.FindFieldLayoutOfOwner(row.MetadataToken);
                 return layoutRow != null ? (FieldLayout) table.GetMemberFromRow(image, layoutRow) : null;
+            });
+            
+            _pinvokeMap = new LazyValue<ImplementationMap>(() =>
+            {
+                if (!row.Column1.HasFlag(FieldAttributes.PinvokeImpl)) 
+                    return null;
+                
+                var table = (ImplementationMapTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.ImplMap);
+                var mapRow = table.FindImplementationMapOfOwner(row.MetadataToken);
+                return mapRow != null ? (ImplementationMap) table.GetMemberFromRow(image, mapRow) : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -163,6 +175,12 @@ namespace AsmResolver.Net.Cts
         {
             get { return _fieldLayout.Value; }
             set { _fieldLayout.Value = value; }
+        }
+
+        public ImplementationMap PInvokeMap
+        {
+            get { return _pinvokeMap.Value; }
+            set { _pinvokeMap.Value = value; }
         }
         
         public CustomAttributeCollection CustomAttributes
@@ -245,29 +263,6 @@ namespace AsmResolver.Net.Cts
         IMetadataMember IResolvable.Resolve()
         {
             return this;
-        }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<FieldDefinitionTable>().Add(new MetadataRow<FieldAttributes, uint, uint>
-            {
-                Column1 = Attributes,
-                Column2 = buffer.StringStreamBuffer.GetStringOffset(Name),
-                Column3 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
-            });
-
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-            
-            if (Constant != null)
-                Constant.AddToBuffer(buffer);
-            if (FieldLayout != null)
-                FieldLayout.AddToBuffer(buffer);
-            if (FieldRva != null)
-                FieldRva.AddToBuffer(buffer);
-            if (FieldMarshal != null)
-                FieldMarshal.AddToBuffer(buffer);
         }
     }
 }

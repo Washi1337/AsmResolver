@@ -43,16 +43,5 @@ namespace AsmResolver.Net.Cts
                 return _customAttributes = new CustomAttributeCollection(this);
             }
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<StandAloneSignatureTable>().Add(new MetadataRow<uint>
-            {
-                Column1 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
-            });
-
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-        }
     }
 }

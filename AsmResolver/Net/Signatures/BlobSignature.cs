@@ -1,6 +1,11 @@
-﻿namespace AsmResolver.Net.Signatures
+﻿using AsmResolver.Net.Builder;
+
+namespace AsmResolver.Net.Signatures
 {
-    public abstract class BlobSignature : FileSegment
+    public abstract class BlobSignature
     {
+        public abstract uint GetPhysicalLength();
+        
+        public abstract void Write(MetadataBuffer buffer, IBinaryStreamWriter writer);
     }
 }

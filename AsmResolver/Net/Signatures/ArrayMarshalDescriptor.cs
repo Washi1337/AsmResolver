@@ -1,4 +1,6 @@
-﻿namespace AsmResolver.Net.Signatures
+﻿using AsmResolver.Net.Builder;
+
+namespace AsmResolver.Net.Signatures
 {
     public class ArrayMarshalDescriptor : MarshalDescriptor
     {
@@ -53,9 +55,8 @@
                        : 0);
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)NativeType);
             writer.WriteByte((byte)ElementType);
             if (ParameterIndex.HasValue)

@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
@@ -8,10 +9,7 @@ namespace AsmResolver.Net.Signatures
         public new static PinnedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.StartPosition;
-            return new PinnedTypeSignature(TypeSignature.FromReader(image, reader))
-            {
-                StartOffset = reader.Position,
-            };
+            return new PinnedTypeSignature(TypeSignature.FromReader(image, reader));
         }
 
         public PinnedTypeSignature(TypeSignature baseType)
@@ -30,10 +28,10 @@ namespace AsmResolver.Net.Signatures
                    BaseType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            context.Writer.WriteByte((byte)ElementType);
-            BaseType.Write(context);
+            writer.WriteByte((byte)ElementType);
+            BaseType.Write(buffer, writer);
         }
     }
 }

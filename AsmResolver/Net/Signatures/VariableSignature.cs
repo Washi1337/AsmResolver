@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -6,11 +7,7 @@ namespace AsmResolver.Net.Signatures
     {
         public static VariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new VariableSignature(TypeSignature.FromReader(image, reader))
-            {
-                StartOffset = position
-            };
+            return new VariableSignature(TypeSignature.FromReader(image, reader));
         }
 
         public VariableSignature(TypeSignature variableType)
@@ -29,9 +26,9 @@ namespace AsmResolver.Net.Signatures
             return VariableType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            VariableType.Write(context);
+            VariableType.Write(buffer, writer);
         }
     }
 }

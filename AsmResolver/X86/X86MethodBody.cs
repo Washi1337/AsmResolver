@@ -14,35 +14,34 @@ namespace AsmResolver.X86
         public static X86MethodBody FromReadingContext(ReadingContext context)
         {
             var body = new X86MethodBody();
-            body._readingContext = context.CreateSubContext(context.Reader.StartPosition);
+            body._instructions = new LazyValue<List<X86Instruction>>(() =>
+            {
+                var instructions = new List<X86Instruction>();
+                var reader = context.Reader.CreateSubReader(context.Reader.StartPosition);
+                var disassembler = new X86Disassembler(reader);
+                while (reader.Position < reader.StartPosition + reader.Length)
+                {
+                    instructions.Add(disassembler.ReadNextInstruction());
+                }
+
+                return instructions;
+            });
             return body;
         }
 
-        private List<X86Instruction> _instructions;
-        private ReadingContext _readingContext;
+        private LazyValue<List<X86Instruction>> _instructions;
+
+        public X86MethodBody()
+        {
+            _instructions = new LazyValue<List<X86Instruction>>(new List<X86Instruction>());
+        }
         
         /// <summary>
         /// Gets the instructions in the method body.
         /// </summary>
         public IList<X86Instruction> Instructions
         {
-            get
-            {
-                if (_instructions != null)
-                    return _instructions;
-                var instructions = new List<X86Instruction>();
-                if (_readingContext != null)
-                {
-                    var disassembler = new X86Disassembler(_readingContext.Reader);
-                    while (_readingContext.Reader.Position
-                           < _readingContext.Reader.StartPosition + _readingContext.Reader.Length)
-                    {
-                        instructions.Add(disassembler.ReadNextInstruction());
-                    }
-                }
-
-                return _instructions = instructions;
-            }
+            get { return _instructions.Value; }
         }
 
         public override uint GetPhysicalLength()

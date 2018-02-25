@@ -48,15 +48,5 @@ namespace AsmResolver.Net.Cts
             get { return _parent.Value; }
             set { _parent.Value = value; }
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<ClassLayoutTable>().Add(new MetadataRow<ushort, uint, uint>
-            {
-                Column1 = PackingSize,
-                Column2 = ClassSize,
-                Column3 = Parent.MetadataToken.Rid
-            });
-        }
     }
 }

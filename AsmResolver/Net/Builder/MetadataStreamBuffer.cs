@@ -12,6 +12,6 @@
             get;
         }
 
-        public abstract MetadataStream CreateStream(WritingContext context);
+        public abstract MetadataStream CreateStream();
     }
 }

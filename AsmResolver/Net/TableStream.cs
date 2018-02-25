@@ -154,6 +154,10 @@ namespace AsmResolver.Net
                 new IndexEncoder(this, MetadataTokenType.TypeDef, MetadataTokenType.Method),
 
             };
+
+            MajorVersion = 2;
+            Reserved2 = 1;
+            SortedBitVector = 0x000016003301FA00;
         }
 
         public bool IsReadOnly

@@ -328,8 +328,8 @@ namespace AsmResolver.Net.Metadata
         public virtual void Add(TRow item)
         {
             AssertIsWriteable();
-            item.MetadataToken = new MetadataToken(TokenType, (uint) Count);
             InsertRow(Count, item);
+            item.MetadataToken = new MetadataToken(TokenType, (uint) Count);
         }
 
         public void Clear()

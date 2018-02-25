@@ -49,15 +49,5 @@ namespace AsmResolver.Net.Cts
             get { return _value.Value; }
             set { _value.Value = value; }
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<ConstantTable>().Add(new MetadataRow<ElementType, byte, uint, uint>
-            {
-                Column1 = ConstantType,
-                Column3 = buffer.TableStreamBuffer.GetIndexEncoder(CodedIndex.HasConstant).EncodeToken(Parent.MetadataToken),
-                Column4 = buffer.BlobStreamBuffer.GetBlobOffset(Value)
-            });
-        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -8,11 +9,7 @@ namespace AsmResolver.Net.Signatures
     {
         public static ElementSignature FromReader(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new ElementSignature(ReadValue(image, typeSignature, reader))
-            {
-                StartOffset = position
-            };
+            return new ElementSignature(ReadValue(image, typeSignature, reader));
         }
 
         private static object ReadValue(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
@@ -110,10 +107,8 @@ namespace AsmResolver.Net.Signatures
             throw new NotSupportedException();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
-            
             if (Value == null)
             {
                 writer.WriteSerString(null);

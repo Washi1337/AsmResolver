@@ -1,13 +1,12 @@
-﻿namespace AsmResolver.Net.Signatures
+﻿using AsmResolver.Net.Builder;
+
+namespace AsmResolver.Net.Signatures
 {
     public class FixedArrayMarshalDescriptor : MarshalDescriptor
     {
         public new static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new FixedArrayMarshalDescriptor
-            {
-                StartOffset = reader.Position,
-            };
+            var descriptor = new FixedArrayMarshalDescriptor();
 
             uint value;
             if (!reader.TryReadCompressedUInt32(out value))
@@ -43,9 +42,8 @@
                    sizeof (byte);
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)NativeType);
             writer.WriteCompressedUInt32((uint)NumberOfElements);
             writer.WriteByte((byte)ElementType);

@@ -92,16 +92,5 @@ namespace AsmResolver.Net.Cts
         {
             return Signature.FullName;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<TypeSpecificationTable>().Add(new MetadataRow<uint>
-            {
-                Column1 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
-            });
-            
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-        }
     }
 }

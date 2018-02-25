@@ -62,19 +62,5 @@ namespace AsmResolver.Net.Cts
             get;
             private set;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<SecurityDeclarationTable>().Add(new MetadataRow<SecurityAction, uint, uint>
-            {
-                Column1 = Action,
-                Column2 = tableStream.GetIndexEncoder(CodedIndex.HasDeclSecurity).EncodeToken(Parent.MetadataToken),
-                Column3 = buffer.BlobStreamBuffer.GetBlobOffset(PermissionSet)
-            });
-
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-        }
     }
 }

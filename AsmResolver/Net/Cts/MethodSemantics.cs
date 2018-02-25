@@ -55,17 +55,5 @@ namespace AsmResolver.Net.Cts
             get { return _association.Value; }
             set { _association.Value = value; }
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<MethodSemanticsTable>().Add(new MetadataRow<MethodSemanticsAttributes, uint, uint>
-            {
-                Column1 = Attributes,
-                Column2 = Method.MetadataToken.Rid,
-                Column3 = tableStream.GetIndexEncoder(CodedIndex.HasSemantics).EncodeToken(Association.MetadataToken)
-            });
-        }
-    }
-    
+    }    
 }

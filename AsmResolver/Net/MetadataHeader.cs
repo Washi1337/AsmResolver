@@ -183,30 +183,32 @@ namespace AsmResolver.Net
 
         public void UnlockMetadata()
         {
-            var buffer = new MetadataBuffer();
-            Image.Assembly.AddToBuffer(buffer);
+            var buffer = new MetadataBuffer(Image);
+            buffer.TableStreamBuffer.AddAssembly(Image.Assembly);
+            
             foreach (var header in StreamHeaders)
             {
-                var context = new WritingContext(NetDirectory.Assembly, null);
                 switch (header.Name)
                 {
                     case "#~":
-                        header.Stream = buffer.TableStreamBuffer;
+                        header.Stream = buffer.TableStreamBuffer.CreateStream();
                         break;
                     case "#Blob":
-                        //header.Stream = buffer.BlobStreamBuffer.CreateStream(context);
+                        header.Stream = buffer.BlobStreamBuffer.CreateStream();
                         break;
                     case "#Strings":
-                        header.Stream = buffer.StringStreamBuffer.CreateStream(context);
+                        header.Stream = buffer.StringStreamBuffer.CreateStream();
                         break;
                     case "#US":
-                        header.Stream = buffer.UserStringStreamBuffer.CreateStream(context);
+                        header.Stream = buffer.UserStringStreamBuffer.CreateStream();
                         break;
                     case "#GUID":
-                        header.Stream = buffer.GuidStreamBuffer.CreateStream(context);
+                        header.Stream = buffer.GuidStreamBuffer.CreateStream();
                         break;
                 }
             }
+
+            Image = null;
         }
             
         public override uint GetPhysicalLength()

@@ -44,7 +44,7 @@ namespace AsmResolver.Net.Builder
             return offset;
         }
 
-        public override MetadataStream CreateStream(WritingContext context)
+        public override MetadataStream CreateStream()
         {
             using (var stream = new MemoryStream())
             {

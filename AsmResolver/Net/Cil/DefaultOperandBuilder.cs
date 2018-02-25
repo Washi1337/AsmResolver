@@ -1,4 +1,7 @@
-﻿using AsmResolver.Net.Builder;
+﻿using System;
+using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts;
+using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cil
@@ -6,17 +9,42 @@ namespace AsmResolver.Net.Cil
     public class DefaultOperandBuilder : IOperandBuilder
     {
         private readonly CilMethodBody _methodBody;
-        private readonly UserStringStreamBuffer _buffer;
+        private readonly MetadataBuffer _buffer;
 
-        public DefaultOperandBuilder(CilMethodBody methodBody, UserStringStreamBuffer buffer)
+        public DefaultOperandBuilder(CilMethodBody methodBody, MetadataBuffer buffer)
         {
             _methodBody = methodBody;
             _buffer = buffer;
         }
-        
+
+        public MetadataToken GetMetadataToken(IMetadataMember member)
+        {
+            var type = member as ITypeDefOrRef;
+            if (type != null)
+                return _buffer.TableStreamBuffer.GetTypeToken(type);
+            
+            var reference = member as MemberReference;
+            if (reference != null)
+                return _buffer.TableStreamBuffer.GetMemberReferenceToken(reference);
+            
+            var method = member as IMethodDefOrRef;
+            if (method != null)
+                return _buffer.TableStreamBuffer.GetMethodToken(method);
+
+            var field = member as FieldDefinition;
+            if (field != null)
+                return _buffer.TableStreamBuffer.GetNewToken(field);
+
+            var specification = member as MethodSpecification;
+            if (specification != null)
+                return _buffer.TableStreamBuffer.GetMethodSpecificationToken(specification);
+            
+            throw new NotSupportedException("Invalid or unsupported operand " + member + ".");
+        }
+
         public uint GetStringOffset(string value)
         {
-            return _buffer.GetStringOffset(value);
+            return _buffer.UserStringStreamBuffer.GetStringOffset(value);
         }
 
         public int GetVariableIndex(VariableSignature variable)

@@ -48,6 +48,7 @@ namespace AsmResolver.Net.Cts
             get;
             private set;
         }
+       
 
         internal bool TryGetCachedMember(MetadataToken token, out IMetadataMember member)
         {

@@ -38,15 +38,5 @@ namespace AsmResolver.Net.Cts
             get;
             set;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<AssemblyOsTable>().Add(new MetadataRow<uint, uint, uint>
-            {
-                Column1 = PlatformId,
-                Column2 = MajorVersion,
-                Column3 = MinorVersion
-            });
-        }
     }
 }

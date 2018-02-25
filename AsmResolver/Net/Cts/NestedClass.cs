@@ -56,14 +56,5 @@ namespace AsmResolver.Net.Cts
             get { return _enclosingClass.Value; }
             internal set { _enclosingClass.Value = value; }
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<NestedClassTable>().Add(new MetadataRow<uint, uint>
-            {
-                Column1 = Class.MetadataToken.Rid,
-                Column2 = EnclosingClass.MetadataToken.Rid
-            });
-        }
     }
 }

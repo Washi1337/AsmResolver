@@ -52,15 +52,5 @@ namespace AsmResolver.Net.Cts
         {
             return string.Format("({0}) {1}", Constraint, Owner);
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<GenericParameterConstraintTable>().Add(new MetadataRow<uint, uint>
-            {
-                Column1 = Owner.MetadataToken.Rid,
-                Column2 = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(Constraint.MetadataToken)
-            });
-        }
     }
 }

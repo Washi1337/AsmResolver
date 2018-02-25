@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
@@ -8,9 +9,8 @@ namespace AsmResolver.Net.Signatures
     {
         public new static LocalVariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            var signature = new LocalVariableSignature()
+            var signature = new LocalVariableSignature
             {
-                StartOffset = reader.Position,
                 Attributes = (CallingConventionAttributes)reader.ReadByte()
             };
             
@@ -39,13 +39,12 @@ namespace AsmResolver.Net.Signatures
                           Variables.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte(0x07);
             writer.WriteCompressedUInt32((uint)Variables.Count);
             foreach (var variable in Variables)
-                variable.Write(context);
+                variable.Write(buffer, writer);
         }
     }
 }

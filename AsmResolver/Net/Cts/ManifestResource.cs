@@ -88,20 +88,5 @@ namespace AsmResolver.Net.Cts
             get;
             private set;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<ManifestResourceTable>().Add(new MetadataRow<uint, ManifestResourceAttributes, uint, uint>
-            {
-                Column1 = Offset, // TODO: add resource buffer. 
-                Column2 = Attributes,
-                Column3 = buffer.StringStreamBuffer.GetStringOffset(Name),
-                Column4 = Implementation == null ? 0 : tableStream.GetIndexEncoder(CodedIndex.Implementation).EncodeToken(Implementation.MetadataToken),
-            });
-
-            foreach (var attributes in CustomAttributes)
-                attributes.AddToBuffer(buffer);
-        }
     }
 }

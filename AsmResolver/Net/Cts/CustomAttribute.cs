@@ -61,16 +61,5 @@ namespace AsmResolver.Net.Cts
         {
             return Constructor.ToString();
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<CustomAttributeTable>().Add(new MetadataRow<uint, uint, uint>
-            {
-                Column1 = tableStream.GetIndexEncoder(CodedIndex.HasCustomAttribute).EncodeToken(Parent.MetadataToken),
-                Column2 = tableStream.GetIndexEncoder(CodedIndex.CustomAttributeType).EncodeToken(Constructor.MetadataToken),
-                Column3 = buffer.BlobStreamBuffer.GetBlobOffset(Signature)
-            });
-        }
     }
 }

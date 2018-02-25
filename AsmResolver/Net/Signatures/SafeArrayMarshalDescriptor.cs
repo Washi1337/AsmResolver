@@ -1,13 +1,12 @@
-﻿namespace AsmResolver.Net.Signatures
+﻿using AsmResolver.Net.Builder;
+
+namespace AsmResolver.Net.Signatures
 {
     public class SafeArrayMarshalDescriptor : MarshalDescriptor
     {
         public new static SafeArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new SafeArrayMarshalDescriptor
-            {
-                StartOffset = reader.Position,
-            };
+            var descriptor = new SafeArrayMarshalDescriptor();
 
             if (reader.CanRead((sizeof (byte))))
                 descriptor.ElementType = (VariantType)reader.ReadByte();
@@ -31,9 +30,8 @@
             return 2 * sizeof (byte);
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)NativeType);
             writer.WriteByte((byte)ElementType);
         }

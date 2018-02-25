@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
@@ -8,11 +9,7 @@ namespace AsmResolver.Net.Signatures
     {
         public static DataBlobSignature FromReader(IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new DataBlobSignature(reader.ReadBytes((int) reader.Length))
-            {
-                StartOffset = position
-            };
+            return new DataBlobSignature(reader.ReadBytes((int) reader.Length));
         }
 
         public DataBlobSignature(byte[] data)
@@ -31,9 +28,9 @@ namespace AsmResolver.Net.Signatures
             return (uint)Data.Length;
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            context.Writer.WriteBytes(Data);
+            writer.WriteBytes(Data);
         }
 
         public object InterpretData(ElementType constantType)

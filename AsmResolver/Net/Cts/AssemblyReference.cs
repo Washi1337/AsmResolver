@@ -192,28 +192,5 @@ namespace AsmResolver.Net.Cts
         {
             os.Reference = reference;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            buffer.TableStreamBuffer.GetTable<AssemblyReferenceTable>().Add(new MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint>
-            {
-                Column1 = (ushort) Version.Major,
-                Column2 = (ushort) Version.Minor,
-                Column3 = (ushort) Version.MajorRevision,
-                Column4 = (ushort) Version.MinorRevision,
-                Column5 =  Attributes,
-                Column6 = buffer.BlobStreamBuffer.GetBlobOffset(PublicKey),
-                Column7 = buffer.StringStreamBuffer.GetStringOffset(Name),
-                Column8 = buffer.StringStreamBuffer.GetStringOffset(Culture),
-                Column9 = buffer.BlobStreamBuffer.GetBlobOffset(HashValue),
-            });
-            
-            foreach (var attribute in CustomAttributes)
-                attribute.AddToBuffer(buffer);
-            foreach (var os in OperatingSystems)
-                os.AddToBuffer(buffer);
-            foreach (var processor in Processors)
-                processor.AddToBuffer(buffer);
-        }
     }
 }

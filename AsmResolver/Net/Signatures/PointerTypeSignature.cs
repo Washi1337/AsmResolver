@@ -8,10 +8,7 @@ namespace AsmResolver.Net.Signatures
         public new static PointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             long position = reader.Position;
-            return new PointerTypeSignature(TypeSignature.FromReader(image, reader))
-            {
-                StartOffset = position
-            };
+            return new PointerTypeSignature(TypeSignature.FromReader(image, reader));
         }
 
         public PointerTypeSignature(TypeSignature baseType)

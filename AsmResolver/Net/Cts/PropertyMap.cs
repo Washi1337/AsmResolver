@@ -54,20 +54,5 @@ namespace AsmResolver.Net.Cts
         {
             property.PropertyMap = owner;
         }
-
-        public override void AddToBuffer(MetadataBuffer buffer)
-        {
-            foreach (var property in Properties)
-                property.AddToBuffer(buffer);
-
-            var tableStream = buffer.TableStreamBuffer;
-            tableStream.GetTable<PropertyMapTable>().Add(new MetadataRow<uint, uint>
-            {
-                Column1 = Parent.MetadataToken.Rid,
-                Column2 = Properties.Count == 0 
-                    ? (uint) Math.Min(1, tableStream.GetTable(MetadataTokenType.Property).Count) 
-                    : Properties[0].MetadataToken.Rid
-            });
-        }
     }
 }

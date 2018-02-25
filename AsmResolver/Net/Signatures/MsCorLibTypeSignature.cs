@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
@@ -54,9 +55,9 @@ namespace AsmResolver.Net.Signatures
             return sizeof (byte);
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            context.Writer.WriteByte((byte)ElementType);
+            writer.WriteByte((byte)ElementType);
         }
 
         public IMetadataMember Resolve()

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
@@ -10,7 +11,6 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new SecurityAttributeSignature
             {
-                StartOffset = reader.Position,
                 TypeName = reader.ReadSerString(),
             };
 
@@ -57,9 +57,8 @@ namespace AsmResolver.Net.Signatures
                                 argumentsSize));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteSerString(TypeName);
 
             if (NamedArguments.Count == 0)
@@ -74,7 +73,7 @@ namespace AsmResolver.Net.Signatures
                 writer.WriteCompressedUInt32((uint)NamedArguments.Count);
                 foreach (var argument in NamedArguments)
                 {
-                    argument.Write(context);
+                    argument.Write(buffer, writer);
                 }
             }
         }

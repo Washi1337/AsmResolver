@@ -1,27 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Builder
 {
+    
     public class MetadataBuffer
     {
-        public MetadataBuffer()
+        public MetadataBuffer(MetadataImage image)
         {
-            TableStreamBuffer = new TableStream();
-            BlobStreamBuffer = new BlobStreamBuffer();
+            if (image == null) 
+                throw new ArgumentNullException("image");
+            
+            Image = image;
+            TableStreamBuffer = new TableStreamBuffer(this);
+            BlobStreamBuffer = new BlobStreamBuffer(this);
             StringStreamBuffer = new StringStreamBuffer();
             UserStringStreamBuffer = new UserStringStreamBuffer();
-            GuidStreamBuffer = new GuidStreamBuffer();
+            GuidStreamBuffer = new GuidStreamBuffer(this);
+            ResourcesBuffer = new ResourcesBuffer();
         }
-
-        public MetadataHeader Header
+        
+        public MetadataImage Image
         {
             get;
             private set;
         }
 
-        public TableStream TableStreamBuffer
+        public TableStreamBuffer TableStreamBuffer
         {
             get;
             private set;
@@ -46,6 +53,12 @@ namespace AsmResolver.Net.Builder
         }
         
         public GuidStreamBuffer GuidStreamBuffer
+        {
+            get;
+            private set;
+        }
+
+        public ResourcesBuffer ResourcesBuffer
         {
             get;
             private set;
