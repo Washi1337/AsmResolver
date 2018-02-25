@@ -36,8 +36,14 @@ namespace AsmResolver.Net.Cts
                     ResolutionScope = resolutionScope as IResolutionScope;
             }
 
-            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
-            _namespace = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column3));
+            _name = new LazyValue<string>(() =>
+            {
+                return stringStream.GetStringByOffset(row.Column2);
+            });
+            _namespace = new LazyValue<string>(() =>
+            {
+                return stringStream.GetStringByOffset(row.Column3);
+            });
             
             CustomAttributes = new CustomAttributeCollection(this);
         }

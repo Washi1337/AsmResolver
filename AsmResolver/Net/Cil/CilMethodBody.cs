@@ -584,7 +584,7 @@ namespace AsmResolver.Net.Cil
                 WriteCode(buffer, writer);
     
                 if (ExceptionHandlers.Count > 0)
-                    WriteExceptionHandlers(writer);
+                    WriteExceptionHandlers(buffer, writer);
 
                 return new RvaDataSegment(stream.ToArray());
             }
@@ -599,7 +599,7 @@ namespace AsmResolver.Net.Cil
                 assembler.Write(instruction);
         }
         
-        private void WriteExceptionHandlers(IBinaryStreamWriter writer)
+        private void WriteExceptionHandlers(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             var useFatFormat = ExceptionHandlers.Any(x => x.IsFatFormatRequired);
 
@@ -622,7 +622,7 @@ namespace AsmResolver.Net.Cil
             foreach (var handler in ExceptionHandlers)
             {
                 handler.IsFat = useFatFormat;
-                handler.Write(writer);
+                handler.Write(buffer, writer);
             }
         }
 

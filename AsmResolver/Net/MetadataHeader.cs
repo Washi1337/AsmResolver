@@ -185,27 +185,21 @@ namespace AsmResolver.Net
         {
             var buffer = new MetadataBuffer(Image);
             buffer.TableStreamBuffer.AddAssembly(Image.Assembly);
-            
-            foreach (var header in StreamHeaders)
+
+            var buffers = new MetadataStreamBuffer[]
             {
-                switch (header.Name)
-                {
-                    case "#~":
-                        header.Stream = buffer.TableStreamBuffer.CreateStream();
-                        break;
-                    case "#Blob":
-                        header.Stream = buffer.BlobStreamBuffer.CreateStream();
-                        break;
-                    case "#Strings":
-                        header.Stream = buffer.StringStreamBuffer.CreateStream();
-                        break;
-                    case "#US":
-                        header.Stream = buffer.UserStringStreamBuffer.CreateStream();
-                        break;
-                    case "#GUID":
-                        header.Stream = buffer.GuidStreamBuffer.CreateStream();
-                        break;
-                }
+                buffer.TableStreamBuffer,
+                buffer.BlobStreamBuffer,
+                buffer.GuidStreamBuffer,
+                buffer.StringStreamBuffer,
+                buffer.UserStringStreamBuffer
+            };
+            
+            StreamHeaders.Clear();
+            
+            foreach (var streamBuffer in buffers)
+            {
+                StreamHeaders.Add(new MetadataStreamHeader(streamBuffer.Name, streamBuffer.CreateStream()));    
             }
 
             Image = null;

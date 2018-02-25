@@ -323,7 +323,7 @@ namespace AsmResolver.Net.Builder
                 Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature)
             };
 
-            if (_methodSpecs.TryGetValue(specificationRow, out token))
+            if (!_methodSpecs.TryGetValue(specificationRow, out token))
             {
                 var table = (MethodSpecificationTable) _tableStream.GetTable(MetadataTokenType.MethodSpec);
                 table.Add(specificationRow);
@@ -349,7 +349,7 @@ namespace AsmResolver.Net.Builder
                 Column5 = (ushort) assembly.Version.MinorRevision,
                 Column6 = assembly.Attributes,
                 Column7 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assembly.PublicKey),
-                Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(Name),
+                Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Name),
                 Column9 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Culture)
             };
             assemblyTable.Add(assemblyRow);

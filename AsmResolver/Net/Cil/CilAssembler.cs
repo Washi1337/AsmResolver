@@ -73,8 +73,8 @@ namespace AsmResolver.Net.Cil
                     break;
 
                 case CilOperandType.ShortInlineBrTarget:
-                    _writer.WriteSByte((sbyte)(((CilInstruction)instruction.Operand).Offset - 
-                        (instruction.Offset + instruction.Size)));
+                    _writer.WriteSByte((sbyte) (((CilInstruction) instruction.Operand).Offset -
+                                                (instruction.Offset + instruction.Size)));
                     break;
 
                 case CilOperandType.InlineField:
@@ -82,10 +82,13 @@ namespace AsmResolver.Net.Cil
                 case CilOperandType.InlineSig:
                 case CilOperandType.InlineTok:
                 case CilOperandType.InlineType:
-                    var token = ((IMetadataMember) instruction.Operand).MetadataToken;
+                    var token = _builder.GetMetadataToken((IMetadataMember) instruction.Operand);
                     if (token.Rid == 0)
+                    {
                         throw new InvalidOperationException(string.Format("Member {0} has an invalid metadata token.",
                             instruction.Operand));
+                    }
+
                     _writer.WriteUInt32(token.ToUInt32());
                     break;
 
@@ -94,7 +97,7 @@ namespace AsmResolver.Net.Cil
                     break;
 
                 case CilOperandType.InlineSwitch:
-                    var targets = (CilInstruction[])instruction.Operand;
+                    var targets = (CilInstruction[]) instruction.Operand;
                     _writer.WriteInt32(targets.Length);
                     foreach (var target in targets)
                         _writer.WriteInt32(target.Offset - (instruction.Offset + instruction.Size));

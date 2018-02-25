@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts;
+﻿using AsmResolver.Net.Builder;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cil
@@ -111,7 +112,7 @@ namespace AsmResolver.Net.Cil
             return IsFat ? FatExceptionHandlerSize : (uint) SmallExceptionHandlerSize;
         }
 
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             if (IsFat)
             {
@@ -133,7 +134,7 @@ namespace AsmResolver.Net.Cil
             switch (HandlerType)
             {
                 case ExceptionHandlerType.Exception:
-                    writer.WriteUInt32(CatchType.MetadataToken.ToUInt32());
+                    writer.WriteUInt32(buffer.TableStreamBuffer.GetTypeToken(CatchType).ToUInt32());
                     break;
                 case ExceptionHandlerType.Filter:
                     writer.WriteUInt32((uint)FilterStart.Offset);
