@@ -95,7 +95,7 @@ namespace AsmResolver.Net.Cts
                 return (TypeDefinition)ThrowOrReturn(type);
 
             var typeDefTable = assembly.Modules[0].Types;
-            var definition = typeDefTable.FirstOrDefault(x => _signatureComparer.MatchTypes(x, type)); // TODO: handle nested types after moduledef.Types implementation is changed.
+            var definition = typeDefTable.FirstOrDefault(x => _signatureComparer.Equals(x, type)); // TODO: handle nested types after moduledef.Types implementation is changed.
             return definition ?? (TypeDefinition)ThrowOrReturn(type);
         }
 
@@ -108,7 +108,7 @@ namespace AsmResolver.Net.Cts
             if (typeDef == null)
                 return (MethodDefinition)ThrowOrReturn(reference);
 
-            var method = typeDef.Methods.FirstOrDefault(x => _signatureComparer.MatchMembers(x, reference));
+            var method = typeDef.Methods.FirstOrDefault(x => _signatureComparer.Equals(x, reference));
             return method ?? (MethodDefinition)ThrowOrReturn(reference);
         }
 
@@ -121,7 +121,7 @@ namespace AsmResolver.Net.Cts
             if (typeDef == null)
                 return (FieldDefinition)ThrowOrReturn(reference);
 
-            var field = typeDef.Fields.FirstOrDefault(x => _signatureComparer.MatchMembers(x, reference));
+            var field = typeDef.Fields.FirstOrDefault(x => _signatureComparer.Equals(x, reference));
             return field ?? (FieldDefinition)ThrowOrReturn(reference);
         }
     }

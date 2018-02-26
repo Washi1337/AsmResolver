@@ -26,7 +26,7 @@ namespace AsmResolver.Tests.Net.Cts
 
             Assert.Equal(newAlgorithm, assemblyRow.Column1);
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newAlgorithm, image.Assembly.HashAlgorithm);
         }
 
@@ -49,7 +49,7 @@ namespace AsmResolver.Tests.Net.Cts
             Assert.Equal(newVersion.Build, assemblyRow.Column4);
             Assert.Equal(newVersion.Revision, assemblyRow.Column5);
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newVersion, image.Assembly.Version);
         }
 
@@ -69,7 +69,7 @@ namespace AsmResolver.Tests.Net.Cts
             var assemblyRow = header.GetStream<TableStream>().GetTable<AssemblyDefinitionTable>()[0];
             Assert.Equal(newAttributes, assemblyRow.Column6);
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newAttributes, image.Assembly.Attributes);
         }
 
@@ -88,7 +88,7 @@ namespace AsmResolver.Tests.Net.Cts
             var assemblyRow = header.GetStream<TableStream>().GetTable<AssemblyDefinitionTable>()[0];
             Assert.Equal(newPublicKey.Data, header.GetStream<BlobStream>().GetBlobByOffset(assemblyRow.Column7));
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newPublicKey.Data, image.Assembly.PublicKey.Data);
         }
 
@@ -107,7 +107,7 @@ namespace AsmResolver.Tests.Net.Cts
             var assemblyRow = header.GetStream<TableStream>().GetTable<AssemblyDefinitionTable>()[0];
             Assert.Equal(newName, header.GetStream<StringStream>().GetStringByOffset(assemblyRow.Column8));
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newName, image.Assembly.Name);
         }
 
@@ -126,7 +126,7 @@ namespace AsmResolver.Tests.Net.Cts
             var assemblyRow = header.GetStream<TableStream>().GetTable<AssemblyDefinitionTable>()[0];
             Assert.Equal(newCulture, header.GetStream<StringStream>().GetStringByOffset(assemblyRow.Column9));
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newCulture, image.Assembly.Culture);
         }
         

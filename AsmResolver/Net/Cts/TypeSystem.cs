@@ -80,7 +80,7 @@ namespace AsmResolver.Net.Cts
             SignatureComparer comparer = new SignatureComparer();
             MsCorLibTypeSignature signature;
 
-            if (!comparer.MatchAssemblies(type.ResolutionScope.GetAssembly(), MsCorLibReference)
+            if (!comparer.Equals(type.ResolutionScope.GetAssembly(), MsCorLibReference)
                 || type.Namespace != "System"
                 || !_typesByName.TryGetValue(type.Name, out signature))
             {

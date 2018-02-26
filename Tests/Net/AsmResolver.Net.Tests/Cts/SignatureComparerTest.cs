@@ -65,41 +65,41 @@ namespace AsmResolver.Tests.Net.Cts
 
         private void VerifyMatching(TypeSignature original, TypeSignature expected, params TypeSignature[] fails)
         {
-            Assert.True(_comparer.MatchTypes(original, expected), "The original signature did not match the expected.");
-            Assert.True(_comparer.MatchTypes(expected, original), "The expected signature did not match the original.");
+            Assert.True(_comparer.Equals(original, expected), "The original signature did not match the expected.");
+            Assert.True(_comparer.Equals(expected, original), "The expected signature did not match the original.");
 
             foreach (var fail in fails)
             {
-                Assert.False(_comparer.MatchTypes(fail, original), original + " matched " + fail.FullName);
-                Assert.False(_comparer.MatchTypes(original, fail), fail.FullName + " matched " + original);
+                Assert.False(_comparer.Equals(fail, original), original + " matched " + fail.FullName);
+                Assert.False(_comparer.Equals(original, fail), fail.FullName + " matched " + original);
             }
 
             var dummyType = CreateTypeRef(original.Namespace, original.Name);
-            Assert.False(_comparer.MatchTypes(original, dummyType), original.FullName + " matched the dummy type.");
-            Assert.False(_comparer.MatchTypes(dummyType, original), "The dummy type for " + original.FullName + " matched the original.");
+            Assert.False(_comparer.Equals(original, dummyType), original.FullName + " matched the dummy type.");
+            Assert.False(_comparer.Equals(dummyType, original), "The dummy type for " + original.FullName + " matched the original.");
         }
 
         private void VerifyMatching(MemberSignature original, MemberSignature expected, params MemberSignature[] fails)
         {
-            Assert.True(_comparer.MatchMemberSignatures(original, expected), "The original signature did not match the expected.");
-            Assert.True(_comparer.MatchMemberSignatures(expected, original), "The expected signature did not match the original.");
+            Assert.True(_comparer.Equals(original, expected), "The original signature did not match the expected.");
+            Assert.True(_comparer.Equals(expected, original), "The expected signature did not match the original.");
 
             foreach (var fail in fails)
             {
-                Assert.False(_comparer.MatchMemberSignatures(original, fail), original + " matched " + fail);
-                Assert.False(_comparer.MatchMemberSignatures(fail, original), fail + " matched " + original);
+                Assert.False(_comparer.Equals(original, fail), original + " matched " + fail);
+                Assert.False(_comparer.Equals(fail, original), fail + " matched " + original);
             }
         }
 
         private void VerifyMatching(IMemberReference original, IMemberReference expected, params IMemberReference[] fails)
         {
-            Assert.True(_comparer.MatchMembers(original, expected), "The original signature did not match the expected.");
-            Assert.True(_comparer.MatchMembers(expected, original), "The expected signature did not match the original.");
+            Assert.True(_comparer.Equals(original, expected), "The original signature did not match the expected.");
+            Assert.True(_comparer.Equals(expected, original), "The expected signature did not match the original.");
 
             foreach (var fail in fails)
             {
-                Assert.False(_comparer.MatchMembers(original, fail), original + " matched " + fail.FullName);
-                Assert.False(_comparer.MatchMembers(fail, original), fail.FullName + " matched " + original);
+                Assert.False(_comparer.Equals(original, fail), original + " matched " + fail.FullName);
+                Assert.False(_comparer.Equals(fail, original), fail.FullName + " matched " + original);
             }
         }
 
@@ -115,8 +115,8 @@ namespace AsmResolver.Tests.Net.Cts
             var assembly2 = CreateAssemblyReference();
             var assembly3 = CreateAssemblyReference();
             assembly3.Name += "1";
-            Assert.True(_comparer.MatchAssemblies(assembly1, assembly2));
-            Assert.False(_comparer.MatchAssemblies(assembly1, assembly3));
+            Assert.True(_comparer.Equals((IAssemblyDescriptor) assembly1, assembly2));
+            Assert.False(_comparer.Equals((IAssemblyDescriptor) assembly1, assembly3));
         }
 
         #endregion
@@ -131,8 +131,8 @@ namespace AsmResolver.Tests.Net.Cts
             var module1 = new ModuleDefinition(name);
             var module2 = new ModuleDefinition(name);
             var module3 = new ModuleDefinition(name + "1");
-            Assert.True(_comparer.MatchModules(module1, module2));
-            Assert.False(_comparer.MatchModules(module1, module3));
+            Assert.True(_comparer.Equals(module1, module2));
+            Assert.False(_comparer.Equals(module1, module3));
         }
 
         [Fact]
@@ -143,8 +143,8 @@ namespace AsmResolver.Tests.Net.Cts
             var module1 = new ModuleReference(name);
             var module2 = new ModuleReference(name);
             var module3 = new ModuleReference(name + "1");
-            Assert.True(_comparer.MatchModules(module1, module2));
-            Assert.False(_comparer.MatchModules(module1, module3));
+            Assert.True(_comparer.Equals(module1, module2));
+            Assert.False(_comparer.Equals(module1, module3));
         }
 
         #endregion
@@ -167,9 +167,9 @@ namespace AsmResolver.Tests.Net.Cts
             resolutionScope.Name += "1";
             var type4 = new TypeReference(resolutionScope, typeNamespace, typeName + "1");
 
-            Assert.True(_comparer.MatchTypes(type1, type2));
-            Assert.False(_comparer.MatchTypes(type1, type3));
-            Assert.False(_comparer.MatchTypes(type1, type4));
+            Assert.True(_comparer.Equals((ITypeDefOrRef) type1, type2));
+            Assert.False(_comparer.Equals((ITypeDefOrRef) type1, type3));
+            Assert.False(_comparer.Equals((ITypeDefOrRef) type1, type4));
         }
 
         [Fact]
@@ -185,8 +185,8 @@ namespace AsmResolver.Tests.Net.Cts
             var type2 = new TypeReference(declaringType2, null, typeNestedName);
             var type3 = new TypeReference(CreateAssemblyReference(), null, typeNestedName);
 
-            Assert.True(_comparer.MatchTypes(type1, type2));
-            Assert.False(_comparer.MatchTypes(type1, type3));
+            Assert.True(_comparer.Equals((ITypeDefOrRef) type1, type2));
+            Assert.False(_comparer.Equals((ITypeDefOrRef) type1, type3));
         }
 
         [Fact]
@@ -231,9 +231,9 @@ namespace AsmResolver.Tests.Net.Cts
             ITypeDescriptor type3 = new TypeDefOrRefSignature(typeRef3);
             ITypeDescriptor type4 = new TypeDefOrRefSignature(typeRef4);
 
-            Assert.True(_comparer.MatchTypes(type1, type2), "The same types did not match each other.");
-            Assert.False(_comparer.MatchTypes(type1, type3), "A name change matched the original.");
-            Assert.False(_comparer.MatchTypes(type1, type4), "A resolution scope change matched the original.");
+            Assert.True(_comparer.Equals(type1, type2), "The same types did not match each other.");
+            Assert.False(_comparer.Equals(type1, type3), "A name change matched the original.");
+            Assert.False(_comparer.Equals(type1, type4), "A resolution scope change matched the original.");
         }
 
         #endregion

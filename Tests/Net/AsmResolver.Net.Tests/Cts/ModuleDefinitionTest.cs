@@ -26,7 +26,7 @@ namespace AsmResolver.Tests.Net.Cts
             var moduleRow = header.GetStream<TableStream>().GetTable<ModuleDefinitionTable>()[0];
             Assert.Equal(newGeneration, moduleRow.Column1);
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newGeneration, image.Assembly.Modules[0].Generation);
         }
 
@@ -45,7 +45,7 @@ namespace AsmResolver.Tests.Net.Cts
             var moduleRow = header.GetStream<TableStream>().GetTable<ModuleDefinitionTable>()[0];
             Assert.Equal(newName, header.GetStream<StringStream>().GetStringByOffset(moduleRow.Column2));
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newName, image.Assembly.Modules[0].Name);
         }
 
@@ -64,7 +64,7 @@ namespace AsmResolver.Tests.Net.Cts
             var moduleRow = header.GetStream<TableStream>().GetTable<ModuleDefinitionTable>()[0];
             Assert.Equal(newGuid, header.GetStream<GuidStream>().GetGuidByOffset(moduleRow.Column3));
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newGuid, image.Assembly.Modules[0].Mvid);
         }
 
@@ -83,7 +83,7 @@ namespace AsmResolver.Tests.Net.Cts
             var moduleRow = header.GetStream<TableStream>().GetTable<ModuleDefinitionTable>()[0];
             Assert.Equal(newGuid, header.GetStream<GuidStream>().GetGuidByOffset(moduleRow.Column4));
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newGuid, image.Assembly.Modules[0].EncId);
         }
 
@@ -102,8 +102,23 @@ namespace AsmResolver.Tests.Net.Cts
             var moduleRow = header.GetStream<TableStream>().GetTable<ModuleDefinitionTable>()[0];
             Assert.Equal(newGuid, header.GetStream<GuidStream>().GetGuidByOffset(moduleRow.Column5));
 
-            image.Header.LockMetadata();
+            image = header.LockMetadata();
             Assert.Equal(newGuid, image.Assembly.Modules[0].EncBaseId);
+        }
+
+        [Fact]
+        public void PersistentTypes()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            image.Assembly.Modules[0].Types.Add(new TypeDefinition("SomeNamespace", "SomeName"));
+            int newCount = image.Assembly.Modules[0].Types.Count;
+            header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            Assert.Equal(newCount, image.Assembly.Modules[0].Types.Count);
         }
 
     }
