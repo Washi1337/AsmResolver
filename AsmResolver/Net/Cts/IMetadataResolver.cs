@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {

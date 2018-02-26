@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using AsmResolver.Net.Cts;
-using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Builder
 {

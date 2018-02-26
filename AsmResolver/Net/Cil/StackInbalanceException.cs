@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace AsmResolver.Net.Cil
 {
     public class StackInbalanceException : Exception

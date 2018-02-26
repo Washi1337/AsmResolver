@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AsmResolver.Net
+﻿namespace AsmResolver.Net
 {
     /// <summary>
     /// Represents a .NET data directory header (COR20 header) in a windows assembly image.

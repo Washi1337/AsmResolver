@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using AsmResolver.Net.Metadata;
 
 namespace AsmResolver
 {

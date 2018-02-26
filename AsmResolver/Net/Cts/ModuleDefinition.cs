@@ -1,6 +1,5 @@
 ﻿using System;
 using AsmResolver.Collections.Generic;
-using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using AsmResolver.Collections.Generic;
-using AsmResolver.Net.Builder;
+﻿using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 

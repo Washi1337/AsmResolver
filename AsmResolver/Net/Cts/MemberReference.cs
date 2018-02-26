@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.Remoting.Messaging;
-using AsmResolver.Net.Builder;
-using AsmResolver.Net.Cts.Collections;
+﻿using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data;
-using AsmResolver.Net.Cil;
+﻿using AsmResolver.Net.Cil;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Metadata

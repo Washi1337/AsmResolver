@@ -1,5 +1,4 @@
-﻿using AsmResolver.Net.Builder;
-using AsmResolver.Net.Cts.Collections;
+﻿using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 

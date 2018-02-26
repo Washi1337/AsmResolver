@@ -1,5 +1,4 @@
-﻿using System.Security.Permissions;
-using AsmResolver.Net.Cts;
+﻿using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Metadata
 {
