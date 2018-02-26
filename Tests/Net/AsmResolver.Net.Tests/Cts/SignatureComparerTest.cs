@@ -1,25 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AsmResolver.Net;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Signatures;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace AsmResolver.Tests.Net
+namespace AsmResolver.Tests.Net.Cts
 {
-    [TestClass]
     public class SignatureComparerTests
     {
-        private static SignatureComparer _comparer;
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
-        {
-            _comparer = new SignatureComparer();
-        }
+        private readonly SignatureComparer _comparer = new SignatureComparer();
+        
 
         #region Utilities
 
@@ -73,43 +63,43 @@ namespace AsmResolver.Tests.Net
             return new TypeReference(CreateAssemblyReference(), @namespace, name);
         }
 
-        private static void VerifyMatching(TypeSignature original, TypeSignature expected, params TypeSignature[] fails)
+        private void VerifyMatching(TypeSignature original, TypeSignature expected, params TypeSignature[] fails)
         {
-            Assert.IsTrue(_comparer.MatchTypes(original, expected), "The original signature did not match the expected.");
-            Assert.IsTrue(_comparer.MatchTypes(expected, original), "The expected signature did not match the original.");
+            Assert.True(_comparer.MatchTypes(original, expected), "The original signature did not match the expected.");
+            Assert.True(_comparer.MatchTypes(expected, original), "The expected signature did not match the original.");
 
             foreach (var fail in fails)
             {
-                Assert.IsFalse(_comparer.MatchTypes(fail, original), original + " matched " + fail.FullName);
-                Assert.IsFalse(_comparer.MatchTypes(original, fail), fail.FullName + " matched " + original);
+                Assert.False(_comparer.MatchTypes(fail, original), original + " matched " + fail.FullName);
+                Assert.False(_comparer.MatchTypes(original, fail), fail.FullName + " matched " + original);
             }
 
             var dummyType = CreateTypeRef(original.Namespace, original.Name);
-            Assert.IsFalse(_comparer.MatchTypes(original, dummyType), original.FullName + " matched the dummy type.");
-            Assert.IsFalse(_comparer.MatchTypes(dummyType, original), "The dummy type for " + original.FullName + " matched the original.");
+            Assert.False(_comparer.MatchTypes(original, dummyType), original.FullName + " matched the dummy type.");
+            Assert.False(_comparer.MatchTypes(dummyType, original), "The dummy type for " + original.FullName + " matched the original.");
         }
 
-        private static void VerifyMatching(MemberSignature original, MemberSignature expected, params MemberSignature[] fails)
+        private void VerifyMatching(MemberSignature original, MemberSignature expected, params MemberSignature[] fails)
         {
-            Assert.IsTrue(_comparer.MatchMemberSignatures(original, expected), "The original signature did not match the expected.");
-            Assert.IsTrue(_comparer.MatchMemberSignatures(expected, original), "The expected signature did not match the original.");
+            Assert.True(_comparer.MatchMemberSignatures(original, expected), "The original signature did not match the expected.");
+            Assert.True(_comparer.MatchMemberSignatures(expected, original), "The expected signature did not match the original.");
 
             foreach (var fail in fails)
             {
-                Assert.IsFalse(_comparer.MatchMemberSignatures(original, fail), original + " matched " + fail);
-                Assert.IsFalse(_comparer.MatchMemberSignatures(fail, original), fail + " matched " + original);
+                Assert.False(_comparer.MatchMemberSignatures(original, fail), original + " matched " + fail);
+                Assert.False(_comparer.MatchMemberSignatures(fail, original), fail + " matched " + original);
             }
         }
 
-        private static void VerifyMatching(IMemberReference original, IMemberReference expected, params IMemberReference[] fails)
+        private void VerifyMatching(IMemberReference original, IMemberReference expected, params IMemberReference[] fails)
         {
-            Assert.IsTrue(_comparer.MatchMembers(original, expected), "The original signature did not match the expected.");
-            Assert.IsTrue(_comparer.MatchMembers(expected, original), "The expected signature did not match the original.");
+            Assert.True(_comparer.MatchMembers(original, expected), "The original signature did not match the expected.");
+            Assert.True(_comparer.MatchMembers(expected, original), "The expected signature did not match the original.");
 
             foreach (var fail in fails)
             {
-                Assert.IsFalse(_comparer.MatchMembers(original, fail), original + " matched " + fail.FullName);
-                Assert.IsFalse(_comparer.MatchMembers(fail, original), fail.FullName + " matched " + original);
+                Assert.False(_comparer.MatchMembers(original, fail), original + " matched " + fail.FullName);
+                Assert.False(_comparer.MatchMembers(fail, original), fail.FullName + " matched " + original);
             }
         }
 
@@ -117,7 +107,7 @@ namespace AsmResolver.Tests.Net
 
         #region Assemblies
 
-        [TestMethod]
+        [Fact]
         public void MatchAssembliesTest()
         {
 
@@ -125,15 +115,15 @@ namespace AsmResolver.Tests.Net
             var assembly2 = CreateAssemblyReference();
             var assembly3 = CreateAssemblyReference();
             assembly3.Name += "1";
-            Assert.IsTrue(_comparer.MatchAssemblies(assembly1, assembly2));
-            Assert.IsFalse(_comparer.MatchAssemblies(assembly1, assembly3));
+            Assert.True(_comparer.MatchAssemblies(assembly1, assembly2));
+            Assert.False(_comparer.MatchAssemblies(assembly1, assembly3));
         }
 
         #endregion
 
         #region Modules
 
-        [TestMethod]
+        [Fact]
         public void MatchModulesTest()
         {
             const string name = "somemodule";
@@ -141,11 +131,11 @@ namespace AsmResolver.Tests.Net
             var module1 = new ModuleDefinition(name);
             var module2 = new ModuleDefinition(name);
             var module3 = new ModuleDefinition(name + "1");
-            Assert.IsTrue(_comparer.MatchModules(module1, module2));
-            Assert.IsFalse(_comparer.MatchModules(module1, module3));
+            Assert.True(_comparer.MatchModules(module1, module2));
+            Assert.False(_comparer.MatchModules(module1, module3));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchModuleReferencesTest()
         {
             const string name = "somemodule";
@@ -153,8 +143,8 @@ namespace AsmResolver.Tests.Net
             var module1 = new ModuleReference(name);
             var module2 = new ModuleReference(name);
             var module3 = new ModuleReference(name + "1");
-            Assert.IsTrue(_comparer.MatchModules(module1, module2));
-            Assert.IsFalse(_comparer.MatchModules(module1, module3));
+            Assert.True(_comparer.MatchModules(module1, module2));
+            Assert.False(_comparer.MatchModules(module1, module3));
         }
 
         #endregion
@@ -163,7 +153,7 @@ namespace AsmResolver.Tests.Net
 
         #region Type references and definitions
 
-        [TestMethod]
+        [Fact]
         public void MatchSimpleTypeReferenceTest()
         {
             const string typeNamespace = "SomeNamespace";
@@ -177,12 +167,12 @@ namespace AsmResolver.Tests.Net
             resolutionScope.Name += "1";
             var type4 = new TypeReference(resolutionScope, typeNamespace, typeName + "1");
 
-            Assert.IsTrue(_comparer.MatchTypes(type1, type2));
-            Assert.IsFalse(_comparer.MatchTypes(type1, type3));
-            Assert.IsFalse(_comparer.MatchTypes(type1, type4));
+            Assert.True(_comparer.MatchTypes(type1, type2));
+            Assert.False(_comparer.MatchTypes(type1, type3));
+            Assert.False(_comparer.MatchTypes(type1, type4));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchNestedTypeReferenceTest()
         {
             const string typeNamespace = "SomeNamespace";
@@ -195,33 +185,35 @@ namespace AsmResolver.Tests.Net
             var type2 = new TypeReference(declaringType2, null, typeNestedName);
             var type3 = new TypeReference(CreateAssemblyReference(), null, typeNestedName);
 
-            Assert.IsTrue(_comparer.MatchTypes(type1, type2));
-            Assert.IsFalse(_comparer.MatchTypes(type1, type3));
+            Assert.True(_comparer.MatchTypes(type1, type2));
+            Assert.False(_comparer.MatchTypes(type1, type3));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchTypeDefWithRef()
         {
-            const string typeNamespace = "SomeNamespace";
-            const string typeName = "SomeType";
+            // TODO
+            Assert.True(false);
+            //const string typeNamespace = "SomeNamespace";
+            //const string typeName = "SomeType";
 
-            var assembly = Utilities.CreateTempNetAssembly();
-            var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
-            tableStream.GetTable<AssemblyDefinition>()[0] = CreateAssemblyDefinition();
+            //var assembly = Utilities.CreateTempNetAssembly();
+            //var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            //tableStream.GetTable<AssemblyDefinition>()[0] = CreateAssemblyDefinition();
 
-            var typeDef = new TypeDefinition(typeNamespace, typeName);
-            tableStream.GetTable<TypeDefinition>().Add(typeDef);
+            //var typeDef = new TypeDefinition(typeNamespace, typeName);
+            //tableStream.GetTable<TypeDefinition>().Add(typeDef);
 
-            var type1 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName);
-            var type2 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName + "1");
+            //var type1 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName);
+            //var type2 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName + "1");
 
-            Assert.IsTrue(_comparer.MatchTypes(typeDef, type1));
-            Assert.IsTrue(_comparer.MatchTypes(type1, typeDef));
-            Assert.IsFalse(_comparer.MatchTypes(typeDef, type2));
-            Assert.IsFalse(_comparer.MatchTypes(type2, typeDef));
+            //Assert.True(_comparer.MatchTypes(typeDef, type1));
+            //Assert.True(_comparer.MatchTypes(type1, typeDef));
+            //Assert.False(_comparer.MatchTypes(typeDef, type2));
+            //Assert.False(_comparer.MatchTypes(type2, typeDef));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchTypeDefOrRefSignature()
         {
             const string typeNamespace = "SomeNamespace";
@@ -239,16 +231,16 @@ namespace AsmResolver.Tests.Net
             ITypeDescriptor type3 = new TypeDefOrRefSignature(typeRef3);
             ITypeDescriptor type4 = new TypeDefOrRefSignature(typeRef4);
 
-            Assert.IsTrue(_comparer.MatchTypes(type1, type2), "The same types did not match each other.");
-            Assert.IsFalse(_comparer.MatchTypes(type1, type3), "A name change matched the original.");
-            Assert.IsFalse(_comparer.MatchTypes(type1, type4), "A resolution scope change matched the original.");
+            Assert.True(_comparer.MatchTypes(type1, type2), "The same types did not match each other.");
+            Assert.False(_comparer.MatchTypes(type1, type3), "A name change matched the original.");
+            Assert.False(_comparer.MatchTypes(type1, type4), "A resolution scope change matched the original.");
         }
 
         #endregion
 
         #region Type signatures
 
-        [TestMethod]
+        [Fact]
         public void MatchArrayTypeSignatures()
         {
             var arrayType1 = new ArrayTypeSignature(CreateTypeSig1());
@@ -266,7 +258,7 @@ namespace AsmResolver.Tests.Net
             VerifyMatching(arrayType1, arrayType2, arrayType3);
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchBoxedTypeSignatures()
         {
             VerifyMatching(
@@ -275,7 +267,7 @@ namespace AsmResolver.Tests.Net
                 new BoxedTypeSignature(CreateTypeSig2()));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchByReferenceTypeSignatures()
         {
             VerifyMatching(
@@ -284,7 +276,7 @@ namespace AsmResolver.Tests.Net
                 new ByReferenceTypeSignature(CreateTypeSig2()));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchFunctionPointerTypeSignatures()
         {
             var expected = new FunctionPointerTypeSignature(
@@ -297,7 +289,7 @@ namespace AsmResolver.Tests.Net
             VerifyMatching(expected, match, fail1);
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchGenericTypeSignatures()
         {
             var expected = new GenericInstanceTypeSignature(CreateTypeRef1());
@@ -312,7 +304,7 @@ namespace AsmResolver.Tests.Net
             VerifyMatching(expected, match, fail1, fail2);
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchOptionalModifierTypeSignatures()
         {
             VerifyMatching(
@@ -322,7 +314,7 @@ namespace AsmResolver.Tests.Net
                 new OptionalModifierSignature(CreateTypeRef1(), CreateTypeSig3()));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchPinnedTypeSignatures()
         {
             VerifyMatching(
@@ -331,7 +323,7 @@ namespace AsmResolver.Tests.Net
                 new PinnedTypeSignature(CreateTypeSig2()));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchPointerTypeSignatures()
         {
             VerifyMatching(
@@ -340,7 +332,7 @@ namespace AsmResolver.Tests.Net
                 new PointerTypeSignature(CreateTypeSig2()));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchRequiredModifierTypeSignatures()
         {
             VerifyMatching(
@@ -350,7 +342,7 @@ namespace AsmResolver.Tests.Net
                 new RequiredModifierSignature(CreateTypeRef1(), CreateTypeSig3()));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchSentinelTypeSignatures()
         {
             VerifyMatching(
@@ -359,7 +351,7 @@ namespace AsmResolver.Tests.Net
                 new SentinelTypeSignature(CreateTypeSig2()));
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchSzArrayTypeSignatures()
         {
             VerifyMatching(
@@ -374,7 +366,7 @@ namespace AsmResolver.Tests.Net
 
         #region Member signatures
 
-        [TestMethod]
+        [Fact]
         public void MatchFieldSignatures()
         {
             VerifyMatching(
@@ -384,7 +376,7 @@ namespace AsmResolver.Tests.Net
                 new FieldSignature(CreateTypeSig1()) { HasThis = true });
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchMethodSignatures()
         {
             var expected = new MethodSignature(new[] { CreateTypeSig1(), CreateTypeSig2() }, CreateTypeSig3());
@@ -401,7 +393,7 @@ namespace AsmResolver.Tests.Net
 
         #region Fields
 
-        [TestMethod]
+        [Fact]
         public void MatchFieldReferences()
         {
             const string fieldName = "MyField";
@@ -415,34 +407,36 @@ namespace AsmResolver.Tests.Net
             VerifyMatching(expected, match, fail1, fail2, fail3);
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchFieldDefWithRef()
         {
-            const string fieldName = "MyField";
+            // TODO
+            Assert.True(false);
+            //const string fieldName = "MyField";
 
-            var assembly = Utilities.CreateTempNetAssembly();
-            var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            //var assembly = Utilities.CreateTempNetAssembly();
+            //var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
 
-            var typeRef = CreateTypeRef1();
-            var typeDef = new TypeDefinition(typeRef.Namespace, typeRef.Name);
-            tableStream.GetTable<AssemblyDefinition>()[0] = new AssemblyDefinition(typeRef.ResolutionScope.GetAssembly());
+            //var typeRef = CreateTypeRef1();
+            //var typeDef = new TypeDefinition(typeRef.Namespace, typeRef.Name);
+            //tableStream.GetTable<AssemblyDefinition>()[0] = new AssemblyDefinition(typeRef.ResolutionScope.GetAssembly());
 
-            var fieldDef = new FieldDefinition(fieldName, FieldAttributes.Public, new FieldSignature(CreateTypeSig2()));
-            typeDef.Fields.Add(fieldDef);
+            //var fieldDef = new FieldDefinition(fieldName, FieldAttributes.Public, new FieldSignature(CreateTypeSig2()));
+            //typeDef.Fields.Add(fieldDef);
 
-            var match = new MemberReference(typeRef, fieldName, new FieldSignature(CreateTypeSig2()));
-            var fail1 = new MemberReference(CreateTypeRef3(), fieldName, new FieldSignature(CreateTypeSig2()));
-            var fail2 = new MemberReference(typeRef, fieldName + "1", new FieldSignature(CreateTypeSig2()));
-            var fail3 = new MemberReference(typeRef, fieldName, new FieldSignature(CreateTypeSig3()));
+            //var match = new MemberReference(typeRef, fieldName, new FieldSignature(CreateTypeSig2()));
+            //var fail1 = new MemberReference(CreateTypeRef3(), fieldName, new FieldSignature(CreateTypeSig2()));
+            //var fail2 = new MemberReference(typeRef, fieldName + "1", new FieldSignature(CreateTypeSig2()));
+            //var fail3 = new MemberReference(typeRef, fieldName, new FieldSignature(CreateTypeSig3()));
 
-            VerifyMatching(fieldDef, match, fail1, fail2, fail3);
+            //VerifyMatching(fieldDef, match, fail1, fail2, fail3);
         }
 
         #endregion
 
         #region Methods
 
-        [TestMethod]
+        [Fact]
         public void MatchMethodReferences()
         {
             const string methodName = "MyMethod";
@@ -456,27 +450,29 @@ namespace AsmResolver.Tests.Net
             VerifyMatching(expected, match, fail1, fail2, fail3);
         }
 
-        [TestMethod]
+        [Fact]
         public void MatchMethodDefWithRef()
         {
-            const string methodName = "MyMethod";
+            // TODO
+            Assert.True(false);
+            //const string methodName = "MyMethod";
 
-            var assembly = Utilities.CreateTempNetAssembly();
-            var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            //var assembly = Utilities.CreateTempNetAssembly();
+            //var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
 
-            var typeRef = CreateTypeRef1();
-            var typeDef = new TypeDefinition(typeRef.Namespace, typeRef.Name);
-            tableStream.GetTable<AssemblyDefinition>()[0] = new AssemblyDefinition(typeRef.ResolutionScope.GetAssembly());
+            //var typeRef = CreateTypeRef1();
+            //var typeDef = new TypeDefinition(typeRef.Namespace, typeRef.Name);
+            //tableStream.GetTable<AssemblyDefinition>()[0] = new AssemblyDefinition(typeRef.ResolutionScope.GetAssembly());
 
-            var methodDef = new MethodDefinition(methodName, MethodAttributes.Public, new MethodSignature(CreateTypeSig2()));
-            typeDef.Methods.Add(methodDef);
+            //var methodDef = new MethodDefinition(methodName, MethodAttributes.Public, new MethodSignature(CreateTypeSig2()));
+            //typeDef.Methods.Add(methodDef);
 
-            var match = new MemberReference(typeRef, methodName, new MethodSignature(CreateTypeSig2()));
-            var fail1 = new MemberReference(CreateTypeRef3(), methodName, new MethodSignature(CreateTypeSig2()));
-            var fail2 = new MemberReference(typeRef, methodName + "1", new MethodSignature(CreateTypeSig2()));
-            var fail3 = new MemberReference(typeRef, methodName, new MethodSignature(CreateTypeSig3()));
+            //var match = new MemberReference(typeRef, methodName, new MethodSignature(CreateTypeSig2()));
+            //var fail1 = new MemberReference(CreateTypeRef3(), methodName, new MethodSignature(CreateTypeSig2()));
+            //var fail2 = new MemberReference(typeRef, methodName + "1", new MethodSignature(CreateTypeSig2()));
+            //var fail3 = new MemberReference(typeRef, methodName, new MethodSignature(CreateTypeSig3()));
 
-            VerifyMatching(methodDef, match, fail1, fail2, fail3);
+            //VerifyMatching(methodDef, match, fail1, fail2, fail3);
         }
 
         #endregion

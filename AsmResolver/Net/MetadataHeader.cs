@@ -181,7 +181,7 @@ namespace AsmResolver.Net
             return Image;
         }
 
-        public void UnlockMetadata()
+        public IDictionary<IMetadataMember, MetadataToken> UnlockMetadata()
         {
             var buffer = new MetadataBuffer(Image);
             buffer.TableStreamBuffer.AddAssembly(Image.Assembly);
@@ -203,6 +203,8 @@ namespace AsmResolver.Net
             }
 
             Image = null;
+
+            return buffer.TableStreamBuffer.GetNewTokenMapping();
         }
             
         public override uint GetPhysicalLength()

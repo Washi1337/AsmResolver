@@ -16,7 +16,12 @@ namespace AsmResolver.Net.Cts
             var tableStream = header.GetStream<TableStream>();
 
             var table = tableStream.GetTable(MetadataTokenType.Assembly);
-            Assembly = (AssemblyDefinition) table.GetMemberFromRow(this, table.GetRow(0));
+
+            MetadataRow assemblyRow;
+            if (table.TryGetRow(0, out assemblyRow))
+                Assembly = (AssemblyDefinition) table.GetMemberFromRow(this, assemblyRow);
+            else
+                Assembly = new AssemblyDefinition(null, new Version());
 
             TypeSystem = new TypeSystem(this, Assembly.Name == "mscorlib");
             MetadataResolver = new DefaultMetadataResolver(new DefaultNetAssemblyResolver());
@@ -49,7 +54,6 @@ namespace AsmResolver.Net.Cts
             private set;
         }
        
-
         internal bool TryGetCachedMember(MetadataToken token, out IMetadataMember member)
         {
             return _cachedMembers.TryGetValue(token, out member);

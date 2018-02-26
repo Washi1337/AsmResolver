@@ -31,14 +31,12 @@ namespace AsmResolver.Net.Cts
                 MsCorLibReference = image.Assembly.AssemblyReferences.FirstOrDefault(x => x.Name == "mscorlib");
                 if (MsCorLibReference == null)
                 {
-                    // TODO
-                    throw new NotImplementedException();
-                    //MsCorLibReference = new AssemblyReference(new ReflectionAssemblyNameWrapper(typeof(object).Assembly.GetName()))
-                    //{
-                    //    Header = header,
-                    //    Culture = "neutral",
-                    //    Version = new Version(header.VersionString[1] - 48, 0, 0, 0)
-                    //};
+                    MsCorLibReference = new AssemblyReference(new ReflectionAssemblyNameWrapper(typeof(object).Assembly.GetName()))
+                    {
+                        Image = image,
+                        Culture = "neutral",
+                        Version = new Version(image.Header.VersionString[1] - 48, 0, 0, 0)
+                    };
                 }
             }
 

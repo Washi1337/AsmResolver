@@ -1,48 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using AsmResolver.X86;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace AsmResolver.Tests.Native
 {
-    [TestClass]
     public class X86DisassemblerTests
     {
         private static readonly FasmX86Formatter _formatter = new FasmX86Formatter();
 
-        [TestMethod]
+        [Fact]
         public void Reg8_RegOrMem8()
         {
             TestDisassembler(Properties.Resources.Reg8_RegOrMem8, Properties.Resources.Reg8_RegOrMem8_source);
         }
 
-        [TestMethod]
+        [Fact]
         public void RegOrMem8_Reg8()
         {
             TestDisassembler(Properties.Resources.RegOrMem8_Reg8, Properties.Resources.RegOrMem8_Reg8_source);
         }
 
-        [TestMethod]
+        [Fact]
         public void RegOrMem8_Reg8_SIB()
         {
             TestDisassembler(Properties.Resources.RegOrMem8_Reg8_sib, Properties.Resources.RegOrMem8_Reg8_sib_source);
         }
 
-        [TestMethod]
+        [Fact]
         public void Misc()
         {
             TestDisassembler(Properties.Resources.Misc, Properties.Resources.Misc_source);
         }
 
-        [TestMethod]
+        [Fact]
         public void RelativeOffsets()
         {
             TestDisassembler(Properties.Resources.RelativeOffsets, Properties.Resources.RelativeOffsets_source);
         }
 
-        [TestMethod]
+        [Fact]
         public void OpCodeRegisterToken()
         {
             TestDisassembler(Properties.Resources.OpCodeRegisterToken, Properties.Resources.OpCodeRegisterToken_source);
@@ -61,7 +57,7 @@ namespace AsmResolver.Tests.Native
                 var instruction = disassembler.ReadNextInstruction();
 
                 var formattedInstruction = _formatter.FormatInstruction(instruction);
-                Assert.AreEqual(sourceLines[currentLine], formattedInstruction);
+                Assert.Equal(sourceLines[currentLine], formattedInstruction);
                 currentLine++;
             }
         }

@@ -64,6 +64,11 @@ namespace AsmResolver.Net.Builder
         {
             get { return 0; }
         }
+
+        public IDictionary<IMetadataMember, MetadataToken> GetNewTokenMapping()
+        {
+            return _members;
+        }
         
         private void AssertIsImported(IMetadataMember member)
         {
@@ -345,8 +350,8 @@ namespace AsmResolver.Net.Builder
                 Column1 = assembly.HashAlgorithm,
                 Column2 = (ushort) assembly.Version.Major,
                 Column3 = (ushort) assembly.Version.Minor,
-                Column4 = (ushort) assembly.Version.MajorRevision,
-                Column5 = (ushort) assembly.Version.MinorRevision,
+                Column4 = (ushort) assembly.Version.Build,
+                Column5 = (ushort) assembly.Version.Revision,
                 Column6 = assembly.Attributes,
                 Column7 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assembly.PublicKey),
                 Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Name),
