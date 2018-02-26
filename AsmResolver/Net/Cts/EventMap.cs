@@ -54,6 +54,7 @@ namespace AsmResolver.Net.Cts
         private static void SetEventOwner(EventDefinition @event, EventMap owner)
         {
             @event.EventMap = owner;
+            @event.Image = owner == null ? null : owner.Image;
         }
     }
 }

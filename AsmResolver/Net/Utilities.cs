@@ -59,6 +59,14 @@ namespace AsmResolver.Net
             }
         }
 
+        public static void ImportAssemblyInfo(this AssemblyDefinition assembly, IAssemblyDescriptor info)
+        {
+            assembly.Name = info.Name;
+            assembly.Version = info.Version;
+            assembly.Culture = info.Culture;
+            assembly.PublicKey = info.PublicKeyToken != null ? new DataBlobSignature(info.PublicKeyToken) : null;
+        }
+
         public static bool GetMaskedAttribute(this uint self, uint mask, uint attribute)
         {
             return (self & mask) == attribute;

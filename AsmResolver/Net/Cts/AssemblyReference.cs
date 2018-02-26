@@ -31,7 +31,12 @@ namespace AsmResolver.Net.Cts
         }
 
         public AssemblyReference(string name, Version version)
-            : base(null, new MetadataToken(MetadataTokenType.AssemblyRef))
+            : this(name, version, null)
+        {
+        }
+
+        public AssemblyReference(string name, Version version, MetadataImage image)
+            : base(image, new MetadataToken(MetadataTokenType.AssemblyRef))
         {
             _name = new LazyValue<string>(name);
             _version = version;
@@ -62,7 +67,7 @@ namespace AsmResolver.Net.Cts
             OperatingSystems = new TableMemberCollection<AssemblyReference, AssemblyRefOs>(this, MetadataTokenType.AssemblyRefOs, GetOsOwner, SetOsOwner);
             Processors = new TableMemberCollection<AssemblyReference, AssemblyRefProcessor>(this, MetadataTokenType.AssemblyRefProcessor, GetProcessorOwner, SetProcessorOwner);
         }
-        
+
         public Version Version
         {
             get { return _version; }
@@ -191,6 +196,7 @@ namespace AsmResolver.Net.Cts
         private static void SetOsOwner(AssemblyRefOs os, AssemblyReference reference)
         {
             os.Reference = reference;
+            os.Image = reference == null ? null : reference.Image;
         }
     }
 }

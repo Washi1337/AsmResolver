@@ -13,16 +13,21 @@ namespace AsmResolver.Net.Cts
         private string _fullName;
 
         public TypeReference(IResolutionScope resolutionScope, string @namespace, string name)
-            : base(null, new MetadataToken(MetadataTokenType.TypeRef))
+            : this(resolutionScope, @namespace, name, null)
+        {
+        }
+
+        public TypeReference(IResolutionScope resolutionScope, string @namespace, string name, MetadataImage image)
+            : base(image, new MetadataToken(MetadataTokenType.TypeRef))
         {
             ResolutionScope = resolutionScope;
             _namespace = new LazyValue<string>(@namespace);
             _name = new LazyValue<string>(name);
-            
+
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
-        internal TypeReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
+        public TypeReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
             : base(image, row.MetadataToken)
         {
             var stringStream = image.Header.GetStream<StringStream>();

@@ -410,6 +410,7 @@ namespace AsmResolver.Net.Cts
         private static void SetParamOwner(ParameterDefinition param, MethodDefinition method)
         {
             param.Method = method;
+            param.Image = method == null ? null : method.Image;
         }
 
         private static MethodDefinition GetParamOwner(ParameterDefinition param)

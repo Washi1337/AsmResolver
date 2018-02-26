@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Security.Cryptography;
 using AsmResolver.Collections.Generic;
-using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -318,6 +317,7 @@ namespace AsmResolver.Net.Cts
         private static void SetModuleOwner(ModuleDefinition module, AssemblyDefinition assembly)
         {
             module.Assembly = assembly;
+            module.Image = assembly == null ? null : assembly.Image;
         }
     }
 }

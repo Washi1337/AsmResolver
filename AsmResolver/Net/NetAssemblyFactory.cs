@@ -1,4 +1,5 @@
 ﻿
+using System;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net
@@ -16,6 +17,8 @@ namespace AsmResolver.Net
             var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
 
             image.Assembly.Name = name;
+            image.Assembly.Version = new Version(1, 0, 0, 0);
+
             var mainModule = new ModuleDefinition(name + (isDll ? ".dll" :".exe"));
             image.Assembly.Modules.Add(mainModule);
 

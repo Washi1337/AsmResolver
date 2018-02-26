@@ -194,8 +194,8 @@ namespace AsmResolver.Net.Builder
                 {
                     Column1 = (ushort) assemblyRef.Version.Major,
                     Column2 = (ushort) assemblyRef.Version.Minor,
-                    Column3 = (ushort) assemblyRef.Version.MajorRevision,
-                    Column4 = (ushort) assemblyRef.Version.MinorRevision,
+                    Column3 = (ushort) assemblyRef.Version.Build,
+                    Column4 = (ushort) assemblyRef.Version.Revision,
                     Column5 = assemblyRef.Attributes,
                     Column6 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.PublicKey),
                     Column7 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Name),

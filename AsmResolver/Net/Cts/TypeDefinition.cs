@@ -462,6 +462,7 @@ namespace AsmResolver.Net.Cts
         private static void SetFieldOwner(FieldDefinition field, TypeDefinition type)
         {
             field.DeclaringType = type;
+            field.Image = type == null ? null : type.Image;
         }
 
         private static TypeDefinition GetMethodOwner(MethodDefinition method)
@@ -472,6 +473,7 @@ namespace AsmResolver.Net.Cts
         private static void SetMethodOwner(MethodDefinition method, TypeDefinition type)
         {
             method.DeclaringType = type;
+            method.Image = type == null ? null : type.Image;
         }
 
     }

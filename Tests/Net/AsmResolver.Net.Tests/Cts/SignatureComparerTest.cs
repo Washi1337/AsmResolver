@@ -1,6 +1,7 @@
 ﻿using System;
 using AsmResolver.Net;
 using AsmResolver.Net.Cts;
+using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 using Xunit;
 
@@ -9,7 +10,8 @@ namespace AsmResolver.Tests.Net.Cts
     public class SignatureComparerTests
     {
         private readonly SignatureComparer _comparer = new SignatureComparer();
-        
+        private const string DummyAssemblyName = "SomeAssemblyName";
+
 
         #region Utilities
 
@@ -192,25 +194,22 @@ namespace AsmResolver.Tests.Net.Cts
         [Fact]
         public void MatchTypeDefWithRef()
         {
-            // TODO
-            Assert.True(false);
-            //const string typeNamespace = "SomeNamespace";
-            //const string typeName = "SomeType";
+            const string typeNamespace = "SomeNamespace";
+            const string typeName = "SomeType";
 
-            //var assembly = Utilities.CreateTempNetAssembly();
-            //var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
-            //tableStream.GetTable<AssemblyDefinition>()[0] = CreateAssemblyDefinition();
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
 
-            //var typeDef = new TypeDefinition(typeNamespace, typeName);
-            //tableStream.GetTable<TypeDefinition>().Add(typeDef);
+            var typeDef = new TypeDefinition(typeNamespace, typeName);
+            image.Assembly.Modules[0].Types.Add(typeDef);
 
-            //var type1 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName);
-            //var type2 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName + "1");
+            var type1 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName);
+            var type2 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName + "1");
 
-            //Assert.True(_comparer.MatchTypes(typeDef, type1));
-            //Assert.True(_comparer.MatchTypes(type1, typeDef));
-            //Assert.False(_comparer.MatchTypes(typeDef, type2));
-            //Assert.False(_comparer.MatchTypes(type2, typeDef));
+            Assert.Equal((ITypeDescriptor) typeDef, type1, _comparer);
+            Assert.Equal((ITypeDescriptor)type1, typeDef, _comparer);
+            Assert.NotEqual((ITypeDescriptor)typeDef, type2, _comparer);
+            Assert.NotEqual((ITypeDescriptor)type2, typeDef, _comparer);
         }
 
         [Fact]
@@ -410,26 +409,24 @@ namespace AsmResolver.Tests.Net.Cts
         [Fact]
         public void MatchFieldDefWithRef()
         {
-            // TODO
-            Assert.True(false);
-            //const string fieldName = "MyField";
+            const string fieldName = "MyField";
 
-            //var assembly = Utilities.CreateTempNetAssembly();
-            //var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
 
-            //var typeRef = CreateTypeRef1();
-            //var typeDef = new TypeDefinition(typeRef.Namespace, typeRef.Name);
-            //tableStream.GetTable<AssemblyDefinition>()[0] = new AssemblyDefinition(typeRef.ResolutionScope.GetAssembly());
+            var typeRef = CreateTypeRef1();
+            var typeDef = new TypeDefinition(typeRef.Namespace, typeRef.Name);
+            image.Assembly.ImportAssemblyInfo(typeRef.ResolutionScope.GetAssembly());
 
-            //var fieldDef = new FieldDefinition(fieldName, FieldAttributes.Public, new FieldSignature(CreateTypeSig2()));
-            //typeDef.Fields.Add(fieldDef);
+            var fieldDef = new FieldDefinition(fieldName, FieldAttributes.Public, new FieldSignature(CreateTypeSig2()));
+            typeDef.Fields.Add(fieldDef);
 
-            //var match = new MemberReference(typeRef, fieldName, new FieldSignature(CreateTypeSig2()));
-            //var fail1 = new MemberReference(CreateTypeRef3(), fieldName, new FieldSignature(CreateTypeSig2()));
-            //var fail2 = new MemberReference(typeRef, fieldName + "1", new FieldSignature(CreateTypeSig2()));
-            //var fail3 = new MemberReference(typeRef, fieldName, new FieldSignature(CreateTypeSig3()));
+            var match = new MemberReference(typeRef, fieldName, new FieldSignature(CreateTypeSig2()));
+            var fail1 = new MemberReference(CreateTypeRef3(), fieldName, new FieldSignature(CreateTypeSig2()));
+            var fail2 = new MemberReference(typeRef, fieldName + "1", new FieldSignature(CreateTypeSig2()));
+            var fail3 = new MemberReference(typeRef, fieldName, new FieldSignature(CreateTypeSig3()));
 
-            //VerifyMatching(fieldDef, match, fail1, fail2, fail3);
+            VerifyMatching(fieldDef, match, fail1, fail2, fail3);
         }
 
         #endregion
@@ -453,26 +450,24 @@ namespace AsmResolver.Tests.Net.Cts
         [Fact]
         public void MatchMethodDefWithRef()
         {
-            // TODO
-            Assert.True(false);
-            //const string methodName = "MyMethod";
+            const string methodName = "MyMethod";
 
-            //var assembly = Utilities.CreateTempNetAssembly();
-            //var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
 
-            //var typeRef = CreateTypeRef1();
-            //var typeDef = new TypeDefinition(typeRef.Namespace, typeRef.Name);
-            //tableStream.GetTable<AssemblyDefinition>()[0] = new AssemblyDefinition(typeRef.ResolutionScope.GetAssembly());
+            var typeRef = CreateTypeRef1();
+            var typeDef = new TypeDefinition(typeRef.Namespace, typeRef.Name);
+            image.Assembly.ImportAssemblyInfo(typeRef.ResolutionScope.GetAssembly());
 
-            //var methodDef = new MethodDefinition(methodName, MethodAttributes.Public, new MethodSignature(CreateTypeSig2()));
-            //typeDef.Methods.Add(methodDef);
+            var methodDef = new MethodDefinition(methodName, MethodAttributes.Public, new MethodSignature(CreateTypeSig2()));
+            typeDef.Methods.Add(methodDef);
 
-            //var match = new MemberReference(typeRef, methodName, new MethodSignature(CreateTypeSig2()));
-            //var fail1 = new MemberReference(CreateTypeRef3(), methodName, new MethodSignature(CreateTypeSig2()));
-            //var fail2 = new MemberReference(typeRef, methodName + "1", new MethodSignature(CreateTypeSig2()));
-            //var fail3 = new MemberReference(typeRef, methodName, new MethodSignature(CreateTypeSig3()));
+            var match = new MemberReference(typeRef, methodName, new MethodSignature(CreateTypeSig2()));
+            var fail1 = new MemberReference(CreateTypeRef3(), methodName, new MethodSignature(CreateTypeSig2()));
+            var fail2 = new MemberReference(typeRef, methodName + "1", new MethodSignature(CreateTypeSig2()));
+            var fail3 = new MemberReference(typeRef, methodName, new MethodSignature(CreateTypeSig3()));
 
-            //VerifyMatching(methodDef, match, fail1, fail2, fail3);
+            VerifyMatching(methodDef, match, fail1, fail2, fail3);
         }
 
         #endregion

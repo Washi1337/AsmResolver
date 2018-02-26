@@ -102,6 +102,7 @@ namespace AsmResolver.Net.Cts
         private static void SetTypeOwner(TypeDefinition type, ModuleDefinition module)
         {
             type.Module = module;
+            type.Image = module == null ? null : module.Image;
         }
 
         public override string ToString()

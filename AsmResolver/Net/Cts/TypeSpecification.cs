@@ -10,13 +10,18 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<TypeSignature> _signature;
 
         public TypeSpecification(TypeSignature signature)
-            : base(null, new MetadataToken(MetadataTokenType.TypeSpec))
+            : this(signature, null)
+        {
+        }
+
+        public TypeSpecification(TypeSignature signature, MetadataImage image)
+            : base(image, new MetadataToken(MetadataTokenType.TypeSpec))
         {
             _signature = new LazyValue<TypeSignature>(signature);
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
-        internal TypeSpecification(MetadataImage image, MetadataRow<uint> row)
+        public TypeSpecification(MetadataImage image, MetadataRow<uint> row)
             : base(image, row.MetadataToken)
         {
             _signature = new LazyValue<TypeSignature>(() => 

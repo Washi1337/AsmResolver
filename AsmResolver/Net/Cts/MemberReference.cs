@@ -15,7 +15,12 @@ namespace AsmResolver.Net.Cts
         private string _fullName;
 
         public MemberReference(IMemberRefParent parent, string name, MemberSignature signature)
-            : base(null, new MetadataToken(MetadataTokenType.MemberRef))
+            : this(parent, name, signature, null)
+        {
+        }
+
+        public MemberReference(IMemberRefParent parent, string name, MemberSignature signature, MetadataImage image)
+            : base(image, new MetadataToken(MetadataTokenType.MemberRef))
         {
             _parent = new LazyValue<IMemberRefParent>(parent);
             _name = new LazyValue<string>(name);
@@ -23,7 +28,7 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
-        internal MemberReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
+        public MemberReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
             : base(image, row.MetadataToken)
         {
             var tableStream = image.Header.GetStream<TableStream>();

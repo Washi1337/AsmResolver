@@ -53,6 +53,7 @@ namespace AsmResolver.Net.Cts
         private static void SetPropertyOwner(PropertyDefinition property, PropertyMap owner)
         {
             property.PropertyMap = owner;
+            property.Image = owner == null ? null : owner.Image;
         }
     }
 }
