@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AsmResolver.Net.Cts;
-using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cil

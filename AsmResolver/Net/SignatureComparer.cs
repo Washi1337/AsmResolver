@@ -14,7 +14,8 @@ namespace AsmResolver.Net
         IEqualityComparer<ModuleReference>,
         IEqualityComparer<ModuleDefinition>,
         IEqualityComparer<ITypeDescriptor>,
-        IEqualityComparer<IMemberReference>
+        IEqualityComparer<IMemberReference>,
+        IEqualityComparer<MethodSignature>
     {
         /// <summary>
         /// Determines whether two assembly descriptors are considered equal according to their signature.
@@ -780,6 +781,11 @@ namespace AsmResolver.Net
                    Equals(signature1.ReturnType, signature2.ReturnType) &&
                    EqualsManyTypes(signature1.Parameters.Select(x => x.ParameterType),
                        signature2.Parameters.Select(x => x.ParameterType));
+        }
+
+        public int GetHashCode(MethodSignature obj)
+        {
+            return obj.ToString().GetHashCode();
         }
 
         /// <summary>

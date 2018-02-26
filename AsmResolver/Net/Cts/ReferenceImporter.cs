@@ -34,10 +34,17 @@ namespace AsmResolver.Net.Cts
 
         public AssemblyReference ImportAssembly(IAssemblyDescriptor assemblyInfo)
         {
-            var reference =
-                _image.Assembly.AssemblyReferences.FirstOrDefault(x => _signatureComparer.Equals(x, assemblyInfo));
+            var reference = _image.Assembly.AssemblyReferences.FirstOrDefault(x =>
+                _signatureComparer.Equals(x, assemblyInfo));
+
             if (reference == null)
-                _image.Assembly.AssemblyReferences.Add(reference = new AssemblyReference(assemblyInfo));
+            {
+                reference = new AssemblyReference(assemblyInfo)
+                {
+                    Image = _image
+                };
+                _image.Assembly.AssemblyReferences.Add(reference);
+            }
             return reference;
         }
 

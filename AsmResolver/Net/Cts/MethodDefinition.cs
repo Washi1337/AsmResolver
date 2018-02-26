@@ -1,6 +1,5 @@
 ﻿using System;
 using AsmResolver.Collections.Generic;
-using AsmResolver.Net.Builder;
 using AsmResolver.Net.Cil;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
@@ -29,6 +28,7 @@ namespace AsmResolver.Net.Cts
 
             _name = new LazyValue<string>(name);
             Attributes = attributes;
+            ImplAttributes = MethodImplAttributes.IL | MethodImplAttributes.Managed;
             _signature = new LazyValue<MethodSignature>(signature);
             Parameters = new DelegatedMemberCollection<MethodDefinition, ParameterDefinition>(this, GetParamOwner, SetParamOwner);
             _methodBody = new LazyValue<MethodBody>(default(MethodBody));

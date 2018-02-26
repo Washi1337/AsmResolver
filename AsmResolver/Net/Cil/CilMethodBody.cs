@@ -11,6 +11,23 @@ namespace AsmResolver.Net.Cil
 {
     public class CilMethodBody : MethodBody, IOperandResolver
     {
+        private struct StackState
+        {
+            public readonly int InstructionIndex;
+            public readonly int StackSize;
+
+            public StackState(int instructionIndex, int stackSize)
+            {
+                InstructionIndex = instructionIndex;
+                StackSize = stackSize;
+            }
+
+            public override string ToString()
+            {
+                return string.Format("InstructionIndex: {0}, StackSize: {1}", InstructionIndex, StackSize);
+            }
+        }
+
         public static int GetMethodBodySize(ReadingContext context)
         {   
             var reader = context.Reader;
@@ -124,6 +141,7 @@ namespace AsmResolver.Net.Cil
         {
             Method = method;
             MaxStack = 8;
+            // TODO: catch if method is not added to type yet.
             ThisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
         }
 
@@ -231,9 +249,31 @@ namespace AsmResolver.Net.Cil
             } while ((sectionHeader & 0x80) == 0x80);
         }
 
+        public int GetInstructionIndex(int offset)
+        {
+            int left = 0;
+            int right = Instructions.Count - 1;
+
+            while (left <= right)
+            {
+                int m = (left + right) / 2;
+                int currentOffset = Instructions[m].Offset;
+
+                if (currentOffset > offset)
+                    right = m - 1;
+                else if (currentOffset < offset)
+                    left = m + 1;
+                else
+                    return m;
+            }
+
+            return -1;
+        }
+
         public CilInstruction GetInstructionByOffset(int offset)
         {
-            return Instructions.FirstOrDefault(x => x.Offset == offset);
+            int index = GetInstructionIndex(offset);
+            return index == -1 ? null : Instructions[index];
         }
 
         public void CalculateOffsets()
@@ -590,8 +630,98 @@ namespace AsmResolver.Net.Cil
             }
         }
 
+        public int ComputeMaxStack()
+        {
+            CalculateOffsets();
+
+            var visitedInstructions = new Dictionary<int, StackState>();
+            var agenda = new Stack<StackState>();
+
+            // Add entrypoints to agenda.
+            agenda.Push(new StackState(0, 0));
+            foreach (var handler in ExceptionHandlers)
+            {
+                agenda.Push(new StackState(GetInstructionIndex(handler.TryStart.Offset), 0));
+                agenda.Push(new StackState(GetInstructionIndex(handler.HandlerStart.Offset),
+                    handler.HandlerType == ExceptionHandlerType.Finally ? 0 : 1));
+                if (handler.FilterStart!= null)
+                    agenda.Push(new StackState(GetInstructionIndex(handler.FilterStart.Offset), 1));
+            }
+
+            while (agenda.Count > 0)
+            {
+                var currentState = agenda.Pop();
+                var instruction = Instructions[currentState.InstructionIndex];
+
+                StackState visitedState;
+                if (visitedInstructions.TryGetValue(currentState.InstructionIndex, out visitedState))
+                {
+                    // Check if previously visited state is consistent with current observation.
+                    if (visitedState.StackSize != currentState.StackSize)
+                        throw new StackInbalanceException(this, instruction.Offset);
+                }
+                else
+                {
+                    // Mark instruction as visited and store current state.
+                    visitedInstructions[currentState.InstructionIndex] = currentState;
+
+                    // Compute next stack size.
+                    int nextStackSize = currentState.StackSize + instruction.GetStackDelta(this);
+
+                    // Add outgoing edges to agenda.
+                    switch (instruction.OpCode.FlowControl)
+                    {
+                        case CilFlowControl.Branch:
+                            agenda.Push(new StackState(
+                                GetInstructionIndex(((CilInstruction) instruction.Operand).Offset),
+                                nextStackSize));
+                            break;
+                        case CilFlowControl.CondBranch:
+                            switch (instruction.OpCode.OperandType)
+                            {
+                                case CilOperandType.InlineBrTarget:
+                                case CilOperandType.ShortInlineBrTarget:
+                                    agenda.Push(new StackState(
+                                        GetInstructionIndex(((CilInstruction) instruction.Operand).Offset),
+                                        nextStackSize));
+                                    break;
+                                case CilOperandType.InlineSwitch:
+                                    foreach (var target in ((IEnumerable<CilInstruction>) instruction.Operand))
+                                    {
+                                        agenda.Push(new StackState(
+                                            GetInstructionIndex(target.Offset),
+                                            nextStackSize));
+                                    }
+                                    break;
+                            }
+                            agenda.Push(new StackState(
+                                currentState.InstructionIndex + 1,
+                                nextStackSize));
+                            break;
+                        case CilFlowControl.Call:
+                        case CilFlowControl.Break:
+                        case CilFlowControl.Meta:
+                        case CilFlowControl.Phi:
+                        case CilFlowControl.Next:
+                            agenda.Push(new StackState(
+                                currentState.InstructionIndex + 1,
+                                nextStackSize));
+                            break;
+                        case CilFlowControl.Return:
+                            if (nextStackSize != 0)
+                                throw new StackInbalanceException(this, instruction.Offset);
+                            break;
+                    }
+                }
+            }
+
+            return visitedInstructions.Max(x => x.Value.StackSize);
+        }
+
         private void WriteCode(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
+            CalculateOffsets();
+
             var builder = new DefaultOperandBuilder(this, buffer); 
             var assembler = new CilAssembler(builder, writer);
 

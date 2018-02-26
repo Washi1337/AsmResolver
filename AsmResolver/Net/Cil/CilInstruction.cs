@@ -222,6 +222,93 @@ namespace AsmResolver.Net.Cil
             throw new NotSupportedException();
         }
 
+        public int GetStackDelta(CilMethodBody parent)
+        {
+            int delta = 0;
+
+            MethodSignature signature = null;
+            var member = Operand as IMethodDefOrRef;
+            var standalone = Operand as StandAloneSignature;
+            if (member != null)
+                signature = (MethodSignature) member.Signature;
+            else if (standalone != null)
+                signature = (MethodSignature) standalone.Signature;
+
+            switch (OpCode.StackBehaviourPop)
+            {
+                case CilStackBehaviour.Pop1:
+                case CilStackBehaviour.Popi:
+                case CilStackBehaviour.Popref:
+                    delta = -1;
+                    break;
+                case CilStackBehaviour.Pop1_pop1:
+                case CilStackBehaviour.Popi_pop1:
+                case CilStackBehaviour.Popi_popi:
+                case CilStackBehaviour.Popi_popi8:
+                case CilStackBehaviour.Popi_popr4:
+                case CilStackBehaviour.Popi_popr8:
+                case CilStackBehaviour.Popref_pop1:
+                case CilStackBehaviour.Popref_popi:
+                    delta = -2;
+                    break;
+                case CilStackBehaviour.Popi_popi_popi:
+                case CilStackBehaviour.Popref_popi_popi:
+                case CilStackBehaviour.Popref_popi_popi8:
+                case CilStackBehaviour.Popref_popi_popr4:
+                case CilStackBehaviour.Popref_popi_popr8:
+                case CilStackBehaviour.Popref_popi_popref:
+                    delta = -3;
+                    break;
+                case CilStackBehaviour.Varpop:
+                    if (signature == null)
+                    {
+                        if (OpCode.Code == CilCode.Ret)
+                        {
+                            delta = parent.Method.Signature.ReturnType.IsTypeOf("System", "Void") ? 0 : -1;
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Invalid or unsupported operand.");
+                        }
+                    }
+                    else
+                    {
+                        delta = -signature.Parameters.Count;
+                        if (signature.HasThis)
+                            delta--;
+                    }
+                    break;
+            }
+
+            switch (OpCode.StackBehaviourPush)
+            {
+                case CilStackBehaviour.Push1:
+                case CilStackBehaviour.Pushi:
+                case CilStackBehaviour.Pushi8:
+                case CilStackBehaviour.Pushr4:
+                case CilStackBehaviour.Pushr8:
+                case CilStackBehaviour.Pushref:
+                    delta++;
+                    break;
+                case CilStackBehaviour.Push1_push1:
+                    delta += 2;
+                    break;
+                case CilStackBehaviour.Varpush:
+                    if (signature == null)
+                        throw new ArgumentException("Invalid or unsupported operand.");
+
+                    if (!signature.ReturnType.IsTypeOf("System", "Void"))
+                        delta++;
+                    break;
+
+                case CilStackBehaviour.Popref_popi_pop1:
+                    delta += 3;
+                    break;
+            }
+
+            return delta;
+        }
+
         public override string ToString()
         {
             return string.Format("IL_{0:X4}: {1}{2}", Offset, OpCode.Name,
