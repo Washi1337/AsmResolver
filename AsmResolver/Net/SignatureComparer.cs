@@ -15,7 +15,9 @@ namespace AsmResolver.Net
         IEqualityComparer<ModuleDefinition>,
         IEqualityComparer<ITypeDescriptor>,
         IEqualityComparer<IMemberReference>,
-        IEqualityComparer<MethodSignature>
+        IEqualityComparer<MethodSignature>,
+        IEqualityComparer<FieldSignature>,
+        IEqualityComparer<MarshalDescriptor>
     {
         /// <summary>
         /// Determines whether two assembly descriptors are considered equal according to their signature.
@@ -763,6 +765,11 @@ namespace AsmResolver.Net
                 && Equals(signature1.FieldType, signature2.FieldType);
         }
 
+        public int GetHashCode(FieldSignature obj)
+        {
+            return (int) obj.Attributes ^ obj.FieldType.GetHashCode();
+        }
+
         /// <summary>
         /// Determines whether two method signatures are considered equal according to their signatures.
         /// </summary>
@@ -839,6 +846,92 @@ namespace AsmResolver.Net
                 return false;
 
             return !array1.Where((t, i) => t != array2[i]).Any();
+        }
+
+        public bool Equals(MarshalDescriptor x, MarshalDescriptor y)
+        {
+            var array = x as ArrayMarshalDescriptor;
+            if (array != null)
+                return Equals(array, y as ArrayMarshalDescriptor);
+
+            var custom = x as CustomMarshalDescriptor;
+            if (custom != null)
+                return Equals(custom, y as CustomMarshalDescriptor);
+
+            var fixedArray = x as FixedArrayMarshalDescriptor;
+            if (fixedArray != null)
+                return Equals(fixedArray, y as FixedArrayMarshalDescriptor);
+
+            var safe = x as SafeArrayMarshalDescriptor;
+            if (safe != null)
+                return Equals(safe, y as SafeArrayMarshalDescriptor);
+
+            var simple = x as SimpleMarshalDescriptor;
+            if (simple != null)
+                return Equals(simple, y as SimpleMarshalDescriptor);
+
+            return false;
+        }
+
+        public bool Equals(ArrayMarshalDescriptor x, ArrayMarshalDescriptor y)
+        {
+            if (x == null && y == null)
+                return true;
+            if (x == null || y == null)
+                return false;
+
+            return x.ElementType == y.ElementType
+                   && x.NumberOfElements.Equals(y.NumberOfElements)
+                   && x.ParameterIndex.Equals(y.ParameterIndex);
+        }
+
+        public bool Equals(CustomMarshalDescriptor x, CustomMarshalDescriptor y)
+        {
+            if (x == null && y == null)
+                return true;
+            if (x == null || y == null)
+                return false;
+
+            return x.Cookie == y.Cookie
+                   && x.Guid == y.Guid
+                   && x.ManagedType == y.ManagedType
+                   && x.UnmanagedType == y.ManagedType;
+        }
+
+        public bool Equals(FixedArrayMarshalDescriptor x, FixedArrayMarshalDescriptor y)
+        {
+            if (x == null && y == null)
+                return true;
+            if (x == null || y == null)
+                return false;
+
+            return x.ElementType == y.ElementType
+                   && x.NumberOfElements == y.NumberOfElements;
+        }
+
+        public bool Equals(SafeArrayMarshalDescriptor x, SafeArrayMarshalDescriptor y)
+        {
+            if (x == null && y == null)
+                return true;
+            if (x == null || y == null)
+                return false;
+
+            return x.ElementType == y.ElementType;
+        }
+
+        public bool Equals(SimpleMarshalDescriptor x, SimpleMarshalDescriptor y)
+        {
+            if (x == null && y == null)
+                return true;
+            if (x == null || y == null)
+                return false;
+
+            return true;
+        }
+
+        public int GetHashCode(MarshalDescriptor obj)
+        {
+            return obj.GetHashCode();
         }
     }
 }

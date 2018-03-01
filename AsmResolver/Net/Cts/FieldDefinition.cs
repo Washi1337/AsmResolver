@@ -149,13 +149,13 @@ namespace AsmResolver.Net.Cts
         public Constant Constant
         {
             get { return _constant.Value; }
-            set { _constant.Value = value; }
+            set { this.SetConstant(_constant, value); }
         }
 
         public FieldMarshal FieldMarshal
         {
             get { return _fieldMarshal.Value; }
-            set { _fieldMarshal.Value = value; }
+            set { this.SetFieldMarshal(_fieldMarshal, value); }
         }
 
         public bool HasFieldRva
@@ -167,19 +167,37 @@ namespace AsmResolver.Net.Cts
         public FieldRva FieldRva
         {
             get { return _fieldRva.Value; }
-            set { _fieldRva.Value = value; }
+            set
+            {
+                if (_fieldRva.Value != null)
+                    _fieldRva.Value.Field = null;
+                if (value != null && value.Field != null)
+                    throw new InvalidOperationException("Field Rva is already added to another field.");
+                _fieldRva.Value = value;
+                if (value != null)
+                    value.Field = this;
+            }
         }
 
         public FieldLayout FieldLayout
         {
             get { return _fieldLayout.Value; }
-            set { _fieldLayout.Value = value; }
+            set
+            {
+                if (_fieldLayout.Value != null)
+                    _fieldLayout.Value.Field = null;
+                if (value != null && value.Field != null)
+                    throw new InvalidOperationException("Field layout is already added to another field.");
+                _fieldLayout.Value = value;
+                if (value != null)
+                    value.Field = this;
+            }
         }
 
         public ImplementationMap PInvokeMap
         {
             get { return _pinvokeMap.Value; }
-            set { _pinvokeMap.Value = value; }
+            set { this.SetPInvokeMap(_pinvokeMap, value); }
         }
         
         public CustomAttributeCollection CustomAttributes

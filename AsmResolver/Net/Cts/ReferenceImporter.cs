@@ -588,7 +588,7 @@ namespace AsmResolver.Net.Cts
             var newReference =
                 _image.Assembly.ModuleReferences.FirstOrDefault(x => _signatureComparer.Equals(x, reference));
             if (newReference == null)
-                _image.Assembly.ModuleReferences.Add(newReference = new ModuleReference(reference.Name));
+                _image.Assembly.ModuleReferences.Add(newReference = new ModuleReference(reference.Name, _image));
             return newReference;
         }
 

@@ -99,5 +99,40 @@ namespace AsmResolver.Net
         {
             return Type.GetType ("Mono.Runtime") != null;
         }
+
+        internal static void SetConstant(this IHasConstant owner, LazyValue<Constant> container, Constant newValue)
+        {
+            if (container.Value != null)
+                container.Value.Parent = null;
+            if (newValue != null && newValue.Parent != null)
+                throw new InvalidOperationException("Constant is already added to another member.");
+            container.Value = newValue;
+            if (newValue != null)
+                newValue.Parent = owner;
+        }
+
+        internal static void SetPInvokeMap(this IMemberForwarded owner, LazyValue<ImplementationMap> container, ImplementationMap newValue)
+        {
+            if (container.Value != null)
+                container.Value.MemberForwarded = null;
+            if (newValue != null && newValue.MemberForwarded != null)
+                throw new InvalidOperationException("Implementation map is already added to another member.");
+            container.Value = newValue;
+            if (newValue != null)
+                newValue.MemberForwarded = owner;
+        }
+
+        internal static void SetFieldMarshal(this IHasFieldMarshal owner, LazyValue<FieldMarshal> container, FieldMarshal newValue)
+        {
+            if (container.Value != null)
+                container.Value.Parent = null;
+            if (newValue != null && newValue.Parent != null)
+                throw new InvalidOperationException("Field marshal is already added to another member.");
+            container.Value = newValue;
+            if (newValue != null)
+                newValue.Parent = owner;
+        }
+        
+
     }
 }

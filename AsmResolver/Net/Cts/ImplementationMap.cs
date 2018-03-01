@@ -60,7 +60,7 @@ namespace AsmResolver.Net.Cts
         public IMemberForwarded MemberForwarded
         {
             get { return _memberForwarded.Value; }
-            set { _memberForwarded.Value = value; }
+            internal set { _memberForwarded.Value = value; }
         }
 
         public string ImportName

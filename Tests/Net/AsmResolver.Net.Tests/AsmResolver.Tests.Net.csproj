@@ -76,6 +76,7 @@
     <Compile Include="Cil\CilMethodBodyTest.cs" />
     <Compile Include="Cts\AssemblyDefinitionTest.cs" />
     <Compile Include="Cts\AssemblyReferenceTest.cs" />
+    <Compile Include="Cts\FieldDefinitionTest.cs" />
     <Compile Include="Cts\MethodDefinitionTest.cs" />
     <Compile Include="Cts\ModuleDefinitionTest.cs" />
     <Compile Include="Cts\ReferenceImporterTest.cs" />

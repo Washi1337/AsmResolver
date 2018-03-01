@@ -130,5 +130,30 @@ namespace AsmResolver.Tests.Net.Cts
             var newMethod = (MethodDefinition)image.ResolveMember(mapping[method]);
             Assert.Equal(newSignature, newMethod.Signature, _comparer);
         }
+
+        [Fact]
+        public void PersistentPInvokeMap()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+            var method = CreateAndAddDummyMethod(image);
+            var newMap = new ImplementationMap(importer.ImportModule(new ModuleReference("SomeModule")),
+                "SomeImport",
+                ImplementationMapAttributes.CharSetUnicode);
+            method.PInvokeMap = newMap;
+            method.Attributes |= MethodAttributes.PInvokeImpl;
+
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            method = (MethodDefinition) image.ResolveMember(mapping[method]);
+            Assert.NotNull(method.PInvokeMap);
+            Assert.Equal(newMap.ImportScope, method.PInvokeMap.ImportScope, _comparer);
+            Assert.Equal(newMap.ImportName, method.PInvokeMap.ImportName);
+            Assert.Equal(newMap.Attributes, method.PInvokeMap.Attributes);
+        }
     }
 }

@@ -10,10 +10,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<byte[]> _data;
         private readonly LazyValue<FieldDefinition> _field;
 
-        public FieldRva(FieldDefinition field, byte[] data)
+        public FieldRva(byte[] data)
             : base(null, new MetadataToken(MetadataTokenType.FieldRva))
         {
-            _field = new LazyValue<FieldDefinition>(field);
+            _field = new LazyValue<FieldDefinition>(default(FieldDefinition));
             _data = new LazyValue<byte[]>(data);
         }
 
@@ -46,7 +46,7 @@ namespace AsmResolver.Net.Cts
         public FieldDefinition Field
         {
             get { return _field.Value; }
-            set { _field.Value = value; }
+            internal set { _field.Value = value; }
         }
 
         public byte[] Data

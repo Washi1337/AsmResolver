@@ -76,7 +76,7 @@ namespace AsmResolver.Net.Cts
         public Constant Constant
         {
             get { return _constant.Value;}
-            set { _constant.Value = value; }
+            set { this.SetConstant(_constant, value); }
         }
 
         public MethodDefinition Method
@@ -94,7 +94,7 @@ namespace AsmResolver.Net.Cts
         public FieldMarshal FieldMarshal
         {
             get { return _fieldMarshal.Value;}
-            set { _fieldMarshal.Value = value; }
+            set { this.SetFieldMarshal(_fieldMarshal, value); }
         }
         
         public override string ToString()

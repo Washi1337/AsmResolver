@@ -290,5 +290,6 @@ namespace AsmResolver.Tests.Net.Cil
             Assert.Equal(handlerEnd, handler.HandlerEnd, instructionComparer);
             Assert.Equal(exceptionType, handler.CatchType, _comparer);
         }
+        
     }
 }

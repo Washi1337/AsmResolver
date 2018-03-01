@@ -61,7 +61,6 @@ namespace AsmResolver.Net.Cts
                 if (row.Column1 == null)
                     return null;
                 
-                var windowsAssembly = image.Header.NetDirectory.Assembly;
                 var readingContext = new ReadingContext()
                 {
                     Assembly = image.Header.NetDirectory.Assembly,
@@ -192,7 +191,7 @@ namespace AsmResolver.Net.Cts
         public ImplementationMap PInvokeMap
         {
             get { return _pinvokeMap.Value; }
-            set { _pinvokeMap.Value = value; }
+            set { this.SetPInvokeMap(_pinvokeMap, value); }
         }
         
         public bool IsPrivate

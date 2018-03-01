@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Metadata;
+﻿using System;
+using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
@@ -13,6 +14,7 @@ namespace AsmResolver.Net.Cts
         {
             ConstantType = constantType;
             _value = new LazyValue<DataBlobSignature>(value);
+            _parent = new LazyValue<IHasConstant>(default(IHasConstant));
         }
 
         internal Constant(MetadataImage image, MetadataRow<ElementType, byte, uint, uint> row)
@@ -40,7 +42,7 @@ namespace AsmResolver.Net.Cts
         public IHasConstant Parent
         {
             get { return _parent.Value; }
-            set { _parent.Value = value; }
+            internal set { _parent.Value = value; }
         }
 
         public DataBlobSignature Value

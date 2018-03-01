@@ -79,6 +79,21 @@ namespace AsmResolver.Tests.Net.Cts
 
         #endregion
 
+        [Fact]
+        public void ImportModuleReference()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var module = new ModuleReference("SomeModule");
+            var newModule = importer.ImportModule(module);
+
+            Assert.NotSame(module, newModule);
+            Assert.Equal(image, newModule.Image);
+            Assert.Equal(newModule.Name, newModule.Name);
+        }
+
         #region Types
 
         #region Type reference

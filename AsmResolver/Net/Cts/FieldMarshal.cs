@@ -8,10 +8,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<IHasFieldMarshal> _parent;
         private readonly LazyValue<MarshalDescriptor> _marshalDescriptor;
 
-        public FieldMarshal(IHasFieldMarshal parent, MarshalDescriptor marshalDescriptor)
+        public FieldMarshal(MarshalDescriptor marshalDescriptor)
             : base(null, new MetadataToken(MetadataTokenType.FieldMarshal))
         {
-            _parent = new LazyValue<IHasFieldMarshal>(parent);
+            _parent = new LazyValue<IHasFieldMarshal>(default(IHasFieldMarshal));
             _marshalDescriptor = new LazyValue<MarshalDescriptor>(marshalDescriptor);
         }
 
@@ -35,7 +35,7 @@ namespace AsmResolver.Net.Cts
         public IHasFieldMarshal Parent
         {
             get { return _parent.Value; }
-            set { _parent.Value = value; }
+            internal set { _parent.Value = value; }
         }
 
         public MarshalDescriptor MarshalDescriptor

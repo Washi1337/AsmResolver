@@ -8,7 +8,12 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<string> _name;
 
         public ModuleReference(string name)
-            : base(null, new MetadataToken(MetadataTokenType.ModuleRef))
+            : this(name, null)
+        {
+        }
+
+        public ModuleReference(string name, MetadataImage image)
+            : base(image, new MetadataToken(MetadataTokenType.ModuleRef))
         {
             _name = new LazyValue<string>(name);
             CustomAttributes = new CustomAttributeCollection(this);
@@ -31,6 +36,11 @@ namespace AsmResolver.Net.Cts
         {
             get;
             private set;
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

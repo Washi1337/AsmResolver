@@ -118,12 +118,8 @@ namespace AsmResolver.Net.Cts
 
     }
 
-    public interface IImplementation : IMetadataMember
+    public interface IImplementation : IMetadataMember, INameProvider
     {
-        string Name
-        {
-            get;
-        }
     }
 
     public interface ICustomAttributeType : IMethodDefOrRef

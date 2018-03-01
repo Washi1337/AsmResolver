@@ -6,11 +6,11 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<FieldDefinition> _field;
 
-        public FieldLayout(FieldDefinition field, uint offset)
+        public FieldLayout(uint offset)
             : base(null, new MetadataToken(MetadataTokenType.FieldLayout))
         {
-            _field = new LazyValue<FieldDefinition>(field);
             Offset = offset;
+            _field = new LazyValue<FieldDefinition>(default(FieldDefinition));
         }
         
         internal FieldLayout(MetadataImage image, MetadataRow<uint, uint> row)
@@ -37,7 +37,7 @@ namespace AsmResolver.Net.Cts
         public FieldDefinition Field
         {
             get { return _field.Value; }
-            set { _field.Value = value; }
+            internal set { _field.Value = value; }
         }
     }
 }
