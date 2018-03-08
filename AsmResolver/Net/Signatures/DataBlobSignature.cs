@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using AsmResolver.Net.Builder;
+using AsmResolver.Net.Emit;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures

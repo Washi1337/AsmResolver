@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using AsmResolver.Net.Cts;
 
-namespace AsmResolver.Net.Builder
+namespace AsmResolver.Net.Emit
 {
     public class ResourcesBuffer : FileSegment
     {

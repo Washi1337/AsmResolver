@@ -4,7 +4,7 @@ using System.Linq;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
-namespace AsmResolver.Net.Builder
+namespace AsmResolver.Net.Emit
 {
     public class TableStreamBuffer : MetadataStreamBuffer
     {

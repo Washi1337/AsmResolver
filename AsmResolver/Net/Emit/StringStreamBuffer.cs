@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace AsmResolver.Net.Builder
+namespace AsmResolver.Net.Emit
 {
     /// <summary>
     /// Represents a buffer for constructing a new strings metadata stream.

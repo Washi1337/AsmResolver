@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using AsmResolver.Net.Builder;
+using AsmResolver.Net.Emit;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;

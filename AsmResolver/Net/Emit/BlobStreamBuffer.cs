@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using AsmResolver.Net.Signatures;
 
-namespace AsmResolver.Net.Builder
+namespace AsmResolver.Net.Emit
 {
     /// <summary>
     /// Represents a buffer for constructing new blob metadata streams.

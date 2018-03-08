@@ -1,5 +1,5 @@
 ﻿using AsmResolver.Net;
-using AsmResolver.Net.Builder;
+using AsmResolver.Net.Emit;
 
 namespace AsmResolver
 {

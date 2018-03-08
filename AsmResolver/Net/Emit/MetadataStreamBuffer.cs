@@ -1,4 +1,4 @@
-﻿namespace AsmResolver.Net.Builder
+﻿namespace AsmResolver.Net.Emit
 {
     public abstract class MetadataStreamBuffer
     {

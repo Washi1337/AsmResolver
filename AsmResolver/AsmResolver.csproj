@@ -80,15 +80,15 @@
     <Compile Include="ImageOptionalHeader.cs" />
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
-    <Compile Include="Net\Builder\BlobStreamBuffer.cs" />
-    <Compile Include="Net\Builder\GuidStreamBuffer.cs" />
-    <Compile Include="Net\Builder\MetadataBuffer.cs" />
-    <Compile Include="Net\Builder\MemberNotImportedException.cs" />
-    <Compile Include="Net\Builder\MetadataStreamBuffer.cs" />
-    <Compile Include="Net\Builder\ResourcesBuffer.cs" />
-    <Compile Include="Net\Builder\StringStreamBuffer.cs" />
-    <Compile Include="Net\Builder\TableStreamBuffer.cs" />
-    <Compile Include="Net\Builder\UserStringStreamBuffer.cs" />
+    <Compile Include="Net\Emit\BlobStreamBuffer.cs" />
+    <Compile Include="Net\Emit\GuidStreamBuffer.cs" />
+    <Compile Include="Net\Emit\MetadataBuffer.cs" />
+    <Compile Include="Net\Emit\MemberNotImportedException.cs" />
+    <Compile Include="Net\Emit\MetadataStreamBuffer.cs" />
+    <Compile Include="Net\Emit\ResourcesBuffer.cs" />
+    <Compile Include="Net\Emit\StringStreamBuffer.cs" />
+    <Compile Include="Net\Emit\TableStreamBuffer.cs" />
+    <Compile Include="Net\Emit\UserStringStreamBuffer.cs" />
     <Compile Include="Net\Cil\DefaultOperandBuilder.cs" />
     <Compile Include="Net\Cil\IOperandBuilder.cs" />
     <Compile Include="Net\Cil\StackInbalanceException.cs" />
@@ -314,6 +314,9 @@
     <Compile Include="X86\X86OperandSize.cs" />
     <Compile Include="X86\X86Register.cs" />
     <Compile Include="X86\X86RegOrMemModifier.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Emit\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,7 +1,7 @@
 ﻿using System;
 using AsmResolver.Net.Cts;
 
-namespace AsmResolver.Net.Builder
+namespace AsmResolver.Net.Emit
 {
     public class MemberNotImportedException : Exception
     {

@@ -1,4 +1,4 @@
-﻿using AsmResolver.Net.Builder;
+﻿using AsmResolver.Net.Emit;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
