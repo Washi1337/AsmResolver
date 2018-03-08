@@ -124,7 +124,7 @@ namespace AsmResolver
         /// </summary>
         public WindowsAssembly()
         {
-            SectionHeaders = new List<ImageSectionHeader>();
+            SectionHeaders = new ImageSectionHeaderCollection(this);
         }
 
         /// <summary>
@@ -302,7 +302,13 @@ namespace AsmResolver
             }
             set { _debugDirectory = value; }
         }
-        
+
+        public ImageSection GetSectionByName(string name)
+        {
+            var header = SectionHeaders.FirstOrDefault(x => x.Name == name);
+            return header != null ? header.Section : null;
+        }
+
         public long RvaToFileOffset(long rva)
         {
             var section = GetSectionHeaderByRva(rva);

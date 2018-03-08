@@ -10,7 +10,7 @@ namespace AsmResolver
         internal static ImageSectionHeader FromReadingContext(ReadingContext context)
         {
             var reader = context.Reader;
-            return new ImageSectionHeader
+            var header = new ImageSectionHeader
             {
                 StartOffset = reader.Position,
                 Name = Encoding.ASCII.GetString(reader.ReadBytes(8)),
@@ -23,7 +23,27 @@ namespace AsmResolver
                 NumberOfRelocations = reader.ReadUInt16(),
                 NumberOfLinenumbers = reader.ReadUInt16(),
                 Attributes = (ImageSectionAttributes)reader.ReadUInt32(),
+                
             };
+
+            var sectionReader = context.Reader.CreateSubReader(
+                header.PointerToRawData, 
+                (int) header.SizeOfRawData);
+
+            header.Section = new ImageSection(sectionReader);
+
+            return header;
+        }
+
+        public ImageSectionHeader()
+        {
+            Section = new ImageSection();
+        }
+
+        public WindowsAssembly Assembly
+        {
+            get;
+            internal set;
         }
 
         public string Name
@@ -86,6 +106,12 @@ namespace AsmResolver
         }
 
         public ImageSectionAttributes Attributes
+        {
+            get;
+            set;
+        }
+
+        public ImageSection Section
         {
             get;
             set;
