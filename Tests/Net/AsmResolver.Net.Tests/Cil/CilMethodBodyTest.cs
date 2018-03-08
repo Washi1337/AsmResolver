@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
+using System.Windows.Forms;
 using AsmResolver.Net;
 using AsmResolver.Net.Cil;
 using AsmResolver.Net.Cts;
@@ -290,6 +293,261 @@ namespace AsmResolver.Tests.Net.Cil
             Assert.Equal(handlerEnd, handler.HandlerEnd, instructionComparer);
             Assert.Equal(exceptionType, handler.CatchType, _comparer);
         }
-        
+
+        [Fact]
+        public void PersistentVariables()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+            var importer = new ReferenceImporter(image);
+
+            var var1 = new VariableSignature(image.TypeSystem.Int32);
+            var var2 = new VariableSignature(importer.ImportTypeSignature(typeof(Stream)));
+            methodBody.Signature = new StandAloneSignature(new LocalVariableSignature(new[] { var1, var2 }));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            methodBody = ((MethodDefinition) image.ResolveMember(mapping[methodBody.Method])).CilMethodBody;
+            Assert.NotNull(methodBody.Signature);
+            Assert.IsType<LocalVariableSignature>(methodBody.Signature.Signature);
+
+            var localVarSig = (LocalVariableSignature) methodBody.Signature.Signature;
+            Assert.Equal(2, localVarSig.Variables.Count);
+            Assert.Equal(var1.VariableType, localVarSig.Variables[0].VariableType, _comparer);
+            Assert.Equal(var2.VariableType, localVarSig.Variables[1].VariableType, _comparer);
+        }
+
+        [Fact]
+        public void OperandTypeInts()
+        {
+            const sbyte shortOperand = 0x12;
+            const int operand = 0x1234;
+            const long longOperand = 0x12345678;
+
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+
+            var instructions = methodBody.Instructions;
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_S, shortOperand));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4, operand));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I8, longOperand));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            Assert.Equal(shortOperand, instructions[0].Operand);
+            Assert.Equal(operand, instructions[1].Operand);
+            Assert.Equal(longOperand, instructions[2].Operand);
+        }
+
+        [Fact]
+        public void OperandTypeReals()
+        {
+            const float shortOperand = 0.1234F;
+            const double operand = 0.1234;
+
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+
+            var instructions = methodBody.Instructions;
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_R4, shortOperand));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_R8, operand));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            Assert.Equal(shortOperand, instructions[0].Operand);
+            Assert.Equal(operand, instructions[1].Operand);
+        }
+
+
+        [Fact]
+        public void OperandTypeBranchTarget()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+
+            var instructions = methodBody.Instructions;
+            var target1 = CilInstruction.Create(CilOpCodes.Nop);
+            var target2 = CilInstruction.Create(CilOpCodes.Nop);
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Br, target1));
+            instructions.Add(target2);
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.Add(target1);
+            instructions.Add(CilInstruction.Create(CilOpCodes.Br, target2));
+
+            methodBody.CalculateOffsets();
+            
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition) image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            Assert.Equal(target1.Offset, ((CilInstruction) instructions[0].Operand).Offset);
+            Assert.Equal(target2.Offset, ((CilInstruction) instructions[4].Operand).Offset);
+        }
+
+        [Fact]
+        public void OperandTypeSwitch()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+
+            var instructions = methodBody.Instructions;
+            var target1 = CilInstruction.Create(CilOpCodes.Nop);
+            var target2 = CilInstruction.Create(CilOpCodes.Nop);
+            var target3 = CilInstruction.Create(CilOpCodes.Nop);
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Switch, new[] { target1, target2, target3 }));
+            instructions.Add(target2);
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.Add(target1);
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.Add(target3);
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            methodBody.CalculateOffsets();
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = (IList<CilInstruction>) newMethod.CilMethodBody.Instructions[1].Operand;
+
+            Assert.Equal(target1.Offset, instructions[0].Offset);
+            Assert.Equal(target2.Offset, instructions[1].Offset);
+            Assert.Equal(target3.Offset, instructions[2].Offset);
+        }
+
+        [Fact]
+        public void OperandTypeVar()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+
+            var instructions = methodBody.Instructions;
+            var var1 = new VariableSignature(image.TypeSystem.Boolean);
+            var var2 = new VariableSignature(image.TypeSystem.Int32);
+            methodBody.Signature = new StandAloneSignature(new LocalVariableSignature(new[] { var1, var2 }));
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldloc, var1));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Stloc, var1));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldloc, var2));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Stloc, var2));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            Assert.Equal(var1.VariableType, ((VariableSignature)instructions[0].Operand).VariableType, _comparer);
+            Assert.Equal(var1.VariableType, ((VariableSignature)instructions[1].Operand).VariableType, _comparer);
+            Assert.Equal(var2.VariableType, ((VariableSignature)instructions[2].Operand).VariableType, _comparer);
+            Assert.Equal(var2.VariableType, ((VariableSignature)instructions[3].Operand).VariableType, _comparer);
+        }
+
+        [Fact]
+        public void OperandTypeArgument()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+
+            var instructions = methodBody.Instructions;
+            var param1 = new ParameterSignature(image.TypeSystem.Boolean);
+            var param2 = new ParameterSignature(image.TypeSystem.Int32);
+            methodBody.Method.Signature = new MethodSignature(new[] { param1, param2 }, image.TypeSystem.Void);
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldarg, param1));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Starg, param1));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldarg, param2));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Starg, param2));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            Assert.Equal(param1.ParameterType, ((ParameterSignature)instructions[0].Operand).ParameterType, _comparer);
+            Assert.Equal(param1.ParameterType, ((ParameterSignature)instructions[1].Operand).ParameterType, _comparer);
+            Assert.Equal(param2.ParameterType, ((ParameterSignature)instructions[2].Operand).ParameterType, _comparer);
+            Assert.Equal(param2.ParameterType, ((ParameterSignature)instructions[3].Operand).ParameterType, _comparer);
+        }
+
+        [Fact]
+        public void OperandTypeString()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+
+            var instructions = methodBody.Instructions;
+
+            const string operand = "Lorem Ipsum Dolor Sit Amet";
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, operand));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            Assert.Equal(operand, instructions[0].Operand);
+        }
+
+        [Fact]
+        public void OperandTypeMethod()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+            var importer = new ReferenceImporter(image);
+
+            var instructions = methodBody.Instructions;
+
+            var simpleMethod = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(string) }));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, "Some String"));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Call, simpleMethod));
+
+            var genericInstanceMethod = new MethodSpecification(
+                new MemberReference(
+                    importer.ImportType(typeof(Activator)),
+                    "CreateInstance",
+                    new MethodSignature(new GenericParameterSignature(GenericParameterType.Method, 0))
+                    {
+                        GenericParameterCount = 1,
+                        IsGeneric = true
+                    }),
+                new GenericInstanceMethodSignature(importer.ImportTypeSignature(typeof(Stream))));
+
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Call, importer.ImportMethod(genericInstanceMethod)));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+            
+            Assert.Equal(simpleMethod, instructions[1].Operand as IMemberReference, _comparer);
+            Assert.Equal(genericInstanceMethod, instructions[2].Operand as IMemberReference, _comparer);
+        }
     }
 }

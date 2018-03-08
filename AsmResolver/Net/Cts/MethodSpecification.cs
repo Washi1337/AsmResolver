@@ -13,7 +13,12 @@ namespace AsmResolver.Net.Cts
         private string _fullName;
 
         public MethodSpecification(IMethodDefOrRef method, GenericInstanceMethodSignature signature)
-            : base(null, new MetadataToken(MetadataTokenType.MethodSpec))
+            : this(method, signature, null)
+        {
+        }
+
+        public MethodSpecification(IMethodDefOrRef method, GenericInstanceMethodSignature signature, MetadataImage image)
+            : base(image, new MetadataToken(MetadataTokenType.MethodSpec))
         {
             _method = new LazyValue<IMethodDefOrRef>(method);
             _signature = new LazyValue<GenericInstanceMethodSignature>(signature);
@@ -75,13 +80,14 @@ namespace AsmResolver.Net.Cts
                 if (_fullName != null)
                     return _fullName;
 
-                var parameterString = Method.Signature != null && Method.Signature.IsMethod
-                    ? '(' +
-                      string.Join(", ",
-                          ((MethodSignature)Method.Signature).Parameters.Select(x => x.ParameterType.FullName)) + ')'
-                    : string.Empty;
+                var methodSignature = (MethodSignature) Method.Signature;
 
-                return _fullName = Method.DeclaringType.FullName + "::" + Name + '<' + string.Join(", ", Signature.GenericArguments.Select(x => x.FullName)) + '>' + parameterString;
+                return _fullName = string.Format("{0} {1}::{2}<{3}>({4})",
+                    methodSignature.ReturnType,
+                    DeclaringType.FullName,
+                    Name,
+                    string.Join(", ", Signature.GenericArguments.Select(x => x.FullName)),
+                    methodSignature.Parameters.Select(x => x.ParameterType).GetTypeArrayString());
             }
         }
 

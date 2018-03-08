@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Signatures;
 
@@ -92,8 +93,8 @@ namespace AsmResolver.Net.Cil
                     break;
 
                 case CilOperandType.InlineSwitch:
-                    var targets = (CilInstruction[]) instruction.Operand;
-                    _writer.WriteInt32(targets.Length);
+                    var targets = (IList<CilInstruction>) instruction.Operand;
+                    _writer.WriteInt32(targets.Count);
                     foreach (var target in targets)
                         _writer.WriteInt32(target.Offset - (instruction.Offset + instruction.Size));
                     break;

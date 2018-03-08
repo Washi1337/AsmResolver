@@ -168,11 +168,14 @@ namespace AsmResolver.Net.Cts
 
         #region Method
 
-        public MemberReference ImportMethod(MethodBase method)
+        public IMemberReference ImportMethod(MethodBase method)
         {
-            // TODO: support generic instance methods.
-            if (method.IsGenericMethod)
-                throw new NotSupportedException();
+            if (method.IsGenericMethod && !method.IsGenericMethodDefinition)
+            {
+                var genericMethod = (MethodInfo) method;
+                return new MethodSpecification((IMethodDefOrRef) ImportMethod(genericMethod.GetGenericMethodDefinition()),
+                    new GenericInstanceMethodSignature(genericMethod.GetGenericArguments().Select(ImportTypeSignature)));
+            }
 
             var returnType = method.IsConstructor ? typeof(void) : ((MethodInfo) method).ReturnType;
             var signature = new MethodSignature(ImportTypeSignature(returnType));
@@ -186,11 +189,23 @@ namespace AsmResolver.Net.Cts
                     new ParameterSignature(ImportTypeSignature(parameter.ParameterType)));
             }
 
-            var reference = new MemberReference(ImportType(method.DeclaringType), method.Name, signature);
-            return ImportMember(reference);
+            return ImportMember(new MemberReference(ImportType(method.DeclaringType), method.Name, signature));
         }
 
-        public IMemberReference ImportMethod(MethodDefinition definition)
+        public IMethodDefOrRef ImportMethod(IMethodDefOrRef method)
+        {
+            var definition = method as MethodDefinition;
+            if (definition != null)
+                return ImportMethod(definition);
+
+            var reference = method as MemberReference;
+            if (reference != null)
+                return ImportMember(reference);
+
+            throw new NotSupportedException("Invalid or unsupported MethodDefOrRef instance.");
+        }
+
+        public IMethodDefOrRef ImportMethod(MethodDefinition definition)
         {
             if (definition.Image == _image)
                 return definition;
@@ -200,6 +215,15 @@ namespace AsmResolver.Net.Cts
                 definition.Name,
                 ImportMethodSignature(definition.Signature),
                 _image);
+        }
+
+        public MethodSpecification ImportMethod(MethodSpecification specification)
+        {
+            if (specification.Image == _image)
+                return specification;
+
+            return new MethodSpecification(ImportMethod(specification.Method),
+                new GenericInstanceMethodSignature(specification.Signature.GenericArguments.Select(ImportTypeSignature)), _image);
         }
 
         #endregion
@@ -272,6 +296,8 @@ namespace AsmResolver.Net.Cts
                 return ImportPointerTypeSignature(type);
             if (type.IsGenericType)
                 return ImportGenericInstanceTypeSignature(type);
+            
+            // TODO: generic parameter types.
 
             return ImportTypeDefOrRefSignature(type);
         }
@@ -292,10 +318,6 @@ namespace AsmResolver.Net.Cts
             var typeDefOrRef = signature as TypeDefOrRefSignature;
             if (typeDefOrRef != null)
                 return ImportTypeDefOrRefSignature(typeDefOrRef);
-
-            var corlibType = signature as MsCorLibTypeSignature;
-            if (corlibType != null)
-                return ImportCorlibTypeSignature(corlibType);
 
             var arrayType = signature as ArrayTypeSignature;
             if (arrayType != null)
@@ -340,6 +362,10 @@ namespace AsmResolver.Net.Cts
             var szArrayType = signature as SzArrayTypeSignature;
             if (szArrayType != null)
                 return ImportSzArrayTypeSignature(szArrayType);
+
+            var genericParameter = signature as GenericParameterSignature;
+            if (genericParameter != null)
+                return ImportGenericParameterSignature(genericParameter);
 
             throw new NotSupportedException("Invalid or unsupported type signature.");
         }
@@ -527,7 +553,14 @@ namespace AsmResolver.Net.Cts
 
         #endregion
 
+        #region MVAR & TVAR
+        
+        private GenericParameterSignature ImportGenericParameterSignature(GenericParameterSignature genericParameter)
+        {
+            return new GenericParameterSignature(genericParameter.ParameterType, genericParameter.Index);
+        }
 
+        #endregion
 
 
         #region TypeDefOrRef

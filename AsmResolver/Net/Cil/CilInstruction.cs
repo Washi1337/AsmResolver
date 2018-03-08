@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace AsmResolver.Net.Cil
 
         public static CilInstruction Create(CilOpCode code, sbyte operand)
         {
-            if (code.OperandType != CilOperandType.ShortInlineR)
+            if (code.OperandType != CilOperandType.ShortInlineI)
                 throw new ArgumentException("Opcode does not accept an int8 operand.", "code");
             return new CilInstruction(0, code, operand);
         }
@@ -79,11 +80,11 @@ namespace AsmResolver.Net.Cil
             return new CilInstruction(0, code, operand);
         }
 
-        public static CilInstruction Create(CilOpCode code, IList<CilInstruction> operand)
+        public static CilInstruction Create(CilOpCode code, IEnumerable<CilInstruction> operand)
         {
             if (code.OperandType != CilOperandType.InlineSwitch)
-                throw new ArgumentException("Opcode does not accept an instruction array operand.", "code");
-            return new CilInstruction(0, code, operand);
+                throw new ArgumentException("Opcode does not accept a collection of instructions as operand.", "code");
+            return new CilInstruction(0, code, new List<CilInstruction>(operand));
         }
 
         public static CilInstruction Create(CilOpCode code, VariableSignature operand)
@@ -167,10 +168,10 @@ namespace AsmResolver.Net.Cil
                     return 8;
 
                 case CilOperandType.InlineSwitch:
-                    var array = Operand as Array;
+                    var array = Operand as IList;
                     if (array == null)
                         return 4;
-                    return 4 * (array.GetLength(0) + 1);
+                    return 4 * (array.Count + 1);
             }
             throw new NotSupportedException();
         }

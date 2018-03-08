@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -348,13 +349,37 @@ namespace AsmResolver.Tests.Net.Cts
 
             Assert.NotSame(signature, newSignature);
             Assert.Equal(signature, newSignature, _comparer);
-
+            
             var newGenericSiganture = (GenericInstanceTypeSignature) newSignature;
             Assert.Equal(image, newGenericSiganture.GenericType.Image);
 
             var genericArgElementType = newGenericSiganture.GenericArguments[0].GetElementType();
             Assert.IsAssignableFrom<ITypeDefOrRef>(genericArgElementType);
             Assert.Equal(image, ((ITypeDefOrRef) genericArgElementType).Image);
+        }
+
+
+        [Fact]
+        public void ImportGenericInstanceTypeReflection()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var signature = new GenericInstanceTypeSignature(CreateTypeReference(typeof(List<>)));
+            var genericArg = CreateTypeDefOrRef(typeof(Form));
+            signature.GenericArguments.Add(genericArg);
+
+            var newSignature = importer.ImportTypeSignature(typeof(List<Form>));
+            
+            Assert.NotSame(signature, newSignature);
+            Assert.Equal(signature, newSignature, _comparer);
+
+            var newGenericSiganture = (GenericInstanceTypeSignature)newSignature;
+            Assert.Equal(image, newGenericSiganture.GenericType.Image);
+            var genericArgElementType = newGenericSiganture.GenericArguments[0].GetElementType();
+            Assert.IsAssignableFrom<ITypeDefOrRef>(genericArgElementType);
+            Assert.Equal(image, ((ITypeDefOrRef)genericArgElementType).Image);
         }
 
         #endregion
@@ -411,7 +436,7 @@ namespace AsmResolver.Tests.Net.Cts
 
             var newReference = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(string) }));
 
-            VerifyImportedReference(image, reference, newReference);
+            VerifyImportedReference(image, reference, newReference as MemberReference);
         }
 
         [Fact]
@@ -457,6 +482,30 @@ namespace AsmResolver.Tests.Net.Cts
             Assert.Equal((IMemberReference) method, newReference, _comparer);
         }
 
+        [Fact]
+        public void ImportGenericInstanceMethod()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var specification = new MethodSpecification(
+                new MemberReference(
+                    CreateTypeReference(typeof(Activator)),
+                    "CreateInstance",
+                    new MethodSignature(new GenericParameterSignature(GenericParameterType.Method, 0))
+                    {
+                        GenericParameterCount = 1
+                    }),
+                new GenericInstanceMethodSignature(CreateTypeDefOrRef(typeof(Stream))));
+
+            var newSpecification = importer.ImportMethod(specification);
+
+            Assert.NotSame(specification, newSpecification);
+            Assert.Equal(specification, newSpecification, _comparer);
+            Assert.Equal(image, newSpecification.Image);
+        }
+        
         #endregion
 
         #region Fields

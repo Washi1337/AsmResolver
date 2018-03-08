@@ -9,9 +9,7 @@ namespace AsmResolver.Net.Signatures
     {
         public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            var signature = ReadTypeSignature(image, reader);
-            return signature;
+            return ReadTypeSignature(image, reader);
         }
 
         private static TypeSignature ReadTypeSignature(MetadataImage image, IBinaryStreamReader reader)

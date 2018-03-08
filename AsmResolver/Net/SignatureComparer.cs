@@ -661,6 +661,10 @@ namespace AsmResolver.Net
             if (reference1 == null || reference2 == null)
                 return false;
 
+            var specification = reference1 as MethodSpecification;
+            if (specification != null)
+                return Equals(specification, reference2 as MethodSpecification);
+
             return reference1.Name == reference2.Name &&
                    Equals((IMemberRefParent) reference1.DeclaringType, reference2.DeclaringType) &&
                    Equals(reference1.Signature, reference2.Signature);
@@ -720,6 +724,17 @@ namespace AsmResolver.Net
                    Equals(reference1.Signature, reference2.Signature);
         }
 
+        public bool Equals(MethodSpecification specification1, MethodSpecification specification2)
+        {
+            if (specification1 == null && specification2 == null)
+                return true;
+            if (specification1 == null || specification2 == null)
+                return false;
+
+            return Equals(specification1.Signature, specification2.Signature)
+                   && Equals(specification1.Method, specification2.Method);
+        }
+
         /// <summary>
         /// Determines whether two member signatures are considered equal according to their signatures.
         /// </summary>
@@ -744,6 +759,10 @@ namespace AsmResolver.Net
             var propertySignature = signature1 as PropertySignature;
             if (propertySignature != null)
                 return Equals(propertySignature, signature2 as PropertySignature);
+
+            var genericInstanceSignature = signature1 as GenericInstanceMethodSignature;
+            if (genericInstanceSignature != null)
+                return Equals(genericInstanceSignature, signature2 as GenericInstanceMethodSignature);
 
             return false;
         }
@@ -812,6 +831,17 @@ namespace AsmResolver.Net
                    Equals(signature1.PropertyType, signature2.PropertyType) &&
                    EqualsManyTypes(signature1.Parameters.Select(x => x.ParameterType),
                        signature2.Parameters.Select(x => x.ParameterType));
+        }
+
+        public bool Equals(GenericInstanceMethodSignature signature1, GenericInstanceMethodSignature signature2)
+        {
+            if (signature1 == null && signature2 == null)
+                return true;
+            if (signature1 == null || signature2 == null)
+                return false;
+
+            return signature1.Attributes == signature2.Attributes &&
+                   EqualsManyTypes(signature1.GenericArguments, signature2.GenericArguments);
         }
 
         /// <summary>

@@ -25,8 +25,19 @@ namespace AsmResolver.Net.Signatures
         }
 
         public GenericInstanceMethodSignature()
+            : this(Enumerable.Empty<TypeSignature>())
         {
-            GenericArguments = new List<TypeSignature>();
+        }
+
+        public GenericInstanceMethodSignature(params TypeSignature[] arguments)
+            : this(arguments.AsEnumerable())
+        {
+        }
+
+        public GenericInstanceMethodSignature(IEnumerable<TypeSignature> arguments)
+        {
+            GenericArguments = new List<TypeSignature>(arguments);
+            Attributes = CallingConventionAttributes.GenericInstance;
         }
 
         public IList<TypeSignature> GenericArguments

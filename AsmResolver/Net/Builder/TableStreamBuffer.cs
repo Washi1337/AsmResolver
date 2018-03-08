@@ -882,7 +882,7 @@ namespace AsmResolver.Net.Builder
             AddCustomAttributes(resource);
         }
 
-        public void AddStandaloneSignatureToken(StandAloneSignature signature)
+        public MetadataToken GetStandaloneSignatureToken(StandAloneSignature signature)
         {
             var table = (StandAloneSignatureTable) _tableStream.GetTable(MetadataTokenType.StandAloneSig);
             var signatureRow = new MetadataRow<uint>
@@ -893,6 +893,8 @@ namespace AsmResolver.Net.Builder
             _members.Add(signature, signatureRow.MetadataToken);
 
             AddCustomAttributes(signature);
+
+            return signatureRow.MetadataToken;
         }
         
         private void AddCustomAttributes(IHasCustomAttribute provider)

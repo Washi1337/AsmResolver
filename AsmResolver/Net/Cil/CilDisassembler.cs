@@ -129,17 +129,19 @@ namespace AsmResolver.Net.Cil
                     break;
 
                 case CilOperandType.InlineString:
-                    var stringValue = _resolver.ResolveString(((MetadataToken)current.Operand).ToUInt32());
+                    var stringValue = _resolver.ResolveString(((MetadataToken) current.Operand).ToUInt32());
                     if (stringValue != null)
                         current.Operand = stringValue;
                     break;
 
                 case CilOperandType.InlineSwitch:
-                    var targetOffsets = (int[])current.Operand;
-                    var targets = new CilInstruction[targetOffsets.Length];
-                    for (int i = 0; i < targetOffsets.Length; i++)
-                        targets[i] = instructions.FirstOrDefault(
-                            x => x.Offset == nextOffset + targetOffsets[i]);
+                    var targetOffsets = (IList<int>) current.Operand;
+                    var targets = new List<CilInstruction>(targetOffsets.Count);
+                    for (int i = 0; i < targetOffsets.Count; i++)
+                    {
+                        targets.Add(instructions.FirstOrDefault(
+                            x => x.Offset == nextOffset + targetOffsets[i]));
+                    }
                     current.Operand = targets;
                     break;
             }

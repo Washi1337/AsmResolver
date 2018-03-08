@@ -58,11 +58,27 @@ namespace AsmResolver.Net.Builder
             {
                 var writer = new BinaryStreamWriter(stream);
                 writer.WriteByte(0);
-                
-                foreach (var signature in _signatureOffsetMapping.Keys)
+
+                var processedSignatures = new HashSet<BlobSignature>();
+                var agenda = new Queue<BlobSignature>(_signatureOffsetMapping.Keys);
+
+                while (agenda.Count > 0)
                 {
-                    writer.WriteCompressedUInt32(signature.GetPhysicalLength());
-                    signature.Write(_parentBuffer, writer);
+                    var signature = agenda.Dequeue();
+                    if (processedSignatures.Add(signature))
+                    {
+                        writer.WriteCompressedUInt32(signature.GetPhysicalLength());
+
+                        int count = _signatureOffsetMapping.Count;
+                        signature.Write(_parentBuffer, writer);
+
+                        // TODO: find more efficient way of adding newly created signatures to the queue.
+                        if (count != _signatureOffsetMapping.Count)
+                        {
+                            foreach (var sig in _signatureOffsetMapping.Keys)
+                                agenda.Enqueue(sig);
+                        }
+                    }
                 }
 
                 writer.WriteByte(0);

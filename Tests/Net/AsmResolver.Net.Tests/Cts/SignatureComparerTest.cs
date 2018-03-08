@@ -470,6 +470,12 @@ namespace AsmResolver.Tests.Net.Cts
             VerifyMatching(methodDef, match, fail1, fail2, fail3);
         }
 
+        [Fact]
+        public void MatchGenericInstanceMethods()
+        {
+            
+        }
+
         #endregion
 
     }
