@@ -540,6 +540,8 @@ namespace AsmResolver.Tests.Net.Cil
             instructions.Add(CilInstruction.Create(CilOpCodes.Call, importer.ImportMethod(genericInstanceMethod)));
             instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
 
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
 
@@ -548,6 +550,86 @@ namespace AsmResolver.Tests.Net.Cil
             
             Assert.Equal(simpleMethod, instructions[1].Operand as IMemberReference, _comparer);
             Assert.Equal(genericInstanceMethod, instructions[2].Operand as IMemberReference, _comparer);
+        }
+
+        [Fact]
+        public void OperandTypeType()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+            var importer = new ReferenceImporter(image);
+
+            var instructions = methodBody.Instructions;
+
+            var simpleType = importer.ImportType(typeof(Form));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldtoken, simpleType));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+
+            var genericType = importer.ImportType(typeof(List<Form>));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldtoken, genericType));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            Assert.Equal(simpleType, instructions[0].Operand as ITypeDescriptor, _comparer);
+            Assert.Equal(genericType, instructions[2].Operand as ITypeDescriptor, _comparer);
+        }
+
+        [Fact]
+        public void OperandTypeField()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+            var importer = new ReferenceImporter(image);
+
+            var instructions = methodBody.Instructions;
+
+            var simpleField = importer.ImportField(typeof(Type).GetField("EmptyTypes", BindingFlags.Public | BindingFlags.Static));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldsfld, simpleField));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            Assert.Equal(simpleField, instructions[0].Operand as IMemberReference, _comparer);
+        }
+
+        [Fact]
+        public void OperandTypeSig()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+            var importer = new ReferenceImporter(image);
+
+            var instructions = methodBody.Instructions;
+
+            var signature = importer.ImportStandAloneSignature(
+                new StandAloneSignature(new MethodSignature(image.TypeSystem.Void)));
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Calli, signature));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
+
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            instructions = newMethod.CilMethodBody.Instructions;
+
+            var newSignature = (StandAloneSignature) instructions[0].Operand;
+            Assert.Equal(signature.Signature as MethodSignature, newSignature.Signature as MethodSignature, _comparer);
         }
     }
 }

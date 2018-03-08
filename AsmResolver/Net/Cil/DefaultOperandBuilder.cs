@@ -38,6 +38,10 @@ namespace AsmResolver.Net.Cil
             var specification = member as MethodSpecification;
             if (specification != null)
                 return _buffer.TableStreamBuffer.GetMethodSpecificationToken(specification);
+
+            var standAlone = member as StandAloneSignature;
+            if (standAlone != null)
+                return _buffer.TableStreamBuffer.GetStandaloneSignatureToken(standAlone);
             
             throw new NotSupportedException("Invalid or unsupported operand " + member + ".");
         }

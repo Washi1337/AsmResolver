@@ -243,6 +243,64 @@ namespace AsmResolver.Net.Cts
 
         #region Member signatures
 
+        public StandAloneSignature ImportStandAloneSignature(StandAloneSignature signature)
+        {
+            return new StandAloneSignature(ImportCallingConventionSignature(signature.Signature), _image);
+        }
+
+
+        public CallingConventionSignature ImportCallingConventionSignature(CallingConventionSignature signature)
+        {
+            var memberSig = signature as MemberSignature;
+            if (memberSig != null)
+                return ImportMemberSignature(memberSig);
+
+            var propertySig = signature as PropertySignature;
+            if (propertySig != null)
+                return ImportPropertySignature(propertySig);
+
+            var genericInstanceSig = signature as GenericInstanceMethodSignature;
+            if (genericInstanceSig != null)
+                return ImportGenericInstanceMethodSignature(genericInstanceSig);
+
+            var localVarSig = signature as LocalVariableSignature;
+            if (localVarSig != null)
+                return ImportLocalVariableSignature(localVarSig);
+
+            throw new NotSupportedException("Invalid or unsupported calling convention signature.");
+        }
+
+        private LocalVariableSignature ImportLocalVariableSignature(LocalVariableSignature signature)
+        {
+            return new LocalVariableSignature(signature.Variables.Select(
+                x => new VariableSignature(ImportTypeSignature(x.VariableType))))
+            {
+                Attributes = signature.Attributes
+            };
+        }
+
+        private GenericInstanceMethodSignature ImportGenericInstanceMethodSignature(GenericInstanceMethodSignature signature)
+        {
+            return new GenericInstanceMethodSignature(signature.GenericArguments.Select(ImportTypeSignature))
+            {
+                Attributes = signature.Attributes,
+            };
+        }
+
+        private PropertySignature ImportPropertySignature(PropertySignature signature)
+        {
+            var newSignature = new PropertySignature
+            {
+                Attributes = signature.Attributes,
+                PropertyType = ImportTypeSignature(signature.PropertyType),
+            };
+
+            foreach (var parameter in signature.Parameters)
+                newSignature.Parameters.Add(new ParameterSignature(ImportTypeSignature(parameter.ParameterType)));
+
+            return newSignature;
+        }
+
         public MemberSignature ImportMemberSignature(MemberSignature signature)
         {
             var fieldSignature = signature as FieldSignature;

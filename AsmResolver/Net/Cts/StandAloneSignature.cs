@@ -10,7 +10,12 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<CallingConventionSignature> _signature;
 
         public StandAloneSignature(CallingConventionSignature signature)
-            : base(null, new MetadataToken(MetadataTokenType.StandAloneSig))
+            : this(signature, null)
+        {
+        }
+
+        public StandAloneSignature(CallingConventionSignature signature, MetadataImage image)
+            : base(image, new MetadataToken(MetadataTokenType.StandAloneSig))
         {
             _signature = new LazyValue<CallingConventionSignature>(signature);
         }
