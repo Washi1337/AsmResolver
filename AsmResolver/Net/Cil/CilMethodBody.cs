@@ -28,14 +28,17 @@ namespace AsmResolver.Net.Cil
             }
         }
 
-        public static int GetMethodBodySize(ReadingContext context)
-        {   
+        public static int GetMethodBodySize(ReadingContext context, out bool isFatMethod)
+        {
+            isFatMethod = false;
+
             var reader = context.Reader;
             long start = reader.Position;
             
             byte bodyHeader = reader.ReadByte();
             if ((bodyHeader & 0x3) == 0x3)
             {
+                isFatMethod = true;
                 reader.Position--;
                 
                 ushort fatBodyHeader = reader.ReadUInt16();
@@ -56,9 +59,9 @@ namespace AsmResolver.Net.Cil
                         sectionHeader = reader.ReadByte();
                         if ((sectionHeader & 0x01) == 0x01)
                         {
-                            bool isFat = (sectionHeader & 0x40) == 0x40;
+                            bool isFatSection = (sectionHeader & 0x40) == 0x40;
                             int dataSize = 0;
-                            if (isFat)
+                            if (isFatSection)
                             {
                                 dataSize = reader.ReadByte() |
                                            (reader.ReadByte() << 0x08) |

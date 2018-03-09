@@ -48,6 +48,9 @@ namespace AsmResolver
 
         public override void Write(WritingContext context)
         {
+            // TODO: more elegant way of creating buffer.
+            context.Writer.Position += GetPhysicalLength();
+            context.Writer.Position -= GetPhysicalLength();
             Contents.Write(context);
         }
     }

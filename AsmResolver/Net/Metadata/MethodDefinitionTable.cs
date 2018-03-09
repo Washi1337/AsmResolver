@@ -36,8 +36,12 @@ namespace AsmResolver.Net.Metadata
                 long fileOffset = context.Assembly.RvaToFileOffset(rva);
                 if (implAttributes.HasFlag(MethodImplAttributes.IL))
                 {
-                    int size = CilMethodBody.GetMethodBodySize(context.CreateSubContext(fileOffset));
-                    body = new RvaDataSegment(rva, context.Reader.CreateSubReader(fileOffset, size));
+                    bool isFat;
+                    int size = CilMethodBody.GetMethodBodySize(context.CreateSubContext(fileOffset), out isFat);
+                    body = new RvaDataSegment(rva, context.Reader.CreateSubReader(fileOffset, size))
+                    {
+                        ShouldBeAligned = isFat
+                    };
                 }
                 else
                 {

@@ -1,4 +1,4 @@
-﻿namespace AsmResolver.Net
+﻿namespace AsmResolver
 {
     public class RvaDataSegment : FileSegment
     {
@@ -16,6 +16,12 @@
         }
         
         public uint Rva
+        {
+            get;
+            set;
+        }
+
+        public bool ShouldBeAligned
         {
             get;
             set;

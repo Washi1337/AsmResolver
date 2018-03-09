@@ -354,26 +354,26 @@ namespace AsmResolver
         }
 
         // TODO
-        ///// <summary>
-        ///// Rebuilds and writes the assembly to a specific file path.
-        ///// </summary>
-        ///// <param name="file">The file path to write the image to.</param>
-        //public void Write(string file)
-        //{
-        //    using (var stream = File.Create(file))
-        //    {
-        //        Write(new BuildingParameters(new BinaryStreamWriter(stream)));
-        //    }
-        //}
+        /// <summary>
+        /// Rebuilds and writes the assembly to a specific file path.
+        /// </summary>
+        /// <param name="file">The file path to write the image to.</param>
+        public void Write(string file)
+        {
+            using (var stream = File.Create(file))
+            {
+                Write(new BinaryStreamWriter(stream));
+            }
+        }
 
-        ///// <summary>
-        ///// Rebuilds and writes the assembly to a specific binary stream.
-        ///// </summary>
-        ///// <param name="writer">The writer to write the image to.</param>
-        //public void Write(IBinaryStreamWriter writer)
-        //{
-        //    Write(new BuildingParameters(writer));
-        //}
+        /// <summary>
+        /// Rebuilds and writes the assembly to a specific binary stream.
+        /// </summary>
+        /// <param name="writer">The writer to write the image to.</param>
+        public void Write(IBinaryStreamWriter writer)
+        {         
+
+        }
 
         ///// <summary>
         ///// Rebuilds and writes the assembly to a destination, using the specified building parameters.

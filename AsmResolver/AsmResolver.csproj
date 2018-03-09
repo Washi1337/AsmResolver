@@ -47,8 +47,14 @@
     <Compile Include="BaseRelocationEntry.cs" />
     <Compile Include="BaseRelocationType.cs" />
     <Compile Include="Collections\Generic\Collection.cs" />
+    <Compile Include="Emit\EmitContext.cs" />
+    <Compile Include="Emit\FileSegmentBuilder.cs" />
+    <Compile Include="Emit\ImportDirectoryBuffer.cs" />
+    <Compile Include="Emit\ResourceDirectoryBuffer.cs" />
     <Compile Include="ImageDebugDirectory.cs" />
     <Compile Include="ImageResourceDirectoryType.cs" />
+    <Compile Include="ImageSection.cs" />
+    <Compile Include="ImageSectionHeaderCollection.cs" />
     <Compile Include="LazyValue.cs" />
     <Compile Include="MethodBody.cs" />
     <Compile Include="Net\AssemblyResolutionEventArgs.cs" />
@@ -81,11 +87,13 @@
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
     <Compile Include="Net\Emit\BlobStreamBuffer.cs" />
+    <Compile Include="Net\Emit\CompactNetTextContent.cs" />
     <Compile Include="Net\Emit\GuidStreamBuffer.cs" />
     <Compile Include="Net\Emit\MetadataBuffer.cs" />
     <Compile Include="Net\Emit\MemberNotImportedException.cs" />
     <Compile Include="Net\Emit\MetadataStreamBuffer.cs" />
     <Compile Include="Net\Emit\ResourcesBuffer.cs" />
+    <Compile Include="Emit\RvaDataSegmentTableBuffer.cs" />
     <Compile Include="Net\Emit\StringStreamBuffer.cs" />
     <Compile Include="Net\Emit\TableStreamBuffer.cs" />
     <Compile Include="Net\Emit\UserStringStreamBuffer.cs" />
@@ -150,7 +158,7 @@
     <Compile Include="Net\ITypeDescriptor.cs" />
     <Compile Include="Net\Metadata\SecurityAction.cs" />
     <Compile Include="Net\ReflectionAssemblyNameWrapper.cs" />
-    <Compile Include="Net\RvaDataSegment.cs" />
+    <Compile Include="RvaDataSegment.cs" />
     <Compile Include="Net\MetadataStreamHeaderCollection.cs" />
     <Compile Include="Net\IAssemblyDescriptor.cs" />
     <Compile Include="Net\INameProvider.cs" />
@@ -315,9 +323,7 @@
     <Compile Include="X86\X86Register.cs" />
     <Compile Include="X86\X86RegOrMemModifier.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Emit\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

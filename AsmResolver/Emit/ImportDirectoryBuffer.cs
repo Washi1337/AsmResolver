@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AsmResolver.Emit
 {
-    public class ImageImportDirectoryBuffer
+    public class ImportDirectoryBuffer
     {
         public sealed class ImportTableBuffer : FileSegmentBuilder
         {
@@ -123,7 +123,7 @@ namespace AsmResolver.Emit
 
         private readonly IOffsetConverter _offsetConverter;
 
-        public ImageImportDirectoryBuffer(IOffsetConverter offsetConverter, bool is32Bit)
+        public ImportDirectoryBuffer(IOffsetConverter offsetConverter, bool is32Bit)
         {
             Is32Bit = is32Bit;
             if (offsetConverter == null)
