@@ -38,7 +38,7 @@
         private DataSegment _strongNameData;
 
         private ResourcesManifest _resources;
-        //private VTablesDirectory _vtablesDirectory;
+        private VTablesDirectory _vtablesDirectory;
 
         public ImageNetDirectory()
         {
@@ -199,7 +199,7 @@
         {
             get
             {
-                if (_strongNameData != null || StrongNameSignatureDirectory.VirtualAddress == 0)
+                if (_strongNameData != null || _readingContext == null || StrongNameSignatureDirectory.VirtualAddress == 0)
                     return _strongNameData;
 
                 var context = _readingContext.CreateSubContext(
@@ -210,6 +210,9 @@
             set { _strongNameData = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the managed resources manifest directory of the .NET assembly image.
+        /// </summary>
         public ResourcesManifest ResourcesManifest
         {
             get
@@ -225,50 +228,28 @@
             set { _resources = value; }
         }
         
-        // TODO
         /// <summary>
         /// Gets or sets the VTable fixups directory of the .NET assembly image.
         /// </summary>
-        //public VTablesDirectory VTablesDirectory
-        //{
-        //    get
-        //    {
-        //        if (_vtablesDirectory != null)
-        //            return _vtablesDirectory;
+        public VTablesDirectory VTablesDirectory
+        {
+            get
+            {
+                if (_vtablesDirectory != null)
+                    return _vtablesDirectory;
 
-        //        if (_readingContext != null)
-        //        {
-        //            var context = _readingContext.CreateSubContext(
-        //                _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
-        //            if (context != null)
-        //                return _vtablesDirectory = VTablesDirectory.FromReadingContext(context);
-        //        }
+                if (_readingContext != null)
+                {
+                    var context = _readingContext.CreateSubContext(
+                        _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
+                    if (context != null)
+                        return _vtablesDirectory = VTablesDirectory.FromReadingContext(context);
+                }
 
-        //        return null;
-        //    }
-        //    set { _vtablesDirectory = value; }
-        //}
-
-//        /// <summary>
-//        /// Gets the managed resource data at the given offset.
-//        /// </summary>
-//        /// <param name="offset">The offset of the managed resource to get.</param>
-//        /// <returns>The raw data of the managed resource.</returns>
-//        public byte[] GetResourceData(uint offset)
-//        {
-//            if (_readingContext == null || ResourcesDirectory.VirtualAddress == 0)
-//                return null;
-//
-//            var context = _readingContext.CreateSubContext(
-//                Assembly.RvaToFileOffset(ResourcesDirectory.VirtualAddress) + offset,
-//                (int)ResourcesDirectory.Size);
-//
-//            if (context == null)
-//                return null;
-//
-//            var length = context.Reader.ReadInt32();
-//            return context.Reader.ReadBytes(length);
-//        }
+                return null;
+            }
+            set { _vtablesDirectory = value; }
+        }
 
         public override uint GetPhysicalLength()
         {

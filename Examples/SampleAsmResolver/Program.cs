@@ -80,18 +80,6 @@ namespace SampleAsmResolver
                                           | MethodImplAttributes.PreserveSig;
 
             var nativeBody = new X86MethodBody();
-            nativeBody.Instructions.Add(new X86Instruction
-            {
-                Mnemonic = X86Mnemonic.Push,
-                OpCode = X86OpCodes.Push_Ebp,
-            });
-            nativeBody.Instructions.Add(new X86Instruction
-            {
-                Mnemonic = X86Mnemonic.Mov,
-                OpCode = X86OpCodes.Mov_Reg1632_RegOrMem1632,
-                Operand1 = new X86Operand(X86Register.Ebx),
-                Operand2 = new X86Operand(X86Register.Esp),
-            });
 
             nativeBody.Instructions.Add(new X86Instruction
             {
@@ -99,12 +87,6 @@ namespace SampleAsmResolver
                 OpCode = X86OpCodes.Mov_Eax_Imm1632,
                 Operand1 = new X86Operand(X86Register.Eax),
                 Operand2 = new X86Operand(1337),
-            });
-
-            nativeBody.Instructions.Add(new X86Instruction
-            {
-                Mnemonic = X86Mnemonic.Pop,
-                OpCode = X86OpCodes.Pop_Ebp,
             });
 
             nativeBody.Instructions.Add(new X86Instruction

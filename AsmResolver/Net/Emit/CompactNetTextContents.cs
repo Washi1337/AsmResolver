@@ -20,7 +20,7 @@ namespace AsmResolver.Net.Emit
                 Segments.Add(ResourcesManifest = assembly.NetDirectory.ResourcesManifest);
             }
 
-//            Segments.Add(FieldDataTable = new RvaDataSegmentTableBuffer(assembly));
+            Segments.Add(FieldDataTable = new RvaDataSegmentTableBuffer(assembly));
             Segments.Add(MetadataDirectory = new MetadataDirectoryBuffer(assembly.NetDirectory.MetadataHeader));
 
             if (assembly.DebugDirectory != null)
@@ -42,6 +42,7 @@ namespace AsmResolver.Net.Emit
                 if (method.Column1 != null)
                     MethodBodyTable.AddSegment(method.Column1);
             }
+
         }
 
         public ImportDirectoryBuffer ImportBuffer

@@ -23,8 +23,14 @@ namespace AsmResolver.Net.Cts
         }
 
         public TypeDefinition(string @namespace, string name, ITypeDefOrRef baseType)
+            : this(@namespace, name, TypeAttributes.Class, baseType)
+        {
+        }
+        
+        public TypeDefinition(string @namespace, string name, TypeAttributes attributes, ITypeDefOrRef baseType)
             : base(null, new MetadataToken(MetadataTokenType.TypeDef))
         {
+            Attributes = attributes;
             _namespace = new LazyValue<string>(@namespace);
             _name = new LazyValue<string>(name);
             _baseType = new LazyValue<ITypeDefOrRef>(baseType);

@@ -28,7 +28,7 @@
             if (_reader == null)
                 return null;
 
-            var reader = _reader.CreateSubReader(offset);
+            var reader = _reader.CreateSubReader(_reader.StartPosition + offset);
             int length = reader.ReadInt32();
             return reader.ReadBytes(length);
         }

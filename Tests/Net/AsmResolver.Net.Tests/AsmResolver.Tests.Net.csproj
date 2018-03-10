@@ -83,6 +83,8 @@
     <Compile Include="Cts\ModuleDefinitionTest.cs" />
     <Compile Include="Cts\ReferenceImporterTest.cs" />
     <Compile Include="Cts\TypeDefinitionTest.cs" />
+    <Compile Include="Emit\CompactNetAssemblyTest.cs" />
+    <Compile Include="Emit\TemporaryDirectoryFixture.cs" />
     <Compile Include="MetadataLockTest.cs" />
     <Compile Include="NetAssemblyFactoryTest.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
