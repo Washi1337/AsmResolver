@@ -161,6 +161,7 @@
     <Compile Include="Net\IndexSize.cs" />
     <Compile Include="Net\Cts\INetAssemblyResolver.cs" />
     <Compile Include="Net\ITypeDescriptor.cs" />
+    <Compile Include="Net\ResourcesManifest.cs" />
     <Compile Include="Net\Metadata\SecurityAction.cs" />
     <Compile Include="Net\ReflectionAssemblyNameWrapper.cs" />
     <Compile Include="RvaDataSegment.cs" />

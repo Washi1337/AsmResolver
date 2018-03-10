@@ -145,7 +145,7 @@ namespace AsmResolver.Net.Cil
             Method = method;
             MaxStack = 8;
             // TODO: catch if method is not added to type yet.
-            ThisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
+//            ThisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
         }
 
         public MethodDefinition Method

@@ -6,6 +6,10 @@ namespace AsmResolver.Net
     public enum ImageNetDirectoryFlags : uint
     {
         /// <summary>
+        /// Specifies no .NET directory flags.
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// The file contains only managed IL code.
         /// </summary>
         IlOnly = 0x00000001,

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Emit
@@ -14,7 +15,7 @@ namespace AsmResolver.Net.Emit
             if (!_resources.TryGetValue(resource, out offset))
             {
                 _resources.Add(resource, _length);
-                _length += (uint) resource.Data.Length;
+                _length += (uint) resource.Data.Length + sizeof(uint);
                 return offset;
             }
             return offset;
@@ -28,8 +29,26 @@ namespace AsmResolver.Net.Emit
 
         public override void Write(WritingContext context)
         {
+            Write(context.Writer);
+        }
+
+        private void Write(IBinaryStreamWriter writer)
+        {
             foreach (var resource in _resources.Keys)
-                context.Writer.WriteBytes(resource.Data);
+            {
+                writer.WriteUInt32((uint) resource.Data.Length);
+                writer.WriteBytes(resource.Data);
+            }
+        }
+
+        public ResourcesManifest CreateDirectory()
+        {
+            using (var stream = new MemoryStream())
+            {
+                var writer = new BinaryStreamWriter(stream);
+                Write(writer);
+                return new ResourcesManifest(new MemoryStreamReader(stream.ToArray()));
+            }
         }
     }
 }

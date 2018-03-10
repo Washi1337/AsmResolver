@@ -41,7 +41,7 @@ namespace AsmResolver.Net.Cts
             
             _data = new LazyValue<byte[]>(() => 
                 IsEmbedded && Image != null
-                ? Image.Header.NetDirectory.GetResourceData(Offset)
+                ? Image.Header.NetDirectory.ResourcesManifest.GetResourceData(Offset)
                 : null);
 
             CustomAttributes = new CustomAttributeCollection(this);

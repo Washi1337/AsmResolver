@@ -185,7 +185,8 @@ namespace AsmResolver.Net
         {
             var buffer = new MetadataBuffer(Image);
             buffer.TableStreamBuffer.AddAssembly(Image.Assembly);
-
+            NetDirectory.ResourcesManifest = buffer.ResourcesBuffer.CreateDirectory();
+            
             var buffers = new MetadataStreamBuffer[]
             {
                 buffer.TableStreamBuffer,
@@ -195,11 +196,11 @@ namespace AsmResolver.Net
                 buffer.UserStringStreamBuffer
             };
             
-            StreamHeaders.Clear();
-            
             foreach (var streamBuffer in buffers)
             {
-                StreamHeaders.Add(new MetadataStreamHeader(streamBuffer.Name, streamBuffer.CreateStream()));    
+                var header = StreamHeaders.FirstOrDefault(x => x.Name == streamBuffer.Name) 
+                             ?? new MetadataStreamHeader(streamBuffer.Name);
+                header.Stream = streamBuffer.CreateStream();
             }
 
             Image = null;

@@ -868,10 +868,10 @@ namespace AsmResolver.Net.Emit
             var table = (ManifestResourceTable) _tableStream.GetTable(MetadataTokenType.ManifestResource);
             var resourceRow = new MetadataRow<uint, ManifestResourceAttributes, uint, uint>
             {
-                Column1 = resource.Offset, // TODO: add resource buffer. 
+                Column1 = _parentBuffer.ResourcesBuffer.GetResourceOffset(resource), 
                 Column2 = resource.Attributes,
-                Column3 = _parentBuffer.StringStreamBuffer.GetStringOffset(Name),
-                Column4 = resource.IsEmbedded
+                Column3 = _parentBuffer.StringStreamBuffer.GetStringOffset(resource.Name),
+                Column4 = !resource.IsEmbedded
                     ? _tableStream.GetIndexEncoder(CodedIndex.Implementation)
                         .EncodeToken(GetImplementationToken(resource.Implementation))
                     : 0,

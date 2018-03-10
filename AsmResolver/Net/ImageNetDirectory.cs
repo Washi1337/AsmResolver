@@ -36,6 +36,8 @@
         private ReadingContext _readingContext;
         private MetadataHeader _metaDataHeader;
         private DataSegment _strongNameData;
+
+        private ResourcesManifest _resources;
         //private VTablesDirectory _vtablesDirectory;
 
         public ImageNetDirectory()
@@ -208,6 +210,21 @@
             set { _strongNameData = value; }
         }
 
+        public ResourcesManifest ResourcesManifest
+        {
+            get
+            {
+                if (_resources != null || _readingContext == null || ResourcesDirectory.VirtualAddress == 0)
+                    return _resources;
+                
+                var context = _readingContext.CreateSubContext(
+                    _readingContext.Assembly.RvaToFileOffset(ResourcesDirectory.VirtualAddress),
+                    (int) ResourcesDirectory.Size);
+                return _resources = ResourcesManifest.FromReadingContext(context);
+            }
+            set { _resources = value; }
+        }
+        
         // TODO
         /// <summary>
         /// Gets or sets the VTable fixups directory of the .NET assembly image.
@@ -232,26 +249,26 @@
         //    set { _vtablesDirectory = value; }
         //}
 
-        /// <summary>
-        /// Gets the managed resource data at the given offset.
-        /// </summary>
-        /// <param name="offset">The offset of the managed resource to get.</param>
-        /// <returns>The raw data of the managed resource.</returns>
-        public byte[] GetResourceData(uint offset)
-        {
-            if (_readingContext == null || ResourcesDirectory.VirtualAddress == 0)
-                return null;
-
-            var context = _readingContext.CreateSubContext(
-                Assembly.RvaToFileOffset(ResourcesDirectory.VirtualAddress) + offset,
-                (int)ResourcesDirectory.Size);
-
-            if (context == null)
-                return null;
-
-            var length = context.Reader.ReadInt32();
-            return context.Reader.ReadBytes(length);
-        }
+//        /// <summary>
+//        /// Gets the managed resource data at the given offset.
+//        /// </summary>
+//        /// <param name="offset">The offset of the managed resource to get.</param>
+//        /// <returns>The raw data of the managed resource.</returns>
+//        public byte[] GetResourceData(uint offset)
+//        {
+//            if (_readingContext == null || ResourcesDirectory.VirtualAddress == 0)
+//                return null;
+//
+//            var context = _readingContext.CreateSubContext(
+//                Assembly.RvaToFileOffset(ResourcesDirectory.VirtualAddress) + offset,
+//                (int)ResourcesDirectory.Size);
+//
+//            if (context == null)
+//                return null;
+//
+//            var length = context.Reader.ReadInt32();
+//            return context.Reader.ReadBytes(length);
+//        }
 
         public override uint GetPhysicalLength()
         {

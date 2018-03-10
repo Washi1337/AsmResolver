@@ -14,6 +14,12 @@ namespace AsmResolver.Net.Emit
             Segments.Add(ImportBuffer.AddressTables);
             Segments.Add(NetDirectory = assembly.NetDirectory);
             Segments.Add(MethodBodyTable = new RvaDataSegmentTableBuffer(assembly));
+            
+            if (assembly.NetDirectory.ResourcesManifest != null)
+            {
+                Segments.Add(ResourcesManifest = assembly.NetDirectory.ResourcesManifest);
+            }
+
 //            Segments.Add(FieldDataTable = new RvaDataSegmentTableBuffer(assembly));
             Segments.Add(MetadataDirectory = new MetadataDirectoryBuffer(assembly.NetDirectory.MetadataHeader));
 
@@ -67,6 +73,12 @@ namespace AsmResolver.Net.Emit
             private set;
         }
 
+        public ResourcesManifest ResourcesManifest
+        {
+            get;
+            private set;
+        }
+
         public MetadataDirectoryBuffer MetadataDirectory
         {
             get;
@@ -94,18 +106,22 @@ namespace AsmResolver.Net.Emit
 
         private void UpdateNetDirectory(EmitContext context)
         {
-            NetDirectory.MetadataDirectory.VirtualAddress =
-                (uint) NetDirectory.Assembly.FileOffsetToRva(MetadataDirectory.StartOffset);
+            var assembly = NetDirectory.Assembly;
+            NetDirectory.MetadataDirectory.VirtualAddress = (uint) assembly.FileOffsetToRva(MetadataDirectory.StartOffset);
             NetDirectory.MetadataDirectory.Size = MetadataDirectory.GetPhysicalLength();
 
+            if (ResourcesManifest != null)
+            {
+                NetDirectory.ResourcesDirectory.VirtualAddress = (uint) assembly.FileOffsetToRva(ResourcesManifest.StartOffset);
+                NetDirectory.ResourcesDirectory.Size = ResourcesManifest.GetPhysicalLength();
+            }
+            
             if (NetDirectory.StrongNameData != null)
             {
                 NetDirectory.StrongNameSignatureDirectory.VirtualAddress =
-                    (uint) NetDirectory.Assembly.FileOffsetToRva(NetDirectory.StrongNameData.StartOffset);
+                    (uint) assembly.FileOffsetToRva(NetDirectory.StrongNameData.StartOffset);
                 NetDirectory.StrongNameSignatureDirectory.Size = NetDirectory.StrongNameData.GetPhysicalLength();
             }
-
-           
         }
 
     }
