@@ -183,5 +183,74 @@ namespace AsmResolver.Tests.Net.Emit
                 Assert.Equal(contents, image.Assembly.Resources[0].Data);
             }
         }
+
+        [Fact]
+        public void PersistentStrongName()
+        {
+            var strongNameData = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+            var assembly = CreateTempAssembly();
+            assembly.NetDirectory.MetadataHeader.UnlockMetadata();
+            assembly.NetDirectory.StrongNameData = new DataSegment(strongNameData);
+            
+            using (var stream = new MemoryStream())
+            {
+                assembly.Write(new BinaryStreamWriter(stream), new CompactNetAssemblyBuilder(assembly));
+                assembly = WindowsAssembly.FromBytes(stream.ToArray());
+                Assert.NotNull(assembly.NetDirectory.StrongNameData);
+                Assert.Equal(strongNameData, assembly.NetDirectory.StrongNameData.Data);
+            }
+        }
+
+        [Fact]
+        public void PersistentVTables()
+        {
+            var assembly = CreateTempAssembly();
+            var header = assembly.NetDirectory.MetadataHeader;
+            var importer = new ReferenceImporter(header.Image);
+
+            var type = new TypeDefinition(null, "SomeType", TypeAttributes.Public, importer.ImportType(typeof(object)));
+
+            for (int i = 0; i < 10; i++)
+            {
+                var method = new MethodDefinition("Method" + i, MethodAttributes.Public | MethodAttributes.Virtual,
+                    new MethodSignature(header.Image.TypeSystem.Void));
+                method.MethodBody = new CilMethodBody(method)
+                {
+                    Instructions = {CilInstruction.Create(CilOpCodes.Ret)}
+                };
+                type.Methods.Add(method);
+            }
+
+            header.Image.Assembly.Modules[0].Types.Add(type);
+
+            var mapping = header.UnlockMetadata();
+
+            var directory = new VTablesDirectory();
+            var vTableHeader = new VTableHeader()
+            {
+                Attributes = VTableAttributes.Is32Bit,
+            };
+
+            foreach (var method in type.Methods)
+                vTableHeader.Table.Add(header.GetStream<TableStream>().ResolveRow(mapping[method]));
+            
+            directory.VTableHeaders.Add(vTableHeader);
+            
+            assembly.NetDirectory.VTablesDirectory = directory;
+            
+            using (var stream = new MemoryStream())
+            {
+                assembly.Write(new BinaryStreamWriter(stream), new CompactNetAssemblyBuilder(assembly));
+                
+                assembly = WindowsAssembly.FromBytes(stream.ToArray());
+
+                directory = assembly.NetDirectory.VTablesDirectory;
+                Assert.NotNull(directory);
+                Assert.Equal(1, directory.VTableHeaders.Count);
+                Assert.Equal(type.Methods.Select(x => mapping[x]),
+                    directory.VTableHeaders[0].Table.Select(x => x.MetadataToken));
+            }
+            
+        }
     }
 }

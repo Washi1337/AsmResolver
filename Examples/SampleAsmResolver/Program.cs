@@ -19,16 +19,12 @@ namespace SampleAsmResolver
         {
             // Create new assembly.
             var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", false);
-            assembly.NetDirectory.Flags = ImageNetDirectoryFlags.None; // Required for mixed mode apps.
+            assembly.NetDirectory.Flags &= ~ImageNetDirectoryFlags.IlOnly; // Required for mixed mode apps.
             var header = assembly.NetDirectory.MetadataHeader;
             
             // Lock the metadata so that we can add and remove members safely.
             var image = header.LockMetadata();
             var importer = new ReferenceImporter(image);
-            
-            // Add custom resource.
-            image.Assembly.Resources.Add(new ManifestResource("MyResource", ManifestResourceAttributes.Public,
-                new byte[] {10, 9, 8, 7, 6, 5, 4, 3, 2, 1}));
             
             // Create a native method.
             var nativeMethod = CreateNativeMethod(image);
@@ -58,10 +54,6 @@ namespace SampleAsmResolver
             
             // Set entrypoint to our main method.
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
-            
-            // Add a custom metadata stream.
-            header.StreamHeaders.Add(new MetadataStreamHeader("#Washi",
-                new CustomMetadataStream(new byte[] {1, 2, 3, 4, 5, 6, 7, 8})));
             
             // Save!
             string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output.exe");

@@ -241,7 +241,7 @@
                 if (_readingContext != null)
                 {
                     var context = _readingContext.CreateSubContext(
-                        _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
+                        _readingContext.Assembly.RvaToFileOffset(VTableFixupsDirectory.VirtualAddress), (int) VTableFixupsDirectory.Size);
                     if (context != null)
                         return _vtablesDirectory = VTablesDirectory.FromReadingContext(context);
                 }

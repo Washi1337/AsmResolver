@@ -14,11 +14,9 @@ namespace AsmResolver.Net.Emit
             Segments.Add(ImportBuffer.AddressTables);
             Segments.Add(NetDirectory = assembly.NetDirectory);
             Segments.Add(MethodBodyTable = new RvaDataSegmentTableBuffer(assembly));
-            
+
             if (assembly.NetDirectory.ResourcesManifest != null)
-            {
-                Segments.Add(ResourcesManifest = assembly.NetDirectory.ResourcesManifest);
-            }
+                Segments.Add(assembly.NetDirectory.ResourcesManifest);
 
             Segments.Add(FieldDataTable = new RvaDataSegmentTableBuffer(assembly));
             Segments.Add(MetadataDirectory = new MetadataDirectoryBuffer(assembly.NetDirectory.MetadataHeader));
@@ -28,7 +26,17 @@ namespace AsmResolver.Net.Emit
                 Segments.Add(assembly.DebugDirectory);
                 Segments.Add(assembly.DebugDirectory.Data);
             }
-            
+
+            if (NetDirectory.StrongNameData != null)
+                Segments.Add(NetDirectory.StrongNameData);
+
+            if (NetDirectory.VTablesDirectory != null)
+            {
+                VTableFixups = new VTableFixupsBuffer(NetDirectory.VTablesDirectory);
+                Segments.Add(VTableFixups.Directory);
+                Segments.Add(VTableFixups.EntriesTable);
+            }
+
             _importDirectory.Segments.Add(ImportBuffer.ModuleImportTable);
             _importDirectory.Segments.Add(ImportBuffer.LookupTables);
             _importDirectory.Segments.Add(ImportBuffer.NameTable);
@@ -74,12 +82,6 @@ namespace AsmResolver.Net.Emit
             private set;
         }
 
-        public ResourcesManifest ResourcesManifest
-        {
-            get;
-            private set;
-        }
-
         public MetadataDirectoryBuffer MetadataDirectory
         {
             get;
@@ -87,6 +89,12 @@ namespace AsmResolver.Net.Emit
         }
 
         public ImageDebugDirectory DebugDirectory
+        {
+            get;
+            private set;
+        }
+
+        public VTableFixupsBuffer VTableFixups
         {
             get;
             private set;
@@ -101,6 +109,8 @@ namespace AsmResolver.Net.Emit
         public override void UpdateReferences(EmitContext context)
         {
             ImportBuffer.UpdateTableRvas();
+            if (VTableFixups != null)
+                VTableFixups.UpdateTableRvas(context);
             UpdateNetDirectory(context);
             base.UpdateReferences(context);
         }
@@ -111,10 +121,10 @@ namespace AsmResolver.Net.Emit
             NetDirectory.MetadataDirectory.VirtualAddress = (uint) assembly.FileOffsetToRva(MetadataDirectory.StartOffset);
             NetDirectory.MetadataDirectory.Size = MetadataDirectory.GetPhysicalLength();
 
-            if (ResourcesManifest != null)
+            if (NetDirectory.ResourcesManifest != null)
             {
-                NetDirectory.ResourcesDirectory.VirtualAddress = (uint) assembly.FileOffsetToRva(ResourcesManifest.StartOffset);
-                NetDirectory.ResourcesDirectory.Size = ResourcesManifest.GetPhysicalLength();
+                NetDirectory.ResourcesDirectory.VirtualAddress = (uint) assembly.FileOffsetToRva(NetDirectory.ResourcesManifest.StartOffset);
+                NetDirectory.ResourcesDirectory.Size = NetDirectory.ResourcesManifest.GetPhysicalLength();
             }
             
             if (NetDirectory.StrongNameData != null)
@@ -122,6 +132,13 @@ namespace AsmResolver.Net.Emit
                 NetDirectory.StrongNameSignatureDirectory.VirtualAddress =
                     (uint) assembly.FileOffsetToRva(NetDirectory.StrongNameData.StartOffset);
                 NetDirectory.StrongNameSignatureDirectory.Size = NetDirectory.StrongNameData.GetPhysicalLength();
+            }
+            
+            if (VTableFixups != null)
+            {
+                NetDirectory.VTableFixupsDirectory.VirtualAddress =
+                    (uint) assembly.FileOffsetToRva(VTableFixups.Directory.StartOffset);
+                NetDirectory.VTableFixupsDirectory.Size = VTableFixups.Directory.GetPhysicalLength();
             }
         }
 

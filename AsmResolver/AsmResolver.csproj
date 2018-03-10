@@ -154,6 +154,7 @@
     <Compile Include="Net\Cts\TypeReference.cs" />
     <Compile Include="Net\Cts\TypeSpecification.cs" />
     <Compile Include="Net\CustomMetadataStream.cs" />
+    <Compile Include="Net\Emit\VTableFixupsBuffer.cs" />
     <Compile Include="Net\GuidStream.cs" />
     <Compile Include="Net\ImageNetDirectory.cs" />
     <Compile Include="Net\ImageNetDirectoryFlags.cs" />
@@ -164,6 +165,8 @@
     <Compile Include="Net\ResourcesManifest.cs" />
     <Compile Include="Net\Metadata\SecurityAction.cs" />
     <Compile Include="Net\ReflectionAssemblyNameWrapper.cs" />
+    <Compile Include="Net\VTableAttributes.cs" />
+    <Compile Include="Net\VTableHeader.cs" />
     <Compile Include="RvaDataSegment.cs" />
     <Compile Include="Net\MetadataStreamHeaderCollection.cs" />
     <Compile Include="Net\IAssemblyDescriptor.cs" />
