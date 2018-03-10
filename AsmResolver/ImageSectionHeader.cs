@@ -30,14 +30,14 @@ namespace AsmResolver
                 header.PointerToRawData, 
                 (int) header.SizeOfRawData);
 
-            header.Section = new ImageSection(sectionReader);
+            header.Section = new ImageSection(header, sectionReader);
 
             return header;
         }
 
         public ImageSectionHeader()
         {
-            Section = new ImageSection();
+            Section = new ImageSection(this);
         }
 
         public WindowsAssembly Assembly

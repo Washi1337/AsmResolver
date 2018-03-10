@@ -47,10 +47,12 @@
     <Compile Include="BaseRelocationEntry.cs" />
     <Compile Include="BaseRelocationType.cs" />
     <Compile Include="Collections\Generic\Collection.cs" />
+    <Compile Include="Emit\WindowsAssemblyBuilder.cs" />
     <Compile Include="Emit\EmitContext.cs" />
     <Compile Include="Emit\FileSegmentBuilder.cs" />
     <Compile Include="Emit\ImportDirectoryBuffer.cs" />
     <Compile Include="Emit\ResourceDirectoryBuffer.cs" />
+    <Compile Include="Emit\SectionTableBuffer.cs" />
     <Compile Include="ImageDebugDirectory.cs" />
     <Compile Include="ImageResourceDirectoryType.cs" />
     <Compile Include="ImageSection.cs" />
@@ -87,10 +89,13 @@
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
     <Compile Include="Net\Emit\BlobStreamBuffer.cs" />
-    <Compile Include="Net\Emit\CompactNetTextContent.cs" />
+    <Compile Include="Net\Emit\BootstrapperSegment.cs" />
+    <Compile Include="Net\Emit\CompactNetAssemblyBuilder.cs" />
+    <Compile Include="Net\Emit\CompactNetTextContents.cs" />
     <Compile Include="Net\Emit\GuidStreamBuffer.cs" />
     <Compile Include="Net\Emit\MetadataBuffer.cs" />
     <Compile Include="Net\Emit\MemberNotImportedException.cs" />
+    <Compile Include="Net\Emit\MetadataDirectoryBuffer.cs" />
     <Compile Include="Net\Emit\MetadataStreamBuffer.cs" />
     <Compile Include="Net\Emit\ResourcesBuffer.cs" />
     <Compile Include="Emit\RvaDataSegmentTableBuffer.cs" />

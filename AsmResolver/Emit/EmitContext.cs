@@ -4,14 +4,14 @@ namespace AsmResolver.Emit
 {
     public class EmitContext
     {
-        public EmitContext(WindowsAssembly assembly)
+        public EmitContext(WindowsAssemblyBuilder builder)
         {
-            if (assembly == null)
-                throw new ArgumentNullException("assembly");
-            Assembly = assembly;
+            if (builder == null)
+                throw new ArgumentNullException("builder");
+            this.Builder = builder;
         }
 
-        public WindowsAssembly Assembly
+        public WindowsAssemblyBuilder Builder
         {
             get;
             private set;

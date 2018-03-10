@@ -59,7 +59,6 @@ namespace AsmResolver.Net.Emit
                     writer.WriteByte(0);
                 }
 
-                writer.WriteByte(0);
                 writer.WriteZeroes((int)(FileSegment.Align(_length, 4) - _length));
                 
                 return new StringStream(new MemoryStreamReader(stream.ToArray()));

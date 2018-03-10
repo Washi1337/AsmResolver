@@ -31,7 +31,7 @@ namespace AsmResolver.Emit
                 foreach (var directory in _directories)
                 {
                     UpdateReferences(
-                        context.Assembly.NtHeaders.OptionalHeader.DataDirectories[ImageDataDirectory.ResourceDirectoryIndex], 
+                        context.Builder.Assembly.NtHeaders.OptionalHeader.DataDirectories[ImageDataDirectory.ResourceDirectoryIndex], 
                         directory);
                 }
                 base.UpdateReferences(context);
@@ -103,6 +103,13 @@ namespace AsmResolver.Emit
             DirectoryTable = new DirectoryTableBuffer(offsetConverter);
             DataTable = new DataTableBuilder();
             DataDirectoryTable = new DataDirectoryTableBuffer(DataTable, offsetConverter);
+        }
+
+        public ResourceDirectoryBuffer(WindowsAssembly assembly)
+            : this((IOffsetConverter) assembly)
+        {
+            if (assembly.RootResourceDirectory != null)
+                AddDirectory(assembly.RootResourceDirectory, 0);
         }
 
         public DirectoryTableBuffer DirectoryTable

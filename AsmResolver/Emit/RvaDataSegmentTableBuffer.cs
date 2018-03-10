@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace AsmResolver.Emit
 {
@@ -33,10 +34,16 @@ namespace AsmResolver.Emit
                 {
                     if (dataSegment.ShouldBeAligned)
                         dataSegment.StartOffset = Align((uint) dataSegment.StartOffset, 4);
-
-                    dataSegment.Rva = (uint) _converter.FileOffsetToRva(dataSegment.StartOffset);
                 }
             }
+        }
+
+        public override void UpdateReferences(EmitContext context)
+        {
+            foreach (var segment in Segments.OfType<RvaDataSegment>())
+                segment.Rva = (uint) _converter.FileOffsetToRva(segment.StartOffset);
+            
+            base.UpdateReferences(context);
         }
     }
 }

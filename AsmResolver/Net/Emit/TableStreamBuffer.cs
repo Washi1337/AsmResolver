@@ -199,7 +199,7 @@ namespace AsmResolver.Net.Emit
                     Column5 = assemblyRef.Attributes,
                     Column6 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.PublicKey),
                     Column7 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Name),
-                    Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Culture),
+                    Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Culture == "neutral" ? null : assemblyRef.Culture),
                     Column9 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.HashValue),
                 };
 
@@ -355,7 +355,7 @@ namespace AsmResolver.Net.Emit
                 Column6 = assembly.Attributes,
                 Column7 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assembly.PublicKey),
                 Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Name),
-                Column9 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Culture)
+                Column9 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Culture == "neutral" ? null : assembly.Culture)
             };
             assemblyTable.Add(assemblyRow);
             _members.Add(assembly, assemblyRow.MetadataToken);

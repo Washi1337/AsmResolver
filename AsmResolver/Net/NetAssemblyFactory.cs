@@ -20,6 +20,7 @@ namespace AsmResolver.Net
             image.Assembly.Version = new Version(1, 0, 0, 0);
 
             var mainModule = new ModuleDefinition(name + (isDll ? ".dll" :".exe"));
+            mainModule.Mvid = Guid.NewGuid();
             image.Assembly.Modules.Add(mainModule);
 
             mainModule.Types.Add(new TypeDefinition(null, "<Module>"));
@@ -75,7 +76,7 @@ namespace AsmResolver.Net
             fileHeader.Characteristics = ImageCharacteristics.Image | ImageCharacteristics.LineNumsStripped |
                                          ImageCharacteristics.LocalSymsStripped | ImageCharacteristics.Machine32Bit;
         }
-
+        
         private static void InitializeNetDirectory(ImageNetDirectory directory)
         {
             directory.Cb = 0x48;

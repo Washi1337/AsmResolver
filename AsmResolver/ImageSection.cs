@@ -1,31 +1,30 @@
 ﻿
+using System;
+using AsmResolver.Emit;
+
 namespace AsmResolver
 {
-    public class ImageSection : FileSegment, IOffsetConverter
+    public class ImageSection : SimpleFileSegmentBuilder, IOffsetConverter
     {
-        private readonly LazyValue<FileSegment> _contents;
-        
-        public ImageSection()
+        public ImageSection(ImageSectionHeader header)
         {
-            _contents = new LazyValue<FileSegment>(default(FileSegment));
+            if (header == null)
+                throw new ArgumentNullException("header");
+            Header = header;
         }
 
-        public ImageSection(IBinaryStreamReader reader)
+        public ImageSection(ImageSectionHeader header, IBinaryStreamReader reader)
         {
-            _contents = new LazyValue<FileSegment>(() =>
-                new DataSegment(reader.ReadBytes((int) reader.Length)));
+            if (header == null)
+                throw new ArgumentNullException("header");
+            Header = header;
+            Segments.Add(new DataSegment(reader.ReadBytes((int) reader.Length)));
         }
 
         public ImageSectionHeader Header
         {
             get;
             private set;
-        }
-
-        public FileSegment Contents
-        {
-            get { return _contents.Value; }
-            set { _contents.Value = value; }
         }
 
         public long RvaToFileOffset(long rva)
@@ -38,9 +37,14 @@ namespace AsmResolver
             return Header.FileOffsetToRva(fileOffset);
         }
 
+        public uint GetVirtualSize()
+        {
+            return base.GetPhysicalLength();
+        }
+        
         public override uint GetPhysicalLength()
         {
-            uint physicalLength = Contents.GetPhysicalLength();
+            uint physicalLength = base.GetPhysicalLength();
             return Header != null && Header.Assembly != null
                 ? Align(physicalLength, Header.Assembly.NtHeaders.OptionalHeader.FileAlignment)
                 : physicalLength;
@@ -49,9 +53,10 @@ namespace AsmResolver
         public override void Write(WritingContext context)
         {
             // TODO: more elegant way of creating buffer.
-            context.Writer.Position += GetPhysicalLength();
-            context.Writer.Position -= GetPhysicalLength();
-            Contents.Write(context);
+            uint physicalLength = GetPhysicalLength();
+            context.Writer.Position += physicalLength;
+            context.Writer.Position -= physicalLength;
+            base.Write(context);
         }
     }
 }

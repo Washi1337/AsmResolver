@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.Emit;
 using AsmResolver.Net;
 
 namespace AsmResolver
@@ -303,6 +304,11 @@ namespace AsmResolver
             set { _debugDirectory = value; }
         }
 
+        public IEnumerable<ImageSection> GetSections()
+        {
+            return SectionHeaders.Select(x => x.Section);
+        }
+
         public ImageSection GetSectionByName(string name)
         {
             var header = SectionHeaders.FirstOrDefault(x => x.Name == name);
@@ -353,27 +359,34 @@ namespace AsmResolver
                         fileOffset < sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData);
         }
 
-        // TODO
-        /// <summary>
-        /// Rebuilds and writes the assembly to a specific file path.
-        /// </summary>
-        /// <param name="file">The file path to write the image to.</param>
-        public void Write(string file)
-        {
-            using (var stream = File.Create(file))
-            {
-                Write(new BinaryStreamWriter(stream));
-            }
-        }
-
-        /// <summary>
-        /// Rebuilds and writes the assembly to a specific binary stream.
-        /// </summary>
-        /// <param name="writer">The writer to write the image to.</param>
-        public void Write(IBinaryStreamWriter writer)
-        {         
-
-        }
+//        // TODO
+//        /// <summary>
+//        /// Rebuilds and writes the assembly to a specific file path.
+//        /// </summary>
+//        /// <param name="file">The file path to write the image to.</param>
+//        public void Write(string file)
+//        {
+//            using (var stream = File.Create(file))
+//            {
+//                Write(new BinaryStreamWriter(stream));
+//            }
+//        }
+//
+//        /// <summary>
+//        /// Rebuilds and writes the assembly to a specific binary stream.
+//        /// </summary>
+//        /// <param name="writer">The writer to write the image to.</param>
+//        public void Write(IBinaryStreamWriter writer)
+//        {
+//            var buffer = new WindowsAssemblyBuffer(this);
+//
+//            var context = new EmitContext(this);
+//            
+//            buffer.UpdateOffsets(context);
+//            buffer.UpdateReferences(context);
+//            
+//            buffer.Write(new WritingContext(this, writer));
+//        }
 
         ///// <summary>
         ///// Rebuilds and writes the assembly to a destination, using the specified building parameters.

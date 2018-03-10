@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.Emit
 {
     public class ImportDirectoryBuffer
     {
-        public sealed class ImportTableBuffer : FileSegmentBuilder
+        public sealed class ModuleImportTableBuffer : FileSegmentBuilder
         {
-            public ImportTableBuffer()
+            public ModuleImportTableBuffer()
             {
                 Segments.Add(new ImageModuleImport());
             }
 
             public void AddModuleImport(ImageModuleImport import)
             {
-                Segments.Insert(Segments.Count - 2, import);
+                Segments.Insert(Segments.Count - 1, import);
+            }
+
+            public IEnumerable<ImageModuleImport> GetAddedImports()
+            {
+                return Segments.OfType<ImageModuleImport>();
             }
         }
 
@@ -131,15 +137,20 @@ namespace AsmResolver.Emit
 
             _offsetConverter = offsetConverter;
 
-            ImportTable = new ImportTableBuffer();
+            ModuleImportTable = new ModuleImportTableBuffer();
             NameTable = new NameTableBuffer();
             LookupTables = new LookupTablesBuffer(_offsetConverter, NameTable);
             AddressTables = new LookupTablesBuffer(_offsetConverter, NameTable);
-            
-            
         }
 
-        public ImportTableBuffer ImportTable
+        public ImportDirectoryBuffer(WindowsAssembly assembly)
+            : this(assembly, assembly.NtHeaders.OptionalHeader.Magic == OptionalHeaderMagic.Pe32)
+        {
+            foreach (var import in assembly.ImportDirectory.ModuleImports)
+                AddModuleImport(import);
+        }
+
+        public ModuleImportTableBuffer ModuleImportTable
         {
             get;
             private set;
@@ -172,30 +183,11 @@ namespace AsmResolver.Emit
         public void AddModuleImport(ImageModuleImport moduleImport)
         {
             _imports.Add(moduleImport);
-            ImportTable.AddModuleImport(moduleImport);
+            ModuleImportTable.AddModuleImport(moduleImport);
             LookupTables.GetModuleLookupTable(moduleImport);
             AddressTables.GetModuleLookupTable(moduleImport);
             NameTable.GetModuleNameSegment(moduleImport);
         }
-
-        //public void UpdateReferences(EmitContext context)
-        //{
-        //    UpdateTableRvas();
-        //    //UpdateDataDirectories(context);
-
-        //}
-
-        //private void UpdateDataDirectories(EmitContext context)
-        //{
-        //    var optionalHeader = context.Assembly.NtHeaders.OptionalHeader;
-        //    var importDirectory = optionalHeader.DataDirectories[ImageDataDirectory.ImportDirectoryIndex];
-        //    importDirectory.VirtualAddress = (uint)_offsetConverter.FileOffsetToRva(_importTableBuilder.StartOffset);
-        //    importDirectory.Size = this.GetPhysicalLength();
-
-        //    var iatDirectory = optionalHeader.DataDirectories[ImageDataDirectory.IatDirectoryIndex];
-        //    iatDirectory.VirtualAddress = (uint)_offsetConverter.FileOffsetToRva(AddressTables.StartOffset);
-        //    iatDirectory.Size = AddressTables.GetPhysicalLength();
-        //}
 
         public void UpdateTableRvas()
         {
@@ -206,6 +198,5 @@ namespace AsmResolver.Emit
                 module.ImportAddressTableRva = (uint)_offsetConverter.FileOffsetToRva(AddressTables.GetModuleLookupTable(module).StartOffset);
             }
         }
-
     }
 }

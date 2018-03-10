@@ -46,7 +46,7 @@ namespace AsmResolver.Net.Emit
             if (!_signatureOffsetMapping.TryGetValue(signature, out offset))
             {
                 _signatureOffsetMapping.Add(signature, offset = _length);
-                var signatureLength = signature.GetPhysicalLength();
+                uint signatureLength = signature.GetPhysicalLength();
                 _length += signatureLength.GetCompressedSize() + signatureLength;
             }
             return offset;
@@ -81,7 +81,6 @@ namespace AsmResolver.Net.Emit
                     }
                 }
 
-                writer.WriteByte(0);
                 writer.WriteZeroes((int)(FileSegment.Align(_length, 4) - _length));
                 return new BlobStream(new MemoryStreamReader(stream.ToArray()));
             }

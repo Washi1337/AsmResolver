@@ -37,12 +37,14 @@ namespace AsmResolver.Emit
         {
             for (int i = 0; i < Segments.Count; i++)
             {
+                var currentSegment = Segments[i];
+                
                 if (i == 0)
-                    Segments[i].StartOffset = StartOffset;
+                    currentSegment.StartOffset = StartOffset;
                 else
-                    Segments[i].StartOffset = Segments[i - 1].StartOffset + Segments[i - 1].GetPhysicalLength();
+                    currentSegment.StartOffset = Segments[i - 1].StartOffset + Segments[i - 1].GetPhysicalLength();
 
-                var builder = Segments[i] as FileSegmentBuilder;
+                var builder = currentSegment as FileSegmentBuilder;
                 if (builder != null)
                     builder.UpdateOffsets(context);
             }

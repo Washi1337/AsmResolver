@@ -48,7 +48,7 @@ namespace AsmResolver.Net.Cil
 
         public uint GetStringOffset(string value)
         {
-            return _buffer.UserStringStreamBuffer.GetStringOffset(value);
+            return 0x70000000 | _buffer.UserStringStreamBuffer.GetStringOffset(value);
         }
 
         public int GetVariableIndex(VariableSignature variable)

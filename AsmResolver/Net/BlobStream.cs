@@ -75,7 +75,8 @@
 
         public override void Write(WritingContext context)
         {
-            context.Writer.WriteBytes(_reader.ReadBytes((int) _reader.Length));
+            var reader = _reader.CreateSubReader(_reader.StartPosition, (int) _reader.Length);
+            context.Writer.WriteBytes(reader.ReadBytes((int) reader.Length));
         }
     }
 
