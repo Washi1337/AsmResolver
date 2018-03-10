@@ -32,9 +32,17 @@ namespace AsmResolver.Net
             if (info1 == null || info2 == null)
                 return false;
 
+            if (info1.Culture != info2.Culture)
+            {
+                if (!((string.IsNullOrEmpty(info1.Culture) || info1.Culture == "neutral")
+                      && (string.IsNullOrEmpty(info2.Culture) || info2.Culture == "neutral")))
+                {
+                    return false;
+                }
+            }
+
             return info1.Name == info2.Name &&
                    info1.Version == info2.Version &&
-                   info1.Culture == info2.Culture &&
                    ByteArrayMatches(info1.PublicKeyToken, info2.PublicKeyToken);
         }
 
