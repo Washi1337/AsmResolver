@@ -24,8 +24,12 @@ namespace AsmResolver.Net.Emit
             bool isDll = context.Builder.Assembly.NtHeaders.FileHeader.Characteristics.HasFlag(ImageCharacteristics.Dll);
 
             var mscoreeModule = context.Builder.Assembly.ImportDirectory.ModuleImports.First(x => x.Name == "mscoree.dll");
-            var corMainImport = mscoreeModule.SymbolImports.First(
+            var corMainImport = mscoreeModule.SymbolImports.FirstOrDefault(
                 x => x.HintName != null && x.HintName.Name == (isDll ? "_CorDllMain" : "_CorExeMain"));
+
+            if (corMainImport == null)
+                throw new ArgumentException(".NET bootstrapper requires a reference to mscoree.dll!_CorDllMain or mscoree.dll!_CorExeMain.");
+            
             ulong address = corMainImport.GetTargetAddress(true);
 
             _addressSegment.Data = BitConverter.GetBytes((uint)(address | context.Builder.Assembly.NtHeaders.OptionalHeader.ImageBase));

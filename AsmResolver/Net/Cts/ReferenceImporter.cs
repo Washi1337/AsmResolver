@@ -368,6 +368,11 @@ namespace AsmResolver.Net.Cts
             return ImportArrayTypeSignature(arrayType);
         }
 
+        public TypeSignature ImportTypeSignature(ITypeDefOrRef typeDefOrRef)
+        {
+            return new TypeDefOrRefSignature(ImportType(typeDefOrRef));
+        }
+
         public TypeSignature ImportTypeSignature(TypeSignature signature)
         {
             if (signature is MsCorLibTypeSignature)

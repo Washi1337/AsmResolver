@@ -8,10 +8,10 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<TypeDefinition> _parent;
 
-        public PropertyMap(TypeDefinition parent)
+        public PropertyMap()
             : base(null, new MetadataToken(MetadataTokenType.PropertyMap))
         {
-            _parent = new LazyValue<TypeDefinition>(parent);
+            _parent = new LazyValue<TypeDefinition>(default(TypeDefinition));
             Properties = new DelegatedMemberCollection<PropertyMap, PropertyDefinition>(
                     this, 
                     GetPropertyOwner,
@@ -34,7 +34,7 @@ namespace AsmResolver.Net.Cts
         public TypeDefinition Parent
         {
             get { return _parent.Value; }
-            set { _parent.Value = value; }
+            internal set { _parent.Value = value; }
         }
 
         public Collection<PropertyDefinition> Properties

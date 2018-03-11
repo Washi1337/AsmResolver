@@ -10,7 +10,7 @@ namespace AsmResolver.Net
         {
             var assembly = new WindowsAssembly();
             assembly.RelocationDirectory = new ImageRelocationDirectory();
-            InitializeNtHeaders(assembly.NtHeaders);
+            InitializeNtHeaders(assembly.NtHeaders, isDll);
             InitializeNetDirectory(assembly.NetDirectory = new ImageNetDirectory());
             assembly.ImportDirectory.ModuleImports.Add(CreateMscoreeImport(isDll));
 
@@ -37,10 +37,10 @@ namespace AsmResolver.Net
             return module;
         }
 
-        private static void InitializeNtHeaders(ImageNtHeaders headers)
+        private static void InitializeNtHeaders(ImageNtHeaders headers, bool isDll)
         {
             headers.Signature = 0x00004550;
-            InitializeFileHeader(headers.FileHeader);
+            InitializeFileHeader(headers.FileHeader, isDll);
             InitializeOptionalHeader(headers.OptionalHeader);
         }
 
@@ -69,12 +69,14 @@ namespace AsmResolver.Net
 
         }
 
-        private static void InitializeFileHeader(ImageFileHeader fileHeader)
+        private static void InitializeFileHeader(ImageFileHeader fileHeader, bool isDll)
         {
             fileHeader.Machine = ImageMachineType.I386;
             fileHeader.SizeOfOptionalHeader = 0xE0;
             fileHeader.Characteristics = ImageCharacteristics.Image | ImageCharacteristics.LineNumsStripped |
                                          ImageCharacteristics.LocalSymsStripped | ImageCharacteristics.Machine32Bit;
+            if (isDll)
+                fileHeader.Characteristics |= ImageCharacteristics.Dll;
         }
         
         private static void InitializeNetDirectory(ImageNetDirectory directory)

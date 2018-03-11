@@ -31,6 +31,17 @@ namespace AsmResolver.Net.Signatures
             Parameters = new List<ParameterSignature>();
         }
 
+        public PropertySignature(TypeSignature propertyType)
+            : this(propertyType, Enumerable.Empty<ParameterSignature>())
+        {
+        }
+
+        public PropertySignature(TypeSignature propertyType, IEnumerable<ParameterSignature> parameters)
+        {
+            PropertyType = propertyType;
+            Parameters = new List<ParameterSignature>(parameters);
+        }
+
         public TypeSignature PropertyType
         {
             get;
@@ -45,7 +56,7 @@ namespace AsmResolver.Net.Signatures
         public IList<ParameterSignature> Parameters
         {
             get;
-            set;
+            private set;
         }
 
         public override uint GetPhysicalLength()

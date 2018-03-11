@@ -35,7 +35,7 @@ namespace AsmResolver.Net
         public string GetStringByOffset(uint offset)
         {
             if (offset == 0 || offset >= _reader.Length)
-                return string.Empty;
+                return null;
 
             var reader = _reader.CreateSubReader(_reader.StartPosition);
             reader.Position += offset;

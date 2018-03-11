@@ -703,7 +703,7 @@ namespace AsmResolver.Net.Emit
             // Create and add row.
             var mapRow = new MetadataRow<uint, uint>
             {
-                Column1 = propertyMap.Parent.MetadataToken.Rid,
+                Column1 = GetNewToken(propertyMap.Parent).Rid,
                 Column2 = _propertyList
             };
             table.Add(mapRow);
@@ -750,6 +750,8 @@ namespace AsmResolver.Net.Emit
                 Column1 = GetNewToken(eventMap.Parent).Rid,
                 Column2 = _eventList
             };
+            table.Add(mapRow);
+            _members.Add(eventMap, mapRow.MetadataToken);
 
             _eventList += (uint) eventMap.Events.Count;
 
@@ -765,11 +767,11 @@ namespace AsmResolver.Net.Emit
             var eventRow = new MetadataRow<EventAttributes, uint, uint>
             {
                 Column1 = @event.Attributes,
-                Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(Name),
+                Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(@event.Name),
                 Column3 = _tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(GetTypeToken(@event.EventType)),
             };
             table.Add(eventRow);
-            _members.Add(@event, @event.MetadataToken);
+            _members.Add(@event, eventRow.MetadataToken);
 
             // Add associated methods.
             foreach (var semantic in @event.Semantics)

@@ -7,11 +7,11 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<MethodDefinition> _method;
         private readonly LazyValue<IHasSemantics> _association;
 
-        public MethodSemantics(MethodDefinition method, IHasSemantics association, MethodSemanticsAttributes attributes) 
+        public MethodSemantics(MethodDefinition method, MethodSemanticsAttributes attributes) 
             : base(null, new MetadataToken(MetadataTokenType.MethodSemantics))
         {
             _method = new LazyValue<MethodDefinition>(method);
-            _association = new LazyValue<IHasSemantics>(association);
+            _association = new LazyValue<IHasSemantics>(default(IHasSemantics));
             Attributes = attributes;
         }
         
@@ -52,7 +52,7 @@ namespace AsmResolver.Net.Cts
         public IHasSemantics Association
         {
             get { return _association.Value; }
-            set { _association.Value = value; }
+            internal set { _association.Value = value; }
         }
     }    
 }

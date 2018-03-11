@@ -136,32 +136,30 @@ namespace AsmResolver.Net.Metadata
             int left = 0;
             int right = Count - 1;
             int m = 0;
-            
-            MetadataRow row = null;
-            uint currentKey = 0;
-            
-            while (left <= right && left < Count && right < Count)
+
+            while (left <= right)
             {
                 m = (left + right) / 2;
-                row = GetRow(m);
-                currentKey = Convert.ToUInt32(row.GetAllColumns()[keyColumnIndex]);
+                var row = GetRow(m);
+                uint currentKey = Convert.ToUInt32(row.GetAllColumns()[keyColumnIndex]);
 
                 if (currentKey > key)
                     right = m - 1;
                 else if (currentKey < key)
                     left = m + 1;
                 else
-                {
-                    left++;
-                    right++;
-                }
+                    break;
             }
 
-            if (row != null && currentKey > key)
+            while (m < Count - 1)
             {
-                m--;
+                var nextRow = GetRow(m + 1);
+                var nextKey = Convert.ToUInt32(nextRow.GetAllColumns()[keyColumnIndex]);
+                if (nextKey > key)
+                    return m;
+                m++;
             }
-                
+
             return m;
         }
 

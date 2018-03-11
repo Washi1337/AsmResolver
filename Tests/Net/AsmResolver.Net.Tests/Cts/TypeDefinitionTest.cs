@@ -1,7 +1,9 @@
 ﻿
+using System.Collections.Generic;
 using AsmResolver.Net;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Signatures;
 using Xunit;
 
 namespace AsmResolver.Tests.Net.Cts
@@ -9,7 +11,8 @@ namespace AsmResolver.Tests.Net.Cts
     public class TypeDefinitionTest
     {
         private const string DummyAssemblyName = "SomeAssemblyName";
-
+        private static readonly SignatureComparer _comparer = new SignatureComparer();
+        
         [Fact]
         public void PersistentAttributes()
         {
@@ -71,6 +74,84 @@ namespace AsmResolver.Tests.Net.Cts
 
             image = header.LockMetadata();
             Assert.Equal(newNamespace, ((TypeDefinition)image.ResolveMember(mapping[type])).Namespace);
+        }
+
+        [Fact]
+        public void PersistentFields()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var types = new List<TypeDefinition>();
+            for (int i = 0; i < 5; i++)
+            {
+                var type = new TypeDefinition(null, "SomeType_" + i, 
+                    TypeAttributes.Public | TypeAttributes.Abstract,
+                    importer.ImportType(typeof(object)));
+                
+                for (int j = 0; j < i; j++)
+                {
+                    var field = new FieldDefinition("SomeField_" + i + "_" + j, 
+                        FieldAttributes.Public,
+                        new FieldSignature(image.TypeSystem.Int32));
+                    type.Fields.Add(field);
+                }
+
+                image.Assembly.Modules[0].Types.Add(type);
+                types.Add(type);
+            }
+
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            foreach (var type in types)
+            {
+                var newType = ((TypeDefinition) image.ResolveMember(mapping[type]));
+                Assert.Equal(type.Fields.Count, type.Fields.Count);
+                Assert.Equal(type.Fields, newType.Fields, _comparer);
+            }
+        }
+
+        [Fact]
+        public void PersistentMethods()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var types = new List<TypeDefinition>();
+            for (int i = 0; i < 5; i++)
+            {
+                var type = new TypeDefinition(null, "SomeType_" + i, 
+                    TypeAttributes.Public | TypeAttributes.Abstract,
+                    importer.ImportType(typeof(object)));
+                
+                for (int j = 0; j < i; j++)
+                {
+                    var method = new MethodDefinition("SomeMethod_" + i + "_" + j, 
+                        MethodAttributes.Public | MethodAttributes.Abstract,
+                        new MethodSignature(image.TypeSystem.Void));
+                    type.Methods.Add(method);
+                }
+
+                image.Assembly.Modules[0].Types.Add(type);
+                types.Add(type);
+            }
+
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            foreach (var type in types)
+            {
+                var newType = ((TypeDefinition) image.ResolveMember(mapping[type]));
+                Assert.Equal(type.Methods.Count, type.Methods.Count);
+                Assert.Equal(type.Methods, newType.Methods, _comparer);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AsmResolver.Collections.Generic;
+﻿using System;
+using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -176,13 +177,31 @@ namespace AsmResolver.Net.Cts
         public PropertyMap PropertyMap
         {
             get { return _propertyMap.Value; }
-            set { _propertyMap.Value = value; }
+            set
+            {
+                if (value != null && value.Parent != null)
+                    throw new InvalidOperationException("Property map is already added to another type.");
+                if (_propertyMap.Value != null)
+                    _propertyMap.Value.Parent = null;
+                _propertyMap.Value = value;
+                if (value != null)
+                    value.Parent = this;
+            }
         }
         
         public EventMap EventMap
         {
             get { return _eventMap.Value; }
-            set { _eventMap.Value = value; }
+            set
+            {
+                if (value != null && value.Parent != null)
+                    throw new InvalidOperationException("Event map is already added to another type.");
+                if (_eventMap.Value != null)
+                    _eventMap.Value.Parent = null;
+                _eventMap.Value = value;
+                if (value != null)
+                    value.Parent = this;
+            }
         }
 
         public virtual string FullName

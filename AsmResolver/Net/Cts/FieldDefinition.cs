@@ -169,10 +169,10 @@ namespace AsmResolver.Net.Cts
             get { return _fieldRva.Value; }
             set
             {
-                if (_fieldRva.Value != null)
-                    _fieldRva.Value.Field = null;
                 if (value != null && value.Field != null)
                     throw new InvalidOperationException("Field Rva is already added to another field.");
+                if (_fieldRva.Value != null)
+                    _fieldRva.Value.Field = null;
                 _fieldRva.Value = value;
                 if (value != null)
                     value.Field = this;
@@ -184,10 +184,10 @@ namespace AsmResolver.Net.Cts
             get { return _fieldLayout.Value; }
             set
             {
-                if (_fieldLayout.Value != null)
-                    _fieldLayout.Value.Field = null;
                 if (value != null && value.Field != null)
                     throw new InvalidOperationException("Field layout is already added to another field.");
+                if (_fieldLayout.Value != null)
+                    _fieldLayout.Value.Field = null;
                 _fieldLayout.Value = value;
                 if (value != null)
                     value.Field = this;

@@ -87,6 +87,29 @@ namespace AsmResolver.Tests.Net.Cts
         }
 
         [Fact]
+        public void PersistentDeclaringType()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+            
+            var type = new TypeDefinition("MyNamespace", "MyType", TypeAttributes.Public, importer.ImportType(typeof(object)));
+            image.Assembly.Modules[0].Types.Add(type);
+            
+            var field = CreateAndAddDummyField(image);
+            field.DeclaringType.Fields.Remove(field);
+            type.Fields.Add(field);
+            
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            field = (FieldDefinition) image.ResolveMember(mapping[field]);
+            Assert.Equal(type, field.DeclaringType, _comparer);
+        }
+        
+        [Fact]
         public void PersistentConstant()
         {
             var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);

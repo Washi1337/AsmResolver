@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using AsmResolver.Net;
 using AsmResolver.Net.Cts;
+using AsmResolver.Net.Emit;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 using Xunit;
@@ -129,6 +130,31 @@ namespace AsmResolver.Tests.Net.Cts
             image = header.LockMetadata();
             var newMethod = (MethodDefinition)image.ResolveMember(mapping[method]);
             Assert.Equal(newSignature, newMethod.Signature, _comparer);
+        }
+
+        [Fact]
+        public void PersistentDeclaringType()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+            
+            var type = new TypeDefinition("MyNamespace", "MyType", TypeAttributes.Public, importer.ImportType(typeof(object)));
+            image.Assembly.Modules[0].Types.Add(type);
+            
+            var method = CreateAndAddDummyMethod(image);
+            method.DeclaringType.Methods.Remove(method);
+            type.Methods.Add(method);
+            
+            var mapping = header.UnlockMetadata();
+
+            assembly.Write("C:\\users\\washi\\desktop\\test.exe", new CompactNetAssemblyBuilder(assembly));
+            
+            image = header.LockMetadata();
+            method = (MethodDefinition) image.ResolveMember(mapping[method]);
+            Assert.Equal(type, method.DeclaringType, _comparer);
         }
 
         [Fact]

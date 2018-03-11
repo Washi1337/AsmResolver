@@ -17,6 +17,7 @@ namespace AsmResolver.Net
         IEqualityComparer<IMemberReference>,
         IEqualityComparer<MethodSignature>,
         IEqualityComparer<FieldSignature>,
+        IEqualityComparer<PropertySignature>,
         IEqualityComparer<MarshalDescriptor>
     {
         /// <summary>
@@ -839,6 +840,12 @@ namespace AsmResolver.Net
                    Equals(signature1.PropertyType, signature2.PropertyType) &&
                    EqualsManyTypes(signature1.Parameters.Select(x => x.ParameterType),
                        signature2.Parameters.Select(x => x.ParameterType));
+        }
+
+        public int GetHashCode(PropertySignature obj)
+        {
+            return GetHashCode(obj.PropertyType) ^
+                   obj.Parameters.Aggregate(0, (i, signature) => i ^ GetHashCode(signature.ParameterType));
         }
 
         public bool Equals(GenericInstanceMethodSignature signature1, GenericInstanceMethodSignature signature2)

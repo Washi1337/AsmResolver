@@ -8,10 +8,10 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<TypeDefinition> _parent;
 
-        public EventMap(TypeDefinition parent)
+        public EventMap()
             : base(null, new MetadataToken(MetadataTokenType.EventMap))
         {
-            _parent = new LazyValue<TypeDefinition>(parent);
+            _parent = new LazyValue<TypeDefinition>(default(TypeDefinition));
             Events = new DelegatedMemberCollection<EventMap, EventDefinition>(this, GetEventOwner, SetEventOwner);
         }
 
@@ -34,7 +34,7 @@ namespace AsmResolver.Net.Cts
         public TypeDefinition Parent
         {
             get { return _parent.Value; }
-            set { _parent.Value = value; }
+            internal set { _parent.Value = value; }
         }
 
         public Collection<EventDefinition> Events

@@ -7,6 +7,16 @@ namespace AsmResolver.Tests.Net
     public class NetAssemblyFactoryTest
     {
         [Fact]
+        public void FileHeader()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", true);
+            Assert.True(assembly.NtHeaders.FileHeader.Characteristics.HasFlag(ImageCharacteristics.Dll));
+
+            assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", false);
+            Assert.False(assembly.NtHeaders.FileHeader.Characteristics.HasFlag(ImageCharacteristics.Dll));
+        }
+        
+        [Fact]
         public void ImportDirectory()
         {
             var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", true);
