@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AsmResolver.Net.Cts
@@ -93,8 +94,19 @@ namespace AsmResolver.Net.Cts
             if (assembly == null)
                 return (TypeDefinition)ThrowOrReturn(type);
 
-            var typeDefTable = assembly.Modules[0].TopLevelTypes;
-            var definition = typeDefTable.FirstOrDefault(x => _signatureComparer.Equals(x, type)); // TODO: handle nested types after moduledef.Types implementation is changed.
+            IEnumerable<TypeDefinition> types;
+            if (type.DeclaringTypeDescriptor != null)
+            {
+                var declaringType = ResolveType(type.DeclaringTypeDescriptor);
+                if (declaringType == null)
+                    return (TypeDefinition) ThrowOrReturn(type);
+                types = declaringType.NestedClasses.Select(x => x.Class);
+            }
+            else
+            {
+                types = assembly.Modules[0].TopLevelTypes;
+            }
+            var definition = types.FirstOrDefault(x => _signatureComparer.Equals(x, type));
             return definition ?? (TypeDefinition)ThrowOrReturn(type);
         }
 

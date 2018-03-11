@@ -104,7 +104,7 @@ namespace AsmResolver.Net.Signatures
             if (typeSignature != null)
                 return TypeNameBuilder.GetAssemblyQualifiedName(typeSignature).GetSerStringSize();
             
-            throw new NotSupportedException();
+            throw new NotSupportedException("Invalid or unsupported argument element value in custom attribute.");
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)

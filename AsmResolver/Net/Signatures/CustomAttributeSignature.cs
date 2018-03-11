@@ -37,9 +37,14 @@ namespace AsmResolver.Net.Signatures
         }
 
         public CustomAttributeSignature()
+            : this(Enumerable.Empty<CustomAttributeArgument>())
         {
-            FixedArguments = new List<CustomAttributeArgument>();
-            NamedArguments = new List<CustomAttributeNamedArgument>();
+        }
+
+        public CustomAttributeSignature(IEnumerable<CustomAttributeArgument> fixedArguments)
+        {
+            FixedArguments = new List<CustomAttributeArgument>(fixedArguments);
+            NamedArguments = new List<CustomAttributeNamedArgument>();   
         }
 
         public IList<CustomAttributeArgument> FixedArguments
