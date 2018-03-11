@@ -10,7 +10,7 @@ namespace AsmResolver.Net.Cts
             : base(null, new MetadataToken(MetadataTokenType.FieldLayout))
         {
             Offset = offset;
-            _field = new LazyValue<FieldDefinition>(default(FieldDefinition));
+            _field = new LazyValue<FieldDefinition>();
         }
         
         internal FieldLayout(MetadataImage image, MetadataRow<uint, uint> row)

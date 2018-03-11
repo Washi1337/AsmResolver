@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Cts
         public PropertyMap()
             : base(null, new MetadataToken(MetadataTokenType.PropertyMap))
         {
-            _parent = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _parent = new LazyValue<TypeDefinition>();
             Properties = new DelegatedMemberCollection<PropertyMap, PropertyDefinition>(
                     this, 
                     GetPropertyOwner,

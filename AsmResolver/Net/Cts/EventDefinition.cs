@@ -16,7 +16,7 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(name);
             _eventType = new LazyValue<ITypeDefOrRef>(eventType);
 
-            _eventMap = new LazyValue<EventMap>(default(EventMap));
+            _eventMap = new LazyValue<EventMap>();
             
             CustomAttributes = new CustomAttributeCollection(this);
             Semantics = new MethodSemanticsCollection(this);

@@ -29,12 +29,12 @@ namespace AsmResolver.Net.Cts
             Attributes = attributes;
             _signature = new LazyValue<FieldSignature>(signature);
             
-            _constant = new LazyValue<Constant>(default(Constant));
-            _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
-            _fieldRva = new LazyValue<FieldRva>(default(FieldRva));
-            _fieldMarshal = new LazyValue<FieldMarshal>(default(FieldMarshal));
-            _fieldLayout = new LazyValue<FieldLayout>(default(FieldLayout));
-            _pinvokeMap = new LazyValue<ImplementationMap>(default(ImplementationMap));
+            _constant = new LazyValue<Constant>();
+            _declaringType = new LazyValue<TypeDefinition>();
+            _fieldRva = new LazyValue<FieldRva>();
+            _fieldMarshal = new LazyValue<FieldMarshal>();
+            _fieldLayout = new LazyValue<FieldLayout>();
+            _pinvokeMap = new LazyValue<ImplementationMap>();
             
             CustomAttributes = new CustomAttributeCollection(this);
         }

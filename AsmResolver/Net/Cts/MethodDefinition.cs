@@ -31,10 +31,10 @@ namespace AsmResolver.Net.Cts
             ImplAttributes = MethodImplAttributes.IL | MethodImplAttributes.Managed;
             _signature = new LazyValue<MethodSignature>(signature);
             Parameters = new DelegatedMemberCollection<MethodDefinition, ParameterDefinition>(this, GetParamOwner, SetParamOwner);
-            _methodBody = new LazyValue<MethodBody>(default(MethodBody));
-            _pinvokeMap = new LazyValue<ImplementationMap>(default(ImplementationMap));
+            _methodBody = new LazyValue<MethodBody>();
+            _pinvokeMap = new LazyValue<ImplementationMap>();
             
-            _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _declaringType = new LazyValue<TypeDefinition>();
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             GenericParameters = new GenericParameterCollection(this);

@@ -17,9 +17,9 @@ namespace AsmResolver.Net.Cts
             Sequence = sequence;
             Attributes = attributes;
 
-            _method = new LazyValue<MethodDefinition>(default(MethodDefinition));
-            _constant = new LazyValue<Constant>(default(Constant));
-            _fieldMarshal = new LazyValue<FieldMarshal>(default(FieldMarshal));
+            _method = new LazyValue<MethodDefinition>();
+            _constant = new LazyValue<Constant>();
+            _fieldMarshal = new LazyValue<FieldMarshal>();
             
             CustomAttributes = new CustomAttributeCollection(this);
         }

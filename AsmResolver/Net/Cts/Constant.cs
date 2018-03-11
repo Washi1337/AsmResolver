@@ -14,7 +14,7 @@ namespace AsmResolver.Net.Cts
         {
             ConstantType = constantType;
             _value = new LazyValue<DataBlobSignature>(value);
-            _parent = new LazyValue<IHasConstant>(default(IHasConstant));
+            _parent = new LazyValue<IHasConstant>();
         }
 
         internal Constant(MetadataImage image, MetadataRow<ElementType, byte, uint, uint> row)

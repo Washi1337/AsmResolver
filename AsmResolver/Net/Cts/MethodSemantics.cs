@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Cts
             : base(null, new MetadataToken(MetadataTokenType.MethodSemantics))
         {
             _method = new LazyValue<MethodDefinition>(method);
-            _association = new LazyValue<IHasSemantics>(default(IHasSemantics));
+            _association = new LazyValue<IHasSemantics>();
             Attributes = attributes;
         }
         

@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Cts
         public InterfaceImplementation(ITypeDefOrRef @interface)
             : base(null, new MetadataToken(MetadataTokenType.InterfaceImpl))
         {
-            _class = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _class = new LazyValue<TypeDefinition>();
             _interface = new LazyValue<ITypeDefOrRef>(@interface);
             
             CustomAttributes = new CustomAttributeCollection(this);

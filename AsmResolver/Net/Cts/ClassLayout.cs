@@ -9,7 +9,7 @@ namespace AsmResolver.Net.Cts
         public ClassLayout(uint classSize, ushort packingSize)
             : base(null, new MetadataToken(MetadataTokenType.ClassLayout))
         {
-            _parent = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _parent = new LazyValue<TypeDefinition>();
             ClassSize = classSize;
             PackingSize = packingSize;
         }

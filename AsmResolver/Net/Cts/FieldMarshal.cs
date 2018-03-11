@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Cts
         public FieldMarshal(MarshalDescriptor marshalDescriptor)
             : base(null, new MetadataToken(MetadataTokenType.FieldMarshal))
         {
-            _parent = new LazyValue<IHasFieldMarshal>(default(IHasFieldMarshal));
+            _parent = new LazyValue<IHasFieldMarshal>();
             _marshalDescriptor = new LazyValue<MarshalDescriptor>(marshalDescriptor);
         }
 

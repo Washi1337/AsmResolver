@@ -13,7 +13,7 @@ namespace AsmResolver.Net.Cts
         public FieldRva(byte[] data)
             : base(null, new MetadataToken(MetadataTokenType.FieldRva))
         {
-            _field = new LazyValue<FieldDefinition>(default(FieldDefinition));
+            _field = new LazyValue<FieldDefinition>();
             _data = new LazyValue<byte[]>(data);
         }
 

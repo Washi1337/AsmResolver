@@ -12,7 +12,7 @@ namespace AsmResolver.Net.Cts
         public GenericParameter(int index, string name, GenericParameterAttributes attributes = GenericParameterAttributes.NonVariant)
             : base(null, new MetadataToken(MetadataTokenType.GenericParam))
         {
-            _owner = new LazyValue<IGenericParameterProvider>(default(IGenericParameterProvider));
+            _owner = new LazyValue<IGenericParameterProvider>();
             Index = index;
             _name = new LazyValue<string>(name);
             Attributes = attributes;

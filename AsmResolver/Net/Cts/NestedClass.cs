@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Cts
             : base(null, new MetadataToken(MetadataTokenType.NestedClass))
         {
             _class = new LazyValue<TypeDefinition>(@class);
-            _enclosingClass = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _enclosingClass = new LazyValue<TypeDefinition>();
         }
         
         internal NestedClass(MetadataImage image, MetadataRow<uint, uint> row)

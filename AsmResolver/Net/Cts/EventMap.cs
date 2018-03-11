@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Cts
         public EventMap()
             : base(null, new MetadataToken(MetadataTokenType.EventMap))
         {
-            _parent = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _parent = new LazyValue<TypeDefinition>();
             Events = new DelegatedMemberCollection<EventMap, EventDefinition>(this, GetEventOwner, SetEventOwner);
         }
 

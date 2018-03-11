@@ -12,7 +12,7 @@ namespace AsmResolver.Net.Cts
             IMethodDefOrRef methodDeclaration)
             : base(null, new MetadataToken(MetadataTokenType.MethodImpl))
         {
-            _class = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _class = new LazyValue<TypeDefinition>();
             _methodBody = new LazyValue<IMethodDefOrRef>(methodBody);
             _methodDeclaration = new LazyValue<IMethodDefOrRef>(methodDeclaration);
         }

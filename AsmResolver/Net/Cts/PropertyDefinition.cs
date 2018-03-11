@@ -19,8 +19,8 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(name);
             _signature = new LazyValue<PropertySignature>(signature);
             
-            _propertyMap = new LazyValue<PropertyMap>(default(PropertyMap));
-            _constant = new LazyValue<Constant>(default(Constant));
+            _propertyMap = new LazyValue<PropertyMap>();
+            _constant = new LazyValue<Constant>();
             
             CustomAttributes = new CustomAttributeCollection(this);
             Semantics = new MethodSemanticsCollection(this);

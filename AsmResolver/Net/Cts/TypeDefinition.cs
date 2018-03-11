@@ -38,11 +38,11 @@ namespace AsmResolver.Net.Cts
             Fields = new DelegatedMemberCollection<TypeDefinition, FieldDefinition>(this, GetFieldOwner, SetFieldOwner);
             Methods = new DelegatedMemberCollection<TypeDefinition, MethodDefinition>(this, GetMethodOwner, SetMethodOwner);
 
-            _module = new LazyValue<ModuleDefinition>(default(ModuleDefinition));
-            _classLayout = new LazyValue<ClassLayout>(default(ClassLayout));
-            _propertyMap = new LazyValue<PropertyMap>(default(PropertyMap));
-            _eventMap = new LazyValue<EventMap>(default(EventMap));
-            _declaringType = new LazyValue<TypeDefinition>(default(TypeDefinition));
+            _module = new LazyValue<ModuleDefinition>();
+            _classLayout = new LazyValue<ClassLayout>();
+            _propertyMap = new LazyValue<PropertyMap>();
+            _eventMap = new LazyValue<EventMap>();
+            _declaringType = new LazyValue<TypeDefinition>();
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);

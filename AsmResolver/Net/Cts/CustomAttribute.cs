@@ -25,13 +25,19 @@ namespace AsmResolver.Net.Cts
             _parent = new LazyValue<IHasCustomAttribute>(() =>
             {
                 var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasCustomAttribute).DecodeIndex(row.Column1);
-                return parentToken.Rid != 0 ? (IHasCustomAttribute)image.ResolveMember(parentToken) : null;
+                IMetadataMember member;
+                return image.TryResolveMember(parentToken, out member)
+                    ? (IHasCustomAttribute) member
+                    : null;
             });
 
             _constructor = new LazyValue<ICustomAttributeType>(() =>
             {
                 var ctorToken = tableStream.GetIndexEncoder(CodedIndex.CustomAttributeType).DecodeIndex(row.Column2);
-                return ctorToken.Rid != 0 ? (ICustomAttributeType)image.ResolveMember(ctorToken) : null;
+                IMetadataMember member;
+                return image.TryResolveMember(ctorToken, out member)
+                    ? (ICustomAttributeType) member
+                    : null;
             });
 
             _signature = new LazyValue<CustomAttributeSignature>(() => CustomAttributeSignature.FromReader(this,

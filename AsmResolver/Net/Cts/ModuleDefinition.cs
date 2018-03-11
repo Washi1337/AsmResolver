@@ -25,7 +25,7 @@ namespace AsmResolver.Net.Cts
             _mvid = new LazyValue<Guid>();
             _encId = new LazyValue<Guid>();
             _encBaseId = new LazyValue<Guid>();
-            _assembly = new LazyValue<AssemblyDefinition>(default(AssemblyDefinition));
+            _assembly = new LazyValue<AssemblyDefinition>();
             TopLevelTypes = new DelegatedMemberCollection<ModuleDefinition, TypeDefinition>(this, GetTypeOwner, SetTypeOwner);
             CustomAttributes = new CustomAttributeCollection(this);
         }
