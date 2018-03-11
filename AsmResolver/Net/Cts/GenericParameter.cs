@@ -9,9 +9,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<IGenericParameterProvider> _owner;
         private readonly LazyValue<string> _name;
 
-        public GenericParameter(int index, string name, GenericParameterAttributes attributes)
+        public GenericParameter(int index, string name, GenericParameterAttributes attributes = GenericParameterAttributes.NonVariant)
             : base(null, new MetadataToken(MetadataTokenType.GenericParam))
         {
+            _owner = new LazyValue<IGenericParameterProvider>(default(IGenericParameterProvider));
             Index = index;
             _name = new LazyValue<string>(name);
             Attributes = attributes;
@@ -22,7 +23,7 @@ namespace AsmResolver.Net.Cts
             : base(image, row.MetadataToken)
         {
             Index = row.Column1;
-            Attributes = (GenericParameterAttributes)row.Column2;
+            Attributes = row.Column2;
 
             _owner = new LazyValue<IGenericParameterProvider>(() =>
             {

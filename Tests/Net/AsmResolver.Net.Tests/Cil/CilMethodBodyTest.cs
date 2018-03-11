@@ -23,7 +23,7 @@ namespace AsmResolver.Tests.Net.Cil
             var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
 
             var type = new TypeDefinition("SomeType", "SomeMethod");
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var method = new MethodDefinition("SomeMethod",
                 MethodAttributes.Public,

@@ -271,7 +271,16 @@ namespace AsmResolver.Net.Cts
         public ClassLayout ClassLayout
         {
             get { return _classLayout.Value;}
-            private set { _classLayout.Value = value; }
+            set
+            {
+                if (value != null && value.Parent != null)
+                    throw new InvalidOperationException("Class Layout is already added to another type.");
+                if (_classLayout.Value != null)
+                    _classLayout.Value.Parent = null;
+                _classLayout.Value = value;
+                if (value != null)
+                    value.Parent = this;
+            }
         }
 
         public bool IsNotPublic

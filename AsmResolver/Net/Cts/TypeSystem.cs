@@ -24,7 +24,7 @@ namespace AsmResolver.Net.Cts
 
             if (isMsCorLib)
             {
-                _typeDefinitions = image.Assembly.Modules[0].Types;
+                _typeDefinitions = image.Assembly.Modules[0].TopLevelTypes;
             }
             else
             {

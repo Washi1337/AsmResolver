@@ -15,7 +15,7 @@ namespace AsmResolver.Tests.Net.Cts
         private FieldDefinition CreateAndAddDummyField(MetadataImage image)
         {
             var type = new TypeDefinition("SomeNamespace", "SomeType");
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var field = new FieldDefinition("SomeField", FieldAttributes.PrivateScope,
                 new FieldSignature(image.TypeSystem.Int32));
@@ -96,7 +96,7 @@ namespace AsmResolver.Tests.Net.Cts
             var importer = new ReferenceImporter(image);
             
             var type = new TypeDefinition("MyNamespace", "MyType", TypeAttributes.Public, importer.ImportType(typeof(object)));
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
             
             var field = CreateAndAddDummyField(image);
             field.DeclaringType.Fields.Remove(field);

@@ -88,6 +88,7 @@
     <Compile Include="ImageOptionalHeader.cs" />
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
+    <Compile Include="Net\Cts\Collections\ShallowTypeCollection.cs" />
     <Compile Include="Net\Emit\BlobStreamBuffer.cs" />
     <Compile Include="Net\Emit\BootstrapperSegment.cs" />
     <Compile Include="Net\Emit\CompactNetAssemblyBuilder.cs" />

@@ -16,7 +16,7 @@ namespace AsmResolver.Tests.Net.Cts
         private MethodDefinition CreateAndAddDummyMethod(MetadataImage image)
         {
             var type = new TypeDefinition("SomeNamespace", "SomeType");
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var method = new MethodDefinition("SomeMethod", MethodAttributes.Public,
                 new MethodSignature(image.TypeSystem.Void));
@@ -142,7 +142,7 @@ namespace AsmResolver.Tests.Net.Cts
             var importer = new ReferenceImporter(image);
             
             var type = new TypeDefinition("MyNamespace", "MyType", TypeAttributes.Public, importer.ImportType(typeof(object)));
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
             
             var method = CreateAndAddDummyMethod(image);
             method.DeclaringType.Methods.Remove(method);
@@ -180,6 +180,24 @@ namespace AsmResolver.Tests.Net.Cts
             Assert.Equal(newMap.ImportScope, method.PInvokeMap.ImportScope, _comparer);
             Assert.Equal(newMap.ImportName, method.PInvokeMap.ImportName);
             Assert.Equal(newMap.Attributes, method.PInvokeMap.Attributes);
+        }
+
+        [Fact]
+        public void PersistentGenericParameters()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var method = CreateAndAddDummyMethod(image);
+            method.GenericParameters.Add(new GenericParameter(0, "T1"));
+            method.GenericParameters.Add(new GenericParameter(1, "T2"));
+            
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            var newMethod = (MethodDefinition) image.ResolveMember(mapping[method]);
+            Assert.Equal(method.GenericParameters, newMethod.GenericParameters, _comparer);
         }
     }
 }

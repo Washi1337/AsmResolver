@@ -8,11 +8,11 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<IMethodDefOrRef> _methodBody;
         private readonly LazyValue<IMethodDefOrRef> _methodDeclaration;
 
-        public MethodImplementation(TypeDefinition @class, IMethodDefOrRef methodBody,
+        public MethodImplementation(IMethodDefOrRef methodBody,
             IMethodDefOrRef methodDeclaration)
             : base(null, new MetadataToken(MetadataTokenType.MethodImpl))
         {
-            _class = new LazyValue<TypeDefinition>(@class);
+            _class = new LazyValue<TypeDefinition>(default(TypeDefinition));
             _methodBody = new LazyValue<IMethodDefOrRef>(methodBody);
             _methodDeclaration = new LazyValue<IMethodDefOrRef>(methodDeclaration);
         }
@@ -50,7 +50,7 @@ namespace AsmResolver.Net.Cts
         public TypeDefinition Class
         {
             get { return _class.Value; }
-            set { _class.Value = value; }
+            internal set { _class.Value = value; }
         }
 
         public IMethodDefOrRef MethodBody

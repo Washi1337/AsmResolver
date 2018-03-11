@@ -113,12 +113,12 @@ namespace AsmResolver.Tests.Net.Cts
             var header = assembly.NetDirectory.MetadataHeader;
 
             var image = header.LockMetadata();
-            image.Assembly.Modules[0].Types.Add(new TypeDefinition("SomeNamespace", "SomeName"));
-            int newCount = image.Assembly.Modules[0].Types.Count;
+            image.Assembly.Modules[0].TopLevelTypes.Add(new TypeDefinition("SomeNamespace", "SomeName"));
+            int newCount = image.Assembly.Modules[0].TopLevelTypes.Count;
             header.UnlockMetadata();
 
             image = header.LockMetadata();
-            Assert.Equal(newCount, image.Assembly.Modules[0].Types.Count);
+            Assert.Equal(newCount, image.Assembly.Modules[0].TopLevelTypes.Count);
         }
 
     }

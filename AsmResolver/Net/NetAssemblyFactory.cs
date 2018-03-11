@@ -23,7 +23,7 @@ namespace AsmResolver.Net
             mainModule.Mvid = Guid.NewGuid();
             image.Assembly.Modules.Add(mainModule);
 
-            mainModule.Types.Add(new TypeDefinition(null, "<Module>"));
+            mainModule.TopLevelTypes.Add(new TypeDefinition(null, "<Module>"));
 
             assembly.NetDirectory.MetadataHeader.UnlockMetadata();
 

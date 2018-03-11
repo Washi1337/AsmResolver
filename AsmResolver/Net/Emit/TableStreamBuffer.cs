@@ -83,7 +83,10 @@ namespace AsmResolver.Net.Emit
 
         public MetadataToken GetNewToken(IMetadataMember member)
         {
-            return _members[member];
+            MetadataToken token;
+            if (!_members.TryGetValue(member, out token))
+                throw new MemberNotImportedException(member);
+            return token;
         }
 
         public MetadataToken GetTypeToken(ITypeDefOrRef type)
@@ -390,7 +393,7 @@ namespace AsmResolver.Net.Emit
             _members.Add(module, moduleRow.MetadataToken);
 
             // Add children.
-            AddTypes(module.Types);
+            AddTypes(module.GetAllTypes().ToArray());
             AddCustomAttributes(module);
         }
 
@@ -656,7 +659,7 @@ namespace AsmResolver.Net.Emit
             // Create and add row.
             var interfaceRow = new MetadataRow<uint, uint>
             {
-                Column1 = @interface.Class.MetadataToken.Rid,
+                Column1 = GetNewToken(@interface.Class).Rid,
                 Column2 = _tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(GetTypeToken(@interface.Interface))
             };
             table.Add(interfaceRow);
@@ -673,7 +676,7 @@ namespace AsmResolver.Net.Emit
             var encoder = _tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
             var implementationRow = new MetadataRow<uint, uint, uint>
             {
-                Column1 = implementation.Class.MetadataToken.Rid,
+                Column1 = GetNewToken(implementation.Class).Rid,
                 Column2 = encoder.EncodeToken(GetMethodToken(implementation.MethodBody)),
                 Column3 = encoder.EncodeToken(GetMethodToken(implementation.MethodDeclaration))
             };
@@ -840,7 +843,7 @@ namespace AsmResolver.Net.Emit
                 Column1 = (ushort) parameter.Index,
                 Column2 = parameter.Attributes,
                 Column3 = _tableStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef).EncodeToken(GetNewToken(parameter.Owner)),
-                Column4 = _parentBuffer.StringStreamBuffer.GetStringOffset(Name),
+                Column4 = _parentBuffer.StringStreamBuffer.GetStringOffset(parameter.Name),
             };
             table.Add(parameterRow);
             _members.Add(parameter, parameterRow.MetadataToken);

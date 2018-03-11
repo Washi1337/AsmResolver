@@ -15,7 +15,7 @@ namespace AsmResolver.Tests.Net.Cts
         private static EventDefinition CreateAndAddDummyEvent(MetadataImage image)
         {
             var type = new TypeDefinition("SomeNamespace", "SomeType");
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var @event = new EventDefinition("SomeEvent", new ReferenceImporter(image).ImportType(typeof(EventHandler)));
             type.EventMap = new EventMap
@@ -95,7 +95,7 @@ namespace AsmResolver.Tests.Net.Cts
             var image = header.LockMetadata();
             
             var type = new TypeDefinition(null, "MyType", TypeAttributes.Public, null);
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
             
             var @event = CreateAndAddDummyEvent(image);
             @event.EventMap.Parent.EventMap = null;

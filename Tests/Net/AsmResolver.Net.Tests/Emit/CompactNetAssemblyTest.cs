@@ -39,7 +39,7 @@ namespace AsmResolver.Tests.Net.Emit
                 TypeAttributes.Public,
                 importer.ImportType(typeof(object)));
             
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var mainMethod = new MethodDefinition(MainMethodName, MethodAttributes.Public | MethodAttributes.Static,
                 new MethodSignature(new[] {importer.ImportTypeSignature(typeof(string[]))},
@@ -90,7 +90,7 @@ namespace AsmResolver.Tests.Net.Emit
             var assembly = CreateTempAssembly();
             var image = assembly.NetDirectory.MetadataHeader.Image;
             var importer = new ReferenceImporter(image);
-            var mainMethod = image.Assembly.Modules[0].Types.First(x => x.Name == TypeName).Methods.First(x => x.Name == MainMethodName);
+            var mainMethod = image.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == TypeName).Methods.First(x => x.Name == MainMethodName);
 
             var instructions = mainMethod.CilMethodBody.Instructions;
             instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput));
@@ -143,9 +143,9 @@ namespace AsmResolver.Tests.Net.Emit
             });
 
             nativeMethod.MethodBody = nativeBody;
-            image.Assembly.Modules[0].Types[0].Methods.Add(nativeMethod);
+            image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(nativeMethod);
             
-            var mainMethod = image.Assembly.Modules[0].Types.First(x => x.Name == TypeName).Methods.First(x => x.Name == MainMethodName);
+            var mainMethod = image.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == TypeName).Methods.First(x => x.Name == MainMethodName);
 
             var instructions = mainMethod.CilMethodBody.Instructions;
             instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, "The secret number is: {0}"));
@@ -221,7 +221,7 @@ namespace AsmResolver.Tests.Net.Emit
                 type.Methods.Add(method);
             }
 
-            header.Image.Assembly.Modules[0].Types.Add(type);
+            header.Image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var mapping = header.UnlockMetadata();
 

@@ -120,6 +120,7 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(NestedClass item, TypeDefinition owner)
         {
             item.EnclosingClass = owner;
+            item.Class.Module = owner == null ? null : owner.Module;
             item.Image = owner == null ? null : owner.Image;
         }
     }

@@ -7,11 +7,11 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<TypeDefinition> _class;
         private readonly LazyValue<TypeDefinition> _enclosingClass;
 
-        public NestedClass(TypeDefinition @class, TypeDefinition enclosingClass) 
+        public NestedClass(TypeDefinition @class) 
             : base(null, new MetadataToken(MetadataTokenType.NestedClass))
         {
             _class = new LazyValue<TypeDefinition>(@class);
-            _enclosingClass = new LazyValue<TypeDefinition>(enclosingClass);
+            _enclosingClass = new LazyValue<TypeDefinition>(default(TypeDefinition));
         }
         
         internal NestedClass(MetadataImage image, MetadataRow<uint, uint> row)
@@ -53,7 +53,12 @@ namespace AsmResolver.Net.Cts
         public TypeDefinition EnclosingClass
         {
             get { return _enclosingClass.Value; }
-            internal set { _enclosingClass.Value = value; }
+            internal set
+            {
+                _enclosingClass.Value = value;
+                if (_class.IsInitialized && _class.Value != null)
+                    _class.Value.DeclaringType = value;
+            }
         }
     }
 }

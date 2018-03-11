@@ -6,10 +6,10 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<TypeDefinition> _parent;
 
-        public ClassLayout(TypeDefinition parent, uint classSize, ushort packingSize)
+        public ClassLayout(uint classSize, ushort packingSize)
             : base(null, new MetadataToken(MetadataTokenType.ClassLayout))
         {
-            _parent = new LazyValue<TypeDefinition>(parent);
+            _parent = new LazyValue<TypeDefinition>(default(TypeDefinition));
             ClassSize = classSize;
             PackingSize = packingSize;
         }

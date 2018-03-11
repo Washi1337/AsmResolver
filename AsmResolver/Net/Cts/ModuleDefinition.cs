@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
@@ -24,7 +26,7 @@ namespace AsmResolver.Net.Cts
             _encId = new LazyValue<Guid>();
             _encBaseId = new LazyValue<Guid>();
             _assembly = new LazyValue<AssemblyDefinition>(default(AssemblyDefinition));
-            Types = new DelegatedMemberCollection<ModuleDefinition, TypeDefinition>(this, GetTypeOwner, SetTypeOwner);
+            TopLevelTypes = new DelegatedMemberCollection<ModuleDefinition, TypeDefinition>(this, GetTypeOwner, SetTypeOwner);
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
@@ -41,7 +43,7 @@ namespace AsmResolver.Net.Cts
            _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
            _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
             _assembly = new LazyValue<AssemblyDefinition>(() => (AssemblyDefinition) Image.ResolveMember(new MetadataToken(MetadataTokenType.Assembly, 1)));
-            Types = new TableMemberCollection<ModuleDefinition, TypeDefinition>(this, MetadataTokenType.TypeDef, GetTypeOwner, SetTypeOwner); // TODO: filter nested types.
+            TopLevelTypes = new ShallowTypeCollection(this, header.GetStream<TableStream>().GetTable<TypeDefinitionTable>());
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
@@ -87,10 +89,26 @@ namespace AsmResolver.Net.Cts
             internal set { _assembly.Value = value; }
         }
 
-        public Collection<TypeDefinition> Types
+        public Collection<TypeDefinition> TopLevelTypes
         {
             get;
             private set;
+        }
+
+        public IEnumerable<TypeDefinition> GetAllTypes()
+        {
+            var stack = new Stack<TypeDefinition>();
+
+            foreach (var type in TopLevelTypes.Reverse())
+                stack.Push(type);
+                   
+            while (stack.Count > 0)
+            {
+                var type = stack.Pop();
+                yield return type;
+                foreach (var nestedClass in type.NestedClasses.Reverse())
+                    stack.Push(nestedClass.Class);
+            }
         }
 
         private static ModuleDefinition GetTypeOwner(TypeDefinition type)
@@ -108,6 +126,5 @@ namespace AsmResolver.Net.Cts
         {
             return Name;
         }
-
     }
 }

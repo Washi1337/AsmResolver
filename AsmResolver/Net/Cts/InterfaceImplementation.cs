@@ -8,10 +8,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<TypeDefinition> _class;
         private readonly LazyValue<ITypeDefOrRef> _interface;
         
-        public InterfaceImplementation(TypeDefinition @class, ITypeDefOrRef @interface)
+        public InterfaceImplementation(ITypeDefOrRef @interface)
             : base(null, new MetadataToken(MetadataTokenType.InterfaceImpl))
         {
-            _class = new LazyValue<TypeDefinition>(@class);
+            _class = new LazyValue<TypeDefinition>(default(TypeDefinition));
             _interface = new LazyValue<ITypeDefOrRef>(@interface);
             
             CustomAttributes = new CustomAttributeCollection(this);

@@ -28,12 +28,12 @@ namespace SampleAsmResolver
             
             // Create a native method.
             var nativeMethod = CreateNativeMethod(image);
-            image.Assembly.Modules[0].Types[0].Methods.Add(nativeMethod);
+            image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(nativeMethod);
             
             // Create a new type.
             var type = new TypeDefinition("SomeNamespace", "SomeType", importer.ImportType(typeof(object)));
             type.Attributes = TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed;
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
             
             // Create a new main method.
             var mainMethod = new MethodDefinition("Main", MethodAttributes.Public | MethodAttributes.Static,

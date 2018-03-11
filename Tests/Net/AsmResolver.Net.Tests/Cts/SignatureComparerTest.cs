@@ -201,7 +201,7 @@ namespace AsmResolver.Tests.Net.Cts
             var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
 
             var typeDef = new TypeDefinition(typeNamespace, typeName);
-            image.Assembly.Modules[0].Types.Add(typeDef);
+            image.Assembly.Modules[0].TopLevelTypes.Add(typeDef);
 
             var type1 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName);
             var type2 = new TypeReference(CreateAssemblyReference(), typeNamespace, typeName + "1");

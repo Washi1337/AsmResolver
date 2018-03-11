@@ -152,7 +152,7 @@ namespace AsmResolver.Tests.Net.Cts
             var importer = new ReferenceImporter(image);
 
             var typeDef = new TypeDefinition("SomeNamespace", "SomeName");
-            image.Assembly.Modules[0].Types.Add(typeDef);
+            image.Assembly.Modules[0].TopLevelTypes.Add(typeDef);
 
             var newReference = importer.ImportType(typeDef);
 
@@ -165,7 +165,7 @@ namespace AsmResolver.Tests.Net.Cts
             var externalAssembly = NetAssemblyFactory.CreateAssembly(ExternalAssemblyName, true);
             var externalImage = externalAssembly.NetDirectory.MetadataHeader.LockMetadata();
             var externalType = new TypeDefinition("SomeNamespace", "SomeName");
-            externalImage.Assembly.Modules[0].Types.Add(externalType);
+            externalImage.Assembly.Modules[0].TopLevelTypes.Add(externalType);
 
             var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
             var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
@@ -447,7 +447,7 @@ namespace AsmResolver.Tests.Net.Cts
             var importer = new ReferenceImporter(image);
 
             var type = new TypeDefinition("SomeNamespace", "SomeType");
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var method = new MethodDefinition("SomeMethod", MethodAttributes.Public | MethodAttributes.Static,
                 new MethodSignature(new[] { image.TypeSystem.String }, image.TypeSystem.Void));
@@ -465,7 +465,7 @@ namespace AsmResolver.Tests.Net.Cts
             var externalImage = externalAssembly.NetDirectory.MetadataHeader.LockMetadata();
 
             var type = new TypeDefinition("SomeNamespace", "SomeType");
-            externalImage.Assembly.Modules[0].Types.Add(type);
+            externalImage.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var method = new MethodDefinition("SomeMethod", MethodAttributes.Public | MethodAttributes.Static,
                 new MethodSignature(new[] { externalImage.TypeSystem.String }, externalImage.TypeSystem.Void));
@@ -550,7 +550,7 @@ namespace AsmResolver.Tests.Net.Cts
             var importer = new ReferenceImporter(image);
 
             var type = new TypeDefinition("SomeNamespace", "SomeType");
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var field = new FieldDefinition("SomeField", FieldAttributes.Public | FieldAttributes.Static,
                 new FieldSignature(image.TypeSystem.String));
@@ -569,7 +569,7 @@ namespace AsmResolver.Tests.Net.Cts
             var externalImage = externalAssembly.NetDirectory.MetadataHeader.LockMetadata();
 
             var type = new TypeDefinition("SomeNamespace", "SomeType");
-            externalImage.Assembly.Modules[0].Types.Add(type);
+            externalImage.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var field = new FieldDefinition("SomeField", FieldAttributes.Public | FieldAttributes.Static,
                 new FieldSignature(externalImage.TypeSystem.String));

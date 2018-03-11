@@ -145,7 +145,7 @@ namespace AsmResolver.Net.Cts
         public Constant Constant
         {
             get { return _constant.Value; }
-            set { _constant.Value = value; }
+            set { this.SetConstant(_constant, value); }
         }
 
         public IMetadataMember Resolve()

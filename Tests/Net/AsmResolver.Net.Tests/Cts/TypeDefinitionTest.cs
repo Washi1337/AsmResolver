@@ -1,7 +1,9 @@
 ﻿
+using System.Collections;
 using System.Collections.Generic;
 using AsmResolver.Net;
 using AsmResolver.Net.Cts;
+using AsmResolver.Net.Emit;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 using Xunit;
@@ -11,7 +13,7 @@ namespace AsmResolver.Tests.Net.Cts
     public class TypeDefinitionTest
     {
         private const string DummyAssemblyName = "SomeAssemblyName";
-        private static readonly SignatureComparer _comparer = new SignatureComparer();
+        private readonly SignatureComparer _comparer = new SignatureComparer();
         
         [Fact]
         public void PersistentAttributes()
@@ -22,7 +24,7 @@ namespace AsmResolver.Tests.Net.Cts
             var header = assembly.NetDirectory.MetadataHeader;
 
             var image = header.LockMetadata();
-            var type = image.Assembly.Modules[0].Types[0];
+            var type = image.Assembly.Modules[0].TopLevelTypes[0];
             type.Attributes = newAttributes;
 
             var mapping = header.UnlockMetadata();
@@ -43,7 +45,7 @@ namespace AsmResolver.Tests.Net.Cts
             var header = assembly.NetDirectory.MetadataHeader;
 
             var image = header.LockMetadata();
-            var type = image.Assembly.Modules[0].Types[0];
+            var type = image.Assembly.Modules[0].TopLevelTypes[0];
             type.Name = newName;
 
             var mapping = header.UnlockMetadata();
@@ -64,7 +66,7 @@ namespace AsmResolver.Tests.Net.Cts
             var header = assembly.NetDirectory.MetadataHeader;
 
             var image = header.LockMetadata();
-            var type = image.Assembly.Modules[0].Types[0];
+            var type = image.Assembly.Modules[0].TopLevelTypes[0];
             type.Namespace = newNamespace;
 
             var mapping = header.UnlockMetadata();
@@ -100,7 +102,7 @@ namespace AsmResolver.Tests.Net.Cts
                     type.Fields.Add(field);
                 }
 
-                image.Assembly.Modules[0].Types.Add(type);
+                image.Assembly.Modules[0].TopLevelTypes.Add(type);
                 types.Add(type);
             }
 
@@ -139,7 +141,7 @@ namespace AsmResolver.Tests.Net.Cts
                     type.Methods.Add(method);
                 }
 
-                image.Assembly.Modules[0].Types.Add(type);
+                image.Assembly.Modules[0].TopLevelTypes.Add(type);
                 types.Add(type);
             }
 
@@ -152,6 +154,141 @@ namespace AsmResolver.Tests.Net.Cts
                 Assert.Equal(type.Methods.Count, type.Methods.Count);
                 Assert.Equal(type.Methods, newType.Methods, _comparer);
             }
+        }
+
+        [Fact]
+        public void PersistentNestedClasses()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public,
+                importer.ImportType(typeof(object)));
+            var nestedType = new TypeDefinition(null, "NestedType", TypeAttributes.NestedPublic,
+                importer.ImportType(typeof(object)));
+            type.NestedClasses.Add(new NestedClass(nestedType));
+
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
+
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            type = (TypeDefinition) image.ResolveMember(mapping[type]);
+            Assert.Equal(1, type.NestedClasses.Count);
+            Assert.Same(type, type.NestedClasses[0].EnclosingClass);
+            Assert.Equal(nestedType, type.NestedClasses[0].Class, _comparer);
+            
+            Assert.DoesNotContain(type.NestedClasses[0].Class, image.Assembly.Modules[0].TopLevelTypes);
+            Assert.Contains(type.NestedClasses[0].Class, image.Assembly.Modules[0].GetAllTypes());
+        }
+
+        [Fact]
+        public void PersistentInterfaces()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public,
+                importer.ImportType(typeof(object)));
+            var @interface = importer.ImportType(typeof(IList));
+            type.Interfaces.Add(new InterfaceImplementation(@interface));
+
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
+
+            var mapping = header.UnlockMetadata();
+            
+            image = header.LockMetadata();
+            type = (TypeDefinition) image.ResolveMember(mapping[type]);
+            Assert.Equal(1, type.Interfaces.Count);
+            Assert.Same(type, type.Interfaces[0].Class);
+            Assert.Equal(@interface, type.Interfaces[0].Interface, _comparer);
+        }
+
+        [Fact]
+        public void PersistentMethodImplementations()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public,
+                importer.ImportType(typeof(object)));
+            var @interface = importer.ImportType(typeof(IList));
+            type.Interfaces.Add(new InterfaceImplementation(@interface));
+            
+            var addMethodRef = (IMethodDefOrRef) importer.ImportMethod(typeof(IList).GetMethod("Add", new[] {typeof(object)}));
+
+            var addMethodDef = new MethodDefinition("Add", MethodAttributes.Public,
+                (MethodSignature) addMethodRef.Signature);
+            type.Methods.Add(addMethodDef);
+            
+            type.MethodImplementations.Add(new MethodImplementation(addMethodDef,
+                addMethodRef));
+
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
+
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            type = (TypeDefinition) image.ResolveMember(mapping[type]);
+            Assert.Equal(1, type.MethodImplementations.Count);
+            Assert.Same(type, type.MethodImplementations[0].Class);
+            Assert.Equal(addMethodDef, type.MethodImplementations[0].MethodBody, _comparer);
+            Assert.Equal(addMethodRef, type.MethodImplementations[0].MethodDeclaration, _comparer);
+        }
+
+        [Fact]
+        public void PersistentClassLayout()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public,
+                importer.ImportType(typeof(object)));
+            type.ClassLayout = new ClassLayout(20, 1);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
+            
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            type = (TypeDefinition) image.ResolveMember(mapping[type]);
+            Assert.NotNull(type.ClassLayout);
+            Assert.Same(type.ClassLayout.Parent, type);
+            Assert.Equal(20u, type.ClassLayout.ClassSize);
+            Assert.Equal(1u, type.ClassLayout.PackingSize);
+        }
+
+        [Fact]
+        public void PersistentGenericParameters()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public,
+                importer.ImportType(typeof(object)));
+            type.GenericParameters.Add(new GenericParameter(0, "T1"));
+            type.GenericParameters.Add(new GenericParameter(1, "T2"));
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
+            
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            var newType = (TypeDefinition) image.ResolveMember(mapping[type]);
+            Assert.Equal(type.GenericParameters, newType.GenericParameters, _comparer);
         }
     }
 }

@@ -93,7 +93,7 @@ namespace AsmResolver.Net.Cts
             if (assembly == null)
                 return (TypeDefinition)ThrowOrReturn(type);
 
-            var typeDefTable = assembly.Modules[0].Types;
+            var typeDefTable = assembly.Modules[0].TopLevelTypes;
             var definition = typeDefTable.FirstOrDefault(x => _signatureComparer.Equals(x, type)); // TODO: handle nested types after moduledef.Types implementation is changed.
             return definition ?? (TypeDefinition)ThrowOrReturn(type);
         }

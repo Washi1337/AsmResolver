@@ -15,7 +15,7 @@ namespace AsmResolver.Tests.Net.Cts
         private static AssemblyReference CreateAndAddDummyReference(MetadataImage image)
         {
             var reference = new AssemblyReference(ExternalAssemblyName, new Version(), image);
-            image.Assembly.Modules[0].Types.Add(new TypeDefinition("SomeNamespace", "SomeName",
+            image.Assembly.Modules[0].TopLevelTypes.Add(new TypeDefinition("SomeNamespace", "SomeName",
                 new TypeReference(reference, "Namespace", "Name", image)));
             return reference;
         }

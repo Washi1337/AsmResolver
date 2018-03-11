@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net;
+﻿using System;
+using AsmResolver.Net;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
@@ -14,7 +15,7 @@ namespace AsmResolver.Tests.Net.Cts
         private static PropertyDefinition CreateAndAddDummyProperty(MetadataImage image)
         {
             var type = new TypeDefinition("SomeNamespace", "SomeType");
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var property = new PropertyDefinition("SomeProperty", new PropertySignature(image.TypeSystem.Int32));
             type.PropertyMap = new PropertyMap
@@ -94,7 +95,7 @@ namespace AsmResolver.Tests.Net.Cts
             var image = header.LockMetadata();
             
             var type = new TypeDefinition(null, "MyType", TypeAttributes.Public, null);
-            image.Assembly.Modules[0].Types.Add(type);
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
             
             var property = CreateAndAddDummyProperty(image);
             property.PropertyMap.Parent.PropertyMap = null;
@@ -128,6 +129,27 @@ namespace AsmResolver.Tests.Net.Cts
             Assert.Equal(1, property.Semantics.Count);
             Assert.Equal(getMethod, property.Semantics[0].Method, _comparer);
             Assert.Equal(MethodSemanticsAttributes.Getter, property.Semantics[0].Attributes);
+        }
+
+        [Fact]
+        public void PersistentConstant()
+        {
+            var constantValue = BitConverter.GetBytes(1337);
+            
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var property = CreateAndAddDummyProperty(image);
+            property.Constant = new Constant(ElementType.I4, new DataBlobSignature(constantValue));
+            var mapping = header.UnlockMetadata();
+            
+            image = header.LockMetadata();
+            property = (PropertyDefinition) image.ResolveMember(mapping[property]);
+            Assert.NotNull(property.Constant);
+            Assert.Equal(ElementType.I4, property.Constant.ConstantType);
+            Assert.NotNull(property.Constant.Value);
+            Assert.Equal(constantValue, property.Constant.Value.Data);
         }
     }
 }

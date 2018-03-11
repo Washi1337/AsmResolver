@@ -18,6 +18,8 @@ namespace AsmResolver.Net
         IEqualityComparer<MethodSignature>,
         IEqualityComparer<FieldSignature>,
         IEqualityComparer<PropertySignature>,
+        IEqualityComparer<GenericParameter>,
+        IEqualityComparer<GenericParameterConstraint>,
         IEqualityComparer<MarshalDescriptor>
     {
         /// <summary>
@@ -977,6 +979,40 @@ namespace AsmResolver.Net
         public int GetHashCode(MarshalDescriptor obj)
         {
             return obj.GetHashCode();
+        }
+
+        public bool Equals(GenericParameter x, GenericParameter y)
+        {
+            if (x == null && y == null)
+                return true;
+            if (x == null || y == null)
+                return false;
+
+            return x.Index == y.Index
+                   && x.Name == y.Name
+                   && x.Attributes == y.Attributes;
+        }
+
+        public int GetHashCode(GenericParameter obj)
+        {
+            return obj.Index ^ obj.Name.GetHashCode() ^ (int) obj.Attributes ^
+                   obj.Constraints.Aggregate(0, (i, c) => i ^ GetHashCode(c));
+            
+        }
+
+        public bool Equals(GenericParameterConstraint x, GenericParameterConstraint y)
+        {
+            if (x == null && y == null)
+                return true;
+            if (x == null || y == null)
+                return false;
+
+            return Equals(x.Constraint, y.Constraint);
+        }
+
+        public int GetHashCode(GenericParameterConstraint obj)
+        {
+            return GetHashCode((ITypeDescriptor) obj.Constraint);
         }
     }
 }
