@@ -88,6 +88,11 @@
     <Compile Include="ImageOptionalHeader.cs" />
     <Compile Include="BinaryStreamWriter.cs" />
     <Compile Include="Net\BlobStream.cs" />
+    <Compile Include="Net\Cil\CilExtraSection.cs" />
+    <Compile Include="Net\Cil\CilExtraSectionAttributes.cs" />
+    <Compile Include="Net\Cil\CilRawFatMethodBody.cs" />
+    <Compile Include="Net\Cil\CilRawMethodBody.cs" />
+    <Compile Include="Net\Cil\CilRawSmallMethodBody.cs" />
     <Compile Include="Net\Cts\Collections\ShallowTypeCollection.cs" />
     <Compile Include="Net\Emit\BlobStreamBuffer.cs" />
     <Compile Include="Net\Emit\BootstrapperSegment.cs" />
@@ -98,8 +103,8 @@
     <Compile Include="Net\Emit\MemberNotImportedException.cs" />
     <Compile Include="Net\Emit\MetadataDirectoryBuffer.cs" />
     <Compile Include="Net\Emit\MetadataStreamBuffer.cs" />
+    <Compile Include="Net\Emit\MethodBodyTableBuffer.cs" />
     <Compile Include="Net\Emit\ResourcesBuffer.cs" />
-    <Compile Include="Emit\RvaDataSegmentTableBuffer.cs" />
     <Compile Include="Net\Emit\StringStreamBuffer.cs" />
     <Compile Include="Net\Emit\TableStreamBuffer.cs" />
     <Compile Include="Net\Emit\UserStringStreamBuffer.cs" />
@@ -168,7 +173,6 @@
     <Compile Include="Net\ReflectionAssemblyNameWrapper.cs" />
     <Compile Include="Net\VTableAttributes.cs" />
     <Compile Include="Net\VTableHeader.cs" />
-    <Compile Include="RvaDataSegment.cs" />
     <Compile Include="Net\MetadataStreamHeaderCollection.cs" />
     <Compile Include="Net\IAssemblyDescriptor.cs" />
     <Compile Include="Net\INameProvider.cs" />

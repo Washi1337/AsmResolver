@@ -3,8 +3,10 @@ using AsmResolver.Net.Emit;
 
 namespace AsmResolver
 {
-    public abstract class MethodBody : FileSegment
+    public abstract class MethodBody
     {
-        public abstract RvaDataSegment CreateDataSegment(MetadataBuffer buffer);
+        public abstract uint GetCodeSize();
+        
+        public abstract FileSegment CreateRawMethodBody(MetadataBuffer buffer);
     }
 }

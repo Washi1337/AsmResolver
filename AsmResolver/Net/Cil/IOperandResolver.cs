@@ -14,4 +14,27 @@ namespace AsmResolver.Net.Cil
 
         ParameterSignature ResolveParameter(int index);
     }
+
+    public class EmptyOperandResolver : IOperandResolver
+    {
+        public IMetadataMember ResolveMember(MetadataToken token)
+        {
+            return null;
+        }
+
+        public string ResolveString(uint token)
+        {
+            return null;
+        }
+
+        public VariableSignature ResolveVariable(int index)
+        {
+            return null;
+        }
+
+        public ParameterSignature ResolveParameter(int index)
+        {
+            return null;
+        }
+    }
 }

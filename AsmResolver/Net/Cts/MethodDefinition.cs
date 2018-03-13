@@ -8,7 +8,7 @@ using AsmResolver.X86;
 
 namespace AsmResolver.Net.Cts
 {
-    public class MethodDefinition : MetadataMember<MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>>, ICallableMemberReference, IHasSecurityAttribute, IMemberForwarded, IGenericParameterProvider, IMemberRefParent, ICustomAttributeType
+    public class MethodDefinition : MetadataMember<MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>>, ICallableMemberReference, IHasSecurityAttribute, IMemberForwarded, IGenericParameterProvider, IMemberRefParent, ICustomAttributeType
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<MethodSignature> _signature;
@@ -40,7 +40,7 @@ namespace AsmResolver.Net.Cts
             GenericParameters = new GenericParameterCollection(this);
         }
 
-        internal MethodDefinition(MetadataImage image, MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
+        internal MethodDefinition(MetadataImage image, MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
             : base(image, row.MetadataToken)
         {
             var stringStream = image.Header.GetStream<StringStream>();
@@ -58,18 +58,12 @@ namespace AsmResolver.Net.Cts
 
             _methodBody = new LazyValue<MethodBody>(() =>
             {
-                if (row.Column1 == null)
-                    return null;
-                
-                var readingContext = new ReadingContext()
-                {
-                    Assembly = image.Header.NetDirectory.Assembly,
-                    Reader = row.Column1.CreateReader()
-                };
+                var rawBody = row.Column1 as CilRawMethodBody;
+                if (rawBody != null)
+                    return CilMethodBody.FromRawMethodBody(this, rawBody);
 
-                return row.Column2.HasFlag(MethodImplAttributes.IL)
-                    ? (MethodBody) CilMethodBody.FromReadingContext(this, readingContext)
-                    : X86MethodBody.FromReadingContext(readingContext);
+                // TODO: handler for native methods.
+                return null;
             });
             
             _declaringType = new LazyValue<TypeDefinition>(() =>

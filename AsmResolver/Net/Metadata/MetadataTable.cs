@@ -354,6 +354,19 @@ namespace AsmResolver.Net.Metadata
             }
             return false;
         }
+
+        public new TRow GetRowByKey(int keyColumnIndex, uint key)
+        {
+            return (TRow) base.GetRowByKey(keyColumnIndex, key);
+        }
+
+        public new bool TryGetRow(int index, out TRow row)
+        {
+            MetadataRow mrow;
+            bool result = base.TryGetRow(index, out mrow);
+            row = mrow as TRow;
+            return result;
+        }
         
         public override void Write(WritingContext context)
         {

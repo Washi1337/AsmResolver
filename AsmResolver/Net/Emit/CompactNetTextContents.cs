@@ -13,12 +13,12 @@ namespace AsmResolver.Net.Emit
             
             Segments.Add(ImportBuffer.AddressTables);
             Segments.Add(NetDirectory = assembly.NetDirectory);
-            Segments.Add(MethodBodyTable = new RvaDataSegmentTableBuffer(assembly));
+            Segments.Add(MethodBodyTable = new MethodBodyTableBuffer());
 
             if (assembly.NetDirectory.ResourcesManifest != null)
                 Segments.Add(assembly.NetDirectory.ResourcesManifest);
 
-            Segments.Add(FieldDataTable = new RvaDataSegmentTableBuffer(assembly));
+            Segments.Add(FieldDataTable = new SimpleFileSegmentBuilder());
             Segments.Add(MetadataDirectory = new MetadataDirectoryBuffer(assembly.NetDirectory.MetadataHeader));
 
             if (assembly.DebugDirectory != null)
@@ -48,7 +48,7 @@ namespace AsmResolver.Net.Emit
                 .GetTable<MethodDefinitionTable>())
             {
                 if (method.Column1 != null)
-                    MethodBodyTable.AddSegment(method.Column1);
+                    MethodBodyTable.Segments.Add(method.Column1);
             }
 
         }
@@ -70,13 +70,13 @@ namespace AsmResolver.Net.Emit
             private set;
         }
 
-        public RvaDataSegmentTableBuffer MethodBodyTable
+        public MethodBodyTableBuffer MethodBodyTable
         {
             get;
             private set;
         }
 
-        public RvaDataSegmentTableBuffer FieldDataTable
+        public SimpleFileSegmentBuilder FieldDataTable
         {
             get;
             private set;

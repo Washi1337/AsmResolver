@@ -90,6 +90,7 @@
     <Compile Include="Emit\TemporaryDirectoryFixture.cs" />
     <Compile Include="MetadataLockTest.cs" />
     <Compile Include="NetAssemblyFactoryTest.cs" />
+    <Compile Include="OpenExistingAssembly.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -106,6 +107,10 @@
     <ProjectReference Include="..\..\..\AsmResolver\AsmResolver.csproj">
       <Project>{228B5994-1035-4EB0-A095-8D85B6EE1146}</Project>
       <Name>AsmResolver</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dummies\ClassLibrary1\ClassLibrary1.csproj">
+      <Project>{ee8795db-1b7a-4d78-8021-fd8cbcc52720}</Project>
+      <Name>ClassLibrary1</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

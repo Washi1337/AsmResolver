@@ -149,8 +149,6 @@ namespace AsmResolver.Tests.Net.Cts
             type.Methods.Add(method);
             
             var mapping = header.UnlockMetadata();
-
-            assembly.Write("C:\\users\\washi\\desktop\\test.exe", new CompactNetAssemblyBuilder(assembly));
             
             image = header.LockMetadata();
             method = (MethodDefinition) image.ResolveMember(mapping[method]);

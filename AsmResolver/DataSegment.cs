@@ -5,10 +5,10 @@ namespace AsmResolver
 {
     public class DataSegment : FileSegment
     {
-        public static DataSegment FromReadingContext(ReadingContext context)
+        public static DataSegment FromReader(IBinaryStreamReader reader)
         {
-            return new DataSegment(context.Reader.ReadBytes(
-                (int)(context.Reader.Length - (context.Reader.Position - context.Reader.StartPosition))));
+            return new DataSegment(reader.ReadBytes(
+                (int)(reader.Length - (reader.Position - reader.StartPosition))));
         }
 
         public static DataSegment CreateAsciiString(string value, bool useTerminator)

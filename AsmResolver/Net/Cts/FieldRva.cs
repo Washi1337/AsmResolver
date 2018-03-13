@@ -5,7 +5,7 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
- public class FieldRva : MetadataMember<MetadataRow<uint, uint>>
+ public class FieldRva : MetadataMember<MetadataRow<DataSegment, uint>>
     {
         private readonly LazyValue<byte[]> _data;
         private readonly LazyValue<FieldDefinition> _field;
@@ -17,11 +17,9 @@ namespace AsmResolver.Net.Cts
             _data = new LazyValue<byte[]>(data);
         }
 
-        internal FieldRva(MetadataImage image, MetadataRow<uint, uint> row)
+        internal FieldRva(MetadataImage image, MetadataRow<DataSegment, uint> row)
             : base(image, row.MetadataToken)
         {
-            Rva = row.Column1;
-
             _field = new LazyValue<FieldDefinition>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.Field);
@@ -29,18 +27,7 @@ namespace AsmResolver.Net.Cts
                 return (FieldDefinition) table.GetMemberFromRow(image, fieldRow);
             });
 
-            _data = new LazyValue<byte[]>(() =>
-            {
-                var assembly = Image.Header.NetDirectory.Assembly;
-                var reader = assembly.ReadingContext.Reader.CreateSubReader(assembly.RvaToFileOffset(Rva), GetDataSize());
-                return reader.ReadBytes((int)reader.Length);
-            });
-        }
-
-        public uint Rva
-        {
-            get;
-            private set;
+            _data = new LazyValue<byte[]>(() => row.Column1.Data);
         }
 
         public FieldDefinition Field

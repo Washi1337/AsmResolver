@@ -28,122 +28,42 @@ namespace AsmResolver.Net.Cil
             }
         }
 
-        public static int GetMethodBodySize(ReadingContext context, out bool isFatMethod)
+        public static CilMethodBody FromRawMethodBody(MethodDefinition method, CilRawMethodBody rawMethodBody)
         {
-            isFatMethod = false;
+            var body = new CilMethodBody(method);
 
-            var reader = context.Reader;
-            long start = reader.Position;
-            
-            byte bodyHeader = reader.ReadByte();
-            if ((bodyHeader & 0x3) == 0x3)
+            var fatBody = rawMethodBody as CilRawFatMethodBody;
+            if (fatBody != null)
             {
-                isFatMethod = true;
-                reader.Position--;
+                body.MaxStack = fatBody.MaxStack;
+                body.InitLocals = fatBody.InitLocals;
                 
-                ushort fatBodyHeader = reader.ReadUInt16();
-                bool hasSection = (fatBodyHeader & 0x8) == 0x8;
-                int headerSize = (fatBodyHeader >> 12) * 4;
-                
-                reader.Position += sizeof(ushort); // max stack
-                uint codeSize = reader.ReadUInt32();
-                reader.Position += sizeof(uint); // localvarsig
-                reader.Position += codeSize; // cil code.
-                
-                if (hasSection)
-                {
-                    reader.Align(4);
-                    byte sectionHeader;
-                    do
-                    {
-                        sectionHeader = reader.ReadByte();
-                        if ((sectionHeader & 0x01) == 0x01)
-                        {
-                            bool isFatSection = (sectionHeader & 0x40) == 0x40;
-                            int dataSize = 0;
-                            if (isFatSection)
-                            {
-                                dataSize = reader.ReadByte() |
-                                           (reader.ReadByte() << 0x08) |
-                                           reader.ReadByte() << 0x10;
-                            }
-                            else
-                            {
-                                dataSize = reader.ReadByte();
-                                reader.ReadUInt16();
-                            }
-
-                            reader.Position += dataSize - 4;
-                        }
-                    } while ((sectionHeader & 0x80) == 0x80);
-                }
-            }
-            else if ((bodyHeader & 0x2) == 0x2)
-            {
-                uint codeSize = (uint)(bodyHeader >> 2);
-                reader.Position += codeSize;
-            }
-
-            return (int) (reader.Position - start);
-        }
-        
-        public static CilMethodBody FromReadingContext(MethodDefinition method, ReadingContext context)
-        {
-            var reader = context.Reader;
-            var body = new CilMethodBody(method)
-            {
-                StartOffset = reader.Position,
-            };
-
-            var bodyHeader = reader.ReadByte();
-            uint codeSize;
-
-            if ((bodyHeader & 0x3) == 0x3)
-            {
-                reader.Position--;
-                ushort fatBodyHeader = reader.ReadUInt16();
-                int headerSize = (fatBodyHeader >> 12) * 4;
-
-                bool hasSections = (fatBodyHeader & 0x8) == 0x8;
-                body.InitLocals = (fatBodyHeader & 0x10) == 0x10;
-                body.MaxStack = reader.ReadUInt16();
-                codeSize = reader.ReadUInt32();
-
-                var localVarSig = reader.ReadUInt32();
-                if (localVarSig != 0)
-                {
-                    IMetadataMember signature;
-                    method.Image.TryResolveMember(new MetadataToken(localVarSig), out signature);
+                IMetadataMember signature;
+                if (method.Image.TryResolveMember(new MetadataToken(fatBody.LocalVarSigToken), out signature))
                     body.Signature = signature as StandAloneSignature;
-                }
 
-                if (hasSections)
+                foreach (var section in fatBody.ExtraSections)
                 {
-                    body._sectionReadingContext = context.CreateSubContext(reader.Position + codeSize);
-                    body._sectionReadingContext.Reader.Align(4);
+                    var sectionReader = new MemoryStreamReader(section.Data);
+                    body.ExceptionHandlers.Add(ExceptionHandler.FromReader(body, sectionReader, section.IsFat));
                 }
             }
-            else if ((bodyHeader & 0x2) == 0x2)
-            {
-                codeSize = (uint)(bodyHeader >> 2);
-                body.MaxStack = 8;
-            }
-            else
-                throw new ArgumentException("Invalid method body header signature.");
 
-            body._cilReadingContext = context.CreateSubContext(reader.Position, (int)codeSize);
+            var codeReader = new MemoryStreamReader(rawMethodBody.Code);
+            var disassembler = new CilDisassembler(codeReader, body);
+            foreach (var instruction in disassembler.Disassemble())
+                body.Instructions.Add(instruction);
+            
             return body;
         }
-
-        private IList<CilInstruction> _instructions; 
-        private ReadingContext _cilReadingContext;
-        private ReadingContext _sectionReadingContext;
-        private List<ExceptionHandler> _handlers;
-
+        
         public CilMethodBody(MethodDefinition method)
         {
             Method = method;
             MaxStack = 8;
+            Instructions = new List<CilInstruction>();
+            ExceptionHandlers = new List<ExceptionHandler>();
+            
             // TODO: catch if method is not added to type yet.
 //            ThisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
         }
@@ -192,64 +112,14 @@ namespace AsmResolver.Net.Cil
 
         public IList<CilInstruction> Instructions
         {
-            get
-            {
-                if (_instructions != null)
-                    return _instructions;
-                if (_cilReadingContext == null)
-                    return _instructions = new List<CilInstruction>();
-
-                var cilReader = _cilReadingContext.Reader;
-                cilReader.Position = cilReader.StartPosition;
-                var disassembler = new CilDisassembler(cilReader, this);
-                var instructions = disassembler.Disassemble();
-                return _instructions = instructions;
-            }
+            get;
+            private set;
         }
 
         public IList<ExceptionHandler> ExceptionHandlers
         {
-            get
-            {
-                if (_handlers != null)
-                    return _handlers;
-                var handlers = new List<ExceptionHandler>();
-
-                if (_sectionReadingContext != null)
-                    handlers.AddRange(ReadExceptionHandlers());
-
-                return _handlers = handlers;
-            }
-        }
-
-        private IEnumerable<ExceptionHandler> ReadExceptionHandlers()
-        {
-            var reader = _sectionReadingContext.Reader;
-            reader.Position = reader.StartPosition;
-            byte sectionHeader;
-            do
-            {
-                sectionHeader = reader.ReadByte();
-                if ((sectionHeader & 0x01) == 0x01)
-                {
-                    var isFat = (sectionHeader & 0x40) == 0x40;
-                    var handlerCount = 0;
-                    if (isFat)
-                    {
-                        handlerCount = ((reader.ReadByte() |
-                                         (reader.ReadByte() << 0x08) |
-                                         reader.ReadByte() << 0x10) / 24);
-                    }
-                    else
-                    {
-                        handlerCount = reader.ReadByte() / 12;
-                        reader.ReadUInt16();
-                    }
-
-                    for (int i = 0; i < handlerCount; i++)
-                        yield return ExceptionHandler.FromReader(this, reader, isFat);
-                }
-            } while ((sectionHeader & 0x80) == 0x80);
+            get;
+            private set;
         }
 
         public int GetInstructionIndex(int offset)
@@ -576,58 +446,69 @@ namespace AsmResolver.Net.Cil
             }
         }
 
-        public uint GetCodeSize()
+        public override uint GetCodeSize()
         {
             return (uint) Instructions.Sum(x => x.Size);
         }
 
-        public override uint GetPhysicalLength()
+        public override FileSegment CreateRawMethodBody(MetadataBuffer buffer)
         {
-            var size = IsFat ? 12u : 1u;
-            size += GetCodeSize();
-
-            foreach (var handler in ExceptionHandlers)
+            using (var codeStream = new MemoryStream())
             {
-                handler.IsFat = IsFat;
-                size += sizeof (uint) + handler.GetPhysicalLength();
-            }
+                WriteCode(buffer, new BinaryStreamWriter(codeStream));
 
-            return size;
-        }
-
-        public override void Write(WritingContext context)
-        {
-            // TODO
-            throw new NotImplementedException();
-            
-        }
-
-        public override RvaDataSegment CreateDataSegment(MetadataBuffer buffer)
-        {
-            using (var stream = new MemoryStream())
-            {
-                var writer = new BinaryStreamWriter(stream);
-                
-                if (IsFat)
+                if (!IsFat)
                 {
-                    writer.WriteUInt16((ushort)((ExceptionHandlers.Count > 0 ? 0x8 : 0) |
-                                                (InitLocals ? 0x10 : 0) | 0x3003));
-                    writer.WriteUInt16((ushort)MaxStack);
-                    writer.WriteUInt32(GetCodeSize());
-                    writer.WriteUInt32(Signature == null ? 0 : buffer.TableStreamBuffer.GetStandaloneSignatureToken(Signature).ToUInt32());
+                    return new CilRawSmallMethodBody()
+                    {
+                        Code = codeStream.ToArray()
+                    };
                 }
-                else
+
+                var fatBody = new CilRawFatMethodBody
                 {
-                    writer.WriteByte((byte)(0x2 | GetCodeSize() << 2));
-                }
-    
-                WriteCode(buffer, writer);
-    
+                    HasSections = ExceptionHandlers.Count > 0,
+                    InitLocals = InitLocals,
+                    LocalVarSigToken = buffer.TableStreamBuffer.GetStandaloneSignatureToken(Signature).ToUInt32(),
+                    MaxStack = (ushort) MaxStack,
+                    Code = codeStream.ToArray()
+                };
+
                 if (ExceptionHandlers.Count > 0)
-                    WriteExceptionHandlers(buffer, writer);
+                {
+                    using (var sectionStream = new MemoryStream())
+                    {
+                        var sectionWriter = new BinaryStreamWriter(sectionStream);
+                        bool useFatFormat = ExceptionHandlers.Any(x => x.IsFatFormatRequired);
+                        foreach (var handler in ExceptionHandlers)
+                        {
+                            handler.IsFat = useFatFormat;
+                            handler.Write(buffer, sectionWriter);
+                        }
 
-                return new RvaDataSegment(stream.ToArray());
+                        fatBody.ExtraSections.Add(new CilExtraSection
+                        {
+                            IsExceptionHandler = true,
+                            IsFat = useFatFormat,
+                            HasMoreSections = false,
+                            Data = sectionStream.ToArray()
+                        });
+                    }
+                }
+
+                return fatBody;
             }
+        }
+
+        private void WriteCode(MetadataBuffer buffer, IBinaryStreamWriter writer)
+        {
+            CalculateOffsets();
+
+            var builder = new DefaultOperandBuilder(this, buffer); 
+            var assembler = new CilAssembler(builder, writer);
+
+            foreach (var instruction in Instructions)
+                assembler.Write(instruction);
         }
 
         public int ComputeMaxStack()
@@ -716,44 +597,6 @@ namespace AsmResolver.Net.Cil
             }
 
             return visitedInstructions.Max(x => x.Value.StackSize);
-        }
-
-        private void WriteCode(MetadataBuffer buffer, IBinaryStreamWriter writer)
-        {
-            CalculateOffsets();
-
-            var builder = new DefaultOperandBuilder(this, buffer); 
-            var assembler = new CilAssembler(builder, writer);
-
-            foreach (var instruction in Instructions)
-                assembler.Write(instruction);
-        }
-        
-        private void WriteExceptionHandlers(MetadataBuffer buffer, IBinaryStreamWriter writer)
-        {
-            var useFatFormat = ExceptionHandlers.Any(x => x.IsFatFormatRequired);
-
-            writer.Align(4);
-
-            writer.WriteByte((byte)(0x01 | (useFatFormat ? 0x40 : 0)));
-            if (useFatFormat)
-            {
-                var byteLength = ExceptionHandlers.Count * 24;
-                writer.WriteByte((byte)(byteLength & 0xFF));
-                writer.WriteByte((byte)((byteLength & 0xFF00) >> 0x08));
-                writer.WriteByte((byte)((byteLength & 0xFF0000) >> 0x10));
-            }
-            else
-            {
-                writer.WriteByte((byte)(ExceptionHandlers.Count * 12));
-                writer.WriteUInt16(0);
-            }
-
-            foreach (var handler in ExceptionHandlers)
-            {
-                handler.IsFat = useFatFormat;
-                handler.Write(buffer, writer);
-            }
         }
 
         IMetadataMember IOperandResolver.ResolveMember(MetadataToken token)

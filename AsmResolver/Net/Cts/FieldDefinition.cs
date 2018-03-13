@@ -67,8 +67,8 @@ namespace AsmResolver.Net.Cts
             _fieldRva = new LazyValue<FieldRva>(() =>
             {
                 var tableStream = image.Header.GetStream<TableStream>();
-                var table = tableStream.GetTable(MetadataTokenType.FieldRva);
-                var rvaRow = table.GetRowByKey(1, row.MetadataToken.Rid);
+                var table = (FieldRvaTable) tableStream.GetTable(MetadataTokenType.FieldRva);
+                var rvaRow = table.FindFieldRvaOfField(row.MetadataToken.Rid);
                 return rvaRow != null ? (FieldRva) table.GetMemberFromRow(image, rvaRow) : null;
             });
             

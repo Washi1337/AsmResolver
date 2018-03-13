@@ -170,6 +170,30 @@ namespace AsmResolver.Tests.Net.Cts
         }
 
         [Fact]
+        public void PersistentRva()
+        {
+            byte[] data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+            
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var field = CreateAndAddDummyField(image);
+            var newRva = new FieldRva(data);
+            field.FieldRva = newRva;
+            field.HasFieldRva = true;
+
+            var mapping = header.UnlockMetadata();
+            var rvaRow = header.GetStream<TableStream>().GetTable<FieldRvaTable>()[(int) (mapping[newRva].Rid - 1)];
+            Assert.Equal(data, rvaRow.Column1.Data);
+
+            image = header.LockMetadata();
+            field = (FieldDefinition) image.ResolveMember(mapping[field]);
+            Assert.NotNull(field.FieldRva);
+            Assert.Equal(data, field.FieldRva.Data);
+        }
+        
+        [Fact]
         public void PersistentPInvokeMap()
         {
             var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);

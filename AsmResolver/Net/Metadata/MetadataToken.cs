@@ -4,6 +4,8 @@ namespace AsmResolver.Net.Metadata
 {
     public struct MetadataToken : IEquatable<MetadataToken>
     {
+        public static readonly MetadataToken Zero = new MetadataToken(0u);
+        
         private readonly uint _token;
 
         public MetadataToken(uint token)

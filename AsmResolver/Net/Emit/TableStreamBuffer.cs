@@ -460,7 +460,7 @@ namespace AsmResolver.Net.Emit
 
         private void AddDummyMethod(MethodDefinitionTable methodTable, MethodDefinition method)
         {
-            var methodRow = new MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>
+            var methodRow = new MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>
             {
                 Column1 = null, // Body
                 Column2 = method.ImplAttributes,
@@ -552,11 +552,11 @@ namespace AsmResolver.Net.Emit
         }
 
         private void FinalizeMethodRow(MethodDefinition method,
-            MetadataRow<RvaDataSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> methodRow)
+            MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> methodRow)
         {
             // Update remaining columns.
             if (method.MethodBody != null)
-                methodRow.Column1 = method.MethodBody.CreateDataSegment(_parentBuffer);
+                methodRow.Column1 = method.MethodBody.CreateRawMethodBody(_parentBuffer);
             methodRow.Column5 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(method.Signature);
 
             // Add parameters.
@@ -605,9 +605,9 @@ namespace AsmResolver.Net.Emit
             var table = (FieldRvaTable) _tableStream.GetTable(MetadataTokenType.FieldRva);
             
             // Create and add row.
-            var rvaRow = new MetadataRow<uint, uint>
+            var rvaRow = new MetadataRow<DataSegment, uint>
             {
-                Column1 = fieldRva.Rva, // TODO: change to RvaDataSegment
+                Column1 = new DataSegment(fieldRva.Data),
                 Column2 = GetNewToken(fieldRva.Field).Rid
             };
             table.Add(rvaRow);
@@ -889,6 +889,9 @@ namespace AsmResolver.Net.Emit
 
         public MetadataToken GetStandaloneSignatureToken(StandAloneSignature signature)
         {
+            if (signature == null)
+                return MetadataToken.Zero;
+            
             var table = (StandAloneSignatureTable) _tableStream.GetTable(MetadataTokenType.StandAloneSig);
             var signatureRow = new MetadataRow<uint>
             {

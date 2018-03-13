@@ -205,7 +205,7 @@
                 var context = _readingContext.CreateSubContext(
                     _readingContext.Assembly.RvaToFileOffset(StrongNameSignatureDirectory.VirtualAddress),
                     (int) StrongNameSignatureDirectory.Size);
-                return _strongNameData = DataSegment.FromReadingContext(context);
+                return _strongNameData = DataSegment.FromReader(context.Reader);
             }
             set { _strongNameData = value; }
         }

@@ -11,29 +11,20 @@ namespace AsmResolver.X86
     /// </summary>
     public class X86MethodBody : MethodBody
     {
-        public static X86MethodBody FromReadingContext(ReadingContext context)
+        public static X86MethodBody FromReader(IBinaryStreamReader reader)
         {
             var body = new X86MethodBody();
-            body._instructions = new LazyValue<List<X86Instruction>>(() =>
-            {
-                var instructions = new List<X86Instruction>();
-                var reader = context.Reader.CreateSubReader(context.Reader.StartPosition);
-                var disassembler = new X86Disassembler(reader);
-                while (reader.Position < reader.StartPosition + reader.Length)
-                {
-                    instructions.Add(disassembler.ReadNextInstruction());
-                }
+            
+            var disassembler = new X86Disassembler(reader);
+            while (reader.Position < reader.StartPosition + reader.Length)
+                body.Instructions.Add(disassembler.ReadNextInstruction());
 
-                return instructions;
-            });
             return body;
         }
 
-        private LazyValue<List<X86Instruction>> _instructions;
-
         public X86MethodBody()
         {
-            _instructions = new LazyValue<List<X86Instruction>>(new List<X86Instruction>());
+            Instructions = new List<X86Instruction>();
         }
         
         /// <summary>
@@ -41,22 +32,16 @@ namespace AsmResolver.X86
         /// </summary>
         public IList<X86Instruction> Instructions
         {
-            get { return _instructions.Value; }
+            get;
+            private set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetCodeSize()
         {
             return (uint) Instructions.Sum(x => x.ComputeSize());
         }
 
-        public override void Write(WritingContext context)
-        {
-            var assembler = new X86Assembler(context.Writer);
-            foreach (var instruction in Instructions)
-                assembler.Write(instruction);
-        }
-
-        public override RvaDataSegment CreateDataSegment(MetadataBuffer buffer)
+        public override FileSegment CreateRawMethodBody(MetadataBuffer buffer)
         {
             using (var stream = new MemoryStream())
             {
@@ -64,7 +49,7 @@ namespace AsmResolver.X86
                 var assembler = new X86Assembler(writer);
                 foreach (var instruction in Instructions)
                     assembler.Write(instruction);
-                return new RvaDataSegment(stream.ToArray());
+                return new DataSegment(stream.ToArray());
             }
         }
     }
