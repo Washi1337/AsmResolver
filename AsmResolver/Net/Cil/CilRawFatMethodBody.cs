@@ -91,6 +91,9 @@ namespace AsmResolver.Net.Cil
             writer.WriteInt32(Code.Length);
             writer.WriteUInt32(LocalVarSigToken);
             writer.WriteBytes(Code);
+
+            foreach (var section in ExtraSections)
+                section.Write(context);
         }
     }
 }

@@ -26,6 +26,11 @@ namespace AsmResolver.Net.Signatures
             Variables = new List<VariableSignature>();
         }
 
+        public LocalVariableSignature(IEnumerable<TypeSignature> variableTypes)
+            : this(variableTypes.Select(x => new VariableSignature(x)))
+        {
+        }
+
         public LocalVariableSignature(IEnumerable<VariableSignature> variables)
         {
             Variables = new List<VariableSignature>(variables);

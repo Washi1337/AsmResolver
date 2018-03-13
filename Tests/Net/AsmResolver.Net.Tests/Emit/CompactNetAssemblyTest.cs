@@ -83,7 +83,7 @@ namespace AsmResolver.Tests.Net.Emit
         }
 
         [Fact]
-        public void PersistentManagedMethod()
+        public void PersistentManagedSmallMethod()
         {
             const string expectedOutput = "Hello, world!";
             
@@ -97,6 +97,80 @@ namespace AsmResolver.Tests.Net.Emit
             instructions.Add(CilInstruction.Create(CilOpCodes.Call,
                 importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))));
             instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            
+            var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
+            assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
+            
+            VerifyOutput(assembly, expectedOutput);
+        }
+
+        [Fact]
+        public void PersistentManagedFatMethodVariables()
+        {
+            const string expectedOutput = "Hello, world!";
+            
+            var assembly = CreateTempAssembly();
+            var image = assembly.NetDirectory.MetadataHeader.Image;
+            var importer = new ReferenceImporter(image);
+            var mainMethod = image.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == TypeName).Methods.First(x => x.Name == MainMethodName);
+
+            mainMethod.CilMethodBody.Signature = new StandAloneSignature(
+                new LocalVariableSignature(new[] { image.TypeSystem.String }));
+            
+            var instructions = mainMethod.CilMethodBody.Instructions;
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Stloc_0));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldloc_0));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Call,
+                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            
+            var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
+            assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
+            
+            VerifyOutput(assembly, expectedOutput);
+        }
+
+        [Fact]
+        public void PersistentManagedFatMethodExceptionHandlers()
+        {
+            const string expectedOutput = "Hello, world!";
+            
+            var assembly = CreateTempAssembly();
+            var image = assembly.NetDirectory.MetadataHeader.Image;
+            var importer = new ReferenceImporter(image);
+            var mainMethod = image.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == TypeName).Methods.First(x => x.Name == MainMethodName);
+
+            var instructions = mainMethod.CilMethodBody.Instructions;
+            var tryStart = CilInstruction.Create(CilOpCodes.Nop);
+            var handlerStart = CilInstruction.Create(CilOpCodes.Nop);
+            var handlerEnd = CilInstruction.Create(CilOpCodes.Nop);
+
+            instructions.Add(tryStart);
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Newobj,
+                importer.ImportMethod(typeof(Exception).GetConstructor(new[] { typeof(string) }))));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Throw));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Leave, handlerEnd));
+            
+            instructions.Add(handlerStart);
+            instructions.Add(CilInstruction.Create(CilOpCodes.Callvirt,
+                importer.ImportMethod(typeof(Exception).GetMethod("get_Message"))));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Call,
+                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Leave_S, handlerEnd));
+            instructions.Add(handlerEnd);
+            
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            mainMethod.CilMethodBody.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Exception)
+            {
+                TryStart = tryStart,
+                TryEnd = handlerStart,
+                HandlerStart = handlerStart,
+                HandlerEnd = handlerEnd,
+                CatchType = importer.ImportType(typeof(Exception))
+            });
             
             var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();

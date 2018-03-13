@@ -40,19 +40,19 @@ namespace AsmResolver.Net.Cil
         public bool IsExceptionHandler
         {
             get { return Attributes.HasFlag(CilExtraSectionAttributes.ExceptionHandler); }
-            set { Attributes.SetFlag(CilExtraSectionAttributes.ExceptionHandler, value); }
+            set { Attributes = Attributes.SetFlag(CilExtraSectionAttributes.ExceptionHandler, value); }
         }
 
         public bool HasMoreSections
         {
             get { return Attributes.HasFlag(CilExtraSectionAttributes.HasMoreSections); }
-            set { Attributes.SetFlag(CilExtraSectionAttributes.HasMoreSections, value); }
+            set { Attributes = Attributes.SetFlag(CilExtraSectionAttributes.HasMoreSections, value); }
         }
 
         public bool IsFat
         {
             get { return Attributes.HasFlag(CilExtraSectionAttributes.FatFormat); }
-            set { Attributes.SetFlag(CilExtraSectionAttributes.FatFormat, value); }
+            set { Attributes = Attributes.SetFlag(CilExtraSectionAttributes.FatFormat, value); }
         }
 
         public byte[] Data
