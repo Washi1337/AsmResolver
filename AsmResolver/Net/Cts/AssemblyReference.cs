@@ -6,6 +6,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a reference to another .NET assembly.
+    /// </summary>
     public class AssemblyReference : MetadataMember<MetadataRow<ushort,ushort,ushort,ushort,AssemblyAttributes,uint,uint,uint,uint>>, IImplementation, IHasCustomAttribute, IResolutionScope, IAssemblyDescriptor
     {
         private Version _version;
@@ -67,6 +70,7 @@ namespace AsmResolver.Net.Cts
             Processors = new TableMemberCollection<AssemblyReference, AssemblyRefProcessor>(this, MetadataTokenType.AssemblyRefProcessor, GetProcessorOwner, SetProcessorOwner);
         }
 
+        /// <inheritdoc />
         public Version Version
         {
             get { return _version; }
@@ -77,12 +81,14 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <inheritdoc />
         public AssemblyAttributes Attributes
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public string Name
         {
             get { return _name.Value; }
@@ -93,6 +99,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <inheritdoc />
         public string FullName
         {
             get
@@ -103,6 +110,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <inheritdoc />
         public string Culture
         {
             get { return _culture.Value; }
@@ -113,12 +121,18 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the hash value identifying the assembly file.
+        /// </summary>
         public DataBlobSignature HashValue
         {
             get { return _hashValue.Value; }
             set { _hashValue.Value = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the public key of the assembly reference. 
+        /// </summary>
         public DataBlobSignature PublicKey
         {
             get { return _publicKey.Value; }
@@ -134,6 +148,7 @@ namespace AsmResolver.Net.Cts
             get { return PublicKey != null ? PublicKey.Data : null; }
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;

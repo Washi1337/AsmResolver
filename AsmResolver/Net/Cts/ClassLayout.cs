@@ -2,6 +2,9 @@
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Provides a description of the physical layout of a particular type definition.
+    /// </summary>
     public class ClassLayout : MetadataMember<MetadataRow<ushort, uint, uint>>
     {
         private readonly LazyValue<TypeDefinition> _parent;
@@ -30,22 +33,36 @@ namespace AsmResolver.Net.Cts
             });
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating the alignment of the fields defined in the <see cref="Parent"/> type.
+        /// If set to 0, then the alignment is selected by the runtime.  
+        /// </summary>
+        /// <remarks>
+        /// This value must be one of 0, 1, 2, 4, 8, 16, 32, 64 or 128 for a valid application to be produced.
+        /// </remarks>
+        
         public ushort PackingSize
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating the amount of bytes the <see cref="Parent"/> type uses in memory.
+        /// </summary>
         public uint ClassSize
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the parent type definition that this class layout applies to.
+        /// </summary>
         public TypeDefinition Parent
         {
             get { return _parent.Value; }
-            set { _parent.Value = value; }
+            internal set { _parent.Value = value; }
         }
     }
 }

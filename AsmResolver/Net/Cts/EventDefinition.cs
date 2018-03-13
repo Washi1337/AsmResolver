@@ -4,7 +4,10 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
-  public class EventDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, IHasSemantics, IResolvable
+    /// <summary>
+    /// Represents an event definition defined in a <see cref="TypeDefinition" />.
+    /// </summary>
+    public class EventDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, IHasSemantics, IResolvable
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<ITypeDefOrRef> _eventType;
@@ -25,7 +28,7 @@ namespace AsmResolver.Net.Cts
         internal EventDefinition(MetadataImage image, MetadataRow<EventAttributes, uint, uint> row)
             : base(image, row.MetadataToken)
         {
-            Attributes = (EventAttributes)row.Column1;
+            Attributes = row.Column1;
             _name = new LazyValue<string>(() => image.Header.GetStream<StringStream>().GetStringByOffset(row.Column2));
 
             _eventType = new LazyValue<ITypeDefOrRef>(() =>
@@ -47,18 +50,23 @@ namespace AsmResolver.Net.Cts
             Semantics = new MethodSemanticsCollection(this);
         }
 
+        /// <summary>
+        /// Gets or sets the attributes of the event definition.
+        /// </summary>
         public EventAttributes Attributes
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public string Name
         {
             get { return _name.Value; }
             set { _name.Value = value; }
         }
 
+        /// <inheritdoc />
         public string FullName
         {
             get
@@ -69,12 +77,18 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets the event map of the type that this event is declared in.
+        /// </summary>
         public EventMap EventMap
         {
             get { return _eventMap.Value; }
             set { _eventMap.Value = value; }
         }
 
+        /// <summary>
+        /// Gets the type declaring the event.
+        /// </summary>
         public TypeDefinition DeclaringType
         {
             get { return EventMap.Parent; }
@@ -85,24 +99,33 @@ namespace AsmResolver.Net.Cts
             get { return DeclaringType; }
         }
 
+        /// <summary>
+        /// Gets the delegate type of the event handler.
+        /// </summary>
         public ITypeDefOrRef EventType
         {
             get { return _eventType.Value; }
             set { _eventType.Value = value; }
         }
 
+        /// <inheritdoc />
         public MethodSemanticsCollection Semantics
         {
             get;
             private set;
         }
 
+
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the method responsible for adding a handler to the event (if present). 
+        /// </summary>
         public MethodDefinition AddMethod
         {
             get
@@ -112,6 +135,9 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets the method responsible for removing a handler to the event (if present). 
+        /// </summary>
         public MethodDefinition RemoveMethod
         {
             get
@@ -121,7 +147,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        public IMetadataMember Resolve()
+        IMetadataMember IResolvable.Resolve()
         {
             return this;
         }

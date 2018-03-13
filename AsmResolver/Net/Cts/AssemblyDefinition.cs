@@ -109,9 +109,7 @@ namespace AsmResolver.Net.Cts
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the version number of the assembly.
-        /// </summary>
+        /// <inheritdoc />
         public Version Version
         {
             get { return _version; }
@@ -122,18 +120,14 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        /// <summary>
-        /// Gets or sets the attributes for the assembly.
-        /// </summary>
+        /// <inheritdoc />
         public AssemblyAttributes Attributes
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the name of the assembly.
-        /// </summary>
+        /// <inheritdoc />
         public string Name
         {
             get { return _name.Value; }
@@ -144,9 +138,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        /// <summary>
-        /// Gets the fully qualified name of the assembly. This name is compatible with reflection.
-        /// </summary>
+        /// <inheritdoc />
         public string FullName
         {
             get
@@ -157,9 +149,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        /// <summary>
-        /// Gets or sets the culture string of the assembly.
-        /// </summary>
+        /// <inheritdoc />
         public string Culture
         {
             get { return _culture.Value; }
@@ -184,9 +174,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        /// <summary>
-        /// Gets the public key token derived from <see cref="PublicKey"/> for this assembly.
-        /// </summary>
+        /// <inheritdoc />
         public byte[] PublicKeyToken
         {
             get
@@ -199,12 +187,14 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
             private set;
         }
 
+        /// <inheritdoc />
         public SecurityDeclarationCollection SecurityDeclarations
         {
             get;

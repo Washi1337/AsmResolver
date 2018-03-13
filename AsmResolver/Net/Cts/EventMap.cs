@@ -4,6 +4,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Provides a map that binds a <see cref="TypeDefinition"/> to a collection of <see cref="EventDefinition"/>s.
+    /// </summary>
     public class EventMap : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<TypeDefinition> _parent;
@@ -31,12 +34,18 @@ namespace AsmResolver.Net.Cts
             Events = new RangedMemberCollection<EventMap,EventDefinition>(this, MetadataTokenType.Event, 1, GetEventOwner, SetEventOwner);
         }
 
+        /// <summary>
+        /// Gets the type the event map was assigned to.
+        /// </summary>
         public TypeDefinition Parent
         {
             get { return _parent.Value; }
             internal set { _parent.Value = value; }
         }
 
+        /// <summary>
+        /// Gets a collection of events the <see cref="Parent"/> type declares.
+        /// </summary>
         public Collection<EventDefinition> Events
         {
             get;

@@ -4,6 +4,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a constant value for a field, property or parameter definition.
+    /// </summary>
     public class Constant : MetadataMember<MetadataRow<ElementType, byte, uint, uint>>
     {
         private readonly LazyValue<IHasConstant> _parent;
@@ -33,18 +36,27 @@ namespace AsmResolver.Net.Cts
                 DataBlobSignature.FromReader(image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column4)));
         }
 
+        /// <summary>
+        /// Gets or sets the element type of the constant.
+        /// </summary>
         public ElementType ConstantType
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the parent member that owns this constant value.
+        /// </summary>
         public IHasConstant Parent
         {
             get { return _parent.Value; }
             internal set { _parent.Value = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the raw data blob containing the actual value of the constant.  
+        /// </summary>
         public DataBlobSignature Value
         {
             get { return _value.Value; }

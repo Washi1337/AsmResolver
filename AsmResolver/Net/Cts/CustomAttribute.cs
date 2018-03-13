@@ -3,6 +3,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a custom attribute that can be assigned to a member to provide additional information about the member.
+    /// </summary>
     public class CustomAttribute : MetadataMember<MetadataRow<uint, uint, uint>>
     {
         private readonly LazyValue<IHasCustomAttribute> _parent;
@@ -44,18 +47,27 @@ namespace AsmResolver.Net.Cts
                 tableStream.MetadataHeader.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
         }
 
+        /// <summary>
+        /// Gets the member that the custom attribute is assigned to.
+        /// </summary>
         public IHasCustomAttribute Parent
         {
             get { return _parent.Value; }
             internal set { _parent.Value = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the constructor that is used to initialize the attribute.
+        /// </summary>
         public ICustomAttributeType Constructor
         {
             get { return _constructor.Value; }
             set { _constructor.Value = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the signature containing the arguments used to invoke the constructor and initialize the attribute. 
+        /// </summary>
         public CustomAttributeSignature Signature
         {
             get { return _signature.Value; }

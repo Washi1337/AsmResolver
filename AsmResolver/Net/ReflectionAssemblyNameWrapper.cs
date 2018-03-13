@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using AsmResolver.Net.Cts;
+using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net
 {
@@ -23,6 +24,16 @@ namespace AsmResolver.Net
         public string FullName
         {
             get { return _assemblyName.FullName; }
+        }
+
+        public AssemblyAttributes Attributes
+        {
+            get
+            {
+                return (AssemblyAttributes) (
+                    _assemblyName.Flags
+                    | (AssemblyNameFlags) ((int) _assemblyName.ProcessorArchitecture << 4));
+            }
         }
 
         public string Culture
