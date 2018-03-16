@@ -18,9 +18,6 @@ namespace AsmResolver.Net.Emit
 
         protected override void CreateSections(EmitContext context)
         {
-            _textContents = new CompactNetTextContents(Assembly);
-            Assembly.SectionHeaders.Clear();
-
             CreateTextSection();
 
             if (Assembly.RootResourceDirectory != null)
@@ -29,12 +26,21 @@ namespace AsmResolver.Net.Emit
             if (Assembly.RelocationDirectory != null)
                 CreateRelocationSection();
 
+            Assembly.SectionHeaders.Clear();
+            Assembly.SectionHeaders.Add(_textSectionHeader);
+
+            if (_relocSectionHeader != null)
+                Assembly.SectionHeaders.Add(_relocSectionHeader);
+            if (_rsrcSectionHeader != null)
+                Assembly.SectionHeaders.Add(_rsrcSectionHeader);
+            
             foreach (var section in Assembly.GetSections())
                 SectionTable.AddSection(section);
         }
 
         private void CreateTextSection()
         {
+            _textContents = new CompactNetTextContents(Assembly);
             _textSectionHeader = new ImageSectionHeader
             {
                 Name = ".text",
@@ -43,7 +49,6 @@ namespace AsmResolver.Net.Emit
                              ImageSectionAttributes.ContentCode,
                 Section = {Segments = {_textContents}}
             };
-            Assembly.SectionHeaders.Add(_textSectionHeader);
         }
 
         private void CreateRelocationSection()
@@ -61,7 +66,6 @@ namespace AsmResolver.Net.Emit
                              ImageSectionAttributes.ContentInitializedData,
                 Section = {Segments = {Assembly.RelocationDirectory}}
             };
-            Assembly.SectionHeaders.Add(_relocSectionHeader);
         }
 
         private void CreateResourceSection()
@@ -77,7 +81,6 @@ namespace AsmResolver.Net.Emit
                     Segments = {resourcesBuffer.DirectoryTable, resourcesBuffer.DataDirectoryTable, resourcesBuffer.DataTable}
                 }
             };
-            Assembly.SectionHeaders.Add(_rsrcSectionHeader);
         }
 
         public override void UpdateReferences(EmitContext context)

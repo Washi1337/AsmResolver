@@ -238,7 +238,7 @@
                 if (_vtablesDirectory != null)
                     return _vtablesDirectory;
 
-                if (_readingContext != null)
+                if (_readingContext != null && VTableFixupsDirectory.VirtualAddress != 0)
                 {
                     var context = _readingContext.CreateSubContext(
                         _readingContext.Assembly.RvaToFileOffset(VTableFixupsDirectory.VirtualAddress), (int) VTableFixupsDirectory.Size);

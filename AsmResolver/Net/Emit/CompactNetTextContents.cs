@@ -111,6 +111,14 @@ namespace AsmResolver.Net.Emit
             ImportBuffer.UpdateTableRvas();
             if (VTableFixups != null)
                 VTableFixups.UpdateTableRvas(context);
+            if (DebugDirectory != null)
+            {
+                DebugDirectory.PointerToRawData = (uint) DebugDirectory.Data.StartOffset;
+                DebugDirectory.AddressOfRawData =
+                    (uint) context.Builder.Assembly.FileOffsetToRva(DebugDirectory.PointerToRawData);
+                DebugDirectory.SizeOfData = DebugDirectory.Data.GetPhysicalLength();
+            }
+           
             UpdateNetDirectory(context);
             base.UpdateReferences(context);
         }
