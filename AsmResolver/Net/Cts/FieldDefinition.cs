@@ -305,6 +305,18 @@ namespace AsmResolver.Net.Cts
             set { Attributes = Attributes.SetFlag(FieldAttributes.InitOnly, value); }
         }
 
+        public bool IsSpecialName
+        {
+            get { return Attributes.HasFlag(FieldAttributes.SpecialName);}
+            set { Attributes = Attributes.SetFlag(FieldAttributes.SpecialName, value); }
+        }
+
+        public bool IsRuntimeSpecialName
+        {
+            get { return Attributes.HasFlag(FieldAttributes.RuntimeSpecialName);}
+            set { Attributes = Attributes.SetFlag(FieldAttributes.RuntimeSpecialName, value); }
+        }
+
         private bool GetFieldAccessAttribute(FieldAttributes attribute)
         {
             return ((uint)Attributes).GetMaskedAttribute((uint)FieldAttributes.FieldAccessMask,

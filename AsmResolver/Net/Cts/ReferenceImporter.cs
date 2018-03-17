@@ -5,7 +5,7 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
-    public class ReferenceImporter
+    public class ReferenceImporter : IReferenceImporter
     {
         private readonly MetadataImage _image;
         private readonly SignatureComparer _signatureComparer;
@@ -27,12 +27,12 @@ namespace AsmResolver.Net.Cts
 
         #region Assembly
 
-        public AssemblyReference ImportAssembly(AssemblyName assemblyName)
+        public virtual AssemblyReference ImportAssembly(AssemblyName assemblyName)
         {
             return ImportAssembly(new ReflectionAssemblyNameWrapper(assemblyName));
         }
 
-        public AssemblyReference ImportAssembly(IAssemblyDescriptor assemblyInfo)
+        public virtual AssemblyReference ImportAssembly(IAssemblyDescriptor assemblyInfo)
         {
             var reference = _image.Assembly.AssemblyReferences.FirstOrDefault(x =>
                 _signatureComparer.Equals(x, assemblyInfo));
@@ -50,7 +50,7 @@ namespace AsmResolver.Net.Cts
 
         #endregion
 
-        public IMemberReference ImportReference(IMemberReference reference)
+        public virtual IMemberReference ImportReference(IMemberReference reference)
         {
             var type = reference as ITypeDefOrRef;
             if (type != null)
@@ -73,7 +73,7 @@ namespace AsmResolver.Net.Cts
 
         #region Type
 
-        public ITypeDefOrRef ImportType(Type type)
+        public virtual ITypeDefOrRef ImportType(Type type)
         {
             IResolutionScope resolutionScope = type.IsNested
                 ? (IResolutionScope) ImportType(type.DeclaringType)
@@ -92,7 +92,7 @@ namespace AsmResolver.Net.Cts
                 type.Name));
         }
 
-        public ITypeDefOrRef ImportType(ITypeDefOrRef type)
+        public virtual ITypeDefOrRef ImportType(ITypeDefOrRef type)
         {
             var typeRef = type as TypeReference;
             if (typeRef != null)
@@ -109,7 +109,7 @@ namespace AsmResolver.Net.Cts
             throw new NotSupportedException();
         }
 
-        public TypeReference ImportType(TypeReference reference)
+        public virtual TypeReference ImportType(TypeReference reference)
         {
             return new TypeReference(ImportScope(reference.ResolutionScope),
                 reference.Namespace,
@@ -117,7 +117,7 @@ namespace AsmResolver.Net.Cts
                 _image);
         }
 
-        public ITypeDefOrRef ImportType(TypeDefinition definition)
+        public virtual ITypeDefOrRef ImportType(TypeDefinition definition)
         {
             if (definition.Image == _image)
                 return definition;
@@ -132,7 +132,7 @@ namespace AsmResolver.Net.Cts
                 definition.Name));
         }
 
-        public ITypeDefOrRef ImportType(TypeSpecification specification)
+        public virtual ITypeDefOrRef ImportType(TypeSpecification specification)
         {
             return new TypeSpecification(ImportTypeSignature(specification.Signature), _image);
         }
@@ -141,7 +141,7 @@ namespace AsmResolver.Net.Cts
 
         #region Field
 
-        public MemberReference ImportField(FieldInfo field)
+        public virtual MemberReference ImportField(FieldInfo field)
         {
             var signature = new FieldSignature(ImportTypeSignature(field.FieldType));
 
@@ -153,22 +153,22 @@ namespace AsmResolver.Net.Cts
             return ImportMember(new MemberReference(declaringType, field.Name, signature));
         }
 
-        public IMemberReference ImportField(FieldDefinition definition)
+        public virtual IMemberReference ImportField(FieldDefinition field)
         {
-            if (definition.Image == _image)
-                return definition;
+            if (field.Image == _image)
+                return field;
 
             return new MemberReference(
-                ImportType(definition.DeclaringType),
-                definition.Name,
-                ImportFieldSignature(definition.Signature));
+                ImportType(field.DeclaringType),
+                field.Name,
+                ImportFieldSignature(field.Signature));
         }
 
         #endregion
 
         #region Method
 
-        public IMemberReference ImportMethod(MethodBase method)
+        public virtual IMemberReference ImportMethod(MethodBase method)
         {
             if (method.IsGenericMethod && !method.IsGenericMethodDefinition)
             {
@@ -192,7 +192,7 @@ namespace AsmResolver.Net.Cts
             return ImportMember(new MemberReference(ImportType(method.DeclaringType), method.Name, signature));
         }
 
-        public IMethodDefOrRef ImportMethod(IMethodDefOrRef method)
+        public virtual IMethodDefOrRef ImportMethod(IMethodDefOrRef method)
         {
             var definition = method as MethodDefinition;
             if (definition != null)
@@ -205,7 +205,7 @@ namespace AsmResolver.Net.Cts
             throw new NotSupportedException("Invalid or unsupported MethodDefOrRef instance.");
         }
 
-        public IMethodDefOrRef ImportMethod(MethodDefinition definition)
+        public virtual IMethodDefOrRef ImportMethod(MethodDefinition definition)
         {
             if (definition.Image == _image)
                 return definition;
@@ -217,7 +217,7 @@ namespace AsmResolver.Net.Cts
                 _image);
         }
 
-        public MethodSpecification ImportMethod(MethodSpecification specification)
+        public virtual MethodSpecification ImportMethod(MethodSpecification specification)
         {
             if (specification.Image == _image)
                 return specification;
@@ -230,7 +230,7 @@ namespace AsmResolver.Net.Cts
 
         #region Member references
 
-        public MemberReference ImportMember(MemberReference reference)
+        public virtual MemberReference ImportMember(MemberReference reference)
         {
             return new MemberReference(
                 ImportMemberRefParent(reference.Parent),
@@ -243,11 +243,10 @@ namespace AsmResolver.Net.Cts
 
         #region Member signatures
 
-        public StandAloneSignature ImportStandAloneSignature(StandAloneSignature signature)
+        public virtual StandAloneSignature ImportStandAloneSignature(StandAloneSignature signature)
         {
             return new StandAloneSignature(ImportCallingConventionSignature(signature.Signature), _image);
         }
-
 
         public CallingConventionSignature ImportCallingConventionSignature(CallingConventionSignature signature)
         {
@@ -270,7 +269,7 @@ namespace AsmResolver.Net.Cts
             throw new NotSupportedException("Invalid or unsupported calling convention signature.");
         }
 
-        private LocalVariableSignature ImportLocalVariableSignature(LocalVariableSignature signature)
+        public LocalVariableSignature ImportLocalVariableSignature(LocalVariableSignature signature)
         {
             return new LocalVariableSignature(signature.Variables.Select(
                 x => new VariableSignature(ImportTypeSignature(x.VariableType))))
@@ -279,7 +278,7 @@ namespace AsmResolver.Net.Cts
             };
         }
 
-        private GenericInstanceMethodSignature ImportGenericInstanceMethodSignature(GenericInstanceMethodSignature signature)
+        public GenericInstanceMethodSignature ImportGenericInstanceMethodSignature(GenericInstanceMethodSignature signature)
         {
             return new GenericInstanceMethodSignature(signature.GenericArguments.Select(ImportTypeSignature))
             {
@@ -287,7 +286,7 @@ namespace AsmResolver.Net.Cts
             };
         }
 
-        private PropertySignature ImportPropertySignature(PropertySignature signature)
+        public PropertySignature ImportPropertySignature(PropertySignature signature)
         {
             var newSignature = new PropertySignature
             {
@@ -340,7 +339,7 @@ namespace AsmResolver.Net.Cts
 
         #region Type signatures
 
-        public TypeSignature ImportTypeSignature(Type type)
+        public virtual TypeSignature ImportTypeSignature(Type type)
         {
             TypeSignature signature = GetCorLibSignature(type);
             if (signature != null)
@@ -368,12 +367,12 @@ namespace AsmResolver.Net.Cts
             return ImportArrayTypeSignature(arrayType);
         }
 
-        public TypeSignature ImportTypeSignature(ITypeDefOrRef typeDefOrRef)
+        public virtual TypeSignature ImportTypeSignature(ITypeDefOrRef typeDefOrRef)
         {
             return new TypeDefOrRefSignature(ImportType(typeDefOrRef));
         }
 
-        public TypeSignature ImportTypeSignature(TypeSignature signature)
+        public virtual TypeSignature ImportTypeSignature(TypeSignature signature)
         {
             if (signature is MsCorLibTypeSignature)
                 return signature;
@@ -679,7 +678,7 @@ namespace AsmResolver.Net.Cts
             throw new NotSupportedException();
         }
 
-        public ModuleReference ImportModule(ModuleReference reference)
+        public virtual ModuleReference ImportModule(ModuleReference reference)
         {
             var newReference =
                 _image.Assembly.ModuleReferences.FirstOrDefault(x => _signatureComparer.Equals(x, reference));

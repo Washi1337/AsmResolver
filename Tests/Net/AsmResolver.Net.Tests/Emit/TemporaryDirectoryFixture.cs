@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using AsmResolver.Net.Emit;
+using Xunit;
 
 namespace AsmResolver.Tests.Net.Emit
 {
@@ -28,6 +31,37 @@ namespace AsmResolver.Tests.Net.Emit
         public string GenerateRandomFileName()
         {
             return Path.Combine(TemporaryDirectory, GenerateRandomName() + ".exe");
+        }
+        
+        public void VerifyOutput(WindowsAssembly assembly, string expectedOutput)
+        {
+            string path =  GenerateRandomFileName();
+            assembly.Write(path, new CompactNetAssemblyBuilder(assembly));
+
+            string contents = null;
+            string error = null;
+            using (var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = path,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    ErrorDialog = false
+                }
+            })
+            {
+                process.Start();
+
+                contents= process.StandardOutput.ReadToEnd().Trim();
+                error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+            }
+            
+            Assert.Empty(error);                
+            Assert.Equal(expectedOutput, contents);
         }
         
         public void Dispose()

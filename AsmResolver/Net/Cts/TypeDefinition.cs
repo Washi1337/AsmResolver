@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
@@ -18,17 +19,12 @@ namespace AsmResolver.Net.Cts
         
         private string _fullName;
 
-        public TypeDefinition(string @namespace, string name)
-            : this(@namespace, name, null)
-        {
-        }
-
-        public TypeDefinition(string @namespace, string name, ITypeDefOrRef baseType)
+        public TypeDefinition(string @namespace, string name, ITypeDefOrRef baseType = null)
             : this(@namespace, name, TypeAttributes.Class, baseType)
         {
         }
         
-        public TypeDefinition(string @namespace, string name, TypeAttributes attributes, ITypeDefOrRef baseType)
+        public TypeDefinition(string @namespace, string name, TypeAttributes attributes, ITypeDefOrRef baseType = null)
             : base(null, new MetadataToken(MetadataTokenType.TypeDef))
         {
             Attributes = attributes;
@@ -463,6 +459,19 @@ namespace AsmResolver.Net.Cts
         public ITypeDescriptor GetElementType()
         {
             return this;
+        }
+
+        public IEnumerable<TypeDefinition> GetAllTypes()
+        {
+            var stack = new Stack<TypeDefinition>();
+            stack.Push(this);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                yield return current;
+                foreach (var nestedClass in current.NestedClasses)
+                    stack.Push(nestedClass.Class);
+            }
         }
 
         public override string ToString()

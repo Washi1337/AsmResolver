@@ -51,7 +51,7 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public MetadataImage Image
+        public virtual MetadataImage Image
         {
             get;
             internal set;

@@ -50,37 +50,6 @@ namespace AsmResolver.Tests.Net.Emit
             
             return assembly;
         }
-        
-        private void VerifyOutput(WindowsAssembly assembly, string expectedOutput)
-        {
-            string path =  _context.GenerateRandomFileName();
-            assembly.Write(path, new CompactNetAssemblyBuilder(assembly));
-
-            string contents = null;
-            string error = null;
-            using (var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = path,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        ErrorDialog = false
-                    }
-                })
-            {
-                process.Start();
-
-                contents= process.StandardOutput.ReadToEnd().Trim();
-                error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
-            }
-            
-            Assert.Empty(error);                
-            Assert.Equal(expectedOutput, contents);
-        }
 
         [Fact]
         public void PersistentManagedSmallMethod()
@@ -101,7 +70,7 @@ namespace AsmResolver.Tests.Net.Emit
             var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
             
-            VerifyOutput(assembly, expectedOutput);
+            _context.VerifyOutput(assembly, expectedOutput);
         }
 
         [Fact]
@@ -128,7 +97,7 @@ namespace AsmResolver.Tests.Net.Emit
             var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
             
-            VerifyOutput(assembly, expectedOutput);
+            _context.VerifyOutput(assembly, expectedOutput);
         }
 
         [Fact]
@@ -175,7 +144,7 @@ namespace AsmResolver.Tests.Net.Emit
             var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
             
-            VerifyOutput(assembly, expectedOutput);
+            _context.VerifyOutput(assembly, expectedOutput);
         }
 
         [Fact]
@@ -232,7 +201,7 @@ namespace AsmResolver.Tests.Net.Emit
             var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
             
-            VerifyOutput(assembly, "The secret number is: 1337");
+            _context.VerifyOutput(assembly, "The secret number is: 1337");
         }
 
         [Fact]

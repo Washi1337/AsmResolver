@@ -891,6 +891,10 @@ namespace AsmResolver.Net.Emit
         {
             if (signature == null)
                 return MetadataToken.Zero;
+
+            MetadataToken token;
+            if (_members.TryGetValue(signature, out token))
+                return token;
             
             var table = (StandAloneSignatureTable) _tableStream.GetTable(MetadataTokenType.StandAloneSig);
             var signatureRow = new MetadataRow<uint>
@@ -898,11 +902,11 @@ namespace AsmResolver.Net.Emit
                 Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(signature.Signature)
             };
             table.Add(signatureRow);
-            _members.Add(signature, signatureRow.MetadataToken);
+            _members.Add(signature, token = signatureRow.MetadataToken);
 
             AddCustomAttributes(signature);
 
-            return signatureRow.MetadataToken;
+            return token;
         }
         
         private void AddCustomAttributes(IHasCustomAttribute provider)

@@ -94,6 +94,7 @@
     <Compile Include="Net\Cil\CilRawMethodBody.cs" />
     <Compile Include="Net\Cil\CilRawSmallMethodBody.cs" />
     <Compile Include="Net\Cts\Collections\ShallowTypeCollection.cs" />
+    <Compile Include="Net\Cts\IReferenceImporter.cs" />
     <Compile Include="Net\Emit\BlobStreamBuffer.cs" />
     <Compile Include="Net\Emit\BootstrapperSegment.cs" />
     <Compile Include="Net\Emit\CompactNetAssemblyBuilder.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="Net\IndexSize.cs" />
     <Compile Include="Net\Cts\INetAssemblyResolver.cs" />
     <Compile Include="Net\ITypeDescriptor.cs" />
+    <Compile Include="Net\Metadata\MemberCloner.cs" />
     <Compile Include="Net\ResourcesManifest.cs" />
     <Compile Include="Net\Metadata\SecurityAction.cs" />
     <Compile Include="Net\ReflectionAssemblyNameWrapper.cs" />
