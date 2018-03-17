@@ -26,6 +26,8 @@ namespace AsmResolver.Net.Cts
         MethodSignature ImportMethodSignature(MethodSignature signature);
         FieldSignature ImportFieldSignature(FieldSignature signature);
         TypeSignature ImportTypeSignature(Type type);
+        TypeSignature ImportTypeSignature(TypeSignature signature);
+        TypeSignature ImportTypeSignature(ITypeDefOrRef typeDefOrRef);
         IResolutionScope ImportScope(IResolutionScope scope);
         ModuleReference ImportModule(ModuleReference reference);
     }

@@ -8,10 +8,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<ITypeDefOrRef> _constraint;
         private MetadataImage _image;
 
-        public GenericParameterConstraint(GenericParameter owner, ITypeDefOrRef constraint)
+        public GenericParameterConstraint(ITypeDefOrRef constraint)
             : base(new MetadataToken(MetadataTokenType.GenericParamConstraint))
         {
-            _owner = new LazyValue<GenericParameter>(owner);
+            _owner = new LazyValue<GenericParameter>();
             _constraint = new LazyValue<ITypeDefOrRef>(constraint);
         }
         

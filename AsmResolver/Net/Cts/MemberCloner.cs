@@ -71,6 +71,7 @@ namespace AsmResolver.Net.Cts
                 newField.Constant = new Constant(field.Constant.ConstantType, new DataBlobSignature(field.Constant.Value.Data));
             
             _createdMembers.Add(field, newField);
+            CloneCustomAttributes(field, newField);
             
             return newField;
         }
@@ -111,6 +112,23 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        private void FinalizeTypeStub(TypeDefinition type, TypeDefinition stub)
+        {
+            foreach (var nestedType in type.NestedClasses)
+                FinalizeTypeStub(nestedType.Class, (TypeDefinition) _createdMembers[nestedType.Class]);
+            
+            foreach (var method in type.Methods)
+                FinalizeMethod(method, (MethodDefinition) _createdMembers[method]);
+            
+            stub.BaseType = _importer.ImportType(type.BaseType);
+
+            if (type.ClassLayout != null)
+                stub.ClassLayout = new ClassLayout(type.ClassLayout.ClassSize, type.ClassLayout.PackingSize);
+
+            CloneGenericParameters(type, stub);
+            CloneCustomAttributes(type, stub);
+        }
+
         private EventDefinition CloneEvent(EventDefinition @event)
         {
             var newEvent = new EventDefinition(
@@ -118,6 +136,7 @@ namespace AsmResolver.Net.Cts
                 _importer.ImportType(@event.EventType));
 
             CloneSemantics(@event, newEvent);
+            CloneCustomAttributes(@event, newEvent);
             
             return newEvent;
         }
@@ -129,6 +148,7 @@ namespace AsmResolver.Net.Cts
                 _importer.ImportPropertySignature(property.Signature));
 
             CloneSemantics(property, newProperty);
+            CloneCustomAttributes(property, newProperty);
             
             return newProperty;
         }
@@ -143,21 +163,6 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        private void FinalizeTypeStub(TypeDefinition type, TypeDefinition stub)
-        {
-            foreach (var nestedType in type.NestedClasses)
-                FinalizeTypeStub(nestedType.Class, (TypeDefinition) _createdMembers[nestedType.Class]);
-            
-            foreach (var method in type.Methods)
-                FinalizeMethod(method, (MethodDefinition) _createdMembers[method]);
-            
-            stub.BaseType = _importer.ImportType(type.BaseType);
-
-            if (type.ClassLayout != null)
-                stub.ClassLayout = new ClassLayout(type.ClassLayout.ClassSize, type.ClassLayout.PackingSize);
-            
-        }
-        
         private MethodDefinition CreateMethodStub(MethodDefinition method)
         {
             var newMethod = new MethodDefinition(
@@ -174,8 +179,53 @@ namespace AsmResolver.Net.Cts
 
         private void FinalizeMethod(MethodDefinition method, MethodDefinition stub)
         {
+            CloneGenericParameters(method, stub);
+            CloneCustomAttributes(method, stub);
             if (method.CilMethodBody != null)
                 stub.CilMethodBody = CloneCilMethodBody(method.CilMethodBody, stub);
+        }
+
+        private void CloneGenericParameters(IGenericParameterProvider source, IGenericParameterProvider newOwner)
+        {
+            foreach (var parameter in source.GenericParameters)
+            {
+                var newParameter = new GenericParameter(parameter.Index, parameter.Name, parameter.Attributes);
+                foreach (var constraint in newParameter.Constraints)
+                {
+                    newParameter.Constraints.Add(new GenericParameterConstraint(
+                        _importer.ImportType(constraint.Constraint)));
+                }
+                newOwner.GenericParameters.Add(newParameter);
+            }
+        }
+
+        private void CloneCustomAttributes(IHasCustomAttribute source, IHasCustomAttribute newOwner)
+        {
+            foreach (var attribute in source.CustomAttributes)
+            {
+                var signature = new CustomAttributeSignature();
+                
+                foreach (var argument in attribute.Signature.FixedArguments)
+                    signature.FixedArguments.Add(CloneAttributeArgument(argument));
+                
+                foreach (var argument in attribute.Signature.NamedArguments)
+                {
+                    signature.NamedArguments.Add(new CustomAttributeNamedArgument(argument.ArgumentMemberType,
+                        _importer.ImportTypeSignature(argument.ArgumentType), argument.MemberName,
+                        CloneAttributeArgument(argument.Argument)));
+                }
+
+                var newAttribute = new CustomAttribute((ICustomAttributeType) _importer.ImportReference(attribute.Constructor), signature);
+                newOwner.CustomAttributes.Add(newAttribute);
+            }
+        }
+
+        private CustomAttributeArgument CloneAttributeArgument(CustomAttributeArgument argument)
+        {
+            var newArgument = new CustomAttributeArgument(_importer.ImportTypeSignature(argument.ArgumentType));
+            foreach (var element in argument.Elements)
+                newArgument.Elements.Add(new ElementSignature(element.Value));
+            return newArgument;
         }
 
         private CilMethodBody CloneCilMethodBody(CilMethodBody body, MethodDefinition newOwner)

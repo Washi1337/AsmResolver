@@ -1,4 +1,6 @@
-﻿namespace ClassLibrary1
+﻿using System;
+
+namespace ClassLibrary1
 {
     public class SimpleClassInternalReferences
     {
@@ -11,7 +13,15 @@
 
         public string SomeMethod(int x)
         {
-            return SomeMethod(_defaultPrefix, x);
+            try
+            {
+                return SomeMethod(_defaultPrefix, x);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
         
         public string SomeMethod(string prefix, int x)
