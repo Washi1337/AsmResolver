@@ -17,9 +17,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<ImplementationMap> _pinvokeMap;
         
         private string _fullName;
+        private MetadataImage _image;
 
         public MethodDefinition(string name, MethodAttributes attributes, MethodSignature signature)
-            : base(null, new MetadataToken(MetadataTokenType.Method))
+            : base(new MetadataToken(MetadataTokenType.Method))
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -41,8 +42,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal MethodDefinition(MetadataImage image, MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var stringStream = image.Header.GetStream<StringStream>();
             var blobStream = image.Header.GetStream<BlobStream>();
 
@@ -53,8 +55,6 @@ namespace AsmResolver.Net.Cts
             IBinaryStreamReader blobReader;
             if (blobStream.TryCreateBlobReader(row.Column5, out blobReader))
                 _signature = new LazyValue<MethodSignature>(() => MethodSignature.FromReader(image, blobReader));
-
-            Parameters = new RangedMemberCollection<MethodDefinition, ParameterDefinition>(this, MetadataTokenType.Param, 5, GetParamOwner, SetParamOwner);
 
             _methodBody = new LazyValue<MethodBody>(() =>
             {
@@ -82,12 +82,20 @@ namespace AsmResolver.Net.Cts
                 var mapRow = table.FindImplementationMapOfOwner(row.MetadataToken);
                 return mapRow != null ? (ImplementationMap) table.GetMemberFromRow(image, mapRow) : null;
             });
+
+            Parameters = new RangedMemberCollection<MethodDefinition, ParameterDefinition>(this, MetadataTokenType.Param, 5, GetParamOwner, SetParamOwner);
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             GenericParameters = new GenericParameterCollection(this);
         }
-        
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _declaringType.IsInitialized && _declaringType.Value != null ? _declaringType.Value.Image : _image; }
+        }
+
         public MethodImplAttributes ImplAttributes
         {
             get;
@@ -118,7 +126,11 @@ namespace AsmResolver.Net.Cts
         public TypeDefinition DeclaringType
         {
             get { return _declaringType.Value; }
-            internal set { _declaringType.Value = value; }
+            internal set
+            {
+                _declaringType.Value = value;
+                _image = null;
+            }
         }
 
         ITypeDefOrRef IMemberReference.DeclaringType
@@ -403,7 +415,6 @@ namespace AsmResolver.Net.Cts
         private static void SetParamOwner(ParameterDefinition param, MethodDefinition method)
         {
             param.Method = method;
-            param.Image = method == null ? null : method.Image;
         }
 
         private static MethodDefinition GetParamOwner(ParameterDefinition param)

@@ -8,9 +8,10 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<IHasSecurityAttribute> _parent;
         private readonly LazyValue<PermissionSetSignature> _permissionSet;
+        private MetadataImage _image;
 
         public SecurityDeclaration(SecurityAction action, PermissionSetSignature permissionSet)
-            : base(null, new MetadataToken(MetadataTokenType.DeclSecurity))
+            : base(new MetadataToken(MetadataTokenType.DeclSecurity))
         {
             Action = action;
             _parent = new LazyValue<IHasSecurityAttribute>();
@@ -20,8 +21,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal SecurityDeclaration(MetadataImage image, MetadataRow<SecurityAction, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var tableStream = image.Header.GetStream<TableStream>();
             Action = row.Column1;
 
@@ -38,10 +40,20 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
+        }
+
         public IHasSecurityAttribute Parent
         {
             get { return _parent.Value; }
-            set { _parent.Value = value; }
+            internal set
+            {
+                _parent.Value = value;
+                _image = null;
+            }
         }
 
         public SecurityAction Action

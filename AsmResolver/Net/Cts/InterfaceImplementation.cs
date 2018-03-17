@@ -7,9 +7,10 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<TypeDefinition> _class;
         private readonly LazyValue<ITypeDefOrRef> _interface;
-        
+        private MetadataImage _image;
+
         public InterfaceImplementation(ITypeDefOrRef @interface)
-            : base(null, new MetadataToken(MetadataTokenType.InterfaceImpl))
+            : base(new MetadataToken(MetadataTokenType.InterfaceImpl))
         {
             _class = new LazyValue<TypeDefinition>();
             _interface = new LazyValue<ITypeDefOrRef>(@interface);
@@ -18,8 +19,9 @@ namespace AsmResolver.Net.Cts
         }
         
         internal InterfaceImplementation(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var tableStream = image.Header.GetStream<TableStream>();
             _class = new LazyValue<TypeDefinition>(() =>
             {
@@ -40,10 +42,20 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _class.IsInitialized && _class.Value != null ? _class.Value.Image : _image; }
+        }
+
         public TypeDefinition Class
         {
             get { return _class.Value;}
-            internal set { _class.Value = value; }
+            internal set
+            {
+                _class.Value = value;
+                _image = null;
+            }
         }
 
         public ITypeDefOrRef Interface

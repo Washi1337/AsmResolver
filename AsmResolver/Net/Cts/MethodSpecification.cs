@@ -11,14 +11,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<IMethodDefOrRef> _method;
         private readonly LazyValue<GenericInstanceMethodSignature> _signature;
         private string _fullName;
+        private MetadataImage _image;
 
         public MethodSpecification(IMethodDefOrRef method, GenericInstanceMethodSignature signature)
-            : this(method, signature, null)
-        {
-        }
-
-        public MethodSpecification(IMethodDefOrRef method, GenericInstanceMethodSignature signature, MetadataImage image)
-            : base(image, new MetadataToken(MetadataTokenType.MethodSpec))
+            : base(new MetadataToken(MetadataTokenType.MethodSpec))
         {
             _method = new LazyValue<IMethodDefOrRef>(method);
             _signature = new LazyValue<GenericInstanceMethodSignature>(signature);
@@ -26,8 +22,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal MethodSpecification(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             _method = new LazyValue<IMethodDefOrRef>(() =>
             {
                 var encoder = image.Header.GetStream<TableStream>().GetIndexEncoder(CodedIndex.MethodDefOrRef);
@@ -43,6 +40,12 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _method.IsInitialized && _method.Value != null ? _method.Value.Image : _image; }
+        }
+
         public IMethodDefOrRef Method
         {
             get { return _method.Value; }
@@ -50,6 +53,7 @@ namespace AsmResolver.Net.Cts
             {
                 _method.Value = value;
                 _fullName = null;
+                _image = null;
             }
         }
 

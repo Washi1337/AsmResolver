@@ -7,10 +7,11 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<TypeDefinition> _class;
         private readonly LazyValue<IMethodDefOrRef> _methodBody;
         private readonly LazyValue<IMethodDefOrRef> _methodDeclaration;
+        private MetadataImage _image;
 
         public MethodImplementation(IMethodDefOrRef methodBody,
             IMethodDefOrRef methodDeclaration)
-            : base(null, new MetadataToken(MetadataTokenType.MethodImpl))
+            : base(new MetadataToken(MetadataTokenType.MethodImpl))
         {
             _class = new LazyValue<TypeDefinition>();
             _methodBody = new LazyValue<IMethodDefOrRef>(methodBody);
@@ -18,8 +19,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal MethodImplementation(MetadataImage image, MetadataRow<uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var tableStream = image.Header.GetStream<TableStream>();
             var encoder = tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
 
@@ -47,10 +49,20 @@ namespace AsmResolver.Net.Cts
             });
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _class.IsInitialized && _class.Value != null ? _class.Value.Image : _image; }
+        }
+
         public TypeDefinition Class
         {
             get { return _class.Value; }
-            internal set { _class.Value = value; }
+            internal set
+            {
+                _class.Value = value;
+                _image = null;
+            }
         }
 
         public IMethodDefOrRef MethodBody

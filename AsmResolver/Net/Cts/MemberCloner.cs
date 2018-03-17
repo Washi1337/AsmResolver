@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using AsmResolver.Net.Cil;
-using AsmResolver.Net.Cts;
 using AsmResolver.Net.Signatures;
 
-namespace AsmResolver.Net.Metadata
+namespace AsmResolver.Net.Cts
 {
     public class MemberCloner
     {
@@ -96,6 +95,52 @@ namespace AsmResolver.Net.Metadata
                 stub.Fields.Add(CloneField(field));
             foreach (var method in type.Methods)
                 stub.Methods.Add(CreateMethodStub(method));
+            
+            if (type.PropertyMap != null)
+            {
+                stub.PropertyMap = new PropertyMap();
+                foreach (var property in type.PropertyMap.Properties)
+                    stub.PropertyMap.Properties.Add(CloneProperty(property));
+            }
+            
+            if (type.EventMap != null)
+            {
+                stub.EventMap = new EventMap();
+                foreach (var @event in type.EventMap.Events)
+                    stub.EventMap.Events.Add(CloneEvent(@event));
+            }
+        }
+
+        private EventDefinition CloneEvent(EventDefinition @event)
+        {
+            var newEvent = new EventDefinition(
+                @event.Name,
+                _importer.ImportType(@event.EventType));
+
+            CloneSemantics(@event, newEvent);
+            
+            return newEvent;
+        }
+
+        private PropertyDefinition CloneProperty(PropertyDefinition property)
+        {
+            var newProperty = new PropertyDefinition(
+                property.Name,
+                _importer.ImportPropertySignature(property.Signature));
+
+            CloneSemantics(property, newProperty);
+            
+            return newProperty;
+        }
+
+        private void CloneSemantics(IHasSemantics owner, IHasSemantics newOwner)
+        {
+            foreach (var semantic in owner.Semantics)
+            {
+                newOwner.Semantics.Add(new MethodSemantics(
+                    (MethodDefinition) _createdMembers[semantic.Method],
+                    semantic.Attributes));
+            }
         }
 
         private void FinalizeTypeStub(TypeDefinition type, TypeDefinition stub)
@@ -103,10 +148,14 @@ namespace AsmResolver.Net.Metadata
             foreach (var nestedType in type.NestedClasses)
                 FinalizeTypeStub(nestedType.Class, (TypeDefinition) _createdMembers[nestedType.Class]);
             
-            stub.BaseType = _importer.ImportType(type.BaseType);
-
             foreach (var method in type.Methods)
                 FinalizeMethod(method, (MethodDefinition) _createdMembers[method]);
+            
+            stub.BaseType = _importer.ImportType(type.BaseType);
+
+            if (type.ClassLayout != null)
+                stub.ClassLayout = new ClassLayout(type.ClassLayout.ClassSize, type.ClassLayout.PackingSize);
+            
         }
         
         private MethodDefinition CreateMethodStub(MethodDefinition method)

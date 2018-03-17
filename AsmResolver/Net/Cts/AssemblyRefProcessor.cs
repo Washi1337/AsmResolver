@@ -5,17 +5,19 @@ namespace AsmResolver.Net.Cts
     public class AssemblyRefProcessor : MetadataMember<MetadataRow<uint,uint>>
     {
         private readonly LazyValue<AssemblyReference> _reference;
+        private MetadataImage _image;
 
         public AssemblyRefProcessor(AssemblyReference reference, uint processor)
-            : base(null, new MetadataToken(MetadataTokenType.AssemblyRefProcessor))
+            : base(new MetadataToken(MetadataTokenType.AssemblyRefProcessor))
         {
             Processor = processor;
             _reference.Value = reference;
         }
 
         internal AssemblyRefProcessor(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Processor = row.Column1;
             _reference = new LazyValue<AssemblyReference>(() =>
             {
@@ -27,6 +29,12 @@ namespace AsmResolver.Net.Cts
             });
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _reference.IsInitialized && _reference.Value != null ? _reference.Value.Image : _image; }
+        }
+
         public uint Processor
         {
             get;
@@ -36,7 +44,11 @@ namespace AsmResolver.Net.Cts
         public AssemblyReference Reference
         {
             get { return _reference.Value; }
-            set { _reference.Value = value; }
+            internal set
+            {
+                _reference.Value = value;
+                _image = null;
+            }
         }
     }
 }

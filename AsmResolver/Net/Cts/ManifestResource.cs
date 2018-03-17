@@ -10,7 +10,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<IImplementation> _implementation;
 
         public ManifestResource(string name, ManifestResourceAttributes attributes, byte[] data)
-            : base(null, new MetadataToken(MetadataTokenType.ManifestResource))
+            : base(new MetadataToken(MetadataTokenType.ManifestResource))
         {
             Attributes = attributes;
             _name = new LazyValue<string>(name);
@@ -21,8 +21,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal ManifestResource(MetadataImage image, MetadataRow<uint, ManifestResourceAttributes, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            Owner = image.Assembly;
             Offset = row.Column1;
             Attributes = row.Column2;
 
@@ -45,6 +46,18 @@ namespace AsmResolver.Net.Cts
                 : null);
 
             CustomAttributes = new CustomAttributeCollection(this);
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return Owner != null ? Owner.Image : null; }
+        }
+
+        public AssemblyDefinition Owner
+        {
+            get;
+            internal set;
         }
 
         public uint Offset

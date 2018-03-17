@@ -8,9 +8,10 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<DataBlobSignature> _hashValue;
-        
+        private MetadataImage _image;
+
         public FileReference(string name, FileAttributes attributes, DataBlobSignature hashValue)
-            : base(null, new MetadataToken(MetadataTokenType.File))
+            : base(new MetadataToken(MetadataTokenType.File))
         {
             _name = new LazyValue<string>(name);
             _hashValue = new LazyValue<DataBlobSignature>(hashValue);
@@ -20,8 +21,9 @@ namespace AsmResolver.Net.Cts
         }
             
         internal FileReference(MetadataImage image, MetadataRow<FileAttributes, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Attributes = row.Column1;
             
             _name = new LazyValue<string>(() 
@@ -31,6 +33,11 @@ namespace AsmResolver.Net.Cts
                 DataBlobSignature.FromReader(image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
             
             CustomAttributes = new CustomAttributeCollection(this);
+        }
+
+        public override MetadataImage Image
+        {
+            get { return _image; }
         }
 
         public FileAttributes Attributes
@@ -55,6 +62,12 @@ namespace AsmResolver.Net.Cts
         {
             get;
             private set;
+        }
+
+        public AssemblyDefinition Referrer
+        {
+            get;
+            set;
         }
     }
 }

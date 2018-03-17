@@ -19,9 +19,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<FieldLayout> _fieldLayout;
         private readonly LazyValue<ImplementationMap> _pinvokeMap;
         private string _fullName;
+        private MetadataImage _image;
 
         public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
-            : base(null, new MetadataToken(MetadataTokenType.Field))
+            : base(new MetadataToken(MetadataTokenType.Field))
         {
             if (name == null)
                 throw new ArgumentNullException("name");
@@ -43,8 +44,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal FieldDefinition(MetadataImage image, MetadataRow<FieldAttributes, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Attributes = row.Column1;
             
             _name = new LazyValue<string>(() => 
@@ -100,6 +102,12 @@ namespace AsmResolver.Net.Cts
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _declaringType.IsInitialized && _declaringType.Value != null ? _declaringType.Value.Image : _image; }
         }
 
         /// <summary>

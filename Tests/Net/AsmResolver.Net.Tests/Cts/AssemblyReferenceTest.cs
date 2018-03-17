@@ -16,7 +16,8 @@ namespace AsmResolver.Tests.Net.Cts
         {
             var reference = new AssemblyReference(ExternalAssemblyName, new Version(), image);
             image.Assembly.Modules[0].TopLevelTypes.Add(new TypeDefinition("SomeNamespace", "SomeName",
-                new TypeReference(reference, "Namespace", "Name", image)));
+                new TypeReference(reference, "Namespace", "Name")));
+            image.Assembly.AssemblyReferences.Add(reference);
             return reference;
         }
 

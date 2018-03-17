@@ -10,14 +10,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<MemberSignature> _signature;
         private readonly LazyValue<IMemberRefParent> _parent;
         private string _fullName;
+        private MetadataImage _image;
 
         public MemberReference(IMemberRefParent parent, string name, MemberSignature signature)
-            : this(parent, name, signature, null)
-        {
-        }
-
-        public MemberReference(IMemberRefParent parent, string name, MemberSignature signature, MetadataImage image)
-            : base(image, new MetadataToken(MetadataTokenType.MemberRef))
+            : base(new MetadataToken(MetadataTokenType.MemberRef))
         {
             _parent = new LazyValue<IMemberRefParent>(parent);
             _name = new LazyValue<string>(name);
@@ -26,8 +22,9 @@ namespace AsmResolver.Net.Cts
         }
 
         public MemberReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var tableStream = image.Header.GetStream<TableStream>();
 
             _parent = new LazyValue<IMemberRefParent>(() =>
@@ -44,10 +41,20 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
+        }
+
         public IMemberRefParent Parent
         {
             get { return _parent.Value; }
-            set { _parent.Value = value; }
+            set
+            {
+                _parent.Value = value;
+                _image = null;
+            }
         }
 
         public string Name

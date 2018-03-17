@@ -5,14 +5,27 @@ namespace AsmResolver.Net.Cts
     public class AssemblyProcessor : MetadataMember<MetadataRow<uint>>
     {
         public AssemblyProcessor(uint processor)
-            : base(null, new MetadataToken(MetadataTokenType.AssemblyProcessor))
+            : base(new MetadataToken(MetadataTokenType.AssemblyProcessor))
         {
+            Processor = processor;
         }
         
         internal AssemblyProcessor(MetadataImage image, MetadataRow<uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            Assembly = image.Assembly;
             Processor = row.Column1;
+        }
+
+        public override MetadataImage Image
+        {
+            get { return Assembly != null ? Assembly.Image : null; }
+        }
+
+        public AssemblyDefinition Assembly
+        {
+            get;
+            internal set;
         }
 
         public uint Processor

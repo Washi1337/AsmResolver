@@ -11,9 +11,10 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<IHasConstant> _parent;
         private readonly LazyValue<DataBlobSignature> _value;
+        private MetadataImage _image;
 
         public Constant(ElementType constantType, DataBlobSignature value)
-            : base(null, new MetadataToken(MetadataTokenType.Constant))
+            : base(new MetadataToken(MetadataTokenType.Constant))
         {
             ConstantType = constantType;
             _value = new LazyValue<DataBlobSignature>(value);
@@ -21,8 +22,10 @@ namespace AsmResolver.Net.Cts
         }
 
         internal Constant(MetadataImage image, MetadataRow<ElementType, byte, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
+            
             ConstantType = row.Column1;
 
             _parent = new LazyValue<IHasConstant>(() =>
@@ -34,6 +37,11 @@ namespace AsmResolver.Net.Cts
 
             _value = new LazyValue<DataBlobSignature>(() => 
                 DataBlobSignature.FromReader(image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column4)));
+        }
+
+        public override MetadataImage Image
+        {
+            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
         }
 
         /// <summary>
@@ -51,7 +59,11 @@ namespace AsmResolver.Net.Cts
         public IHasConstant Parent
         {
             get { return _parent.Value; }
-            internal set { _parent.Value = value; }
+            internal set
+            {
+                _parent.Value = value;
+                _image = null;
+            }
         }
 
         /// <summary>

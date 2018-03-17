@@ -9,9 +9,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<MethodDefinition> _method;
         private readonly LazyValue<Constant> _constant;
         private readonly LazyValue<FieldMarshal> _fieldMarshal;
+        private MetadataImage _image;
 
         public ParameterDefinition(int sequence, string name, ParameterAttributes attributes)
-            : base(null, new MetadataToken(MetadataTokenType.Param))
+            : base(new MetadataToken(MetadataTokenType.Param))
         {
             _name = new LazyValue<string>(name);
             Sequence = sequence;
@@ -25,8 +26,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal ParameterDefinition(MetadataImage image, MetadataRow<ParameterAttributes, ushort, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Attributes = row.Column1;
             Sequence = row.Column2;
             _name = new LazyValue<string>(() => image.Header.GetStream<StringStream>().GetStringByOffset(row.Column3));
@@ -55,6 +57,12 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _method.IsInitialized && _method.Value != null ? _method.Value.Image : _image; }
+        }
+
         public ParameterAttributes Attributes
         {
             get;
@@ -81,8 +89,12 @@ namespace AsmResolver.Net.Cts
 
         public MethodDefinition Method
         {
-            get;
-            internal set;
+            get { return _method.Value; }
+            internal set
+            {
+                _method.Value = value;
+                _image = null;
+            }
         }
 
         public CustomAttributeCollection CustomAttributes

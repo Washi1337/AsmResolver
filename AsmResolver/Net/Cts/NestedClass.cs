@@ -6,17 +6,19 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<TypeDefinition> _class;
         private readonly LazyValue<TypeDefinition> _enclosingClass;
+        private MetadataImage _image;
 
         public NestedClass(TypeDefinition @class) 
-            : base(null, new MetadataToken(MetadataTokenType.NestedClass))
+            : base( new MetadataToken(MetadataTokenType.NestedClass))
         {
             _class = new LazyValue<TypeDefinition>(@class);
             _enclosingClass = new LazyValue<TypeDefinition>();
         }
         
         internal NestedClass(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var typeTable = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
 
             _class = new LazyValue<TypeDefinition>(() =>
@@ -35,6 +37,17 @@ namespace AsmResolver.Net.Cts
                     : null;
             });
 
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get
+            {
+                return _enclosingClass.IsInitialized && _enclosingClass.Value != null
+                    ? _enclosingClass.Value.Image
+                    : _image;
+            }
         }
 
         public TypeDefinition Class
@@ -56,6 +69,7 @@ namespace AsmResolver.Net.Cts
             internal set
             {
                 _enclosingClass.Value = value;
+                _image = null;
                 if (_class.IsInitialized && _class.Value != null)
                     _class.Value.DeclaringType = value;
             }

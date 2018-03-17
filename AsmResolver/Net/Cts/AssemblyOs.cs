@@ -5,7 +5,7 @@ namespace AsmResolver.Net.Cts
     public class AssemblyOs : MetadataMember<MetadataRow<uint, uint, uint>>
     {
         public AssemblyOs(uint platformId, uint majorVersion, uint minorVersion)
-            : base(null, new MetadataToken(MetadataTokenType.AssemblyOs))
+            : base(new MetadataToken(MetadataTokenType.AssemblyOs))
         {
             PlatformId = platformId;
             MajorVersion = majorVersion;
@@ -13,11 +13,23 @@ namespace AsmResolver.Net.Cts
         }
 
         internal AssemblyOs(MetadataImage image, MetadataRow<uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            Assembly = image.Assembly;
             PlatformId = row.Column1;
             MajorVersion = row.Column2;
             MinorVersion = row.Column3;
+        }
+
+        public override MetadataImage Image
+        {
+            get { return Assembly != null ? Assembly.Image : null; }
+        }
+
+        public AssemblyDefinition Assembly
+        {
+            get;
+            internal set;
         }
 
         public uint PlatformId

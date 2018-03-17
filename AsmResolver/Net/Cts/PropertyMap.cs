@@ -7,9 +7,10 @@ namespace AsmResolver.Net.Cts
     public class PropertyMap : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<TypeDefinition> _parent;
+        private MetadataImage _image;
 
         public PropertyMap()
-            : base(null, new MetadataToken(MetadataTokenType.PropertyMap))
+            : base(new MetadataToken(MetadataTokenType.PropertyMap))
         {
             _parent = new LazyValue<TypeDefinition>();
             Properties = new DelegatedMemberCollection<PropertyMap, PropertyDefinition>(
@@ -19,8 +20,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal PropertyMap(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             _parent = new LazyValue<TypeDefinition>(() =>
             {
                 var typeTable = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
@@ -31,10 +33,20 @@ namespace AsmResolver.Net.Cts
                 1, GetPropertyOwner, SetPropertyOwner);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
+        }
+
         public TypeDefinition Parent
         {
             get { return _parent.Value; }
-            internal set { _parent.Value = value; }
+            internal set
+            {
+                _parent.Value = value;
+                _image = null;
+            }
         }
 
         public Collection<PropertyDefinition> Properties
@@ -51,7 +63,6 @@ namespace AsmResolver.Net.Cts
         private static void SetPropertyOwner(PropertyDefinition property, PropertyMap owner)
         {
             property.PropertyMap = owner;
-            property.Image = owner == null ? null : owner.Image;
         }
     }
 }

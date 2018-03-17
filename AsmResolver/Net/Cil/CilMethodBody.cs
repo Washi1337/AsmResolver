@@ -41,18 +41,21 @@ namespace AsmResolver.Net.Cil
                 IMetadataMember signature;
                 if (method.Image.TryResolveMember(new MetadataToken(fatBody.LocalVarSigToken), out signature))
                     body.Signature = signature as StandAloneSignature;
-
-                foreach (var section in fatBody.ExtraSections)
-                {
-                    var sectionReader = new MemoryStreamReader(section.Data);
-                    body.ExceptionHandlers.Add(ExceptionHandler.FromReader(body, sectionReader, section.IsFat));
-                }
             }
 
             var codeReader = new MemoryStreamReader(rawMethodBody.Code);
             var disassembler = new CilDisassembler(codeReader, body);
             foreach (var instruction in disassembler.Disassemble())
                 body.Instructions.Add(instruction);
+
+            if (fatBody != null)
+            {
+                foreach (var section in fatBody.ExtraSections)
+                {
+                    var sectionReader = new MemoryStreamReader(section.Data);
+                    body.ExceptionHandlers.Add(ExceptionHandler.FromReader(body, sectionReader, section.IsFat));
+                }
+            }
             
             return body;
         }

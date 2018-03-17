@@ -39,10 +39,7 @@ namespace AsmResolver.Net.Cts
 
             if (reference == null)
             {
-                reference = new AssemblyReference(assemblyInfo)
-                {
-                    Image = _image
-                };
+                reference = new AssemblyReference(assemblyInfo);
                 _image.Assembly.AssemblyReferences.Add(reference);
             }
             return reference;
@@ -113,8 +110,7 @@ namespace AsmResolver.Net.Cts
         {
             return new TypeReference(ImportScope(reference.ResolutionScope),
                 reference.Namespace,
-                reference.Name,
-                _image);
+                reference.Name);
         }
 
         public virtual ITypeDefOrRef ImportType(TypeDefinition definition)
@@ -134,7 +130,7 @@ namespace AsmResolver.Net.Cts
 
         public virtual ITypeDefOrRef ImportType(TypeSpecification specification)
         {
-            return new TypeSpecification(ImportTypeSignature(specification.Signature), _image);
+            return new TypeSpecification(ImportTypeSignature(specification.Signature));
         }
 
         #endregion
@@ -213,8 +209,7 @@ namespace AsmResolver.Net.Cts
             return new MemberReference(
                 ImportType(definition.DeclaringType),
                 definition.Name,
-                ImportMethodSignature(definition.Signature),
-                _image);
+                ImportMethodSignature(definition.Signature));
         }
 
         public virtual MethodSpecification ImportMethod(MethodSpecification specification)
@@ -223,7 +218,7 @@ namespace AsmResolver.Net.Cts
                 return specification;
 
             return new MethodSpecification(ImportMethod(specification.Method),
-                new GenericInstanceMethodSignature(specification.Signature.GenericArguments.Select(ImportTypeSignature)), _image);
+                new GenericInstanceMethodSignature(specification.Signature.GenericArguments.Select(ImportTypeSignature)));
         }
 
         #endregion
@@ -235,8 +230,7 @@ namespace AsmResolver.Net.Cts
             return new MemberReference(
                 ImportMemberRefParent(reference.Parent),
                 reference.Name,
-                ImportMemberSignature(reference.Signature),
-                _image);
+                ImportMemberSignature(reference.Signature));
         }
 
         #endregion
@@ -683,7 +677,7 @@ namespace AsmResolver.Net.Cts
             var newReference =
                 _image.Assembly.ModuleReferences.FirstOrDefault(x => _signatureComparer.Equals(x, reference));
             if (newReference == null)
-                _image.Assembly.ModuleReferences.Add(newReference = new ModuleReference(reference.Name, _image));
+                _image.Assembly.ModuleReferences.Add(newReference = new ModuleReference(reference.Name));
             return newReference;
         }
 

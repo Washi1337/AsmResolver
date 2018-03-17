@@ -12,6 +12,11 @@ namespace AsmResolver.Tests.Net.Cil
         
         public bool Equals(CilInstruction x, CilInstruction y)
         {
+            if (x == null && y == null)
+                return true;
+            if (x == null || y == null)
+                return false;
+            
             if (x.OpCode.Code != y.OpCode.Code || x.Offset != y.Offset)
                 return false;
 

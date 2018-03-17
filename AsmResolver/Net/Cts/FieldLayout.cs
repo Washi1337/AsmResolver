@@ -5,17 +5,19 @@ namespace AsmResolver.Net.Cts
     public class FieldLayout : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<FieldDefinition> _field;
+        private MetadataImage _image;
 
         public FieldLayout(uint offset)
-            : base(null, new MetadataToken(MetadataTokenType.FieldLayout))
+            : base(new MetadataToken(MetadataTokenType.FieldLayout))
         {
             Offset = offset;
             _field = new LazyValue<FieldDefinition>();
         }
         
         internal FieldLayout(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Offset = row.Column1;
 
             _field = new LazyValue<FieldDefinition>(() =>
@@ -28,6 +30,12 @@ namespace AsmResolver.Net.Cts
             });
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _field.IsInitialized && _field.Value != null ? _field.Value.Image : _image; }
+        }
+
         public uint Offset
         {
             get;
@@ -37,7 +45,11 @@ namespace AsmResolver.Net.Cts
         public FieldDefinition Field
         {
             get { return _field.Value; }
-            internal set { _field.Value = value; }
+            internal set
+            {
+                _field.Value = value;
+                _image = null;
+            }
         }
     }
 }

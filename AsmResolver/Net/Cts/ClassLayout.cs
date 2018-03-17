@@ -8,9 +8,10 @@ namespace AsmResolver.Net.Cts
     public class ClassLayout : MetadataMember<MetadataRow<ushort, uint, uint>>
     {
         private readonly LazyValue<TypeDefinition> _parent;
+        private MetadataImage _image;
 
         public ClassLayout(uint classSize, ushort packingSize)
-            : base(null, new MetadataToken(MetadataTokenType.ClassLayout))
+            : base(new MetadataToken(MetadataTokenType.ClassLayout))
         {
             _parent = new LazyValue<TypeDefinition>();
             ClassSize = classSize;
@@ -18,8 +19,9 @@ namespace AsmResolver.Net.Cts
         }
 
         public ClassLayout(MetadataImage image, MetadataRow<ushort, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             PackingSize = row.Column1;
             ClassSize = row.Column2;
 
@@ -33,6 +35,12 @@ namespace AsmResolver.Net.Cts
             });
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating the alignment of the fields defined in the <see cref="Parent"/> type.
         /// If set to 0, then the alignment is selected by the runtime.  
@@ -40,7 +48,6 @@ namespace AsmResolver.Net.Cts
         /// <remarks>
         /// This value must be one of 0, 1, 2, 4, 8, 16, 32, 64 or 128 for a valid application to be produced.
         /// </remarks>
-        
         public ushort PackingSize
         {
             get;
@@ -62,7 +69,11 @@ namespace AsmResolver.Net.Cts
         public TypeDefinition Parent
         {
             get { return _parent.Value; }
-            internal set { _parent.Value = value; }
+            internal set
+            {
+                _parent.Value = value;
+                _image = null;
+            }
         }
     }
 }

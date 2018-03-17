@@ -6,17 +6,19 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<GenericParameter> _owner;
         private readonly LazyValue<ITypeDefOrRef> _constraint;
+        private MetadataImage _image;
 
         public GenericParameterConstraint(GenericParameter owner, ITypeDefOrRef constraint)
-            : base(null, new MetadataToken(MetadataTokenType.GenericParamConstraint))
+            : base(new MetadataToken(MetadataTokenType.GenericParamConstraint))
         {
             _owner = new LazyValue<GenericParameter>(owner);
             _constraint = new LazyValue<ITypeDefOrRef>(constraint);
         }
         
         internal GenericParameterConstraint(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             _owner = new LazyValue<GenericParameter>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.GenericParam);
@@ -35,10 +37,19 @@ namespace AsmResolver.Net.Cts
             });
         }
 
+        public override MetadataImage Image
+        {
+            get { return _owner.IsInitialized && _owner.Value != null ? _owner.Value.Image : _image; }
+        }
+
         public GenericParameter Owner
         {
             get { return _owner.Value; }
-            internal set { _owner.Value = value; }
+            internal set
+            {
+                _owner.Value = value;
+                _image = null;
+            }
         }
 
         public ITypeDefOrRef Constraint

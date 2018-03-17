@@ -7,17 +7,19 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<IHasFieldMarshal> _parent;
         private readonly LazyValue<MarshalDescriptor> _marshalDescriptor;
+        private MetadataImage _image;
 
         public FieldMarshal(MarshalDescriptor marshalDescriptor)
-            : base(null, new MetadataToken(MetadataTokenType.FieldMarshal))
+            : base(new MetadataToken(MetadataTokenType.FieldMarshal))
         {
             _parent = new LazyValue<IHasFieldMarshal>();
             _marshalDescriptor = new LazyValue<MarshalDescriptor>(marshalDescriptor);
         }
 
         internal FieldMarshal(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             _parent = new LazyValue<IHasFieldMarshal>(() =>
             {
                 var tableStream = image.Header.GetStream<TableStream>();
@@ -32,10 +34,20 @@ namespace AsmResolver.Net.Cts
                 MarshalDescriptor.FromReader(image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column2)));
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
+        }
+
         public IHasFieldMarshal Parent
         {
             get { return _parent.Value; }
-            internal set { _parent.Value = value; }
+            internal set
+            {
+                _parent.Value = value;
+                _image = null;
+            }
         }
 
         public MarshalDescriptor MarshalDescriptor

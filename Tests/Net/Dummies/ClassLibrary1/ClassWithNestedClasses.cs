@@ -18,7 +18,7 @@ namespace ClassLibrary1
 
         public ClassWithNestedClasses()
         {
-            MyField = new NestedClass("Test");
+            MyField = new NestedClass("abc");
         }
         
         public string SomeMethod(int x)

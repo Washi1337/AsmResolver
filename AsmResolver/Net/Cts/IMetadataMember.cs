@@ -36,9 +36,8 @@ namespace AsmResolver.Net.Cts
     {
         private MetadataToken _metadataToken;
         
-        protected MetadataMember(MetadataImage image, MetadataToken token)
+        protected MetadataMember(MetadataToken token)
         {
-            Image = image;
             _metadataToken = token;
         }
 
@@ -51,10 +50,9 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public virtual MetadataImage Image
+        public abstract MetadataImage Image
         {
             get;
-            internal set;
         }
 
         /// <inheritdoc />

@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using AsmResolver.Net;
 using AsmResolver.Net.Cil;
 using AsmResolver.Net.Cts;
+using AsmResolver.Net.Emit;
 using AsmResolver.Net.Signatures;
 using Xunit;
 using MethodAttributes = AsmResolver.Net.Metadata.MethodAttributes;
@@ -280,14 +281,15 @@ namespace AsmResolver.Tests.Net.Cil
             });
 
             var mapping = image.Header.UnlockMetadata();
+            
             image = image.Header.LockMetadata();
             
             var instructionComparer = new CilInstructionComparer();
 
-            var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
+            var newMethod = (MethodDefinition) image.ResolveMember(mapping[methodBody.Method]);
             Assert.Equal(1, newMethod.CilMethodBody.ExceptionHandlers.Count);
             var handler = newMethod.CilMethodBody.ExceptionHandlers[0];
-            Assert.Equal(tryStart, handler.TryStart, instructionComparer);
+             Assert.Equal(tryStart, handler.TryStart, instructionComparer);
             Assert.Equal(handlerStart, handler.TryEnd, instructionComparer);
             Assert.Equal(handlerStart, handler.HandlerStart, instructionComparer);
             Assert.Equal(handlerEnd, handler.HandlerEnd, instructionComparer);

@@ -12,9 +12,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<PropertyMap> _propertyMap;
         private readonly LazyValue<Constant> _constant;
         private string _fullName;
+        private MetadataImage _image;
 
         public PropertyDefinition(string name, PropertySignature signature) 
-            : base(null, new MetadataToken(MetadataTokenType.Property))
+            : base(new MetadataToken(MetadataTokenType.Property))
         {
             _name = new LazyValue<string>(name);
             _signature = new LazyValue<PropertySignature>(signature);
@@ -27,8 +28,9 @@ namespace AsmResolver.Net.Cts
         }
         
         internal PropertyDefinition(MetadataImage image, MetadataRow<PropertyAttributes, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Attributes = row.Column1;
             
             _name = new LazyValue<string>(() => 
@@ -53,6 +55,12 @@ namespace AsmResolver.Net.Cts
             
             CustomAttributes = new CustomAttributeCollection(this);
             Semantics = new MethodSemanticsCollection(this);
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _propertyMap.IsInitialized && _propertyMap.Value != null ? _propertyMap.Value.Image : _image; }
         }
 
         public PropertyAttributes Attributes
@@ -99,7 +107,11 @@ namespace AsmResolver.Net.Cts
         public PropertyMap PropertyMap
         {
             get { return _propertyMap.Value; }
-            internal set { _propertyMap.Value = value; }
+            internal set
+            {
+                _propertyMap.Value = value;
+                _image = null;
+            }
         }
 
         public TypeDefinition DeclaringType

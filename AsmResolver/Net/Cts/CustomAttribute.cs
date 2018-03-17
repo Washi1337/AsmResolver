@@ -11,9 +11,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<IHasCustomAttribute> _parent;
         private readonly LazyValue<ICustomAttributeType> _constructor;
         private readonly LazyValue<CustomAttributeSignature> _signature;
+        private MetadataImage _image;
 
         public CustomAttribute(ICustomAttributeType constructor, CustomAttributeSignature signature)
-            : base(null, new MetadataToken(MetadataTokenType.CustomAttribute))
+            : base(new MetadataToken(MetadataTokenType.CustomAttribute))
         {
             _parent = new LazyValue<IHasCustomAttribute>();
             _constructor = new LazyValue<ICustomAttributeType>(constructor);
@@ -21,7 +22,7 @@ namespace AsmResolver.Net.Cts
         }
 
         internal CustomAttribute(MetadataImage image, MetadataRow<uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
             var tableStream = image.Header.GetStream<TableStream>();
 
@@ -47,13 +48,23 @@ namespace AsmResolver.Net.Cts
                 tableStream.MetadataHeader.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
+        }
+
         /// <summary>
         /// Gets the member that the custom attribute is assigned to.
         /// </summary>
         public IHasCustomAttribute Parent
         {
             get { return _parent.Value; }
-            internal set { _parent.Value = value; }
+            internal set
+            {
+                _parent.Value = value;
+                _image = null;
+            }
         }
 
         /// <summary>

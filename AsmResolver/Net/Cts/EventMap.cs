@@ -10,9 +10,10 @@ namespace AsmResolver.Net.Cts
     public class EventMap : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<TypeDefinition> _parent;
+        private MetadataImage _image;
 
         public EventMap()
-            : base(null, new MetadataToken(MetadataTokenType.EventMap))
+            : base(new MetadataToken(MetadataTokenType.EventMap))
         {
             _parent = new LazyValue<TypeDefinition>();
             Events = new DelegatedMemberCollection<EventMap, EventDefinition>(this, GetEventOwner, SetEventOwner);
@@ -20,8 +21,9 @@ namespace AsmResolver.Net.Cts
 
 
         internal EventMap(MetadataImage image, MetadataRow<uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             _parent = new LazyValue<TypeDefinition>(() =>
             {
                 var typeTable = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
@@ -34,13 +36,23 @@ namespace AsmResolver.Net.Cts
             Events = new RangedMemberCollection<EventMap,EventDefinition>(this, MetadataTokenType.Event, 1, GetEventOwner, SetEventOwner);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
+        }
+
         /// <summary>
         /// Gets the type the event map was assigned to.
         /// </summary>
         public TypeDefinition Parent
         {
             get { return _parent.Value; }
-            internal set { _parent.Value = value; }
+            internal set
+            {
+                _parent.Value = value;
+                _image = null;
+            }
         }
 
         /// <summary>
@@ -60,7 +72,6 @@ namespace AsmResolver.Net.Cts
         private static void SetEventOwner(EventDefinition @event, EventMap owner)
         {
             @event.EventMap = owner;
-            @event.Image = owner == null ? null : owner.Image;
         }
     }
 }

@@ -19,14 +19,14 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<DataBlobSignature> _hashValue;
 
         public AssemblyReference(IAssemblyDescriptor info)
-            : base(null, new MetadataToken(MetadataTokenType.AssemblyRef))
+            : base(new MetadataToken(MetadataTokenType.AssemblyRef))
         {
             _name = new LazyValue<string>(info.Name);
             Version = info.Version;
             _culture = new LazyValue<string>(info.Culture);
             _publicKey = new LazyValue<DataBlobSignature>(info.PublicKeyToken == null ? null : new DataBlobSignature(info.PublicKeyToken));
             _hashValue = new LazyValue<DataBlobSignature>();
-         
+            
             CustomAttributes = new CustomAttributeCollection(this);
             OperatingSystems = new DelegatedMemberCollection<AssemblyReference, AssemblyRefOs>(this, GetOsOwner, SetOsOwner);
             Processors = new DelegatedMemberCollection<AssemblyReference, AssemblyRefProcessor>(this, GetProcessorOwner, SetProcessorOwner);
@@ -38,22 +38,22 @@ namespace AsmResolver.Net.Cts
         }
 
         public AssemblyReference(string name, Version version, MetadataImage image)
-            : base(image, new MetadataToken(MetadataTokenType.AssemblyRef))
+            : base(new MetadataToken(MetadataTokenType.AssemblyRef))
         {
             _name = new LazyValue<string>(name);
             _version = version;
             _culture = new LazyValue<string>();
             _publicKey = new LazyValue<DataBlobSignature>();
             _hashValue = new LazyValue<DataBlobSignature>();
-            CustomAttributes = new CustomAttributeCollection(this);
             
+            CustomAttributes = new CustomAttributeCollection(this);
             OperatingSystems = new Collection<AssemblyRefOs>();
             OperatingSystems = new DelegatedMemberCollection<AssemblyReference, AssemblyRefOs>(this, GetOsOwner, SetOsOwner);
             Processors = new DelegatedMemberCollection<AssemblyReference, AssemblyRefProcessor>(this, GetProcessorOwner, SetProcessorOwner);
         }
 
         internal AssemblyReference(MetadataImage image, MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
             var stringStream = image.Header.GetStream<StringStream>();
             var blobStream = image.Header.GetStream<BlobStream>();
@@ -64,10 +64,26 @@ namespace AsmResolver.Net.Cts
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column7));
             _culture = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column8));
             _hashValue = new LazyValue<DataBlobSignature>(() => row.Column9 == 0 ? null : DataBlobSignature.FromReader(blobStream.CreateBlobReader(row.Column9)));
-            
+
+            Referrer = image.Assembly;
             CustomAttributes = new CustomAttributeCollection(this);
             OperatingSystems = new TableMemberCollection<AssemblyReference, AssemblyRefOs>(this, MetadataTokenType.AssemblyRefOs, GetOsOwner, SetOsOwner);
             Processors = new TableMemberCollection<AssemblyReference, AssemblyRefProcessor>(this, MetadataTokenType.AssemblyRefProcessor, GetProcessorOwner, SetProcessorOwner);
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return Referrer != null ? Referrer.Image : null; }
+        }
+
+        /// <summary>
+        /// Gets the assembly that refers this assembly reference.
+        /// </summary>
+        public AssemblyDefinition Referrer
+        {
+            get;
+            internal set;
         }
 
         /// <inheritdoc />
@@ -210,7 +226,6 @@ namespace AsmResolver.Net.Cts
         private static void SetOsOwner(AssemblyRefOs os, AssemblyReference reference)
         {
             os.Reference = reference;
-            os.Image = reference == null ? null : reference.Image;
         }
     }
 }

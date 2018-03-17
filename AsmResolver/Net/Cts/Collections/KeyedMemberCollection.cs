@@ -82,7 +82,6 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(CustomAttribute item, IHasCustomAttribute owner)
         {
             item.Parent = owner;
-            item.Image = owner == null ? null : owner.Image;
         }
     }
 
@@ -101,7 +100,6 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(MethodSemantics item, IHasSemantics owner)
         {
             item.Association = owner;
-            item.Image = owner == null ? null : owner.Image;
         }
     }
 
@@ -121,7 +119,6 @@ namespace AsmResolver.Net.Cts.Collections
         {
             item.EnclosingClass = owner;
             item.Class.Module = owner == null ? null : owner.Module;
-            item.Image = owner == null ? null : owner.Image;
         }
     }
 
@@ -140,7 +137,6 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(SecurityDeclaration item, IHasSecurityAttribute owner)
         {
             item.Parent = owner;
-            item.Image = owner == null ? null : owner.Image;
         }
     }
 
@@ -159,7 +155,6 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(GenericParameter item, IGenericParameterProvider owner)
         {
             item.Owner = owner;
-            item.Image = owner == null ? null : owner.Image;
         }
     }
 
@@ -178,7 +173,6 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(GenericParameterConstraint item, GenericParameter owner)
         {
             item.Owner = owner;
-            item.Image = owner == null ? null : owner.Image;
         }
     }
 
@@ -197,7 +191,6 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(InterfaceImplementation item, TypeDefinition owner)
         {
             item.Class = owner;
-            item.Image = owner == null ? null : owner.Image;
         }
     }
 
@@ -216,7 +209,6 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(MethodImplementation item, TypeDefinition owner)
         {
             item.Class = owner;
-            item.Image = owner == null ? null : owner.Image;
         }
     }
 }

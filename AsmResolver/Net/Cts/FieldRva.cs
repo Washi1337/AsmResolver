@@ -9,17 +9,19 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<byte[]> _data;
         private readonly LazyValue<FieldDefinition> _field;
+        private MetadataImage _image;
 
         public FieldRva(byte[] data)
-            : base(null, new MetadataToken(MetadataTokenType.FieldRva))
+            : base(new MetadataToken(MetadataTokenType.FieldRva))
         {
             _field = new LazyValue<FieldDefinition>();
             _data = new LazyValue<byte[]>(data);
         }
 
         internal FieldRva(MetadataImage image, MetadataRow<DataSegment, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             _field = new LazyValue<FieldDefinition>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.Field);
@@ -30,10 +32,20 @@ namespace AsmResolver.Net.Cts
             _data = new LazyValue<byte[]>(() => row.Column1.Data);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _field.IsInitialized && _field.Value != null ? _field.Value.Image : _image; }
+        }
+
         public FieldDefinition Field
         {
             get { return _field.Value; }
-            internal set { _field.Value = value; }
+            internal set
+            {
+                _field.Value = value;
+                _image = null;
+            }
         }
 
         public byte[] Data

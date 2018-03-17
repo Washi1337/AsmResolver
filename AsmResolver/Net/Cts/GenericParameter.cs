@@ -8,9 +8,10 @@ namespace AsmResolver.Net.Cts
     {
         private readonly LazyValue<IGenericParameterProvider> _owner;
         private readonly LazyValue<string> _name;
+        private MetadataImage _image;
 
         public GenericParameter(int index, string name, GenericParameterAttributes attributes = GenericParameterAttributes.NonVariant)
-            : base(null, new MetadataToken(MetadataTokenType.GenericParam))
+            : base(new MetadataToken(MetadataTokenType.GenericParam))
         {
             _owner = new LazyValue<IGenericParameterProvider>();
             Index = index;
@@ -20,8 +21,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal GenericParameter(MetadataImage image, MetadataRow<ushort, GenericParameterAttributes, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Index = row.Column1;
             Attributes = row.Column2;
 
@@ -35,6 +37,12 @@ namespace AsmResolver.Net.Cts
 
             _name = new LazyValue<string>(() => image.Header.GetStream<StringStream>().GetStringByOffset(row.Column4));
             Constraints = new GenericParameterConstraintCollection(this);
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _owner.IsInitialized && _owner.Value != null ? _owner.Value.Image : _image; }
         }
 
         public int Index
@@ -52,7 +60,11 @@ namespace AsmResolver.Net.Cts
         public IGenericParameterProvider Owner
         {
             get { return _owner.Value; }
-            internal set { _owner.Value = value; }
+            internal set
+            {
+                _owner.Value = value;
+                _image = null;
+            }
         }
 
         public string Name

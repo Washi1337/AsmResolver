@@ -8,6 +8,7 @@ namespace AsmResolver.Net.Cts
     {
         private CustomAttributeCollection _customAttributes;
         private readonly LazyValue<CallingConventionSignature> _signature;
+        private MetadataImage _image;
 
         public StandAloneSignature(CallingConventionSignature signature)
             : this(signature, null)
@@ -15,14 +16,16 @@ namespace AsmResolver.Net.Cts
         }
 
         public StandAloneSignature(CallingConventionSignature signature, MetadataImage image)
-            : base(image, new MetadataToken(MetadataTokenType.StandAloneSig))
+            : base(new MetadataToken(MetadataTokenType.StandAloneSig))
         {
+            _image = image;
             _signature = new LazyValue<CallingConventionSignature>(signature);
         }
 
         internal StandAloneSignature(MetadataImage image, MetadataRow<uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             _signature = new LazyValue<CallingConventionSignature>(() =>
             {
                 IBinaryStreamReader reader;
@@ -30,6 +33,11 @@ namespace AsmResolver.Net.Cts
                     ? CallingConventionSignature.FromReader(image, reader)
                     : null;
             });
+        }
+
+        public override MetadataImage Image
+        {
+            get { return _image; }
         }
 
         public CallingConventionSignature Signature

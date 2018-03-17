@@ -6,19 +6,16 @@ namespace AsmResolver.Net.Cts
 {
     public class TypeReference : MetadataMember<MetadataRow<uint, uint, uint>>, ITypeDefOrRef, IResolutionScope
     {
+        private readonly LazyValue<IResolutionScope> _resolutionScope;
         private readonly LazyValue<string> _name;
         private readonly LazyValue<string> _namespace;
         private string _fullName;
+        private MetadataImage _image;
 
         public TypeReference(IResolutionScope resolutionScope, string @namespace, string name)
-            : this(resolutionScope, @namespace, name, null)
+            : base(new MetadataToken(MetadataTokenType.TypeRef))
         {
-        }
-
-        public TypeReference(IResolutionScope resolutionScope, string @namespace, string name, MetadataImage image)
-            : base(image, new MetadataToken(MetadataTokenType.TypeRef))
-        {
-            ResolutionScope = resolutionScope;
+            _resolutionScope = new LazyValue<IResolutionScope>(resolutionScope);
             _namespace = new LazyValue<string>(@namespace);
             _name = new LazyValue<string>(name);
 
@@ -26,18 +23,20 @@ namespace AsmResolver.Net.Cts
         }
 
         public TypeReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var stringStream = image.Header.GetStream<StringStream>();
             var tableStream = image.Header.GetStream<TableStream>();
 
-            var resolutionScopeToken = tableStream.GetIndexEncoder(CodedIndex.ResolutionScope).DecodeIndex(row.Column1);
-            if (resolutionScopeToken.Rid != 0)
+            _resolutionScope = new LazyValue<IResolutionScope>(() =>
             {
+                var resolutionScopeToken = tableStream.GetIndexEncoder(CodedIndex.ResolutionScope).DecodeIndex(row.Column1);
                 IMetadataMember resolutionScope;
-                if (image.TryResolveMember(resolutionScopeToken, out resolutionScope))
-                    ResolutionScope = resolutionScope as IResolutionScope;
-            }
+                return image.TryResolveMember(resolutionScopeToken, out resolutionScope)
+                    ? resolutionScope as IResolutionScope
+                    : null;
+            });
 
             _name = new LazyValue<string>(() =>
             {
@@ -49,6 +48,11 @@ namespace AsmResolver.Net.Cts
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
+        }
+
+        public override MetadataImage Image
+        {
+            get { return _resolutionScope.IsInitialized && _resolutionScope.Value != null ? _resolutionScope.Value.Image : _image; }
         }
 
         public ITypeDefOrRef DeclaringType
@@ -63,8 +67,12 @@ namespace AsmResolver.Net.Cts
 
         public IResolutionScope ResolutionScope
         {
-            get;
-            set;
+            get { return _resolutionScope.Value;}
+            set
+            {
+                _resolutionScope.Value = value;
+                _image = null;
+            }
         }
 
         public string Name

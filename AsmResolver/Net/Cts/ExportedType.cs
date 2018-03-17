@@ -9,9 +9,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<string> _namespace;
         private readonly LazyValue<IImplementation> _implementation;
         private CustomAttributeCollection _customAttributes;
+        private MetadataImage _image;
 
         public ExportedType(IImplementation implementation, uint typeDefId, string name, string @namespace, TypeAttributes attributes)
-            : base(null, new MetadataToken(MetadataTokenType.ExportedType))
+            : base(new MetadataToken(MetadataTokenType.ExportedType))
         {
             Attributes = attributes;
             TypeDefId = typeDefId;
@@ -21,8 +22,9 @@ namespace AsmResolver.Net.Cts
         }
         
         internal ExportedType(MetadataImage image, MetadataRow<TypeAttributes, uint, uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Attributes = row.Column1;
             TypeDefId = row.Column2;
             
@@ -41,6 +43,11 @@ namespace AsmResolver.Net.Cts
                     ? (IImplementation) member
                     : null;
             });
+        }
+
+        public override MetadataImage Image
+        {
+            get { return _image; }
         }
 
         public TypeAttributes Attributes

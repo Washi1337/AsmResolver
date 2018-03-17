@@ -19,9 +19,10 @@ namespace AsmResolver.Net.Cts
         private Version _version;
         private string _fullName;
         private byte[] _publicKeyToken;
+        private MetadataImage _image;
 
         public AssemblyDefinition(IAssemblyDescriptor info)
-            : base(null, new MetadataToken(MetadataTokenType.Assembly))
+            : base(new MetadataToken(MetadataTokenType.Assembly))
         {
             _name = new LazyValue<string>(info.Name);
             Version = info.Version;
@@ -33,12 +34,12 @@ namespace AsmResolver.Net.Cts
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             Resources = new Collection<ManifestResource>();
             Files = new Collection<FileReference>();
-            OperatingSystems = new Collection<AssemblyOs>();
-            Processors = new Collection<AssemblyProcessor>();
+            OperatingSystems = new DelegatedMemberCollection<AssemblyDefinition,AssemblyOs>(this, GetOsOwner, SetOsOwner);
+            Processors = new DelegatedMemberCollection<AssemblyDefinition,AssemblyProcessor>(this, GetProcessorOwner, SetProcessorOwner);
         }
 
         public AssemblyDefinition(string name, Version version)
-            : base(null, new MetadataToken(MetadataTokenType.Assembly))
+            : base(new MetadataToken(MetadataTokenType.Assembly))
         {
             _name = new LazyValue<string>(name);
             _version = version;
@@ -51,13 +52,14 @@ namespace AsmResolver.Net.Cts
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             Resources = new Collection<ManifestResource>();
             Files = new Collection<FileReference>();
-            OperatingSystems = new Collection<AssemblyOs>();
-            Processors = new Collection<AssemblyProcessor>();
+            OperatingSystems = new DelegatedMemberCollection<AssemblyDefinition,AssemblyOs>(this, GetOsOwner, SetOsOwner);
+            Processors = new DelegatedMemberCollection<AssemblyDefinition,AssemblyProcessor>(this, GetProcessorOwner, SetProcessorOwner);
         }
 
         internal AssemblyDefinition(MetadataImage image, MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var tableStream = image.Header.GetStream<TableStream>();
             var stringStream = image.Header.GetStream<StringStream>();
             var blobStream = image.Header.GetStream<BlobStream>();
@@ -79,25 +81,31 @@ namespace AsmResolver.Net.Cts
                 this, tableStream.GetTable(MetadataTokenType.Module), GetModuleOwner, SetModuleOwner);
             
             AssemblyReferences = new TableMemberCollection<AssemblyDefinition, AssemblyReference>(
-                this, tableStream.GetTable(MetadataTokenType.AssemblyRef));
+                this, tableStream.GetTable(MetadataTokenType.AssemblyRef), GetReferenceOwner, SetReferenceOwner);
             
             ModuleReferences = new TableMemberCollection<AssemblyDefinition, ModuleReference>(
-                this, tableStream.GetTable(MetadataTokenType.ModuleRef));
+                this, tableStream.GetTable(MetadataTokenType.ModuleRef), GetReferenceOwner, SetReferenceOwner);
             
             Resources = new TableMemberCollection<AssemblyDefinition, ManifestResource>(
-                this, tableStream.GetTable(MetadataTokenType.ManifestResource));
+                this, tableStream.GetTable(MetadataTokenType.ManifestResource), GetResourceOwner, SetResourceOwner);
             
             Files = new TableMemberCollection<AssemblyDefinition, FileReference>(
-                this, tableStream.GetTable(MetadataTokenType.File));
+                this, tableStream.GetTable(MetadataTokenType.File), GetFileOwner, SetFileOwner);
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             
             OperatingSystems = new TableMemberCollection<AssemblyDefinition, AssemblyOs>(
-                this, tableStream.GetTable(MetadataTokenType.AssemblyOs));
+                this, tableStream.GetTable(MetadataTokenType.AssemblyOs), GetOsOwner, SetOsOwner);
             
             Processors = new TableMemberCollection<AssemblyDefinition, AssemblyProcessor>(
-                this, tableStream.GetTable(MetadataTokenType.AssemblyProcessor));
+                this, tableStream.GetTable(MetadataTokenType.AssemblyProcessor), GetProcessorOwner, SetProcessorOwner);
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _image; }
         }
 
         /// <summary>
@@ -307,7 +315,66 @@ namespace AsmResolver.Net.Cts
         private static void SetModuleOwner(ModuleDefinition module, AssemblyDefinition assembly)
         {
             module.Assembly = assembly;
-            module.Image = assembly == null ? null : assembly.Image;
+        }
+
+        private static AssemblyDefinition GetProcessorOwner(AssemblyProcessor processor)
+        {
+            return processor.Assembly;
+        }
+
+        private static void SetProcessorOwner(AssemblyProcessor processor, AssemblyDefinition definition)
+        {
+            processor.Assembly = definition;
+        }
+
+        private static AssemblyDefinition GetOsOwner(AssemblyOs os)
+        {
+            return os.Assembly;
+        }
+
+        private static void SetOsOwner(AssemblyOs os, AssemblyDefinition definition)
+        {
+            os.Assembly = definition;
+        }
+
+        private static void SetFileOwner(FileReference file, AssemblyDefinition definition)
+        {
+            file.Referrer = definition;
+        }
+
+        private static AssemblyDefinition GetFileOwner(FileReference file)
+        {
+            return file.Referrer;
+        }
+
+        private static void SetResourceOwner(ManifestResource resource, AssemblyDefinition definition)
+        {
+            resource.Owner = definition;
+        }
+
+        private static AssemblyDefinition GetResourceOwner(ManifestResource arg)
+        {
+            return arg.Owner;
+        }
+
+        private static void SetReferenceOwner(ModuleReference module, AssemblyDefinition definition)
+        {
+            module.Referrer = definition;
+        }
+
+        private static AssemblyDefinition GetReferenceOwner(ModuleReference arg)
+        {
+            return arg.Referrer;
+        }
+
+        private static void SetReferenceOwner(AssemblyReference reference, AssemblyDefinition definition)
+        {
+            reference.Referrer = definition;
+        }
+
+        private static AssemblyDefinition GetReferenceOwner(AssemblyReference arg)
+        {
+            return arg.Referrer;
         }
     }
 }

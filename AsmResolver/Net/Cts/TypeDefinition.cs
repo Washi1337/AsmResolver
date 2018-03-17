@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.Collections.Generic;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
@@ -11,13 +12,13 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<string> _name;
         private readonly LazyValue<string> _namespace;
         private readonly LazyValue<ITypeDefOrRef> _baseType;
-        private readonly LazyValue<ModuleDefinition> _module;
         private readonly LazyValue<ClassLayout> _classLayout;
         private readonly LazyValue<PropertyMap> _propertyMap;
         private readonly LazyValue<EventMap> _eventMap;
         private readonly LazyValue<TypeDefinition> _declaringType;
         
         private string _fullName;
+        private ModuleDefinition _module;
 
         public TypeDefinition(string @namespace, string name, ITypeDefOrRef baseType = null)
             : this(@namespace, name, TypeAttributes.Class, baseType)
@@ -25,7 +26,7 @@ namespace AsmResolver.Net.Cts
         }
         
         public TypeDefinition(string @namespace, string name, TypeAttributes attributes, ITypeDefOrRef baseType = null)
-            : base(null, new MetadataToken(MetadataTokenType.TypeDef))
+            : base(new MetadataToken(MetadataTokenType.TypeDef))
         {
             Attributes = attributes;
             _namespace = new LazyValue<string>(@namespace);
@@ -34,7 +35,6 @@ namespace AsmResolver.Net.Cts
             Fields = new DelegatedMemberCollection<TypeDefinition, FieldDefinition>(this, GetFieldOwner, SetFieldOwner);
             Methods = new DelegatedMemberCollection<TypeDefinition, MethodDefinition>(this, GetMethodOwner, SetMethodOwner);
 
-            _module = new LazyValue<ModuleDefinition>();
             _classLayout = new LazyValue<ClassLayout>();
             _propertyMap = new LazyValue<PropertyMap>();
             _eventMap = new LazyValue<EventMap>();
@@ -49,8 +49,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal TypeDefinition(MetadataImage image, MetadataRow<TypeAttributes, uint, uint, uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            Module = image.Assembly.Modules.FirstOrDefault();
             var tableStream = image.Header.GetStream<TableStream>();
             var stringStream = image.Header.GetStream<StringStream>();
 
@@ -72,9 +73,6 @@ namespace AsmResolver.Net.Cts
 
             Fields = new RangedMemberCollection<TypeDefinition, FieldDefinition>(this, MetadataTokenType.Field, 4, GetFieldOwner, SetFieldOwner);
             Methods = new RangedMemberCollection<TypeDefinition, MethodDefinition>(this, MetadataTokenType.Method, 5, GetMethodOwner, SetMethodOwner);
-
-            _module = new LazyValue<ModuleDefinition>(() =>
-                (ModuleDefinition) Image.ResolveMember(new MetadataToken(MetadataTokenType.Module, 1)));
             
             _classLayout = new LazyValue<ClassLayout>(() =>
             {
@@ -114,6 +112,12 @@ namespace AsmResolver.Net.Cts
             MethodImplementations = new MethodImplementationCollection(this);
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return Module != null ? Module.Image : null; }
+        }
+
         public TypeAttributes Attributes
         {
             get;
@@ -140,10 +144,9 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        public IResolutionScope ResolutionScope
+        IResolutionScope ITypeDescriptor.ResolutionScope
         {
-            get;
-            internal set;
+            get { return Module; }
         }
 
         public ITypeDefOrRef BaseType
@@ -166,8 +169,19 @@ namespace AsmResolver.Net.Cts
 
         public ModuleDefinition Module
         {
-            get { return _module.Value; }
-            internal set { _module.Value = value; }
+            get { return _module; }
+            internal set
+            {
+                if (_module != value)
+                {
+                    _module = value;
+                    if (NestedClasses != null)
+                    {
+                        foreach (var nestedClass in NestedClasses)
+                            nestedClass.Class.Module = value;
+                    }
+                }
+            }
         }
 
         public PropertyMap PropertyMap
@@ -503,7 +517,6 @@ namespace AsmResolver.Net.Cts
         private static void SetFieldOwner(FieldDefinition field, TypeDefinition type)
         {
             field.DeclaringType = type;
-            field.Image = type == null ? null : type.Image;
         }
 
         private static TypeDefinition GetMethodOwner(MethodDefinition method)
@@ -514,7 +527,6 @@ namespace AsmResolver.Net.Cts
         private static void SetMethodOwner(MethodDefinition method, TypeDefinition type)
         {
             method.DeclaringType = type;
-            method.Image = type == null ? null : type.Image;
         }
 
     }

@@ -12,9 +12,10 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<string> _name;
         private readonly LazyValue<ITypeDefOrRef> _eventType;
         private readonly LazyValue<EventMap> _eventMap;
+        private MetadataImage _image;
 
         public EventDefinition(string name, ITypeDefOrRef eventType)
-            : base(null, new MetadataToken(MetadataTokenType.Event))
+            : base(new MetadataToken(MetadataTokenType.Event))
         {
             _name = new LazyValue<string>(name);
             _eventType = new LazyValue<ITypeDefOrRef>(eventType);
@@ -26,8 +27,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal EventDefinition(MetadataImage image, MetadataRow<EventAttributes, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             Attributes = row.Column1;
             _name = new LazyValue<string>(() => image.Header.GetStream<StringStream>().GetStringByOffset(row.Column2));
 
@@ -48,6 +50,12 @@ namespace AsmResolver.Net.Cts
             
             CustomAttributes = new CustomAttributeCollection(this);
             Semantics = new MethodSemanticsCollection(this);
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _eventMap.IsInitialized && _eventMap.Value != null ? _eventMap.Value.Image : _image; }
         }
 
         /// <summary>
@@ -83,7 +91,11 @@ namespace AsmResolver.Net.Cts
         public EventMap EventMap
         {
             get { return _eventMap.Value; }
-            set { _eventMap.Value = value; }
+            internal set
+            {
+                _eventMap.Value = value;
+                _image = null;
+            }
         }
 
         /// <summary>
@@ -91,7 +103,7 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public TypeDefinition DeclaringType
         {
-            get { return EventMap.Parent; }
+            get { return EventMap != null ? EventMap.Parent : null; }
         }
 
         ITypeDefOrRef IMemberReference.DeclaringType

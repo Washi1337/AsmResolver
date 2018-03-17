@@ -7,6 +7,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<IMemberForwarded> _memberForwarded;
         private readonly LazyValue<string> _importName;
         private readonly LazyValue<ModuleReference> _importScope;
+        private MetadataImage _image;
 
         public ImplementationMap(string moduleName, string importName, ImplementationMapAttributes attributes)
             : this(new ModuleReference(moduleName), importName, attributes)
@@ -14,7 +15,7 @@ namespace AsmResolver.Net.Cts
         }
 
         public ImplementationMap(ModuleReference importScope, string importName, ImplementationMapAttributes attributes)
-            : base(null, new MetadataToken(MetadataTokenType.ImplMap))
+            : base(new MetadataToken(MetadataTokenType.ImplMap))
         {
             _memberForwarded = new LazyValue<IMemberForwarded>();
             _importScope = new LazyValue<ModuleReference>(importScope);
@@ -23,8 +24,9 @@ namespace AsmResolver.Net.Cts
         }
 
         internal ImplementationMap(MetadataImage image, MetadataRow<ImplementationMapAttributes, uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var tableStream = image.Header.GetStream<TableStream>();
 
             Attributes = row.Column1;
@@ -51,6 +53,12 @@ namespace AsmResolver.Net.Cts
             });
         }
 
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _memberForwarded.IsInitialized && _memberForwarded.Value != null ? _memberForwarded.Value.Image : _image; }
+        }
+
         public ImplementationMapAttributes Attributes
         {
             get;
@@ -60,7 +68,11 @@ namespace AsmResolver.Net.Cts
         public IMemberForwarded MemberForwarded
         {
             get { return _memberForwarded.Value; }
-            internal set { _memberForwarded.Value = value; }
+            internal set
+            {
+                _memberForwarded.Value = value;
+                _image = null;
+            }
         }
 
         public string ImportName

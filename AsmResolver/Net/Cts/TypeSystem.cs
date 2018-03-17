@@ -33,7 +33,7 @@ namespace AsmResolver.Net.Cts
                 {
                     MsCorLibReference = new AssemblyReference(new ReflectionAssemblyNameWrapper(typeof(object).Assembly.GetName()))
                     {
-                        Image = image,
+                        Referrer = image.Assembly,
                         Culture = "neutral",
                         Version = new Version(image.Header.VersionString[1] - 48, 0, 0, 0)
                     };
@@ -100,10 +100,7 @@ namespace AsmResolver.Net.Cts
             }
             else
             {
-                signature = new MsCorLibTypeSignature(new TypeReference(MsCorLibReference, "System", name)
-                {
-                    Image = _image
-                }, type, isValueType);
+                signature = new MsCorLibTypeSignature(new TypeReference(MsCorLibReference, "System", name), type, isValueType);
             }
 
             _typesByName[name] = signature;

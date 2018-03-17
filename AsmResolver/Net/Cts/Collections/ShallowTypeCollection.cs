@@ -37,7 +37,6 @@ namespace AsmResolver.Net.Cts.Collections
         protected override void SetOwner(TypeDefinition item, ModuleDefinition owner)
         {
             item.Module = owner;
-            item.Image = owner != null ? owner.Image : null;
         }
     }
 }

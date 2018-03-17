@@ -114,8 +114,6 @@ namespace AsmResolver.Net.Signatures
             var type = dotIndex == -1
                 ? new TypeReference(scope, string.Empty, fullName)
                 : new TypeReference(scope, fullName.Remove(dotIndex), fullName.Substring(dotIndex + 1));
-            if (scope != null)
-                type.Image = scope.Image;
             return type;
         }
 

@@ -16,23 +16,23 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<Guid> _mvid;
         private readonly LazyValue<Guid> _encId;
         private readonly LazyValue<Guid> _encBaseId;
-        private readonly LazyValue<AssemblyDefinition> _assembly;
+        private MetadataImage _image;
 
         public ModuleDefinition(string name)
-            : base(null, new MetadataToken(MetadataTokenType.Module))
+            : base(new MetadataToken(MetadataTokenType.Module))
         {
             _name = new LazyValue<string>(name);
             _mvid = new LazyValue<Guid>();
             _encId = new LazyValue<Guid>();
             _encBaseId = new LazyValue<Guid>();
-            _assembly = new LazyValue<AssemblyDefinition>();
             TopLevelTypes = new DelegatedMemberCollection<ModuleDefinition, TypeDefinition>(this, GetTypeOwner, SetTypeOwner);
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
         internal ModuleDefinition(MetadataImage image, MetadataRow<ushort, uint, uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             var header = image.Header;
             var stringStream = header.GetStream<StringStream>();
             var guidStream = header.GetStream<GuidStream>();
@@ -42,9 +42,14 @@ namespace AsmResolver.Net.Cts
            _mvid = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column3));
            _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
            _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
-            _assembly = new LazyValue<AssemblyDefinition>(() => (AssemblyDefinition) Image.ResolveMember(new MetadataToken(MetadataTokenType.Assembly, 1)));
             TopLevelTypes = new ShallowTypeCollection(this, header.GetStream<TableStream>().GetTable<TypeDefinitionTable>());
             CustomAttributes = new CustomAttributeCollection(this);
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return Assembly != null ? Assembly.Image : null; }
         }
 
         public ushort Generation
@@ -85,8 +90,8 @@ namespace AsmResolver.Net.Cts
 
         public AssemblyDefinition Assembly
         {
-            get { return _assembly.Value; }
-            internal set { _assembly.Value = value; }
+            get;
+            internal set;
         }
 
         public Collection<TypeDefinition> TopLevelTypes
@@ -119,7 +124,6 @@ namespace AsmResolver.Net.Cts
         private static void SetTypeOwner(TypeDefinition type, ModuleDefinition module)
         {
             type.Module = module;
-            type.Image = module == null ? null : module.Image;
         }
 
         public override string ToString()

@@ -5,9 +5,10 @@ namespace AsmResolver.Net.Cts
     public class AssemblyRefOs : MetadataMember<MetadataRow<uint, uint,uint,uint>>
     {
         private readonly LazyValue<AssemblyReference> _reference;
-        
+        private MetadataImage _image;
+
         public AssemblyRefOs(AssemblyReference reference, uint platformId, uint majorVersion, uint minorVersion)
-            : base(null, new MetadataToken(MetadataTokenType.AssemblyRefOs))
+            : base(new MetadataToken(MetadataTokenType.AssemblyRefOs))
         {
             PlatformId = platformId;
             MajorVersion = majorVersion;
@@ -16,8 +17,9 @@ namespace AsmResolver.Net.Cts
         }
         
         internal AssemblyRefOs(MetadataImage image, MetadataRow<uint, uint, uint, uint> row)
-            : base(image, row.MetadataToken)
+            : base(row.MetadataToken)
         {
+            _image = image;
             PlatformId = row.Column1;
             MajorVersion = row.Column2;
             MinorVersion = row.Column3;
@@ -29,6 +31,12 @@ namespace AsmResolver.Net.Cts
                     ? (AssemblyReference) table.GetMemberFromRow(image, referenceRow)
                     : null;
             });
+        }
+
+        /// <inheritdoc />
+        public override MetadataImage Image
+        {
+            get { return _reference.IsInitialized && _reference.Value != null ? _reference.Value.Image : _image; }
         }
 
         public uint PlatformId
@@ -52,7 +60,11 @@ namespace AsmResolver.Net.Cts
         public AssemblyReference Reference
         {
             get { return _reference.Value;}
-            set { _reference.Value = value; }
+            internal set
+            {
+                _reference.Value = value;
+                _image = null;
+            }
         }
     }
 }
