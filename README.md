@@ -47,7 +47,7 @@ using (var stream = File.Create("C:\yourfile.exe"))
 AsmResolver ships with one standard .NET assembly builder, the CompactNetAssemblyBuilder, which constructs a new assembly which layout is similar to the ones produced by standard compilers. Example:
 
 ```csharp
-var builder = new CompactNetAssemblyBuilder(builder);
+var builder = new CompactNetAssemblyBuilder(assembly);
 ```
 
 ## Disassembling x86 code
@@ -118,7 +118,7 @@ typesTable.Add(myTypeRow);
 
 ## Accessing high level .NET metadata
 
-While AsmResolver provides low-level access to .NET metadata, often we are not interested in the raw representations in the form of tables and table entries. Therefore, AsmResolver provides a different view for the metadata, which resembles a more hierarchial view of the loaded .NET assembly.
+While AsmResolver provides low-level access to .NET metadata, often we are not interested in the raw representations in the form of tables and table entries. Therefore, AsmResolver provides a different view for the metadata, which resembles a more hierarchical view of the loaded .NET assembly.
 
 In order to switch to this mode, it is required to lock the metadata using  `MetadataHeader.LockMetadata()` which returns an instance of the `MetadataImage` class.
 
@@ -126,7 +126,7 @@ In order to switch to this mode, it is required to lock the metadata using  `Met
 var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
 ```
 
-From there on, the declared members can be read and updated using a more familiar hierarchial approach:
+From there on, the declared members can be read and updated using a more familiar hierarchical approach:
 
 ```csharp
 var assemblyDef = image.Assembly;
