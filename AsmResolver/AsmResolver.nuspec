@@ -6,11 +6,11 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://github.com/JerreS/AsmResolver/blob/master/LICENSE.md</licenseUrl>
-    <projectUrl>https://github.com/JerreS/AsmResolver</projectUrl>
+    <licenseUrl>https://github.com/Washi1337/AsmResolver/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/Washi1337/AsmResolver</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright $author$ 2016</copyright>
-    <tags>.NET assembly inspector editor MSIL x86 disassembler assembler metadata</tags>
+    <copyright>Copyright $author$ 2016-2018</copyright>
+    <tags>.NET assembly inspector editor CIL x86 disassembler assembler metadata</tags>
   </metadata>
 </package>

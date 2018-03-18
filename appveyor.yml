@@ -1,0 +1,37 @@
+-
+  branches:
+    only:
+      - master
+
+  version: 3.0.0-{branch}-build{bulid}
+  configuration: Release
+
+  build:
+    publish_nuget: true
+    verbosity: minimal
+
+  artifacts:
+    - path: AsmResolver/bin/Release
+      name: Latest stable release
+
+  deploy:
+    provider: NuGet
+    api_key:
+      secure: vZjUvk6GBXzuEgIRaJ6gsbyjLzYVOozBGX0ZycdseqTK2q0XLmJgRAk758ugrzsV
+    skip_symbols: false
+    artifact: /.*\.nupkg/
+-
+  branches:
+    only:
+      - development
+  
+  version: 3.0.0-{branch}-build{bulid}
+  configuration: Release
+
+  build:
+    publish_nuget: false
+    verbosity: minimal
+
+  artifacts:
+    - path: AsmResolver/bin/Release
+      name: Bleeding edge
