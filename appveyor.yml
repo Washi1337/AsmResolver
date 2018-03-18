@@ -3,8 +3,11 @@
     only:
       - master
 
-  version: 3.0.0-{branch}-build{bulid}
+  version: 3.0.0-{branch}-build{build}
   configuration: Release
+  
+  before_build:
+    - nuget restore
 
   build:
     publish_nuget: true
@@ -25,9 +28,12 @@
     only:
       - development
   
-  version: 3.0.0-{branch}-build{bulid}
+  version: 3.0.0-{branch}-build{build}
   configuration: Release
 
+  before_build:
+    - nuget restore
+    
   build:
     publish_nuget: false
     verbosity: minimal
