@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using AsmResolver.Builder;
+using AsmResolver.Emit;
 using AsmResolver.Net;
-using AsmResolver.Net.Builder;
 
 namespace AsmResolver
 {
@@ -129,7 +125,7 @@ namespace AsmResolver
         /// </summary>
         public WindowsAssembly()
         {
-            SectionHeaders = new List<ImageSectionHeader>();
+            SectionHeaders = new ImageSectionHeaderCollection(this);
         }
 
         /// <summary>
@@ -307,7 +303,18 @@ namespace AsmResolver
             }
             set { _debugDirectory = value; }
         }
-        
+
+        public IEnumerable<ImageSection> GetSections()
+        {
+            return SectionHeaders.Select(x => x.Section);
+        }
+
+        public ImageSection GetSectionByName(string name)
+        {
+            var header = SectionHeaders.FirstOrDefault(x => x.Name == name);
+            return header != null ? header.Section : null;
+        }
+
         public long RvaToFileOffset(long rva)
         {
             var section = GetSectionHeaderByRva(rva);
@@ -352,15 +359,16 @@ namespace AsmResolver
                         fileOffset < sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData);
         }
 
+        // TODO
         /// <summary>
         /// Rebuilds and writes the assembly to a specific file path.
         /// </summary>
         /// <param name="file">The file path to write the image to.</param>
-        public void Write(string file)
+        public void Write(string file, WindowsAssemblyBuilder builder)
         {
             using (var stream = File.Create(file))
             {
-                Write(new BuildingParameters(new BinaryStreamWriter(stream)));
+                Write(new BinaryStreamWriter(stream), builder);
             }
         }
 
@@ -368,23 +376,10 @@ namespace AsmResolver
         /// Rebuilds and writes the assembly to a specific binary stream.
         /// </summary>
         /// <param name="writer">The writer to write the image to.</param>
-        public void Write(IBinaryStreamWriter writer)
+        public void Write(IBinaryStreamWriter writer, WindowsAssemblyBuilder builder)
         {
-            Write(new BuildingParameters(writer));
-        }
-
-        /// <summary>
-        /// Rebuilds and writes the assembly to a destination, using the specified building parameters.
-        /// </summary>
-        /// <param name="parameters">The parameters to use for building the assembly image.</param>
-        public void Write(BuildingParameters parameters)
-        {
-            var builder = new NetAssemblyBuilder(this, parameters);
-            var context = new NetBuildingContext(builder);
-            builder.Build(context);
-            builder.UpdateOffsets(context);
-            builder.UpdateReferences(context);
-            builder.Write(new WritingContext(this, parameters.Writer, context));
+            builder.Build();
+            builder.Write(new WritingContext(this, writer));
         }
     }
 }

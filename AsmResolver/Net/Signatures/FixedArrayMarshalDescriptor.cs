@@ -1,4 +1,4 @@
-﻿using System;
+﻿using AsmResolver.Net.Emit;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -6,10 +6,7 @@ namespace AsmResolver.Net.Signatures
     {
         public new static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new FixedArrayMarshalDescriptor()
-            {
-                StartOffset = reader.Position,
-            };
+            var descriptor = new FixedArrayMarshalDescriptor();
 
             uint value;
             if (!reader.TryReadCompressedUInt32(out value))
@@ -45,9 +42,8 @@ namespace AsmResolver.Net.Signatures
                    sizeof (byte);
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)NativeType);
             writer.WriteCompressedUInt32((uint)NumberOfElements);
             writer.WriteByte((byte)ElementType);

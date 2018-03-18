@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
@@ -49,16 +47,24 @@ namespace AsmResolver.Net
                 var assembly = scope as IAssemblyDescriptor;
                 if (assembly != null)
                     return assembly;
-                
+
                 var module = scope as ModuleDefinition;
                 if (module != null)
-                    return module.Header.GetStream<TableStream>().GetTable<AssemblyDefinition>()[0];
+                    return module.Image.Assembly;
 
                 var type = scope as ITypeDefOrRef;
                 if (type == null)
                     return null;
                 scope = type.ResolutionScope;
             }
+        }
+
+        public static void ImportAssemblyInfo(this AssemblyDefinition assembly, IAssemblyDescriptor info)
+        {
+            assembly.Name = info.Name;
+            assembly.Version = info.Version;
+            assembly.Culture = info.Culture;
+            assembly.PublicKey = info.PublicKeyToken != null ? new DataBlobSignature(info.PublicKeyToken) : null;
         }
 
         public static bool GetMaskedAttribute(this uint self, uint mask, uint attribute)
@@ -85,8 +91,48 @@ namespace AsmResolver.Net
         public static TEnum SetFlag<TEnum>(this Enum self, TEnum flag, bool value)
         {
             return (TEnum)Convert.ChangeType(
-                (Convert.ToUInt64(self) & ~Convert.ToUInt64(flag)) | (value ? Convert.ToUInt64(flag) : 0), 
+                (Convert.ToUInt64(self) & ~Convert.ToUInt64(flag)) | (value ? Convert.ToUInt64(flag) : 0),
                 typeof(TEnum).GetEnumUnderlyingType());
         }
+        
+        internal static bool IsRunningOnMono ()
+        {
+            return Type.GetType ("Mono.Runtime") != null;
+        }
+
+        internal static void SetConstant(this IHasConstant owner, LazyValue<Constant> container, Constant newValue)
+        {
+            if (newValue != null && newValue.Parent != null)
+                throw new InvalidOperationException("Constant is already added to another member.");
+            if (container.Value != null)
+                container.Value.Parent = null;
+            container.Value = newValue;
+            if (newValue != null)
+                newValue.Parent = owner;
+        }
+
+        internal static void SetPInvokeMap(this IMemberForwarded owner, LazyValue<ImplementationMap> container, ImplementationMap newValue)
+        {
+            if (newValue != null && newValue.MemberForwarded != null)
+                throw new InvalidOperationException("Implementation map is already added to another member.");
+            if (container.Value != null)
+                container.Value.MemberForwarded = null;
+            container.Value = newValue;
+            if (newValue != null)
+                newValue.MemberForwarded = owner;
+        }
+
+        internal static void SetFieldMarshal(this IHasFieldMarshal owner, LazyValue<FieldMarshal> container, FieldMarshal newValue)
+        {
+            if (newValue != null && newValue.Parent != null)
+                throw new InvalidOperationException("Field marshal is already added to another member.");
+            if (container.Value != null)
+                container.Value.Parent = null;
+            container.Value = newValue;
+            if (newValue != null)
+                newValue.Parent = owner;
+        }
+        
+
     }
 }

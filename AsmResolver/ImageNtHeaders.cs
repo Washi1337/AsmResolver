@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AsmResolver
+﻿namespace AsmResolver
 {
     /// <summary>
     /// Represents the NT headers in a windows assembly image.

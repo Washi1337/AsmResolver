@@ -1,27 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public static class TypeNameParser
     {
-        public static TypeSignature ParseType(MetadataHeader header, string name)
+        public static TypeSignature ParseType(MetadataImage image, string name)
         {
             int position = 0;
-            var defaultScope = header == null ? null : header.GetStream<TableStream>().GetTable<ModuleDefinition>()[0];
+            var defaultScope = image == null ? null : image.Assembly.Modules[0];
             var type = ReadTypeSignature(defaultScope, name, ref position);
-            
+
             if (position >= name.Length)
                 return type;
 
             position++;
             SkipSpaces(name, ref position);
-            
+
             var elementType = ((TypeReference)type.GetElementType());
             while (elementType.DeclaringType != null)
                 elementType = (TypeReference)elementType.DeclaringType;
@@ -77,7 +74,7 @@ namespace AsmResolver.Net.Signatures
             {
                 var typeName = ReadTypeName(name, ref position);
                 type = CreateTypeReference(type ?? scope, typeName);
-                
+
                 if (position < name.Length && name[position] == '+')
                     position++;
                 else
@@ -117,8 +114,6 @@ namespace AsmResolver.Net.Signatures
             var type = dotIndex == -1
                 ? new TypeReference(scope, string.Empty, fullName)
                 : new TypeReference(scope, fullName.Remove(dotIndex), fullName.Substring(dotIndex + 1));
-            if (scope != null)
-                type.Header = scope.Header;
             return type;
         }
 

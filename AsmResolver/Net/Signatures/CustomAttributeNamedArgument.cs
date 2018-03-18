@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class CustomAttributeNamedArgument : BlobSignature
     {
-        public static CustomAttributeNamedArgument FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static CustomAttributeNamedArgument FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new CustomAttributeNamedArgument
             {
-                StartOffset = reader.Position,
                 ArgumentMemberType =
                     (reader.CanRead(sizeof (byte))
                         ? (CustomAttributeArgumentMemberType)reader.ReadByte()
                         : CustomAttributeArgumentMemberType.Field),
-                ArgumentType = TypeSignature.ReadFieldOrPropType(header, reader),
+                ArgumentType = TypeSignature.ReadFieldOrPropType(image, reader),
                 MemberName = reader.ReadSerString(),
             };
-            signature.Argument = CustomAttributeArgument.FromReader(header, signature.ArgumentType, reader);
+            signature.Argument = CustomAttributeArgument.FromReader(image, signature.ArgumentType, reader);
             return signature;
         }
 
@@ -68,13 +64,12 @@ namespace AsmResolver.Net.Signatures
                    Argument.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)ArgumentMemberType);
-            ArgumentType.Write(context); // TODO: write FieldOrPropType instead.
+            ArgumentType.Write(buffer, writer); // TODO: write FieldOrPropType instead.
             writer.WriteSerString(MemberName);
-            Argument.Write(context);
+            Argument.Write(buffer, writer);
         }
     }
 

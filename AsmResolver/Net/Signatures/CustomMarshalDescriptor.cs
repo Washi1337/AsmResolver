@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text;
+using AsmResolver.Net.Emit;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -7,10 +7,7 @@ namespace AsmResolver.Net.Signatures
     {
         public new static CustomMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
-            var descriptor = new CustomMarshalDescriptor()
-            {
-                StartOffset = reader.Position
-            };
+            var descriptor = new CustomMarshalDescriptor();
 
             Guid guid;
             Guid.TryParse(reader.ReadSerString(), out guid);
@@ -62,9 +59,8 @@ namespace AsmResolver.Net.Signatures
 
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)NativeType);
             writer.WriteSerString(Guid.ToString("B"));
             writer.WriteSerString(UnmanagedType);

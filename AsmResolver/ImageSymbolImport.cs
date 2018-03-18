@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AsmResolver
+﻿namespace AsmResolver
 {
     /// <summary>
     /// Represents a symbol imported by a windows assembly image.

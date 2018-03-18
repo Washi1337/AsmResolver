@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class CustomAttributeArgument : BlobSignature
     {
-        public static CustomAttributeArgument FromReader(MetadataHeader header, TypeSignature typeSignature, IBinaryStreamReader reader)
+        public static CustomAttributeArgument FromReader(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
             var signature = new CustomAttributeArgument()
             {
-                StartOffset = reader.Position,
                 ArgumentType = typeSignature
             };
 
             if (typeSignature.ElementType != ElementType.SzArray)
             {
-                signature.Elements.Add(ElementSignature.FromReader(header, typeSignature, reader));
+                signature.Elements.Add(ElementSignature.FromReader(image, typeSignature, reader));
             }
             else
             {
@@ -28,7 +29,7 @@ namespace AsmResolver.Net.Signatures
                 {
                     for (uint i = 0; i < elementCount; i++)
                     {
-                        signature.Elements.Add(ElementSignature.FromReader(header, arrayType, reader));
+                        signature.Elements.Add(ElementSignature.FromReader(image, arrayType, reader));
                     }
                 }
             }
@@ -79,16 +80,15 @@ namespace AsmResolver.Net.Signatures
                         : sizeof(uint) + Elements.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             if (ArgumentType.ElementType != ElementType.SzArray)
-                Elements[0].Write(context);
+                Elements[0].Write(buffer, writer);
             else
             {
                 writer.WriteUInt32((uint)Elements.Count);
                 foreach (var element in Elements)
-                    element.Write(context);
+                    element.Write(buffer, writer);
             }
         }
     }

@@ -1,47 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.X86;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AsmResolver.X86;
+using Xunit;
 
 namespace AsmResolver.Tests.Native
 {
-    [TestClass]
     public class X86SizeComputationTests
     {
-        [TestMethod]
+        [Fact]
         public void Misc()
         {
             TestSizeComputation(Properties.Resources.Misc);
         }
 
-        [TestMethod]
+        [Fact]
         public void RelativeOffsets()
         {
             TestSizeComputation(Properties.Resources.RelativeOffsets);
         }
 
-        [TestMethod]
+        [Fact]
         public void Reg8_RegOrMem8()
         {
             TestSizeComputation(Properties.Resources.RegOrMem8_Reg8);
         }
 
-        [TestMethod]
+        [Fact]
         public void RegOrMem8_Reg8()
         {
             TestSizeComputation(Properties.Resources.Reg8_RegOrMem8);
         }
 
-        [TestMethod]
+        [Fact]
         public void Reg8_RegOrMem8_SIB()
         {
             TestSizeComputation(Properties.Resources.RegOrMem8_Reg8_sib);
         }
 
-        [TestMethod]
+        [Fact]
         public void OpCodeRegisterToken()
         {
             TestSizeComputation(Properties.Resources.OpCodeRegisterToken);
@@ -56,12 +50,10 @@ namespace AsmResolver.Tests.Native
             {
                 var instruction = disassembler.ReadNextInstruction();
 
-                var expectedSize = reader.Position - instruction.Offset;
-                var computeSize = instruction.ComputeSize();
+                long expectedSize = reader.Position - instruction.Offset;
+                long computeSize = instruction.ComputeSize();
 
-                if (expectedSize != computeSize)
-                    Assert.Fail("The instruction {0} has size {1}, but {2} was computed.", instruction, expectedSize,
-                        computeSize);
+                Assert.Equal(expectedSize, computeSize);
             }
         }
 

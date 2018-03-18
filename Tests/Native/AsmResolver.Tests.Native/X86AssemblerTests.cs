@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Signatures;
 using AsmResolver.X86;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace AsmResolver.Tests.Native
 {
-    [TestClass]
     public class X86AssemblerTests
     {
 
-        [TestMethod]
+        [Fact]
         public void RegOrMem8_Reg8()
         {
             var body = CreateRegOrMemTestInstructions(X86OpCodes.Add_RegOrMem8_Reg8, X86Mnemonic.Add, false).ToArray();
@@ -22,7 +18,7 @@ namespace AsmResolver.Tests.Native
             TestAssembler(body);
         }
 
-        [TestMethod]
+        [Fact]
         public void Reg8_RegOrMem8()
         {
             var body = CreateRegOrMemTestInstructions(X86OpCodes.Add_Reg8_RegOrMem8, X86Mnemonic.Add, true).ToArray();
@@ -30,7 +26,7 @@ namespace AsmResolver.Tests.Native
             TestAssembler(body);
         }
 
-        [TestMethod]
+        [Fact]
         public void RegOrMem8_Reg8_SIB()
         { 
             var body = CreateRegOrMemSibTestInstructions(X86OpCodes.Add_RegOrMem8_Reg8, X86Mnemonic.Add).ToArray();
@@ -38,7 +34,7 @@ namespace AsmResolver.Tests.Native
             TestAssembler(body);
         }
 
-        [TestMethod]
+        [Fact]
         public void OpCodeRegisterToken()
         {
             var body = CreateOpCodeRegisterTokenTestInstructions().ToArray();
@@ -189,7 +185,7 @@ namespace AsmResolver.Tests.Native
             for (int i = 0; i < originalBody.Count; i++)
             {
                 var newInstruction = disassembler.ReadNextInstruction();
-                Assert.AreEqual(formatter.FormatInstruction(originalBody[i]),
+                Assert.Equal(formatter.FormatInstruction(originalBody[i]),
                     formatter.FormatInstruction(newInstruction));
             }
         }

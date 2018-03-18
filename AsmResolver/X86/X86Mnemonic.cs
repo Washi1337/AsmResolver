@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AsmResolver.X86
+﻿namespace AsmResolver.X86
 {
     /// <summary>
     /// Provides valid mnemonics of an x86 instruction.

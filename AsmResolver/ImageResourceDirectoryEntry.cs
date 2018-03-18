@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Services;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver;
+﻿using System.Text;
 
 namespace AsmResolver
 {
@@ -50,7 +44,7 @@ namespace AsmResolver
         private ImageResourceDataEntry _dataEntry;
         private string _name;
 
-        private ImageResourceDirectoryEntry()
+        public ImageResourceDirectoryEntry()
         {
         }
 

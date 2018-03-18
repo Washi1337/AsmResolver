@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class VariableSignature : BlobSignature
     {
-        public static VariableSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static VariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new VariableSignature(TypeSignature.FromReader(header, reader))
-            {
-                StartOffset = position
-            };
+            return new VariableSignature(TypeSignature.FromReader(image, reader));
         }
 
         public VariableSignature(TypeSignature variableType)
@@ -33,9 +26,9 @@ namespace AsmResolver.Net.Signatures
             return VariableType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            VariableType.Write(context);
+            VariableType.Write(buffer, writer);
         }
     }
 }

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Emit;
 
 namespace AsmResolver.Net.Signatures
 {
-    public abstract class BlobSignature : FileSegment
+    public abstract class BlobSignature
     {
+        public abstract uint GetPhysicalLength();
+        
+        public abstract void Write(MetadataBuffer buffer, IBinaryStreamWriter writer);
     }
 }

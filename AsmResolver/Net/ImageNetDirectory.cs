@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AsmResolver.Net
+﻿namespace AsmResolver.Net
 {
     /// <summary>
     /// Represents a .NET data directory header (COR20 header) in a windows assembly image.
@@ -41,6 +36,8 @@ namespace AsmResolver.Net
         private ReadingContext _readingContext;
         private MetadataHeader _metaDataHeader;
         private DataSegment _strongNameData;
+
+        private ResourcesManifest _resources;
         private VTablesDirectory _vtablesDirectory;
 
         public ImageNetDirectory()
@@ -202,17 +199,35 @@ namespace AsmResolver.Net
         {
             get
             {
-                if (_strongNameData != null || StrongNameSignatureDirectory.VirtualAddress == 0)
+                if (_strongNameData != null || _readingContext == null || StrongNameSignatureDirectory.VirtualAddress == 0)
                     return _strongNameData;
 
                 var context = _readingContext.CreateSubContext(
                     _readingContext.Assembly.RvaToFileOffset(StrongNameSignatureDirectory.VirtualAddress),
                     (int) StrongNameSignatureDirectory.Size);
-                return _strongNameData = DataSegment.FromReadingContext(context);
+                return _strongNameData = DataSegment.FromReader(context.Reader);
             }
             set { _strongNameData = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the managed resources manifest directory of the .NET assembly image.
+        /// </summary>
+        public ResourcesManifest ResourcesManifest
+        {
+            get
+            {
+                if (_resources != null || _readingContext == null || ResourcesDirectory.VirtualAddress == 0)
+                    return _resources;
+                
+                var context = _readingContext.CreateSubContext(
+                    _readingContext.Assembly.RvaToFileOffset(ResourcesDirectory.VirtualAddress),
+                    (int) ResourcesDirectory.Size);
+                return _resources = ResourcesManifest.FromReadingContext(context);
+            }
+            set { _resources = value; }
+        }
+        
         /// <summary>
         /// Gets or sets the VTable fixups directory of the .NET assembly image.
         /// </summary>
@@ -223,10 +238,10 @@ namespace AsmResolver.Net
                 if (_vtablesDirectory != null)
                     return _vtablesDirectory;
 
-                if (_readingContext != null)
+                if (_readingContext != null && VTableFixupsDirectory.VirtualAddress != 0)
                 {
                     var context = _readingContext.CreateSubContext(
-                        _readingContext.Assembly.RvaToFileOffset(MetadataDirectory.VirtualAddress));
+                        _readingContext.Assembly.RvaToFileOffset(VTableFixupsDirectory.VirtualAddress), (int) VTableFixupsDirectory.Size);
                     if (context != null)
                         return _vtablesDirectory = VTablesDirectory.FromReadingContext(context);
                 }
@@ -234,27 +249,6 @@ namespace AsmResolver.Net
                 return null;
             }
             set { _vtablesDirectory = value; }
-        }
-
-        /// <summary>
-        /// Gets the managed resource data at the given offset.
-        /// </summary>
-        /// <param name="offset">The offset of the managed resource to get.</param>
-        /// <returns>The raw data of the managed resource.</returns>
-        public byte[] GetResourceData(uint offset)
-        {
-            if (_readingContext == null || ResourcesDirectory.VirtualAddress == 0)
-                return null;
-
-            var context = _readingContext.CreateSubContext(
-                Assembly.RvaToFileOffset(ResourcesDirectory.VirtualAddress) + offset,
-                (int)ResourcesDirectory.Size);
-
-            if (context == null)
-                return null;
-
-            var length = context.Reader.ReadInt32();
-            return context.Reader.ReadBytes(length);
         }
 
         public override uint GetPhysicalLength()

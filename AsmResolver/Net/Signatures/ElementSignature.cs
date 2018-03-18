@@ -1,26 +1,18 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class ElementSignature : BlobSignature
     {
-        public static ElementSignature FromReader(MetadataHeader header, TypeSignature typeSignature, IBinaryStreamReader reader)
+        public static ElementSignature FromReader(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new ElementSignature(ReadValue(header, typeSignature, reader))
-            {
-                StartOffset = position
-            };
+            return new ElementSignature(ReadValue(image, typeSignature, reader));
         }
 
-        private static object ReadValue(MetadataHeader header, TypeSignature typeSignature, IBinaryStreamReader reader)
+        private static object ReadValue(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
             switch (typeSignature.ElementType)
             {
@@ -51,20 +43,22 @@ namespace AsmResolver.Net.Signatures
                 case ElementType.String:
                     return reader.ReadSerString();
                 case ElementType.Object:
-                    return ReadValue(header, TypeSignature.ReadFieldOrPropType(header, reader), reader);
+                    return ReadValue(image, TypeSignature.ReadFieldOrPropType(image, reader), reader);
                 case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
-                    var enumTypeDef = header.MetadataResolver.ResolveType(typeSignature);
+                    var enumTypeDef = image.MetadataResolver.ResolveType(typeSignature);
                     if (enumTypeDef == null)
                         throw new MemberResolutionException(typeSignature);
 
                     if (enumTypeDef.IsEnum)
-                        return ReadValue(header, enumTypeDef.GetEnumUnderlyingType(), reader);
+                        return ReadValue(image, enumTypeDef.GetEnumUnderlyingType(), reader);
                     break;
             }
+
             if (typeSignature.IsTypeOf("System", "Type"))
-                return TypeSignature.FromAssemblyQualifiedName(header, reader.ReadSerString());
+                return TypeSignature.FromAssemblyQualifiedName(image, reader.ReadSerString());
+
             throw new NotSupportedException("Unsupported element type " + typeSignature.ElementType);
         }
 
@@ -82,7 +76,7 @@ namespace AsmResolver.Net.Signatures
         public override uint GetPhysicalLength()
         {
             if (Value == null)
-                throw new NotSupportedException();
+                return 1;
 
             switch(Type.GetTypeCode(Value.GetType()))
             {
@@ -110,15 +104,17 @@ namespace AsmResolver.Net.Signatures
             if (typeSignature != null)
                 return TypeNameBuilder.GetAssemblyQualifiedName(typeSignature).GetSerStringSize();
             
-            throw new NotSupportedException();
+            throw new NotSupportedException("Invalid or unsupported argument element value in custom attribute.");
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             if (Value == null)
-                throw new ArgumentNullException();
+            {
+                writer.WriteSerString(null);
+                return;
+            }
 
-            var writer = context.Writer;
             switch (Type.GetTypeCode(Value.GetType()))
             {
                 case TypeCode.Boolean:

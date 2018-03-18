@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class FieldSignature : MemberSignature
     {
-        public new static FieldSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static FieldSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new FieldSignature
             {
-                StartOffset = reader.Position,
                 Attributes = (CallingConventionAttributes)reader.ReadByte(),
-                FieldType = TypeSignature.FromReader(header, reader),
+                FieldType = TypeSignature.FromReader(image, reader),
             };
         }
 
@@ -47,11 +42,10 @@ namespace AsmResolver.Net.Signatures
                    FieldType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte(0x06);
-            FieldType.Write(context);
+            FieldType.Write(buffer, writer);
         }
     }
 }

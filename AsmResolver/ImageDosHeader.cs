@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace AsmResolver
+﻿namespace AsmResolver
 {
     /// <summary>
     /// Represents the DOS header of a windows assembly image.

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AsmResolver
 {
@@ -23,7 +20,6 @@ namespace AsmResolver
                 MajorVersion = reader.ReadUInt16(),
                 MinorVersion = reader.ReadUInt16(),
             };
-
 
             var numberOfNamedEntries = reader.ReadUInt16();
             var numberOfIdEntries = reader.ReadUInt16();

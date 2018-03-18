@@ -3,7 +3,7 @@
 namespace AsmResolver.Net.Metadata
 {
     [Flags]
-    public enum GenericParameterAttributes
+    public enum GenericParameterAttributes : ushort
     {
         NonVariant = 0x0000,
         // Variance of type parameters, only applicable to generic parameters

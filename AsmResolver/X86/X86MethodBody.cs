@@ -1,59 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using AsmResolver.Builder;
+using AsmResolver.Net;
+using AsmResolver.Net.Emit;
 
 namespace AsmResolver.X86
 {
     /// <summary>
     /// Represents a chunk of x86 instructions.
     /// </summary>
-    public class X86MethodBody : FileSegment
+    public class X86MethodBody : MethodBody
     {
-        public static X86MethodBody FromReadingContext(ReadingContext context)
+        public static X86MethodBody FromReader(IBinaryStreamReader reader)
         {
             var body = new X86MethodBody();
-            body._readingContext = context.CreateSubContext(context.Reader.StartPosition);
+            
+            var disassembler = new X86Disassembler(reader);
+            while (reader.Position < reader.StartPosition + reader.Length)
+                body.Instructions.Add(disassembler.ReadNextInstruction());
+
             return body;
         }
 
-        private List<X86Instruction> _instructions;
-        private ReadingContext _readingContext;
+        public X86MethodBody()
+        {
+            Instructions = new List<X86Instruction>();
+        }
         
         /// <summary>
         /// Gets the instructions in the method body.
         /// </summary>
         public IList<X86Instruction> Instructions
         {
-            get
-            {
-                if (_instructions != null)
-                    return _instructions;
-                _instructions = new List<X86Instruction>();
-                if (_readingContext != null)
-                {
-                    var disassembler = new X86Disassembler(_readingContext.Reader);
-                    while (_readingContext.Reader.Position
-                           < _readingContext.Reader.StartPosition + _readingContext.Reader.Length)
-                    {
-                        _instructions.Add(disassembler.ReadNextInstruction());
-                    }
-                }
-                return _instructions;
-            }
+            get;
+            private set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetCodeSize()
         {
             return (uint) Instructions.Sum(x => x.ComputeSize());
         }
 
-        public override void Write(WritingContext context)
+        public override FileSegment CreateRawMethodBody(MetadataBuffer buffer)
         {
-            var assembler = new X86Assembler(context.Writer);
-            foreach (var instruction in Instructions)
-                assembler.Write(instruction);
+            using (var stream = new MemoryStream())
+            {
+                var writer = new BinaryStreamWriter(stream);
+                var assembler = new X86Assembler(writer);
+                foreach (var instruction in Instructions)
+                    assembler.Write(instruction);
+                return new DataSegment(stream.ToArray());
+            }
         }
     }
 }

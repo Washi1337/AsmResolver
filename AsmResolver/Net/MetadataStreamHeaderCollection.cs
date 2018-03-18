@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using AsmResolver.Collections.Generic;
 
 namespace AsmResolver.Net

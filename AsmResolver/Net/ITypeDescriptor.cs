@@ -1,4 +1,4 @@
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net
 {

@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class ByReferenceTypeSignature : TypeSpecificationSignature
     {
-        public new static ByReferenceTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static ByReferenceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new ByReferenceTypeSignature(TypeSignature.FromReader(header, reader))
-            {
-                StartOffset = position
-            };
+            return new ByReferenceTypeSignature(TypeSignature.FromReader(image, reader));
         }
 
         public ByReferenceTypeSignature(TypeSignature baseType)

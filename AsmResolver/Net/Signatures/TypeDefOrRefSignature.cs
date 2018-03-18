@@ -1,22 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class TypeDefOrRefSignature : TypeSignature, IResolvable
     {
-        public new static TypeDefOrRefSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static TypeDefOrRefSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            var type = ReadTypeDefOrRef(header, reader);
-            return type == null ? null : new TypeDefOrRefSignature(type)
-            {
-                StartOffset = position
-            };
+            var type = ReadTypeDefOrRef(image, reader);
+            return type == null ? null : new TypeDefOrRefSignature(type);
         }
 
         public TypeDefOrRefSignature(ITypeDefOrRef type)
@@ -70,19 +64,16 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            var encoder = Type.Header.GetStream<TableStream>()
+            var encoder = Type.Image.Header.GetStream<TableStream>()
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             return sizeof (byte) +
                    encoder.EncodeToken(Type.MetadataToken).GetCompressedSize();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)ElementType);
-
-            WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, Type);
-
+            WriteTypeDefOrRef(buffer, writer, Type);
         }
 
         public IMetadataMember Resolve()

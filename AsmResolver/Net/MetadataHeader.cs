@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
+using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net
@@ -12,8 +13,6 @@ namespace AsmResolver.Net
     /// </summary>
     public class MetadataHeader : FileSegment
     {
-        private TypeSystem _typeSystem;
-
         internal static MetadataHeader FromReadingContext(ReadingContext context)
         {
             var reader = context.Reader;
@@ -44,7 +43,6 @@ namespace AsmResolver.Net
 
         private MetadataHeader()
         {
-            MetadataResolver = new DefaultMetadataResolver(new DefaultNetAssemblyResolver());
             StreamHeaders = new MetadataStreamHeaderCollection(this);
         }
 
@@ -129,27 +127,17 @@ namespace AsmResolver.Net
             private set;
         }
 
-        /// <summary>
-        /// Gets a collection of references to default primitive types defined in mscorlib.dll.
-        /// </summary>
-        public TypeSystem TypeSystem
-        {
-            get
-            {
-                return _typeSystem ?? (_typeSystem = new TypeSystem(this,
-                    GetStream<TableStream>().GetTable<AssemblyDefinition>()[0].Name == "mscorlib"));
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the metadata resolver that will be used when <see cref="IResolvable.Resolve"/> is called on a specific member reference.
-        /// </summary>
-        public IMetadataResolver MetadataResolver
+        public MetadataImage Image
         {
             get;
-            set;
+            private set;
         }
 
+        public bool IsLocked
+        {
+            get { return Image != null; }
+        }
+        
         /// <summary>
         /// Gets all metadata heap streams defined in the metadata data directory.
         /// </summary>
@@ -182,6 +170,44 @@ namespace AsmResolver.Net
             return header != null ? (TStream)header.Stream : null;
         }
 
+        public MetadataImage LockMetadata()
+        {
+            if (Image != null)
+                throw new InvalidOperationException("Cannot lock the metadata after the metadata has already been locked.");
+
+            var tableStream = GetStream<TableStream>();
+            tableStream.IsReadOnly = true;
+            Image = new MetadataImage(this);
+            return Image;
+        }
+
+        public IDictionary<IMetadataMember, MetadataToken> UnlockMetadata()
+        {
+            var buffer = new MetadataBuffer(Image);
+            buffer.TableStreamBuffer.AddAssembly(Image.Assembly);
+            NetDirectory.ResourcesManifest = buffer.ResourcesBuffer.CreateDirectory();
+            
+            var buffers = new MetadataStreamBuffer[]
+            {
+                buffer.TableStreamBuffer,
+                buffer.BlobStreamBuffer,
+                buffer.GuidStreamBuffer,
+                buffer.StringStreamBuffer,
+                buffer.UserStringStreamBuffer
+            };
+            
+            foreach (var streamBuffer in buffers)
+            {
+                var header = StreamHeaders.FirstOrDefault(x => x.Name == streamBuffer.Name) 
+                             ?? new MetadataStreamHeader(streamBuffer.Name);
+                header.Stream = streamBuffer.CreateStream();
+            }
+
+            Image = null;
+
+            return buffer.TableStreamBuffer.GetNewTokenMapping();
+        }
+            
         public override uint GetPhysicalLength()
         {
             return (uint)(1 * sizeof (uint) +

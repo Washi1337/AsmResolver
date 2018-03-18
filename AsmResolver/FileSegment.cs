@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AsmResolver
+﻿namespace AsmResolver
 {
     /// <summary>
     /// Represents a generic file segment in a windows image.
@@ -19,6 +12,11 @@ namespace AsmResolver
         {
             get;
             set;
+        }
+
+        public long GetRva(IOffsetConverter converter)
+        {
+            return converter.FileOffsetToRva(StartOffset);
         }
 
         /// <summary>

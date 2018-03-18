@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class FunctionPointerTypeSignature : TypeSignature
     {
-        public new static FunctionPointerTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static FunctionPointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new FunctionPointerTypeSignature(MethodSignature.FromReader(header, reader))
-            {
-                StartOffset = position
-            };
+            return new FunctionPointerTypeSignature(MethodSignature.FromReader(image, reader));
         }
 
         public FunctionPointerTypeSignature(MethodSignature signature)
@@ -59,10 +53,10 @@ namespace AsmResolver.Net.Signatures
                    + Signature.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            context.Writer.WriteByte((byte) ElementType.FnPtr);
-            Signature.Write(context);
+            writer.WriteByte((byte) ElementType.FnPtr);
+            Signature.Write(buffer, writer);
         }
     }
 }

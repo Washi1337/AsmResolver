@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class BoxedTypeSignature : TypeSpecificationSignature
     {
-        public new static BoxedTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static BoxedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new BoxedTypeSignature(TypeSignature.FromReader(header, reader))
-            {
-                StartOffset = position
-            };
+            return new BoxedTypeSignature(TypeSignature.FromReader(image, reader));
         }
 
         public BoxedTypeSignature(TypeSignature baseType)

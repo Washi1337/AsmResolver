@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AsmResolver.Net.Metadata
 {
@@ -13,6 +10,7 @@ namespace AsmResolver.Net.Metadata
         private readonly int _tableIndexBitCount;
         private readonly int _tableIndexBitMask;
         private readonly int _maxSmallTableMemberCount;
+
         public IndexEncoder(TableStream tableStream, params MetadataTokenType[] tables)
         {
             if (tableStream == null)

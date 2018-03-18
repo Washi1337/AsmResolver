@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
@@ -11,15 +10,10 @@ namespace AsmResolver.Net.Signatures
     {
         public static CustomAttributeSignature FromReader(CustomAttribute parent, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-
             if (!reader.CanRead(sizeof (ushort)) || reader.ReadUInt16() != 0x0001)
                 throw new ArgumentException("Signature doesn't refer to a valid custom attribute signature.");
 
-            var signature = new CustomAttributeSignature()
-            {
-                StartOffset = position,
-            };
+            var signature = new CustomAttributeSignature();
 
             if (parent.Constructor != null)
             {
@@ -28,8 +22,7 @@ namespace AsmResolver.Net.Signatures
                 {
                     foreach (var parameter in methodSignature.Parameters)
                     {
-                        signature.FixedArguments.Add(CustomAttributeArgument.FromReader(parent.Header,
-                            parameter.ParameterType, reader));
+                        signature.FixedArguments.Add(CustomAttributeArgument.FromReader(parent.Image, parameter.ParameterType, reader));
                     }
                 }
             }
@@ -37,16 +30,21 @@ namespace AsmResolver.Net.Signatures
             var namedElementCount = reader.CanRead(sizeof (ushort)) ? reader.ReadUInt16() : 0;
             for (uint i = 0; i < namedElementCount; i++)
             {
-                signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Header, reader));
+                signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Image, reader));
             }
 
             return signature;
         }
 
         public CustomAttributeSignature()
+            : this(Enumerable.Empty<CustomAttributeArgument>())
         {
-            FixedArguments = new List<CustomAttributeArgument>();
-            NamedArguments = new List<CustomAttributeNamedArgument>();
+        }
+
+        public CustomAttributeSignature(IEnumerable<CustomAttributeArgument> fixedArguments)
+        {
+            FixedArguments = new List<CustomAttributeArgument>(fixedArguments);
+            NamedArguments = new List<CustomAttributeNamedArgument>();   
         }
 
         public IList<CustomAttributeArgument> FixedArguments
@@ -69,15 +67,14 @@ namespace AsmResolver.Net.Signatures
                           NamedArguments.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteUInt16(0x0001);
             foreach (var argument in FixedArguments)
-                argument.Write(context);
+                argument.Write(buffer, writer);
             writer.WriteUInt16((ushort)NamedArguments.Count);
             foreach (var argument in NamedArguments)
-                argument.Write(context);
+                argument.Write(buffer, writer);
         }
     }
 }

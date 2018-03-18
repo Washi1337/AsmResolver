@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class RequiredModifierSignature : TypeSpecificationSignature
     {
-        public new static RequiredModifierSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static RequiredModifierSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new RequiredModifierSignature(ReadTypeDefOrRef(header, reader),
-                TypeSignature.FromReader(header, reader))
-            {
-                StartOffset = position
-            };
+            return new RequiredModifierSignature(ReadTypeDefOrRef(image, reader),
+                TypeSignature.FromReader(image, reader));
         }
 
         public RequiredModifierSignature(ITypeDefOrRef modifierType, TypeSignature baseType)
@@ -43,19 +36,18 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            var encoder = ModifierType.Header.GetStream<TableStream>()
+            var encoder = ModifierType.Image.Header.GetStream<TableStream>()
                     .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             return sizeof (byte) +
                    encoder.EncodeToken(ModifierType.MetadataToken).GetCompressedSize() +
                    BaseType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)ElementType);
-            WriteTypeDefOrRef(context.Assembly.NetDirectory.MetadataHeader, context.Writer, ModifierType);
-            BaseType.Write(context);
+            WriteTypeDefOrRef(buffer, writer, ModifierType);
+            BaseType.Write(buffer, writer);
         }
     }
 }

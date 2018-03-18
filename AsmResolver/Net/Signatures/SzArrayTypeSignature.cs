@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
     public class SzArrayTypeSignature : TypeSpecificationSignature
     {
-        public new static SzArrayTypeSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static SzArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
-            return new SzArrayTypeSignature(TypeSignature.FromReader(header, reader))
-            {
-                StartOffset = position
-            };
+            return new SzArrayTypeSignature(TypeSignature.FromReader(image, reader));
         }
 
         public SzArrayTypeSignature(TypeSignature baseType)

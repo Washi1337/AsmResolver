@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class MethodSignature : MemberSignature
     {
-        public new static MethodSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             if (!reader.CanRead(sizeof (byte)))
                 return null;
 
             var signature = new MethodSignature
             {
-                StartOffset = reader.Position,
                 Attributes = (CallingConventionAttributes)reader.ReadByte()
             };
 
@@ -32,10 +29,10 @@ namespace AsmResolver.Net.Signatures
             if (!reader.TryReadCompressedUInt32(out parameterCount))
                 return signature;
 
-            signature.ReturnType = TypeSignature.FromReader(header, reader);
+            signature.ReturnType = TypeSignature.FromReader(image, reader);
             for (int i = 0; i < parameterCount; i++)
             {
-                signature.Parameters.Add(ParameterSignature.FromReader(header, reader));
+                signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
             }
 
             return signature;
@@ -95,18 +92,17 @@ namespace AsmResolver.Net.Signatures
                           Parameters.Sum(x => x.GetPhysicalLength()));
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            var writer = context.Writer;
             writer.WriteByte((byte)Attributes);
 
             if (IsGeneric)
                 writer.WriteCompressedUInt32((uint)GenericParameterCount);
 
             writer.WriteCompressedUInt32((uint)Parameters.Count);
-            ReturnType.Write(context);
+            ReturnType.Write(buffer, writer);
             foreach (var parameter in Parameters)
-                parameter.Write(context);
+                parameter.Write(buffer, writer);
         }
 
         public override string ToString()

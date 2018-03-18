@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+﻿
+using System;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net
 {
@@ -14,22 +10,22 @@ namespace AsmResolver.Net
         {
             var assembly = new WindowsAssembly();
             assembly.RelocationDirectory = new ImageRelocationDirectory();
-            InitializeNtHeaders(assembly.NtHeaders);
+            InitializeNtHeaders(assembly.NtHeaders, isDll);
             InitializeNetDirectory(assembly.NetDirectory = new ImageNetDirectory());
-
             assembly.ImportDirectory.ModuleImports.Add(CreateMscoreeImport(isDll));
 
-            var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
-            tableStream.GetTable<ModuleDefinition>().Add(new ModuleDefinition(name + (isDll ? ".dll" : ".exe"))
-            {
-                Mvid = Guid.NewGuid()
-            });
-            tableStream.GetTable<AssemblyDefinition>().Add(new AssemblyDefinition(name, new Version(1, 0, 0, 0)));
+            var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
 
-            var moduleTypeDef = new TypeDefinition(string.Empty, "<Module>", null);
-            moduleTypeDef.MetadataRow.Column5 = 1; // TODO: remove MethodList setter.
-            moduleTypeDef.MetadataRow.Column6 = 1; // TODO: remove MethodList setter.
-            tableStream.GetTable<TypeDefinition>().Add(moduleTypeDef);
+            image.Assembly.Name = name;
+            image.Assembly.Version = new Version(1, 0, 0, 0);
+
+            var mainModule = new ModuleDefinition(name + (isDll ? ".dll" :".exe"));
+            mainModule.Mvid = Guid.NewGuid();
+            image.Assembly.Modules.Add(mainModule);
+
+            mainModule.TopLevelTypes.Add(new TypeDefinition(null, "<Module>"));
+
+            assembly.NetDirectory.MetadataHeader.UnlockMetadata();
 
             return assembly;
         }
@@ -41,10 +37,10 @@ namespace AsmResolver.Net
             return module;
         }
 
-        private static void InitializeNtHeaders(ImageNtHeaders headers)
+        private static void InitializeNtHeaders(ImageNtHeaders headers, bool isDll)
         {
             headers.Signature = 0x00004550;
-            InitializeFileHeader(headers.FileHeader);
+            InitializeFileHeader(headers.FileHeader, isDll);
             InitializeOptionalHeader(headers.OptionalHeader);
         }
 
@@ -63,7 +59,7 @@ namespace AsmResolver.Net
             optionalHeader.SizeOfHeapReserve = 0x100000;
             optionalHeader.SizeOfHeapCommit = 0x1000;
             optionalHeader.NumberOfRvaAndSizes = 0x10;
-            optionalHeader.DllCharacteristics = ImageDllCharacteristics.DynamicBase | 
+            optionalHeader.DllCharacteristics = ImageDllCharacteristics.DynamicBase |
                 ImageDllCharacteristics.NxCompat |
                 ImageDllCharacteristics.NoSeh |
                 ImageDllCharacteristics.TerminalServerAware;
@@ -73,14 +69,16 @@ namespace AsmResolver.Net
 
         }
 
-        private static void InitializeFileHeader(ImageFileHeader fileHeader)
+        private static void InitializeFileHeader(ImageFileHeader fileHeader, bool isDll)
         {
             fileHeader.Machine = ImageMachineType.I386;
             fileHeader.SizeOfOptionalHeader = 0xE0;
             fileHeader.Characteristics = ImageCharacteristics.Image | ImageCharacteristics.LineNumsStripped |
                                          ImageCharacteristics.LocalSymsStripped | ImageCharacteristics.Machine32Bit;
+            if (isDll)
+                fileHeader.Characteristics |= ImageCharacteristics.Dll;
         }
-
+        
         private static void InitializeNetDirectory(ImageNetDirectory directory)
         {
             directory.Cb = 0x48;

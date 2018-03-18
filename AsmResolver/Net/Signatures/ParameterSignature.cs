@@ -1,26 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Emit;
+using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
     public class ParameterSignature : BlobSignature
     {
-        public static ParameterSignature FromReader(MetadataHeader header, IBinaryStreamReader reader)
+        public static ParameterSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new ParameterSignature
-            {
-                StartOffset = reader.Position,
-                ParameterType = TypeSignature.FromReader(header, reader),
-            };
-        }
-
-        private ParameterSignature()
-        {
-            
+            return new ParameterSignature(TypeSignature.FromReader(image, reader));
         }
 
         public ParameterSignature(TypeSignature parameterType)
@@ -39,9 +26,9 @@ namespace AsmResolver.Net.Signatures
             return ParameterType.GetPhysicalLength();
         }
 
-        public override void Write(WritingContext context)
+        public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            ParameterType.Write(context);
+            ParameterType.Write(buffer, writer);
         }
     }
 }
