@@ -3,6 +3,7 @@
     only:
       - master
 
+  image: Visual Studio 2017
   version: 3.0.0-{branch}-build{build}
   configuration: Release
   
@@ -28,6 +29,7 @@
     only:
       - development
   
+  image: Visual Studio 2017
   version: 3.0.0-{branch}-build{build}
   configuration: Release
 
