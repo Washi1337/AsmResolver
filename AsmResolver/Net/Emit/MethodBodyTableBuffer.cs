@@ -7,7 +7,10 @@ namespace AsmResolver.Net.Emit
     {
         public override uint GetPhysicalLength()
         {
-            return (uint) (Segments[Segments.Count - 1].StartOffset - StartOffset + Segments[Segments.Count - 1].GetPhysicalLength());
+            return Segments.Count != 0
+                ? (uint) (Segments[Segments.Count - 1].StartOffset - StartOffset +
+                          Segments[Segments.Count - 1].GetPhysicalLength())
+                : 0;
         }
 
         public override void UpdateOffsets(EmitContext context)

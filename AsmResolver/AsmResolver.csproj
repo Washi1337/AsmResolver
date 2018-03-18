@@ -49,6 +49,7 @@
     <Compile Include="BaseRelocationEntry.cs" />
     <Compile Include="BaseRelocationType.cs" />
     <Compile Include="Collections\Generic\Collection.cs" />
+    <Compile Include="Emit\ExportDirectoryBuffer.cs" />
     <Compile Include="Emit\WindowsAssemblyBuilder.cs" />
     <Compile Include="Emit\EmitContext.cs" />
     <Compile Include="Emit\FileSegmentBuilder.cs" />

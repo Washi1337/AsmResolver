@@ -37,6 +37,11 @@ namespace AsmResolver.Net.Emit
                 Segments.Add(VTableFixups.EntriesTable);
             }
 
+            if (assembly.ExportDirectory != null)
+            {
+                Segments.Add(ExportDirectory = new ExportDirectoryBuffer(assembly.ExportDirectory, assembly));
+            }
+
             _importDirectory.Segments.Add(ImportBuffer.ModuleImportTable);
             _importDirectory.Segments.Add(ImportBuffer.LookupTables);
             _importDirectory.Segments.Add(ImportBuffer.NameTable);
@@ -62,6 +67,12 @@ namespace AsmResolver.Net.Emit
         public FileSegment ImportDirectory
         {
             get { return _importDirectory; }
+        }
+
+        public ExportDirectoryBuffer ExportDirectory
+        {
+            get;
+            private set;
         }
 
         public ImageNetDirectory NetDirectory

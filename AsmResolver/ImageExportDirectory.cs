@@ -175,11 +175,11 @@ namespace AsmResolver
                     var export = new ImageSymbolExport()
                     {
                         Rva = addresses[i],
-                        NameOrdinal = i
+                        NameOrdinal = i + OrdinalBase
                     };
 
                     uint rva;
-                    if (ordinalRvaTable.TryGetValue(i, out rva))
+                    if (ordinalRvaTable.TryGetValue(i + OrdinalBase, out rva))
                     {
                         export.NameRva = rva;
                         var nameReader = reader.CreateSubReader(application.RvaToFileOffset(export.NameRva.Value));
@@ -194,23 +194,23 @@ namespace AsmResolver
             }
         }
 
-        private Dictionary<ushort, uint> ReadOrdinalRvaTable(IBinaryStreamReader reader, WindowsAssembly application)
+        private Dictionary<uint, uint> ReadOrdinalRvaTable(IBinaryStreamReader reader, IOffsetConverter converter)
         {
-            var dictionary = new Dictionary<ushort, uint>();
+            var dictionary = new Dictionary<uint, uint>();
             if (NumberOfNames > 0)
             {
-                var nameOrdinalReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfNameOrdinals));
-                var nameRvaReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfNames));
+                var nameOrdinalReader = reader.CreateSubReader(converter.RvaToFileOffset(AddressOfNameOrdinals));
+                var nameRvaReader = reader.CreateSubReader(converter.RvaToFileOffset(AddressOfNames));
 
                 for (int i = 0; i < NumberOfNames; i++)
-                    dictionary.Add(nameOrdinalReader.ReadUInt16(), nameRvaReader.ReadUInt32());
+                    dictionary.Add(nameOrdinalReader.ReadUInt16() + OrdinalBase, nameRvaReader.ReadUInt32());
             }
             return dictionary;
         }
 
-        private uint[] ReadAddresses(IBinaryStreamReader reader, WindowsAssembly application)
+        private uint[] ReadAddresses(IBinaryStreamReader reader, IOffsetConverter converter)
         {
-            var addressReader = reader.CreateSubReader(application.RvaToFileOffset(AddressOfFunctions));
+            var addressReader = reader.CreateSubReader(converter.RvaToFileOffset(AddressOfFunctions));
             var addresses = new uint[NumberOfFunctions];
 
             for (int i = 0; i < NumberOfFunctions; i++)

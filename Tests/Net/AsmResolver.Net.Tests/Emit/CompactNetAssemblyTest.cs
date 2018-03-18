@@ -339,5 +339,43 @@ namespace AsmResolver.Tests.Net.Emit
             }
             
         }
+
+        [Fact]
+        public void PersistentExports()
+        {
+            var assembly = CreateTempAssembly();
+            var exportDirectory = new ImageExportDirectory
+            {
+                Name = "somefile.dll",
+                OrdinalBase = 2,
+                Exports =
+                {
+                    new ImageSymbolExport(0x1234),
+                    new ImageSymbolExport(0x5678, "MyNamedExport1"),
+                    new ImageSymbolExport(0x9ABC),
+                    new ImageSymbolExport(0xDEF0, "MyNamedExport2"),
+                }
+            };
+            assembly.ExportDirectory = exportDirectory;
+
+            using (var stream = new MemoryStream())
+            {
+                assembly.Write(new BinaryStreamWriter(stream), new CompactNetAssemblyBuilder(assembly));
+                
+                assembly = WindowsAssembly.FromBytes(stream.ToArray());
+
+                Assert.NotNull(assembly.ExportDirectory);
+                Assert.Equal(exportDirectory.Name, assembly.ExportDirectory.Name);
+                Assert.Equal(exportDirectory.Exports.Count, assembly.ExportDirectory.Exports.Count);
+                for (int i = 0; i < assembly.ExportDirectory.Exports.Count; i++)
+                {
+                    var original = exportDirectory.Exports[i];
+                    var newExport = assembly.ExportDirectory.Exports[i];
+                    Assert.Equal(original.Rva, newExport.Rva);
+                    Assert.Equal(original.Name, newExport.Name);
+                }
+            }
+        }
+        
     }
 }
