@@ -19,6 +19,8 @@ namespace ClassLibrary1
         public static void MyFatMethodVariables()
         {
             string variable = Console.ReadLine();
+            if (variable != null)
+                variable += "test";
             Console.WriteLine(variable);
         }
 
