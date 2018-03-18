@@ -205,7 +205,51 @@ namespace AsmResolver.Tests.Net.Emit
         }
 
         [Fact]
-        public void PersistentResource()
+        public void PersistentNativeResources()
+        {
+            var contents = new byte[] {0, 1, 2, 3, 4, 5, 6};
+            
+            var assembly = CreateTempAssembly();
+            assembly.NetDirectory.MetadataHeader.UnlockMetadata();
+            
+            var rootDirectory = new ImageResourceDirectory();
+            rootDirectory.Entries.Add(new ImageResourceDirectoryEntry
+            {
+                ResourceType = ImageResourceDirectoryType.VersionInfo,
+                SubDirectory = new ImageResourceDirectory
+                {
+                    Entries =
+                    {
+                        new ImageResourceDirectoryEntry(1)
+                        {
+                            SubDirectory = new ImageResourceDirectory
+                            {
+                                Entries =
+                                {
+                                    new ImageResourceDirectoryEntry
+                                    {
+                                        DataEntry = new ImageResourceDataEntry(contents)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            assembly.RootResourceDirectory = rootDirectory;
+            
+            using (var stream = new MemoryStream())
+            {
+                assembly.Write(new BinaryStreamWriter(stream), new CompactNetAssemblyBuilder(assembly));
+                assembly = WindowsAssembly.FromBytes(stream.ToArray());
+                
+                Utilities.ValidateResourceDirectory(rootDirectory, assembly.RootResourceDirectory);
+            }
+        }
+
+        [Fact]
+        public void PersistentManagedResource()
         {
             var contents = new byte[] {0, 1, 2, 3, 4, 5, 6};
             

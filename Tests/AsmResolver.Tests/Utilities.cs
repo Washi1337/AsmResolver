@@ -137,6 +137,29 @@ namespace AsmResolver.Tests
             ValidateArgument(originalArgument.Argument, argument.Argument);
         }
 
+        public static void ValidateResourceDirectory(ImageResourceDirectory original, ImageResourceDirectory directory)
+        {
+            Assert.Equal(original.Characteristics, directory.Characteristics);
+            Assert.Equal(original.TimeDateStamp, directory.TimeDateStamp);
+            Assert.Equal(original.IdEntriesCount, directory.IdEntriesCount);
+            Assert.Equal(original.NamedEntriesCount, directory.NamedEntriesCount);
+            for (int i = 0; i < original.Entries.Count; i++)
+            {
+                ValidateResourceEntry(original.Entries[i], directory.Entries[i]);
+            }
+            
+        }
+
+        private static void ValidateResourceEntry(ImageResourceDirectoryEntry originalEntry, ImageResourceDirectoryEntry directoryEntry)
+        {
+            Assert.Equal(originalEntry.Name, directoryEntry.Name);
+            Assert.Equal(originalEntry.ResourceType, directoryEntry.ResourceType);
+            Assert.Equal(originalEntry.HasData, directoryEntry.HasData);
+            if (originalEntry.HasData)
+                Assert.Equal(originalEntry.DataEntry.Data, directoryEntry.DataEntry.Data);
+            else
+                ValidateResourceDirectory(originalEntry.SubDirectory, directoryEntry.SubDirectory);
+        }
         //public static WindowsAssembly RebuildNetAssembly(WindowsAssembly assembly)
         //{
         //    var outputStream = new MemoryStream();

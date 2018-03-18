@@ -44,7 +44,7 @@ namespace AsmResolver
         private ImageResourceDataEntry _dataEntry;
         private string _name;
 
-        private ImageResourceDirectoryEntry()
+        public ImageResourceDirectoryEntry()
         {
         }
 

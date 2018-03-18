@@ -30,16 +30,14 @@ namespace AsmResolver.Emit
             {
                 foreach (var directory in _directories)
                 {
-                    UpdateReferences(
-                        context.Builder.Assembly.NtHeaders.OptionalHeader.DataDirectories[ImageDataDirectory.ResourceDirectoryIndex], 
-                        directory);
+                    UpdateReferences(directory);
                 }
                 base.UpdateReferences(context);
             }
 
-            private void UpdateReferences(ImageDataDirectory resourcesDirectory, ImageResourceDirectory directory)
+            private void UpdateReferences(ImageResourceDirectory directory)
             {
-                var resourcesFileOffset = _offsetConverter.RvaToFileOffset(resourcesDirectory.VirtualAddress);
+                long resourcesFileOffset = StartOffset;
                 foreach (var entry in directory.Entries)
                 {
                     if (entry.HasData)
@@ -75,6 +73,7 @@ namespace AsmResolver.Emit
                 {
                     entry.OffsetToData =
                         (uint)_offsetConverter.FileOffsetToRva(_dataTableBuilder.GetDataSegment(entry).StartOffset);
+                    entry.Size = (uint) entry.Data.Length;
                 }
             }
         }
@@ -147,13 +146,5 @@ namespace AsmResolver.Emit
                 }
             }
         }
-
-        //public override void UpdateReferences(BuildingContext context)
-        //{
-        //    _resourceDirectory.VirtualAddress =
-        //        (uint)_offsetConverter.FileOffsetToRva(_directoryTablesBuilder.StartOffset);
-        //    _resourceDirectory.Size = GetPhysicalLength();
-        //    base.UpdateReferences(context);
-        //}
     }
 }

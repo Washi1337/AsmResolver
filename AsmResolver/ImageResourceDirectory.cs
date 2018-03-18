@@ -21,7 +21,6 @@ namespace AsmResolver
                 MinorVersion = reader.ReadUInt16(),
             };
 
-
             var numberOfNamedEntries = reader.ReadUInt16();
             var numberOfIdEntries = reader.ReadUInt16();
 
