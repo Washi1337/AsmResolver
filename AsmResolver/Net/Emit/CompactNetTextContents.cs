@@ -23,7 +23,7 @@ namespace AsmResolver.Net.Emit
 
             if (assembly.DebugDirectory != null)
             {
-                Segments.Add(assembly.DebugDirectory);
+                Segments.Add(DebugDirectory = assembly.DebugDirectory);
                 Segments.Add(assembly.DebugDirectory.Data);
             }
 
