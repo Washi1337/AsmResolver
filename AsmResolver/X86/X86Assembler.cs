@@ -85,7 +85,7 @@ namespace AsmResolver.X86
                 }
                 case X86OperandType.RelativeOffset:
                 {
-                    WriteNumber(Convert.ToUInt32(operand.Value) - (_writer.Position + sizeof (sbyte)), size);
+                    WriteNumber(Convert.ToUInt32(operand.Value) - (_writer.Position + (int) size), size);
                     break;
                 }
             }

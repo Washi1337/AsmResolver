@@ -15,7 +15,7 @@ namespace AsmResolver.Emit
         public ExportDirectoryBuffer(ImageExportDirectory exportDirectory, IOffsetConverter converter)
         {
             if (exportDirectory == null)
-                throw new ArgumentNullException(nameof(exportDirectory));
+                throw new ArgumentNullException("exportDirectory");
             _converter = converter;
 
             Segments.Add(_exportDirectory = exportDirectory);

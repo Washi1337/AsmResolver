@@ -2,11 +2,12 @@
 {
     public enum X86OperandSize 
     {
-        None,
-        Byte,
-        WordOrDword,
-        Word,
-        Dword,
-        Fword
+        None = 0,
+        Byte = 1,
+        Word = 2,
+        WordOrDword = 3,
+        Dword = 4,
+        Fword = 6,
+        Qword = 8
     }
 }
