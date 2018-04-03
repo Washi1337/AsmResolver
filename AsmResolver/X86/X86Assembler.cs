@@ -52,6 +52,9 @@ namespace AsmResolver.X86
                 {
                     WriteOperand(opcode.OperandTypes2[mnemonicIndex],
                         opcode.OperandSizes2[mnemonicIndex], instruction.Operand2);
+                    
+                    if (instruction.Operand3 != null)
+                        WriteOperand(opcode.OperandType3, opcode.OperandSize3, instruction.Operand3);
                 }
             }
         }
