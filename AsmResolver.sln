@@ -62,6 +62,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{F2FBFE46-4
 		Tests\Native\Dummies\X86Binaries\Misc\OpCodeRegisterToken.bin = Tests\Native\Dummies\X86Binaries\Misc\OpCodeRegisterToken.bin
 		Tests\Native\Dummies\X86Binaries\Misc\RelativeOffsets.asm = Tests\Native\Dummies\X86Binaries\Misc\RelativeOffsets.asm
 		Tests\Native\Dummies\X86Binaries\Misc\RelativeOffsets.bin = Tests\Native\Dummies\X86Binaries\Misc\RelativeOffsets.bin
+		Tests\Native\Dummies\X86Binaries\Misc\3Operands.asm = Tests\Native\Dummies\X86Binaries\Misc\3Operands.asm
+		Tests\Native\Dummies\X86Binaries\Misc\3Operands.bin = Tests\Native\Dummies\X86Binaries\Misc\3Operands.bin
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "Tests\Net\Dummies\ClassLibrary1\ClassLibrary1.csproj", "{EE8795DB-1B7A-4D78-8021-FD8CBCC52720}"

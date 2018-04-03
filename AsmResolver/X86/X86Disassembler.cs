@@ -60,6 +60,9 @@ namespace AsmResolver.X86
             instruction.Operand2 = ReadOperand(instruction.OpCode.OperandTypes2[mnemonicIndex],
                 instruction.OpCode.OperandSizes2[mnemonicIndex], instruction.OpCode.Op1, registerToken);
 
+            instruction.Operand3 = ReadOperand(instruction.OpCode.OperandType3,
+                instruction.OpCode.OperandSize3, instruction.OpCode.Op1, registerToken);
+
             return instruction;
         }
 

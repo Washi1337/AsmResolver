@@ -44,6 +44,12 @@ namespace AsmResolver.Tests.Native
             TestDisassembler(Properties.Resources.OpCodeRegisterToken, Properties.Resources.OpCodeRegisterToken_source);
         }
 
+        [Fact]
+        public void ThreeOperands()
+        {
+            TestDisassembler(Properties.Resources.ThreeOperands, Properties.Resources.ThreeOperands_source);
+        }
+
         private static void TestDisassembler(byte[] code, string source)
         {
             var reader = new MemoryStreamReader(code);

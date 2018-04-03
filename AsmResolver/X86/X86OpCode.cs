@@ -7,20 +7,26 @@ namespace AsmResolver.X86
     /// </summary>
     public struct X86OpCode
     {
-        internal X86OpCode(X86Mnemonic mnemonic, byte opcode, uint operandsValue, bool hasRegisterToken)
-            : this(mnemonic, (uint)(opcode << 8), operandsValue, hasRegisterToken)
+        internal X86OpCode(X86Mnemonic mnemonic, byte opcode, uint operands12Value, bool hasRegisterToken)
+            : this(mnemonic, (uint)(opcode << 8), operands12Value, hasRegisterToken)
         {
         }
 
-        internal X86OpCode(X86Mnemonic mnemonic, uint opcodeValue, uint operandsValue, bool hasRegisterToken)
-            : this(new X86Mnemonic[]
+        internal X86OpCode(X86Mnemonic mnemonic, uint opcodeValue, uint operands12Value, bool hasRegisterToken)
+            : this(new[]
             {
                 mnemonic
-            }, opcodeValue, operandsValue, hasRegisterToken, false)
+            }, opcodeValue, operands12Value, hasRegisterToken, false)
         {
         }
 
-        internal X86OpCode(X86Mnemonic[] mnemonics, uint opcodeValue, uint operandsValue, bool hasRegisterToken, bool hasOpCodeModifier)
+        internal X86OpCode(X86Mnemonic[] mnemonics, uint opcodeValue, uint operands12Value, bool hasRegisterToken,
+            bool hasOpCodeModifier)
+            : this(mnemonics, opcodeValue, operands12Value, 0, hasRegisterToken, hasOpCodeModifier)
+        {
+        }
+
+        internal X86OpCode(X86Mnemonic[] mnemonics, uint opcodeValue, uint operands12Value, uint operands34Value, bool hasRegisterToken, bool hasOpCodeModifier)
             : this()
         {
             Prefix = (byte)((opcodeValue >> 0x18) & 0xFF);
@@ -31,16 +37,19 @@ namespace AsmResolver.X86
             Mnemonics = mnemonics;
             HasRegisterToken = hasRegisterToken;
 
-            var method1 = (X86OperandType)((operandsValue >> 0x18) & 0xFF);
-            var size1 = (X86OperandSize)((operandsValue >> 0x10) & 0xFF);
-            var method2 = (X86OperandType)((operandsValue >> 0x08) & 0xFF);
-            var size2 = (X86OperandSize)(operandsValue & 0xFF);
-
+            var method1 = (X86OperandType)((operands12Value >> 0x18) & 0xFF);
+            var size1 = (X86OperandSize)((operands12Value >> 0x10) & 0xFF);
+            var method2 = (X86OperandType)((operands12Value >> 0x08) & 0xFF);
+            var size2 = (X86OperandSize)(operands12Value & 0xFF);
+            var method3 = (X86OperandType)((operands34Value >> 0x18) & 0xFF);
+            var size3 = (X86OperandSize)((operands34Value >> 0x10) & 0xFF);
+            
             OperandTypes1 = Enumerable.Repeat(method1, mnemonics.Length).ToArray();
             OperandTypes2 = Enumerable.Repeat(method2, mnemonics.Length).ToArray();
             OperandSizes1 = Enumerable.Repeat(size1, mnemonics.Length).ToArray();
             OperandSizes2 = Enumerable.Repeat(size2, mnemonics.Length).ToArray();
-
+            OperandType3 = method3;
+            OperandSize3 = size3;
             HasOpCodeModifier = hasOpCodeModifier;
 
             if (TwoBytePrefix == 0x0F)
@@ -48,6 +57,7 @@ namespace AsmResolver.X86
             else
                 X86OpCodes.SingleByteOpCodes[Op1] = this;
         }
+        
 
         internal X86OpCode(X86Mnemonic[] mnemonics, uint opcodeValue, X86OperandType[] operandTypes1, X86OperandSize[] sizes1,
             X86OperandType[] operandTypes2, X86OperandSize[] sizes2)
@@ -133,6 +143,18 @@ namespace AsmResolver.X86
         }
 
         public X86OperandType[] OperandTypes2
+        {
+            get;
+            private set;
+        }
+
+        public X86OperandType OperandType3
+        {
+            get;
+            private set;
+        }
+
+        public X86OperandSize OperandSize3
         {
             get;
             private set;

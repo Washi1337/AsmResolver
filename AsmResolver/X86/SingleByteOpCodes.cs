@@ -439,13 +439,20 @@ namespace AsmResolver.X86
             ((byte)X86OperandType.ImmediateData << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
             ((byte)X86OperandType.None << 0x08) | (byte)X86OperandSize.None, false);
 
-        // TODO: 0x69: IMul_Reg1632_RegOrMem1632_Imm1632 (registerToken = true)
+        public static readonly X86OpCode IMul_Reg1632_RegOrMem1632_Imm1632 = new X86OpCode(new[] {X86Mnemonic.Imul}, 0x00006900,
+            ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, 
+            ((byte)X86OperandType.ImmediateData << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10), true, false);
 
         public static readonly X86OpCode Push_Imm8 = new X86OpCode(X86Mnemonic.Push, 0x6A,
             ((byte)X86OperandType.ImmediateData << 0x18) | ((byte)X86OperandSize.Byte << 0x10) |
             ((byte)X86OperandType.None << 0x08) | (byte)X86OperandSize.None, false);
 
-        // TODO: 0x6B: IMul_Reg1632_RegOrMem1632_Imm8 (registerToken = true)
+        public static readonly X86OpCode IMul_Reg1632_RegOrMem1632_Imm8 = new X86OpCode(new[] {X86Mnemonic.Imul}, 0x00006B00,
+            ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, 
+            ((byte)X86OperandType.ImmediateData << 0x18) | ((byte)X86OperandSize.Byte << 0x10), true, false);
+
 
         public static readonly X86OpCode Ins_Mem8_Dx = new X86OpCode(X86Mnemonic.Ins, 0x6C,
             ((byte)X86OperandType.ImmediateData << 0x18) | ((byte)X86OperandSize.Byte << 0x10) |

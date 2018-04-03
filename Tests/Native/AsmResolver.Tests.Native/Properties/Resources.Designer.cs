@@ -352,5 +352,33 @@ namespace AsmResolver.Tests.Native.Properties {
                 return ResourceManager.GetString("RelativeOffsets_source", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ThreeOperands {
+            get {
+                object obj = ResourceManager.GetObject("ThreeOperands", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to use32
+        ///
+        ///imul eax, byte [eax], 0x1337
+        ///imul eax, byte [ecx], 0x1337
+        ///imul eax, byte [edx], 0x1337
+        ///imul eax, byte [ebx], 0x1337
+        ///imul eax, byte [esp], 0x1337
+        ///imul eax, byte [0x1234], 0x1337
+        ///imul eax, byte [esi], 0x1337
+        ///imul eax, byte [edi], 0x1337.
+        /// </summary>
+        internal static string ThreeOperands_source {
+            get {
+                return ResourceManager.GetString("ThreeOperands_source", resourceCulture);
+            }
+        }
     }
 }

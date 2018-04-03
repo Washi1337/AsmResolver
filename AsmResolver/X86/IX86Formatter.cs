@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace AsmResolver.X86
 {
@@ -33,16 +34,22 @@ namespace AsmResolver.X86
         public static string FormatInstruction(this IX86Formatter formatter, X86Instruction instruction)
         {
             var mnemonicString = formatter.FormatMnemonic(instruction.Mnemonic);
+            
+            var operands = new[] { instruction.Operand1, instruction.Operand2, instruction.Operand3 }
+                .TakeWhile(x => x != null).Select(formatter.FormatOperand);
+            string operandsString = string.Join(", ", operands);
 
-            if (instruction.Operand2 == null)
-            {
-                return instruction.Operand1 == null
-                    ? mnemonicString
-                    : mnemonicString + ' ' + formatter.FormatOperand(instruction.Operand1);
-            }
-
-            return mnemonicString + ' ' + formatter.FormatOperand(instruction.Operand1) + ", " +
-                   formatter.FormatOperand(instruction.Operand2);
+            return mnemonicString + (string.IsNullOrEmpty(operandsString) ? string.Empty : ' ' + operandsString);
+//            
+//            if (instruction.Operand2 == null)
+//            {
+//                return instruction.Operand1 == null
+//                    ? mnemonicString
+//                    : mnemonicString + ' ' + formatter.FormatOperand(instruction.Operand1);
+//            }
+//
+//            return mnemonicString + ' ' + formatter.FormatOperand(instruction.Operand1) + ", " +
+//                   formatter.FormatOperand(instruction.Operand2);
         }
     }
 

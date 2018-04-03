@@ -63,6 +63,15 @@ namespace AsmResolver.X86
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the third operand of the instruction.
+        /// </summary>
+        public X86Operand Operand3
+        {
+            get;
+            set;
+        }
+
         public override string ToString()
         {
             return string.Format("{0:X8}: {1}", Offset, _formatter.FormatInstruction(this));
@@ -85,6 +94,8 @@ namespace AsmResolver.X86
                 size += GetTotalOperandSize(OpCode.OperandTypes1[mnemonicIndex], OpCode.OperandSizes1[mnemonicIndex], Operand1);
                 if (Operand2 != null)
                     size += GetTotalOperandSize(OpCode.OperandTypes2[mnemonicIndex], OpCode.OperandSizes2[mnemonicIndex], Operand2);
+                if (Operand3 != null)
+                    size += GetTotalOperandSize(OpCode.OperandType3, OpCode.OperandSize3, Operand3);
             }
             
             return size;
