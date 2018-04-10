@@ -339,6 +339,8 @@
     <Compile Include="X86\SingleByteOpCodes.cs" />
     <Compile Include="X86\X86Operand.cs" />
     <Compile Include="X86\X86OperandSize.cs" />
+    <Compile Include="X86\X86Prefix.cs" />
+    <Compile Include="X86\X86Prefixes.cs" />
     <Compile Include="X86\X86Register.cs" />
     <Compile Include="X86\X86RegOrMemModifier.cs" />
   </ItemGroup>

@@ -244,6 +244,54 @@ namespace AsmResolver.Tests.Native.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] RegOrMem16_Reg16 {
+            get {
+                object obj = ResourceManager.GetObject("RegOrMem16_Reg16", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to use32
+        ///
+        ///add word [eax], ax
+        ///add word [ecx], ax
+        ///add word [edx], ax
+        ///add word [ebx], ax
+        ///add word [esp], ax
+        ///add word [0x1337], ax
+        ///add word [esi], ax
+        ///add word [edi], ax
+        ///
+        ///add word [eax], cx
+        ///add word [ecx], cx
+        ///add word [edx], cx
+        ///add word [ebx], cx
+        ///add word [esp], cx
+        ///add word [0x1337], cx
+        ///add word [esi], cx
+        ///add word [edi], cx
+        ///
+        ///add word [eax], dx
+        ///add word [ecx], dx
+        ///add word [edx], dx
+        ///add word [ebx], dx
+        ///add word [esp], dx
+        ///add word [0x1337], dx
+        ///add word [esi], dx
+        ///add word [edi], dx
+        ///
+        ///add word [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string RegOrMem16_Reg16_source {
+            get {
+                return ResourceManager.GetString("RegOrMem16_Reg16_source", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] RegOrMem8_Reg8 {
             get {
                 object obj = ResourceManager.GetObject("RegOrMem8_Reg8", resourceCulture);
@@ -366,14 +414,23 @@ namespace AsmResolver.Tests.Native.Properties {
         /// <summary>
         ///   Looks up a localized string similar to use32
         ///
-        ///imul eax, byte [eax], 0x1337
-        ///imul eax, byte [ecx], 0x1337
-        ///imul eax, byte [edx], 0x1337
-        ///imul eax, byte [ebx], 0x1337
-        ///imul eax, byte [esp], 0x1337
-        ///imul eax, byte [0x1234], 0x1337
-        ///imul eax, byte [esi], 0x1337
-        ///imul eax, byte [edi], 0x1337.
+        ///imul eax, dword [eax], 0x12
+        ///imul eax, dword [ecx], 0x12
+        ///imul eax, dword [edx], 0x12
+        ///imul eax, dword [ebx], 0x12
+        ///imul eax, dword [esp], 0x12
+        ///imul eax, dword [0x1234], 0x12
+        ///imul eax, dword [esi], 0x12
+        ///imul eax, dword [edi], 0x12
+        ///
+        ///imul eax, dword [eax], 0x1337
+        ///imul eax, dword [ecx], 0x1337
+        ///imul eax, dword [edx], 0x1337
+        ///imul eax, dword [ebx], 0x1337
+        ///imul eax, dword [esp], 0x1337
+        ///imul eax, dword [0x1234], 0x1337
+        ///imul eax, dword [esi], 0x1337
+        ///imul eax, dword [edi], 0x1337.
         /// </summary>
         internal static string ThreeOperands_source {
             get {

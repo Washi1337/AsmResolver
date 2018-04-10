@@ -40,16 +40,6 @@ namespace AsmResolver.X86
             string operandsString = string.Join(", ", operands);
 
             return mnemonicString + (string.IsNullOrEmpty(operandsString) ? string.Empty : ' ' + operandsString);
-//            
-//            if (instruction.Operand2 == null)
-//            {
-//                return instruction.Operand1 == null
-//                    ? mnemonicString
-//                    : mnemonicString + ' ' + formatter.FormatOperand(instruction.Operand1);
-//            }
-//
-//            return mnemonicString + ' ' + formatter.FormatOperand(instruction.Operand1) + ", " +
-//                   formatter.FormatOperand(instruction.Operand2);
         }
     }
 

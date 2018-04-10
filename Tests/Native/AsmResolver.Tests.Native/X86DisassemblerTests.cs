@@ -25,6 +25,12 @@ namespace AsmResolver.Tests.Native
         {
             TestDisassembler(Properties.Resources.RegOrMem8_Reg8_sib, Properties.Resources.RegOrMem8_Reg8_sib_source);
         }
+        
+        [Fact]
+        public void RegOrMem16_Reg16()
+        {
+            TestDisassembler(Properties.Resources.RegOrMem16_Reg16, Properties.Resources.RegOrMem16_Reg16_source);
+        }
 
         [Fact]
         public void Misc()
