@@ -95,8 +95,8 @@ namespace AsmResolver.X86
         /// <returns>The size of the instruction in bytes.</returns>
         public int ComputeSize()
         {
-            int size = OpCode.TwoBytePrefix == 0 ? 1 : 2; // TODO: multi-byte opcodes.
-
+            int size = OpCode.TwoBytePrefix == 0 ? 1 : 2;
+            size += Prefixes.Count;
             size += OpCode.HasRegisterToken ? 1 : 0;
 
             if (Operand1 != null)

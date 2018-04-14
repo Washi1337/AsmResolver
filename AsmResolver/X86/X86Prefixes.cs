@@ -25,6 +25,17 @@ namespace AsmResolver.X86
      
         // 0x66 -> Wait 
 
+        public static readonly X86Prefix Lock = new X86Prefix(0xF2,
+            X86Mnemonic.Adc, X86Mnemonic.Add, X86Mnemonic.And,
+            X86Mnemonic.Btc, /* btr , bts, */
+            X86Mnemonic.Cmpxchg,
+            X86Mnemonic.Dec,
+            X86Mnemonic.Inc,
+            X86Mnemonic.Neg, X86Mnemonic.Not,
+            X86Mnemonic.Or,
+            X86Mnemonic.Sbb, X86Mnemonic.Sub,
+            /* xadd, */ X86Mnemonic.Xchg, X86Mnemonic.Xor);
+        
         public static readonly X86Prefix Repnz = new X86Prefix(0xF2, 
             X86Mnemonic.Cmpsb, X86Mnemonic.Cmpsd,
             X86Mnemonic.Scasb, X86Mnemonic.Scasd);
