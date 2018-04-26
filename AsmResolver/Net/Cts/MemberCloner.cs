@@ -70,6 +70,9 @@ namespace AsmResolver.Net.Cts
             if (newField.Constant != null)
                 newField.Constant = new Constant(field.Constant.ConstantType, new DataBlobSignature(field.Constant.Value.Data));
             
+            if (newField.PInvokeMap != null)
+                newField.PInvokeMap = CloneImplementationMap(field.PInvokeMap);
+
             _createdMembers.Add(field, newField);
             CloneCustomAttributes(field, newField);
             
@@ -172,6 +175,9 @@ namespace AsmResolver.Net.Cts
 
             foreach (var parameter in method.Parameters)
                 newMethod.Parameters.Add(new ParameterDefinition(parameter.Sequence, parameter.Name, parameter.Attributes));
+
+            if (method.PInvokeMap != null)
+                newMethod.PInvokeMap = CloneImplementationMap(method.PInvokeMap);
             
             _createdMembers.Add(method, newMethod);
             return newMethod;
@@ -185,6 +191,11 @@ namespace AsmResolver.Net.Cts
                 stub.CilMethodBody = CloneCilMethodBody(method.CilMethodBody, stub);
         }
 
+        private ImplementationMap CloneImplementationMap(ImplementationMap map)
+        {
+            return new ImplementationMap(_importer.ImportModule(map.ImportScope), map.ImportName, map.Attributes);
+        }
+        
         private void CloneGenericParameters(IGenericParameterProvider source, IGenericParameterProvider newOwner)
         {
             foreach (var parameter in source.GenericParameters)
