@@ -4,6 +4,12 @@ namespace AsmResolver.Net.Cts
 {
     public interface IMemberReference : IFullNameProvider, IHasCustomAttribute
     {
+        string Name
+        {
+            get;
+            set;
+        }
+        
         ITypeDefOrRef DeclaringType
         {
             get;

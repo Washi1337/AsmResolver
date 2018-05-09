@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts.Collections;
+﻿using System;
+using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
@@ -36,6 +37,12 @@ namespace AsmResolver.Net.Cts
         public string Name
         {
             get { return Signature.Name; }
+        }
+
+        string IMemberReference.Name
+        {
+            get { return Name; }
+            set{ throw new NotSupportedException(); }
         }
 
         public string Namespace

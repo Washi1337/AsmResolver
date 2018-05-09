@@ -25,6 +25,7 @@ namespace AsmResolver.Collections.Generic
         public T this[int index]
         {
             get
+            
             {
                 EnsureIsInitialized();
                 return Items[index];
