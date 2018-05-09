@@ -74,10 +74,14 @@ namespace AsmResolver.Net.Signatures
             get { return null; }
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return sizeof (byte) +
                    Index.GetCompressedSize();
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)

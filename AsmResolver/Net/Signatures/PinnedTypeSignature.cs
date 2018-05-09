@@ -22,10 +22,10 @@ namespace AsmResolver.Net.Signatures
             get { return ElementType.Pinned; }
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return sizeof (byte) +
-                   BaseType.GetPhysicalLength();
+                   BaseType.GetPhysicalLength(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)

@@ -49,7 +49,7 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return sizeof (byte) +
                    sizeof(byte) + 38 +
@@ -57,6 +57,10 @@ namespace AsmResolver.Net.Signatures
                    ManagedType.GetSerStringSize() +
                    Cookie.GetSerStringSize();
 
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
