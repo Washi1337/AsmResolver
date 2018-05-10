@@ -16,7 +16,7 @@
         {
         }
 
-        internal BlobStream(IBinaryStreamReader reader)
+        public BlobStream(IBinaryStreamReader reader)
         {
             _reader = reader;
         }
