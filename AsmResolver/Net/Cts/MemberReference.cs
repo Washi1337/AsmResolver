@@ -84,8 +84,6 @@ namespace AsmResolver.Net.Cts
                 if (method != null)
                     return method.DeclaringType;
                 
-                // TODO: handle modulereference parent
-
                 return null;
             }
         }

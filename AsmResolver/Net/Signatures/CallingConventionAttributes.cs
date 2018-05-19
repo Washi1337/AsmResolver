@@ -19,6 +19,6 @@ namespace AsmResolver.Net.Signatures
         Generic = 0x10,
         HasThis = 0x20,
         ExplicitThis = 0x40,
-        Sentinel = 0x41, // TODO: support sentinel types.
+        Sentinel = 0x41, 
     }
 }

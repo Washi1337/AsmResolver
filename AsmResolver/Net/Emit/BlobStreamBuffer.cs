@@ -63,29 +63,7 @@ namespace AsmResolver.Net.Emit
                 {
                     writer.WriteCompressedUInt32(signature.GetPhysicalLength(_parentBuffer));
                     signature.Write(_parentBuffer, writer);
-
                 }
-//                var processedSignatures = new HashSet<BlobSignature>();
-//                var agenda = new Queue<BlobSignature>(_signatureOffsetMapping.Keys);
-//
-//                while (agenda.Count > 0)
-//                {
-//                    var signature = agenda.Dequeue();
-//                    if (processedSignatures.Add(signature))
-//                    {
-//                        writer.WriteCompressedUInt32(signature.GetPhysicalLength());
-//
-//                        int count = _signatureOffsetMapping.Count;
-//                        signature.Write(_parentBuffer, writer);
-//
-//                        // TODO: find more efficient way of adding newly created signatures to the queue.
-//                        if (count != _signatureOffsetMapping.Count)
-//                        {
-//                            foreach (var sig in _signatureOffsetMapping.Keys)
-//                                agenda.Enqueue(sig);
-//                        }
-//                    }
-//                }
 
                 writer.WriteZeroes((int)(FileSegment.Align(_length, 4) - _length));
                 return new BlobStream(new MemoryStreamReader(stream.ToArray()));

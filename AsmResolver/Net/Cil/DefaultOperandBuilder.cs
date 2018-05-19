@@ -53,8 +53,15 @@ namespace AsmResolver.Net.Cil
 
         public int GetVariableIndex(VariableSignature variable)
         {
-            // TODO: error avoidance.
-            return ((LocalVariableSignature) _methodBody.Signature.Signature).Variables.IndexOf(variable);
+            var methodSignature = _methodBody.Signature;
+            if (methodSignature == null)
+                return -1;
+
+            var localVarSig = methodSignature.Signature as LocalVariableSignature;
+            if (localVarSig == null)
+                return -1;
+            
+            return localVarSig.Variables.IndexOf(variable);
         }
 
         public int GetParameterIndex(ParameterSignature parameter)
