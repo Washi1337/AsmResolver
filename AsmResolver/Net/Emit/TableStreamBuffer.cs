@@ -26,14 +26,15 @@ namespace AsmResolver.Net.Emit
         private readonly IDictionary<IMetadataMember, MetadataToken> _members =
             new Dictionary<IMetadataMember, MetadataToken>();
         
-        private readonly IDictionary<MetadataRow<uint, uint, uint>, MetadataToken> _typeRefs;
-        private readonly IDictionary<MetadataRow<uint>, MetadataToken> _typeSpecs;
+        private readonly IDictionary<TypeReference, MetadataToken> _typeRefs;
+        private readonly IDictionary<TypeSpecification, MetadataToken> _typeSpecs;
         private readonly IDictionary<MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint>, MetadataToken> _assemblyRefs;
         private readonly IDictionary<MetadataRow<uint>, MetadataToken> _moduleRefs;        
-        private readonly IDictionary<MetadataRow<uint, uint, uint>, MetadataToken> _memberRefs;
+        private readonly IDictionary<MemberReference, MetadataToken> _memberRefs;
         private readonly IDictionary<MetadataRow<uint, uint>, MetadataToken> _methodSpecs;
 
         private readonly TableStream _tableStream;
+        private readonly IList<Action> _fixups = new List<Action>();
 
         private uint _methodList = 1;
         private uint _fieldList = 1;
@@ -47,11 +48,12 @@ namespace AsmResolver.Net.Emit
             _tableStream = new TableStream();
 
             var rowComparer = new MetadataRowComparer();
-            _typeRefs = new Dictionary<MetadataRow<uint, uint, uint>, MetadataToken>(rowComparer);
-            _typeSpecs = new Dictionary<MetadataRow<uint>, MetadataToken>(rowComparer);
+            var sigComparer = new SignatureComparer();
+            _typeRefs = new Dictionary<TypeReference, MetadataToken>(sigComparer);
+            _typeSpecs = new Dictionary<TypeSpecification, MetadataToken>(sigComparer);
             _assemblyRefs = new Dictionary<MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint>, MetadataToken>(rowComparer);
             _moduleRefs = new Dictionary<MetadataRow<uint>, MetadataToken>(rowComparer);
-            _memberRefs = new Dictionary<MetadataRow<uint, uint, uint>, MetadataToken>(rowComparer);
+            _memberRefs = new Dictionary<MemberReference, MetadataToken>(sigComparer);
             _methodSpecs = new Dictionary<MetadataRow<uint, uint>, MetadataToken>(rowComparer);
         }
 
@@ -122,12 +124,12 @@ namespace AsmResolver.Net.Emit
                 Column3 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Namespace),
             };
 
-            if (!_typeRefs.TryGetValue(typeRefRow, out token))
+            if (!_typeRefs.TryGetValue(reference, out token))
             {
                 var table = (TypeReferenceTable) _tableStream.GetTable(MetadataTokenType.TypeRef);
                 table.Add(typeRefRow);
                 token = typeRefRow.MetadataToken;
-                _typeRefs.Add(typeRefRow, token);
+                _typeRefs.Add(reference, token);
                 _members.Add(reference, token);
                 
                 AddCustomAttributes(reference);
@@ -143,18 +145,17 @@ namespace AsmResolver.Net.Emit
                 return token;
             
             AssertIsImported(specification);
-            
-            var typeSpecRow = new MetadataRow<uint>
-            {
-                Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature)
-            };
 
-            if (!_typeSpecs.TryGetValue(typeSpecRow, out token))
+            var typeSpecRow = new MetadataRow<uint>();
+            specification.Signature.Prepare(_parentBuffer);
+            _fixups.Add(() => typeSpecRow.Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature));
+
+            if (!_typeSpecs.TryGetValue(specification, out token))
             {
                 var table = (TypeSpecificationTable) _tableStream.GetTable(MetadataTokenType.TypeSpec);
                 table.Add(typeSpecRow);
                 token = typeSpecRow.MetadataToken;
-                _typeSpecs.Add(typeSpecRow, token);
+                _typeSpecs.Add(specification, token);
                 _members.Add(specification, token);
                 
                 AddCustomAttributes(specification);
@@ -200,11 +201,20 @@ namespace AsmResolver.Net.Emit
                     Column3 = (ushort) assemblyRef.Version.Build,
                     Column4 = (ushort) assemblyRef.Version.Revision,
                     Column5 = assemblyRef.Attributes,
-                    Column6 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.PublicKey),
                     Column7 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Name),
                     Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Culture == "neutral" ? null : assemblyRef.Culture),
-                    Column9 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.HashValue),
                 };
+
+            if (assemblyRef.PublicKey != null)
+                assemblyRef.PublicKey.Prepare(_parentBuffer);
+            if (assemblyRef.HashValue != null)
+                assemblyRef.HashValue.Prepare(_parentBuffer);
+            
+            _fixups.Add(() =>
+            {
+                assemblyRow.Column6 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.PublicKey);
+                assemblyRow.Column9 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.HashValue);
+            });
 
             if (!_assemblyRefs.TryGetValue(assemblyRow, out token))
             {
@@ -247,15 +257,20 @@ namespace AsmResolver.Net.Emit
             {
                 Column1 = _tableStream.GetIndexEncoder(CodedIndex.MemberRefParent).EncodeToken(GetMemberRefParentToken(reference.Parent)),
                 Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Name),
-                Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(reference.Signature)
+                
             };
 
-            if (!_memberRefs.TryGetValue(memberRow, out token))
+            GetTypeToken(reference.DeclaringType);
+            
+            reference.Signature.Prepare(_parentBuffer);
+            _fixups.Add(() => memberRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(reference.Signature));
+
+            if (!_memberRefs.TryGetValue(reference, out token))
             {
                 var table = (MemberReferenceTable) _tableStream.GetTable(MetadataTokenType.MemberRef);
                 table.Add(memberRow);
                 token = memberRow.MetadataToken;
-                _memberRefs.Add(memberRow, token);
+                _memberRefs.Add(reference, token);
                 _members.Add(reference, token);
                 
                 AddCustomAttributes(reference);
@@ -327,9 +342,12 @@ namespace AsmResolver.Net.Emit
             var specificationRow = new MetadataRow<uint, uint>
             {
                 Column1 = _tableStream.GetIndexEncoder(CodedIndex.MethodDefOrRef)
-                    .EncodeToken(GetMethodToken(specification.Method)),
-                Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature)
+                    .EncodeToken(GetMethodToken(specification.Method))
             };
+
+            specification.Signature.Prepare(_parentBuffer);
+            _fixups.Add(() =>
+                specificationRow.Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature));
 
             if (!_methodSpecs.TryGetValue(specificationRow, out token))
             {
@@ -356,10 +374,15 @@ namespace AsmResolver.Net.Emit
                 Column4 = (ushort) assembly.Version.Build,
                 Column5 = (ushort) assembly.Version.Revision,
                 Column6 = assembly.Attributes,
-                Column7 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assembly.PublicKey),
                 Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Name),
                 Column9 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Culture == "neutral" ? null : assembly.Culture)
             };
+
+            if (assembly.PublicKey != null)
+                assembly.PublicKey.Prepare(_parentBuffer);
+            _fixups.Add(() => 
+                assemblyRow.Column7 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assembly.PublicKey));
+            
             assemblyTable.Add(assemblyRow);
             _members.Add(assembly, assemblyRow.MetadataToken);
             
@@ -530,7 +553,9 @@ namespace AsmResolver.Net.Emit
         private void FinalizeFieldRow(FieldDefinition field, MetadataRow<FieldAttributes, uint, uint> fieldRow)
         {
             // Update final column.
-            fieldRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(field.Signature);
+            if (field.Signature != null)
+                field.Signature.Prepare(_parentBuffer);
+            _fixups.Add(() => fieldRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(field.Signature));
 
             // Add optional extensions to field.
             if (field.Constant != null)
@@ -557,7 +582,10 @@ namespace AsmResolver.Net.Emit
             // Update remaining columns.
             if (method.MethodBody != null)
                 methodRow.Column1 = method.MethodBody.CreateRawMethodBody(_parentBuffer);
-            methodRow.Column5 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(method.Signature);
+
+            if (method.Signature != null)
+                method.Signature.Prepare(_parentBuffer);
+            _fixups.Add(() => methodRow.Column5 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(method.Signature));
 
             // Add parameters.
             foreach (var parameter in method.Parameters)
@@ -594,8 +622,13 @@ namespace AsmResolver.Net.Emit
             var marshalRow = new MetadataRow<uint, uint>
             {
                 Column1 = _tableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal).EncodeToken(GetNewToken(fieldMarshal.Parent)),
-                Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(fieldMarshal.MarshalDescriptor)
             };
+
+            if (fieldMarshal.MarshalDescriptor != null)
+                fieldMarshal.MarshalDescriptor.Prepare(_parentBuffer);
+            _fixups.Add(() =>
+                marshalRow.Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(fieldMarshal.MarshalDescriptor));
+            
             table.Add(marshalRow);
             _members.Add(fieldMarshal, marshalRow.MetadataToken);
         }
@@ -729,8 +762,11 @@ namespace AsmResolver.Net.Emit
             {
                 Column1 = property.Attributes,
                 Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(property.Name),
-                Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(property.Signature)
             };
+
+            property.Signature.Prepare(_parentBuffer);
+            _fixups.Add(() => propertyRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(property.Signature));
+            
             table.Add(propertyRow);
             _members.Add(property, propertyRow.MetadataToken);
 
@@ -809,8 +845,13 @@ namespace AsmResolver.Net.Emit
                 Column1 = constant.ConstantType,
                 Column3 = _tableStream.GetIndexEncoder(CodedIndex.HasConstant)
                     .EncodeToken(GetNewToken(constant.Parent)),
-                Column4 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(constant.Value)
             };
+
+            if (constant.Value != null)
+                constant.Value.Prepare(_parentBuffer);
+
+            _fixups.Add(() => constantRow.Column4 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(constant.Value));
+                
             table.Add(constantRow);
             _members.Add(constant, constantRow.MetadataToken);
         }
@@ -897,10 +938,12 @@ namespace AsmResolver.Net.Emit
                 return token;
             
             var table = (StandAloneSignatureTable) _tableStream.GetTable(MetadataTokenType.StandAloneSig);
-            var signatureRow = new MetadataRow<uint>
-            {
-                Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(signature.Signature)
-            };
+            var signatureRow = new MetadataRow<uint>();
+
+            if (signature.Signature != null)
+                signature.Signature.Prepare(_parentBuffer);
+            _fixups.Add(() => signatureRow.Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(signature.Signature));
+            
             table.Add(signatureRow);
             _members.Add(signature, token = signatureRow.MetadataToken);
 
@@ -930,8 +973,13 @@ namespace AsmResolver.Net.Emit
             {
                 Column1 = declaration.Action,
                 Column2 = _tableStream.GetIndexEncoder(CodedIndex.HasDeclSecurity).EncodeToken(GetNewToken(declaration.Parent)),
-                Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(declaration.PermissionSet)
             };
+
+            if (declaration.PermissionSet != null)
+                declaration.PermissionSet.Prepare(_parentBuffer);
+            _fixups.Add(() => 
+                declarationRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(declaration.PermissionSet));
+            
             table.Add(declarationRow);
             _members.Add(declaration, declarationRow.MetadataToken);
             
@@ -947,14 +995,21 @@ namespace AsmResolver.Net.Emit
             {
                 Column1 = _tableStream.GetIndexEncoder(CodedIndex.HasCustomAttribute).EncodeToken(GetNewToken(attribute.Parent)),
                 Column2 = _tableStream.GetIndexEncoder(CodedIndex.CustomAttributeType).EncodeToken(GetMethodToken(attribute.Constructor)),
-                Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(attribute.Signature)
             };
+
+            if (attribute.Signature != null)
+                attribute.Signature.Prepare(_parentBuffer);
+            _fixups.Add(() => attributeRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(attribute.Signature));
+            
             table.Add(attributeRow);
             _members.Add(attribute, attributeRow.MetadataToken);
         }
 
         public override MetadataStream CreateStream()
         {
+            foreach (var fixup in _fixups)
+                fixup();
+            
             _tableStream.BlobIndexSize = _parentBuffer.BlobStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;
             _tableStream.StringIndexSize = _parentBuffer.StringStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;
             _tableStream.GuidIndexSize = _parentBuffer.GuidStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;

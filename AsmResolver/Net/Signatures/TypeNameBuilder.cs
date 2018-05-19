@@ -27,7 +27,6 @@ namespace AsmResolver.Net.Signatures
 
             throw new NotSupportedException("Invalid or unsupported type signature: " + signature.FullName + ".");
         }
-        
 
         private static string GetFullName(TypeSpecificationSignature specification)
         {

@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Linq;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
@@ -75,6 +76,12 @@ namespace AsmResolver.Net.Cts
         public string Name
         {
             get { return Method.Name; }
+        }
+
+        string IMemberReference.Name
+        {
+            get { return Name; }
+            set{ throw new NotSupportedException(); }
         }
 
         public string FullName

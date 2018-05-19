@@ -123,7 +123,7 @@ namespace AsmResolver.Net.Signatures
             return true;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             if (!Validate())
                 throw new InvalidOperationException();
@@ -147,12 +147,16 @@ namespace AsmResolver.Net.Signatures
             }
 
             return sizeof (byte) +
-                   BaseType.GetPhysicalLength() + 
+                   BaseType.GetPhysicalLength(buffer) + 
                    Dimensions.Count.GetCompressedSize() +
                    numSizes.GetCompressedSize() +
                    numLoBounds.GetCompressedSize() +
                    sizesAndLoBoundsLength + 
-                   base.GetPhysicalLength();
+                   base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)

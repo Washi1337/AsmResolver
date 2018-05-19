@@ -22,7 +22,7 @@ namespace AsmResolver.Net
         {
         }
 
-        internal StringStream(IBinaryStreamReader reader)
+        public StringStream(IBinaryStreamReader reader)
         {
             _reader = reader;
         }

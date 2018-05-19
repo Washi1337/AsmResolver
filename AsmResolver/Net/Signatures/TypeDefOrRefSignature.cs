@@ -62,13 +62,19 @@ namespace AsmResolver.Net.Signatures
             return Type.GetElementType();
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            var encoder = Type.Image.Header.GetStream<TableStream>()
+            var encoder = buffer.TableStreamBuffer
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             return sizeof(byte) +
                    encoder.EncodeToken(Type.MetadataToken).GetCompressedSize() +
-                   base.GetPhysicalLength();
+                   base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            buffer.TableStreamBuffer.GetTypeToken(Type);
+            buffer.TableStreamBuffer.GetResolutionScopeToken(ResolutionScope);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)

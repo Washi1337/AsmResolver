@@ -73,7 +73,7 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             if (Value == null)
                 return 1;
@@ -105,6 +105,10 @@ namespace AsmResolver.Net.Signatures
                 return TypeNameBuilder.GetAssemblyQualifiedName(typeSignature).GetSerStringSize();
 
             throw new NotSupportedException("Invalid or unsupported argument element value in custom attribute.");
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)

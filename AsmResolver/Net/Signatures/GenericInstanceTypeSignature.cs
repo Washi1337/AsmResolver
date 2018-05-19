@@ -88,7 +88,7 @@ namespace AsmResolver.Net.Signatures
             return GenericType.GetElementType();
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             var encoder =
                 GenericType.Image.Header.GetStream<TableStream>()
@@ -97,8 +97,15 @@ namespace AsmResolver.Net.Signatures
                            sizeof(byte) +
                            encoder.EncodeToken(GenericType.MetadataToken).GetCompressedSize() +
                            GenericArguments.Count.GetCompressedSize() +
-                           GenericArguments.Sum(x => x.GetPhysicalLength()))
-                   + base.GetPhysicalLength();
+                           GenericArguments.Sum(x => x.GetPhysicalLength(buffer)))
+                   + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            buffer.TableStreamBuffer.GetTypeToken(GenericType);
+            foreach (var argument in GenericArguments)
+                argument.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)

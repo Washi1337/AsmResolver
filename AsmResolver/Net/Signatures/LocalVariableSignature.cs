@@ -45,12 +45,18 @@ namespace AsmResolver.Net.Signatures
             private set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint) (sizeof(byte) +
                            Variables.Count.GetCompressedSize() +
-                           Variables.Sum(x => x.GetPhysicalLength())) +
-                   base.GetPhysicalLength();
+                           Variables.Sum(x => x.GetPhysicalLength(buffer))) +
+                   base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            foreach (var variable in Variables)
+                variable.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
