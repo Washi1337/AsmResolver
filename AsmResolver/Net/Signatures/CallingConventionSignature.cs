@@ -3,16 +3,24 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
-    public abstract class CallingConventionSignature : BlobSignature
+    public abstract class CallingConventionSignature : ExtendableBlobSignature
     {
         private const CallingConventionAttributes SignatureTypeMask = (CallingConventionAttributes)0xF;
 
-        public static CallingConventionSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static CallingConventionSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
+        {
+            var signature = ReadSignature(image, reader);
+            if (readToEnd)
+                signature.ExtraData = reader.ReadToEnd();
+            return signature;
+        }
+
+        private static CallingConventionSignature ReadSignature(MetadataImage image, IBinaryStreamReader reader)
         {
             var flag = reader.ReadByte();
             reader.Position--;
 
-            switch ((CallingConventionAttributes)flag & SignatureTypeMask)
+            switch ((CallingConventionAttributes) flag & SignatureTypeMask)
             {
                 case CallingConventionAttributes.Default:
                 case CallingConventionAttributes.C:
@@ -31,6 +39,7 @@ namespace AsmResolver.Net.Signatures
                 case CallingConventionAttributes.Field:
                     return FieldSignature.FromReader(image, reader);
             }
+
             throw new NotSupportedException();
         }
 
@@ -92,25 +101,5 @@ namespace AsmResolver.Net.Signatures
             get { return Attributes.HasFlag(CallingConventionAttributes.Sentinel); }
             set { Attributes = Attributes.SetFlag(CallingConventionAttributes.Sentinel, value); }
         }
-    }
-
-    [Flags]
-    public enum CallingConventionAttributes : byte
-    {
-        Default = 0x0,
-        C = 0x1,
-        StdCall = 0x2,
-        ThisCall = 0x3,
-        FastCall = 0x4,
-        VarArg = 0x5,
-        Field = 0x6,
-        Local = 0x7,
-        Property = 0x8,
-        GenericInstance = 0xA,
-
-        Generic = 0x10,
-        HasThis = 0x20,
-        ExplicitThis = 0x40,
-        Sentinel = 0x41, // TODO: support sentinel types.
     }
 }

@@ -7,17 +7,20 @@ namespace AsmResolver.Net.Signatures
 {
     public class LocalVariableSignature : CallingConventionSignature
     {
-        public new static LocalVariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public new static LocalVariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
             var signature = new LocalVariableSignature
             {
                 Attributes = (CallingConventionAttributes)reader.ReadByte()
             };
             
-            var count = reader.ReadCompressedUInt32();
-
+            uint count = reader.ReadCompressedUInt32();
             for (int i = 0; i < count; i++)
                 signature.Variables.Add(VariableSignature.FromReader(image, reader));
+
+            if (readToEnd)
+                signature.ExtraData = reader.ReadToEnd();
+            
             return signature;
         }
 
@@ -44,9 +47,10 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return (uint)(sizeof (byte) +
-                          Variables.Count.GetCompressedSize() +
-                          Variables.Sum(x => x.GetPhysicalLength()));
+            return (uint) (sizeof(byte) +
+                           Variables.Count.GetCompressedSize() +
+                           Variables.Sum(x => x.GetPhysicalLength())) +
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -55,6 +59,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteCompressedUInt32((uint)Variables.Count);
             foreach (var variable in Variables)
                 variable.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

@@ -3,7 +3,7 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class VariableSignature : BlobSignature
+    public class VariableSignature : ExtendableBlobSignature
     {
         public static VariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
@@ -23,12 +23,14 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return VariableType.GetPhysicalLength();
+            return VariableType.GetPhysicalLength()
+                + base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             VariableType.Write(buffer, writer);
+            base.Write(buffer, writer);
         }
     }
 }

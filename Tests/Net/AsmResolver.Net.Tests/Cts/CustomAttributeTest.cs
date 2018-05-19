@@ -196,5 +196,28 @@ namespace AsmResolver.Tests.Net.Cts
             Assert.Equal(namedArg.Argument.ArgumentType, newArg.Argument.ArgumentType, _comparer);
             Assert.Equal(namedArg.Argument.Elements[0].Value, newArg.Argument.Elements[0].Value);
         }
+
+        [Fact]
+        public void PersistentExtraData()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var extraData = new byte[] {1, 2, 3, 4};
+            
+            var customAttribute = new CustomAttribute(
+                (ICustomAttributeType) importer.ImportMethod(
+                    typeof(ObfuscationAttribute).GetConstructor(Type.EmptyTypes)),
+                new CustomAttributeSignature {ExtraData = extraData});
+            
+            image.Assembly.CustomAttributes.Add(customAttribute);
+
+            header.UnlockMetadata();
+            
+            image = header.LockMetadata();
+            Assert.Equal(extraData, image.Assembly.CustomAttributes[0].Signature.ExtraData);
+        }
     }
 }

@@ -51,11 +51,12 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return sizeof (byte) +
+            return sizeof(byte) +
                    sizeof(byte) + 38 +
                    UnmanagedType.GetSerStringSize() +
                    ManagedType.GetSerStringSize() +
-                   Cookie.GetSerStringSize();
+                   Cookie.GetSerStringSize() +
+                   base.GetPhysicalLength();
 
         }
 
@@ -66,6 +67,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteSerString(UnmanagedType);
             writer.WriteSerString(ManagedType);
             writer.WriteSerString(Cookie);
+
+            base.Write(buffer, writer);
         }
     }
 }

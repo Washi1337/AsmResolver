@@ -5,12 +5,13 @@ namespace AsmResolver.Net.Signatures
 {
     public class FieldSignature : MemberSignature
     {
-        public new static FieldSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public new static FieldSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
             return new FieldSignature
             {
                 Attributes = (CallingConventionAttributes)reader.ReadByte(),
                 FieldType = TypeSignature.FromReader(image, reader),
+                ExtraData = readToEnd ? reader.ReadToEnd() : null
             };
         }
 
@@ -38,14 +39,17 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return sizeof (byte) +
-                   FieldType.GetPhysicalLength();
+            return sizeof(byte) +
+                   FieldType.GetPhysicalLength() +
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte(0x06);
             FieldType.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

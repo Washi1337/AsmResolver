@@ -33,7 +33,7 @@ namespace AsmResolver.Net.Signatures
                     }
                 }
             }
-
+            
             return signature;
         }
 
@@ -74,10 +74,9 @@ namespace AsmResolver.Net.Signatures
         public override uint GetPhysicalLength()
         {
             return
-                (uint)
-                    (ArgumentType.ElementType != ElementType.SzArray
-                        ? Elements[0].GetPhysicalLength()
-                        : sizeof(uint) + Elements.Sum(x => x.GetPhysicalLength()));
+                (uint) (ArgumentType.ElementType != ElementType.SzArray
+                    ? Elements[0].GetPhysicalLength()
+                    : sizeof(uint) + Elements.Sum(x => x.GetPhysicalLength()));
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)

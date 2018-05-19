@@ -37,9 +37,10 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return sizeof (byte) +
+            return sizeof(byte) +
                    NumberOfElements.GetCompressedSize() +
-                   sizeof (byte);
+                   sizeof(byte) +
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -47,6 +48,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteByte((byte)NativeType);
             writer.WriteCompressedUInt32((uint)NumberOfElements);
             writer.WriteByte((byte)ElementType);
+
+            base.Write(buffer, writer);
         }
     }
 }

@@ -8,7 +8,6 @@ namespace AsmResolver.Net.Signatures
     {
         public new static PinnedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.StartPosition;
             return new PinnedTypeSignature(TypeSignature.FromReader(image, reader));
         }
 
@@ -24,14 +23,16 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return sizeof (byte) +
-                   BaseType.GetPhysicalLength();
+            return sizeof(byte) +
+                   BaseType.GetPhysicalLength() +
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)ElementType);
             BaseType.Write(buffer, writer);
+            base.Write(buffer, writer);
         }
     }
 }

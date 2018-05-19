@@ -7,7 +7,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class MethodSignature : MemberSignature
     {
-        public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
             if (!reader.CanRead(sizeof (byte)))
                 return null;
@@ -35,6 +35,9 @@ namespace AsmResolver.Net.Signatures
                 signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
             }
 
+            if (readToEnd)
+                signature.ExtraData = reader.ReadToEnd();
+            
             return signature;
         }
 
@@ -85,11 +88,12 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return (uint)(sizeof (byte) +
-                          (IsGeneric ? GenericParameterCount.GetCompressedSize() : 0) +
-                          Parameters.Count.GetCompressedSize() +
-                          ReturnType.GetPhysicalLength() +
-                          Parameters.Sum(x => x.GetPhysicalLength()));
+            return (uint) (sizeof(byte) +
+                           (IsGeneric ? GenericParameterCount.GetCompressedSize() : 0) +
+                           Parameters.Count.GetCompressedSize() +
+                           ReturnType.GetPhysicalLength() +
+                           Parameters.Sum(x => x.GetPhysicalLength()))
+                   + base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -103,13 +107,15 @@ namespace AsmResolver.Net.Signatures
             ReturnType.Write(buffer, writer);
             foreach (var parameter in Parameters)
                 parameter.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
 
         public override string ToString()
         {
             return (HasThis ? "instance " : "") 
                 + ReturnType.FullName 
-                + " *(" + Parameters.Select(x => x.ParameterType).GetTypeArrayString() + ")";
+                + " (" + Parameters.Select(x => x.ParameterType).GetTypeArrayString() + ")";
         }
     }
 

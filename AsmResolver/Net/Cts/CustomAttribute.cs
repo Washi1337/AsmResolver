@@ -44,8 +44,10 @@ namespace AsmResolver.Net.Cts
                     : null;
             });
 
-            _signature = new LazyValue<CustomAttributeSignature>(() => CustomAttributeSignature.FromReader(this,
-                tableStream.MetadataHeader.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
+            _signature = new LazyValue<CustomAttributeSignature>(() => CustomAttributeSignature.FromReader(
+                this,
+                tableStream.MetadataHeader.GetStream<BlobStream>().CreateBlobReader(row.Column3), 
+                true));
         }
 
         /// <inheritdoc />

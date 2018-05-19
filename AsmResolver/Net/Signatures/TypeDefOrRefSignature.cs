@@ -66,14 +66,16 @@ namespace AsmResolver.Net.Signatures
         {
             var encoder = Type.Image.Header.GetStream<TableStream>()
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            return sizeof (byte) +
-                   encoder.EncodeToken(Type.MetadataToken).GetCompressedSize();
+            return sizeof(byte) +
+                   encoder.EncodeToken(Type.MetadataToken).GetCompressedSize() +
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)ElementType);
             WriteTypeDefOrRef(buffer, writer, Type);
+            base.Write(buffer, writer);
         }
 
         public IMetadataMember Resolve()

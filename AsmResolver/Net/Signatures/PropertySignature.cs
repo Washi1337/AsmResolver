@@ -7,7 +7,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class PropertySignature : CallingConventionSignature, IHasTypeSignature
     {
-        public new static PropertySignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public new static PropertySignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
             var signature = new PropertySignature
             {
@@ -23,6 +23,9 @@ namespace AsmResolver.Net.Signatures
             for (int i = 0; i < paramCount; i++)
                 signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
 
+            if (readToEnd)
+                signature.ExtraData = reader.ReadToEnd();
+            
             return signature;
         }
 
@@ -64,7 +67,8 @@ namespace AsmResolver.Net.Signatures
             return (uint)(sizeof (byte) +
                           Parameters.Count.GetCompressedSize() +
                           PropertyType.GetPhysicalLength() +
-                          Parameters.Sum(x => x.GetPhysicalLength()));
+                          Parameters.Sum(x => x.GetPhysicalLength()))
+                + base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -74,6 +78,8 @@ namespace AsmResolver.Net.Signatures
             PropertyType.Write(buffer, writer);
             foreach (var parameter in Parameters)
                 parameter.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

@@ -78,16 +78,16 @@ namespace AsmResolver.Net.Signatures
             if (Value == null)
                 return 1;
 
-            switch(Type.GetTypeCode(Value.GetType()))
+            switch (Type.GetTypeCode(Value.GetType()))
             {
                 case TypeCode.Boolean:
                 case TypeCode.Byte:
                 case TypeCode.SByte:
-                    return sizeof (byte);
+                    return sizeof(byte);
                 case TypeCode.Char:
                 case TypeCode.Int16:
                 case TypeCode.UInt16:
-                    return sizeof (ushort);
+                    return sizeof(ushort);
                 case TypeCode.Single:
                 case TypeCode.Int32:
                 case TypeCode.UInt32:
@@ -95,7 +95,7 @@ namespace AsmResolver.Net.Signatures
                 case TypeCode.Double:
                 case TypeCode.Int64:
                 case TypeCode.UInt64:
-                    return sizeof (ulong);
+                    return sizeof(ulong);
                 case TypeCode.String:
                     return ((Value as string).GetSerStringSize());
             }
@@ -103,7 +103,7 @@ namespace AsmResolver.Net.Signatures
             var typeSignature = Value as TypeSignature;
             if (typeSignature != null)
                 return TypeNameBuilder.GetAssemblyQualifiedName(typeSignature).GetSerStringSize();
-            
+
             throw new NotSupportedException("Invalid or unsupported argument element value in custom attribute.");
         }
 
@@ -164,7 +164,6 @@ namespace AsmResolver.Net.Signatures
                         throw new NotSupportedException();
                     break;
             }
-
         }
     }
 }

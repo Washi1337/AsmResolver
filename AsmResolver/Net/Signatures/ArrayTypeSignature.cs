@@ -11,7 +11,6 @@ namespace AsmResolver.Net.Signatures
     {
         public new static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
             var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader));
             
             uint rank;
@@ -49,7 +48,7 @@ namespace AsmResolver.Net.Signatures
                     dimension.LowerBound = (int)loBounds[i];
                 signature.Dimensions.Add(dimension);
             }
-
+            
             return signature;
         }
 
@@ -152,7 +151,8 @@ namespace AsmResolver.Net.Signatures
                    Dimensions.Count.GetCompressedSize() +
                    numSizes.GetCompressedSize() +
                    numLoBounds.GetCompressedSize() +
-                   sizesAndLoBoundsLength;
+                   sizesAndLoBoundsLength + 
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -173,6 +173,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteCompressedUInt32((uint)boundedDimensions.Length);
             foreach (var boundedDimension in boundedDimensions)
                 writer.WriteCompressedUInt32((uint)boundedDimension.LowerBound.Value);
+
+            base.Write(buffer, writer);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace AsmResolver.Net.Cts
             : base(row.MetadataToken)
         {
             _signature = new LazyValue<TypeSignature>(() => 
-                TypeSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column1)));
+                TypeSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column1), true));
             CustomAttributes = new CustomAttributeCollection(this);
         }
 

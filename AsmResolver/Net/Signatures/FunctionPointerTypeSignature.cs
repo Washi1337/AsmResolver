@@ -49,14 +49,17 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return sizeof (byte)
-                   + Signature.GetPhysicalLength();
+            return sizeof(byte)
+                   + Signature.GetPhysicalLength()
+                   + base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte) ElementType.FnPtr);
             Signature.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

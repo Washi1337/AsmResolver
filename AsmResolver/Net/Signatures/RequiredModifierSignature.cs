@@ -38,9 +38,10 @@ namespace AsmResolver.Net.Signatures
         {
             var encoder = ModifierType.Image.Header.GetStream<TableStream>()
                     .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            return sizeof (byte) +
+            return sizeof(byte) +
                    encoder.EncodeToken(ModifierType.MetadataToken).GetCompressedSize() +
-                   BaseType.GetPhysicalLength();
+                   BaseType.GetPhysicalLength() +
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -48,6 +49,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteByte((byte)ElementType);
             WriteTypeDefOrRef(buffer, writer, ModifierType);
             BaseType.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

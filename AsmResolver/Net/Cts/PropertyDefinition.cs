@@ -37,7 +37,7 @@ namespace AsmResolver.Net.Cts
                 image.Header.GetStream<StringStream>().GetStringByOffset(row.Column2));
             
             _signature = new LazyValue<PropertySignature>(() 
-                => PropertySignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
+                => PropertySignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column3), true));
             
             _propertyMap = new LazyValue<PropertyMap>(() =>
             {

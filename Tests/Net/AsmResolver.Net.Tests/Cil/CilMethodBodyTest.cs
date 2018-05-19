@@ -321,6 +321,29 @@ namespace AsmResolver.Tests.Net.Cil
         }
 
         [Fact]
+        public void PersistentExtraData()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var image = methodBody.Method.Image;
+
+            var extraData = new byte[] {1, 2, 3, 4};
+            methodBody.Signature = new StandAloneSignature(new LocalVariableSignature(new[] {image.TypeSystem.Boolean})
+            {
+                ExtraData = extraData
+            });
+
+            var mapping = image.Header.UnlockMetadata();
+            image = image.Header.LockMetadata();
+
+            methodBody = ((MethodDefinition) image.ResolveMember(mapping[methodBody.Method])).CilMethodBody;
+            Assert.NotNull(methodBody.Signature);
+            Assert.IsType<LocalVariableSignature>(methodBody.Signature.Signature);
+
+            var localVarSig = (LocalVariableSignature) methodBody.Signature.Signature;
+            Assert.Equal(extraData, localVarSig.ExtraData);
+        }
+
+        [Fact]
         public void OperandTypeInts()
         {
             const sbyte shortOperand = 0x12;

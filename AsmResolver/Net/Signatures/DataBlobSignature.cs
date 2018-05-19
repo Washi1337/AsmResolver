@@ -69,8 +69,5 @@ namespace AsmResolver.Net.Signatures
             throw new NotSupportedException("Unrecognized or unsupported constant type.");
         }
 
-        
     }
-
-
 }

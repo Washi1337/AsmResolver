@@ -18,12 +18,13 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return sizeof (byte);
+            return sizeof(byte) + base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)NativeType);
+            base.Write(buffer, writer);
         }
     }
 }

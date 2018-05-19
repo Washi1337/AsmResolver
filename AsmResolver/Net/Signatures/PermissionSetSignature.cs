@@ -6,7 +6,7 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class PermissionSetSignature : BlobSignature
+    public class PermissionSetSignature : ExtendableBlobSignature
     {
         public static PermissionSetSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
@@ -38,9 +38,10 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return (uint)(sizeof (byte) +
-                          Attributes.Count.GetCompressedSize() +
-                          Attributes.Sum(x => x.GetPhysicalLength()));
+            return (uint) (sizeof(byte) +
+                           Attributes.Count.GetCompressedSize() +
+                           Attributes.Sum(x => x.GetPhysicalLength())) +
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -49,6 +50,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteCompressedUInt32((uint)Attributes.Count);
             foreach (var attribute in Attributes)
                 attribute.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

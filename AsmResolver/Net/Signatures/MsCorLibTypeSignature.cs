@@ -52,12 +52,15 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return sizeof (byte);
+            return sizeof (byte)
+                + base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)ElementType);
+
+            base.Write(buffer, writer);
         }
 
         public IMetadataMember Resolve()

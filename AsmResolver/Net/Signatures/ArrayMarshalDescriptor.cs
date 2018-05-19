@@ -15,6 +15,7 @@ namespace AsmResolver.Net.Signatures
             if (!reader.TryReadCompressedUInt32(out value))
                 return descriptor;
             descriptor.NumberOfElements = (int)value;
+            
             return descriptor;
         }
 
@@ -52,7 +53,8 @@ namespace AsmResolver.Net.Signatures
                    (ParameterIndex.HasValue
                        ? ParameterIndex.Value.GetCompressedSize() +
                          (NumberOfElements.HasValue ? NumberOfElements.Value.GetCompressedSize() : 0)
-                       : 0);
+                       : 0)
+                + base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -65,6 +67,8 @@ namespace AsmResolver.Net.Signatures
                 if (NumberOfElements.HasValue)
                     writer.WriteCompressedUInt32((uint)NumberOfElements.Value);
             }
+
+            base.Write(buffer, writer);
         }
     }
 }

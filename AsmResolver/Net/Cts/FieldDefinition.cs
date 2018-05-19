@@ -53,7 +53,7 @@ namespace AsmResolver.Net.Cts
                 image.Header.GetStream<StringStream>().GetStringByOffset(row.Column2));
             
             _signature = new LazyValue<FieldSignature>(() => 
-                FieldSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column3)));
+                FieldSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column3), true));
 
             _declaringType = new LazyValue<TypeDefinition>(() =>
             {

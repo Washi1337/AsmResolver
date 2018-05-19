@@ -93,11 +93,12 @@ namespace AsmResolver.Net.Signatures
             var encoder =
                 GenericType.Image.Header.GetStream<TableStream>()
                     .GetIndexEncoder(CodedIndex.TypeDefOrRef);
-            return (uint)(sizeof (byte) +
-                          sizeof (byte) +
-                          encoder.EncodeToken(GenericType.MetadataToken).GetCompressedSize() +
-                          GenericArguments.Count.GetCompressedSize() +
-                          GenericArguments.Sum(x => x.GetPhysicalLength()));
+            return (uint) (sizeof(byte) +
+                           sizeof(byte) +
+                           encoder.EncodeToken(GenericType.MetadataToken).GetCompressedSize() +
+                           GenericArguments.Count.GetCompressedSize() +
+                           GenericArguments.Sum(x => x.GetPhysicalLength()))
+                   + base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -110,6 +111,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteCompressedUInt32((uint)GenericArguments.Count);
             foreach (var argument in GenericArguments)
                 argument.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

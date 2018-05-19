@@ -76,20 +76,17 @@ namespace AsmResolver.Net.Signatures
 
         public override uint GetPhysicalLength()
         {
-            return sizeof (byte) +
-                   Index.GetCompressedSize();
+            return sizeof(byte) +
+                   Index.GetCompressedSize() +
+                   base.GetPhysicalLength();
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)ElementType);
             writer.WriteCompressedUInt32((uint)Index);
-        }
-    }
 
-    public enum GenericParameterType
-    {
-        Type,
-        Method,
+            base.Write(buffer, writer);
+        }
     }
 }
