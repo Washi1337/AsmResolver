@@ -15,6 +15,7 @@ namespace AsmResolver.Net
         IEqualityComparer<ModuleDefinition>,
         IEqualityComparer<ITypeDescriptor>,
         IEqualityComparer<IMemberReference>,
+        IEqualityComparer<CallingConventionSignature>,
         IEqualityComparer<MethodSignature>,
         IEqualityComparer<FieldSignature>,
         IEqualityComparer<PropertySignature>,
@@ -778,6 +779,23 @@ namespace AsmResolver.Net
             return false;
         }
 
+        public int GetHashCode(CallingConventionSignature obj)
+        {
+            var methodSignature = obj as MethodSignature;
+            if (methodSignature != null)
+                return GetHashCode(methodSignature);
+            
+            var fieldSignature = obj as FieldSignature;
+            if (fieldSignature != null)
+                return GetHashCode(fieldSignature);
+            
+            var propertySignature = obj as PropertySignature;
+            if (propertySignature != null)
+                return GetHashCode(propertySignature);
+
+            return obj.GetHashCode();
+        }
+        
         /// <summary>
         /// Determines whether two field signatures are considered equal according to their signatures.
         /// </summary>
