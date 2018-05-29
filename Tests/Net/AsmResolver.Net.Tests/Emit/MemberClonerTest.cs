@@ -128,7 +128,7 @@ namespace AsmResolver.Tests.Net.Emit
         }
 
         [Fact]
-        public void CloneVariables()
+        public void CloneVariableReferences()
         {
             var sourceAssembly = WindowsAssembly.FromFile(typeof(SimpleClass).Assembly.Location);
             var sourceImage = sourceAssembly.NetDirectory.MetadataHeader.LockMetadata();
@@ -165,5 +165,42 @@ namespace AsmResolver.Tests.Net.Emit
                 }
             }
         }
+
+        [Fact]
+        public void CloneParameterReferences()
+        {
+            var sourceAssembly = WindowsAssembly.FromFile(typeof(SimpleClass).Assembly.Location);
+            var sourceImage = sourceAssembly.NetDirectory.MetadataHeader.LockMetadata();
+            
+            var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", false);
+            var header = assembly.NetDirectory.MetadataHeader;
+            var image = header.LockMetadata();
+            var cloner = new MemberCloner(image);
+
+            var variablesClass = sourceImage.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == "Variables");
+            var clonedClass = cloner.CloneType(variablesClass);
+            image.Assembly.Modules[0].TopLevelTypes.Add(clonedClass);
+
+            foreach (var clonedMethod in clonedClass.Methods.Where(x => x.CilMethodBody != null))
+            {
+                var body = clonedMethod.CilMethodBody;
+                var parameters = clonedMethod.Signature.Parameters;
+                
+                var originalBody = variablesClass.Methods.First(x => x.Name == clonedMethod.Name).CilMethodBody;
+                var originalParameters = originalBody.Method.Signature.Parameters;
+
+                foreach (var instruction in body.Instructions.Where(x =>
+                    x.OpCode.OperandType == CilOperandType.InlineArgument
+                    || x.OpCode.OperandType == CilOperandType.ShortInlineArgument))
+                {
+                    var originalInstruction = originalBody.GetInstructionByOffset(instruction.Offset);
+                    Assert.NotNull(instruction.Operand);
+                    Assert.Equal(originalParameters.IndexOf((ParameterSignature) originalInstruction.Operand),
+                        parameters.IndexOf((ParameterSignature) instruction.Operand));
+                }
+                
+            }
+        }
+        
     }
 }

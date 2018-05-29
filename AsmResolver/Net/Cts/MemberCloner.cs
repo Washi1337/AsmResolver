@@ -274,6 +274,12 @@ namespace AsmResolver.Net.Cts
                             (VariableSignature) operand)];
                 }
 
+                if (operand is ParameterSignature)
+                {
+                    operand = newBody.Method.Signature.Parameters[
+                        body.Method.Signature.Parameters.IndexOf((ParameterSignature) operand)];
+                }
+
                 var newInstruction = new CilInstruction(instruction.Offset, instruction.OpCode, operand);
                 newBody.Instructions.Add(newInstruction);
                 switch (instruction.OpCode.OperandType)

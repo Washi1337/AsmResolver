@@ -4,6 +4,11 @@ namespace ClassLibrary1
 {
     public class Variables
     {
+        public void SomeParameters(int x0, int x1, int x2, int x3, int x4)
+        {
+            Console.WriteLine(x4);
+        }
+        
         public void SomeMethod()
         {
             string x0 = Console.ReadLine();
