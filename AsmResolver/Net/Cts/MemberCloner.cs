@@ -263,9 +263,17 @@ namespace AsmResolver.Net.Cts
             foreach (var instruction in body.Instructions)
             {
                 object operand = instruction.Operand;
+                
                 if (operand is IMemberReference)
                     operand = _importer.ImportReference((IMemberReference) operand);
-                
+
+                if (operand is VariableSignature)
+                {
+                    operand = ((LocalVariableSignature) newBody.Signature.Signature).Variables[
+                        ((LocalVariableSignature) body.Signature.Signature).Variables.IndexOf(
+                            (VariableSignature) operand)];
+                }
+
                 var newInstruction = new CilInstruction(instruction.Offset, instruction.OpCode, operand);
                 newBody.Instructions.Add(newInstruction);
                 switch (instruction.OpCode.OperandType)

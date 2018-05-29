@@ -126,5 +126,44 @@ namespace AsmResolver.Tests.Net.Emit
             
             _context.VerifyOutput(assembly, "abc" + 12);
         }
+
+        [Fact]
+        public void CloneVariables()
+        {
+            var sourceAssembly = WindowsAssembly.FromFile(typeof(SimpleClass).Assembly.Location);
+            var sourceImage = sourceAssembly.NetDirectory.MetadataHeader.LockMetadata();
+            
+            var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", false);
+            var header = assembly.NetDirectory.MetadataHeader;
+            var image = header.LockMetadata();
+            var cloner = new MemberCloner(image);
+
+            var variablesClass = sourceImage.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == "Variables");
+            var clonedClass = cloner.CloneType(variablesClass);
+            image.Assembly.Modules[0].TopLevelTypes.Add(clonedClass);
+
+            foreach (var clonedMethod in clonedClass.Methods.Where(x => x.CilMethodBody != null))
+            {
+                var body = clonedMethod.CilMethodBody;
+
+                if (body.Signature != null)
+                {
+                    var variables = ((LocalVariableSignature) body.Signature.Signature).Variables;
+
+                    var originalBody = variablesClass.Methods.First(x => x.Name == clonedMethod.Name).CilMethodBody;
+                    var originalVariables = ((LocalVariableSignature) originalBody.Signature.Signature).Variables;
+
+                    foreach (var instruction in body.Instructions.Where(x =>
+                        x.OpCode.OperandType == CilOperandType.InlineVar
+                        || x.OpCode.OperandType == CilOperandType.ShortInlineVar))
+                    {
+                        var originalInstruction = originalBody.GetInstructionByOffset(instruction.Offset);
+                        Assert.NotNull(instruction.Operand);
+                        Assert.Equal(originalVariables.IndexOf((VariableSignature) originalInstruction.Operand),
+                            variables.IndexOf((VariableSignature) instruction.Operand));
+                    }
+                }
+            }
+        }
     }
 }
