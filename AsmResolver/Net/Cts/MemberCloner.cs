@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.Net.Cil;
 using AsmResolver.Net.Signatures;
 
@@ -55,6 +56,19 @@ namespace AsmResolver.Net.Cts
             _importer = new MemberClonerReferenceImporter(this, targetImage);
         }
 
+        public IList<TypeDefinition> CloneTypes(IList<TypeDefinition> types)
+        {
+            var newTypes = types.Select(CreateTypeStub).ToArray();
+            
+            for (var index = 0; index < newTypes.Length; index++)
+                DeclareMemberStubs(types[index], newTypes[index]);
+            
+            for (var index = 0; index < newTypes.Length; index++)
+                FinalizeTypeStub(types[index], newTypes[index]);
+
+            return newTypes;
+        }
+        
         public TypeDefinition CloneType(TypeDefinition type)
         {
             var newType = CreateTypeStub(type);

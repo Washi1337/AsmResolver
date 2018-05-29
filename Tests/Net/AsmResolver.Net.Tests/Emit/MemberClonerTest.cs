@@ -201,6 +201,44 @@ namespace AsmResolver.Tests.Net.Emit
                 
             }
         }
-        
+
+        [Fact]
+        public void CircularReferenceTest()
+        {
+            var sourceAssembly = WindowsAssembly.FromFile(typeof(SimpleClass).Assembly.Location);
+            var sourceImage = sourceAssembly.NetDirectory.MetadataHeader.LockMetadata();
+            
+            var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", false);
+            var header = assembly.NetDirectory.MetadataHeader;
+            var image = header.LockMetadata();
+            var cloner = new MemberCloner(image);
+
+            var classA = sourceImage.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == "ClassA");
+            var classB = sourceImage.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == "ClassB");
+
+            var clonedTypes = cloner.CloneTypes(new[] {classA, classB});
+            foreach (var type in clonedTypes)
+                image.Assembly.Modules[0].TopLevelTypes.Add(type);
+
+               
+            var main = new MethodDefinition("Main", MethodAttributes.Public | MethodAttributes.Static,
+                new MethodSignature(image.TypeSystem.Void));
+            main.CilMethodBody = new CilMethodBody(main);
+            
+            main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Newobj,
+                clonedTypes[0].Methods.First(x => x.Name == ".ctor")));
+            main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Newobj,
+                clonedTypes[1].Methods.First(x => x.Name == ".ctor")));
+            main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Call,
+                clonedTypes[0].Methods.First(x => x.Name == "Test")));
+            main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            
+            image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(main);
+
+            var mapping = header.UnlockMetadata();
+            assembly.NetDirectory.EntryPointToken = mapping[main].ToUInt32();
+            
+            _context.VerifyOutput(assembly, "MyPropertyA: MyPropertyB");
+        }
     }
 }
