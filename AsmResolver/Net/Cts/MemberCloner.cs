@@ -41,11 +41,27 @@ namespace AsmResolver.Net.Cts
                     ? newMember
                     : base.ImportField(field);
             }
+
+            public override MemberReference ImportMember(MemberReference reference)
+            {
+                IMemberReference newMember;
+                return _memberCloner._createdMembers.TryGetValue(reference, out newMember)
+                    ? (MemberReference) newMember
+                    : base.ImportMember(reference);
+            }
+
+            public override IMemberReference ImportReference(IMemberReference reference)
+            {
+                IMemberReference newMember;
+                return _memberCloner._createdMembers.TryGetValue(reference, out newMember)
+                    ? newMember
+                    : base.ImportReference(reference);
+            }
         }
 
         private readonly MetadataImage _targetImage;
         private readonly IDictionary<IMemberReference, IMemberReference> _createdMembers =
-            new Dictionary<IMemberReference, IMemberReference>();
+            new Dictionary<IMemberReference, IMemberReference>(new SignatureComparer());
         private readonly IReferenceImporter _importer;
 
         public MemberCloner(MetadataImage targetImage)

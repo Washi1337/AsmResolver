@@ -650,7 +650,7 @@ namespace AsmResolver.Net
 
             var type = reference1 as ITypeDefOrRef;
             if (type != null)
-                return Equals((IMemberReference) type, reference1 as ITypeDefOrRef);
+                return Equals(type, (ITypeDefOrRef) reference1);
 
             return false;
         }
