@@ -153,7 +153,8 @@ namespace AsmResolver.Net.Cts
             foreach (var method in type.Methods)
                 FinalizeMethod(method, (MethodDefinition) _createdMembers[method]);
             
-            stub.BaseType = _importer.ImportType(type.BaseType);
+            if (type.BaseType != null)
+                stub.BaseType = _importer.ImportType(type.BaseType);
 
             if (type.ClassLayout != null)
                 stub.ClassLayout = new ClassLayout(type.ClassLayout.ClassSize, type.ClassLayout.PackingSize);
