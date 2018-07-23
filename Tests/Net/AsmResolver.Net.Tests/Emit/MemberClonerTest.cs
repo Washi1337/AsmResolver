@@ -240,5 +240,41 @@ namespace AsmResolver.Tests.Net.Emit
             
             _context.VerifyOutput(assembly, "MyPropertyA: MyPropertyB");
         }
+
+        [Fact]
+        public void ExtensionMethodTest()
+        {
+            var sourceAssembly = WindowsAssembly.FromFile(typeof(StaticClass).Assembly.Location);
+            var sourceImage = sourceAssembly.NetDirectory.MetadataHeader.LockMetadata();
+            
+            var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", false);
+            var header = assembly.NetDirectory.MetadataHeader;
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+            var cloner = new MemberCloner(image);
+
+            var staticClass = sourceImage.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == "StaticClass");
+            var clonedType = cloner.CloneType(staticClass);
+
+            var main = new MethodDefinition("Main", MethodAttributes.Public | MethodAttributes.Static,
+                new MethodSignature(image.TypeSystem.Void));
+            main.CilMethodBody = new CilMethodBody(main);
+            var instructions = main.CilMethodBody.Instructions;
+            
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Call,
+                clonedType.Methods.First(x => x.Name == "SomeExtension")));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Call,
+                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(int)}))));
+            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            image.Assembly.Modules[0].TopLevelTypes.Add(clonedType);
+            image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(main);
+            
+            var mapping = header.UnlockMetadata();
+            assembly.NetDirectory.EntryPointToken = mapping[main].ToUInt32();
+            
+            _context.VerifyOutput(assembly, "4");
+        }
     }
 }

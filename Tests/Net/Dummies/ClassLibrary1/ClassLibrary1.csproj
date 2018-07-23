@@ -46,6 +46,7 @@
     <Compile Include="SimpleClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleClassInternalReferences.cs" />
+    <Compile Include="StaticClass.cs" />
     <Compile Include="Variables.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

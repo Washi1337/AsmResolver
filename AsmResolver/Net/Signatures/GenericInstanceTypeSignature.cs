@@ -95,7 +95,7 @@ namespace AsmResolver.Net.Signatures
                     .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             return (uint) (sizeof(byte) +
                            sizeof(byte) +
-                           encoder.EncodeToken(GenericType.MetadataToken).GetCompressedSize() +
+                           encoder.EncodeToken(buffer.TableStreamBuffer.GetTypeToken(GenericType)).GetCompressedSize() +
                            GenericArguments.Count.GetCompressedSize() +
                            GenericArguments.Sum(x => x.GetPhysicalLength(buffer)))
                    + base.GetPhysicalLength(buffer);

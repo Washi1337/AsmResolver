@@ -39,7 +39,7 @@ namespace AsmResolver.Net.Signatures
             var encoder = ModifierType.Image.Header.GetStream<TableStream>()
                     .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             return sizeof(byte) +
-                   encoder.EncodeToken(ModifierType.MetadataToken).GetCompressedSize() +
+                   encoder.EncodeToken(buffer.TableStreamBuffer.GetTypeToken(ModifierType)).GetCompressedSize() +
                    BaseType.GetPhysicalLength(buffer) +
                    base.GetPhysicalLength(buffer);
         }

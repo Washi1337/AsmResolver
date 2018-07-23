@@ -67,7 +67,7 @@ namespace AsmResolver.Net.Signatures
             var encoder = buffer.TableStreamBuffer
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             return sizeof(byte) +
-                   encoder.EncodeToken(Type.MetadataToken).GetCompressedSize() +
+                   encoder.EncodeToken(buffer.TableStreamBuffer.GetTypeToken(Type)).GetCompressedSize() +
                    base.GetPhysicalLength(buffer);
         }
 
