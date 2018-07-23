@@ -18,6 +18,14 @@ namespace AsmResolver.Net.Cts
                 _memberCloner = memberCloner;
             }
 
+            public override ITypeDefOrRef ImportType(ITypeDefOrRef reference)
+            {
+                IMemberReference newType;
+                return _memberCloner._createdMembers.TryGetValue(reference , out newType)
+                    ? (ITypeDefOrRef) newType
+                    : base.ImportType(reference);
+            }
+
             public override ITypeDefOrRef ImportType(TypeDefinition type)
             {
                 IMemberReference newType;
