@@ -5,7 +5,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class PointerTypeSignature : TypeSpecificationSignature
     {
-        public new static PointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static PointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new PointerTypeSignature(TypeSignature.FromReader(image, reader));
         }

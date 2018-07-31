@@ -5,7 +5,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class SzArrayTypeSignature : TypeSpecificationSignature
     {
-        public new static SzArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static SzArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new SzArrayTypeSignature(TypeSignature.FromReader(image, reader));
         }

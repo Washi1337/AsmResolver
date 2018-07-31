@@ -7,7 +7,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class TypeDefOrRefSignature : TypeSignature, IResolvable
     {
-        public new static TypeDefOrRefSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static TypeDefOrRefSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var type = ReadTypeDefOrRef(image, reader);
             return type == null ? null : new TypeDefOrRefSignature(type);

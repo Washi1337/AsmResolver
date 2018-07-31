@@ -5,7 +5,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class BoxedTypeSignature : TypeSpecificationSignature
     {
-        public new static BoxedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static BoxedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new BoxedTypeSignature(TypeSignature.FromReader(image, reader));
         }

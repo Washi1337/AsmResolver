@@ -4,7 +4,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class ArrayMarshalDescriptor : MarshalDescriptor
     {
-        public new static ArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static ArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var descriptor = new ArrayMarshalDescriptor((NativeType) reader.ReadByte());
 

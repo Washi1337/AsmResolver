@@ -177,7 +177,7 @@ namespace AsmResolver.Tests.Net.Cts
 
             image = header.LockMetadata();
             type = (TypeDefinition) image.ResolveMember(mapping[type]);
-            Assert.Equal(1, type.NestedClasses.Count);
+            Assert.Single(type.NestedClasses);
             Assert.Same(type, type.NestedClasses[0].EnclosingClass);
             Assert.Equal(nestedType, type.NestedClasses[0].Class, _comparer);
             
@@ -205,7 +205,7 @@ namespace AsmResolver.Tests.Net.Cts
             
             image = header.LockMetadata();
             type = (TypeDefinition) image.ResolveMember(mapping[type]);
-            Assert.Equal(1, type.Interfaces.Count);
+            Assert.Single(type.Interfaces);
             Assert.Same(type, type.Interfaces[0].Class);
             Assert.Equal(@interface, type.Interfaces[0].Interface, _comparer);
         }
@@ -239,7 +239,7 @@ namespace AsmResolver.Tests.Net.Cts
 
             image = header.LockMetadata();
             type = (TypeDefinition) image.ResolveMember(mapping[type]);
-            Assert.Equal(1, type.MethodImplementations.Count);
+            Assert.Single(type.MethodImplementations);
             Assert.Same(type, type.MethodImplementations[0].Class);
             Assert.Equal(addMethodDef, type.MethodImplementations[0].MethodBody, _comparer);
             Assert.Equal(addMethodRef, type.MethodImplementations[0].MethodDeclaration, _comparer);

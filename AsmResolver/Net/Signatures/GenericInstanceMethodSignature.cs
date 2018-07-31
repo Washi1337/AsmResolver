@@ -7,7 +7,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
-        public new static GenericInstanceMethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static GenericInstanceMethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new GenericInstanceMethodSignature
             {

@@ -5,7 +5,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class CustomMarshalDescriptor : MarshalDescriptor
     {
-        public new static CustomMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static CustomMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var descriptor = new CustomMarshalDescriptor();
 

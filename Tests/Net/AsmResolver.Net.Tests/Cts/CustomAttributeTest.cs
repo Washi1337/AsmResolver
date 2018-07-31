@@ -35,7 +35,7 @@ namespace AsmResolver.Tests.Net.Cts
 
             image = header.LockMetadata();
             customAttribute = (CustomAttribute) image.ResolveMember(mapping[customAttribute]); 
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Same(customAttribute.Parent, image.Assembly);
         }
         
@@ -58,7 +58,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
 
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Equal(customAttribute.Constructor, image.Assembly.CustomAttributes[0].Constructor, _comparer);
         }
         
@@ -81,7 +81,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
 
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Null(image.Assembly.CustomAttributes[0].Signature.FixedArguments[0].Elements[0].Value);
         }
         
@@ -107,7 +107,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
 
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Equal(argument, image.Assembly.CustomAttributes[0].Signature.FixedArguments[0].Elements[0].Value);
         }
         
@@ -135,7 +135,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
             
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Equal(argument, image.Assembly.CustomAttributes[0].Signature.FixedArguments[0].Elements[0].Value as ITypeDescriptor, _comparer);
         }
         
@@ -163,7 +163,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
             
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Equal(argument, image.Assembly.CustomAttributes[0].Signature.FixedArguments[0].Elements[0].Value);
         }
 
@@ -189,7 +189,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
             
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             var newArg = image.Assembly.CustomAttributes[0].Signature.NamedArguments[0];
             Assert.Equal(namedArg.MemberName, newArg.MemberName);
             Assert.Equal(namedArg.ArgumentMemberType, newArg.ArgumentMemberType);

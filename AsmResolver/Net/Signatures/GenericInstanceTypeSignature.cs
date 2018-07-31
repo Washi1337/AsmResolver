@@ -9,7 +9,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
-        public new static GenericInstanceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static GenericInstanceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             if (!reader.CanRead(sizeof (byte)))
                 return null;

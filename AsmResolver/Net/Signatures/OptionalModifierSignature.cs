@@ -6,7 +6,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class OptionalModifierSignature : TypeSpecificationSignature
     {
-        public new static OptionalModifierSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static OptionalModifierSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new OptionalModifierSignature(ReadTypeDefOrRef(image, reader),
                 TypeSignature.FromReader(image, reader));

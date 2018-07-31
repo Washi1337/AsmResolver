@@ -6,7 +6,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class PinnedTypeSignature : TypeSpecificationSignature
     {
-        public new static PinnedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static PinnedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new PinnedTypeSignature(TypeSignature.FromReader(image, reader));
         }

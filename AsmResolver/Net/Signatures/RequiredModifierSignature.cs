@@ -6,7 +6,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class RequiredModifierSignature : TypeSpecificationSignature
     {
-        public new static RequiredModifierSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static RequiredModifierSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new RequiredModifierSignature(ReadTypeDefOrRef(image, reader),
                 TypeSignature.FromReader(image, reader));

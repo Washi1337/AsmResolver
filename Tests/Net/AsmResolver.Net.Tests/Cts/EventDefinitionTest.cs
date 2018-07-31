@@ -127,7 +127,7 @@ namespace AsmResolver.Tests.Net.Cts
             
             image = header.LockMetadata();
             @event = (EventDefinition) image.ResolveMember(mapping[@event]);
-            Assert.Equal(1, @event.Semantics.Count);
+            Assert.Single(@event.Semantics);
             Assert.Equal(addMethod, @event.Semantics[0].Method, _comparer);
             Assert.Equal(MethodSemanticsAttributes.Getter, @event.Semantics[0].Attributes);
         }

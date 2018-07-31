@@ -5,7 +5,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class ByReferenceTypeSignature : TypeSpecificationSignature
     {
-        public new static ByReferenceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static ByReferenceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new ByReferenceTypeSignature(TypeSignature.FromReader(image, reader));
         }

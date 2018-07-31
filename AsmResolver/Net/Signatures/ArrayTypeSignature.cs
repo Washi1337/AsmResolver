@@ -9,7 +9,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class ArrayTypeSignature : TypeSpecificationSignature
     {
-        public new static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader));
             

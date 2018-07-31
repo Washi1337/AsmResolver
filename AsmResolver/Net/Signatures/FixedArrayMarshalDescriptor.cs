@@ -4,7 +4,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class FixedArrayMarshalDescriptor : MarshalDescriptor
     {
-        public new static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var descriptor = new FixedArrayMarshalDescriptor();
 

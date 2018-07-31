@@ -266,7 +266,7 @@ namespace AsmResolver.Tests.Net.Emit
                 assembly.Write(new BinaryStreamWriter(stream), new CompactNetAssemblyBuilder(assembly));
                 assembly = WindowsAssembly.FromBytes(stream.ToArray());
                 image = assembly.NetDirectory.MetadataHeader.LockMetadata();
-                Assert.Equal(1, image.Assembly.Resources.Count);
+                Assert.Single(image.Assembly.Resources);
                 Assert.Equal(contents, image.Assembly.Resources[0].Data);
             }
         }
