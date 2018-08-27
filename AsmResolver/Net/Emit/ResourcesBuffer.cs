@@ -11,8 +11,7 @@ namespace AsmResolver.Net.Emit
         
         public uint GetResourceOffset(ManifestResource resource)
         {
-            uint offset;
-            if (!_resources.TryGetValue(resource, out offset))
+            if (!_resources.TryGetValue(resource, out uint offset))
             {
                 _resources.Add(resource, _length);
                 _length += (uint) resource.Data.Length + sizeof(uint);

@@ -17,15 +17,9 @@ namespace AsmResolver.Net.Emit
             _length = 1;
         }
 
-        public override string Name
-        {
-            get { return "#US"; }
-        }
+        public override string Name => "#US";
 
-        public override uint Length
-        {
-            get { return FileSegment.Align(_length, 4); }
-        }
+        public override uint Length => FileSegment.Align(_length, 4);
 
         /// <summary>
         /// Gets or creates a new index for the given string.

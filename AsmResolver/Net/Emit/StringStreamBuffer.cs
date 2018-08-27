@@ -17,15 +17,9 @@ namespace AsmResolver.Net.Emit
             _length = 1;
         }
 
-        public override string Name
-        {
-            get { return "#Strings"; }
-        }
+        public override string Name => "#Strings";
 
-        public override uint Length
-        {
-            get { return FileSegment.Align(_length, 4); }
-        }
+        public override uint Length => FileSegment.Align(_length, 4);
 
         /// <summary>
         /// Gets or creates a new index for the given string.
@@ -37,8 +31,7 @@ namespace AsmResolver.Net.Emit
             if (string.IsNullOrEmpty(value))
                 return 0;
 
-            uint offset;
-            if (!_stringOffsetMapping.TryGetValue(value, out offset))
+            if (!_stringOffsetMapping.TryGetValue(value, out uint offset))
             {
                 _stringOffsetMapping.Add(value, offset = _length);
                 _length += (uint)Encoding.UTF8.GetByteCount(value) + 1;
@@ -53,7 +46,7 @@ namespace AsmResolver.Net.Emit
                 var writer = new BinaryStreamWriter(stream);
                 writer.WriteByte(0);
 
-                foreach (var value in _stringOffsetMapping.Keys)
+                foreach (string value in _stringOffsetMapping.Keys)
                 {
                     writer.WriteBytes(Encoding.UTF8.GetBytes(value));
                     writer.WriteByte(0);

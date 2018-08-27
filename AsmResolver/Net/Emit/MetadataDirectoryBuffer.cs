@@ -11,7 +11,7 @@ namespace AsmResolver.Net.Emit
         public MetadataDirectoryBuffer(MetadataHeader header)
         {
             if (header == null)
-                throw new ArgumentNullException("header");
+                throw new ArgumentNullException(nameof(header));
             
             Segments.Add(Header = header);
             Segments.Add(_streamTable);
@@ -23,7 +23,6 @@ namespace AsmResolver.Net.Emit
         public MetadataHeader Header
         {
             get;
-            private set;
         }
 
         public void AddMetadataStream(MetadataStream stream)

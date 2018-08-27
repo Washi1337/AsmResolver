@@ -61,67 +61,54 @@ namespace AsmResolver.Net.Emit
         public ImportDirectoryBuffer ImportBuffer
         {
             get;
-            private set;
         }
 
-        public FileSegment ImportDirectory
-        {
-            get { return _importDirectory; }
-        }
+        public FileSegment ImportDirectory => _importDirectory;
 
         public ExportDirectoryBuffer ExportDirectory
         {
             get;
-            private set;
         }
 
         public ImageNetDirectory NetDirectory
         {
             get;
-            private set;
         }
 
         public MethodBodyTableBuffer MethodBodyTable
         {
             get;
-            private set;
         }
 
         public SimpleFileSegmentBuilder FieldDataTable
         {
             get;
-            private set;
         }
 
         public MetadataDirectoryBuffer MetadataDirectory
         {
             get;
-            private set;
         }
 
         public ImageDebugDirectory DebugDirectory
         {
             get;
-            private set;
         }
 
         public VTableFixupsBuffer VTableFixups
         {
             get;
-            private set;
         }
 
         public BootstrapperSegment Bootstrapper
         {
             get;
-            private set;
         }
 
         public override void UpdateReferences(EmitContext context)
         {
             ImportBuffer.UpdateTableRvas();
-            if (VTableFixups != null)
-                VTableFixups.UpdateTableRvas(context);
+            VTableFixups?.UpdateTableRvas(context);
             if (DebugDirectory != null)
             {
                 DebugDirectory.PointerToRawData = (uint) DebugDirectory.Data.StartOffset;

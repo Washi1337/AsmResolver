@@ -3,15 +3,11 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Emit
 {
-    
     public class MetadataBuffer
     {
         public MetadataBuffer(MetadataImage image)
         {
-            if (image == null) 
-                throw new ArgumentNullException("image");
-            
-            Image = image;
+            Image = image ?? throw new ArgumentNullException(nameof(image));
             TableStreamBuffer = new TableStreamBuffer(this);
             BlobStreamBuffer = new BlobStreamBuffer(this);
             StringStreamBuffer = new StringStreamBuffer();
@@ -23,43 +19,36 @@ namespace AsmResolver.Net.Emit
         public MetadataImage Image
         {
             get;
-            private set;
         }
 
         public TableStreamBuffer TableStreamBuffer
         {
             get;
-            private set;
         }
         
         public BlobStreamBuffer BlobStreamBuffer
         {
             get;
-            private set;
         }
         
         public StringStreamBuffer StringStreamBuffer
         {
             get;
-            private set;
         }
         
         public UserStringStreamBuffer UserStringStreamBuffer
         {
             get;
-            private set;
         }
         
         public GuidStreamBuffer GuidStreamBuffer
         {
             get;
-            private set;
         }
 
         public ResourcesBuffer ResourcesBuffer
         {
             get;
-            private set;
         }
     }
 }

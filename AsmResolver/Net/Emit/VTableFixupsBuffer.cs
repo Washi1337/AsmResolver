@@ -21,13 +21,9 @@ namespace AsmResolver.Net.Emit
         public VTablesDirectory Directory
         {
             get;
-            private set;
         }
 
-        public FileSegment EntriesTable
-        {
-            get { return _entriesTable; }
-        }
+        public FileSegment EntriesTable => _entriesTable;
 
         public void AddVTableHeader(VTableHeader header)
         {
@@ -35,7 +31,7 @@ namespace AsmResolver.Net.Emit
                 throw new ArgumentException("VTable header must be marked either 32 bits or 64 bits.");
             
             if (header.Is32Bit && header.Is64Bit)
-                throw new ArgumentException("VTable header cannot be 32 bits and 64 bits simultanuously.");
+                throw new ArgumentException("VTable header cannot be 32 bits and 64 bits simultaneously.");
             
             var rawTable = new byte[header.Table.Count * (header.Is32Bit ? sizeof(uint) : sizeof(ulong))];
             for (int index = 0; index < header.Table.Count; index++)

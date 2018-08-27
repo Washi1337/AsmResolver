@@ -4,6 +4,13 @@ using AsmResolver.Emit;
 
 namespace AsmResolver.Net.Emit
 {
+    /// <summary>
+    /// Provides a mechanism for building .NET assemblies that outputs binaries in a format similar to the standard
+    /// .NET compiler.
+    /// 
+    /// Resources and relocations are given the dedicated PE section .rsrc and .reloc respectively, and everything
+    /// else is put into the .text section.
+    /// </summary>
     public class CompactNetAssemblyBuilder : WindowsAssemblyBuilder
     {
         private ImageSectionHeader _textSectionHeader;

@@ -16,21 +16,13 @@ namespace AsmResolver.Net.Emit
 
         public BlobStreamBuffer(MetadataBuffer parentBuffer)
         {
-            if (parentBuffer == null) 
-                throw new ArgumentNullException("parentBuffer");
-            _parentBuffer = parentBuffer;
+            _parentBuffer = parentBuffer ?? throw new ArgumentNullException(nameof(parentBuffer));
             _length = 1;
         }
 
-        public override string Name
-        {
-            get { return "#Blob"; }
-        }
-        
-        public override uint Length
-        {
-            get { return FileSegment.Align(_length, 4); }
-        }
+        public override string Name => "#Blob";
+
+        public override uint Length => FileSegment.Align(_length, 4);
 
         /// <summary>
         /// Gets or creates a new index for the given blob signature.
@@ -42,8 +34,7 @@ namespace AsmResolver.Net.Emit
             if (signature == null)
                 return 0;
 
-            uint offset;
-            if (!_signatureOffsetMapping.TryGetValue(signature, out offset))
+            if (!_signatureOffsetMapping.TryGetValue(signature, out uint offset))
             {
                 _signatureOffsetMapping.Add(signature, offset = _length);
                 uint signatureLength = signature.GetPhysicalLength(_parentBuffer);
@@ -65,7 +56,7 @@ namespace AsmResolver.Net.Emit
                     signature.Write(_parentBuffer, writer);
                 }
 
-                writer.WriteZeroes((int)(FileSegment.Align(_length, 4) - _length));
+                writer.WriteZeroes((int) (FileSegment.Align(_length, 4) - _length));
                 return new BlobStream(new MemoryStreamReader(stream.ToArray()));
             }
         }

@@ -6,6 +6,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Emit
 {
+    /// <summary>
+    /// Represents a buffer for constructing a new table stream.
+    /// </summary>
     public class TableStreamBuffer : MetadataStreamBuffer
     {
         private sealed class MetadataRowComparer : IEqualityComparer<MetadataRow>
@@ -22,9 +25,8 @@ namespace AsmResolver.Net.Emit
         }
         
         private readonly MetadataBuffer _parentBuffer;
-
-        private readonly IDictionary<IMetadataMember, MetadataToken> _members =
-            new Dictionary<IMetadataMember, MetadataToken>();
+        
+        private readonly IDictionary<IMetadataMember, MetadataToken> _members = new Dictionary<IMetadataMember, MetadataToken>();
         
         private readonly IDictionary<TypeReference, MetadataToken> _typeRefs;
         private readonly IDictionary<TypeSpecification, MetadataToken> _typeSpecs;
@@ -57,77 +59,105 @@ namespace AsmResolver.Net.Emit
             _methodSpecs = new Dictionary<MetadataRow<uint, uint>, MetadataToken>(rowComparer);
         }
 
-        public override string Name
-        {
-            get { return "#~"; }
-        }
+        public override string Name => "#~";
 
-        public override uint Length
-        {
-            get { return 0; }
-        }
+        public override uint Length => 0;
 
+        /// <summary>
+        /// Gets a dictionary that maps members to their new metadata tokens.
+        /// </summary>
+        /// <returns></returns>
         public IDictionary<IMetadataMember, MetadataToken> GetNewTokenMapping()
         {
             return _members;
         }
         
+        /// <summary>
+        /// Asserts whether a member is imported into the metadata image.
+        /// </summary>
+        /// <param name="member">The member to assert.</param>
+        /// <exception cref="MemberNotImportedException">Occurs when the member is not imported.</exception>
         private void AssertIsImported(IMetadataMember member)
         {
             if (member.Image != _parentBuffer.Image)
                 throw new MemberNotImportedException(member);
         }
 
+        /// <summary>
+        /// Gets the index encoder used for encoding metadata tokens that correspond to the provided coded index type. 
+        /// </summary>
+        /// <param name="codedIndex">The coded index to encode.</param>
+        /// <returns>The encoder.</returns>
         public IndexEncoder GetIndexEncoder(CodedIndex codedIndex)
         {
             return _tableStream.GetIndexEncoder(codedIndex);
         }
 
+        /// <summary>
+        /// Gets the new metadata token for the provided member.
+        /// </summary>
+        /// <param name="member">The member to get the new metadata token from.</param>
+        /// <returns>The new metadata token assigned to the member.</returns>
+        /// <exception cref="MemberNotImportedException">Occurs when the member is not imported or added to the
+        /// table stream.</exception>
         public MetadataToken GetNewToken(IMetadataMember member)
         {
-            MetadataToken token;
-            if (!_members.TryGetValue(member, out token))
+            if (!_members.TryGetValue(member, out var token))
                 throw new MemberNotImportedException(member);
             return token;
         }
 
+        /// <summary>
+        /// Gets the metadata token of a type. References to types that are not added to the table stream are added
+        /// to the buffer. 
+        /// </summary>
+        /// <param name="type">The type to get the new metadata token from.</param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException"></exception>
         public MetadataToken GetTypeToken(ITypeDefOrRef type)
         {
-            var definition = type as TypeDefinition;
-            if (definition != null)
-                return GetNewToken(definition);
-
-            var reference = type as TypeReference;
-            if (reference != null)
-                return GetTypeReferenceToken(reference);
-
-            var specification = type as TypeSpecification;
-            if (specification != null)
-                return GetTypeSpecificationToken(specification);
-            
-            throw new NotSupportedException("Invalid or unsupported TypeDefOrRef reference " + type + ".");
+            switch (type)
+            {
+                case TypeDefinition definition:
+                    return GetNewToken(definition);
+                
+                case TypeReference reference:
+                    return GetTypeReferenceToken(reference);
+                
+                case TypeSpecification specification:
+                    return GetTypeSpecificationToken(specification);
+         
+                default:
+                    throw new NotSupportedException("Invalid or unsupported TypeDefOrRef reference " + type + ".");
+            }
         }
 
-        public MetadataToken GetTypeReferenceToken(TypeReference reference)
+        /// <summary>
+        /// Gets the new metadata token of a type reference. Adds the reference to the buffer if it is not added yet.
+        /// </summary>
+        /// <param name="reference">The reference to get the token for.</param>
+        /// <returns>The new metadata token assigned to the type reference.</returns>
+        private MetadataToken GetTypeReferenceToken(TypeReference reference)
         {
-            MetadataToken token;
-            if (_members.TryGetValue(reference, out token))
+            if (_members.TryGetValue(reference, out var token))
                 return token;
             
-            AssertIsImported(reference);
-            
-            var typeRefRow = new MetadataRow<uint, uint, uint>
-            {
-                Column1 = _tableStream.GetIndexEncoder(CodedIndex.ResolutionScope)
-                    .EncodeToken(GetResolutionScopeToken(reference.ResolutionScope)),
-                Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Name),
-                Column3 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Namespace),
-            };
-
             if (!_typeRefs.TryGetValue(reference, out token))
             {
+                // Type ref is not added yet, check if imported and build new metadata row.
+                AssertIsImported(reference);
+                var typeRefRow = new MetadataRow<uint, uint, uint>
+                {
+                    Column1 = _tableStream.GetIndexEncoder(CodedIndex.ResolutionScope)
+                        .EncodeToken(GetResolutionScopeToken(reference.ResolutionScope)),
+                    Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Name),
+                    Column3 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Namespace),
+                };
+                
                 var table = (TypeReferenceTable) _tableStream.GetTable(MetadataTokenType.TypeRef);
                 table.Add(typeRefRow);
+                
+                // Register tokens.
                 token = typeRefRow.MetadataToken;
                 _typeRefs.Add(reference, token);
                 _members.Add(reference, token);
@@ -138,22 +168,29 @@ namespace AsmResolver.Net.Emit
             return token;
         }
 
-        public MetadataToken GetTypeSpecificationToken(TypeSpecification specification)
+        /// <summary>
+        /// Gets the new metadata token of a type specification. Adds the specification to the buffer if it is not added yet.
+        /// </summary>
+        /// <param name="specification">The specification to get the token for.</param>
+        /// <returns>The new metadata token assigned to the type specification.</returns>
+        private MetadataToken GetTypeSpecificationToken(TypeSpecification specification)
         {
-            MetadataToken token;
-            if (_members.TryGetValue(specification, out token))
+            if (_members.TryGetValue(specification, out var token))
                 return token;
-            
-            AssertIsImported(specification);
-
-            var typeSpecRow = new MetadataRow<uint>();
-            specification.Signature.Prepare(_parentBuffer);
-            _fixups.Add(() => typeSpecRow.Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature));
 
             if (!_typeSpecs.TryGetValue(specification, out token))
             {
+                AssertIsImported(specification);
+
+                // Type spec is not added yet, check if imported and build new metadata row.
+                var typeSpecRow = new MetadataRow<uint>();
+                specification.Signature.Prepare(_parentBuffer);
+                _fixups.Add(() => typeSpecRow.Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature));
+                
                 var table = (TypeSpecificationTable) _tableStream.GetTable(MetadataTokenType.TypeSpec);
                 table.Add(typeSpecRow);
+                
+                // Register tokens.
                 token = typeSpecRow.MetadataToken;
                 _typeSpecs.Add(specification, token);
                 _members.Add(specification, token);
@@ -164,35 +201,47 @@ namespace AsmResolver.Net.Emit
             return token;
         }
 
+        /// <summary>
+        /// Gets the metadata token of a resolution scope. References to scopes that are not added to the table stream
+        /// are added to the buffer. 
+        /// </summary>
+        /// <param name="scope">The scope to get the new metadata token from.</param>
+        /// <returns>The new metadata token assigned to the scope.</returns>
+        /// <exception cref="NotSupportedException">Occurs when an unsupported resolution scope was provided.</exception>
         public MetadataToken GetResolutionScopeToken(IResolutionScope scope)
         {
-            var assemblyRef = scope as AssemblyReference;
-            if (assemblyRef != null)
-                return GetAssemblyReferenceToken(assemblyRef);
-
-            var moduleDef = scope as ModuleDefinition;
-            if (moduleDef != null)
-                return GetNewToken(moduleDef);
-
-            var moduleRef = scope as ModuleReference;
-            if (moduleRef != null)
-                return GetModuleReferenceToken(moduleRef);
-
-            var typeRef = scope as TypeReference;
-            if (typeRef != null)
-                return GetTypeReferenceToken(typeRef);
-            
-            throw new NotSupportedException("Invalid or unsupported ResolutionScope reference " + scope + ".");
+            switch (scope)
+            {
+                case AssemblyReference assemblyRef:
+                    return GetAssemblyReferenceToken(assemblyRef);
+                
+                case ModuleDefinition moduleDef:
+                    return GetNewToken(moduleDef);
+                
+                case ModuleReference moduleRef:
+                    return GetModuleReferenceToken(moduleRef);
+                
+                case TypeReference typeRef:
+                    return GetTypeReferenceToken(typeRef);
+             
+                default:
+                    throw new NotSupportedException("Invalid or unsupported ResolutionScope reference " + scope + ".");
+            }
         }
 
-        public MetadataToken GetAssemblyReferenceToken(AssemblyReference assemblyRef)
+        /// <summary>
+        /// Gets the new metadata token of a reference to an assembly.
+        /// Adds the reference to the buffer if it is not added yet.
+        /// </summary>
+        /// <param name="assemblyRef">The reference to get the token for.</param>
+        /// <returns>The new metadata token assigned to the assembly reference.</returns>
+        private MetadataToken GetAssemblyReferenceToken(AssemblyReference assemblyRef)
         {
-            MetadataToken token;
-            if (_members.TryGetValue(assemblyRef, out token))
+            if (_members.TryGetValue(assemblyRef, out var token))
                 return token;
             
             AssertIsImported(assemblyRef);
-            
+
             var assemblyRow =
                 new MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint>
                 {
@@ -202,22 +251,22 @@ namespace AsmResolver.Net.Emit
                     Column4 = (ushort) assemblyRef.Version.Revision,
                     Column5 = assemblyRef.Attributes,
                     Column7 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Name),
-                    Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Culture == "neutral" ? null : assemblyRef.Culture),
+                    Column8 = _parentBuffer.StringStreamBuffer.GetStringOffset(assemblyRef.Culture == "neutral"
+                        ? null
+                        : assemblyRef.Culture),
                 };
-
-            if (assemblyRef.PublicKey != null)
-                assemblyRef.PublicKey.Prepare(_parentBuffer);
-            if (assemblyRef.HashValue != null)
-                assemblyRef.HashValue.Prepare(_parentBuffer);
-            
-            _fixups.Add(() =>
-            {
-                assemblyRow.Column6 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.PublicKey);
-                assemblyRow.Column9 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.HashValue);
-            });
 
             if (!_assemblyRefs.TryGetValue(assemblyRow, out token))
             {
+                assemblyRef.PublicKey?.Prepare(_parentBuffer);
+                assemblyRef.HashValue?.Prepare(_parentBuffer);
+
+                _fixups.Add(() =>
+                {
+                    assemblyRow.Column6 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.PublicKey);
+                    assemblyRow.Column9 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assemblyRef.HashValue);
+                });
+                
                 var table = (AssemblyReferenceTable) _tableStream.GetTable(MetadataTokenType.AssemblyRef);
                 table.Add(assemblyRow);
                 token = assemblyRow.MetadataToken;
@@ -232,43 +281,59 @@ namespace AsmResolver.Net.Emit
             return token;
         }
 
+        /// <summary>
+        /// Gets the metadata token of a method. References to methods that are not added to the table stream
+        /// are added to the buffer. 
+        /// </summary>
+        /// <param name="method">The method to get the new metadata token from.</param>
+        /// <returns>The new metadata token assigned to the method.</returns>
+        /// <exception cref="NotSupportedException">Occurs when an unsupported method was provided.</exception>
         public MetadataToken GetMethodToken(IMethodDefOrRef method)
         {
-            var definition = method as MethodDefinition;
-            if (definition != null)
-                return GetNewToken(definition);
-
-            var reference = method as MemberReference;
-            if (reference != null)
-                return GetMemberReferenceToken(reference);
-            
-            throw new NotSupportedException("Invalid or unsupported MethodDefOrRef reference + " + method + ".");
+            switch (method)
+            {
+                case MethodDefinition definition:
+                    return GetNewToken(definition);
+                
+                case MemberReference reference:
+                    return GetMemberReferenceToken(reference);
+                
+                default:
+                    throw new NotSupportedException($"Invalid or unsupported MethodDefOrRef reference + {method}.");
+            }
         }
 
+        /// <summary>
+        /// Gets the metadata token of a reference to an external member. References that are not added to the table
+        /// stream are added to the buffer.
+        /// </summary>
+        /// <param name="reference">The reference to get the new metadata token from.</param>
+        /// <returns>The new metadata token assigned to the reference.</returns>
         public MetadataToken GetMemberReferenceToken(MemberReference reference)
         {
-            MetadataToken token;
-            if (_members.TryGetValue(reference, out token))
+            if (_members.TryGetValue(reference, out var token))
                 return token;
-            
-            AssertIsImported(reference);
-
-            var memberRow = new MetadataRow<uint, uint, uint>
-            {
-                Column1 = _tableStream.GetIndexEncoder(CodedIndex.MemberRefParent).EncodeToken(GetMemberRefParentToken(reference.Parent)),
-                Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Name),
-                
-            };
-
-            GetTypeToken(reference.DeclaringType);
-            
-            reference.Signature.Prepare(_parentBuffer);
-            _fixups.Add(() => memberRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(reference.Signature));
 
             if (!_memberRefs.TryGetValue(reference, out token))
             {
+                // Reference is not added yet. Check if imported and build row.
+                AssertIsImported(reference);
+                var memberRow = new MetadataRow<uint, uint, uint>
+                {
+                    Column1 = _tableStream.GetIndexEncoder(CodedIndex.MemberRefParent).EncodeToken(GetMemberRefParentToken(reference.Parent)),
+                    Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Name),
+                };
+
+                // Ensure declaring type is added as well.
+                GetTypeToken(reference.DeclaringType);
+            
+                reference.Signature.Prepare(_parentBuffer);
+                _fixups.Add(() => memberRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(reference.Signature));
+                
                 var table = (MemberReferenceTable) _tableStream.GetTable(MetadataTokenType.MemberRef);
                 table.Add(memberRow);
+                
+                // Register tokens.
                 token = memberRow.MetadataToken;
                 _memberRefs.Add(reference, token);
                 _members.Add(reference, token);
@@ -279,29 +344,41 @@ namespace AsmResolver.Net.Emit
             return token;
         }
 
+        /// <summary>
+        /// Gets the metadata token of a parent of a member reference. Parents that are not added to the table
+        /// stream are added to the buffer.
+        /// </summary>
+        /// <param name="parent">The parent to get the new metadata token from.</param>
+        /// <returns>The new metadata token assigned to the parent.</returns>
         public MetadataToken GetMemberRefParentToken(IMemberRefParent parent)
         {
             AssertIsImported(parent);
-            
-            var type = parent as ITypeDefOrRef;
-            if (type != null)
-                return GetTypeToken(type);
 
-            var method = parent as MethodDefinition;
-            if (method != null)
-                return GetNewToken(method);
-
-            var reference = parent as ModuleReference;
-            if (reference != null)
-                return GetModuleReferenceToken(reference);
-            
-            throw new NotSupportedException("Invalid or unsupported MemberRefParent reference " + parent + ".");
+            switch (parent)
+            {
+                case ITypeDefOrRef type:
+                    return GetTypeToken(type);
+                
+                case MethodDefinition method:
+                    return GetNewToken(method);
+                
+                case ModuleReference reference:
+                    return GetModuleReferenceToken(reference);
+                
+                default:
+                    throw new NotSupportedException($"Invalid or unsupported MemberRefParent reference {parent}.");
+            }
         }
 
-        public MetadataToken GetModuleReferenceToken(ModuleReference reference)
+        /// <summary>
+        /// Gets the metadata token of a reference to an external module. References that are not added to the table
+        /// stream are added to the buffer.
+        /// </summary>
+        /// <param name="reference">The reference to get the new metadata token from.</param>
+        /// <returns>The new metadata token assigned to the reference.</returns>
+        private MetadataToken GetModuleReferenceToken(ModuleReference reference)
         {
-            MetadataToken token;
-            if (_members.TryGetValue(reference, out token))
+            if (_members.TryGetValue(reference, out var token))
                 return token;
             
             AssertIsImported(reference);
@@ -331,10 +408,15 @@ namespace AsmResolver.Net.Emit
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets the metadata token of a method specification. Specifications that are not added to the table
+        /// stream are added to the buffer.
+        /// </summary>
+        /// <param name="specification">The specification to get the new metadata token from.</param>
+        /// <returns>The new metadata token assigned to the specification.</returns>
         public MetadataToken GetMethodSpecificationToken(MethodSpecification specification)
         {
-            MetadataToken token;
-            if (_members.TryGetValue(specification, out token))
+            if (_members.TryGetValue(specification, out var token))
                 return token;
 
             AssertIsImported(specification);
@@ -345,12 +427,12 @@ namespace AsmResolver.Net.Emit
                     .EncodeToken(GetMethodToken(specification.Method))
             };
 
-            specification.Signature.Prepare(_parentBuffer);
-            _fixups.Add(() =>
-                specificationRow.Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature));
-
             if (!_methodSpecs.TryGetValue(specificationRow, out token))
             {
+                specification.Signature.Prepare(_parentBuffer);
+                _fixups.Add(() =>
+                    specificationRow.Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(specification.Signature));
+                
                 var table = (MethodSpecificationTable) _tableStream.GetTable(MetadataTokenType.MethodSpec);
                 table.Add(specificationRow);
                 token = specificationRow.MetadataToken;
@@ -361,6 +443,10 @@ namespace AsmResolver.Net.Emit
             return token;
         }
         
+        /// <summary>
+        /// Adds an entire assembly and all its components to the table stream buffer.
+        /// </summary>
+        /// <param name="assembly">The assembly to add.</param>
         public void AddAssembly(AssemblyDefinition assembly)
         {
             var assemblyTable = (AssemblyDefinitionTable)_tableStream.GetTable(MetadataTokenType.Assembly);
@@ -378,8 +464,7 @@ namespace AsmResolver.Net.Emit
                 Column9 = _parentBuffer.StringStreamBuffer.GetStringOffset(assembly.Culture == "neutral" ? null : assembly.Culture)
             };
 
-            if (assembly.PublicKey != null)
-                assembly.PublicKey.Prepare(_parentBuffer);
+            assembly.PublicKey?.Prepare(_parentBuffer);
             _fixups.Add(() => 
                 assemblyRow.Column7 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assembly.PublicKey));
             
@@ -399,6 +484,10 @@ namespace AsmResolver.Net.Emit
             // TODO: add files, os and processors
         }
 
+        /// <summary>
+        /// Adds an entire module definition and all its components to the table stream buffer.
+        /// </summary>
+        /// <param name="module">The module to add.</param>
         private void AddModule(ModuleDefinition module)
         {
             var moduleTable = (ModuleDefinitionTable) _tableStream.GetTable(MetadataTokenType.Module);
@@ -420,6 +509,10 @@ namespace AsmResolver.Net.Emit
             AddCustomAttributes(module);
         }
 
+        /// <summary>
+        /// Adds a collection of types and all its members to the table stream buffer.
+        /// </summary>
+        /// <param name="types"></param>
         private void AddTypes(IList<TypeDefinition> types)
         {
             var typeTable = (TypeDefinitionTable) _tableStream.GetTable(MetadataTokenType.TypeDef);
@@ -432,7 +525,7 @@ namespace AsmResolver.Net.Emit
 
             foreach (var type in types)
             {
-                AddDummyType(typeTable, fieldTable, methodTable, type);
+                AddTypeStub(typeTable, fieldTable, methodTable, type);
                 typeRows.Add(typeTable[typeTable.Count - 1]);
             }
 
@@ -441,7 +534,15 @@ namespace AsmResolver.Net.Emit
                 FinalizeTypeRow(types[i], typeRows[i], fieldTable, methodTable);
         }
 
-        private void AddDummyType(TypeDefinitionTable typeTable, FieldDefinitionTable fieldTable, MethodDefinitionTable methodTable, TypeDefinition type)
+        /// <summary>
+        /// Adds a stub metadata row for the provided type, as well as stub rows for the fields and methods defined in
+        /// the type to the table buffer stream.
+        /// </summary>
+        /// <param name="typeTable">The table containing the type definition rows to add the type to.</param>
+        /// <param name="fieldTable">The table containing the field definitions.</param>
+        /// <param name="methodTable">The table containing the method definitions.</param>
+        /// <param name="type">The type to add.</param>
+        private void AddTypeStub(TypeDefinitionTable typeTable, FieldDefinitionTable fieldTable, MethodDefinitionTable methodTable, TypeDefinition type)
         {
             // Add dummy type.
             var typeRow = new MetadataRow<TypeAttributes, uint, uint, uint, uint, uint>
@@ -449,7 +550,7 @@ namespace AsmResolver.Net.Emit
                 Column1 = type.Attributes,
                 Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(type.Name),
                 Column3 = _parentBuffer.StringStreamBuffer.GetStringOffset(type.Namespace),
-                Column4 = 0, // BaseType
+                Column4 = 0, // BaseType, updated later.
                 Column5 = _fieldList,
                 Column6 = _methodList
             };
@@ -458,38 +559,48 @@ namespace AsmResolver.Net.Emit
 
             // Add dummy fields.
             foreach (var field in type.Fields)
-                AddDummyField(fieldTable, field);
+                AddFieldStub(fieldTable, field);
 
             _fieldList += (uint) type.Fields.Count;
 
             // Add dummy methods.
             foreach (var method in type.Methods)
-                AddDummyMethod(methodTable, method);
+                AddMethodStub(methodTable, method);
 
             _methodList += (uint) type.Methods.Count;
         }
 
-        private void AddDummyField(FieldDefinitionTable fieldTable, FieldDefinition field)
+        /// <summary>
+        /// Adds a stub metadata row for the provided field to the table stream buffer.
+        /// </summary>
+        /// <param name="fieldTable">The field table to add the metadata row to.</param>
+        /// <param name="field">The field to add.</param>
+        private void AddFieldStub(FieldDefinitionTable fieldTable, FieldDefinition field)
         {
             var fieldRow = new MetadataRow<FieldAttributes, uint, uint>
             {
                 Column1 = field.Attributes,
                 Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(field.Name),
-                Column3 = 0 // Signature.
+                Column3 = 0 // Signature, updated later.
             };
             fieldTable.Add(fieldRow);
             _members.Add(field, fieldRow.MetadataToken);
         }
 
-        private void AddDummyMethod(MethodDefinitionTable methodTable, MethodDefinition method)
+        /// <summary>
+        /// Adds a stub metadata row for the provided method to the table stream buffer.
+        /// </summary>
+        /// <param name="methodTable">The method table to add the metadata row to.</param>
+        /// <param name="method">The method to add.</param>
+        private void AddMethodStub(MethodDefinitionTable methodTable, MethodDefinition method)
         {
             var methodRow = new MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>
             {
-                Column1 = null, // Body
+                Column1 = null, // Body, updated later.
                 Column2 = method.ImplAttributes,
                 Column3 = method.Attributes,
                 Column4 = _parentBuffer.StringStreamBuffer.GetStringOffset(method.Name),
-                Column5 = 0, // Signature
+                Column5 = 0, // Signature, updated later.
                 Column6 = _paramList
             };
             methodTable.Add(methodRow);
@@ -497,6 +608,14 @@ namespace AsmResolver.Net.Emit
             _paramList += (uint) method.Parameters.Count;
         }
 
+        /// <summary>
+        /// Finalizes a metadata row stub of a type definition, as well as all the metadata row stubs of the members
+        /// defined by the type definition. 
+        /// </summary>
+        /// <param name="type">The type definition to finalize.</param>
+        /// <param name="typeRow">The metadata row stub of the type definition referenced by <paramref name="type"/>.</param>
+        /// <param name="fieldTable">The table containing all fields defined by the assembly.</param>
+        /// <param name="methodTable">The table containing all methods defined by the assembly.</param>
         private void FinalizeTypeRow(TypeDefinition type, MetadataRow<TypeAttributes, uint, uint, uint, uint, uint> typeRow, FieldDefinitionTable fieldTable,
             MethodDefinitionTable methodTable)
         {
@@ -550,11 +669,15 @@ namespace AsmResolver.Net.Emit
             AddSecurityDeclarations(type);
         }
 
+        /// <summary>
+        /// Finalizes a field metadata row stub.
+        /// </summary>
+        /// <param name="field">The field to finalize.</param>
+        /// <param name="fieldRow">The metadata row stub associated to the field definition referenced by <paramref name="field"/>.</param>
         private void FinalizeFieldRow(FieldDefinition field, MetadataRow<FieldAttributes, uint, uint> fieldRow)
         {
             // Update final column.
-            if (field.Signature != null)
-                field.Signature.Prepare(_parentBuffer);
+            field.Signature?.Prepare(_parentBuffer);
             _fixups.Add(() => fieldRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(field.Signature));
 
             // Add optional extensions to field.
@@ -576,6 +699,11 @@ namespace AsmResolver.Net.Emit
             AddCustomAttributes(field);
         }
 
+        /// <summary>
+        /// Finalizes a method metadata row stub.
+        /// </summary>
+        /// <param name="method">The method to finalize.</param>
+        /// <param name="methodRow">The metadata row stub associated to the method definition referenced by <paramref name="method"/>.</param>
         private void FinalizeMethodRow(MethodDefinition method,
             MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> methodRow)
         {
@@ -583,8 +711,7 @@ namespace AsmResolver.Net.Emit
             if (method.MethodBody != null)
                 methodRow.Column1 = method.MethodBody.CreateRawMethodBody(_parentBuffer);
 
-            if (method.Signature != null)
-                method.Signature.Prepare(_parentBuffer);
+            method.Signature?.Prepare(_parentBuffer);
             _fixups.Add(() => methodRow.Column5 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(method.Signature));
 
             // Add parameters.
@@ -600,6 +727,10 @@ namespace AsmResolver.Net.Emit
             AddSecurityDeclarations(method);
         }
 
+        /// <summary>
+        /// Adds a field layout metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="fieldLayout">The field layout to add.</param>
         private void AddFieldLayout(FieldLayout fieldLayout)
         {
             var table = (FieldLayoutTable) _tableStream.GetTable(MetadataTokenType.FieldLayout);
@@ -614,6 +745,13 @@ namespace AsmResolver.Net.Emit
             _members.Add(fieldLayout, layoutRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds a field marshal metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="fieldMarshal">The field marshal to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata row of the field in the provided field marshal is already added to the buffer.
+        /// </remarks>
         private void AddFieldMarshal(FieldMarshal fieldMarshal)
         {
             var table = (FieldMarshalTable) _tableStream.GetTable(MetadataTokenType.FieldMarshal);
@@ -624,8 +762,7 @@ namespace AsmResolver.Net.Emit
                 Column1 = _tableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal).EncodeToken(GetNewToken(fieldMarshal.Parent)),
             };
 
-            if (fieldMarshal.MarshalDescriptor != null)
-                fieldMarshal.MarshalDescriptor.Prepare(_parentBuffer);
+            fieldMarshal.MarshalDescriptor?.Prepare(_parentBuffer);
             _fixups.Add(() =>
                 marshalRow.Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(fieldMarshal.MarshalDescriptor));
             
@@ -633,6 +770,13 @@ namespace AsmResolver.Net.Emit
             _members.Add(fieldMarshal, marshalRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds a field RVA metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="fieldRva"></param>
+        /// <remarks>
+        /// This method assumes the metadata row of the field in the provided field RVA is already added to the buffer.
+        /// </remarks>
         private void AddFieldRva(FieldRva fieldRva)
         {
             var table = (FieldRvaTable) _tableStream.GetTable(MetadataTokenType.FieldRva);
@@ -647,6 +791,14 @@ namespace AsmResolver.Net.Emit
             _members.Add(fieldRva, rvaRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds an implementation mapping metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="implementationMap">The mapping to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata rows of the method and the module in the provided map is already added to
+        /// the buffer.
+        /// </remarks>
         private void AddImplementationMap(ImplementationMap implementationMap)
         {
             var table = (ImplementationMapTable) _tableStream.GetTable(MetadataTokenType.ImplMap);
@@ -664,6 +816,10 @@ namespace AsmResolver.Net.Emit
             _members.Add(implementationMap, mapRow.MetadataToken);   
         }
 
+        /// <summary>
+        /// Adds a parameter metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="parameter">The parameter to add.</param>
         private void AddParameter(ParameterDefinition parameter)
         {
             var table = (ParameterDefinitionTable) _tableStream.GetTable(MetadataTokenType.Param);
@@ -685,6 +841,13 @@ namespace AsmResolver.Net.Emit
             AddCustomAttributes(parameter);
         }
 
+        /// <summary>
+        /// Adds an interface implementation to the table stream buffer.
+        /// </summary>
+        /// <param name="interface">The interface to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata rows of the referenced type definitions are already added.
+        /// </remarks>
         private void AddInterface(InterfaceImplementation @interface)
         {
             var table = (InterfaceImplementationTable) _tableStream.GetTable(MetadataTokenType.InterfaceImpl);
@@ -701,6 +864,13 @@ namespace AsmResolver.Net.Emit
             AddCustomAttributes(@interface);
         }
 
+        /// <summary>
+        /// Adds a method implementation metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="implementation">The implementation to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata rows of the referenced type definitions are already added.
+        /// </remarks>
         private void AddImplementation(MethodImplementation implementation)
         {
             var table = (MethodImplementationTable) _tableStream.GetTable(MetadataTokenType.MethodImpl);
@@ -717,6 +887,13 @@ namespace AsmResolver.Net.Emit
             _members.Add(implementation, implementationRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds a class layout metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="classLayout">The class layout to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata rows of the referenced type definitions are already added.
+        /// </remarks>
         private void AddClassLayout(ClassLayout classLayout)
         {
             var table = (ClassLayoutTable) _tableStream.GetTable(MetadataTokenType.ClassLayout);
@@ -732,6 +909,13 @@ namespace AsmResolver.Net.Emit
             _members.Add(classLayout, layoutRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds a property map metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="propertyMap">The property map to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata row of the parent type is already added.
+        /// </remarks>
         private void AddPropertyMap(PropertyMap propertyMap)
         {
             var table = (PropertyMapTable) _tableStream.GetTable(MetadataTokenType.PropertyMap);
@@ -753,6 +937,13 @@ namespace AsmResolver.Net.Emit
                 AddProperty(property);
         }
 
+        /// <summary>
+        /// Adds a property metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="property">The property to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata row of the parent property map is already added.
+        /// </remarks>
         private void AddProperty(PropertyDefinition property)
         {
             var table = (PropertyDefinitionTable) _tableStream.GetTable(MetadataTokenType.Property);
@@ -781,6 +972,13 @@ namespace AsmResolver.Net.Emit
             AddCustomAttributes(property);
         }
 
+        /// <summary>
+        /// Adds a event map metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="eventMap">The event map to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata rows of the parent property map and semantic methods are already added.
+        /// </remarks>
         private void AddEventMap(EventMap eventMap)
         {
             var table = (EventMapTable) _tableStream.GetTable(MetadataTokenType.EventMap);
@@ -798,6 +996,13 @@ namespace AsmResolver.Net.Emit
                 AddEvent(@event);
         }
 
+        /// <summary>
+        /// Adds a event metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="event">The event to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata rows of the parent property map and semantic methods are already added.
+        /// </remarks>
         private void AddEvent(EventDefinition @event)
         {
             var table = (EventDefinitionTable) _tableStream.GetTable(MetadataTokenType.Event);
@@ -819,6 +1024,13 @@ namespace AsmResolver.Net.Emit
             AddCustomAttributes(@event);
         }
 
+        /// <summary>
+        /// Adds a method semantics metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="semantics">The semantics to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata rows of the owner and method are already added.
+        /// </remarks>
         private void AddSemantics(MethodSemantics semantics)
         {
             var table = (MethodSemanticsTable) _tableStream.GetTable(MetadataTokenType.MethodSemantics);
@@ -835,6 +1047,13 @@ namespace AsmResolver.Net.Emit
             _members.Add(semantics, semanticsRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds a constant metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="constant">The constant to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata row of the field is already added.
+        /// </remarks>
         private void AddConstant(Constant constant)
         {
             var table = (ConstantTable) _tableStream.GetTable(MetadataTokenType.Constant);
@@ -847,8 +1066,7 @@ namespace AsmResolver.Net.Emit
                     .EncodeToken(GetNewToken(constant.Parent)),
             };
 
-            if (constant.Value != null)
-                constant.Value.Prepare(_parentBuffer);
+            constant.Value?.Prepare(_parentBuffer);
 
             _fixups.Add(() => constantRow.Column4 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(constant.Value));
                 
@@ -856,6 +1074,13 @@ namespace AsmResolver.Net.Emit
             _members.Add(constant, constantRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds a nested class metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="nestedClass">The nested class to add.</param>
+        /// <remarks>
+        /// This method assumes the metadata rows of the type definitions are already added.
+        /// </remarks>
         private void AddNestedClass(NestedClass nestedClass)
         {
             var table = (NestedClassTable) _tableStream.GetTable(MetadataTokenType.NestedClass);
@@ -868,12 +1093,20 @@ namespace AsmResolver.Net.Emit
             _members.Add(nestedClass, classRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds a collection of generic parameters to the table stream buffer.
+        /// </summary>
+        /// <param name="provider">The member containing the parameters to add.</param>
         private void AddGenericParmeters(IGenericParameterProvider provider)
         {
             foreach (var parameter in provider.GenericParameters)
                 AddGenericParmeter(parameter);
         }
 
+        /// <summary>
+        /// Adds a generic parameter metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="parameter">The parameter to add.</param>
         private void AddGenericParmeter(GenericParameter parameter)
         {
             var table = (GenericParameterTable) _tableStream.GetTable(MetadataTokenType.GenericParam);
@@ -894,6 +1127,13 @@ namespace AsmResolver.Net.Emit
                 AddGenericParameterConstraint(constraint);
         }
 
+        /// <summary>
+        /// Adds a generic parameter constraint metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="constraint">The parameter constraint to add.</param>
+        /// <remarks>
+        /// This method assumes the generic parameter is already added.
+        /// </remarks>
         private void AddGenericParameterConstraint(GenericParameterConstraint constraint)
         {
             var table = (GenericParameterConstraintTable) _tableStream.GetTable(MetadataTokenType.GenericParamConstraint);
@@ -909,6 +1149,10 @@ namespace AsmResolver.Net.Emit
             _members.Add(constraint, constraintRow.MetadataToken);
         }
 
+        /// <summary>
+        /// Adds a manifest resource metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="resource">The resource to add.</param>
         private void AddManifestResource(ManifestResource resource)
         {
             var table = (ManifestResourceTable) _tableStream.GetTable(MetadataTokenType.ManifestResource);
@@ -928,20 +1172,24 @@ namespace AsmResolver.Net.Emit
             AddCustomAttributes(resource);
         }
 
+        /// <summary>
+        /// Gets the new metadata token of a standalone signature. Signatures that are not added to the table stream
+        /// will be added to the buffer.
+        /// </summary>
+        /// <param name="signature">The signature to get the token for.</param>
+        /// <returns>The new metadata token assigned to the signature.</returns>
         public MetadataToken GetStandaloneSignatureToken(StandAloneSignature signature)
         {
             if (signature == null)
                 return MetadataToken.Zero;
 
-            MetadataToken token;
-            if (_members.TryGetValue(signature, out token))
+            if (_members.TryGetValue(signature, out var token))
                 return token;
             
             var table = (StandAloneSignatureTable) _tableStream.GetTable(MetadataTokenType.StandAloneSig);
             var signatureRow = new MetadataRow<uint>();
 
-            if (signature.Signature != null)
-                signature.Signature.Prepare(_parentBuffer);
+            signature.Signature?.Prepare(_parentBuffer);
             _fixups.Add(() => signatureRow.Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(signature.Signature));
             
             table.Add(signatureRow);
@@ -952,40 +1200,20 @@ namespace AsmResolver.Net.Emit
             return token;
         }
         
+        /// <summary>
+        /// Adds a collection of custom attribute metadata rows to the table stream buffer.
+        /// </summary>
+        /// <param name="provider">The member containing the custom attributes to add.</param>
         private void AddCustomAttributes(IHasCustomAttribute provider)
         {
             foreach (var attribute in provider.CustomAttributes)
                 AddCustomAttribute(attribute);
         }
 
-        private void AddSecurityDeclarations(IHasSecurityAttribute provider)
-        {
-            foreach (var attribute in provider.SecurityDeclarations)
-                AddSecurityDeclaration(attribute);
-        }
-
-        private void AddSecurityDeclaration(SecurityDeclaration declaration)
-        {
-            var table = (SecurityDeclarationTable) _tableStream.GetTable(MetadataTokenType.DeclSecurity);
-            
-            // Create and add row.
-            var declarationRow = new MetadataRow<SecurityAction, uint, uint>
-            {
-                Column1 = declaration.Action,
-                Column2 = _tableStream.GetIndexEncoder(CodedIndex.HasDeclSecurity).EncodeToken(GetNewToken(declaration.Parent)),
-            };
-
-            if (declaration.PermissionSet != null)
-                declaration.PermissionSet.Prepare(_parentBuffer);
-            _fixups.Add(() => 
-                declarationRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(declaration.PermissionSet));
-            
-            table.Add(declarationRow);
-            _members.Add(declaration, declarationRow.MetadataToken);
-            
-            AddCustomAttributes(declaration);
-        }
-
+        /// <summary>
+        /// Adds a custom attribute metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="attribute">The attribute to add.</param>
         private void AddCustomAttribute(CustomAttribute attribute)
         {
             var table = (CustomAttributeTable) _tableStream.GetTable(MetadataTokenType.CustomAttribute);
@@ -997,14 +1225,49 @@ namespace AsmResolver.Net.Emit
                 Column2 = _tableStream.GetIndexEncoder(CodedIndex.CustomAttributeType).EncodeToken(GetMethodToken(attribute.Constructor)),
             };
 
-            if (attribute.Signature != null)
-                attribute.Signature.Prepare(_parentBuffer);
+            attribute.Signature?.Prepare(_parentBuffer);
             _fixups.Add(() => attributeRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(attribute.Signature));
             
             table.Add(attributeRow);
             _members.Add(attribute, attributeRow.MetadataToken);
         }
 
+
+        /// <summary>
+        /// Adds a collection of security attribute metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="provider">The member containing the security attributes to add.</param>
+        private void AddSecurityDeclarations(IHasSecurityAttribute provider)
+        {
+            foreach (var attribute in provider.SecurityDeclarations)
+                AddSecurityDeclaration(attribute);
+        }
+
+        /// <summary>
+        /// Adds a security attribute metadata row to the table stream buffer.
+        /// </summary>
+        /// <param name="declaration">The attribute to add.</param>
+        private void AddSecurityDeclaration(SecurityDeclaration declaration)
+        {
+            var table = (SecurityDeclarationTable) _tableStream.GetTable(MetadataTokenType.DeclSecurity);
+            
+            // Create and add row.
+            var declarationRow = new MetadataRow<SecurityAction, uint, uint>
+            {
+                Column1 = declaration.Action,
+                Column2 = _tableStream.GetIndexEncoder(CodedIndex.HasDeclSecurity).EncodeToken(GetNewToken(declaration.Parent)),
+            };
+
+            declaration.PermissionSet?.Prepare(_parentBuffer);
+            _fixups.Add(() => 
+                declarationRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(declaration.PermissionSet));
+            
+            table.Add(declarationRow);
+            _members.Add(declaration, declarationRow.MetadataToken);
+            
+            AddCustomAttributes(declaration);
+        }
+        
         public override MetadataStream CreateStream()
         {
             foreach (var fixup in _fixups)

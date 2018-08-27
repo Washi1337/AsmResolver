@@ -15,9 +15,7 @@ namespace AsmResolver.Net.Emit
 
         public GuidStreamBuffer(MetadataBuffer parentBuffer)
         {
-            if (parentBuffer == null) 
-                throw new ArgumentNullException("parentBuffer");
-            _parentBuffer = parentBuffer;
+            _parentBuffer = parentBuffer ?? throw new ArgumentNullException(nameof(parentBuffer));
         }
 
         public override string Name
@@ -40,8 +38,7 @@ namespace AsmResolver.Net.Emit
             if (guid == default(Guid))
                 return 0;
 
-            uint offset;
-            if (!_guidOffsetMapping.TryGetValue(guid, out offset))
+            if (!_guidOffsetMapping.TryGetValue(guid, out uint offset))
             {
                 _guidOffsetMapping.Add(guid, offset = _length + 1);
                 _length += 16;
