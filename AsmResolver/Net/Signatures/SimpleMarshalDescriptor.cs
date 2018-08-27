@@ -16,14 +16,19 @@ namespace AsmResolver.Net.Signatures
             get { return _nativeType; }
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return sizeof (byte);
+            return sizeof(byte) + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)NativeType);
+            base.Write(buffer, writer);
         }
     }
 }

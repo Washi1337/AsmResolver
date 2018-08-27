@@ -56,12 +56,18 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return sizeof (byte) +
-                   ArgumentType.GetPhysicalLength() +
+                   ArgumentType.GetPhysicalLength(buffer) +
                    (MemberName == null ? sizeof (byte) : MemberName.GetSerStringSize()) +
-                   Argument.GetPhysicalLength();
+                   Argument.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            ArgumentType.Prepare(buffer);
+            Argument.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -71,11 +77,5 @@ namespace AsmResolver.Net.Signatures
             writer.WriteSerString(MemberName);
             Argument.Write(buffer, writer);
         }
-    }
-
-    public enum CustomAttributeArgumentMemberType
-    {
-        Field = 0x53,
-        Property = 0x54,
     }
 }

@@ -54,7 +54,7 @@ namespace AsmResolver.Net.Cts
             
             IBinaryStreamReader blobReader;
             if (blobStream.TryCreateBlobReader(row.Column5, out blobReader))
-                _signature = new LazyValue<MethodSignature>(() => MethodSignature.FromReader(image, blobReader));
+                _signature = new LazyValue<MethodSignature>(() => MethodSignature.FromReader(image, blobReader, true));
 
             _methodBody = new LazyValue<MethodBody>(() =>
             {

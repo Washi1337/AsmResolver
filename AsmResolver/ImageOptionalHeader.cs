@@ -83,7 +83,6 @@ namespace AsmResolver
         
         public ImageOptionalHeader()
         {
-            // TODO: set default values.
             DataDirectories = new List<ImageDataDirectory>();
         }
         
@@ -369,7 +368,6 @@ namespace AsmResolver
         public override uint GetPhysicalLength()
         {
             return 0xE0; // TODO: make dynamic
-            throw new NotImplementedException();
             return (uint)(sizeof (ushort) +
                           2 * sizeof (byte) +
                           5 * sizeof (uint) +

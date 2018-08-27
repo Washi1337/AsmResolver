@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.Net.Emit;
 
 namespace AsmResolver.Net.Cil
 {

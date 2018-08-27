@@ -5,7 +5,7 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class SecurityAttributeSignature : BlobSignature
+    public class SecurityAttributeSignature : ExtendableBlobSignature
     {
         public static SecurityAttributeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
@@ -46,15 +46,22 @@ namespace AsmResolver.Net.Signatures
             private set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            uint argumentsSize = (uint)NamedArguments.Sum(x => x.GetPhysicalLength());
-            return (uint)(TypeName.GetSerStringSize() +
-                          (NamedArguments.Count == 0
-                              ? 2 * sizeof (byte)
-                              : NamedArguments.Count.GetCompressedSize() +
-                                argumentsSize.GetCompressedSize() +
-                                argumentsSize));
+            uint argumentsSize = (uint)NamedArguments.Sum(x => x.GetPhysicalLength(buffer));
+            return TypeName.GetSerStringSize() +
+                   (NamedArguments.Count == 0
+                       ? 2 * sizeof(byte)
+                       : NamedArguments.Count.GetCompressedSize() +
+                         argumentsSize.GetCompressedSize() +
+                         argumentsSize)
+                   + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            foreach (var argument in NamedArguments)
+                argument.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -69,13 +76,15 @@ namespace AsmResolver.Net.Signatures
             else
             {
                 writer.WriteCompressedUInt32(
-                    (uint)(NamedArguments.Count.GetCompressedSize() + NamedArguments.Sum(x => x.GetPhysicalLength())));
+                    (uint)(NamedArguments.Count.GetCompressedSize() + NamedArguments.Sum(x => x.GetPhysicalLength(buffer))));
                 writer.WriteCompressedUInt32((uint)NamedArguments.Count);
                 foreach (var argument in NamedArguments)
                 {
                     argument.Write(buffer, writer);
                 }
             }
+
+            base.Write(buffer, writer);
         }
     }
 }

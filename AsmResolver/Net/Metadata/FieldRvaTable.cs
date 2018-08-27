@@ -91,9 +91,6 @@ namespace AsmResolver.Net.Metadata
                     }
 
                     return 0;
-                case ElementType.I:
-                case ElementType.U:
-                // TODO;
                 default:
                     return 0;
             }

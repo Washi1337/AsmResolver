@@ -4,7 +4,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class ArrayMarshalDescriptor : MarshalDescriptor
     {
-        public new static ArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static ArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var descriptor = new ArrayMarshalDescriptor((NativeType) reader.ReadByte());
 
@@ -15,6 +15,7 @@ namespace AsmResolver.Net.Signatures
             if (!reader.TryReadCompressedUInt32(out value))
                 return descriptor;
             descriptor.NumberOfElements = (int)value;
+            
             return descriptor;
         }
 
@@ -46,13 +47,18 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return 2 * sizeof (byte) +
                    (ParameterIndex.HasValue
                        ? ParameterIndex.Value.GetCompressedSize() +
                          (NumberOfElements.HasValue ? NumberOfElements.Value.GetCompressedSize() : 0)
-                       : 0);
+                       : 0)
+                + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -65,6 +71,8 @@ namespace AsmResolver.Net.Signatures
                 if (NumberOfElements.HasValue)
                     writer.WriteCompressedUInt32((uint)NumberOfElements.Value);
             }
+
+            base.Write(buffer, writer);
         }
     }
 }

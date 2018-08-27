@@ -4,7 +4,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class SafeArrayMarshalDescriptor : MarshalDescriptor
     {
-        public new static SafeArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static SafeArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var descriptor = new SafeArrayMarshalDescriptor();
 
@@ -25,15 +25,22 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return 2 * sizeof (byte);
+            return 2 * sizeof (byte)
+                + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)NativeType);
             writer.WriteByte((byte)ElementType);
+
+            base.Write(buffer, writer);
         }
     }
 }

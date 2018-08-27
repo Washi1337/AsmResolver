@@ -35,7 +35,7 @@ namespace AsmResolver.Tests.Net.Cts
 
             image = header.LockMetadata();
             customAttribute = (CustomAttribute) image.ResolveMember(mapping[customAttribute]); 
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Same(customAttribute.Parent, image.Assembly);
         }
         
@@ -58,7 +58,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
 
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Equal(customAttribute.Constructor, image.Assembly.CustomAttributes[0].Constructor, _comparer);
         }
         
@@ -81,7 +81,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
 
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Null(image.Assembly.CustomAttributes[0].Signature.FixedArguments[0].Elements[0].Value);
         }
         
@@ -107,7 +107,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
 
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Equal(argument, image.Assembly.CustomAttributes[0].Signature.FixedArguments[0].Elements[0].Value);
         }
         
@@ -135,7 +135,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
             
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Equal(argument, image.Assembly.CustomAttributes[0].Signature.FixedArguments[0].Elements[0].Value as ITypeDescriptor, _comparer);
         }
         
@@ -163,7 +163,7 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
             
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             Assert.Equal(argument, image.Assembly.CustomAttributes[0].Signature.FixedArguments[0].Elements[0].Value);
         }
 
@@ -189,12 +189,35 @@ namespace AsmResolver.Tests.Net.Cts
             header.UnlockMetadata();
             
             image = header.LockMetadata();
-            Assert.Equal(1, image.Assembly.CustomAttributes.Count);
+            Assert.Single(image.Assembly.CustomAttributes);
             var newArg = image.Assembly.CustomAttributes[0].Signature.NamedArguments[0];
             Assert.Equal(namedArg.MemberName, newArg.MemberName);
             Assert.Equal(namedArg.ArgumentMemberType, newArg.ArgumentMemberType);
             Assert.Equal(namedArg.Argument.ArgumentType, newArg.Argument.ArgumentType, _comparer);
             Assert.Equal(namedArg.Argument.Elements[0].Value, newArg.Argument.Elements[0].Value);
+        }
+
+        [Fact]
+        public void PersistentExtraData()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var extraData = new byte[] {1, 2, 3, 4};
+            
+            var customAttribute = new CustomAttribute(
+                (ICustomAttributeType) importer.ImportMethod(
+                    typeof(ObfuscationAttribute).GetConstructor(Type.EmptyTypes)),
+                new CustomAttributeSignature {ExtraData = extraData});
+            
+            image.Assembly.CustomAttributes.Add(customAttribute);
+
+            header.UnlockMetadata();
+            
+            image = header.LockMetadata();
+            Assert.Equal(extraData, image.Assembly.CustomAttributes[0].Signature.ExtraData);
         }
     }
 }

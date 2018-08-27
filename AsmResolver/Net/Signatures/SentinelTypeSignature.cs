@@ -5,7 +5,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class SentinelTypeSignature : TypeSpecificationSignature
     {
-        public new static SentinelTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static SentinelTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new SentinelTypeSignature(TypeSignature.FromReader(image, reader));
         }

@@ -34,9 +34,9 @@ namespace AsmResolver.Tests.Net
             Assert.Null(body.Signature);
             
             var instructions = body.Instructions;
-            Assert.True(instructions.Any(x => x.OpCode.Code == CilCode.Ldstr));
-            Assert.True(instructions.Any(x => x.OpCode.Code == CilCode.Call));
-            Assert.True(instructions.Any(x => x.OpCode.Code == CilCode.Ret));
+            Assert.Contains(instructions, x => x.OpCode.Code == CilCode.Ldstr);
+            Assert.Contains(instructions, x => x.OpCode.Code == CilCode.Call);
+            Assert.Contains(instructions, x => x.OpCode.Code == CilCode.Ret);
         }
         
         [Fact]
@@ -63,8 +63,8 @@ namespace AsmResolver.Tests.Net
             Assert.True(body.IsFat);
             Assert.NotNull(body.Signature);
             Assert.IsType<LocalVariableSignature>(body.Signature.Signature);
-            Assert.True(((LocalVariableSignature) body.Signature.Signature).Variables.Any(x =>
-                x.VariableType.FullName == typeof(string).FullName));
+            Assert.Contains(((LocalVariableSignature) body.Signature.Signature).Variables, 
+                x => x.VariableType.FullName == typeof(string).FullName);
         }
         
         [Fact]

@@ -49,6 +49,7 @@
     <Compile Include="BaseRelocationEntry.cs" />
     <Compile Include="BaseRelocationType.cs" />
     <Compile Include="Collections\Generic\Collection.cs" />
+    <Compile Include="Emit\ExportDirectoryBuffer.cs" />
     <Compile Include="Emit\WindowsAssemblyBuilder.cs" />
     <Compile Include="Emit\EmitContext.cs" />
     <Compile Include="Emit\FileSegmentBuilder.cs" />
@@ -175,6 +176,9 @@
     <Compile Include="Net\ResourcesManifest.cs" />
     <Compile Include="Net\Metadata\SecurityAction.cs" />
     <Compile Include="Net\ReflectionAssemblyNameWrapper.cs" />
+    <Compile Include="Net\Signatures\CallingConventionAttributes.cs" />
+    <Compile Include="Net\Signatures\CustomAttributeArgumentMemberType.cs" />
+    <Compile Include="Net\Signatures\GenericParameterType.cs" />
     <Compile Include="Net\VTableAttributes.cs" />
     <Compile Include="Net\VTableHeader.cs" />
     <Compile Include="Net\MetadataStreamHeaderCollection.cs" />
@@ -338,6 +342,8 @@
     <Compile Include="X86\SingleByteOpCodes.cs" />
     <Compile Include="X86\X86Operand.cs" />
     <Compile Include="X86\X86OperandSize.cs" />
+    <Compile Include="X86\X86Prefix.cs" />
+    <Compile Include="X86\X86Prefixes.cs" />
     <Compile Include="X86\X86Register.cs" />
     <Compile Include="X86\X86RegOrMemModifier.cs" />
   </ItemGroup>

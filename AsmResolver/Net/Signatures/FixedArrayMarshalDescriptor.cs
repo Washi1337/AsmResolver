@@ -4,7 +4,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class FixedArrayMarshalDescriptor : MarshalDescriptor
     {
-        public new static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var descriptor = new FixedArrayMarshalDescriptor();
 
@@ -35,11 +35,16 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return sizeof (byte) +
+            return sizeof(byte) +
                    NumberOfElements.GetCompressedSize() +
-                   sizeof (byte);
+                   sizeof(byte) +
+                   base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -47,6 +52,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteByte((byte)NativeType);
             writer.WriteCompressedUInt32((uint)NumberOfElements);
             writer.WriteByte((byte)ElementType);
+
+            base.Write(buffer, writer);
         }
     }
 }

@@ -2,6 +2,21 @@
 {
     public class ImageSymbolExport
     {
+        public ImageSymbolExport()
+        {
+        }
+
+        public ImageSymbolExport(uint rva)
+        {
+            Rva = rva;
+        }
+
+        public ImageSymbolExport(uint rva, string name)
+        {
+            Rva = rva;
+            Name = name;
+        }
+        
         public uint Rva
         {
             get;
@@ -14,7 +29,7 @@
             set;
         }
 
-        public ushort NameOrdinal
+        public uint NameOrdinal
         {
             get;
             set;

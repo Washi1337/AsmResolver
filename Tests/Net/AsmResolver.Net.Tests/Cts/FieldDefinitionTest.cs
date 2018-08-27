@@ -87,6 +87,25 @@ namespace AsmResolver.Tests.Net.Cts
         }
 
         [Fact]
+        public void PersistentExtraData()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var extraData = new byte[] {1, 2, 3, 4};
+            
+            var image = header.LockMetadata();
+            var field = CreateAndAddDummyField(image);
+            field.Signature = new FieldSignature(image.TypeSystem.Boolean) {ExtraData = extraData};
+
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            field = (FieldDefinition) image.ResolveMember(mapping[field]);
+            Assert.Equal(extraData, field.Signature.ExtraData);
+        }
+
+        [Fact]
         public void PersistentDeclaringType()
         {
             var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);

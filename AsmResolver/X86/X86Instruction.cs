@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AsmResolver.X86
 {
@@ -11,9 +12,11 @@ namespace AsmResolver.X86
 
         public X86Instruction()
         {
+            Prefixes = new List<X86Prefix>();
         }
 
         internal X86Instruction(long offset)
+            : this()
         {
             Offset = offset;
         }
@@ -27,6 +30,15 @@ namespace AsmResolver.X86
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the prefix being used by the instruction (if available). 
+        /// </summary>
+        public IList<X86Prefix> Prefixes
+        {
+            get;
+            private set;
+        }
+        
         /// <summary>
         /// Gets or sets the opcode being used by the instruction.
         /// </summary>
@@ -63,6 +75,15 @@ namespace AsmResolver.X86
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the third operand of the instruction.
+        /// </summary>
+        public X86Operand Operand3
+        {
+            get;
+            set;
+        }
+
         public override string ToString()
         {
             return string.Format("{0:X8}: {1}", Offset, _formatter.FormatInstruction(this));
@@ -74,23 +95,25 @@ namespace AsmResolver.X86
         /// <returns>The size of the instruction in bytes.</returns>
         public int ComputeSize()
         {
-            int size = 1; // TODO: multi-byte opcodes.
-
+            int size = OpCode.TwoBytePrefix == 0 ? 1 : 2;
+            size += Prefixes.Count;
             size += OpCode.HasRegisterToken ? 1 : 0;
 
             if (Operand1 != null)
             {
                 int mnemonicIndex = Array.IndexOf(OpCode.Mnemonics, Mnemonic);
 
-                size += GetTotalOperandSize(OpCode.OperandTypes1[mnemonicIndex], OpCode.OperandSizes1[mnemonicIndex], Operand1);
+                size += GetTotalOperandSize(Prefixes, OpCode.OperandTypes1[mnemonicIndex], OpCode.OperandSizes1[mnemonicIndex], Operand1);
                 if (Operand2 != null)
-                    size += GetTotalOperandSize(OpCode.OperandTypes2[mnemonicIndex], OpCode.OperandSizes2[mnemonicIndex], Operand2);
+                    size += GetTotalOperandSize(Prefixes, OpCode.OperandTypes2[mnemonicIndex], OpCode.OperandSizes2[mnemonicIndex], Operand2);
+                if (Operand3 != null)
+                    size += GetTotalOperandSize(Prefixes, OpCode.OperandType3, OpCode.OperandSize3, Operand3);
             }
             
             return size;
         }
 
-        private static int GetTotalOperandSize(X86OperandType operandType, X86OperandSize operandSize, X86Operand operand)
+        private static int GetTotalOperandSize(ICollection<X86Prefix> prefixes, X86OperandType operandType, X86OperandSize operandSize, X86Operand operand)
         {
             int size = (int)operand.OffsetType;
             switch (operandType)
@@ -116,7 +139,7 @@ namespace AsmResolver.X86
 
                 case X86OperandType.RelativeOffset:
                 case X86OperandType.ImmediateData:
-                    size += GetSize(operandSize);
+                    size += GetSize(prefixes, operandSize);
                     break;
 
                 case X86OperandType.RegisterOrMemoryAddress:
@@ -133,7 +156,7 @@ namespace AsmResolver.X86
             return size;
         }
 
-        private static int GetSize(X86OperandSize operandSize)
+        private static int GetSize(ICollection<X86Prefix> prefixes, X86OperandSize operandSize)
         {
             switch (operandSize)
             {
@@ -142,6 +165,7 @@ namespace AsmResolver.X86
                 case X86OperandSize.Word:
                     return 2;
                 case X86OperandSize.WordOrDword:
+                    return prefixes.Contains(X86Prefixes.OperandSizeOverride) ? 2 : 4;
                 case X86OperandSize.Dword:
                     return 4;
                 case X86OperandSize.Fword:

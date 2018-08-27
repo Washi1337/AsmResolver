@@ -5,11 +5,14 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
-    public abstract class TypeSignature : BlobSignature, ITypeDescriptor
+    public abstract class TypeSignature : ExtendableBlobSignature, ITypeDescriptor
     {
-        public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
-            return ReadTypeSignature(image, reader);
+            var signature = ReadTypeSignature(image, reader);
+            if (readToEnd)
+                signature.ExtraData = reader.ReadToEnd();
+            return signature;
         }
 
         private static TypeSignature ReadTypeSignature(MetadataImage image, IBinaryStreamReader reader)

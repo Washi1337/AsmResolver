@@ -131,6 +131,28 @@ namespace AsmResolver.Tests.Net.Cts
             var newMethod = (MethodDefinition)image.ResolveMember(mapping[method]);
             Assert.Equal(newSignature, newMethod.Signature, _comparer);
         }
+        
+        [Fact]
+        public void PersistentExtraData()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var method = CreateAndAddDummyMethod(image);
+            var extraData = new byte[] {1, 2, 3, 4};
+
+            method.Signature = new MethodSignature(new[] {image.TypeSystem.String}, image.TypeSystem.Boolean)
+            {
+                ExtraData = extraData
+            };
+
+            var mapping = header.UnlockMetadata();
+
+            image = header.LockMetadata();
+            var newMethod = (MethodDefinition)image.ResolveMember(mapping[method]);
+            Assert.Equal(extraData, newMethod.Signature.ExtraData);
+        }
 
         [Fact]
         public void PersistentDeclaringType()

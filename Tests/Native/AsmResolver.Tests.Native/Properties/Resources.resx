@@ -151,10 +151,22 @@
   <data name="RegOrMem8_Reg8_source" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\RegOrMem8_Reg8.asm;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="RegOrMem16_Reg16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RegOrMem16_Reg16.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="RegOrMem16_Reg16_source" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RegOrMem16_Reg16.asm;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
   <data name="RelativeOffsets" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\RelativeOffsets.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="RelativeOffsets_source" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\RelativeOffsets.asm;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="ThreeOperands" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\3Operands.bin;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ThreeOperands_source" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\3Operands.asm;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
 </root>

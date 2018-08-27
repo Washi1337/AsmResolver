@@ -5,7 +5,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class CustomMarshalDescriptor : MarshalDescriptor
     {
-        public new static CustomMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static CustomMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var descriptor = new CustomMarshalDescriptor();
 
@@ -49,14 +49,19 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return sizeof (byte) +
+            return sizeof(byte) +
                    sizeof(byte) + 38 +
                    UnmanagedType.GetSerStringSize() +
                    ManagedType.GetSerStringSize() +
-                   Cookie.GetSerStringSize();
+                   Cookie.GetSerStringSize() +
+                   base.GetPhysicalLength(buffer);
 
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -66,6 +71,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteSerString(UnmanagedType);
             writer.WriteSerString(ManagedType);
             writer.WriteSerString(Cookie);
+
+            base.Write(buffer, writer);
         }
     }
 }

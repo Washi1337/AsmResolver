@@ -159,9 +159,26 @@ namespace AsmResolver.Net.Emit
             var iatDirectory = optionalHeader.DataDirectories[ImageDataDirectory.IatDirectoryIndex];
             iatDirectory.VirtualAddress = (uint) Assembly.FileOffsetToRva(_textContents.ImportBuffer.AddressTables.StartOffset);
             iatDirectory.Size = _textContents.ImportBuffer.AddressTables.GetPhysicalLength();
+
+            var exportDirectory = optionalHeader.DataDirectories[ImageDataDirectory.ExportDirectoryIndex];
+            if (_textContents.ExportDirectory == null)
+            {
+                exportDirectory.VirtualAddress = 0;
+                exportDirectory.Size = 0;
+            }
+            else
+            {
+                exportDirectory.VirtualAddress = (uint) Assembly.FileOffsetToRva(_textContents.ExportDirectory.StartOffset);
+                exportDirectory.Size = _textContents.ExportDirectory.GetPhysicalLength();
+            }
             
             var debugDirectory = optionalHeader.DataDirectories[ImageDataDirectory.DebugDirectoryIndex];
-            if (_textContents.DebugDirectory != null)
+            if (_textContents.DebugDirectory == null)
+            {
+                debugDirectory.VirtualAddress = 0;
+                debugDirectory.Size = 0;
+            }
+            else
             {
                 debugDirectory.VirtualAddress = (uint) Assembly.FileOffsetToRva(_textContents.DebugDirectory.StartOffset);
                 debugDirectory.Size = _textContents.DebugDirectory.GetPhysicalLength();

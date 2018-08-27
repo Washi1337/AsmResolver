@@ -7,7 +7,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class MethodSignature : MemberSignature
     {
-        public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
             if (!reader.CanRead(sizeof (byte)))
                 return null;
@@ -35,6 +35,9 @@ namespace AsmResolver.Net.Signatures
                 signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
             }
 
+            if (readToEnd)
+                signature.ExtraData = reader.ReadToEnd();
+            
             return signature;
         }
 
@@ -83,13 +86,21 @@ namespace AsmResolver.Net.Signatures
             get { return ReturnType; }
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return (uint)(sizeof (byte) +
-                          (IsGeneric ? GenericParameterCount.GetCompressedSize() : 0) +
-                          Parameters.Count.GetCompressedSize() +
-                          ReturnType.GetPhysicalLength() +
-                          Parameters.Sum(x => x.GetPhysicalLength()));
+            return (uint) (sizeof(byte) +
+                           (IsGeneric ? GenericParameterCount.GetCompressedSize() : 0) +
+                           Parameters.Count.GetCompressedSize() +
+                           ReturnType.GetPhysicalLength(buffer) +
+                           Parameters.Sum(x => x.GetPhysicalLength(buffer)))
+                   + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            foreach (var parameter in Parameters)
+                parameter.Prepare(buffer);
+            ReturnType.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -103,13 +114,15 @@ namespace AsmResolver.Net.Signatures
             ReturnType.Write(buffer, writer);
             foreach (var parameter in Parameters)
                 parameter.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
 
         public override string ToString()
         {
             return (HasThis ? "instance " : "") 
                 + ReturnType.FullName 
-                + " *(" + Parameters.Select(x => x.ParameterType).GetTypeArrayString() + ")";
+                + " (" + Parameters.Select(x => x.ParameterType).GetTypeArrayString() + ")";
         }
     }
 

@@ -468,6 +468,9 @@ namespace AsmResolver.Net.Cil
                     };
                 }
 
+                if (Signature != null && Signature.Signature != null)
+                    Signature.Signature.Prepare(buffer);
+
                 var fatBody = new CilRawFatMethodBody
                 {
                     HasSections = ExceptionHandlers.Count > 0,

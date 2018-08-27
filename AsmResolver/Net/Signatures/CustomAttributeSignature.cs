@@ -6,9 +6,9 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
-    public class CustomAttributeSignature : BlobSignature
+    public class CustomAttributeSignature : ExtendableBlobSignature
     {
-        public static CustomAttributeSignature FromReader(CustomAttribute parent, IBinaryStreamReader reader)
+        public static CustomAttributeSignature FromReader(CustomAttribute parent, IBinaryStreamReader reader, bool readToEnd = false)
         {
             if (!reader.CanRead(sizeof (ushort)) || reader.ReadUInt16() != 0x0001)
                 throw new ArgumentException("Signature doesn't refer to a valid custom attribute signature.");
@@ -32,6 +32,9 @@ namespace AsmResolver.Net.Signatures
             {
                 signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Image, reader));
             }
+
+            if (readToEnd)
+                signature.ExtraData = reader.ReadToEnd();
 
             return signature;
         }
@@ -59,12 +62,22 @@ namespace AsmResolver.Net.Signatures
             private set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return (uint)(sizeof (ushort) +
-                          FixedArguments.Sum(x => x.GetPhysicalLength()) +
-                          sizeof (ushort) +
-                          NamedArguments.Sum(x => x.GetPhysicalLength()));
+            return (uint) (sizeof(ushort) +
+                           FixedArguments.Sum(x => x.GetPhysicalLength(buffer)) +
+                           sizeof(ushort) +
+                           NamedArguments.Sum(x => x.GetPhysicalLength(buffer)))
+                   + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            foreach (var argument in FixedArguments)
+                argument.Prepare(buffer);
+
+            foreach (var argument in NamedArguments)
+                argument.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -75,6 +88,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteUInt16((ushort)NamedArguments.Count);
             foreach (var argument in NamedArguments)
                 argument.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

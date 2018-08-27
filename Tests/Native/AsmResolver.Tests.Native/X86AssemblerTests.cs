@@ -13,7 +13,7 @@ namespace AsmResolver.Tests.Native
         [Fact]
         public void RegOrMem8_Reg8()
         {
-            var body = CreateRegOrMemTestInstructions(X86OpCodes.Add_RegOrMem8_Reg8, X86Mnemonic.Add, false).ToArray();
+            var body = CreateRegOrMemTestInstructions(X86OpCodes.Add_RegOrMem8_Reg8, X86Mnemonic.Add, false, false).ToArray();
 
             TestAssembler(body);
         }
@@ -21,7 +21,7 @@ namespace AsmResolver.Tests.Native
         [Fact]
         public void Reg8_RegOrMem8()
         {
-            var body = CreateRegOrMemTestInstructions(X86OpCodes.Add_Reg8_RegOrMem8, X86Mnemonic.Add, true).ToArray();
+            var body = CreateRegOrMemTestInstructions(X86OpCodes.Add_Reg8_RegOrMem8, X86Mnemonic.Add, true, false).ToArray();
 
             TestAssembler(body);
         }
@@ -42,7 +42,15 @@ namespace AsmResolver.Tests.Native
             TestAssembler(body);
         }
 
-        private static IEnumerable<X86Instruction> CreateRegOrMemTestInstructions(X86OpCode opcode, X86Mnemonic mnemonic, bool flippedOperands)
+        [Fact]
+        public void AssembleThreeOperands()
+        {
+            var body = Create3OperandsInstructions().ToArray();
+
+            TestAssembler(body);
+        }
+
+        private static IEnumerable<X86Instruction> CreateRegOrMemTestInstructions(X86OpCode opcode, X86Mnemonic mnemonic, bool flippedOperands, bool threeOperands)
         {  
             for (int operandType = 0; operandType < 3; operandType++)
             {
@@ -93,6 +101,20 @@ namespace AsmResolver.Tests.Native
                                 operand1.OffsetType = X86OffsetType.Long;
                                 break;
                         }
+
+                        if (threeOperands)
+                        {
+                            switch (opcode.OperandSize3)
+                            {
+                                case X86OperandSize.Byte:
+                                    instruction.Operand3 = new X86Operand((byte) 0x12);
+                                    break;
+                                case X86OperandSize.WordOrDword:
+                                    instruction.Operand3 = new X86Operand(0x1337u);
+                                    break;
+                            }
+                        }
+                        
                         yield return instruction;
                     }
                 }
@@ -160,20 +182,41 @@ namespace AsmResolver.Tests.Native
             }
         }
 
+        private static IEnumerable<X86Instruction> Create3OperandsInstructions()
+        {
+            for (int reg1 = (int) X86Register.Eax; reg1 <= (int) X86Register.Edi; reg1++)
+            {
+                for (int reg2 = (int) X86Register.Eax; reg2 <= (int) X86Register.Edi; reg2++)
+                {
+                    var operand1 = new X86Operand((X86Register) reg1);
+                    var operand2 = new X86Operand(X86OperandUsage.DwordPointer, (X86Register) reg2);
+                    if ((X86Register) operand2.Value == X86Register.Ebp)
+                        operand2.Value = 0x1337u;
+                    
+                    yield return new X86Instruction
+                    {
+                        OpCode = X86OpCodes.IMul_Reg1632_RegOrMem1632_Imm1632,
+                        Mnemonic = X86Mnemonic.Imul,
+                        Operand1 = operand1,
+                        Operand2 = operand2,
+                        Operand3 = new X86Operand(1337u)
+                    };
+                }
+            }
+        }
 
         private static void TestAssembler(IReadOnlyList<X86Instruction> instructions)
         {
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "test.bin");
-            using (var stream = File.Create(path))
+            using (var stream = new MemoryStream())
             {
                 var writer = new BinaryStreamWriter(stream);
                 var assembler = new X86Assembler(writer);
 
                 foreach (var instruction in instructions)
                     assembler.Write(instruction);
+                
+                ValidateCode(instructions, stream.ToArray());
             }
-
-            ValidateCode(instructions, File.ReadAllBytes(path));
         }
         
         private static void ValidateCode(IReadOnlyList<X86Instruction> originalBody, byte[] assemblerOutput)

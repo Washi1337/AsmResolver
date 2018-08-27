@@ -131,6 +131,11 @@ namespace AsmResolver
             return (reader.Position - reader.StartPosition) + size <= reader.Length;
         }
 
+        public static byte[] ReadToEnd(this IBinaryStreamReader reader)
+        {
+            return reader.ReadBytes((int) (reader.Length - (reader.Position - reader.StartPosition)));
+        }
+
         /// <summary>
         /// Forks the reader by creating a new instance of a binary stream reader, using the same data source, but a different address.
         /// </summary>

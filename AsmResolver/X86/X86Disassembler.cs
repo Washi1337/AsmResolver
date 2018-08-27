@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.X86
 {
@@ -38,15 +40,20 @@ namespace AsmResolver.X86
         public X86Instruction ReadNextInstruction()
         {
             long offset = BaseAddress + _reader.Position;
-            byte code1 = _reader.ReadByte();
-            var instruction = new X86Instruction(offset)
-            {
-                OpCode = ReadOpcode(code1)
-            };
+            var instruction = new X86Instruction(offset);
 
+            List<byte> prefixBytes;
+            byte nextCode = ReadNextOpCode(out prefixBytes);
+
+            instruction.OpCode = InterpretOpCodeByte(prefixBytes, nextCode);
             if (instruction.OpCode.Mnemonics == null)
             {
-                instruction.Operand1 = new X86Operand(code1);
+                if (prefixBytes.Count > 0)
+                {
+                    nextCode = prefixBytes[0];
+                    _reader.Position = offset + 1;
+                }
+                instruction.Operand1 = new X86Operand(nextCode);
                 return instruction;
             }
 
@@ -54,17 +61,56 @@ namespace AsmResolver.X86
             var mnemonicIndex = instruction.OpCode.HasOpCodeModifier ? (registerToken >> 3) & 7 : 0;
             instruction.Mnemonic = instruction.OpCode.Mnemonics[mnemonicIndex];
 
-            instruction.Operand1 = ReadOperand(instruction.OpCode.OperandTypes1[mnemonicIndex],
+            foreach (var prefixByte in prefixBytes)
+            {
+                var prefix = X86Prefixes.PrefixesByByte[prefixByte]
+                    .FirstOrDefault(x => x.CanPrecedeOpCode(instruction.OpCode));
+
+                if (Equals(prefix, default(X86Prefix)))
+                {
+                    instruction.Prefixes.Clear();
+                    instruction.OpCode = default(X86OpCode);
+                    instruction.Operand1 = new X86Operand(prefixBytes[0]);
+                    _reader.Position = offset + 1;
+                    return instruction;
+                }
+
+                instruction.Prefixes.Add(prefix);
+            }
+            
+            instruction.Operand1 = ReadOperand(instruction.Prefixes, instruction.OpCode.OperandTypes1[mnemonicIndex],
                 instruction.OpCode.OperandSizes1[mnemonicIndex], instruction.OpCode.Op1, registerToken);
 
-            instruction.Operand2 = ReadOperand(instruction.OpCode.OperandTypes2[mnemonicIndex],
+            instruction.Operand2 = ReadOperand(instruction.Prefixes, instruction.OpCode.OperandTypes2[mnemonicIndex],
                 instruction.OpCode.OperandSizes2[mnemonicIndex], instruction.OpCode.Op1, registerToken);
+
+            instruction.Operand3 = ReadOperand(instruction.Prefixes, instruction.OpCode.OperandType3,
+                instruction.OpCode.OperandSize3, instruction.OpCode.Op1, registerToken);
 
             return instruction;
         }
 
-        private X86OpCode ReadOpcode(byte code1)
+        private byte ReadNextOpCode(out List<byte> prefixBytes)
         {
+            prefixBytes = new List<byte>(4);
+
+            byte nextCode = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                nextCode = _reader.ReadByte();
+
+                IList<X86Prefix> prefixes;
+                if (!X86Prefixes.PrefixesByByte.TryGetValue(nextCode, out prefixes))
+                    break;
+                prefixBytes.Add(nextCode);
+            }
+            return nextCode;
+        }
+
+        private X86OpCode InterpretOpCodeByte(IList<byte> prefixBytes, byte code1)
+        {
+            // TODO: use prefix.
+            
             switch (code1)
             {
                 case 0x0F:
@@ -75,25 +121,25 @@ namespace AsmResolver.X86
             }
         }
 
-        private X86Operand ReadOperand(X86OperandType method, X86OperandSize size, byte opcode, byte registerToken)
+        private X86Operand ReadOperand(ICollection<X86Prefix> prefixes, X86OperandType method, X86OperandSize size, byte opcode, byte registerToken)
         {
             switch (method)
             {
                 case X86OperandType.OpCodeRegister:
-                    return new X86Operand(GetRegisterFromToken((byte)(opcode & 7), GetRegisterSize(size)));
+                    return new X86Operand(GetRegisterFromToken((byte)(opcode & 7), GetRegisterSize(prefixes, size)));
 
                 case X86OperandType.Register:
                     return new X86Operand(GetRegisterFromToken((byte)((registerToken >> 3) & 7),
-                        GetRegisterSize(size)));
+                        GetRegisterSize(prefixes, size)));
 
                 case X86OperandType.RegisterOrMemoryAddress:
-                    return GetRegOrMemOperand32(registerToken, size);
+                    return GetRegOrMemOperand32(prefixes, registerToken, size);
 
                 case X86OperandType.ImmediateData:
-                    return new X86Operand(ReadImmediateData(size));
+                    return new X86Operand(ReadImmediateData(prefixes, size));
 
                 case X86OperandType.MemoryAddress:
-                    return new X86Operand(GetOperandType(size), _reader.ReadUInt32());
+                    return new X86Operand(GetOperandType(prefixes, size), _reader.ReadUInt32());
 
                 case X86OperandType.RegisterAl:
                     return new X86Operand(X86Register.Al);
@@ -137,7 +183,7 @@ namespace AsmResolver.X86
             throw new NotSupportedException();
         }
 
-        private object ReadImmediateData(X86OperandSize size)
+        private object ReadImmediateData(ICollection<X86Prefix> prefixes, X86OperandSize size)
         {
             switch (size)
             {
@@ -148,13 +194,15 @@ namespace AsmResolver.X86
                 case X86OperandSize.Dword:
                     return _reader.ReadUInt32();
                 case X86OperandSize.WordOrDword:
-                    return _reader.ReadUInt32(); // TODO: use operand-size override opcode
+                    return prefixes.Contains(X86Prefixes.OperandSizeOverride) 
+                        ? _reader.ReadUInt16()
+                        : _reader.ReadUInt32();
                     // TODO: fword
             }
             throw new NotSupportedException();
         }
 
-        private static X86RegisterSize GetRegisterSize(X86OperandSize size)
+        private static X86RegisterSize GetRegisterSize(ICollection<X86Prefix> prefixes, X86OperandSize size)
         {
             switch (size)
             {
@@ -165,12 +213,14 @@ namespace AsmResolver.X86
                 case X86OperandSize.Dword:
                     return X86RegisterSize.Dword;
                 case X86OperandSize.WordOrDword:
-                    return X86RegisterSize.Dword ; // TODO: use operand-size override opcode
+                    return prefixes.Contains(X86Prefixes.OperandSizeOverride)
+                        ? X86RegisterSize.Word
+                        : X86RegisterSize.Dword;
             }
             throw new ArgumentException();
         }
 
-        private static X86OperandUsage GetOperandType(X86OperandSize size)
+        private static X86OperandUsage GetOperandType(ICollection<X86Prefix> prefixes, X86OperandSize size)
         {
             switch (size)
             {
@@ -179,14 +229,16 @@ namespace AsmResolver.X86
                 case X86OperandSize.Dword:
                     return X86OperandUsage.DwordPointer;
                 case X86OperandSize.WordOrDword:
-                    return X86OperandUsage.DwordPointer; // TODO: use operand-size override opcode
+                    return prefixes.Contains(X86Prefixes.OperandSizeOverride)
+                        ? X86OperandUsage.WordPointer
+                        : X86OperandUsage.DwordPointer;
                 case X86OperandSize.Fword:
                     return X86OperandUsage.FwordPointer;
             }
             throw new ArgumentException();
         }
 
-        private X86Operand GetRegOrMemOperand32(byte registerToken, X86OperandSize size)
+        private X86Operand GetRegOrMemOperand32(ICollection<X86Prefix> prefixes, byte registerToken, X86OperandSize size)
         {
             // Mechanism:
             // http://ref.x86asm.net/coder32.html#modrm_byte_32
@@ -202,14 +254,14 @@ namespace AsmResolver.X86
             // Register-only operands:
             if (modifier == X86RegOrMemModifier.RegisterOnly)
             {
-                operand.Value = GetRegisterFromToken((byte)(registerToken & 0x7), GetRegisterSize(size));
+                operand.Value = GetRegisterFromToken((byte)(registerToken & 0x7), GetRegisterSize(prefixes, size));
                 operand.OperandUsage = X86OperandUsage.Normal;
                 return operand;
             }
 
             // Register-pointer operands are always 32-bit registers.
             var register = GetRegisterFromToken((byte)(registerToken & 0x7), X86RegisterSize.Dword);
-            operand.OperandUsage = GetOperandType(size);
+            operand.OperandUsage = GetOperandType(prefixes, size);
             operand.Value = register;
 
             // EBP register is replaced by a direct address.

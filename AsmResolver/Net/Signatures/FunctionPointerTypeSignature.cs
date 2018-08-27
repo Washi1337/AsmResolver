@@ -6,7 +6,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class FunctionPointerTypeSignature : TypeSignature
     {
-        public new static FunctionPointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static FunctionPointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return new FunctionPointerTypeSignature(MethodSignature.FromReader(image, reader));
         }
@@ -47,16 +47,24 @@ namespace AsmResolver.Net.Signatures
             get { return null; }
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return sizeof (byte)
-                   + Signature.GetPhysicalLength();
+            return sizeof(byte)
+                   + Signature.GetPhysicalLength(buffer)
+                   + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            Signature.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte) ElementType.FnPtr);
             Signature.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

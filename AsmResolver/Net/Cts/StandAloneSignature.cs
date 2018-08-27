@@ -30,7 +30,7 @@ namespace AsmResolver.Net.Cts
             {
                 IBinaryStreamReader reader;
                 return image.Header.GetStream<BlobStream>().TryCreateBlobReader(row.Column1, out reader)
-                    ? CallingConventionSignature.FromReader(image, reader)
+                    ? CallingConventionSignature.FromReader(image, reader, true)
                     : null;
             });
         }

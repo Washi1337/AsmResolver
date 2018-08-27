@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.Net.Cil;
 using AsmResolver.Net.Signatures;
 
@@ -15,6 +16,14 @@ namespace AsmResolver.Net.Cts
                 : base(image)
             {
                 _memberCloner = memberCloner;
+            }
+
+            public override ITypeDefOrRef ImportType(ITypeDefOrRef reference)
+            {
+                IMemberReference newType;
+                return _memberCloner._createdMembers.TryGetValue(reference , out newType)
+                    ? (ITypeDefOrRef) newType
+                    : base.ImportType(reference);
             }
 
             public override ITypeDefOrRef ImportType(TypeDefinition type)
@@ -40,11 +49,27 @@ namespace AsmResolver.Net.Cts
                     ? newMember
                     : base.ImportField(field);
             }
+
+            public override MemberReference ImportMember(MemberReference reference)
+            {
+                IMemberReference newMember;
+                return _memberCloner._createdMembers.TryGetValue(reference, out newMember)
+                    ? (MemberReference) newMember
+                    : base.ImportMember(reference);
+            }
+
+            public override IMemberReference ImportReference(IMemberReference reference)
+            {
+                IMemberReference newMember;
+                return _memberCloner._createdMembers.TryGetValue(reference, out newMember)
+                    ? newMember
+                    : base.ImportReference(reference);
+            }
         }
 
         private readonly MetadataImage _targetImage;
         private readonly IDictionary<IMemberReference, IMemberReference> _createdMembers =
-            new Dictionary<IMemberReference, IMemberReference>();
+            new Dictionary<IMemberReference, IMemberReference>(new SignatureComparer());
         private readonly IReferenceImporter _importer;
 
         public MemberCloner(MetadataImage targetImage)
@@ -55,6 +80,19 @@ namespace AsmResolver.Net.Cts
             _importer = new MemberClonerReferenceImporter(this, targetImage);
         }
 
+        public IList<TypeDefinition> CloneTypes(IList<TypeDefinition> types)
+        {
+            var newTypes = types.Select(CreateTypeStub).ToArray();
+            
+            for (var index = 0; index < newTypes.Length; index++)
+                DeclareMemberStubs(types[index], newTypes[index]);
+            
+            for (var index = 0; index < newTypes.Length; index++)
+                FinalizeTypeStub(types[index], newTypes[index]);
+
+            return newTypes;
+        }
+        
         public TypeDefinition CloneType(TypeDefinition type)
         {
             var newType = CreateTypeStub(type);
@@ -70,6 +108,9 @@ namespace AsmResolver.Net.Cts
             if (newField.Constant != null)
                 newField.Constant = new Constant(field.Constant.ConstantType, new DataBlobSignature(field.Constant.Value.Data));
             
+            if (newField.PInvokeMap != null)
+                newField.PInvokeMap = CloneImplementationMap(field.PInvokeMap);
+
             _createdMembers.Add(field, newField);
             CloneCustomAttributes(field, newField);
             
@@ -120,7 +161,8 @@ namespace AsmResolver.Net.Cts
             foreach (var method in type.Methods)
                 FinalizeMethod(method, (MethodDefinition) _createdMembers[method]);
             
-            stub.BaseType = _importer.ImportType(type.BaseType);
+            if (type.BaseType != null)
+                stub.BaseType = _importer.ImportType(type.BaseType);
 
             if (type.ClassLayout != null)
                 stub.ClassLayout = new ClassLayout(type.ClassLayout.ClassSize, type.ClassLayout.PackingSize);
@@ -172,6 +214,9 @@ namespace AsmResolver.Net.Cts
 
             foreach (var parameter in method.Parameters)
                 newMethod.Parameters.Add(new ParameterDefinition(parameter.Sequence, parameter.Name, parameter.Attributes));
+
+            if (method.PInvokeMap != null)
+                newMethod.PInvokeMap = CloneImplementationMap(method.PInvokeMap);
             
             _createdMembers.Add(method, newMethod);
             return newMethod;
@@ -185,6 +230,11 @@ namespace AsmResolver.Net.Cts
                 stub.CilMethodBody = CloneCilMethodBody(method.CilMethodBody, stub);
         }
 
+        private ImplementationMap CloneImplementationMap(ImplementationMap map)
+        {
+            return new ImplementationMap(_importer.ImportModule(map.ImportScope), map.ImportName, map.Attributes);
+        }
+        
         private void CloneGenericParameters(IGenericParameterProvider source, IGenericParameterProvider newOwner)
         {
             foreach (var parameter in source.GenericParameters)
@@ -252,9 +302,23 @@ namespace AsmResolver.Net.Cts
             foreach (var instruction in body.Instructions)
             {
                 object operand = instruction.Operand;
+                
                 if (operand is IMemberReference)
                     operand = _importer.ImportReference((IMemberReference) operand);
-                
+
+                if (operand is VariableSignature)
+                {
+                    operand = ((LocalVariableSignature) newBody.Signature.Signature).Variables[
+                        ((LocalVariableSignature) body.Signature.Signature).Variables.IndexOf(
+                            (VariableSignature) operand)];
+                }
+
+                if (operand is ParameterSignature)
+                {
+                    operand = newBody.Method.Signature.Parameters[
+                        body.Method.Signature.Parameters.IndexOf((ParameterSignature) operand)];
+                }
+
                 var newInstruction = new CilInstruction(instruction.Offset, instruction.OpCode, operand);
                 newBody.Instructions.Add(newInstruction);
                 switch (instruction.OpCode.OperandType)

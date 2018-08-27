@@ -360,7 +360,7 @@ namespace AsmResolver.Net.Metadata
             return (TRow) base.GetRowByKey(keyColumnIndex, key);
         }
 
-        public new bool TryGetRow(int index, out TRow row)
+        public bool TryGetRow(int index, out TRow row)
         {
             MetadataRow mrow;
             bool result = base.TryGetRow(index, out mrow);

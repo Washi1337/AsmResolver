@@ -120,6 +120,7 @@
         Movsx,
         Btc,
         Bsf,
-        Bsr
+        Bsr,
+        Pause
     }
 }

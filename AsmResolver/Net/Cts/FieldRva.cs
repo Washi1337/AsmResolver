@@ -80,9 +80,6 @@ namespace AsmResolver.Net.Cts
                     case ElementType.U8:
                     case ElementType.R8:
                         return sizeof (ulong);
-                    case ElementType.I:
-                    case ElementType.U:
-                        // TODO;
                     default:
                         return 0;
                 }

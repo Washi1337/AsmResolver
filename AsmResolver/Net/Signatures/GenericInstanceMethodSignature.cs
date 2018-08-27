@@ -7,7 +7,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
-        public new static GenericInstanceMethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static GenericInstanceMethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new GenericInstanceMethodSignature
             {
@@ -46,11 +46,18 @@ namespace AsmResolver.Net.Signatures
             private set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return (uint)(sizeof (byte) +
-                          GenericArguments.Count.GetCompressedSize() +
-                          GenericArguments.Sum(x => x.GetPhysicalLength()));
+            return (uint) (sizeof(byte) +
+                           GenericArguments.Count.GetCompressedSize() +
+                           GenericArguments.Sum(x => x.GetPhysicalLength(buffer)))
+                   + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            foreach (var argument in GenericArguments)
+                argument.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -59,6 +66,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteCompressedUInt32((uint)GenericArguments.Count);
             foreach (var argument in GenericArguments)
                 argument.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

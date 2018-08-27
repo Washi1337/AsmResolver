@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace AsmResolver.X86
 {
@@ -8,7 +9,14 @@ namespace AsmResolver.X86
     public interface IX86Formatter
     {
         /// <summary>
-        /// Formats a mnemonic in a x86 assembly instructions to a readable string.
+        /// Formats a prefix in an x86 assembly instruction to a readable string.
+        /// </summary>
+        /// <param name="prefix">The prefix to format.</param>
+        /// <returns>The formatted prefix, or <c>null</c> if no mnemonic is available for the prefix.</returns>
+        string FormatPrefix(X86Prefix prefix);
+        
+        /// <summary>
+        /// Formats a mnemonic in a x86 assembly instruction to a readable string.
         /// </summary>
         /// <param name="mnemonic">The mnemonic to format.</param>
         /// <returns>The formatted mnemonic.</returns>
@@ -32,17 +40,22 @@ namespace AsmResolver.X86
         /// <returns>The formatted operand.</returns>
         public static string FormatInstruction(this IX86Formatter formatter, X86Instruction instruction)
         {
-            var mnemonicString = formatter.FormatMnemonic(instruction.Mnemonic);
+            string prefixesString = string.Join(" ",
+                from prefix in instruction.Prefixes
+                let formatted = formatter.FormatPrefix(prefix)
+                where !string.IsNullOrEmpty(formatted)
+                select formatted);
+            
+            string mnemonicString = formatter.FormatMnemonic(instruction.Mnemonic);
+            
+            var operands = new[] { instruction.Operand1, instruction.Operand2, instruction.Operand3 }
+                .TakeWhile(x => x != null).Select(formatter.FormatOperand);
+            string operandsString = string.Join(", ", operands);
 
-            if (instruction.Operand2 == null)
-            {
-                return instruction.Operand1 == null
-                    ? mnemonicString
-                    : mnemonicString + ' ' + formatter.FormatOperand(instruction.Operand1);
-            }
-
-            return mnemonicString + ' ' + formatter.FormatOperand(instruction.Operand1) + ", " +
-                   formatter.FormatOperand(instruction.Operand2);
+            return string.Format("{0}{1}{2}",
+                string.IsNullOrEmpty(prefixesString) ? string.Empty : prefixesString + ' ',
+                mnemonicString, 
+                string.IsNullOrEmpty(operandsString) ? string.Empty : ' ' + operandsString);
         }
     }
 
@@ -51,6 +64,19 @@ namespace AsmResolver.X86
     /// </summary>
     public abstract class X86Formatter : IX86Formatter
     {
+        public virtual string FormatPrefix(X86Prefix prefix)
+        {
+            if (prefix == X86Prefixes.Rep)
+                return "rep";
+            if (prefix == X86Prefixes.Repnz)
+                return "repnz";
+            if (prefix == X86Prefixes.Repz)
+                return "repz";
+            if (prefix == X86Prefixes.Lock)
+                return "lock";
+            return null;
+        }
+        
         public virtual string FormatMnemonic(X86Mnemonic mnemonic)
         {
             return mnemonic.ToString().ToLowerInvariant().Replace('_', ' ');
@@ -62,9 +88,9 @@ namespace AsmResolver.X86
                 return string.Empty;
             string prefix = FormatOperandUsagePrefix(operand.OperandUsage);
 
-            var formattedValue = FormatValue(operand.Value);
-            var formattedOffset = FormatOffset(operand.Offset);
-            var formattedScaledIndex = operand.ScaledIndex != null ? '+' + operand.ScaledIndex.ToString() : string.Empty;
+            string formattedValue = FormatValue(operand.Value);
+            string formattedOffset = FormatOffset(operand.Offset);
+            string formattedScaledIndex = operand.ScaledIndex != null ? '+' + operand.ScaledIndex.ToString() : string.Empty;
 
             return prefix == null
                 ? formattedValue

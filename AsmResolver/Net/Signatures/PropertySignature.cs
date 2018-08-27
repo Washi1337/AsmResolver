@@ -7,7 +7,7 @@ namespace AsmResolver.Net.Signatures
 {
     public class PropertySignature : CallingConventionSignature, IHasTypeSignature
     {
-        public new static PropertySignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public new static PropertySignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
             var signature = new PropertySignature
             {
@@ -23,6 +23,9 @@ namespace AsmResolver.Net.Signatures
             for (int i = 0; i < paramCount; i++)
                 signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
 
+            if (readToEnd)
+                signature.ExtraData = reader.ReadToEnd();
+            
             return signature;
         }
 
@@ -59,12 +62,20 @@ namespace AsmResolver.Net.Signatures
             private set;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint)(sizeof (byte) +
                           Parameters.Count.GetCompressedSize() +
-                          PropertyType.GetPhysicalLength() +
-                          Parameters.Sum(x => x.GetPhysicalLength()));
+                          PropertyType.GetPhysicalLength(buffer) +
+                          Parameters.Sum(x => x.GetPhysicalLength(buffer)))
+                + base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
+            PropertyType.Prepare(buffer);
+            foreach (var parameter in Parameters)
+                parameter.Prepare(buffer);
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -74,6 +85,8 @@ namespace AsmResolver.Net.Signatures
             PropertyType.Write(buffer, writer);
             foreach (var parameter in Parameters)
                 parameter.Write(buffer, writer);
+
+            base.Write(buffer, writer);
         }
     }
 }

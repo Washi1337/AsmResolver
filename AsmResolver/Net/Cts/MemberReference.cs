@@ -1,4 +1,5 @@
-﻿using AsmResolver.Net.Cts.Collections;
+﻿using System.Diagnostics;
+using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
@@ -84,8 +85,6 @@ namespace AsmResolver.Net.Cts
                 if (method != null)
                     return method.DeclaringType;
                 
-                // TODO: handle modulereference parent
-
                 return null;
             }
         }

@@ -9,9 +9,8 @@ namespace AsmResolver.Net.Signatures
 {
     public class ArrayTypeSignature : TypeSpecificationSignature
     {
-        public new static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            long position = reader.Position;
             var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader));
             
             uint rank;
@@ -49,7 +48,7 @@ namespace AsmResolver.Net.Signatures
                     dimension.LowerBound = (int)loBounds[i];
                 signature.Dimensions.Add(dimension);
             }
-
+            
             return signature;
         }
 
@@ -124,7 +123,7 @@ namespace AsmResolver.Net.Signatures
             return true;
         }
 
-        public override uint GetPhysicalLength()
+        public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             if (!Validate())
                 throw new InvalidOperationException();
@@ -148,11 +147,16 @@ namespace AsmResolver.Net.Signatures
             }
 
             return sizeof (byte) +
-                   BaseType.GetPhysicalLength() + 
+                   BaseType.GetPhysicalLength(buffer) + 
                    Dimensions.Count.GetCompressedSize() +
                    numSizes.GetCompressedSize() +
                    numLoBounds.GetCompressedSize() +
-                   sizesAndLoBoundsLength;
+                   sizesAndLoBoundsLength + 
+                   base.GetPhysicalLength(buffer);
+        }
+
+        public override void Prepare(MetadataBuffer buffer)
+        {
         }
 
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
@@ -173,6 +177,8 @@ namespace AsmResolver.Net.Signatures
             writer.WriteCompressedUInt32((uint)boundedDimensions.Length);
             foreach (var boundedDimension in boundedDimensions)
                 writer.WriteCompressedUInt32((uint)boundedDimension.LowerBound.Value);
+
+            base.Write(buffer, writer);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AsmResolver.X86
 {
@@ -22,6 +23,8 @@ namespace AsmResolver.X86
         /// <param name="instruction">The instruction to write.</param>
         public void Write(X86Instruction instruction)
         {
+            WritePrefixes(instruction.Prefixes);
+            
             var opcode = instruction.OpCode;
             WriteOpCode(opcode);
 
@@ -52,10 +55,19 @@ namespace AsmResolver.X86
                 {
                     WriteOperand(opcode.OperandTypes2[mnemonicIndex],
                         opcode.OperandSizes2[mnemonicIndex], instruction.Operand2);
+                    
+                    if (instruction.Operand3 != null)
+                        WriteOperand(opcode.OperandType3, opcode.OperandSize3, instruction.Operand3);
                 }
             }
         }
 
+        private void WritePrefixes(IEnumerable<X86Prefix> prefixes)
+        {
+            foreach (var prefix in prefixes)
+                _writer.WriteByte(prefix.PrefixByte);
+        }
+        
         private void WriteOperand(X86OperandType method, X86OperandSize size, X86Operand operand)
         {
             WriteOperandValue(method, size, operand);
@@ -85,7 +97,7 @@ namespace AsmResolver.X86
                 }
                 case X86OperandType.RelativeOffset:
                 {
-                    WriteNumber(Convert.ToUInt32(operand.Value) - (_writer.Position + sizeof (sbyte)), size);
+                    WriteNumber(Convert.ToUInt32(operand.Value) - (_writer.Position + (int) size), size);
                     break;
                 }
             }
@@ -138,6 +150,8 @@ namespace AsmResolver.X86
 
         private void WriteOpCode(X86OpCode opCode)
         {
+            if (opCode.TwoBytePrefix != 0)
+                _writer.WriteByte(0xF);
             _writer.WriteByte(opCode.Op1);
             // todo: multibyte opcodes.
         }

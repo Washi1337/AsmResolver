@@ -62,6 +62,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{F2FBFE46-4
 		Tests\Native\Dummies\X86Binaries\Misc\OpCodeRegisterToken.bin = Tests\Native\Dummies\X86Binaries\Misc\OpCodeRegisterToken.bin
 		Tests\Native\Dummies\X86Binaries\Misc\RelativeOffsets.asm = Tests\Native\Dummies\X86Binaries\Misc\RelativeOffsets.asm
 		Tests\Native\Dummies\X86Binaries\Misc\RelativeOffsets.bin = Tests\Native\Dummies\X86Binaries\Misc\RelativeOffsets.bin
+		Tests\Native\Dummies\X86Binaries\Misc\3Operands.asm = Tests\Native\Dummies\X86Binaries\Misc\3Operands.asm
+		Tests\Native\Dummies\X86Binaries\Misc\3Operands.bin = Tests\Native\Dummies\X86Binaries\Misc\3Operands.bin
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "Tests\Net\Dummies\ClassLibrary1\ClassLibrary1.csproj", "{EE8795DB-1B7A-4D78-8021-FD8CBCC52720}"
@@ -71,6 +73,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{2C76E7A9-4183-4CF9-8584-2B703ED1B9F7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleAsmResolver", "Examples\SampleAsmResolver\SampleAsmResolver.csproj", "{E3A1BC77-F37E-4206-9F8F-9022DE4B22EF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RegOrMem16_Reg16", "RegOrMem16_Reg16", "{D4EF03CD-1E89-4250-AB82-FF1756F2F1C5}"
+ProjectSection(SolutionItems) = preProject
+	Tests\Native\Dummies\X86Binaries\RegOrMem16_Reg16\RegOrMem16_Reg16.asm = Tests\Native\Dummies\X86Binaries\RegOrMem16_Reg16\RegOrMem16_Reg16.asm
+	Tests\Native\Dummies\X86Binaries\RegOrMem16_Reg16\RegOrMem16_Reg16.bin = Tests\Native\Dummies\X86Binaries\RegOrMem16_Reg16\RegOrMem16_Reg16.bin
+EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -258,6 +266,7 @@ Global
 		{EE8795DB-1B7A-4D78-8021-FD8CBCC52720} = {719E7608-8AC8-49BD-BE5E-AFC1B464EC64}
 		{16F58711-5DA7-4DFF-90AE-91CCD192E010} = {091C6286-22F5-4407-BD17-805F157F2165}
 		{E3A1BC77-F37E-4206-9F8F-9022DE4B22EF} = {2C76E7A9-4183-4CF9-8584-2B703ED1B9F7}
+		{D4EF03CD-1E89-4250-AB82-FF1756F2F1C5} = {2D487327-F043-49E5-BB05-4D18C33F8C80}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {945A34E1-7D33-4D56-A02B-E74263DAB500}

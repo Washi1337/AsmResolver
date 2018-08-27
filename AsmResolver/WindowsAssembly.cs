@@ -359,7 +359,6 @@ namespace AsmResolver
                         fileOffset < sectionHeader.PointerToRawData + sectionHeader.SizeOfRawData);
         }
 
-        // TODO
         /// <summary>
         /// Rebuilds and writes the assembly to a specific file path.
         /// </summary>

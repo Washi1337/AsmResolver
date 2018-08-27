@@ -31,7 +31,7 @@ namespace AsmResolver.Net.Cts
             });
 
             _marshalDescriptor = new LazyValue<MarshalDescriptor>(() => 
-                MarshalDescriptor.FromReader(image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column2)));
+                MarshalDescriptor.FromReader(image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column2), true));
         }
 
         /// <inheritdoc />
