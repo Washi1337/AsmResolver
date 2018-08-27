@@ -114,6 +114,12 @@
         Sti,
         Cld,
         Std,
-        Rep
+        Rep,
+        Cmpxchg,
+        Movzx,
+        Movsx,
+        Btc,
+        Bsf,
+        Bsr
     }
 }
