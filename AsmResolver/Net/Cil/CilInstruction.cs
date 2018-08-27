@@ -228,12 +228,12 @@ namespace AsmResolver.Net.Cil
             int delta = 0;
 
             MethodSignature signature = null;
-            var member = Operand as IMethodDefOrRef;
+            var member = Operand as ICallableMemberReference;
             var standalone = Operand as StandAloneSignature;
             if (member != null)
-                signature = (MethodSignature) member.Signature;
+                signature = member.Signature as MethodSignature;
             else if (standalone != null)
-                signature = (MethodSignature) standalone.Signature;
+                signature = standalone.Signature as MethodSignature;
 
             switch (OpCode.StackBehaviourPop)
             {
@@ -264,18 +264,12 @@ namespace AsmResolver.Net.Cil
                     if (signature == null)
                     {
                         if (OpCode.Code == CilCode.Ret)
-                        {
                             delta = parent.Method.Signature.ReturnType.IsTypeOf("System", "Void") ? 0 : -1;
-                        }
-                        else
-                        {
-                            throw new ArgumentException("Invalid or unsupported operand.");
-                        }
                     }
                     else
                     {
                         delta = -signature.Parameters.Count;
-                        if (signature.HasThis)
+                        if (signature.HasThis && OpCode.Code != CilCode.Newobj)
                             delta--;
                     }
                     break;
@@ -295,10 +289,8 @@ namespace AsmResolver.Net.Cil
                     delta += 2;
                     break;
                 case CilStackBehaviour.Varpush:
-                    if (signature == null)
-                        throw new ArgumentException("Invalid or unsupported operand.");
-
-                    if (!signature.ReturnType.IsTypeOf("System", "Void"))
+                    if (signature != null 
+                        && (!signature.ReturnType.IsTypeOf("System", "Void") || OpCode.Code == CilCode.Newobj))
                         delta++;
                     break;
 
@@ -312,8 +304,7 @@ namespace AsmResolver.Net.Cil
 
         public override string ToString()
         {
-            return string.Format("IL_{0:X4}: {1}{2}", Offset, OpCode.Name,
-                Operand == null ? string.Empty : " " + OperandToString());
+            return $"IL_{Offset:X4}: {OpCode.Name}{(Operand == null ? string.Empty : " " + OperandToString())}";
         }
     }
 }

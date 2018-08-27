@@ -62,10 +62,13 @@ namespace AsmResolver.Tests.Net.Emit
             var mainMethod = image.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == TypeName).Methods.First(x => x.Name == MainMethodName);
 
             var instructions = mainMethod.CilMethodBody.Instructions;
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call,
-                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput),
+                CilInstruction.Create(CilOpCodes.Call,
+                    importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
             
             var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
@@ -87,12 +90,15 @@ namespace AsmResolver.Tests.Net.Emit
                 new LocalVariableSignature(new[] { image.TypeSystem.String }));
             
             var instructions = mainMethod.CilMethodBody.Instructions;
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Stloc_0));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldloc_0));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call,
-                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput),
+                CilInstruction.Create(CilOpCodes.Stloc_0),
+                CilInstruction.Create(CilOpCodes.Ldloc_0),
+                CilInstruction.Create(CilOpCodes.Call,
+                    importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
             
             var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
@@ -115,22 +121,22 @@ namespace AsmResolver.Tests.Net.Emit
             var handlerStart = CilInstruction.Create(CilOpCodes.Nop);
             var handlerEnd = CilInstruction.Create(CilOpCodes.Nop);
 
-            instructions.Add(tryStart);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Newobj,
-                importer.ImportMethod(typeof(Exception).GetConstructor(new[] { typeof(string) }))));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Throw));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Leave, handlerEnd));
-            
-            instructions.Add(handlerStart);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Callvirt,
-                importer.ImportMethod(typeof(Exception).GetMethod("get_Message"))));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call,
-                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Leave_S, handlerEnd));
-            instructions.Add(handlerEnd);
-            
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                tryStart,
+                CilInstruction.Create(CilOpCodes.Ldstr, expectedOutput),
+                CilInstruction.Create(CilOpCodes.Newobj, importer.ImportMethod(typeof(Exception).GetConstructor(new[] {typeof(string)}))),
+                CilInstruction.Create(CilOpCodes.Throw),
+                CilInstruction.Create(CilOpCodes.Leave, handlerEnd),
+
+                handlerStart,
+                CilInstruction.Create(CilOpCodes.Callvirt, importer.ImportMethod(typeof(Exception).GetMethod("get_Message"))),
+                CilInstruction.Create(CilOpCodes.Call, importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))),
+                CilInstruction.Create(CilOpCodes.Leave_S, handlerEnd),
+                handlerEnd,
+
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
 
             mainMethod.CilMethodBody.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Exception)
             {
@@ -191,12 +197,16 @@ namespace AsmResolver.Tests.Net.Emit
             var mainMethod = image.Assembly.Modules[0].TopLevelTypes.First(x => x.Name == TypeName).Methods.First(x => x.Name == MainMethodName);
 
             var instructions = mainMethod.CilMethodBody.Instructions;
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, "The secret number is: {0}"));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, nativeMethod));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Box, importer.ImportType(typeof(int))));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call,
-                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string),typeof(object)}))));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, "The secret number is: {0}"),
+                CilInstruction.Create(CilOpCodes.Call, nativeMethod),
+                CilInstruction.Create(CilOpCodes.Box, importer.ImportType(typeof(int))),
+                CilInstruction.Create(CilOpCodes.Call,
+                    importer.ImportMethod(
+                        typeof(Console).GetMethod("WriteLine", new[] {typeof(string), typeof(object)}))),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
             
             var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();

@@ -472,10 +472,14 @@ namespace AsmResolver.Tests.Net.Cil
             var var2 = new VariableSignature(image.TypeSystem.Int32);
             methodBody.Signature = new StandAloneSignature(new LocalVariableSignature(new[] { var1, var2 }));
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldloc, var1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Stloc, var1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldloc, var2));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Stloc, var2));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldloc, var1),
+                CilInstruction.Create(CilOpCodes.Stloc, var1),
+                CilInstruction.Create(CilOpCodes.Ldloc, var2),
+                CilInstruction.Create(CilOpCodes.Stloc, var2),
+                CilInstruction.Create(CilOpCodes.Ret) 
+            });
 
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
@@ -500,10 +504,14 @@ namespace AsmResolver.Tests.Net.Cil
             var param2 = new ParameterSignature(image.TypeSystem.Int32);
             methodBody.Method.Signature = new MethodSignature(new[] { param1, param2 }, image.TypeSystem.Void);
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldarg, param1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Starg, param1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldarg, param2));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Starg, param2));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldarg, param1),
+                CilInstruction.Create(CilOpCodes.Starg, param1),
+                CilInstruction.Create(CilOpCodes.Ldarg, param2),
+                CilInstruction.Create(CilOpCodes.Starg, param2),
+                CilInstruction.Create(CilOpCodes.Ret), 
+            });
 
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
@@ -526,7 +534,12 @@ namespace AsmResolver.Tests.Net.Cil
             var instructions = methodBody.Instructions;
 
             const string operand = "Lorem Ipsum Dolor Sit Amet";
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, operand));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, operand),
+                CilInstruction.Create(CilOpCodes.Pop), 
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
 
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
@@ -547,8 +560,6 @@ namespace AsmResolver.Tests.Net.Cil
             var instructions = methodBody.Instructions;
 
             var simpleMethod = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(string) }));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, "Some String"));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, simpleMethod));
 
             var genericInstanceMethod = new MethodSpecification(
                 new MemberReference(
@@ -562,11 +573,15 @@ namespace AsmResolver.Tests.Net.Cil
                 new GenericInstanceMethodSignature(importer.ImportTypeSignature(typeof(Stream))));
 
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, importer.ImportMethod(genericInstanceMethod)));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
-
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, "Some String"),
+                CilInstruction.Create(CilOpCodes.Call, simpleMethod),
+                CilInstruction.Create(CilOpCodes.Call, importer.ImportMethod(genericInstanceMethod)),
+                CilInstruction.Create(CilOpCodes.Pop),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
+            
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
 
@@ -640,12 +655,13 @@ namespace AsmResolver.Tests.Net.Cil
             var instructions = methodBody.Instructions;
 
             var signature = importer.ImportStandAloneSignature(
-                new StandAloneSignature(new MethodSignature(image.TypeSystem.Void)));
+                new StandAloneSignature(new MethodSignature(image.TypeSystem.Void) { HasThis = false }));
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Calli, signature));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
-
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Calli, signature),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
 
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();

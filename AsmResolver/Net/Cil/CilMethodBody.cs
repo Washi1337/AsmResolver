@@ -257,6 +257,9 @@ namespace AsmResolver.Net.Cil
         /// <remarks>This method will force the offsets of each instruction to be calculated.</remarks>
         public int ComputeMaxStack()
         {
+            if (Instructions.Count == 0)
+                return 0;
+            
             Instructions.CalculateOffsets();
 
             var visitedInstructions = new Dictionary<int, StackState>();
@@ -269,13 +272,19 @@ namespace AsmResolver.Net.Cil
                 agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.TryStart.Offset), 0));
                 agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.HandlerStart.Offset),
                     handler.HandlerType == ExceptionHandlerType.Finally ? 0 : 1));
-                if (handler.FilterStart!= null)
+                if (handler.FilterStart != null)
                     agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.FilterStart.Offset), 1));
             }
 
             while (agenda.Count > 0)
             {
                 var currentState = agenda.Pop();
+                if (currentState.InstructionIndex >= Instructions.Count)
+                {
+                    var last = Instructions[Instructions.Count - 1];
+                    throw new StackInbalanceException(this, last.Offset + last.Size);
+                }
+
                 var instruction = Instructions[currentState.InstructionIndex];
 
                 if (visitedInstructions.TryGetValue(currentState.InstructionIndex, out var visitedState))
@@ -291,6 +300,9 @@ namespace AsmResolver.Net.Cil
 
                     // Compute next stack size.
                     int nextStackSize = currentState.StackSize + instruction.GetStackDelta(this);
+                    
+                    if (nextStackSize < 0)
+                        throw new StackInbalanceException(this, instruction.Offset);
 
                     // Add outgoing edges to agenda.
                     switch (instruction.OpCode.FlowControl)
