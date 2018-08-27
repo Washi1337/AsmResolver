@@ -334,14 +334,14 @@ namespace AsmResolver.Net.Cts
             }
 
             foreach (var branch in branchInstructions)
-                branch.Operand = newBody.GetInstructionByOffset(((CilInstruction) branch.Operand).Offset);
+                branch.Operand = newBody.Instructions.GetByOffset(((CilInstruction) branch.Operand).Offset);
 
             foreach (var @switch in switchInstructions)
             {
                 var targets = (IEnumerable<CilInstruction>) @switch.Operand;
                 var newTargets = new List<CilInstruction>();
                 foreach (var target in targets)
-                    newTargets.Add(newBody.GetInstructionByOffset(target.Offset));
+                    newTargets.Add(newBody.Instructions.GetByOffset(target.Offset));
                 @switch.Operand = newTargets;
             }
         }
@@ -352,14 +352,14 @@ namespace AsmResolver.Net.Cts
             {
                 var newHandler = new ExceptionHandler(handler.HandlerType)
                 {
-                    TryStart = newBody.GetInstructionByOffset(handler.TryStart.Offset),
-                    TryEnd = newBody.GetInstructionByOffset(handler.TryEnd.Offset),
-                    HandlerStart = newBody.GetInstructionByOffset(handler.HandlerStart.Offset),
-                    HandlerEnd = newBody.GetInstructionByOffset(handler.HandlerEnd.Offset),
+                    TryStart = newBody.Instructions.GetByOffset(handler.TryStart.Offset),
+                    TryEnd = newBody.Instructions.GetByOffset(handler.TryEnd.Offset),
+                    HandlerStart = newBody.Instructions.GetByOffset(handler.HandlerStart.Offset),
+                    HandlerEnd = newBody.Instructions.GetByOffset(handler.HandlerEnd.Offset),
                 };
                 
                 if (handler.FilterStart != null)
-                    newHandler.FilterStart = newBody.GetInstructionByOffset(handler.FilterStart.Offset);
+                    newHandler.FilterStart = newBody.Instructions.GetByOffset(handler.FilterStart.Offset);
                 if (handler.CatchType != null)
                     newHandler.CatchType = _importer.ImportType(handler.CatchType);
                 

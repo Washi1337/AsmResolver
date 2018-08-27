@@ -157,7 +157,7 @@ namespace AsmResolver.Tests.Net.Emit
                         x.OpCode.OperandType == CilOperandType.InlineVar
                         || x.OpCode.OperandType == CilOperandType.ShortInlineVar))
                     {
-                        var originalInstruction = originalBody.GetInstructionByOffset(instruction.Offset);
+                        var originalInstruction = originalBody.Instructions.GetByOffset(instruction.Offset);
                         Assert.NotNull(instruction.Operand);
                         Assert.Equal(originalVariables.IndexOf((VariableSignature) originalInstruction.Operand),
                             variables.IndexOf((VariableSignature) instruction.Operand));
@@ -193,7 +193,7 @@ namespace AsmResolver.Tests.Net.Emit
                     x.OpCode.OperandType == CilOperandType.InlineArgument
                     || x.OpCode.OperandType == CilOperandType.ShortInlineArgument))
                 {
-                    var originalInstruction = originalBody.GetInstructionByOffset(instruction.Offset);
+                    var originalInstruction = originalBody.Instructions.GetByOffset(instruction.Offset);
                     Assert.NotNull(instruction.Operand);
                     Assert.Equal(originalParameters.IndexOf((ParameterSignature) originalInstruction.Operand),
                         parameters.IndexOf((ParameterSignature) instruction.Operand));

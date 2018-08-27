@@ -9,11 +9,24 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cil
 {
+    /// <summary>
+    /// Provides a representation of a CIL method body found in a .NET image. 
+    /// </summary>
     public class CilMethodBody : MethodBody, IOperandResolver
     {
+        /// <summary>
+        /// Provides information about the state of the stack at a particular point of execution in a method.  
+        /// </summary>
         private struct StackState
         {
+            /// <summary>
+            /// The index of the instruction the state is associated to.
+            /// </summary>
             public readonly int InstructionIndex;
+            
+            /// <summary>
+            /// The number of values currently on the stack.
+            /// </summary>
             public readonly int StackSize;
 
             public StackState(int instructionIndex, int stackSize)
@@ -22,12 +35,21 @@ namespace AsmResolver.Net.Cil
                 StackSize = stackSize;
             }
 
+            #if DEBUG
             public override string ToString()
             {
-                return string.Format("InstructionIndex: {0}, StackSize: {1}", InstructionIndex, StackSize);
+                return $"InstructionIndex: {InstructionIndex}, StackSize: {StackSize}";
             }
+            #endif
         }
 
+        /// <summary>
+        /// Interprets a raw method body to a CILMethodBody, disassembling all instructions, obtaining the local variables
+        /// and reading the extra sections for exception handlers.
+        /// </summary>
+        /// <param name="method">The parent method the method body is associated to.</param>
+        /// <param name="rawMethodBody">The raw method body to convert.</param>
+        /// <returns>The converted method body.</returns>
         public static CilMethodBody FromRawMethodBody(MethodDefinition method, CilRawMethodBody rawMethodBody)
         {
             var body = new CilMethodBody(method);
@@ -37,10 +59,14 @@ namespace AsmResolver.Net.Cil
             {
                 body.MaxStack = fatBody.MaxStack;
                 body.InitLocals = fatBody.InitLocals;
-                
-                IMetadataMember signature;
-                if (method.Image.TryResolveMember(new MetadataToken(fatBody.LocalVarSigToken), out signature))
+
+                if (method.Image.TryResolveMember(new MetadataToken(fatBody.LocalVarSigToken), out var signature))
                     body.Signature = signature as StandAloneSignature;
+            }
+            else
+            {
+                body.MaxStack = 8;
+                body.InitLocals = false;
             }
 
             var codeReader = new MemoryStreamReader(rawMethodBody.Code);
@@ -64,400 +90,109 @@ namespace AsmResolver.Net.Cil
         {
             Method = method;
             MaxStack = 8;
-            Instructions = new List<CilInstruction>();
+            Instructions = new CilInstructionCollection(this);
             ExceptionHandlers = new List<ExceptionHandler>();
-            
+            ComputeMaxStackOnBuild = true;
+
             // TODO: catch if method is not added to type yet.
 //            ThisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
         }
 
+        /// <summary>
+        /// Gets the method the method body is associated to.
+        /// </summary>
         public MethodDefinition Method
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the this parameter, if present.
+        /// </summary>
         public ParameterSignature ThisParameter
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether variables are initialized by the runtime to their default values.
+        /// </summary>
         public bool InitLocals
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="MaxStack"/> field should be recalculated upon rebuilding
+        /// the method body. Set to false if a custom value is provided.
+        /// </summary>
+        public bool ComputeMaxStackOnBuild
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets a value indicating the maximum amount of values that can be pushed onto the stack.
+        /// </summary>
         public int MaxStack
         {
             get;
             set;
         }
 
-        public bool IsFat
-        {
-            get
-            {
-                var localVarSig = Signature == null ? null : Signature.Signature as LocalVariableSignature;
-                return MaxStack > 8 ||
-                       GetCodeSize() >= 64 ||
-                       (localVarSig != null && localVarSig.Variables.Count > 0) ||
-                       ExceptionHandlers.Count > 0;
-            }
-        }
+        /// <summary>
+        /// Gets a value indicating whether the method body is using the fat format.
+        /// </summary>
+        public bool IsFat => MaxStack > 8 
+                             || GetCodeSize() >= 64
+                             || (Signature?.Signature is LocalVariableSignature localVarSig && localVarSig.Variables.Count > 0) 
+                             || ExceptionHandlers.Count > 0;
 
+        /// <summary>
+        /// Gets the standalone signature that was referenced by the method header. This signature typically contains
+        /// a <see cref="LocalVariableSignature"/> which holds the variables.
+        /// </summary>
         public StandAloneSignature Signature
         {
             get;
             set;
         }
 
-        public IList<CilInstruction> Instructions
+        /// <summary>
+        /// Gets the collection of instructions present in the method body.
+        /// </summary>
+        public CilInstructionCollection Instructions
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the collection of exception handlers defined in the method body.
+        /// </summary>
         public IList<ExceptionHandler> ExceptionHandlers
         {
             get;
-            private set;
         }
 
-        public int GetInstructionIndex(int offset)
-        {
-            int left = 0;
-            int right = Instructions.Count - 1;
-
-            while (left <= right)
-            {
-                int m = (left + right) / 2;
-                int currentOffset = Instructions[m].Offset;
-
-                if (currentOffset > offset)
-                    right = m - 1;
-                else if (currentOffset < offset)
-                    left = m + 1;
-                else
-                    return m;
-            }
-
-            return -1;
-        }
-
-        public CilInstruction GetInstructionByOffset(int offset)
-        {
-            int index = GetInstructionIndex(offset);
-            return index == -1 ? null : Instructions[index];
-        }
-
-        public void CalculateOffsets()
-        {
-            var currentOffset = 0;
-            foreach (var instruction in Instructions)
-            {
-                instruction.Offset = currentOffset;
-                currentOffset += instruction.Size;
-            }
-        }
-
-        public void ExpandMacros()
-        {
-            foreach (var instruction in Instructions)
-                ExpandMacro(instruction);
-            CalculateOffsets();
-        }
-
-        private void ExpandMacro(CilInstruction instruction)
-        {
-            switch (instruction.OpCode.Code)
-            {
-                case CilCode.Br_S:
-                    instruction.OpCode = CilOpCodes.Br;
-                    break;
-                case CilCode.Leave_S:
-                    instruction.OpCode = CilOpCodes.Leave;
-                    break;
-                case CilCode.Brfalse_S:
-                    instruction.OpCode = CilOpCodes.Brfalse;
-                    break;
-                case CilCode.Brtrue_S:
-                    instruction.OpCode = CilOpCodes.Brtrue;
-                    break;
-                case CilCode.Beq_S:
-                    instruction.OpCode = CilOpCodes.Beq;
-                    break;
-                case CilCode.Bge_S:
-                    instruction.OpCode = CilOpCodes.Bge;
-                    break;
-                case CilCode.Bge_Un_S:
-                    instruction.OpCode = CilOpCodes.Bge_Un;
-                    break;
-                case CilCode.Bgt_S:
-                    instruction.OpCode = CilOpCodes.Bgt;
-                    break;
-                case CilCode.Bgt_Un_S:
-                    instruction.OpCode = CilOpCodes.Bgt_Un;
-                    break;
-                case CilCode.Ble_S:
-                    instruction.OpCode = CilOpCodes.Ble;
-                    break;
-                case CilCode.Ble_Un_S:
-                    instruction.OpCode = CilOpCodes.Ble_Un;
-                    break;
-                case CilCode.Blt_S:
-                    instruction.OpCode = CilOpCodes.Blt;
-                    break;
-                case CilCode.Blt_Un_S:
-                    instruction.OpCode = CilOpCodes.Blt_Un;
-                    break;
-                case CilCode.Bne_Un_S:
-                    instruction.OpCode = CilOpCodes.Bne_Un;
-                    break;
-
-                case CilCode.Ldloc_S:
-                    instruction.OpCode = CilOpCodes.Ldloc;
-                    break;
-
-                case CilCode.Ldloca_S:
-                    instruction.OpCode = CilOpCodes.Ldloca;
-                    break;
-
-                case CilCode.Ldloc_0:
-                case CilCode.Ldloc_1:
-                case CilCode.Ldloc_2:
-                case CilCode.Ldloc_3:
-                    instruction.Operand = ((IOperandResolver) this).ResolveVariable(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
-                    instruction.OpCode = CilOpCodes.Ldloc;
-                    break;
-
-                case CilCode.Stloc_S:
-                    instruction.OpCode = CilOpCodes.Stloc;
-                    break;
-
-                case CilCode.Stloc_0:
-                case CilCode.Stloc_1:
-                case CilCode.Stloc_2:
-                case CilCode.Stloc_3:
-                    instruction.Operand = ((IOperandResolver) this).ResolveVariable(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
-                    instruction.OpCode = CilOpCodes.Stloc;
-                    break;
-
-                case CilCode.Ldarg_S:
-                    instruction.OpCode = CilOpCodes.Ldarg;
-                    break;
-
-                case CilCode.Ldarga_S:
-                    instruction.OpCode = CilOpCodes.Ldarga;
-                    break;
-
-                case CilCode.Ldarg_0:
-                case CilCode.Ldarg_1:
-                case CilCode.Ldarg_2:
-                case CilCode.Ldarg_3:
-                    instruction.Operand = ((IOperandResolver) this).ResolveParameter(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
-                    instruction.OpCode = CilOpCodes.Ldarg;
-                    break;
-
-                case CilCode.Starg_S:
-                    instruction.OpCode = CilOpCodes.Starg;
-                    break;
-
-                case CilCode.Ldc_I4_0:
-                case CilCode.Ldc_I4_1:
-                case CilCode.Ldc_I4_2:
-                case CilCode.Ldc_I4_3:
-                case CilCode.Ldc_I4_4:
-                case CilCode.Ldc_I4_5:
-                case CilCode.Ldc_I4_6:
-                case CilCode.Ldc_I4_7:
-                case CilCode.Ldc_I4_8:
-                    instruction.Operand = instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48;
-                    instruction.OpCode = CilOpCodes.Ldc_I4;
-                    break;
-                case CilCode.Ldc_I4_S:
-                    instruction.OpCode = CilOpCodes.Ldc_I4;
-                    break;
-                case CilCode.Ldc_I4_M1:
-                    instruction.OpCode = CilOpCodes.Ldc_I4;
-                    instruction.Operand = -1;
-                    break;
-            }
-        }
-
-        public void OptimizeMacros()
-        {
-            CalculateOffsets();
-            foreach (var instruction in Instructions)
-                OptimizeMacro(instruction);
-            CalculateOffsets();
-        }
-
-        private void OptimizeMacro(CilInstruction instruction)
-        {
-            switch (instruction.OpCode.OperandType)
-            {
-                case CilOperandType.InlineBrTarget:
-                    TryOptimizeBranch(instruction);
-                    break;
-                case CilOperandType.InlineVar:
-                    TryOptimizeVariable(instruction);
-                    break;
-                case CilOperandType.InlineArgument:
-                    TryOptimizeArgument(instruction);
-                    break;
-            }
-
-            if (instruction.OpCode.Code == CilCode.Ldc_I4)
-                TryOptimizeLdc(instruction);
-        }
-
-        private void TryOptimizeBranch(CilInstruction instruction)
-        {
-            CilInstruction operand = instruction.Operand as CilInstruction;
-            int relativeOperand = operand.Offset - (instruction.Offset + 2);
-            if (operand == null || relativeOperand < sbyte.MinValue || relativeOperand > sbyte.MaxValue)
-                return;
-            switch (instruction.OpCode.Code)
-            {
-                case CilCode.Br:
-                    instruction.OpCode = CilOpCodes.Br_S;
-                    break;
-                case CilCode.Leave:
-                    instruction.OpCode = CilOpCodes.Leave_S;
-                    break;
-                case CilCode.Brfalse:
-                    instruction.OpCode = CilOpCodes.Brfalse_S;
-                    break;
-                case CilCode.Brtrue:
-                    instruction.OpCode = CilOpCodes.Brtrue_S;
-                    break;
-                case CilCode.Beq:
-                    instruction.OpCode = CilOpCodes.Beq_S;
-                    break;
-                case CilCode.Bge:
-                    instruction.OpCode = CilOpCodes.Bge_S;
-                    break;
-                case CilCode.Bge_Un:
-                    instruction.OpCode = CilOpCodes.Bge_Un_S;
-                    break;
-                case CilCode.Bgt:
-                    instruction.OpCode = CilOpCodes.Bgt_S;
-                    break;
-                case CilCode.Bgt_Un:
-                    instruction.OpCode = CilOpCodes.Bgt_Un_S;
-                    break;
-                case CilCode.Ble:
-                    instruction.OpCode = CilOpCodes.Ble_S;
-                    break;
-                case CilCode.Ble_Un:
-                    instruction.OpCode = CilOpCodes.Ble_Un_S;
-                    break;
-                case CilCode.Blt:
-                    instruction.OpCode = CilOpCodes.Blt_S;
-                    break;
-                case CilCode.Blt_Un:
-                    instruction.OpCode = CilOpCodes.Blt_Un_S;
-                    break;
-                case CilCode.Bne_Un:
-                    instruction.OpCode = CilOpCodes.Bne_Un_S;
-                    break;
-            }
-        }
-
-        private void TryOptimizeVariable(CilInstruction instruction)
-        {
-            var variable = instruction.Operand as VariableSignature;
-            var localVarSig = Signature != null ? Signature.Signature as LocalVariableSignature : null;
-            if (localVarSig == null || variable == null)
-                return;
-            int index = localVarSig.Variables.IndexOf(variable);
-            if (index < 0 || index > byte.MaxValue)
-                return;
-
-            switch (instruction.OpCode.Code)
-            {
-                case CilCode.Ldloc:
-                    if (index <= 3)
-                    {
-                        instruction.OpCode = CilOpCodes.SingleByteOpCodes[CilOpCodes.Ldloc_0.Op2 + index];
-                        instruction.Operand = null;
-                    }
-                    else
-                    {
-                        instruction.OpCode = CilOpCodes.Ldloc_S;
-                    }
-                    break;
-                case CilCode.Ldloca:
-                    instruction.OpCode = CilOpCodes.Ldloca_S;
-                    break;
-                case CilCode.Stloc:
-                    if (index <= 3)
-                    {
-                        instruction.OpCode = CilOpCodes.SingleByteOpCodes[CilOpCodes.Stloc_0.Op2 + index];
-                        instruction.Operand = null;
-                    }
-                    else
-                    {
-                        instruction.OpCode = CilOpCodes.Stloc_S;
-                    }
-                    break;
-            }
-        }
-
-        private void TryOptimizeArgument(CilInstruction instruction)
-        {
-            var parameter = instruction.Operand as ParameterSignature;
-            if (Method == null || Method.Signature == null || parameter == null)
-                return;
-            int index = Method.Signature.Parameters.IndexOf(parameter);
-            if (index < 0 || index > byte.MaxValue)
-                return;
-
-            switch (instruction.OpCode.Code)
-            {
-                case CilCode.Ldarg:
-                    if (index <= 3)
-                    {
-                        instruction.OpCode = CilOpCodes.SingleByteOpCodes[CilOpCodes.Ldarg_0.Op2 + index];
-                        instruction.Operand = null;
-                    }
-                    else
-                    {
-                        instruction.OpCode = CilOpCodes.Ldarg_S;
-                    }
-                    break;
-                case CilCode.Ldarga:
-                    instruction.OpCode = CilOpCodes.Ldarga_S;
-                    break;
-            }
-        }
-
-        private void TryOptimizeLdc(CilInstruction instruction)
-        {
-            int value = (int) instruction.Operand;
-            if (value >= -1 && value <= 8)
-            {
-                instruction.OpCode = CilOpCodes.SingleByteOpCodes[CilOpCodes.Ldc_I4_0.Op2 + value];
-                instruction.Operand = null;
-            }
-            else if (value >= sbyte.MinValue && value <= sbyte.MaxValue)
-            {
-                instruction.OpCode = CilOpCodes.Ldc_I4_S;
-                instruction.Operand = Convert.ToSByte(value);
-            }
-        }
-
+        /// <inheritdoc />
         public override uint GetCodeSize()
         {
-            return (uint) Instructions.Sum(x => x.Size);
+            return (uint) Instructions.Size;
         }
 
+        /// <inheritdoc />
         public override FileSegment CreateRawMethodBody(MetadataBuffer buffer)
         {
             using (var codeStream = new MemoryStream())
             {
+                if (ComputeMaxStackOnBuild)
+                    MaxStack = ComputeMaxStack();
+                else
+                    Instructions.CalculateOffsets();
+                
                 WriteCode(buffer, new BinaryStreamWriter(codeStream));
 
                 if (!IsFat)
@@ -468,8 +203,7 @@ namespace AsmResolver.Net.Cil
                     };
                 }
 
-                if (Signature != null && Signature.Signature != null)
-                    Signature.Signature.Prepare(buffer);
+                Signature?.Signature?.Prepare(buffer);
 
                 var fatBody = new CilRawFatMethodBody
                 {
@@ -508,8 +242,6 @@ namespace AsmResolver.Net.Cil
 
         private void WriteCode(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
-            CalculateOffsets();
-
             var builder = new DefaultOperandBuilder(this, buffer); 
             var assembler = new CilAssembler(builder, writer);
 
@@ -517,9 +249,15 @@ namespace AsmResolver.Net.Cil
                 assembler.Write(instruction);
         }
 
+        /// <summary>
+        /// Computes the maximum values pushed onto the stack by this method body.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="StackInbalanceException">Occurs when the method body will result in an unbalanced stack.</exception>
+        /// <remarks>This method will force the offsets of each instruction to be calculated.</remarks>
         public int ComputeMaxStack()
         {
-            CalculateOffsets();
+            Instructions.CalculateOffsets();
 
             var visitedInstructions = new Dictionary<int, StackState>();
             var agenda = new Stack<StackState>();
@@ -528,11 +266,11 @@ namespace AsmResolver.Net.Cil
             agenda.Push(new StackState(0, 0));
             foreach (var handler in ExceptionHandlers)
             {
-                agenda.Push(new StackState(GetInstructionIndex(handler.TryStart.Offset), 0));
-                agenda.Push(new StackState(GetInstructionIndex(handler.HandlerStart.Offset),
+                agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.TryStart.Offset), 0));
+                agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.HandlerStart.Offset),
                     handler.HandlerType == ExceptionHandlerType.Finally ? 0 : 1));
                 if (handler.FilterStart!= null)
-                    agenda.Push(new StackState(GetInstructionIndex(handler.FilterStart.Offset), 1));
+                    agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.FilterStart.Offset), 1));
             }
 
             while (agenda.Count > 0)
@@ -540,8 +278,7 @@ namespace AsmResolver.Net.Cil
                 var currentState = agenda.Pop();
                 var instruction = Instructions[currentState.InstructionIndex];
 
-                StackState visitedState;
-                if (visitedInstructions.TryGetValue(currentState.InstructionIndex, out visitedState))
+                if (visitedInstructions.TryGetValue(currentState.InstructionIndex, out var visitedState))
                 {
                     // Check if previously visited state is consistent with current observation.
                     if (visitedState.StackSize != currentState.StackSize)
@@ -560,7 +297,7 @@ namespace AsmResolver.Net.Cil
                     {
                         case CilFlowControl.Branch:
                             agenda.Push(new StackState(
-                                GetInstructionIndex(((CilInstruction) instruction.Operand).Offset),
+                                Instructions.GetIndexByOffset(((CilInstruction) instruction.Operand).Offset),
                                 nextStackSize));
                             break;
                         case CilFlowControl.CondBranch:
@@ -569,14 +306,14 @@ namespace AsmResolver.Net.Cil
                                 case CilOperandType.InlineBrTarget:
                                 case CilOperandType.ShortInlineBrTarget:
                                     agenda.Push(new StackState(
-                                        GetInstructionIndex(((CilInstruction) instruction.Operand).Offset),
+                                        Instructions.GetIndexByOffset(((CilInstruction) instruction.Operand).Offset),
                                         nextStackSize));
                                     break;
                                 case CilOperandType.InlineSwitch:
                                     foreach (var target in ((IEnumerable<CilInstruction>) instruction.Operand))
                                     {
                                         agenda.Push(new StackState(
-                                            GetInstructionIndex(target.Offset),
+                                            Instructions.GetIndexByOffset(target.Offset),
                                             nextStackSize));
                                     }
                                     break;
@@ -607,8 +344,7 @@ namespace AsmResolver.Net.Cil
 
         IMetadataMember IOperandResolver.ResolveMember(MetadataToken token)
         {
-            IMetadataMember result;
-            Method.Image.TryResolveMember(token, out result);
+            Method.Image.TryResolveMember(token, out var result);
             return result;
         }
 
@@ -619,10 +355,11 @@ namespace AsmResolver.Net.Cil
 
         VariableSignature IOperandResolver.ResolveVariable(int index)
         {
-            var localVarSig = Signature != null ? Signature.Signature as LocalVariableSignature : null;
-            if (localVarSig == null || index < 0 || index >= localVarSig.Variables.Count)
-                return null;
-            return localVarSig.Variables[index];
+            return !(Signature?.Signature is LocalVariableSignature localVarSig)
+                   || index < 0
+                   || index >= localVarSig.Variables.Count
+                ? null
+                : localVarSig.Variables[index];
         }
 
         ParameterSignature IOperandResolver.ResolveParameter(int index)

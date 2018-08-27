@@ -416,7 +416,7 @@ namespace AsmResolver.Tests.Net.Cil
             instructions.Add(target1);
             instructions.Add(CilInstruction.Create(CilOpCodes.Br, target2));
 
-            methodBody.CalculateOffsets();
+            methodBody.Instructions.CalculateOffsets();
             
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
@@ -448,17 +448,17 @@ namespace AsmResolver.Tests.Net.Cil
             instructions.Add(target3);
             instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
 
-            methodBody.CalculateOffsets();
+            methodBody.Instructions.CalculateOffsets();
 
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
 
             var newMethod = (MethodDefinition)image.ResolveMember(mapping[methodBody.Method]);
-            instructions = (IList<CilInstruction>) newMethod.CilMethodBody.Instructions[1].Operand;
+            var targets = (IList<CilInstruction>) newMethod.CilMethodBody.Instructions[1].Operand;
 
-            Assert.Equal(target1.Offset, instructions[0].Offset);
-            Assert.Equal(target2.Offset, instructions[1].Offset);
-            Assert.Equal(target3.Offset, instructions[2].Offset);
+            Assert.Equal(target1.Offset, targets[0].Offset);
+            Assert.Equal(target2.Offset, targets[1].Offset);
+            Assert.Equal(target3.Offset, targets[2].Offset);
         }
 
         [Fact]

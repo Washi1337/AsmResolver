@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>5</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -93,6 +93,7 @@
     <Compile Include="Net\BlobStream.cs" />
     <Compile Include="Net\Cil\CilExtraSection.cs" />
     <Compile Include="Net\Cil\CilExtraSectionAttributes.cs" />
+    <Compile Include="Net\Cil\CilInstructionCollection.cs" />
     <Compile Include="Net\Cil\CilRawFatMethodBody.cs" />
     <Compile Include="Net\Cil\CilRawMethodBody.cs" />
     <Compile Include="Net\Cil\CilRawSmallMethodBody.cs" />
