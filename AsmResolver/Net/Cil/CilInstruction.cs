@@ -204,14 +204,13 @@ namespace AsmResolver.Net.Cil
                 case CilOperandType.InlineSig:
                 case CilOperandType.InlineTok:
                 case CilOperandType.InlineType:
-                    var member = Operand as IMetadataMember;
-                    return member != null
+                    return Operand is IMetadataMember member
                         ? member.ToString()
                         : "TOKEN<0x" + ((MetadataToken) Operand) + ">";
 
                 case CilOperandType.InlineString:
                     return Operand is string
-                        ? string.Format("\"{0}\"", Operand)
+                        ? $"\"{Operand}\""
                         : "TOKEN<0x" + ((MetadataToken) Operand) + ">";
                 case CilOperandType.InlineSwitch:
                     return string.Join(", ", ((CilInstruction[])Operand).Select(x => "IL_" + x.Offset.ToString("X4")));

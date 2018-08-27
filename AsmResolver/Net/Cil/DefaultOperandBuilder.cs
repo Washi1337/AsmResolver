@@ -6,6 +6,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cil
 {
+    /// <summary>
+    /// Provides the default implementation of a <see cref="IOperandBuilder"/>.
+    /// </summary>
     public class DefaultOperandBuilder : IOperandBuilder
     {
         private readonly CilMethodBody _methodBody;
@@ -19,31 +22,29 @@ namespace AsmResolver.Net.Cil
 
         public MetadataToken GetMetadataToken(IMetadataMember member)
         {
-            var type = member as ITypeDefOrRef;
-            if (type != null)
-                return _buffer.TableStreamBuffer.GetTypeToken(type);
-            
-            var reference = member as MemberReference;
-            if (reference != null)
-                return _buffer.TableStreamBuffer.GetMemberReferenceToken(reference);
-            
-            var method = member as IMethodDefOrRef;
-            if (method != null)
-                return _buffer.TableStreamBuffer.GetMethodToken(method);
-
-            var field = member as FieldDefinition;
-            if (field != null)
-                return _buffer.TableStreamBuffer.GetNewToken(field);
-
-            var specification = member as MethodSpecification;
-            if (specification != null)
-                return _buffer.TableStreamBuffer.GetMethodSpecificationToken(specification);
-
-            var standAlone = member as StandAloneSignature;
-            if (standAlone != null)
-                return _buffer.TableStreamBuffer.GetStandaloneSignatureToken(standAlone);
-            
-            throw new NotSupportedException("Invalid or unsupported operand " + member + ".");
+            switch (member)
+            {
+                case ITypeDefOrRef type:
+                    return _buffer.TableStreamBuffer.GetTypeToken(type);
+                
+                case MemberReference reference:
+                    return _buffer.TableStreamBuffer.GetMemberReferenceToken(reference);
+                
+                case IMethodDefOrRef method:
+                    return _buffer.TableStreamBuffer.GetMethodToken(method);
+                
+                case FieldDefinition field:
+                    return _buffer.TableStreamBuffer.GetNewToken(field);
+                
+                case MethodSpecification specification:
+                    return _buffer.TableStreamBuffer.GetMethodSpecificationToken(specification);
+                
+                case StandAloneSignature standAlone:
+                    return _buffer.TableStreamBuffer.GetStandaloneSignatureToken(standAlone);
+                
+                default:
+                    throw new NotSupportedException("Invalid or unsupported operand " + member + ".");
+            }
         }
 
         public uint GetStringOffset(string value)
@@ -54,14 +55,10 @@ namespace AsmResolver.Net.Cil
         public int GetVariableIndex(VariableSignature variable)
         {
             var methodSignature = _methodBody.Signature;
-            if (methodSignature == null)
-                return -1;
 
-            var localVarSig = methodSignature.Signature as LocalVariableSignature;
-            if (localVarSig == null)
-                return -1;
-            
-            return localVarSig.Variables.IndexOf(variable);
+            return methodSignature?.Signature is LocalVariableSignature localVarSig
+                ? localVarSig.Variables.IndexOf(variable)
+                : -1;
         }
 
         public int GetParameterIndex(ParameterSignature parameter)

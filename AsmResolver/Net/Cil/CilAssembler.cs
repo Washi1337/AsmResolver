@@ -5,23 +5,39 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cil
 {
+    /// <summary>
+    /// Provides a mechanism for assembling CIL instructions to their binary representation.
+    /// </summary>
     public class CilAssembler
     {
         private readonly IOperandBuilder _builder;
         private readonly IBinaryStreamWriter _writer;
 
+        /// <summary>
+        /// Creates a new assembler using an operand builder and an output stream.
+        /// </summary>
+        /// <param name="builder">The raw operand synthesizer.</param>
+        /// <param name="writer">The output stream to write the instructions to.</param>
         public CilAssembler(IOperandBuilder builder, IBinaryStreamWriter writer)
         {
             _builder = builder;
             _writer = writer;
         }
 
+        /// <summary>
+        /// Writes a single instruction to the output stream.
+        /// </summary>
+        /// <param name="instruction">The instruction to write.</param>
         public void Write(CilInstruction instruction)
         {
             WriteOpCode(instruction.OpCode);
             WriteOperand(instruction);
         }
 
+        /// <summary>
+        /// Writes the operation code to the output stream.
+        /// </summary>
+        /// <param name="opCode">The opcode to write.</param>
         private void WriteOpCode(CilOpCode opCode)
         {
             if (opCode.Size == 2)
@@ -29,6 +45,11 @@ namespace AsmResolver.Net.Cil
             _writer.WriteByte(opCode.Op2);
         }
 
+        /// <summary>
+        /// Writes the operand of the instruction to the output stream. 
+        /// </summary>
+        /// <param name="instruction"></param>
+        /// <exception cref="InvalidOperationException"></exception>
         private void WriteOperand(CilInstruction instruction)
         {
             switch (instruction.OpCode.OperandType)
@@ -80,10 +101,7 @@ namespace AsmResolver.Net.Cil
                 case CilOperandType.InlineType:
                     var token = _builder.GetMetadataToken((IMetadataMember) instruction.Operand);
                     if (token.Rid == 0)
-                    {
-                        throw new InvalidOperationException(string.Format("Member {0} has an invalid metadata token.",
-                            instruction.Operand));
-                    }
+                        throw new InvalidOperationException($"Member {instruction.Operand} has an invalid metadata token.");
 
                     _writer.WriteUInt32(token.ToUInt32());
                     break;

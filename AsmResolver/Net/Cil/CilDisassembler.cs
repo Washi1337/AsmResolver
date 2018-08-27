@@ -5,17 +5,29 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cil
 {
+    /// <summary>
+    /// Provides a mechanism for disassembling CIL code from a binary input stream.
+    /// </summary>
     public class CilDisassembler 
     {
         private readonly IBinaryStreamReader _reader;
         private readonly IOperandResolver _resolver;
 
+        /// <summary>
+        /// Creates a new disassembler using a binary input stream and an operand interpreter.
+        /// </summary>
+        /// <param name="reader">The binary input stream to read the raw data from.</param>
+        /// <param name="resolver">The raw operand interpreter.</param>
         public CilDisassembler(IBinaryStreamReader reader, IOperandResolver resolver)
         {
             _reader = reader;
             _resolver = resolver;
         }
 
+        /// <summary>
+        /// Disassembles the entire binary stream. 
+        /// </summary>
+        /// <returns>The list of instructions that was disassembled.</returns>
         public IList<CilInstruction> Disassemble()
         {
             var instructions = new List<CilInstruction>();
@@ -28,6 +40,10 @@ namespace AsmResolver.Net.Cil
             return instructions;
         }
 
+        /// <summary>
+        /// Reads the next instruction from the input stream.
+        /// </summary>
+        /// <returns>The disassembled instruction.</returns>
         private CilInstruction ReadNextInstruction()
         {
             var offset = (int)(_reader.Position - _reader.StartPosition);
