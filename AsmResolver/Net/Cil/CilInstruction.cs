@@ -301,6 +301,28 @@ namespace AsmResolver.Net.Cil
             return delta;
         }
 
+        private bool Equals(CilInstruction other)
+        {
+            return OpCode.Equals(other.OpCode) && Equals(Operand, other.Operand);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            return obj is CilInstruction other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (OpCode.GetHashCode() * 397) ^ (Operand != null ? Operand.GetHashCode() : 0);
+            }
+        }
+
         public override string ToString()
         {
             return $"IL_{Offset:X4}: {OpCode.Name}{(Operand == null ? string.Empty : " " + OperandToString())}";
