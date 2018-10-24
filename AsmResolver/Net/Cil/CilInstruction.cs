@@ -303,7 +303,7 @@ namespace AsmResolver.Net.Cil
 
         private bool Equals(CilInstruction other)
         {
-            return OpCode.Equals(other.OpCode) && Equals(Operand, other.Operand);
+            return Offset == other.Offset && OpCode.Equals(other.OpCode) && Equals(Operand, other.Operand);
         }
 
         public override bool Equals(object obj)
@@ -319,7 +319,10 @@ namespace AsmResolver.Net.Cil
         {
             unchecked
             {
-                return (OpCode.GetHashCode() * 397) ^ (Operand != null ? Operand.GetHashCode() : 0);
+                int hashCode = Offset;
+                hashCode = (hashCode * 397) ^ OpCode.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Operand != null ? Operand.GetHashCode() : 0);
+                return hashCode;
             }
         }
 
