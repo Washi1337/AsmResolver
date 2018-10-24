@@ -294,9 +294,12 @@ namespace AsmResolver.Net.Cil
                     instruction.Operand = instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48;
                     instruction.OpCode = CilOpCodes.Ldc_I4;
                     break;
+                
                 case CilCode.Ldc_I4_S:
                     instruction.OpCode = CilOpCodes.Ldc_I4;
+                    instruction.Operand = Convert.ToInt32(instruction.Operand);
                     break;
+                
                 case CilCode.Ldc_I4_M1:
                     instruction.OpCode = CilOpCodes.Ldc_I4;
                     instruction.Operand = -1;
