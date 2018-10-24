@@ -45,9 +45,12 @@ namespace AsmResolver.Tests.Net.Cil
             var writeLine = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(string) }));
 
             var instructions = methodBody.Instructions;
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, "Lorem Ipsum"));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, "Lorem Ipsum"),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
 
             Assert.Equal(1, methodBody.ComputeMaxStack());
         }
@@ -61,11 +64,14 @@ namespace AsmResolver.Tests.Net.Cil
             var writeLine = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(int) }));
 
             var instructions = methodBody.Instructions;
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_2));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Add));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_2),
+                CilInstruction.Create(CilOpCodes.Add),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
 
             Assert.Equal(2, methodBody.ComputeMaxStack());
         }
@@ -80,12 +86,14 @@ namespace AsmResolver.Tests.Net.Cil
 
             var instructions = methodBody.Instructions;
             var target = CilInstruction.Create(CilOpCodes.Call, writeLine);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Br, target));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_2));
-            instructions.Add(target);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Br, target),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_2),
+                target,
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
             Assert.Equal(1, methodBody.ComputeMaxStack());
         }
 
@@ -101,15 +109,18 @@ namespace AsmResolver.Tests.Net.Cil
             var elseInstr = CilInstruction.Create(CilOpCodes.Sub);
             var endInstr = CilInstruction.Create(CilOpCodes.Call, writeLine);
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_2));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_0));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Brtrue, elseInstr));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Add));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Br, endInstr));
-            instructions.Add(elseInstr);
-            instructions.Add(endInstr);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_2),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_0),
+                CilInstruction.Create(CilOpCodes.Brtrue, elseInstr),
+                CilInstruction.Create(CilOpCodes.Add),
+                CilInstruction.Create(CilOpCodes.Br, endInstr),
+                elseInstr,
+                endInstr,
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
 
             Assert.Equal(3, methodBody.ComputeMaxStack());
         }
@@ -125,16 +136,18 @@ namespace AsmResolver.Tests.Net.Cil
             var instructions = methodBody.Instructions;
             var loopHead = CilInstruction.Create(CilOpCodes.Nop);
 
-            instructions.Add(loopHead);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_2));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Add));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_0));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Brtrue, loopHead));
-
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                loopHead,
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_2),
+                CilInstruction.Create(CilOpCodes.Add),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_0),
+                CilInstruction.Create(CilOpCodes.Brtrue, loopHead),
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
+            
             Assert.Equal(2, methodBody.ComputeMaxStack());
         }
 
@@ -152,19 +165,22 @@ namespace AsmResolver.Tests.Net.Cil
             var handlerStart = CilInstruction.Create(CilOpCodes.Pop);
             var handlerEnd = CilInstruction.Create(CilOpCodes.Nop);
 
-            instructions.Add(tryStart);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_0));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Leave, handlerEnd));
-            instructions.Add(handlerStart);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_2));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Add));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Leave, handlerEnd));
-            instructions.Add(handlerEnd);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                tryStart,
+                CilInstruction.Create(CilOpCodes.Ldc_I4_0),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Leave, handlerEnd),
+                handlerStart,
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_2),
+                CilInstruction.Create(CilOpCodes.Add),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Leave, handlerEnd),
+                handlerEnd,
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
+            
             methodBody.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Exception)
             {
                 TryStart = tryStart,
@@ -187,11 +203,15 @@ namespace AsmResolver.Tests.Net.Cil
 
             var instructions = methodBody.Instructions;
             var target = CilInstruction.Create(CilOpCodes.Call, writeLine);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Brtrue, target));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_2));
-            instructions.Add(target);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Brtrue, target),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_2),
+                target,
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
             
             Assert.Throws<StackInbalanceException>(() => methodBody.ComputeMaxStack());
         }
@@ -207,16 +227,39 @@ namespace AsmResolver.Tests.Net.Cil
             var instructions = methodBody.Instructions;
             var loopHead = CilInstruction.Create(CilOpCodes.Nop);
 
-            instructions.Add(loopHead);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_2));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Add));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_0));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Brtrue, loopHead));
+            instructions.AddRange(new[]
+            {
+                loopHead,
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_2),
+                CilInstruction.Create(CilOpCodes.Add),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_0),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Brtrue, loopHead),
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
+            
+            Assert.Throws<StackInbalanceException>(() => methodBody.ComputeMaxStack());
+        }
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+        [Fact]
+        public void StackInsufficientValues()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var importer = new ReferenceImporter(methodBody.Method.Image);
+
+            var writeLine = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(int) }));
+
+            var instructions = methodBody.Instructions;
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldc_I4, -1),
+                CilInstruction.Create(CilOpCodes.And),
+                CilInstruction.Create(CilOpCodes.Ldc_I4, -1),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Ret), 
+            });
 
             Assert.Throws<StackInbalanceException>(() => methodBody.ComputeMaxStack());
         }
@@ -231,9 +274,12 @@ namespace AsmResolver.Tests.Net.Cil
             var writeLine = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] { typeof(string) }));
 
             var instructions = methodBody.Instructions;
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, "Lorem Ipsum"));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, "Lorem Ipsum"),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
             
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
@@ -257,19 +303,22 @@ namespace AsmResolver.Tests.Net.Cil
             var handlerStart = CilInstruction.Create(CilOpCodes.Pop);
             var handlerEnd = CilInstruction.Create(CilOpCodes.Nop);
 
-            instructions.Add(tryStart);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_0));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Leave, handlerEnd));
-            instructions.Add(handlerStart);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_2));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Add));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Call, writeLine));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Leave, handlerEnd));
-            instructions.Add(handlerEnd);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                tryStart,
+                CilInstruction.Create(CilOpCodes.Ldc_I4_0),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Leave, handlerEnd),
+                handlerStart,
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Ldc_I4_2),
+                CilInstruction.Create(CilOpCodes.Add),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Leave, handlerEnd),
+                handlerEnd,
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
+            
             var exceptionType = importer.ImportType(typeof(Exception));
             methodBody.ExceptionHandlers.Add(new ExceptionHandler(ExceptionHandlerType.Exception)
             {
@@ -354,14 +403,17 @@ namespace AsmResolver.Tests.Net.Cil
             var image = methodBody.Method.Image;
 
             var instructions = methodBody.Instructions;
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_S, shortOperand));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4, operand));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I8, longOperand));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldc_I4_S, shortOperand),
+                CilInstruction.Create(CilOpCodes.Ldc_I4, operand),
+                CilInstruction.Create(CilOpCodes.Ldc_I8, longOperand),
+                CilInstruction.Create(CilOpCodes.Pop),
+                CilInstruction.Create(CilOpCodes.Pop),
+                CilInstruction.Create(CilOpCodes.Pop),
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
+            
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
 
@@ -383,12 +435,15 @@ namespace AsmResolver.Tests.Net.Cil
             var image = methodBody.Method.Image;
 
             var instructions = methodBody.Instructions;
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_R4, shortOperand));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_R8, operand));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldc_R4, shortOperand),
+                CilInstruction.Create(CilOpCodes.Ldc_R8, operand),
+                CilInstruction.Create(CilOpCodes.Pop),
+                CilInstruction.Create(CilOpCodes.Pop),
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
+            
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
 
@@ -410,12 +465,15 @@ namespace AsmResolver.Tests.Net.Cil
             var target1 = CilInstruction.Create(CilOpCodes.Nop);
             var target2 = CilInstruction.Create(CilOpCodes.Nop);
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Br, target1));
-            instructions.Add(target2);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-            instructions.Add(target1);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Br, target2));
-
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Br, target1),
+                target2,
+                CilInstruction.Create(CilOpCodes.Ret),
+                target1,
+                CilInstruction.Create(CilOpCodes.Br, target2),
+            });
+            
             methodBody.Instructions.CalculateOffsets();
             
             var mapping = image.Header.UnlockMetadata();
@@ -439,15 +497,18 @@ namespace AsmResolver.Tests.Net.Cil
             var target2 = CilInstruction.Create(CilOpCodes.Nop);
             var target3 = CilInstruction.Create(CilOpCodes.Nop);
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldc_I4_1));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Switch, new[] { target1, target2, target3 }));
-            instructions.Add(target2);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-            instructions.Add(target1);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-            instructions.Add(target3);
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldc_I4_1),
+                CilInstruction.Create(CilOpCodes.Switch, new[] {target1, target2, target3}),
+                target2,
+                CilInstruction.Create(CilOpCodes.Ret),
+                target1,
+                CilInstruction.Create(CilOpCodes.Ret),
+                target3,
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
+            
             methodBody.Instructions.CalculateOffsets();
 
             var mapping = image.Header.UnlockMetadata();
@@ -631,11 +692,14 @@ namespace AsmResolver.Tests.Net.Cil
             var instructions = methodBody.Instructions;
 
             var simpleField = importer.ImportField(typeof(Type).GetField("EmptyTypes", BindingFlags.Public | BindingFlags.Static));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ldsfld, simpleField));
-            instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
 
-            instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldsfld, simpleField),
+                CilInstruction.Create(CilOpCodes.Pop),
+                CilInstruction.Create(CilOpCodes.Ret),
+            });
+            
             var mapping = image.Header.UnlockMetadata();
             image = image.Header.LockMetadata();
 

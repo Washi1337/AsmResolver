@@ -220,18 +220,17 @@ namespace AsmResolver.Tests.Net.Emit
             foreach (var type in clonedTypes)
                 image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
-               
             var main = new MethodDefinition("Main", MethodAttributes.Public | MethodAttributes.Static,
                 new MethodSignature(image.TypeSystem.Void));
             main.CilMethodBody = new CilMethodBody(main);
             
-            main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Newobj,
-                clonedTypes[0].Methods.First(x => x.Name == ".ctor")));
-            main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Newobj,
-                clonedTypes[1].Methods.First(x => x.Name == ".ctor")));
-            main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Call,
-                clonedTypes[0].Methods.First(x => x.Name == "Test")));
-            main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+            main.CilMethodBody.Instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Newobj, clonedTypes[0].Methods.First(x => x.Name == ".ctor")),
+                CilInstruction.Create(CilOpCodes.Newobj, clonedTypes[1].Methods.First(x => x.Name == ".ctor")),
+                CilInstruction.Create(CilOpCodes.Call, clonedTypes[0].Methods.First(x => x.Name == "Test")),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
             
             image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(main);
 

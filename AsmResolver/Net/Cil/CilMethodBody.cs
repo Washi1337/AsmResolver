@@ -299,10 +299,10 @@ namespace AsmResolver.Net.Cil
                     visitedInstructions[currentState.InstructionIndex] = currentState;
 
                     // Compute next stack size.
-                    int nextStackSize = currentState.StackSize + instruction.GetStackDelta(this);
-                    
+                    int nextStackSize = currentState.StackSize - instruction.GetStackPopCount(this);
                     if (nextStackSize < 0)
                         throw new StackInbalanceException(this, instruction.Offset);
+                    nextStackSize += instruction.GetStackPushCount(this);
 
                     // Add outgoing edges to agenda.
                     switch (instruction.OpCode.FlowControl)

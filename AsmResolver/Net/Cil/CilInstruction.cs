@@ -222,10 +222,8 @@ namespace AsmResolver.Net.Cil
             throw new NotSupportedException();
         }
 
-        public int GetStackDelta(CilMethodBody parent)
+        public int GetStackPopCount(CilMethodBody parent)
         {
-            int delta = 0;
-
             MethodSignature signature = null;
             var member = Operand as ICallableMemberReference;
             var standalone = Operand as StandAloneSignature;
@@ -239,8 +237,8 @@ namespace AsmResolver.Net.Cil
                 case CilStackBehaviour.Pop1:
                 case CilStackBehaviour.Popi:
                 case CilStackBehaviour.Popref:
-                    delta = -1;
-                    break;
+                    return 1;
+                
                 case CilStackBehaviour.Pop1_pop1:
                 case CilStackBehaviour.Popi_pop1:
                 case CilStackBehaviour.Popi_popi:
@@ -249,31 +247,46 @@ namespace AsmResolver.Net.Cil
                 case CilStackBehaviour.Popi_popr8:
                 case CilStackBehaviour.Popref_pop1:
                 case CilStackBehaviour.Popref_popi:
-                    delta = -2;
-                    break;
+                    return 2;
+                
                 case CilStackBehaviour.Popi_popi_popi:
                 case CilStackBehaviour.Popref_popi_popi:
                 case CilStackBehaviour.Popref_popi_popi8:
                 case CilStackBehaviour.Popref_popi_popr4:
                 case CilStackBehaviour.Popref_popi_popr8:
                 case CilStackBehaviour.Popref_popi_popref:
-                    delta = -3;
-                    break;
+                    return 3;
+                
                 case CilStackBehaviour.Varpop:
                     if (signature == null)
                     {
                         if (OpCode.Code == CilCode.Ret)
-                            delta = parent.Method.Signature.ReturnType.IsTypeOf("System", "Void") ? 0 : -1;
+                            return parent.Method.Signature.ReturnType.IsTypeOf("System", "Void") ? 0 : 1;
                     }
                     else
                     {
-                        delta = -signature.Parameters.Count;
+                        int count = signature.Parameters.Count;
                         if (signature.HasThis && OpCode.Code != CilCode.Newobj)
-                            delta--;
+                            count++;
+                        return count;
                     }
+
                     break;
             }
 
+            return 0;
+        }
+
+        public int GetStackPushCount(CilMethodBody parent)
+        {
+            MethodSignature signature = null;
+            var member = Operand as ICallableMemberReference;
+            var standalone = Operand as StandAloneSignature;
+            if (member != null)
+                signature = member.Signature as MethodSignature;
+            else if (standalone != null)
+                signature = standalone.Signature as MethodSignature;
+            
             switch (OpCode.StackBehaviourPush)
             {
                 case CilStackBehaviour.Push1:
@@ -282,23 +295,24 @@ namespace AsmResolver.Net.Cil
                 case CilStackBehaviour.Pushr4:
                 case CilStackBehaviour.Pushr8:
                 case CilStackBehaviour.Pushref:
-                    delta++;
-                    break;
+                    return 1;
+                
                 case CilStackBehaviour.Push1_push1:
-                    delta += 2;
-                    break;
+                    return 2;
+                
                 case CilStackBehaviour.Varpush:
-                    if (signature != null 
+                    if (signature != null
                         && (!signature.ReturnType.IsTypeOf("System", "Void") || OpCode.Code == CilCode.Newobj))
-                        delta++;
-                    break;
-
-                case CilStackBehaviour.Popref_popi_pop1:
-                    delta += 3;
+                        return 1;
                     break;
             }
 
-            return delta;
+            return 0;
+        }
+        
+        public int GetStackDelta(CilMethodBody parent)
+        {
+            return GetStackPushCount(parent) - GetStackPopCount(parent);
         }
 
         private bool Equals(CilInstruction other)
