@@ -250,6 +250,7 @@ namespace AsmResolver.Net.Cil
                     return 2;
                 
                 case CilStackBehaviour.Popi_popi_popi:
+                case CilStackBehaviour.Popref_popi_pop1:
                 case CilStackBehaviour.Popref_popi_popi:
                 case CilStackBehaviour.Popref_popi_popi8:
                 case CilStackBehaviour.Popref_popi_popr4:
