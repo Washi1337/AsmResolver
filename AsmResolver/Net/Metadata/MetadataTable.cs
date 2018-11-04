@@ -432,7 +432,11 @@ namespace AsmResolver.Net.Metadata
             AssertIsWriteable();
             int index = GetRowIndexClosestToKey(KeyColumnIndex, (uint) item.GetAllColumns()[KeyColumnIndex]);
             item.MetadataToken = new MetadataToken(TokenType, (uint) (index + 2));
-            InsertRow(index + 1, item);
+            
+            if (index == -1)
+                base.Add(item);
+            else
+                InsertRow(index, item);
         }
     }
 }
