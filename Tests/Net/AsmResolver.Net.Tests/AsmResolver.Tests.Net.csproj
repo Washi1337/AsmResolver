@@ -91,6 +91,8 @@
     <Compile Include="Emit\MemberClonerTest.cs" />
     <Compile Include="Emit\TemporaryDirectoryFixture.cs" />
     <Compile Include="MetadataLockTest.cs" />
+    <Compile Include="Metadata\DummySortedTable.cs" />
+    <Compile Include="Metadata\SortedTableTest.cs" />
     <Compile Include="NetAssemblyFactoryTest.cs" />
     <Compile Include="OpenExistingAssembly.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace AsmResolver.Net.Metadata
 {
+    /// <summary>
+    /// When derived from this class, represents a single row in a metadata table.
+    /// </summary>
     public abstract class MetadataRow
     {
         private MetadataToken _metadataToken;
@@ -16,25 +19,39 @@ namespace AsmResolver.Net.Metadata
             _metadataToken = metadataToken;
         }
 
+        /// <summary>
+        /// Gets or sets the metadata token associated to the row.
+        /// </summary>
         public MetadataToken MetadataToken
         {
             get { return _metadataToken; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _metadataToken = value;
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating the metadata row is editable or not.
+        /// </summary>
         public bool IsReadOnly
         {
             get;
             internal set;
         }
 
+        /// <summary>
+        /// Gets a collection of all column values in the row.
+        /// </summary>
+        /// <returns></returns>
         public abstract object[] GetAllColumns();
 
-        protected void AssertIsWriteable()
+        /// <summary>
+        /// Verifies whether the metadata row is writable or not.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Occurs when the metadata row is in read-only mode.</exception>
+        protected void AssertIsWritable()
         {
             if (IsReadOnly)
                 throw new InvalidOperationException("Metadata row cannot be modified in read-only mode.");
@@ -43,6 +60,11 @@ namespace AsmResolver.Net.Metadata
         protected bool Equals(MetadataRow other)
         {
             return GetAllColumns().SequenceEqual(other.GetAllColumns());
+        }
+
+        public override string ToString()
+        {
+            return $"({string.Join(", ", GetAllColumns())})";
         }
     }
 
@@ -64,7 +86,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column1; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column1 = value;
             }
         }
@@ -96,7 +118,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column2; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column2 = value;
             }
         }
@@ -129,7 +151,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column3; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column3 = value;
             }
         }
@@ -163,7 +185,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column4; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column4 = value;
             }
         }
@@ -198,7 +220,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column5; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column5 = value;
             }
         }
@@ -234,7 +256,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column6; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column6 = value;
             }
         }
@@ -273,7 +295,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column7; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column7 = value;
             }
         }
@@ -283,7 +305,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column8; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column8 = value;
             }
         }
@@ -293,7 +315,7 @@ namespace AsmResolver.Net.Metadata
             get { return _column9; }
             set
             {
-                AssertIsWriteable();
+                AssertIsWritable();
                 _column9 = value;
             }
         }
