@@ -3,6 +3,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Emit
 {
+    /// <summary>
+    /// Represents a structure of the .text section of a typical .NET assembly.  
+    /// </summary>
     public class CompactNetTextContents : FileSegmentBuilder
     {
         private readonly SimpleFileSegmentBuilder _importDirectory = new SimpleFileSegmentBuilder();
@@ -11,25 +14,37 @@ namespace AsmResolver.Net.Emit
         {
             ImportBuffer = new ImportDirectoryBuffer(assembly);
             
+            // IAT
             Segments.Add(ImportBuffer.AddressTables);
+            
+            // .NET Directory
             Segments.Add(NetDirectory = assembly.NetDirectory);
+            
+            // Method bodies.
             Segments.Add(MethodBodyTable = new MethodBodyTableBuffer());
 
+            // Manifest resource data.
             if (assembly.NetDirectory.ResourcesManifest != null)
                 Segments.Add(assembly.NetDirectory.ResourcesManifest);
 
+            // Field data (FieldRVAs).
             Segments.Add(FieldDataTable = new SimpleFileSegmentBuilder());
+            
+            // Metadata directory header.
             Segments.Add(MetadataDirectory = new MetadataDirectoryBuffer(assembly.NetDirectory.MetadataHeader));
 
+            // Debug directory.
             if (assembly.DebugDirectory != null)
             {
                 Segments.Add(DebugDirectory = assembly.DebugDirectory);
                 Segments.Add(assembly.DebugDirectory.Data);
             }
 
+            // Strong name.
             if (NetDirectory.StrongNameData != null)
                 Segments.Add(NetDirectory.StrongNameData);
 
+            // VTables.
             if (NetDirectory.VTablesDirectory != null)
             {
                 VTableFixups = new VTableFixupsBuffer(NetDirectory.VTablesDirectory);
@@ -37,20 +52,30 @@ namespace AsmResolver.Net.Emit
                 Segments.Add(VTableFixups.EntriesTable);
             }
 
+            // Export directory.
             if (assembly.ExportDirectory != null)
-            {
                 Segments.Add(ExportDirectory = new ExportDirectoryBuffer(assembly.ExportDirectory, assembly));
-            }
 
+            // Remaining bits of the import tables.
             _importDirectory.Segments.Add(ImportBuffer.ModuleImportTable);
             _importDirectory.Segments.Add(ImportBuffer.LookupTables);
             _importDirectory.Segments.Add(ImportBuffer.NameTable);
             Segments.Add(_importDirectory);
 
+            // Bootstrapper (Call to _CorExeMain / _CorDllMain).
             Segments.Add(Bootstrapper = new BootstrapperSegment());
 
-            foreach (var method in assembly.NetDirectory.MetadataHeader.GetStream<TableStream>()
-                .GetTable<MethodDefinitionTable>())
+            var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
+            
+            // Initialize field data segment.
+            foreach (var fieldRva in tableStream.GetTable<FieldRvaTable>())
+            {
+                if (fieldRva.Column1 != null)
+                    FieldDataTable.Segments.Add(fieldRva.Column1);
+            }
+            
+            // Initialize method body table.
+            foreach (var method in tableStream.GetTable<MethodDefinitionTable>())
             {
                 if (method.Column1 != null)
                     MethodBodyTable.Segments.Add(method.Column1);
@@ -147,6 +172,5 @@ namespace AsmResolver.Net.Emit
                 NetDirectory.VTableFixupsDirectory.Size = VTableFixups.Directory.GetPhysicalLength();
             }
         }
-
     }
 }
