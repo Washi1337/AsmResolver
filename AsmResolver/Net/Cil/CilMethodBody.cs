@@ -57,6 +57,7 @@ namespace AsmResolver.Net.Cil
             var fatBody = rawMethodBody as CilRawFatMethodBody;
             if (fatBody != null)
             {
+                // Read fat method body header fields.
                 body.MaxStack = fatBody.MaxStack;
                 body.InitLocals = fatBody.InitLocals;
 
@@ -65,10 +66,12 @@ namespace AsmResolver.Net.Cil
             }
             else
             {
+                // Set values for tiny method bodies.
                 body.MaxStack = 8;
                 body.InitLocals = false;
             }
 
+            // Read code.
             var codeReader = new MemoryStreamReader(rawMethodBody.Code);
             var disassembler = new CilDisassembler(codeReader, body);
             foreach (var instruction in disassembler.Disassemble())
@@ -76,10 +79,16 @@ namespace AsmResolver.Net.Cil
 
             if (fatBody != null)
             {
+                // Read exception handlers.
                 foreach (var section in fatBody.ExtraSections)
                 {
                     var sectionReader = new MemoryStreamReader(section.Data);
-                    body.ExceptionHandlers.Add(ExceptionHandler.FromReader(body, sectionReader, section.IsFat));
+                    while (sectionReader.CanRead(section.IsFat
+                        ? ExceptionHandler.FatExceptionHandlerSize
+                        : ExceptionHandler.SmallExceptionHandlerSize))
+                    {
+                        body.ExceptionHandlers.Add(ExceptionHandler.FromReader(body, sectionReader, section.IsFat));
+                    }
                 }
             }
             
@@ -197,7 +206,7 @@ namespace AsmResolver.Net.Cil
 
                 if (!IsFat)
                 {
-                    return new CilRawSmallMethodBody()
+                    return new CilRawSmallMethodBody
                     {
                         Code = codeStream.ToArray()
                     };

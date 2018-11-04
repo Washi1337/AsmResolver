@@ -1,6 +1,8 @@
 ﻿
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using AsmResolver.Net;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Emit;
@@ -236,7 +238,7 @@ namespace AsmResolver.Tests.Net.Cts
             image.Assembly.Modules[0].TopLevelTypes.Add(type);
 
             var mapping = header.UnlockMetadata();
-
+            
             image = header.LockMetadata();
             type = (TypeDefinition) image.ResolveMember(mapping[type]);
             Assert.Single(type.MethodImplementations);

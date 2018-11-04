@@ -154,7 +154,19 @@ namespace AsmResolver.Net.Metadata
                     break;
             }
 
-            return left > right ? right : middle;
+            if (left > right)
+                return right;
+            
+            while (middle < Count - 1)
+            {
+                var nextRow = GetRow(middle + 1);
+                var nextKey = Convert.ToUInt32(nextRow.GetAllColumns()[keyColumnIndex]);
+                if (nextKey > key)
+                    return middle;
+                middle++;
+            }
+
+            return middle;
         }
 
         /// <summary>

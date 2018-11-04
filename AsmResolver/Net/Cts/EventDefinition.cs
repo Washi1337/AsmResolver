@@ -35,10 +35,9 @@ namespace AsmResolver.Net.Cts
 
             _eventType = new LazyValue<ITypeDefOrRef>(() =>
             {
-                var enoder = image.Header.GetStream<TableStream>().GetIndexEncoder(CodedIndex.TypeDefOrRef);
-                var eventTypeToken = enoder.DecodeIndex(row.Column3);
-                IMetadataMember member;
-                return image.TryResolveMember(eventTypeToken, out member) ? (ITypeDefOrRef) member : null;
+                var encoder = image.Header.GetStream<TableStream>().GetIndexEncoder(CodedIndex.TypeDefOrRef);
+                var eventTypeToken = encoder.DecodeIndex(row.Column3);
+                return image.TryResolveMember(eventTypeToken, out var member) ? (ITypeDefOrRef) member : null;
             });
             
             _eventMap = new LazyValue<EventMap>(() =>
@@ -53,10 +52,9 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _eventMap.IsInitialized && _eventMap.Value != null ? _eventMap.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _eventMap.IsInitialized && _eventMap.Value != null 
+            ? _eventMap.Value.Image 
+            : _image;
 
         /// <summary>
         /// Gets or sets the attributes of the event definition.
@@ -90,7 +88,7 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public EventMap EventMap
         {
-            get { return _eventMap.Value; }
+            get => _eventMap.Value;
             internal set
             {
                 _eventMap.Value = value;
@@ -101,30 +99,23 @@ namespace AsmResolver.Net.Cts
         /// <summary>
         /// Gets the type declaring the event.
         /// </summary>
-        public TypeDefinition DeclaringType
-        {
-            get { return EventMap != null ? EventMap.Parent : null; }
-        }
+        public TypeDefinition DeclaringType => EventMap?.Parent;
 
-        ITypeDefOrRef IMemberReference.DeclaringType
-        {
-            get { return DeclaringType; }
-        }
+        ITypeDefOrRef IMemberReference.DeclaringType => DeclaringType;
 
         /// <summary>
         /// Gets the delegate type of the event handler.
         /// </summary>
         public ITypeDefOrRef EventType
         {
-            get { return _eventType.Value; }
-            set { _eventType.Value = value; }
+            get => _eventType.Value;
+            set => _eventType.Value = value;
         }
 
         /// <inheritdoc />
         public MethodSemanticsCollection Semantics
         {
             get;
-            private set;
         }
 
 
@@ -132,7 +123,6 @@ namespace AsmResolver.Net.Cts
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -143,7 +133,7 @@ namespace AsmResolver.Net.Cts
             get
             {
                 var semantic = Semantics.FirstOrDefault(x => x.Attributes.HasFlag(MethodSemanticsAttributes.AddOn));
-                return semantic != null ? semantic.Method : null;
+                return semantic?.Method;
             }
         }
 
@@ -155,7 +145,7 @@ namespace AsmResolver.Net.Cts
             get
             {
                 var semantic = Semantics.FirstOrDefault(x => x.Attributes.HasFlag(MethodSemanticsAttributes.RemoveOn));
-                return semantic != null ? semantic.Method : null;
+                return semantic?.Method;
             }
         }
 
