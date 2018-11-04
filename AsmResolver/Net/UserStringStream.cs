@@ -73,10 +73,7 @@ namespace AsmResolver.Net
         /// <returns></returns>
         public IEnumerable<string> EnumerateStrings()
         {
-            if (_hasReadAllStrings)
-                return _cachedStrings.Values;
-            else
-                return GetStringsEnumerator();
+            return _hasReadAllStrings ? _cachedStrings.Values : GetStringsEnumerator();
         }
 
         protected IEnumerable<string> GetStringsEnumerator()
@@ -87,11 +84,7 @@ namespace AsmResolver.Net
             lock (_cachedStrings)
             {
                 while (reader.Position < reader.StartPosition + reader.Length)
-                {
-                    var value = ReadString(reader);
-                    if (!string.IsNullOrEmpty(value))
-                        yield return value;
-                }
+                    yield return ReadString(reader);
             }
 
             _hasReadAllStrings = true;
