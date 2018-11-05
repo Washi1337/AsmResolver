@@ -68,42 +68,40 @@ namespace AsmResolver.Net
             if (scope1 == null || scope2 == null)
                 return false;
 
-            var module = scope1 as ModuleDefinition;
-            if (module != null)
-                return Equals(module, scope2 as ModuleDefinition);
-
-            var moduleRef = scope1 as ModuleReference;
-            if (moduleRef != null)
-                return Equals(moduleRef, scope2 as ModuleReference);
-
-            var assemblyRef = scope1 as AssemblyReference;
-            if (assemblyRef != null)
-                return Equals((IAssemblyDescriptor) assemblyRef, scope2 as AssemblyReference);
-
-            var typeRef = scope1 as TypeReference;
-            if (typeRef != null)
-                return Equals((ITypeDefOrRef) typeRef, scope2 as TypeReference);
+            switch (scope1)
+            {
+                case ModuleDefinition module:
+                    return Equals(module, scope2 as ModuleDefinition);
+                
+                case ModuleReference moduleRef:
+                    return Equals(moduleRef, scope2 as ModuleReference);
+                
+                case AssemblyReference assemblyRef:
+                    return Equals((IAssemblyDescriptor) assemblyRef, scope2 as AssemblyReference);
+                
+                case TypeReference typeRef:
+                    return Equals((ITypeDefOrRef) typeRef, scope2 as TypeReference);   
+            }
 
             return false;
         }
 
         public int GetHashCode(IResolutionScope obj)
         {
-            var module = obj as ModuleDefinition;
-            if (module != null)
-                return GetHashCode(module);
-
-            var moduleRef = obj as ModuleReference;
-            if (moduleRef != null)
-                return GetHashCode(moduleRef);
-
-            var assemblyRef = obj as AssemblyReference;
-            if (assemblyRef != null)
-                return GetHashCode((IAssemblyDescriptor) assemblyRef);
-
-            var typeRef = obj as TypeReference;
-            if (typeRef != null)
-                return GetHashCode((ITypeDescriptor) typeRef);
+            switch (obj)
+            {
+                case ModuleDefinition module:
+                    return GetHashCode(module);
+                
+                case ModuleReference moduleRef:
+                    return GetHashCode(moduleRef);
+                
+                case AssemblyReference assemblyRef:
+                    return GetHashCode((IAssemblyDescriptor) assemblyRef);
+                
+                case TypeReference typeRef:
+                    return GetHashCode((ITypeDescriptor) typeRef);
+            }
 
             return obj.GetHashCode();
         }
@@ -193,9 +191,7 @@ namespace AsmResolver.Net
             if (type1 == null || type2 == null)
                 return false;
 
-            var reference1 = type1 as TypeReference;
-            var reference2 = type2 as TypeReference;
-            if (reference1 != null && reference2 != null
+            if (type1 is TypeReference reference1 && type2 is TypeReference reference2
                 && !Equals(reference1.ResolutionScope, reference2.ResolutionScope))
                 return false;
 
@@ -217,17 +213,17 @@ namespace AsmResolver.Net
             if (signature1 == null || descriptor == null)
                 return false;
 
-            var signature2 = descriptor as TypeSignature;
-            if (signature2 != null)
+            if (descriptor is TypeSignature signature2)
                 return Equals(signature1, signature2);
 
-            var typeDefOrRefSig = signature1 as TypeDefOrRefSignature;
-            if (typeDefOrRefSig != null)
-                return Equals(typeDefOrRefSig, descriptor);
-
-            var corlibType = signature1 as MsCorLibTypeSignature;
-            if (corlibType != null)
-                return Equals(corlibType, descriptor);
+            switch (signature1)
+            {
+                case TypeDefOrRefSignature typeDefOrRefSig:
+                    return Equals(typeDefOrRefSig, descriptor);
+             
+                case MsCorLibTypeSignature corlibType:
+                    return Equals(corlibType, descriptor);
+            }
 
             return false;
         }
@@ -245,61 +241,50 @@ namespace AsmResolver.Net
             if (signature1 == null || signature2 == null)
                 return false;
 
-            var typeDefOrRef = signature1 as TypeDefOrRefSignature;
-            if (typeDefOrRef != null)
-                return Equals(typeDefOrRef, (ITypeDescriptor)signature2);
-
-            var corlibType = signature1 as MsCorLibTypeSignature;
-            if (corlibType != null)
-                return Equals(corlibType, (ITypeDescriptor)signature2);
-
-            var arrayType = signature1 as ArrayTypeSignature;
-            if (arrayType != null)
-                return Equals(arrayType, signature2 as ArrayTypeSignature);
-
-            var boxedType = signature1 as BoxedTypeSignature;
-            if (boxedType != null)
-                return Equals(boxedType, signature2 as BoxedTypeSignature);
-
-            var byRefType = signature1 as ByReferenceTypeSignature;
-            if (byRefType != null)
-                return Equals(byRefType, signature2 as ByReferenceTypeSignature);
-
-            var functionPtrType = signature1 as FunctionPointerTypeSignature;
-            if (functionPtrType != null)
-                return Equals(functionPtrType, signature2 as FunctionPointerTypeSignature);
-
-            var genericType = signature1 as GenericInstanceTypeSignature;
-            if (genericType != null)
-                return Equals(genericType, signature2 as GenericInstanceTypeSignature);
-
-            var genericParam = signature1 as GenericParameterSignature;
-            if (genericParam != null)
-                return Equals(genericParam, signature2 as GenericParameterSignature);
-
-            var modOptType = signature1 as OptionalModifierSignature;
-            if (modOptType != null)
-                return Equals(modOptType, signature2 as OptionalModifierSignature);
-
-            var pinnedType = signature1 as PinnedTypeSignature;
-            if (pinnedType != null)
-                return Equals(pinnedType, signature2 as PinnedTypeSignature);
-
-            var pointerType = signature1 as PointerTypeSignature;
-            if (pointerType != null)
-                return Equals(pointerType, signature2 as PointerTypeSignature);
-
-            var modReqType = signature1 as RequiredModifierSignature;
-            if (modReqType != null)
-                return Equals(modReqType, signature2 as RequiredModifierSignature);
-
-            var sentinelType = signature1 as SentinelTypeSignature;
-            if (sentinelType != null)
-                return Equals(sentinelType, signature2 as SentinelTypeSignature);
-
-            var szArrayType = signature1 as SzArrayTypeSignature;
-            if (szArrayType != null)
-                return Equals(szArrayType, signature2 as SzArrayTypeSignature);
+            switch (signature1)
+            {
+                case TypeDefOrRefSignature typeDefOrRef:
+                    return Equals(typeDefOrRef, (ITypeDescriptor) signature2);
+                
+                case MsCorLibTypeSignature corlibType:
+                    return Equals(corlibType, (ITypeDescriptor) signature2);
+                
+                case ArrayTypeSignature arrayType:
+                    return Equals(arrayType, signature2 as ArrayTypeSignature);
+                
+                case BoxedTypeSignature boxedType:
+                    return Equals(boxedType, signature2 as BoxedTypeSignature);
+                
+                case ByReferenceTypeSignature byRefType:
+                    return Equals(byRefType, signature2 as ByReferenceTypeSignature);
+                
+                case FunctionPointerTypeSignature functionPtrType:
+                    return Equals(functionPtrType, signature2 as FunctionPointerTypeSignature);
+                
+                case GenericInstanceTypeSignature genericType:
+                    return Equals(genericType, signature2 as GenericInstanceTypeSignature);
+                
+                case GenericParameterSignature genericParam:
+                    return Equals(genericParam, signature2 as GenericParameterSignature);
+                
+                case OptionalModifierSignature modOptType:
+                    return Equals(modOptType, signature2 as OptionalModifierSignature);
+                
+                case PinnedTypeSignature pinnedType:
+                    return Equals(pinnedType, signature2 as PinnedTypeSignature);
+                
+                case PointerTypeSignature pointerType:
+                    return Equals(pointerType, signature2 as PointerTypeSignature);
+                
+                case RequiredModifierSignature modReqType:
+                    return Equals(modReqType, signature2 as RequiredModifierSignature);
+                
+                case SentinelTypeSignature sentinelType:
+                    return Equals(sentinelType, signature2 as SentinelTypeSignature);
+                
+                case SzArrayTypeSignature szArrayType:
+                    return Equals(szArrayType, signature2 as SzArrayTypeSignature);
+            }
 
             return false;
         }
@@ -588,17 +573,17 @@ namespace AsmResolver.Net
             if (reference1 == null || descriptor == null)
                 return false;
 
-            var signature2 = descriptor as TypeDefOrRefSignature;
-            if (signature2 != null)
-                return Equals(reference1, signature2.Type);
+            switch (descriptor)
+            {
+                case TypeDefOrRefSignature signature2:
+                    return Equals(reference1, signature2.Type);
+             
+                case MsCorLibTypeSignature corlibType:
+                    return Equals(reference1, corlibType.Type);
 
-            var corlibType = descriptor as MsCorLibTypeSignature;
-            if (corlibType != null)
-                return Equals(reference1, corlibType.Type);
-
-            var typeDefOrRef = descriptor as ITypeDefOrRef;
-            if (typeDefOrRef != null)
-                return Equals(reference1, typeDefOrRef);
+                case ITypeDefOrRef typeDefOrRef:
+                    return Equals(reference1, typeDefOrRef);
+            }
 
             return false;
         }
@@ -644,13 +629,13 @@ namespace AsmResolver.Net
             if (reference1 == null || reference2 == null)
                 return false;
 
-            var callable = reference1 as ICallableMemberReference;
-            if (callable != null)
-                return Equals(callable, reference2 as ICallableMemberReference);
-
-            var type = reference1 as ITypeDefOrRef;
-            if (type != null)
-                return Equals(type, (ITypeDefOrRef) reference1);
+            switch (reference1)
+            {
+                case ICallableMemberReference callable:
+                    return Equals(callable, reference2 as ICallableMemberReference);
+                case ITypeDefOrRef type:
+                    return Equals(type, (ITypeDefOrRef) reference1);
+            }
 
             return false;
         }
@@ -673,8 +658,7 @@ namespace AsmResolver.Net
             if (reference1 == null || reference2 == null)
                 return false;
 
-            var specification = reference1 as MethodSpecification;
-            if (specification != null)
+            if (reference1 is MethodSpecification specification)
                 return Equals(specification, reference2 as MethodSpecification);
 
             return reference1.Name == reference2.Name &&
@@ -760,40 +744,34 @@ namespace AsmResolver.Net
             if (signature1 == null || signature2 == null)
                 return false;
 
-            var fieldSignature = signature1 as FieldSignature;
-            if (fieldSignature != null)
-                return Equals(fieldSignature, signature2 as FieldSignature);
-
-            var methodSignature = signature1 as MethodSignature;
-            if (methodSignature != null)
-                return Equals(methodSignature, signature2 as MethodSignature);
-
-            var propertySignature = signature1 as PropertySignature;
-            if (propertySignature != null)
-                return Equals(propertySignature, signature2 as PropertySignature);
-
-            var genericInstanceSignature = signature1 as GenericInstanceMethodSignature;
-            if (genericInstanceSignature != null)
-                return Equals(genericInstanceSignature, signature2 as GenericInstanceMethodSignature);
+            switch (signature1)
+            {
+                case FieldSignature fieldSignature:
+                    return Equals(fieldSignature, signature2 as FieldSignature);
+                case MethodSignature methodSignature:
+                    return Equals(methodSignature, signature2 as MethodSignature);
+                case PropertySignature propertySignature:
+                    return Equals(propertySignature, signature2 as PropertySignature);
+                case GenericInstanceMethodSignature genericInstanceSignature:
+                    return Equals(genericInstanceSignature, signature2 as GenericInstanceMethodSignature);
+            }
 
             return false;
         }
 
         public int GetHashCode(CallingConventionSignature obj)
         {
-            var methodSignature = obj as MethodSignature;
-            if (methodSignature != null)
-                return GetHashCode(methodSignature);
-            
-            var fieldSignature = obj as FieldSignature;
-            if (fieldSignature != null)
-                return GetHashCode(fieldSignature);
-            
-            var propertySignature = obj as PropertySignature;
-            if (propertySignature != null)
-                return GetHashCode(propertySignature);
-
-            return obj.GetHashCode();
+            switch (obj)
+            {
+                case MethodSignature methodSignature:
+                    return GetHashCode(methodSignature);
+                case FieldSignature fieldSignature:
+                    return GetHashCode(fieldSignature);
+                case PropertySignature propertySignature:
+                    return GetHashCode(propertySignature);
+                default:
+                    return obj.GetHashCode();
+            }
         }
         
         /// <summary>
@@ -815,7 +793,7 @@ namespace AsmResolver.Net
 
         public int GetHashCode(FieldSignature obj)
         {
-            return (int) obj.Attributes ^ obj.FieldType.GetHashCode();
+            return (int) obj.Attributes ^ GetHashCode(obj.FieldType);
         }
 
         /// <summary>
@@ -892,15 +870,15 @@ namespace AsmResolver.Net
             if (parent1 == null || parent2 == null)
                 return false;
 
-            var type = parent1 as ITypeDefOrRef;
-            if (type != null)
-                return Equals(type, parent2 as ITypeDefOrRef);
-
-            var moduleRef = parent1 as ModuleReference;
-            if (moduleRef != null)
-                return Equals(moduleRef, parent2 as ModuleReference);
-
-            return false;
+            switch (parent1)
+            {
+                case ITypeDefOrRef type:
+                    return Equals(type, parent2 as ITypeDefOrRef);
+                case ModuleReference moduleRef:
+                    return Equals(moduleRef, parent2 as ModuleReference);
+                default:
+                    return false;
+            }
         }
 
         private static bool ByteArrayMatches(IEnumerable<byte> array1, IList<byte> array2)
