@@ -51,17 +51,16 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _parent.IsInitialized && _parent.Value != null 
+            ? _parent.Value.Image 
+            : _image;
 
         /// <summary>
         /// Gets the member that the custom attribute is assigned to.
         /// </summary>
         public IHasCustomAttribute Parent
         {
-            get { return _parent.Value; }
+            get => _parent.Value;
             internal set
             {
                 _parent.Value = value;
@@ -74,8 +73,8 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public ICustomAttributeType Constructor
         {
-            get { return _constructor.Value; }
-            set { _constructor.Value = value; }
+            get => _constructor.Value;
+            set => _constructor.Value = value;
         }
 
         /// <summary>
@@ -83,8 +82,8 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public CustomAttributeSignature Signature
         {
-            get { return _signature.Value; }
-            set { _signature.Value = value; }
+            get => _signature.Value;
+            set => _signature.Value = value;
         }
 
         public override string ToString()

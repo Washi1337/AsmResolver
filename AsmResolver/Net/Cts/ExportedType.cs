@@ -9,7 +9,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<string> _namespace;
         private readonly LazyValue<IImplementation> _implementation;
         private CustomAttributeCollection _customAttributes;
-        private MetadataImage _image;
+        private readonly MetadataImage _image;
 
         public ExportedType(IImplementation implementation, uint typeDefId, string name, string @namespace, TypeAttributes attributes)
             : base(new MetadataToken(MetadataTokenType.ExportedType))
@@ -45,10 +45,7 @@ namespace AsmResolver.Net.Cts
             });
         }
 
-        public override MetadataImage Image
-        {
-            get { return _image; }
-        }
+        public override MetadataImage Image => _image;
 
         public TypeAttributes Attributes
         {
@@ -64,20 +61,20 @@ namespace AsmResolver.Net.Cts
 
         public string Name
         {
-            get { return _name.Value; }
-            set { _name.Value = value; }
+            get => _name.Value;
+            set => _name.Value = value;
         }
 
         public string Namespace
         {
-            get { return _namespace.Value; }
-            set { _namespace.Value = value; }
+            get => _namespace.Value;
+            set => _namespace.Value = value;
         }
 
         public IImplementation Implementation
         {
-            get { return _implementation.Value; }
-            set { _implementation.Value = value; }
+            get => _implementation.Value;
+            set => _implementation.Value = value;
         }
 
         public CustomAttributeCollection CustomAttributes

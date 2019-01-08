@@ -101,17 +101,14 @@ namespace AsmResolver.Net.Cts
 
         public AssemblyDefinition ResolveAssembly(IAssemblyDescriptor descriptor)
         {
-            AssemblyDefinition definition;
-            if (_cachedAssemblies.TryGetValue(descriptor, out definition))
+            if (_cachedAssemblies.TryGetValue(descriptor, out var definition))
                 return definition;
 
             var path = GetFilePath(descriptor);
             if (!string.IsNullOrEmpty(path))
             {
                 var assembly = ReadAssembly(path);
-                if (assembly.NetDirectory != null 
-                    && assembly.NetDirectory.MetadataHeader != null 
-                    && assembly.NetDirectory.MetadataHeader.Image != null)
+                if (assembly.NetDirectory?.MetadataHeader?.Image != null)
                 {
                     definition = assembly.NetDirectory.MetadataHeader.Image.Assembly;
                     _cachedAssemblies.Add(descriptor, definition);
@@ -189,9 +186,7 @@ namespace AsmResolver.Net.Cts
         /// <returns>The assembly that was resolved, or null if none could be found.</returns>
         protected virtual AssemblyDefinition OnAssemblyResolutionFailed(AssemblyResolutionEventArgs e)
         {
-            if (AssemblyResolutionFailed != null)
-                return AssemblyResolutionFailed(this, e);
-            return null;
+            return AssemblyResolutionFailed?.Invoke(this, e);
         }
     }
 
@@ -202,22 +197,18 @@ namespace AsmResolver.Net.Cts
     {
         public GacDirectory(string path, string folderPrefix)
         {
-            if (path == null)
-                throw new ArgumentNullException("path");
-            DirectoryPath = path;
+            DirectoryPath = path ?? throw new ArgumentNullException(nameof(path));
             FolderPrefix = folderPrefix ?? string.Empty;
         }
 
         public string DirectoryPath
         {
             get;
-            private set;
         }
 
         public string FolderPrefix
         {
             get;
-            private set;
         }
 
         public string GetFilePath(IAssemblyDescriptor descriptor)

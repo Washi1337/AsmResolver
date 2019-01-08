@@ -19,15 +19,15 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<FieldLayout> _fieldLayout;
         private readonly LazyValue<ImplementationMap> _pinvokeMap;
         private string _fullName;
-        private MetadataImage _image;
+        private readonly MetadataImage _image;
 
         public FieldDefinition(string name, FieldAttributes attributes, FieldSignature signature)
             : base(new MetadataToken(MetadataTokenType.Field))
         {
             if (name == null)
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             if (signature == null)
-                throw new ArgumentNullException("signature");
+                throw new ArgumentNullException(nameof(signature));
 
             _name = new LazyValue<string>(name);
             Attributes = attributes;
@@ -105,10 +105,9 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _declaringType.IsInitialized && _declaringType.Value != null ? _declaringType.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _declaringType.IsInitialized && _declaringType.Value != null 
+            ? _declaringType.Value.Image
+            : _image;
 
         /// <summary>
         /// Gets or sets the attributes of the field.
@@ -122,7 +121,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public string Name
         {
-            get { return _name.Value; }
+            get => _name.Value;
             set
             {
                 _name.Value = value;
@@ -131,10 +130,7 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public string FullName
-        {
-            get { return _fullName ?? (_fullName = this.GetFullName(Signature)); }
-        }
+        public string FullName => _fullName ?? (_fullName = this.GetFullName(Signature));
 
         /// <summary>
         /// Gets the type that declares the field.
@@ -145,17 +141,14 @@ namespace AsmResolver.Net.Cts
             internal set { _declaringType.Value = value; }
         }
 
-        ITypeDefOrRef IMemberReference.DeclaringType
-        {
-            get { return DeclaringType; }
-        }
+        ITypeDefOrRef IMemberReference.DeclaringType => DeclaringType;
 
         /// <summary>
         /// Gets or sets the signature of the field, containing e.g. the field type.
         /// </summary>
         public FieldSignature Signature
         {
-            get { return _signature.Value; }
+            get => _signature.Value;
             set
             {
                 _signature.Value = value;
@@ -163,10 +156,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        CallingConventionSignature ICallableMemberReference.Signature
-        {
-            get { return Signature; }
-        }
+        CallingConventionSignature ICallableMemberReference.Signature => Signature;
 
         /// <inheritdoc />
         /// <exception cref="InvalidOperationException">
@@ -174,8 +164,8 @@ namespace AsmResolver.Net.Cts
         /// </exception>
         public Constant Constant
         {
-            get { return _constant.Value; }
-            set { this.SetConstant(_constant, value); }
+            get => _constant.Value;
+            set => this.SetConstant(_constant, value);
         }
 
         /// <inheritdoc />
@@ -184,8 +174,8 @@ namespace AsmResolver.Net.Cts
         /// </exception>
         public FieldMarshal FieldMarshal
         {
-            get { return _fieldMarshal.Value; }
-            set { this.SetFieldMarshal(_fieldMarshal, value); }
+            get => _fieldMarshal.Value;
+            set => this.SetFieldMarshal(_fieldMarshal, value);
         }
 
         /// <summary>
@@ -194,8 +184,8 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public bool HasFieldRva
         {
-            get { return Attributes.HasFlag(FieldAttributes.HasFieldRva); }
-            set { Attributes.SetFlag(FieldAttributes.HasFieldRva, value); }
+            get => Attributes.HasFlag(FieldAttributes.HasFieldRva);
+            set => Attributes.SetFlag(FieldAttributes.HasFieldRva, value);
         }
 
         /// <summary>
@@ -206,10 +196,10 @@ namespace AsmResolver.Net.Cts
         /// </exception>
         public FieldRva FieldRva
         {
-            get { return _fieldRva.Value; }
+            get => _fieldRva.Value;
             set
             {
-                if (value != null && value.Field != null)
+                if (value?.Field != null)
                     throw new InvalidOperationException("Field Rva is already added to another field.");
                 if (_fieldRva.Value != null)
                     _fieldRva.Value.Field = null;
@@ -227,10 +217,10 @@ namespace AsmResolver.Net.Cts
         /// </exception>
         public FieldLayout FieldLayout
         {
-            get { return _fieldLayout.Value; }
+            get => _fieldLayout.Value;
             set
             {
-                if (value != null && value.Field != null)
+                if (value?.Field != null)
                     throw new InvalidOperationException("Field layout is already added to another field.");
                 if (_fieldLayout.Value != null)
                     _fieldLayout.Value.Field = null;
@@ -248,81 +238,120 @@ namespace AsmResolver.Net.Cts
         /// </exception>
         public ImplementationMap PInvokeMap
         {
-            get { return _pinvokeMap.Value; }
-            set { this.SetPInvokeMap(_pinvokeMap, value); }
+            get => _pinvokeMap.Value;
+            set => this.SetPInvokeMap(_pinvokeMap, value);
         }
 
         /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
         
+        /// <summary>
+        /// Gets or sets a value indicating whether the field is private.
+        /// </summary>
         public bool IsPrivate
         {
-            get { return GetFieldAccessAttribute(FieldAttributes.Private); }
-            set { SetFieldAccessAttribute(FieldAttributes.Private, value); }
+            get => GetFieldAccessAttribute(FieldAttributes.Private);
+            set => SetFieldAccessAttribute(FieldAttributes.Private, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the visibility of this field is described by FamANDAssem; that is,
+        /// the field can be accessed from derived classes, but only if they are in the same assembly.
+        /// </summary>
         public bool IsFamilyAndAssembly
         {
-            get { return GetFieldAccessAttribute(FieldAttributes.FamilyAndAssembly); }
-            set { SetFieldAccessAttribute(FieldAttributes.FamilyAndAssembly, value); }
+            get => GetFieldAccessAttribute(FieldAttributes.FamilyAndAssembly);
+            set => SetFieldAccessAttribute(FieldAttributes.FamilyAndAssembly, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the potential visibility of this field is described by FamORAssem;
+        /// that is, the field can be accessed by derived classes wherever they are, and by classes in the same assembly.
+        /// </summary>
         public bool IsFamilyOrAssembly
         {
-            get { return GetFieldAccessAttribute(FieldAttributes.FamilyOrAssembly); }
-            set { SetFieldAccessAttribute(FieldAttributes.FamilyOrAssembly, value); }
+            get => GetFieldAccessAttribute(FieldAttributes.FamilyOrAssembly);
+            set => SetFieldAccessAttribute(FieldAttributes.FamilyOrAssembly, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the potential visibility of this field is described by Assembly;
+        /// that is, the field is visible at most to other types in the same assembly, and is not visible to derived
+        /// types outside the assembly.
+        /// </summary>
         public bool IsAssembly
         {
-            get { return GetFieldAccessAttribute(FieldAttributes.Assembly); }
-            set { SetFieldAccessAttribute(FieldAttributes.Assembly, value); }
+            get => GetFieldAccessAttribute(FieldAttributes.Assembly);
+            set => SetFieldAccessAttribute(FieldAttributes.Assembly, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the visibility of this field is described by Family; that is, the
+        /// field is visible only within its class and derived classes.
+        /// </summary>
         public bool IsFamily
         {
-            get { return GetFieldAccessAttribute(FieldAttributes.Family); }
-            set { SetFieldAccessAttribute(FieldAttributes.Family, value); }
+            get => GetFieldAccessAttribute(FieldAttributes.Family);
+            set => SetFieldAccessAttribute(FieldAttributes.Family, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the field is public.
+        /// </summary>
         public bool IsPublic
         {
-            get { return GetFieldAccessAttribute(FieldAttributes.Public); }
-            set { SetFieldAccessAttribute(FieldAttributes.Public, value); }
+            get => GetFieldAccessAttribute(FieldAttributes.Public);
+            set => SetFieldAccessAttribute(FieldAttributes.Public, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the field is static.
+        /// </summary>
         public bool IsStatic
         {
-            get { return Attributes.HasFlag(FieldAttributes.Static); }
-            set { Attributes = Attributes.SetFlag(FieldAttributes.Static, value); }
+            get => Attributes.HasFlag(FieldAttributes.Static);
+            set => Attributes = Attributes.SetFlag(FieldAttributes.Static, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the value of the field is written at compile time and cannot
+        /// be changed.
+        /// </summary>
         public bool IsLiteral
         {
-            get { return Attributes.HasFlag(FieldAttributes.Literal); }
-            set { Attributes = Attributes.SetFlag(FieldAttributes.Literal, value); }
+            get => Attributes.HasFlag(FieldAttributes.Literal);
+            set => Attributes = Attributes.SetFlag(FieldAttributes.Literal, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the field can only be assigned a new value in the constructors
+        /// of the parent type.
+        /// </summary>
         public bool IsInitOnly
         {
-            get { return Attributes.HasFlag(FieldAttributes.InitOnly); }
-            set { Attributes = Attributes.SetFlag(FieldAttributes.InitOnly, value); }
+            get => Attributes.HasFlag(FieldAttributes.InitOnly);
+            set => Attributes = Attributes.SetFlag(FieldAttributes.InitOnly, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the field has a special name. 
+        /// </summary>
         public bool IsSpecialName
         {
-            get { return Attributes.HasFlag(FieldAttributes.SpecialName);}
-            set { Attributes = Attributes.SetFlag(FieldAttributes.SpecialName, value); }
+            get => Attributes.HasFlag(FieldAttributes.SpecialName);
+            set => Attributes = Attributes.SetFlag(FieldAttributes.SpecialName, value);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the field has a special name used by the runtime. 
+        /// </summary>
         public bool IsRuntimeSpecialName
         {
-            get { return Attributes.HasFlag(FieldAttributes.RuntimeSpecialName);}
-            set { Attributes = Attributes.SetFlag(FieldAttributes.RuntimeSpecialName, value); }
+            get => Attributes.HasFlag(FieldAttributes.RuntimeSpecialName);
+            set => Attributes = Attributes.SetFlag(FieldAttributes.RuntimeSpecialName, value);
         }
 
         private bool GetFieldAccessAttribute(FieldAttributes attribute)

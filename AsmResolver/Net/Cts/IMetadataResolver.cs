@@ -48,9 +48,7 @@ namespace AsmResolver.Net.Cts
 
         public DefaultMetadataResolver(INetAssemblyResolver assemblyResolver)
         {
-            if (assemblyResolver == null)
-                throw new ArgumentNullException("assemblyResolver");
-            AssemblyResolver = assemblyResolver;
+            AssemblyResolver = assemblyResolver ?? throw new ArgumentNullException(nameof(assemblyResolver));
             ThrowOnNotFound = true;
         }
 
@@ -76,14 +74,14 @@ namespace AsmResolver.Net.Cts
             return null;
         }
 
+        /// <inheritdoc />
         public TypeDefinition ResolveType(ITypeDescriptor type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             type = type.GetElementType();
 
-            var typeDef = type as TypeDefinition;
-            if (typeDef != null)
+            if (type is TypeDefinition typeDef)
                 return typeDef;
 
             var assemblyDescriptor = type.ResolutionScope.GetAssembly();
@@ -110,10 +108,11 @@ namespace AsmResolver.Net.Cts
             return definition ?? (TypeDefinition)ThrowOrReturn(type);
         }
 
+        /// <inheritdoc />
         public MethodDefinition ResolveMethod(MemberReference reference)
         {
             if (reference == null)
-                throw new ArgumentNullException("reference");
+                throw new ArgumentNullException(nameof(reference));
 
             var typeDef = ResolveType(reference.Parent as ITypeDefOrRef);
             if (typeDef == null)
@@ -123,10 +122,11 @@ namespace AsmResolver.Net.Cts
             return method ?? (MethodDefinition)ThrowOrReturn(reference);
         }
 
+        /// <inheritdoc />
         public FieldDefinition ResolveField(MemberReference reference)
         {
             if (reference == null)
-                throw new ArgumentNullException("reference");
+                throw new ArgumentNullException(nameof(reference));
 
             var typeDef = ResolveType(reference.Parent as ITypeDefOrRef);
             if (typeDef == null)
@@ -137,6 +137,9 @@ namespace AsmResolver.Net.Cts
         }
     }
 
+    /// <summary>
+    /// Represents an exception that occurs when a resolution of a member fails.
+    /// </summary>
     public class MemberResolutionException : Exception
     {
         public MemberResolutionException()
@@ -154,7 +157,7 @@ namespace AsmResolver.Net.Cts
         }
 
         public MemberResolutionException(IFullNameProvider provider)
-            : base(string.Format("The member {0} could not be resolved.", provider.FullName))
+            : base($"The member {provider.FullName} could not be resolved.")
         {
         }
     }

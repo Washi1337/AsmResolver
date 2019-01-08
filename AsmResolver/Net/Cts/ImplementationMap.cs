@@ -2,7 +2,7 @@
 
 namespace AsmResolver.Net.Cts
 {
-   public class ImplementationMap : MetadataMember<MetadataRow<ImplementationMapAttributes,uint,uint,uint>>
+    public class ImplementationMap : MetadataMember<MetadataRow<ImplementationMapAttributes,uint,uint,uint>>
     {
         private readonly LazyValue<IMemberForwarded> _memberForwarded;
         private readonly LazyValue<string> _importName;
@@ -34,8 +34,7 @@ namespace AsmResolver.Net.Cts
             _memberForwarded = new LazyValue<IMemberForwarded>(() =>
             {
                 var memberForwardedToken = tableStream.GetIndexEncoder(CodedIndex.MemberForwarded).DecodeIndex(row.Column2);
-                IMetadataMember member;
-                return image.TryResolveMember(memberForwardedToken, out member)
+                return image.TryResolveMember(memberForwardedToken, out var member)
                     ? (IMemberForwarded) member
                     : null;
             });
@@ -46,18 +45,16 @@ namespace AsmResolver.Net.Cts
             _importScope = new LazyValue<ModuleReference>(() =>
             {
                 var table = tableStream.GetTable(MetadataTokenType.ModuleRef);
-                MetadataRow moduleRow;
-                return table.TryGetRow((int) (row.Column4 - 1), out moduleRow)
+                return table.TryGetRow((int) (row.Column4 - 1), out var moduleRow)
                     ? (ModuleReference) table.GetMemberFromRow(image, moduleRow)
                     : null;
             });
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _memberForwarded.IsInitialized && _memberForwarded.Value != null ? _memberForwarded.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _memberForwarded.IsInitialized && _memberForwarded.Value != null 
+            ? _memberForwarded.Value.Image 
+            : _image;
 
         public ImplementationMapAttributes Attributes
         {

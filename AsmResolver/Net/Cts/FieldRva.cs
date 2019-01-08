@@ -5,7 +5,10 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
- public class FieldRva : MetadataMember<MetadataRow<DataSegment, uint>>
+    /// <summary>
+    /// Represents extra metadata associated to a field containing information about the initial value of the field.
+    /// </summary>
+    public class FieldRva : MetadataMember<MetadataRow<DataSegment, uint>>
     {
         private readonly LazyValue<byte[]> _data;
         private readonly LazyValue<FieldDefinition> _field;
@@ -33,11 +36,13 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _field.IsInitialized && _field.Value != null ? _field.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _field.IsInitialized && _field.Value != null 
+            ? _field.Value.Image 
+            : _image;
 
+        /// <summary>
+        /// Gets the field that is associated to this extra metadata.
+        /// </summary>
         public FieldDefinition Field
         {
             get { return _field.Value; }
@@ -48,20 +53,26 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the serialized initial value of the field.  
+        /// </summary>
         public byte[] Data
         {
-            get { return _data.Value; }
-            set { _data.Value = value; }
+            get => _data.Value;
+            set => _data.Value = value;
         }
 
+        /// <summary>
+        /// Determines the size of the data according to the type of the associated field.
+        /// </summary>
+        /// <returns></returns>
         public int GetDataSize()
         {
             var signature = Field.Signature;
-            if (signature == null || signature.FieldType == null)
+            if (signature?.FieldType == null)
                 return 0;
 
-            var corlibType = signature.FieldType as MsCorLibTypeSignature;
-            if (corlibType != null)
+            if (signature.FieldType is MsCorLibTypeSignature corlibType)
             {
                 switch (corlibType.ElementType)
                 {
@@ -85,23 +96,30 @@ namespace AsmResolver.Net.Cts
                 }
             }
 
-            var typeDefOrRef = signature.FieldType as TypeDefOrRefSignature;
-            if (typeDefOrRef == null)
+            if (!(signature.FieldType is TypeDefOrRefSignature typeDefOrRef))
                 return 0;
-            var definition = typeDefOrRef.Type as TypeDefinition;
-            if (definition == null || definition.ClassLayout == null)
+            if (!(typeDefOrRef.Type is TypeDefinition definition) || definition.ClassLayout == null)
                 return 0;
-            return (int)definition.ClassLayout.ClassSize;
+            return (int) definition.ClassLayout.ClassSize;
         }
 
+        /// <summary>
+        /// Attempts to deserialize the stored data. 
+        /// </summary>
+        /// <param name="type">The type to deserialize to.</param>
+        /// <returns>The deserialized data.</returns>
         public object InterpretData(TypeSignature type)
         {
-            var arrayType = type as SzArrayTypeSignature;
-            if (arrayType != null)
+            if (type is SzArrayTypeSignature arrayType)
                 return InterpretAsArray(arrayType.BaseType);
             return InterpretData(type.ElementType);
         }
 
+        /// <summary>
+        /// Attempts to deserialize the stored data as an array of elements of a particular type.
+        /// </summary>
+        /// <param name="elementType">The type of each element in the array.</param>
+        /// <returns>The deserialized data.</returns>
         public IEnumerable InterpretAsArray(TypeSignature elementType)
         {
             var corlibType = Image.TypeSystem.GetMscorlibType(elementType);
@@ -110,6 +128,11 @@ namespace AsmResolver.Net.Cts
             return InterpretAsArray(corlibType.ElementType);
         }
 
+        /// <summary>
+        /// Attempts to deserialize the stored data as an array of elements of a particular type.
+        /// </summary>
+        /// <param name="elementType">The type of each element in the array.</param>
+        /// <returns>The deserialized data.</returns>
         public IEnumerable InterpretAsArray(ElementType elementType)
         {
             var reader = new MemoryStreamReader(Data);
@@ -117,6 +140,11 @@ namespace AsmResolver.Net.Cts
                 yield return ReadElement(reader, elementType);
         }
 
+        /// <summary>
+        /// Attempts to deserialize a single element of a particular type from the stored data.
+        /// </summary>
+        /// <param name="elementType">The type of the element to read.</param>
+        /// <returns>The deserialized object.</returns>
         public object InterpretData(ElementType elementType)
         {
             var reader = new MemoryStreamReader(Data);

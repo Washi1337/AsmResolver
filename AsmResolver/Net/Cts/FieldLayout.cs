@@ -2,6 +2,9 @@
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents extra metadata associated to a field definition regarding the raw data offset of the field.
+    /// </summary>
     public class FieldLayout : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<FieldDefinition> _field;
@@ -23,28 +26,32 @@ namespace AsmResolver.Net.Cts
             _field = new LazyValue<FieldDefinition>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.Field);
-                MetadataRow fieldRow;
-                return table.TryGetRow((int) (row.Column2 - 1), out fieldRow)
+                return table.TryGetRow((int) (row.Column2 - 1), out var fieldRow)
                     ? (FieldDefinition) table.GetMemberFromRow(image, fieldRow)
                     : null;
             });
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _field.IsInitialized && _field.Value != null ? _field.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _field.IsInitialized && _field.Value != null 
+            ? _field.Value.Image 
+            : _image;
 
+        /// <summary>
+        /// Gets or sets the offset the field will be found at inside the parent type.
+        /// </summary>
         public uint Offset
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the field that is associated to this field layout metadata.
+        /// </summary>
         public FieldDefinition Field
         {
-            get { return _field.Value; }
+            get => _field.Value;
             internal set
             {
                 _field.Value = value;

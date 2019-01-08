@@ -4,6 +4,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a single type parameter associated to a generic member.
+    /// </summary>
     public class GenericParameter : MetadataMember<MetadataRow<ushort, GenericParameterAttributes, uint, uint>>
     {
         private readonly LazyValue<IGenericParameterProvider> _owner;
@@ -31,8 +34,7 @@ namespace AsmResolver.Net.Cts
             {
                 var encoder = image.Header.GetStream<TableStream>().GetIndexEncoder(CodedIndex.TypeOrMethodDef);
                 var ownerToken = encoder.DecodeIndex(row.Column3);
-                IMetadataMember member;
-                return image.TryResolveMember(ownerToken, out member) ? (IGenericParameterProvider) member : null;
+                return image.TryResolveMember(ownerToken, out var member) ? (IGenericParameterProvider) member : null;
             });
 
             _name = new LazyValue<string>(() => image.Header.GetStream<StringStream>().GetStringByOffset(row.Column4));
@@ -40,26 +42,34 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _owner.IsInitialized && _owner.Value != null ? _owner.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _owner.IsInitialized && _owner.Value != null 
+            ? _owner.Value.Image 
+            : _image;
 
+        /// <summary>
+        /// Gets or sets the index of the generic parameter.
+        /// </summary>
         public int Index
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the attributes associated to the generic parameter.
+        /// </summary>
         public GenericParameterAttributes Attributes
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the member that defines the generic parameter.
+        /// </summary>
         public IGenericParameterProvider Owner
         {
-            get { return _owner.Value; }
+            get => _owner.Value;
             internal set
             {
                 _owner.Value = value;
@@ -67,16 +77,21 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the name of the generic parameter.
+        /// </summary>
         public string Name
         {
-            get { return _name.Value; }
-            set { _name.Value = value; }
+            get => _name.Value;
+            set => _name.Value = value;
         }
 
+        /// <summary>
+        /// Gets a collection of constraints on the types that can be substituted into this generic parameter.
+        /// </summary>
         public GenericParameterConstraintCollection Constraints
         {
             get;
-            private set;
         }
 
         public override string ToString()

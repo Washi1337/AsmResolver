@@ -1,5 +1,4 @@
-﻿using System;
-using AsmResolver.Net.Metadata;
+﻿using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
@@ -39,10 +38,9 @@ namespace AsmResolver.Net.Cts
                 DataBlobSignature.FromReader(image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column4)));
         }
 
-        public override MetadataImage Image
-        {
-            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _parent.IsInitialized && _parent.Value != null 
+            ? _parent.Value.Image 
+            : _image;
 
         /// <summary>
         /// Gets or sets the element type of the constant.
@@ -58,7 +56,7 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public IHasConstant Parent
         {
-            get { return _parent.Value; }
+            get => _parent.Value;
             internal set
             {
                 _parent.Value = value;
@@ -71,8 +69,8 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public DataBlobSignature Value
         {
-            get { return _value.Value; }
-            set { _value.Value = value; }
+            get => _value.Value;
+            set => _value.Value = value;
         }
     }
 }

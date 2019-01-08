@@ -4,11 +4,13 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a reference to an external file containing metadata part of the assembly.
+    /// </summary>
     public class FileReference : MetadataMember<MetadataRow<FileAttributes, uint, uint>>, IImplementation, IHasCustomAttribute
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<DataBlobSignature> _hashValue;
-        private MetadataImage _image;
 
         public FileReference(string name, FileAttributes attributes, DataBlobSignature hashValue)
             : base(new MetadataToken(MetadataTokenType.File))
@@ -23,7 +25,7 @@ namespace AsmResolver.Net.Cts
         internal FileReference(MetadataImage image, MetadataRow<FileAttributes, uint, uint> row)
             : base(row.MetadataToken)
         {
-            _image = image;
+            Image = image;
             Attributes = row.Column1;
             
             _name = new LazyValue<string>(() 
@@ -35,39 +37,52 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
+        /// <inheritdoc />
         public override MetadataImage Image
         {
-            get { return _image; }
+            get;
         }
 
+        /// <summary>
+        /// Gets or sets the attributes associated to the file reference.
+        /// </summary>
         public FileAttributes Attributes
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the name of the file to reference.
+        /// </summary>
         public string Name
         {
-            get { return _name.Value; }
-            set { _name.Value = value; }
+            get => _name.Value;
+            set => _name.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the hash value of the file to reference.
+        /// </summary>
         public DataBlobSignature HashValue
         {
-            get { return _hashValue.Value; }
-            set { _hashValue.Value = value; }
+            get => _hashValue.Value;
+            set => _hashValue.Value = value;
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the assembly that refers to the file.
+        /// </summary>
         public AssemblyDefinition Referrer
         {
             get;
-            set;
+            internal set;
         }
     }
 }

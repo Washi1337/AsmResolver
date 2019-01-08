@@ -72,10 +72,7 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return Referrer != null ? Referrer.Image : null; }
-        }
+        public override MetadataImage Image => Referrer?.Image;
 
         /// <summary>
         /// Gets the assembly that refers this assembly reference.
@@ -89,7 +86,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public Version Version
         {
-            get { return _version; }
+            get => _version;
             set
             {
                 _version = value;
@@ -107,7 +104,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public string Name
         {
-            get { return _name.Value; }
+            get => _name.Value;
             set
             {
                 _name.Value = value;
@@ -116,20 +113,12 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public string FullName
-        {
-            get
-            {
-                if (_fullName != null)
-                    return _fullName;
-                return _fullName = this.GetFullName();
-            }
-        }
+        public string FullName => _fullName ?? (_fullName = this.GetFullName());
 
         /// <inheritdoc />
         public string Culture
         {
-            get { return _culture.Value; }
+            get => _culture.Value;
             set
             {
                 _culture.Value = value;
@@ -142,8 +131,8 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public DataBlobSignature HashValue
         {
-            get { return _hashValue.Value; }
-            set { _hashValue.Value = value; }
+            get => _hashValue.Value;
+            set => _hashValue.Value = value;
         }
 
         /// <summary>
@@ -151,7 +140,7 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public DataBlobSignature PublicKey
         {
-            get { return _publicKey.Value; }
+            get => _publicKey.Value;
             set
             {
                 _publicKey.Value = value;
@@ -159,16 +148,12 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        byte[] IAssemblyDescriptor.PublicKeyToken
-        {
-            get { return PublicKey != null ? PublicKey.Data : null; }
-        }
+        byte[] IAssemblyDescriptor.PublicKeyToken => PublicKey?.Data;
 
         /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -178,7 +163,6 @@ namespace AsmResolver.Net.Cts
         public Collection<AssemblyRefOs> OperatingSystems
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -188,9 +172,13 @@ namespace AsmResolver.Net.Cts
         public Collection<AssemblyRefProcessor> Processors
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Resolves the assembly reference using the default resolver used by the <see cref="Image"/>.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="AssemblyResolutionException">Occurs when the assembly reference is not part of any metadata image.</exception>
         public AssemblyDefinition Resolve()
         {
             if (Image == null)

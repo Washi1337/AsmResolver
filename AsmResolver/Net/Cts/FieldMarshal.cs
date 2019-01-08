@@ -3,6 +3,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents extra metadata associated to a member that has a custom marshal descriptor defined.
+    /// </summary>
     public class FieldMarshal : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<IHasFieldMarshal> _parent;
@@ -24,8 +27,7 @@ namespace AsmResolver.Net.Cts
             {
                 var tableStream = image.Header.GetStream<TableStream>();
                 var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasFieldMarshal).DecodeIndex(row.Column1);
-                MetadataRow parentRow;
-                return tableStream.TryResolveRow(parentToken, out parentRow)
+                return tableStream.TryResolveRow(parentToken, out var parentRow)
                     ? (IHasFieldMarshal) tableStream.GetTable(parentToken.TokenType).GetMemberFromRow(image, parentRow)
                     : null;
             });
@@ -35,14 +37,16 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _parent.IsInitialized && _parent.Value != null 
+            ? _parent.Value.Image 
+            : _image;
 
+        /// <summary>
+        /// Gets the member associated to this extra metadata.
+        /// </summary>
         public IHasFieldMarshal Parent
         {
-            get { return _parent.Value; }
+            get => _parent.Value;
             internal set
             {
                 _parent.Value = value;
@@ -50,10 +54,13 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the custom marshal descriptor that is assigned to the member.
+        /// </summary>
         public MarshalDescriptor MarshalDescriptor
         {
-            get { return _marshalDescriptor.Value; }
-            set { _marshalDescriptor.Value = value; }
+            get => _marshalDescriptor.Value;
+            set => _marshalDescriptor.Value = value;
         }
     }
 }

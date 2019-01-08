@@ -22,18 +22,16 @@ namespace AsmResolver.Net.Cts
             _reference = new LazyValue<AssemblyReference>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.AssemblyRef);
-                MetadataRow referenceRow;
-                return table.TryGetRow((int) (row.Column2 - 1), out referenceRow)
+                return table.TryGetRow((int) (row.Column2 - 1), out var referenceRow)
                     ? (AssemblyReference) table.GetMemberFromRow(image, referenceRow)
                     : null;
             });
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _reference.IsInitialized && _reference.Value != null ? _reference.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _reference.IsInitialized && _reference.Value != null 
+            ? _reference.Value.Image 
+            : _image;
 
         public uint Processor
         {
@@ -43,7 +41,7 @@ namespace AsmResolver.Net.Cts
 
         public AssemblyReference Reference
         {
-            get { return _reference.Value; }
+            get => _reference.Value;
             internal set
             {
                 _reference.Value = value;

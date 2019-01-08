@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 
@@ -17,6 +18,11 @@ namespace AsmResolver.Net.Cts
         public EventDefinition(string name, ITypeDefOrRef eventType)
             : base(new MetadataToken(MetadataTokenType.Event))
         {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+            if (eventType == null)
+                throw new ArgumentNullException(nameof(eventType));
+
             _name = new LazyValue<string>(name);
             _eventType = new LazyValue<ITypeDefOrRef>(eventType);
 
@@ -65,11 +71,13 @@ namespace AsmResolver.Net.Cts
             set;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the name of the event.
+        /// </summary>
         public string Name
         {
-            get { return _name.Value; }
-            set { _name.Value = value; }
+            get => _name.Value;
+            set => _name.Value = value;
         }
 
         /// <inheritdoc />

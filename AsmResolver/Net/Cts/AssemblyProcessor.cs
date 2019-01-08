@@ -17,10 +17,7 @@ namespace AsmResolver.Net.Cts
             Processor = row.Column1;
         }
 
-        public override MetadataImage Image
-        {
-            get { return Assembly != null ? Assembly.Image : null; }
-        }
+        public override MetadataImage Image => Assembly?.Image;
 
         public AssemblyDefinition Assembly
         {

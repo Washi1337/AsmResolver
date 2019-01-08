@@ -2,6 +2,9 @@
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a constraint on a substitution put onto a type used as an argument for a generic parameter.  
+    /// </summary>
     public class GenericParameterConstraint : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<GenericParameter> _owner;
@@ -22,8 +25,7 @@ namespace AsmResolver.Net.Cts
             _owner = new LazyValue<GenericParameter>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.GenericParam);
-                MetadataRow paramRow;
-                return table.TryGetRow((int) (row.Column1 - 1), out paramRow)
+                return table.TryGetRow((int) (row.Column1 - 1), out var paramRow)
                     ? (GenericParameter) table.GetMemberFromRow(image, paramRow)
                     : null;
             });
@@ -32,19 +34,21 @@ namespace AsmResolver.Net.Cts
             {
                 var encoder = image.Header.GetStream<TableStream>().GetIndexEncoder(CodedIndex.TypeDefOrRef);
                 var constraintToken = encoder.DecodeIndex(row.Column2);
-                IMetadataMember member;
-                return image.TryResolveMember(constraintToken, out member) ? (ITypeDefOrRef) member : null;
+                return image.TryResolveMember(constraintToken, out var member) ? (ITypeDefOrRef) member : null;
             });
         }
 
-        public override MetadataImage Image
-        {
-            get { return _owner.IsInitialized && _owner.Value != null ? _owner.Value.Image : _image; }
-        }
+        /// <inheritdoc />
+        public override MetadataImage Image => _owner.IsInitialized && _owner.Value != null
+            ? _owner.Value.Image 
+            : _image;
 
+        /// <summary>
+        /// Gets the generic parameter on which the constraint was put on.
+        /// </summary>
         public GenericParameter Owner
         {
-            get { return _owner.Value; }
+            get => _owner.Value;
             internal set
             {
                 _owner.Value = value;
@@ -52,15 +56,18 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the type constraint that is put onto the generic parameter. 
+        /// </summary>
         public ITypeDefOrRef Constraint
         {
-            get { return _constraint.Value; }
-            set { _constraint.Value = value; }
+            get => _constraint.Value;
+            set => _constraint.Value = value;
         }
 
         public override string ToString()
         {
-            return string.Format("({0}) {1}", Constraint, Owner);
+            return $"({Constraint}) {Owner}";
         }
     }
 }

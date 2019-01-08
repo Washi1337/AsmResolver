@@ -59,7 +59,7 @@ namespace AsmResolver.Net.Cts
 
         public AssemblyReference Reference
         {
-            get { return _reference.Value;}
+            get => _reference.Value;
             internal set
             {
                 _reference.Value = value;

@@ -28,18 +28,16 @@ namespace AsmResolver.Net.Cts
             _parent = new LazyValue<TypeDefinition>(() =>
             {
                 var typeTable = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
-                MetadataRow typeRow;
-                return typeTable.TryGetRow((int) (row.Column3 - 1), out typeRow)
+                return typeTable.TryGetRow((int) (row.Column3 - 1), out var typeRow)
                     ? (TypeDefinition) typeTable.GetMemberFromRow(image, typeRow)
                     : null;
             });
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _parent.IsInitialized && _parent.Value != null 
+            ? _parent.Value.Image 
+            : _image;
 
         /// <summary>
         /// Gets or sets a value indicating the alignment of the fields defined in the <see cref="Parent"/> type.
@@ -68,7 +66,7 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public TypeDefinition Parent
         {
-            get { return _parent.Value; }
+            get => _parent.Value;
             internal set
             {
                 _parent.Value = value;

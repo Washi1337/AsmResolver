@@ -19,11 +19,13 @@ namespace AsmResolver.Net.Cts
         private Version _version;
         private string _fullName;
         private byte[] _publicKeyToken;
-        private MetadataImage _image;
 
         public AssemblyDefinition(IAssemblyDescriptor info)
             : base(new MetadataToken(MetadataTokenType.Assembly))
         {
+            if (info == null)
+                throw new ArgumentNullException(nameof(info));
+            
             _name = new LazyValue<string>(info.Name);
             Version = info.Version;
             _culture = new LazyValue<string>(info.Culture);
@@ -41,8 +43,11 @@ namespace AsmResolver.Net.Cts
         public AssemblyDefinition(string name, Version version)
             : base(new MetadataToken(MetadataTokenType.Assembly))
         {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+            
             _name = new LazyValue<string>(name);
-            _version = version;
+            _version = version ?? throw new ArgumentNullException(nameof(version));
             _culture = new LazyValue<string>();
             _publicKey = new LazyValue<DataBlobSignature>();
             Modules = new DelegatedMemberCollection<AssemblyDefinition, ModuleDefinition>(this, GetModuleOwner, SetModuleOwner);
@@ -59,7 +64,7 @@ namespace AsmResolver.Net.Cts
         internal AssemblyDefinition(MetadataImage image, MetadataRow<AssemblyHashAlgorithm, ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint> row)
             : base(row.MetadataToken)
         {
-            _image = image;
+            Image = image;
             var tableStream = image.Header.GetStream<TableStream>();
             var stringStream = image.Header.GetStream<StringStream>();
             var blobStream = image.Header.GetStream<BlobStream>();
@@ -105,7 +110,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public override MetadataImage Image
         {
-            get { return _image; }
+            get;
         }
 
         /// <summary>
@@ -120,7 +125,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public Version Version
         {
-            get { return _version; }
+            get => _version;
             set
             {
                 _version = value;
@@ -138,7 +143,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public string Name
         {
-            get { return _name.Value; }
+            get => _name.Value;
             set
             {
                 _name.Value = value;
@@ -160,7 +165,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public string Culture
         {
-            get { return _culture.Value; }
+            get => _culture.Value;
             set
             {
                 _culture.Value = value;
@@ -173,7 +178,7 @@ namespace AsmResolver.Net.Cts
         /// </summary>
         public DataBlobSignature PublicKey
         {
-            get { return _publicKey.Value; }
+            get => _publicKey.Value;
             set
             {
                 _publicKey.Value = value;
@@ -199,14 +204,12 @@ namespace AsmResolver.Net.Cts
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
         /// <inheritdoc />
         public SecurityDeclarationCollection SecurityDeclarations
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -215,7 +218,6 @@ namespace AsmResolver.Net.Cts
         public Collection<ModuleDefinition> Modules
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -224,7 +226,6 @@ namespace AsmResolver.Net.Cts
         public Collection<AssemblyReference> AssemblyReferences
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -233,7 +234,6 @@ namespace AsmResolver.Net.Cts
         public Collection<ModuleReference> ModuleReferences
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -242,7 +242,6 @@ namespace AsmResolver.Net.Cts
         public Collection<ManifestResource> Resources
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -251,7 +250,6 @@ namespace AsmResolver.Net.Cts
         public Collection<FileReference> Files
         {
             get;
-            private set;
         }
         
         /// <summary>
@@ -261,7 +259,6 @@ namespace AsmResolver.Net.Cts
         public Collection<AssemblyOs> OperatingSystems
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -271,7 +268,6 @@ namespace AsmResolver.Net.Cts
         public Collection<AssemblyProcessor> Processors
         {
             get;
-            private set;
         }
 
         public override string ToString()
@@ -298,8 +294,9 @@ namespace AsmResolver.Net.Cts
                 case AssemblyHashAlgorithm.None:
                     return key;
                 default:
-                    throw new ArgumentException("algorithm");
+                    throw new NotSupportedException("Invalid or unsupported hash algorithm.");
             }
+            
             using (hashAlgorithm)
             {
                 var token = hashAlgorithm.ComputeHash(key);

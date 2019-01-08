@@ -27,8 +27,7 @@ namespace AsmResolver.Net.Cts
             _parent = new LazyValue<TypeDefinition>(() =>
             {
                 var typeTable = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
-                MetadataRow typeRow;
-                return typeTable.TryGetRow((int) row.Column1 - 1, out typeRow)
+                return typeTable.TryGetRow((int) row.Column1 - 1, out var typeRow)
                     ? (TypeDefinition) typeTable.GetMemberFromRow(image, typeRow)
                     : null;
             });
@@ -37,17 +36,16 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _parent.IsInitialized && _parent.Value != null 
+            ? _parent.Value.Image 
+            : _image;
 
         /// <summary>
         /// Gets the type the event map was assigned to.
         /// </summary>
         public TypeDefinition Parent
         {
-            get { return _parent.Value; }
+            get => _parent.Value;
             internal set
             {
                 _parent.Value = value;
@@ -61,7 +59,6 @@ namespace AsmResolver.Net.Cts
         public Collection<EventDefinition> Events
         {
             get;
-            private set;
         }
 
         private static EventMap GetEventOwner(EventDefinition @event)
