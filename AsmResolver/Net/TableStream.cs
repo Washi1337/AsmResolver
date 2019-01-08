@@ -27,12 +27,18 @@ namespace AsmResolver.Net
                 ValidBitVector = reader.ReadUInt64(),
                 SortedBitVector = reader.ReadUInt64(),
             };
-
+            
             var presentTables = stream.GetPresentTables().ToArray();
             var currentOffset = reader.Position + (presentTables.Length * sizeof (uint));
 
             foreach (var table in presentTables)
                 table.SetRowCount(reader.ReadUInt32());
+
+            if (stream.HasExtraData)
+            {
+                stream.ExtraData = reader.ReadUInt32();
+                currentOffset += 4;
+            }
 
             foreach (var table in presentTables)
             {
@@ -265,6 +271,21 @@ namespace AsmResolver.Net
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the table stream header has extra data stored.
+        /// </summary>
+        public bool HasExtraData
+        {
+            get => (HeapSizes & 0x40) != 0;
+            set => HeapSizes = (byte) ((HeapSizes & ~0x40) | (value ? 0x40 : 0));
+        }
+
+        public uint ExtraData
+        {
+            get;
+            set;
+        }
+        
         /// <summary>
         /// Gets the index encoder for a specific type of coded index.
         /// </summary>

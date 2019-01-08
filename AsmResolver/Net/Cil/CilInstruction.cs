@@ -213,11 +213,12 @@ namespace AsmResolver.Net.Cil
                         ? $"\"{Operand}\""
                         : "TOKEN<0x" + ((MetadataToken) Operand) + ">";
                 case CilOperandType.InlineSwitch:
-                    return string.Join(", ", ((CilInstruction[])Operand).Select(x => "IL_" + x.Offset.ToString("X4")));
+                    return string.Join(", ",
+                        ((IList<CilInstruction>) Operand).Select(x => "IL_" + x.Offset.ToString("X4")));
 
                 case CilOperandType.InlineBrTarget:
                 case CilOperandType.ShortInlineBrTarget:
-                    return "IL_" + ((CilInstruction)Operand).Offset.ToString("X4");
+                    return "IL_" + ((CilInstruction) Operand).Offset.ToString("X4");
             }
             throw new NotSupportedException();
         }

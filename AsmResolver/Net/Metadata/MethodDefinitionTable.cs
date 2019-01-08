@@ -23,37 +23,38 @@ namespace AsmResolver.Net.Metadata
             }
         }
 
+        /// <summary>
+        /// Gets or sets the reader to use for reading method body file segments.
+        /// </summary>
+        public IRawMethodBodyReader MethodBodyReader
+        {
+            get;
+            set;
+        } = new DefaultMethodBodyReader();
+
         protected override MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> ReadRow(ReadingContext context, MetadataToken token)
         {
             var reader = context.Reader;
             
             uint rva = reader.ReadUInt32();
-            var implAttributes = (MethodImplAttributes) reader.ReadUInt16();
-            
-            FileSegment body = null;
-            if (rva != 0)
-            {
-                long fileOffset = context.Assembly.RvaToFileOffset(rva);
-                if (implAttributes.HasFlag(MethodImplAttributes.IL))
-                {
-                    body = CilRawMethodBody.FromReader(context.Reader.CreateSubReader(fileOffset));
-                }
-                else
-                {
-                    // TODO: handler for native method bodies.
-                    body = new DataSegment(new byte[0]) { StartOffset = fileOffset };
-                }
-            }
 
-            return new MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>(token)
-            {
-                Column1 = body,                                                          
-                Column2 = implAttributes,                                                           // ImplAttrbibutes
+            var methodRow = new MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>(token)
+            {                                                          
+                Column2 = (MethodImplAttributes) reader.ReadUInt16(),                               // ImplAttrbibutes
                 Column3 = (MethodAttributes) reader.ReadUInt16(),                                   // Attributes
                 Column4 = reader.ReadIndex(TableStream.StringIndexSize),                            // Name
                 Column5 = reader.ReadIndex(TableStream.BlobIndexSize),                              // Signature
                 Column6 = reader.ReadIndex(TableStream.GetTable(MetadataTokenType.Param).IndexSize) // ParamList
             };
+            
+            FileSegment body = null;
+            if (rva != 0)
+            {
+                long fileOffset = context.Assembly.RvaToFileOffset(rva);
+                methodRow.Column1 = MethodBodyReader.ReadMethodBody(methodRow, reader.CreateSubReader(fileOffset));
+            }
+
+            return methodRow;
         }
 
         protected override void WriteRow(WritingContext context, MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)

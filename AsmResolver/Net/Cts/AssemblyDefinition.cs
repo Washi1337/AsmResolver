@@ -23,9 +23,6 @@ namespace AsmResolver.Net.Cts
         public AssemblyDefinition(IAssemblyDescriptor info)
             : base(new MetadataToken(MetadataTokenType.Assembly))
         {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
-            
             _name = new LazyValue<string>(info.Name);
             Version = info.Version;
             _culture = new LazyValue<string>(info.Culture);
@@ -43,11 +40,8 @@ namespace AsmResolver.Net.Cts
         public AssemblyDefinition(string name, Version version)
             : base(new MetadataToken(MetadataTokenType.Assembly))
         {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-            
             _name = new LazyValue<string>(name);
-            _version = version ?? throw new ArgumentNullException(nameof(version));
+            _version = version;
             _culture = new LazyValue<string>();
             _publicKey = new LazyValue<DataBlobSignature>();
             Modules = new DelegatedMemberCollection<AssemblyDefinition, ModuleDefinition>(this, GetModuleOwner, SetModuleOwner);
