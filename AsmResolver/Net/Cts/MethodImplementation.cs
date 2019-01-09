@@ -2,6 +2,9 @@
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents extra metadata added to a method that implements another method declared in an interface.
+    /// </summary>
     public class MethodImplementation : MetadataMember<MetadataRow<uint, uint, uint>>
     {
         private readonly LazyValue<TypeDefinition> _class;
@@ -28,8 +31,7 @@ namespace AsmResolver.Net.Cts
             _class = new LazyValue<TypeDefinition>(() =>
             {
                 var table = tableStream.GetTable(MetadataTokenType.TypeDef);
-                MetadataRow typeRow;
-                return table.TryGetRow((int) (row.Column1 - 1), out typeRow) 
+                return table.TryGetRow((int) (row.Column1 - 1), out var typeRow) 
                     ? (TypeDefinition) table.GetMemberFromRow(image, typeRow) 
                     : null;
             });
@@ -37,27 +39,27 @@ namespace AsmResolver.Net.Cts
             _methodBody = new LazyValue<IMethodDefOrRef>(() =>
             {
                 var methodBodyToken = encoder.DecodeIndex(row.Column2);
-                IMetadataMember member;
-                return image.TryResolveMember(methodBodyToken, out member) ? (IMethodDefOrRef) member : null;
+                return image.TryResolveMember(methodBodyToken, out var member) ? (IMethodDefOrRef) member : null;
             });
 
             _methodDeclaration = new LazyValue<IMethodDefOrRef>(() =>
             {
                 var declarationToken = encoder.DecodeIndex(row.Column3);
-                IMetadataMember member;
-                return image.TryResolveMember(declarationToken, out member) ? (IMethodDefOrRef) member : null;
+                return image.TryResolveMember(declarationToken, out var member) ? (IMethodDefOrRef) member : null;
             });
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _class.IsInitialized && _class.Value != null ? _class.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _class.IsInitialized && _class.Value != null 
+            ? _class.Value.Image 
+            : _image;
 
+        /// <summary>
+        /// Gets the interface that is implemented.
+        /// </summary>
         public TypeDefinition Class
         {
-            get { return _class.Value; }
+            get => _class.Value;
             internal set
             {
                 _class.Value = value;
@@ -65,16 +67,22 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the method that implements the interface method.
+        /// </summary>
         public IMethodDefOrRef MethodBody
         {
-            get { return _methodBody.Value; }
-            set { _methodBody.Value = value; }
+            get => _methodBody.Value;
+            set => _methodBody.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the method to be implemented.
+        /// </summary>
         public IMethodDefOrRef MethodDeclaration
         {
-            get { return _methodDeclaration.Value; }
-            set { _methodDeclaration.Value = value; }
+            get => _methodDeclaration.Value;
+            set => _methodDeclaration.Value = value;
         }
     }
 }

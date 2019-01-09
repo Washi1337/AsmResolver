@@ -5,6 +5,10 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Provides a default implementation of a reference importer. A reference importer is often used when copying
+    /// member over from one assembly to another, or writing CIL code that uses members from other assemblies.
+    /// </summary>
     public class ReferenceImporter : IReferenceImporter
     {
         private readonly MetadataImage _image;
@@ -18,20 +22,20 @@ namespace AsmResolver.Net.Cts
 
         public ReferenceImporter(MetadataImage image, SignatureComparer signatureComparer)
         {
-            if (image == null)
-                throw new ArgumentNullException("image");
-            _image = image;
+            _image = image ?? throw new ArgumentNullException(nameof(image));
             _signatureComparer = signatureComparer;
             _typeSystem = image.TypeSystem;
         }
 
         #region Assembly
 
+        /// <inheritdoc />
         public virtual AssemblyReference ImportAssembly(AssemblyName assemblyName)
         {
             return ImportAssembly(new ReflectionAssemblyNameWrapper(assemblyName));
         }
 
+        /// <inheritdoc />
         public virtual AssemblyReference ImportAssembly(IAssemblyDescriptor assemblyInfo)
         {
             var reference = _image.Assembly.AssemblyReferences.FirstOrDefault(x =>
@@ -47,32 +51,30 @@ namespace AsmResolver.Net.Cts
 
         #endregion
 
+        /// <inheritdoc />
         public virtual IMemberReference ImportReference(IMemberReference reference)
         {
-            var type = reference as ITypeDefOrRef;
-            if (type != null)
-                return ImportType(type);
-
-            var method = reference as MethodDefinition;
-            if (method != null)
-                return ImportMethod(method);
-
-            var field = reference as FieldDefinition;
-            if (field != null)
-                return ImportField(field);
-
-            var member = reference as MemberReference;
-            if (member != null)
-                return ImportMember(member);
-
-            throw new NotSupportedException("Invalid or unsupported reference.");
+            switch (reference)
+            {
+                case ITypeDefOrRef type:
+                    return ImportType(type);
+                case MethodDefinition method:
+                    return ImportMethod(method);
+                case FieldDefinition field:
+                    return ImportField(field);
+                case MemberReference member:
+                    return ImportMember(member);
+                default:
+                    throw new NotSupportedException("Invalid or unsupported reference.");
+            }
         }
 
         #region Type
 
+        /// <inheritdoc />
         public virtual ITypeDefOrRef ImportType(Type type)
         {
-            IResolutionScope resolutionScope = type.IsNested
+            var resolutionScope = type.IsNested
                 ? (IResolutionScope) ImportType(type.DeclaringType)
                 : ImportAssembly(type.Assembly.GetName());
 
@@ -89,23 +91,28 @@ namespace AsmResolver.Net.Cts
                 type.Name));
         }
 
+        /// <inheritdoc />
         public virtual ITypeDefOrRef ImportType(ITypeDefOrRef type)
         {
-            var typeRef = type as TypeReference;
-            if (typeRef != null)
-                return ImportType(typeRef);
-
-            var typeDef = type as TypeDefinition;
-            if (typeDef != null)
-                return ImportType(typeDef);
-
-            var typeSpec = type as TypeSpecification;
-            if (typeSpec != null)
-                return ImportType(typeSpec);
-
-            throw new NotSupportedException();
+            switch (type)
+            {
+                case TypeReference typeRef:
+                    return ImportType(typeRef);
+                case TypeDefinition typeDef:
+                    return ImportType(typeDef);
+                case TypeSpecification typeSpec:
+                    return ImportType(typeSpec);
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
+        /// <summary>
+        /// Imports a type reference into the assembly.
+        /// </summary>
+        /// <param name="reference">The reference to import.</param>
+        /// <returns>The imported reference, or the same reference provided in <<paramref name="reference"/> if the
+        /// reference was already imported.</returns>
         public virtual TypeReference ImportType(TypeReference reference)
         {
             return new TypeReference(ImportScope(reference.ResolutionScope),
@@ -113,6 +120,12 @@ namespace AsmResolver.Net.Cts
                 reference.Name);
         }
 
+        /// <summary>
+        /// Imports a type reference into the assembly.
+        /// </summary>
+        /// <param name="definition">The reference to import.</param>
+        /// <returns>The imported reference, or the same definition provided in <<paramref name="definition"/> if the
+        /// definition was already present in the target image.</returns>
         public virtual ITypeDefOrRef ImportType(TypeDefinition definition)
         {
             if (definition.Image == _image)
@@ -127,7 +140,13 @@ namespace AsmResolver.Net.Cts
                 definition.Namespace,
                 definition.Name));
         }
-
+        
+        /// <summary>
+        /// Imports a type specification into the assembly.
+        /// </summary>
+        /// <param name="specification">The reference to import.</param>
+        /// <returns>The imported reference, or the same reference provided in <<paramref name="specification"/> if the
+        /// reference was already imported.</returns>
         public virtual ITypeDefOrRef ImportType(TypeSpecification specification)
         {
             return new TypeSpecification(ImportTypeSignature(specification.Signature));
@@ -137,6 +156,7 @@ namespace AsmResolver.Net.Cts
 
         #region Field
 
+        /// <inheritdoc />
         public virtual MemberReference ImportField(FieldInfo field)
         {
             var signature = new FieldSignature(ImportTypeSignature(field.FieldType));
@@ -149,6 +169,7 @@ namespace AsmResolver.Net.Cts
             return ImportMember(new MemberReference(declaringType, field.Name, signature));
         }
 
+        /// <inheritdoc />
         public virtual IMemberReference ImportField(FieldDefinition field)
         {
             if (field.Image == _image)
@@ -164,6 +185,7 @@ namespace AsmResolver.Net.Cts
 
         #region Method
 
+        /// <inheritdoc />
         public virtual IMemberReference ImportMethod(MethodBase method)
         {
             if (method.IsGenericMethod && !method.IsGenericMethodDefinition)
@@ -188,19 +210,26 @@ namespace AsmResolver.Net.Cts
             return ImportMember(new MemberReference(ImportType(method.DeclaringType), method.Name, signature));
         }
 
+        /// <inheritdoc />
         public virtual IMethodDefOrRef ImportMethod(IMethodDefOrRef method)
         {
-            var definition = method as MethodDefinition;
-            if (definition != null)
-                return ImportMethod(definition);
-
-            var reference = method as MemberReference;
-            if (reference != null)
-                return ImportMember(reference);
-
-            throw new NotSupportedException("Invalid or unsupported MethodDefOrRef instance.");
+            switch (method)
+            {
+                case MethodDefinition definition:
+                    return ImportMethod(definition);
+                case MemberReference reference:
+                    return ImportMember(reference);
+                default:
+                    throw new NotSupportedException("Invalid or unsupported MethodDefOrRef instance.");
+            }
         }
 
+        /// <summary>
+        /// Imports a method definition into the assembly.
+        /// </summary>
+        /// <param name="definition">The definition to import.</param>
+        /// <returns>The imported reference, or the same definition provided in <paramref name="definition"/> if the
+        /// definition was already present in the target image.</returns>
         public virtual IMethodDefOrRef ImportMethod(MethodDefinition definition)
         {
             if (definition.Image == _image)
@@ -212,6 +241,7 @@ namespace AsmResolver.Net.Cts
                 ImportMethodSignature(definition.Signature));
         }
 
+        /// <inheritdoc />
         public virtual MethodSpecification ImportMethod(MethodSpecification specification)
         {
             if (specification.Image == _image)
@@ -225,6 +255,7 @@ namespace AsmResolver.Net.Cts
 
         #region Member references
 
+        /// <inheritdoc />
         public virtual MemberReference ImportMember(MemberReference reference)
         {
             return new MemberReference(
@@ -237,32 +268,31 @@ namespace AsmResolver.Net.Cts
 
         #region Member signatures
 
+        /// <inheritdoc />
         public virtual StandAloneSignature ImportStandAloneSignature(StandAloneSignature signature)
         {
             return new StandAloneSignature(ImportCallingConventionSignature(signature.Signature), _image);
         }
 
+        /// <inheritdoc />
         public CallingConventionSignature ImportCallingConventionSignature(CallingConventionSignature signature)
         {
-            var memberSig = signature as MemberSignature;
-            if (memberSig != null)
-                return ImportMemberSignature(memberSig);
-
-            var propertySig = signature as PropertySignature;
-            if (propertySig != null)
-                return ImportPropertySignature(propertySig);
-
-            var genericInstanceSig = signature as GenericInstanceMethodSignature;
-            if (genericInstanceSig != null)
-                return ImportGenericInstanceMethodSignature(genericInstanceSig);
-
-            var localVarSig = signature as LocalVariableSignature;
-            if (localVarSig != null)
-                return ImportLocalVariableSignature(localVarSig);
-
-            throw new NotSupportedException("Invalid or unsupported calling convention signature.");
+            switch (signature)
+            {
+                case MemberSignature memberSig:
+                    return ImportMemberSignature(memberSig);
+                case PropertySignature propertySig:
+                    return ImportPropertySignature(propertySig);
+                case GenericInstanceMethodSignature genericInstanceSig:
+                    return ImportGenericInstanceMethodSignature(genericInstanceSig);
+                case LocalVariableSignature localVarSig:
+                    return ImportLocalVariableSignature(localVarSig);
+                default:
+                    throw new NotSupportedException("Invalid or unsupported calling convention signature.");
+            }
         }
 
+        /// <inheritdoc />
         public LocalVariableSignature ImportLocalVariableSignature(LocalVariableSignature signature)
         {
             return new LocalVariableSignature(signature.Variables.Select(
@@ -272,6 +302,7 @@ namespace AsmResolver.Net.Cts
             };
         }
 
+        /// <inheritdoc />
         public GenericInstanceMethodSignature ImportGenericInstanceMethodSignature(GenericInstanceMethodSignature signature)
         {
             return new GenericInstanceMethodSignature(signature.GenericArguments.Select(ImportTypeSignature))
@@ -280,6 +311,7 @@ namespace AsmResolver.Net.Cts
             };
         }
 
+        /// <inheritdoc />
         public PropertySignature ImportPropertySignature(PropertySignature signature)
         {
             var newSignature = new PropertySignature
@@ -294,19 +326,21 @@ namespace AsmResolver.Net.Cts
             return newSignature;
         }
 
+        /// <inheritdoc />
         public MemberSignature ImportMemberSignature(MemberSignature signature)
         {
-            var fieldSignature = signature as FieldSignature;
-            if (fieldSignature != null)
-                return ImportFieldSignature(fieldSignature);
-
-            var methodSignature = signature as MethodSignature;
-            if (methodSignature != null)
-                return ImportMethodSignature(methodSignature);
-
-            throw new NotSupportedException();
+            switch (signature)
+            {
+                case FieldSignature fieldSignature:
+                    return ImportFieldSignature(fieldSignature);
+                case MethodSignature methodSignature:
+                    return ImportMethodSignature(methodSignature);
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
+        /// <inheritdoc />
         public MethodSignature ImportMethodSignature(MethodSignature signature)
         {
             var newSignature = new MethodSignature(ImportTypeSignature(signature.ReturnType))
@@ -321,6 +355,7 @@ namespace AsmResolver.Net.Cts
             return newSignature;
         }
 
+        /// <inheritdoc />
         public FieldSignature ImportFieldSignature(FieldSignature signature)
         {
             return new FieldSignature(ImportTypeSignature(signature.FieldType))
@@ -333,6 +368,7 @@ namespace AsmResolver.Net.Cts
 
         #region Type signatures
 
+        /// <inheritdoc />
         public virtual TypeSignature ImportTypeSignature(Type type)
         {
             TypeSignature signature = GetCorLibSignature(type);
@@ -361,69 +397,48 @@ namespace AsmResolver.Net.Cts
             return ImportArrayTypeSignature(arrayType);
         }
 
+        /// <inheritdoc />
         public virtual TypeSignature ImportTypeSignature(ITypeDefOrRef typeDefOrRef)
         {
             return new TypeDefOrRefSignature(ImportType(typeDefOrRef));
         }
 
+        /// <inheritdoc />
         public virtual TypeSignature ImportTypeSignature(TypeSignature signature)
         {
-            if (signature is MsCorLibTypeSignature)
-                return signature;
-
-            var typeDefOrRef = signature as TypeDefOrRefSignature;
-            if (typeDefOrRef != null)
-                return ImportTypeDefOrRefSignature(typeDefOrRef);
-
-            var arrayType = signature as ArrayTypeSignature;
-            if (arrayType != null)
-                return ImportArrayTypeSignature(arrayType);
-
-            var boxedType = signature as BoxedTypeSignature;
-            if (boxedType != null)
-                return ImportBoxedTypeSignature(boxedType);
-
-            var byRefType = signature as ByReferenceTypeSignature;
-            if (byRefType != null)
-                return ImportByRefTypeSignature(byRefType);
-
-            var functionPtrType = signature as FunctionPointerTypeSignature;
-            if (functionPtrType != null)
-                return ImportFunctionPointerTypeSignature(functionPtrType);
-
-            var genericType = signature as GenericInstanceTypeSignature;
-            if (genericType != null)
-                return ImportGenericInstanceTypeSignature(genericType);
-
-            var modOptType = signature as OptionalModifierSignature;
-            if (modOptType != null)
-                return ImportOptionalModifierSignature(modOptType);
-
-            var pinnedType = signature as PinnedTypeSignature;
-            if (pinnedType != null)
-                return ImportPinnedTypeSignature(pinnedType);
-
-            var pointerType = signature as PointerTypeSignature;
-            if (pointerType != null)
-                return ImportPointerTypeSignature(pointerType);
-
-            var modReqType = signature as RequiredModifierSignature;
-            if (modReqType != null)
-                return ImportRequiredModifierSignature(modReqType);
-
-            var sentinelType = signature as SentinelTypeSignature;
-            if (sentinelType != null)
-                return ImportSentinelTypeSignature(sentinelType);
-
-            var szArrayType = signature as SzArrayTypeSignature;
-            if (szArrayType != null)
-                return ImportSzArrayTypeSignature(szArrayType);
-
-            var genericParameter = signature as GenericParameterSignature;
-            if (genericParameter != null)
-                return ImportGenericParameterSignature(genericParameter);
-
-            throw new NotSupportedException("Invalid or unsupported type signature.");
+            switch (signature)
+            {
+                case MsCorLibTypeSignature _:
+                    return signature;
+                case TypeDefOrRefSignature typeDefOrRef:
+                    return ImportTypeDefOrRefSignature(typeDefOrRef);
+                case ArrayTypeSignature arrayType:
+                    return ImportArrayTypeSignature(arrayType);
+                case BoxedTypeSignature boxedType:
+                    return ImportBoxedTypeSignature(boxedType);
+                case ByReferenceTypeSignature byRefType:
+                    return ImportByRefTypeSignature(byRefType);
+                case FunctionPointerTypeSignature functionPtrType:
+                    return ImportFunctionPointerTypeSignature(functionPtrType);
+                case GenericInstanceTypeSignature genericType:
+                    return ImportGenericInstanceTypeSignature(genericType);
+                case OptionalModifierSignature modOptType:
+                    return ImportOptionalModifierSignature(modOptType);
+                case PinnedTypeSignature pinnedType:
+                    return ImportPinnedTypeSignature(pinnedType);
+                case PointerTypeSignature pointerType:
+                    return ImportPointerTypeSignature(pointerType);
+                case RequiredModifierSignature modReqType:
+                    return ImportRequiredModifierSignature(modReqType);
+                case SentinelTypeSignature sentinelType:
+                    return ImportSentinelTypeSignature(sentinelType);
+                case SzArrayTypeSignature szArrayType:
+                    return ImportSzArrayTypeSignature(szArrayType);
+                case GenericParameterSignature genericParameter:
+                    return ImportGenericParameterSignature(genericParameter);
+                default:
+                    throw new NotSupportedException("Invalid or unsupported type signature.");
+            }
         }
 
         #region Array
@@ -642,36 +657,41 @@ namespace AsmResolver.Net.Cts
 
         #region Misc
 
+        /// <summary>
+        /// Imports a parent of a member reference into the assembly.
+        /// </summary>
+        /// <param name="parent">The parent to import.</param>
+        /// <returns>The imported parent.</returns>
         public IMemberRefParent ImportMemberRefParent(IMemberRefParent parent)
         {
-            var type = parent as ITypeDefOrRef;
-            if (type != null)
-                return ImportType(type);
-
-            var moduleRef = parent as ModuleReference;
-            if (moduleRef != null)
-                return ImportModule(moduleRef);
-
-            throw new NotSupportedException();
+            switch (parent)
+            {
+                case ITypeDefOrRef type:
+                    return ImportType(type);
+                case ModuleReference moduleRef:
+                    return ImportModule(moduleRef);
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
+        /// <inheritdoc />
         public IResolutionScope ImportScope(IResolutionScope scope)
         {
-            var assemblyRef = scope as AssemblyReference;
-            if (assemblyRef != null)
-                return ImportAssembly(assemblyRef);
-
-            var typeRef = scope as TypeReference;
-            if (typeRef != null)
-                return ImportType(typeRef);
-
-            var moduleRef = scope as ModuleReference;
-            if (moduleRef != null)
-                return ImportModule(moduleRef);
-
-            throw new NotSupportedException();
+            switch (scope)
+            {
+                case AssemblyReference assemblyRef:
+                    return ImportAssembly(assemblyRef);
+                case TypeReference typeRef:
+                    return ImportType(typeRef);
+                case ModuleReference moduleRef:
+                    return ImportModule(moduleRef);
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
+        /// <inheritdoc />
         public virtual ModuleReference ImportModule(ModuleReference reference)
         {
             var newReference =

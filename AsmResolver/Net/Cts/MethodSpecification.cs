@@ -7,6 +7,10 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents extra metadata added to a method reference to indicate the type parameters for a generic
+    /// method instance.
+    /// </summary>
     public class MethodSpecification : MetadataMember<MetadataRow<uint, uint>>, ICallableMemberReference
     {
         private readonly LazyValue<IMethodDefOrRef> _method;
@@ -30,9 +34,8 @@ namespace AsmResolver.Net.Cts
             {
                 var encoder = image.Header.GetStream<TableStream>().GetIndexEncoder(CodedIndex.MethodDefOrRef);
                 var methodToken = encoder.DecodeIndex(row.Column1);
-                
-                IMetadataMember member;
-                return image.TryResolveMember(methodToken, out member) ? (IMethodDefOrRef) member : null;
+
+                return image.TryResolveMember(methodToken, out var member) ? (IMethodDefOrRef) member : null;
             });
 
             _signature = new LazyValue<GenericInstanceMethodSignature>(() =>
@@ -42,14 +45,16 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _method.IsInitialized && _method.Value != null ? _method.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _method.IsInitialized && _method.Value != null 
+            ? _method.Value.Image 
+            : _image;
 
+        /// <summary>
+        /// Gets or sets the generic method to instantiate. 
+        /// </summary>
         public IMethodDefOrRef Method
         {
-            get { return _method.Value; }
+            get => _method.Value;
             set
             {
                 _method.Value = value;
@@ -58,9 +63,12 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the signature associated to the specification, containing the generic type arguments.
+        /// </summary>
         public GenericInstanceMethodSignature Signature
         {
-            get { return _signature.Value; }
+            get => _signature.Value;
             set
             {
                 _signature.Value = value;
@@ -68,22 +76,18 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        CallingConventionSignature ICallableMemberReference.Signature
-        {
-            get { return Method.Signature; }
-        }
+        CallingConventionSignature ICallableMemberReference.Signature => Method.Signature;
 
-        public string Name
-        {
-            get { return Method.Name; }
-        }
+        /// <inheritdoc />
+        public string Name => Method.Name;
 
         string IMemberReference.Name
         {
-            get { return Name; }
-            set{ throw new NotSupportedException(); }
+            get => Name;
+            set => throw new NotSupportedException();
         }
 
+        /// <inheritdoc />
         public string FullName
         {
             get
@@ -102,20 +106,22 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        public ITypeDefOrRef DeclaringType
-        {
-            get { return Method.DeclaringType; }
-        }
+        /// <inheritdoc />
+        public ITypeDefOrRef DeclaringType => Method.DeclaringType;
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Resolves the method to its method definition.
+        /// </summary>
+        /// <returns>The resolved method.</returns>
         public MethodDefinition Resolve()
         {
-            return (MethodDefinition)Method.Resolve();
+            return (MethodDefinition) Method.Resolve();
         }
 
         IMetadataMember IResolvable.Resolve()

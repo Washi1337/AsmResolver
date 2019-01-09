@@ -4,21 +4,27 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Provides a high-level view on the .NET metadata tables that somewhat resembles the hierarchical structure found
+    /// in the common type system (CTS). It contains the root assembly definition, as well as various ways to resolve
+    /// members by their token.
+    ///
+    /// When a metadata image is instantiated from a <see cref="MetadataHeader"/>, the metadata header is automatically
+    /// locked and cannot be changed until the image has been committed to the .NET streams. This is done by
+    /// <see cref="MetadataHeader.UnlockMetadata"/>.
+    /// </summary>
     public class MetadataImage
     {
         private readonly IDictionary<MetadataToken, IMetadataMember> _cachedMembers = new Dictionary<MetadataToken, IMetadataMember>();
 
         internal MetadataImage(MetadataHeader header)
         {
-            if (header == null)
-                throw new ArgumentNullException("header");
-            Header = header;
+            Header = header ?? throw new ArgumentNullException(nameof(header));
             var tableStream = header.GetStream<TableStream>();
 
             var table = tableStream.GetTable(MetadataTokenType.Assembly);
 
-            MetadataRow assemblyRow;
-            if (table.TryGetRow(0, out assemblyRow))
+            if (table.TryGetRow(0, out var assemblyRow))
                 Assembly = (AssemblyDefinition) table.GetMemberFromRow(this, assemblyRow);
             else
                 Assembly = new AssemblyDefinition(null, new Version());
@@ -27,20 +33,25 @@ namespace AsmResolver.Net.Cts
             MetadataResolver = new DefaultMetadataResolver(new DefaultNetAssemblyResolver());
         }
 
+        /// <summary>
+        /// Gets the metadata header this image was based on. 
+        /// </summary>
         public MetadataHeader Header
         {
             get;
-            private set;
-        }
-
-        public TypeSystem TypeSystem
-        {
-            get;
-            private set;
         }
 
         /// <summary>
-        /// Gets or sets the metadata resolver that will be used when <see cref="IResolvable.Resolve"/> is called on a specific member reference.
+        /// Gets a collection of the basic type signatures that are used throughout the image.
+        /// </summary>
+        public TypeSystem TypeSystem
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets or sets the metadata resolver that will be used when <see cref="IResolvable.Resolve"/> is called on a
+        /// specific member reference.
         /// </summary>
         public IMetadataResolver MetadataResolver
         {
@@ -48,10 +59,12 @@ namespace AsmResolver.Net.Cts
             set;
         }
 
+        /// <summary>
+        /// Gets the root assembly definition that is defined in the assembly.
+        /// </summary>
         public AssemblyDefinition Assembly
         {
             get;
-            private set;
         }
        
         internal bool TryGetCachedMember(MetadataToken token, out IMetadataMember member)
@@ -66,22 +79,32 @@ namespace AsmResolver.Net.Cts
             _cachedMembers[member.MetadataToken] = member;
         }
 
+        /// <summary>
+        /// Resolves a member by its metadata token.
+        /// </summary>
+        /// <param name="token">The token to resolve.</param>
+        /// <returns>The resolved metadata member.</returns>
+        /// <exception cref="MemberResolutionException">Occurs when the metadata token is invalid for this image.</exception>
         public IMetadataMember ResolveMember(MetadataToken token)
         {
-            IMetadataMember member;
-            if (!TryResolveMember(token, out member))
-                throw new MemberResolutionException(string.Format("Invalid metadata token {0}.", token));
+            if (!TryResolveMember(token, out var member))
+                throw new MemberResolutionException($"Invalid metadata token {token}.");
             return member;
         }
 
+        /// <summary>
+        /// Attempts to resolves a member by its metadata token.
+        /// </summary>
+        /// <param name="token">The token to resolve.</param>
+        /// <param name="member">The resolved metadata member.</param>
+        /// <returns>True if the resolution succeeded, false otherwise.</returns>
         public bool TryResolveMember(MetadataToken token, out IMetadataMember member)
         {
             if (!TryGetCachedMember(token, out member))
             {
                 var tableStream = Header.GetStream<TableStream>();
 
-                MetadataRow row;
-                if (!tableStream.TryResolveRow(token, out row))
+                if (!tableStream.TryResolveRow(token, out var row))
                     return false;
 
                 member = tableStream.GetTable(token.TokenType).GetMemberFromRow(this, row);

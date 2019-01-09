@@ -4,6 +4,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Provides a map that binds a <see cref="TypeDefinition"/> to a collection of <see cref="PropertyDefinition"/>s.
+    /// </summary>
     public class PropertyMap : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<TypeDefinition> _parent;
@@ -34,11 +37,13 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _parent.IsInitialized && _parent.Value != null 
+            ? _parent.Value.Image
+            : _image;
 
+        /// <summary>
+        /// Gets the type the property map was assigned to.
+        /// </summary>
         public TypeDefinition Parent
         {
             get { return _parent.Value; }
@@ -49,10 +54,12 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets a collection of properties the <see cref="Parent"/> type declares.
+        /// </summary>
         public Collection<PropertyDefinition> Properties
         {
             get;
-            private set;
         }
 
         private static PropertyMap GetPropertyOwner(PropertyDefinition property)

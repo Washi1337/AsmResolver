@@ -5,6 +5,13 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a property that is declared in a type definition.
+    /// </summary>
+    /// <remarks>
+    /// Properties do not contain any code themselves. Rather, the code is defined in the methods stored in
+    /// the <see cref="Semantics"/> properties. 
+    /// </remarks>
     public class PropertyDefinition : MetadataMember<MetadataRow<ushort, uint, uint>>, ICallableMemberReference, IHasConstant, IHasSemantics
     {
         private readonly LazyValue<string> _name;
@@ -58,20 +65,23 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _propertyMap.IsInitialized && _propertyMap.Value != null ? _propertyMap.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _propertyMap.IsInitialized && _propertyMap.Value != null 
+            ? _propertyMap.Value.Image 
+            : _image;
 
+        /// <summary>
+        /// Gets or sets the attributes associated to the property.
+        /// </summary>
         public PropertyAttributes Attributes
         {
             get;
             set;
         }
 
+        /// <inheritdoc cref="IMemberReference.Name" />
         public string Name
         {
-            get { return _name.Value; }
+            get => _name.Value;
             set
             {
                 _name.Value = value;
@@ -79,6 +89,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <inheritdoc />
         public string FullName
         {
             get
@@ -89,9 +100,12 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the signature associated to the property.
+        /// </summary>
         public PropertySignature Signature
         {
-            get { return _signature.Value; }
+            get => _signature.Value;
             set
             {
                 _signature.Value = value;
@@ -99,14 +113,14 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        CallingConventionSignature ICallableMemberReference.Signature
-        {
-            get { return Signature; }
-        }
+        CallingConventionSignature ICallableMemberReference.Signature => Signature;
 
+        /// <summary>
+        /// Gets the map the property is contained in.
+        /// </summary>
         public PropertyMap PropertyMap
         {
-            get { return _propertyMap.Value; }
+            get => _propertyMap.Value;
             internal set
             {
                 _propertyMap.Value = value;
@@ -114,53 +128,59 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        public TypeDefinition DeclaringType
-        {
-            get { return PropertyMap.Parent; }
-        }
+        /// <summary>
+        /// Gets the type that declares the property.
+        /// </summary>
+        public TypeDefinition DeclaringType => PropertyMap.Parent;
 
-        ITypeDefOrRef IMemberReference.DeclaringType
-        {
-            get { return DeclaringType; }
-        }
+        ITypeDefOrRef IMemberReference.DeclaringType => DeclaringType;
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
+        /// <inheritdoc />
         public MethodSemanticsCollection Semantics
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the getter method associated to the property (if available).
+        /// </summary>
         public MethodDefinition GetMethod
         {
             get
             {
                 var semantics = Semantics.FirstOrDefault(x => (x.Attributes & MethodSemanticsAttributes.Getter) != 0);
-                return semantics != null ? semantics.Method : null;
+                return semantics?.Method;
             }
         }
 
+        /// <summary>
+        /// Gets the setter method associated to the property (if available).
+        /// </summary>
         public MethodDefinition SetMethod
         {
             get
             {
                 var semantics = Semantics.FirstOrDefault(x => (x.Attributes & MethodSemanticsAttributes.Setter) != 0);
-                return semantics != null ? semantics.Method : null;
+                return semantics?.Method;
             }
         }
 
+        /// <summary>
+        /// Gets the default value associated to the property (if available).
+        /// </summary>
         public Constant Constant
         {
-            get { return _constant.Value; }
-            set { this.SetConstant(_constant, value); }
+            get => _constant.Value;
+            set => this.SetConstant(_constant, value);
         }
 
-        public IMetadataMember Resolve()
+        IMetadataMember IResolvable.Resolve()
         {
             return this;
         }

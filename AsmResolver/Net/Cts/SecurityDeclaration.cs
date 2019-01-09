@@ -4,6 +4,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents an attribute that binds a set of permissions to a member.
+    /// </summary>
     public class SecurityDeclaration : MetadataMember<MetadataRow<SecurityAction, uint, uint>>, IHasCustomAttribute
     {
         private readonly LazyValue<IHasSecurityAttribute> _parent;
@@ -30,7 +33,7 @@ namespace AsmResolver.Net.Cts
             _parent = new LazyValue<IHasSecurityAttribute>(() =>
             {
                 var parentToken = tableStream.GetIndexEncoder(CodedIndex.HasDeclSecurity).DecodeIndex(row.Column2);
-                return parentToken.Rid != 0 ? (IHasSecurityAttribute) tableStream.ResolveRow(parentToken) : null;
+                return parentToken.Rid != 0 ? (IHasSecurityAttribute) _image.ResolveMember(parentToken) : null;
             });
 
             _permissionSet = new LazyValue<PermissionSetSignature>(() =>
@@ -46,9 +49,12 @@ namespace AsmResolver.Net.Cts
             get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
         }
 
+        /// <summary>
+        /// Gets the member the security attribute was put on.
+        /// </summary>
         public IHasSecurityAttribute Parent
         {
-            get { return _parent.Value; }
+            get => _parent.Value;
             internal set
             {
                 _parent.Value = value;
@@ -56,22 +62,28 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the action to perform.
+        /// </summary>
         public SecurityAction Action
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the permission set associated to the attribute.
+        /// </summary>
         public PermissionSetSignature PermissionSet
         {
-            get { return _permissionSet.Value; }
-            set { _permissionSet.Value = value; }
+            get => _permissionSet.Value;
+            set => _permissionSet.Value = value;
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
     }
 }

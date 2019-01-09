@@ -5,6 +5,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a reference to a member in an assembly different to the current metadata image.
+    /// </summary>
     public class MemberReference : MetadataMember<MetadataRow<uint, uint, uint>>, ICustomAttributeType, ICallableMemberReference
     {
         private readonly LazyValue<string> _name;
@@ -43,14 +46,16 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return _parent.IsInitialized && _parent.Value != null ? _parent.Value.Image : _image; }
-        }
+        public override MetadataImage Image => _parent.IsInitialized && _parent.Value != null 
+            ? _parent.Value.Image
+            : _image;
 
+        /// <summary>
+        /// Gets or sets a reference to the member that declares this referenced member.  
+        /// </summary>
         public IMemberRefParent Parent
         {
-            get { return _parent.Value; }
+            get => _parent.Value;
             set
             {
                 _parent.Value = value;
@@ -58,9 +63,10 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <inheritdoc cref="IMemberReference.Name"/>
         public string Name
         {
-            get { return _name.Value; }
+            get => _name.Value;
             set
             {
                 _name.Value = value;
@@ -68,30 +74,30 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        public string FullName
-        {
-            get { return _fullName ?? (_fullName = this.GetFullName(Signature)); }
-        }
+        /// <inheritdoc />
+        public string FullName => _fullName ?? (_fullName = this.GetFullName(Signature));
 
+        /// <inheritdoc />
         public ITypeDefOrRef DeclaringType
         {
             get
             {
-                var declaringType = Parent as ITypeDefOrRef;
-                if (declaringType != null)
-                    return declaringType;
-
-                var method = Parent as MethodDefinition;
-                if (method != null)
-                    return method.DeclaringType;
-                
-                return null;
+                switch (Parent)
+                {
+                    case ITypeDefOrRef declaringType:
+                        return declaringType;
+                    case MethodDefinition method:
+                        return method.DeclaringType;
+                    default:
+                        return null;
+                }
             }
         }
 
+        /// <inheritdoc />
         public MemberSignature Signature
         {
-            get { return _signature.Value; }
+            get => _signature.Value;
             set
             {
                 _signature.Value = value;
@@ -99,15 +105,12 @@ namespace AsmResolver.Net.Cts
             }
         }
 
-        CallingConventionSignature ICallableMemberReference.Signature
-        {
-            get { return Signature; }
-        }
+        CallingConventionSignature ICallableMemberReference.Signature => Signature;
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
         
         public override string ToString()
@@ -115,9 +118,10 @@ namespace AsmResolver.Net.Cts
             return FullName;
         }
 
+        /// <inheritdoc />
         public IMetadataMember Resolve()
         {
-            if (Image == null || Image.MetadataResolver == null || Signature == null)
+            if (Image?.MetadataResolver == null || Signature == null)
                 throw new MemberResolutionException(this);
 
             return Signature.IsMethod

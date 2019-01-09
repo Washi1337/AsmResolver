@@ -2,6 +2,10 @@
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents extra metadata that binds accessor methods (such as getters and setters) to their owners
+    /// (such as properties). 
+    /// </summary>
     public class MethodSemantics : MetadataMember<MetadataRow<MethodSemanticsAttributes, uint, uint>>
     {
         private readonly LazyValue<MethodDefinition> _method;
@@ -34,8 +38,7 @@ namespace AsmResolver.Net.Cts
             _association = new LazyValue<IHasSemantics>(() =>
             {
                 var associationToken = tableStream.GetIndexEncoder(CodedIndex.HasSemantics).DecodeIndex(row.Column3);
-                IMetadataMember member;
-                return image.TryResolveMember(associationToken, out member) ? (IHasSemantics) member : null;
+                return image.TryResolveMember(associationToken, out var member) ? (IHasSemantics) member : null;
             });
         }
 
@@ -45,21 +48,30 @@ namespace AsmResolver.Net.Cts
             get { return _association.IsInitialized && _association.Value != null ? _association.Value.Image : _image; }
         }
 
+        /// <summary>
+        /// Gets or sets the attributes associated to the semantics.
+        /// </summary>
         public MethodSemanticsAttributes Attributes
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the method that is bound to the association.
+        /// </summary>
         public MethodDefinition Method
         {
-            get { return _method.Value; }
-            set { _method.Value = value; }
+            get => _method.Value;
+            set => _method.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the member that owns the method.
+        /// </summary>
         public IHasSemantics Association
         {
-            get { return _association.Value; }
+            get => _association.Value;
             internal set
             {
                 _association.Value = value;

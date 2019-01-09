@@ -4,11 +4,16 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a blob signature that can be referred to by a metadata token.  
+    /// </summary>
+    /// <remarks>
+    /// Usually this signature contains a local variable signature, but is also used for other purposes such as
+    /// storing method signatures for calli instructions.
+    /// </remarks>
     public class StandAloneSignature : MetadataMember<MetadataRow<uint>>, IHasCustomAttribute
     {
-        private CustomAttributeCollection _customAttributes;
         private readonly LazyValue<CallingConventionSignature> _signature;
-        private MetadataImage _image;
 
         public StandAloneSignature(CallingConventionSignature signature)
             : this(signature, null)
@@ -18,42 +23,42 @@ namespace AsmResolver.Net.Cts
         public StandAloneSignature(CallingConventionSignature signature, MetadataImage image)
             : base(new MetadataToken(MetadataTokenType.StandAloneSig))
         {
-            _image = image;
+            Image = image;
             _signature = new LazyValue<CallingConventionSignature>(signature);
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
         internal StandAloneSignature(MetadataImage image, MetadataRow<uint> row)
             : base(row.MetadataToken)
         {
-            _image = image;
+            Image = image;
             _signature = new LazyValue<CallingConventionSignature>(() =>
-            {
-                IBinaryStreamReader reader;
-                return image.Header.GetStream<BlobStream>().TryCreateBlobReader(row.Column1, out reader)
+                image.Header.GetStream<BlobStream>().TryCreateBlobReader(row.Column1, out var reader)
                     ? CallingConventionSignature.FromReader(image, reader, true)
-                    : null;
-            });
+                    : null);
+
+            CustomAttributes = new CustomAttributeCollection(this);
         }
 
+        /// <inheritdoc />
         public override MetadataImage Image
         {
-            get { return _image; }
+            get;
         }
 
+        /// <summary>
+        /// Gets the blob signature referenced by this stand-alone signature.
+        /// </summary>
         public CallingConventionSignature Signature
         {
-            get { return _signature.Value; }
-            set { _signature.Value = value; }
+            get => _signature.Value;
+            set => _signature.Value = value;
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
-            get
-            {
-                if (_customAttributes != null)
-                    return _customAttributes;
-                return _customAttributes = new CustomAttributeCollection(this);
-            }
+            get;
         }
     }
 }

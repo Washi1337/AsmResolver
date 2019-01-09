@@ -3,6 +3,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents extra metadata added to a type indicating the type is implementing a particular interface.
+    /// </summary>
     public class InterfaceImplementation : MetadataMember<MetadataRow<uint, uint>>, IHasCustomAttribute
     {
         private readonly LazyValue<TypeDefinition> _class;
@@ -26,8 +29,7 @@ namespace AsmResolver.Net.Cts
             _class = new LazyValue<TypeDefinition>(() =>
             {
                 var table = tableStream.GetTable(MetadataTokenType.TypeDef);
-                MetadataRow typeRow;
-                return table.TryGetRow((int) (row.Column1 - 1), out typeRow)
+                return table.TryGetRow((int) (row.Column1 - 1), out var typeRow)
                     ? (TypeDefinition) table.GetMemberFromRow(image, typeRow)
                     : null;
             });
@@ -35,8 +37,7 @@ namespace AsmResolver.Net.Cts
             _interface = new LazyValue<ITypeDefOrRef>(() =>
             {
                 var interfaceToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column2);
-                IMetadataMember member;
-                return image.TryResolveMember(interfaceToken, out member) ? (ITypeDefOrRef) member : null;
+                return image.TryResolveMember(interfaceToken, out var member) ? (ITypeDefOrRef) member : null;
             });
             
             CustomAttributes = new CustomAttributeCollection(this);
@@ -48,9 +49,12 @@ namespace AsmResolver.Net.Cts
             get { return _class.IsInitialized && _class.Value != null ? _class.Value.Image : _image; }
         }
 
+        /// <summary>
+        /// Gets the type that is implementing the interface.
+        /// </summary>
         public TypeDefinition Class
         {
-            get { return _class.Value;}
+            get => _class.Value;
             internal set
             {
                 _class.Value = value;
@@ -58,16 +62,19 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the reference to the interface that is implemented.
+        /// </summary>
         public ITypeDefOrRef Interface
         {
-            get { return _interface.Value;}
-            set { _interface.Value = value; }
+            get => _interface.Value;
+            set => _interface.Value = value;
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
     }
 }

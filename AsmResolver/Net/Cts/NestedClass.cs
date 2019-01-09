@@ -2,6 +2,9 @@
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents extra metadata that binds two types together in such a way that one type is nested in the other.
+    /// </summary>
     public class NestedClass : MetadataMember<MetadataRow<uint, uint>>
     {
         private readonly LazyValue<TypeDefinition> _class;
@@ -22,37 +25,28 @@ namespace AsmResolver.Net.Cts
             var typeTable = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
 
             _class = new LazyValue<TypeDefinition>(() =>
-            {
-                MetadataRow type;
-                return typeTable.TryGetRow((int) (row.Column1 - 1), out type)
+                typeTable.TryGetRow((int) (row.Column1 - 1), out var type)
                     ? (TypeDefinition) typeTable.GetMemberFromRow(image, type)
-                    : null;
-            });
+                    : null);
 
             _enclosingClass = new LazyValue<TypeDefinition>(() =>
-            {
-                MetadataRow type;
-                return typeTable.TryGetRow((int) (row.Column2 - 1), out type)
+                typeTable.TryGetRow((int) (row.Column2 - 1), out var type)
                     ? (TypeDefinition) typeTable.GetMemberFromRow(image, type)
-                    : null;
-            });
+                    : null);
 
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get
-            {
-                return _enclosingClass.IsInitialized && _enclosingClass.Value != null
-                    ? _enclosingClass.Value.Image
-                    : _image;
-            }
-        }
+        public override MetadataImage Image => _enclosingClass.IsInitialized && _enclosingClass.Value != null
+            ? _enclosingClass.Value.Image
+            : _image;
 
+        /// <summary>
+        /// Gets or sets the type that is nested in the enclosing type.
+        /// </summary>
         public TypeDefinition Class
         {
-            get { return _class.Value; }
+            get => _class.Value;
             set
             {
                 if (_class.IsInitialized && _class.Value != null)
@@ -63,9 +57,12 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets the type that declares the nested type.
+        /// </summary>
         public TypeDefinition EnclosingClass
         {
-            get { return _enclosingClass.Value; }
+            get => _enclosingClass.Value;
             internal set
             {
                 _enclosingClass.Value = value;

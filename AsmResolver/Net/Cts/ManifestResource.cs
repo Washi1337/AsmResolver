@@ -3,6 +3,10 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a single manifest resource file either embedded into the .NET assembly, or put into a separate file.
+    /// In this case, it contains also a reference to the file the resource is located in.
+    /// </summary>
     public class ManifestResource : MetadataMember<MetadataRow<uint, ManifestResourceAttributes, uint, uint>>, IHasCustomAttribute
     {
         private readonly LazyValue<byte[]> _data;
@@ -34,8 +38,7 @@ namespace AsmResolver.Net.Cts
             {
                 var encoder = image.Header.GetStream<TableStream>().GetIndexEncoder(CodedIndex.Implementation);
                 var implementationToken = encoder.DecodeIndex(row.Column4);
-                IMetadataMember member;
-                return image.TryResolveMember(implementationToken, out member)
+                return image.TryResolveMember(implementationToken, out var member)
                     ? (IImplementation) member
                     : null;
             });
@@ -49,56 +52,76 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return Owner != null ? Owner.Image : null; }
-        }
+        public override MetadataImage Image => Owner?.Image;
 
+        /// <summary>
+        /// Gets the owner of the resource.
+        /// </summary>
         public AssemblyDefinition Owner
         {
             get;
             internal set;
         }
 
+        /// <summary>
+        /// Gets or sets the offset into the file where the resource data begins.
+        /// 
+        /// When <see cref="Implementation"/> is <c>null</c>, this offset is relative to the start address of the
+        /// managed resource directory found in the PE. Otherwise, it is an offset into the file specified by this
+        /// property. 
+        /// </summary>
         public uint Offset
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the attributes associated to the resource.
+        /// </summary>
         public ManifestResourceAttributes Attributes
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the name of the resource.
+        /// </summary>
         public string Name
         {
-            get { return _name.Value; }
-            set { _name.Value = value; }
+            get => _name.Value;
+            set => _name.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the file the resource is located in. When this property is <c>null</c>, the resource is
+        /// located in the current .NET assembly image.
+        /// </summary>
         public IImplementation Implementation
         {
-            get { return _implementation.Value; }
-            set { _implementation.Value = value; }
+            get => _implementation.Value;
+            set => _implementation.Value = value;
         }
 
-        public bool IsEmbedded
-        {
-            get { return Implementation == null; }
-        }
+        /// <summary>
+        /// Gets a value indicating whether the resource data is embedded into the current .NET assembly image.
+        /// </summary>
+        public bool IsEmbedded => Implementation == null;
 
+        /// <summary>
+        /// Gets or sets the data stored in the resource.
+        /// </summary>
         public byte[] Data
         {
-            get { return _data.Value; }
-            set { _data.Value = value; }
+            get => _data.Value;
+            set => _data.Value = value;
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
     }
 }

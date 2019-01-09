@@ -2,6 +2,9 @@
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a P/Invoke mapping between a managed method definition and a native entry point.
+    /// </summary>
     public class ImplementationMap : MetadataMember<MetadataRow<ImplementationMapAttributes,uint,uint,uint>>
     {
         private readonly LazyValue<IMemberForwarded> _memberForwarded;
@@ -56,32 +59,44 @@ namespace AsmResolver.Net.Cts
             ? _memberForwarded.Value.Image 
             : _image;
 
+        /// <summary>
+        /// Gets or sets the attributes associated to the mapping.
+        /// </summary>
         public ImplementationMapAttributes Attributes
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets the member that was used to map the native procedure to.
+        /// </summary>
         public IMemberForwarded MemberForwarded
         {
-            get { return _memberForwarded.Value; }
+            get => _memberForwarded.Value;
             internal set
             {
                 _memberForwarded.Value = value;
                 _image = null;
             }
         }
-
+        
+        /// <summary>
+        /// Gets or sets the name of the native procedure to call.
+        /// </summary>
         public string ImportName
         {
-            get { return _importName.Value; }
-            set { _importName.Value = value; }
+            get => _importName.Value;
+            set => _importName.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the reference to the module containing the native procedure.
+        /// </summary>
         public ModuleReference ImportScope
         {
-            get { return _importScope.Value; }
-            set { _importScope.Value = value; }
+            get => _importScope.Value;
+            set => _importScope.Value = value;
         }
     }
 }
