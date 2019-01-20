@@ -10,7 +10,7 @@ namespace AsmResolver.Net.Cts
         /// <summary>
         /// Gets or sets the name of the member.
         /// </summary>
-        string Name
+        new string Name
         {
             get;
             set;

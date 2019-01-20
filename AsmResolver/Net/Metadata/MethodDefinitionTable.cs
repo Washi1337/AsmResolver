@@ -47,7 +47,6 @@ namespace AsmResolver.Net.Metadata
                 Column6 = reader.ReadIndex(TableStream.GetTable(MetadataTokenType.Param).IndexSize) // ParamList
             };
             
-            FileSegment body = null;
             if (rva != 0)
             {
                 long fileOffset = context.Assembly.RvaToFileOffset(rva);
