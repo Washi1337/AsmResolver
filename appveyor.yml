@@ -4,7 +4,7 @@
       - master
 
   image: Visual Studio 2017
-  version: 3.0.1-{branch}-build{build}
+  version: 3.0.2-{branch}-build{build}
   configuration: Release
   
   before_build:
@@ -30,7 +30,7 @@
       - development
   
   image: Visual Studio 2017
-  version: 3.0.1-{branch}-build{build}
+  version: 3.0.2-{branch}-build{build}
   configuration: Release
 
   before_build:
