@@ -180,13 +180,6 @@ namespace AsmResolver.Tests.Net.Emit
             });
             nativeBody.Instructions.Add(new X86Instruction
             {
-                Mnemonic = X86Mnemonic.Mov,
-                OpCode = X86OpCodes.Mov_Eax_Imm1632,
-                Operand1 = new X86Operand(X86Register.Eax),
-                Operand2 = new X86Operand(1337),
-            });
-            nativeBody.Instructions.Add(new X86Instruction
-            {
                 Mnemonic = X86Mnemonic.Retn,
                 OpCode = X86OpCodes.Retn,
             });

@@ -198,8 +198,14 @@ namespace AsmResolver.Net
             
             foreach (var streamBuffer in buffers)
             {
-                var header = StreamHeaders.FirstOrDefault(x => x.Name == streamBuffer.Name) 
-                             ?? new MetadataStreamHeader(streamBuffer.Name);
+                var header = StreamHeaders.FirstOrDefault(x => x.Name == streamBuffer.Name);
+
+                if (header == null)
+                {
+                    header = new MetadataStreamHeader(streamBuffer.Name);
+                    StreamHeaders.Add(header);
+                }
+
                 header.Stream = streamBuffer.CreateStream();
             }
 
