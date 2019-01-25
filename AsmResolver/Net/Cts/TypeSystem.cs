@@ -6,6 +6,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Provides a collection of commonly used (element) type signatures.
+    /// </summary>
     public class TypeSystem
     {
         private readonly MetadataImage _image;
@@ -17,9 +20,7 @@ namespace AsmResolver.Net.Cts
 
         public TypeSystem(MetadataImage image, bool isMsCorLib)
         {
-            if (image == null)
-                throw new ArgumentNullException("image");
-            _image = image;
+            _image = image ?? throw new ArgumentNullException(nameof(image));
             _isMsCorLib = isMsCorLib;
 
             if (isMsCorLib)
@@ -61,28 +62,40 @@ namespace AsmResolver.Net.Cts
             Void = CreateSignature(ElementType.Void, "Void", true);
         }
 
+        /// <summary>
+        /// Resolves the provided element type to a type signature.
+        /// </summary>
+        /// <param name="elementType">The element type to resolve.</param>
+        /// <returns>The resolved signature, or null if none exists.</returns>
         public MsCorLibTypeSignature GetMscorlibType(ElementType elementType)
         {
-            MsCorLibTypeSignature signature;
-            _typesByElementType.TryGetValue(elementType, out signature);
+            _typesByElementType.TryGetValue(elementType, out var signature);
             return signature;
         }
 
+        /// <summary>
+        /// Resolves the full type name of an element type to a type signature.
+        /// </summary>
+        /// <param name="name">The full name of the element type to resolve.</param>
+        /// <returns>The resolved signature, or null if none exists.</returns>
         public MsCorLibTypeSignature GetMscorlibType(string name)
         {
-            MsCorLibTypeSignature signature;
-            _typesByName.TryGetValue(name, out signature);
+            _typesByName.TryGetValue(name, out var signature);
             return signature;
         }
 
+        /// <summary>
+        /// Resolves the provided type descriptor to a type signature.
+        /// </summary>
+        /// <param name="type">The type descriptor to resolve.</param>
+        /// <returns>The resolved signature, or null if none exists.</returns>
         public MsCorLibTypeSignature GetMscorlibType(ITypeDescriptor type)
         {
-            SignatureComparer comparer = new SignatureComparer();
-            MsCorLibTypeSignature signature;
+            var comparer = new SignatureComparer();
 
             if (!comparer.Equals(type.ResolutionScope.GetAssembly(), MsCorLibReference)
                 || type.Namespace != "System"
-                || !_typesByName.TryGetValue(type.Name, out signature))
+                || !_typesByName.TryGetValue(type.Name, out var signature))
             {
                 return null;
             }
@@ -108,124 +121,164 @@ namespace AsmResolver.Net.Cts
             return signature;
         }
 
+        /// <summary>
+        /// Gets the assembly reference to the standard library (corlib).
+        /// </summary>
         public AssemblyReference MsCorLibReference
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Boolean element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Boolean
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Byte element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Byte
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Char element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Char
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Double element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Double
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.IntPtr element type signature.
+        /// </summary>
         public MsCorLibTypeSignature IntPtr
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Int16 element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Int16
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Int32 element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Int32
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Int64 element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Int64
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Object element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Object
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.SByte element type signature.
+        /// </summary>
         public MsCorLibTypeSignature SByte
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Single element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Single
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.String element type signature.
+        /// </summary>
         public MsCorLibTypeSignature String
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Type element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Type
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.TypedReference element type signature.
+        /// </summary>
         public MsCorLibTypeSignature TypedReference
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.UIntPtr element type signature.
+        /// </summary>
         public MsCorLibTypeSignature UIntPtr
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.UInt16 element type signature.
+        /// </summary>
         public MsCorLibTypeSignature UInt16
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.UInt32 element type signature.
+        /// </summary>
         public MsCorLibTypeSignature UInt32
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.UInt64 element type signature.
+        /// </summary>
         public MsCorLibTypeSignature UInt64
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the System.Void element type signature.
+        /// </summary>
         public MsCorLibTypeSignature Void
         {
             get;
-            private set;
         }
     }
 }

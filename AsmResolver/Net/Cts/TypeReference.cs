@@ -4,6 +4,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a reference to a type defined in an external .NET assembly.
+    /// </summary>
     public class TypeReference : MetadataMember<MetadataRow<uint, uint, uint>>, ITypeDefOrRef, IResolutionScope
     {
         private readonly LazyValue<IResolutionScope> _resolutionScope;
@@ -32,42 +35,35 @@ namespace AsmResolver.Net.Cts
             _resolutionScope = new LazyValue<IResolutionScope>(() =>
             {
                 var resolutionScopeToken = tableStream.GetIndexEncoder(CodedIndex.ResolutionScope).DecodeIndex(row.Column1);
-                IMetadataMember resolutionScope;
-                return image.TryResolveMember(resolutionScopeToken, out resolutionScope)
+                return image.TryResolveMember(resolutionScopeToken, out var resolutionScope)
                     ? resolutionScope as IResolutionScope
                     : null;
             });
 
-            _name = new LazyValue<string>(() =>
-            {
-                return stringStream.GetStringByOffset(row.Column2);
-            });
-            _namespace = new LazyValue<string>(() =>
-            {
-                return stringStream.GetStringByOffset(row.Column3);
-            });
+            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
+            _namespace = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column3));
             
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
-        public override MetadataImage Image
-        {
-            get { return _resolutionScope.IsInitialized && _resolutionScope.Value != null ? _resolutionScope.Value.Image : _image; }
-        }
+        /// <inheritdoc />
+        public override MetadataImage Image => _resolutionScope.IsInitialized && _resolutionScope.Value != null 
+            ? _resolutionScope.Value.Image 
+            : _image;
 
-        public ITypeDefOrRef DeclaringType
-        {
-            get { return ResolutionScope as ITypeDefOrRef; }
-        }
+        /// <summary>
+        /// Gets the type that declares the type reference (if any).
+        /// </summary>
+        public ITypeDefOrRef DeclaringType => ResolutionScope as ITypeDefOrRef;
 
-        ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor
-        {
-            get { return DeclaringType; }
-        }
+        ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor => DeclaringType;
 
+        /// <summary>
+        /// Gets the scope the referenced type is defined in.
+        /// </summary>
         public IResolutionScope ResolutionScope
         {
-            get { return _resolutionScope.Value;}
+            get => _resolutionScope.Value;
             set
             {
                 _resolutionScope.Value = value;
@@ -75,9 +71,10 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <inheritdoc />
         public string Name
         {
-            get { return _name.Value; }
+            get => _name.Value;
             set
             {
                 _name.Value = value;
@@ -85,9 +82,12 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets or sets the namespace of the referenced type. 
+        /// </summary>
         public string Namespace
         {
-            get { return _namespace.Value; }
+            get => _namespace.Value;
             set
             {
                 _namespace.Value = value;
@@ -95,6 +95,7 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <inheritdoc />
         public virtual string FullName
         {
             get
@@ -107,6 +108,12 @@ namespace AsmResolver.Net.Cts
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the type is a value type or not.
+        /// </summary>
+        /// <remarks>
+        /// This property tries to resolve the type to determine whether it is a value type or not.
+        /// </remarks>
         public bool IsValueType
         {
             get
@@ -115,16 +122,17 @@ namespace AsmResolver.Net.Cts
                 return definition != null && definition.IsValueType;
             }
         }
-        
+
+        /// <inheritdoc />
         public ITypeDescriptor GetElementType()
         {
             return this;
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
         public override string ToString()
@@ -132,9 +140,14 @@ namespace AsmResolver.Net.Cts
             return FullName;
         }
 
+        /// <summary>
+        /// Resolves the type reference to its definition.
+        /// </summary>
+        /// <returns>The type definition.</returns>
+        /// <exception cref="MemberResolutionException">Occurs when the resolution fails.</exception>
         public TypeDefinition Resolve()
         {
-            if (Image == null || Image.MetadataResolver == null)
+            if (Image?.MetadataResolver == null)
                 throw new MemberResolutionException(this);
             return Image.MetadataResolver.ResolveType(this);
         }

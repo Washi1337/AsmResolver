@@ -5,6 +5,9 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a type that is specified by a blob signature.
+    /// </summary>
     public class TypeSpecification : MetadataMember<MetadataRow<uint>>, ITypeDefOrRef
     {
         private readonly LazyValue<TypeSignature> _signature;
@@ -23,72 +26,65 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
-        public override MetadataImage Image
-        {
-            get { return Signature != null && Signature.ResolutionScope != null ? Signature.ResolutionScope.Image : null; }
-        }
+        /// <inheritdoc />
+        public override MetadataImage Image => Signature?.ResolutionScope?.Image;
 
+        /// <summary>
+        /// Gets or sets the type signature that is referred to by this specification.
+        /// </summary>
         public TypeSignature Signature
         {
-            get { return _signature.Value; }
-            set { _signature.Value = value; }
+            get => _signature.Value;
+            set => _signature.Value = value;
         }
 
-        public string Name
-        {
-            get { return Signature.Name; }
-        }
+        /// <inheritdoc />
+        public string Name => Signature.Name;
 
         string IMemberReference.Name
         {
-            get { return Name; }
-            set{ throw new NotSupportedException(); }
+            get => Name;
+            set => throw new NotSupportedException();
         }
 
-        public string Namespace
-        {
-            get { return Signature.Namespace; }
-        }
+        /// <summary>
+        /// Gets the namespace of the type.
+        /// </summary>
+        public string Namespace => Signature.Namespace;
 
-        ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor
-        {
-            get { return DeclaringType; }
-        }
+        ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor => DeclaringType;
 
-        public IResolutionScope ResolutionScope
-        {
-            get { return Signature.ResolutionScope; }
-        }
+        /// <inheritdoc />
+        public IResolutionScope ResolutionScope => Signature.ResolutionScope;
 
-        public virtual string FullName
-        {
-            get { return Signature.FullName; }
-        }
+        /// <inheritdoc />
+        public virtual string FullName => Signature.FullName;
 
-        public bool IsValueType
-        {
-            get { return Signature.IsValueType; }
-        }
+        /// <inheritdoc />
+        public bool IsValueType => Signature.IsValueType;
 
         public ITypeDescriptor GetElementType()
         {
             return Signature.GetElementType();
         }
 
-        public ITypeDefOrRef DeclaringType
-        {
-            get { return ResolutionScope as ITypeDefOrRef; }
-        }
+        /// <inheritdoc />
+        public ITypeDefOrRef DeclaringType => ResolutionScope as ITypeDefOrRef;
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Resolves the type embedded in the signature to its definition.
+        /// </summary>
+        /// <returns>The type definition.</returns>
+        /// <exception cref="MemberResolutionException">Occurs when the resolution fails.</exception>
         public TypeDefinition Resolve()
         {
-            if (Image == null || Image.MetadataResolver == null)
+            if (Image?.MetadataResolver == null)
                 throw new MemberResolutionException(this);
             return Image.MetadataResolver.ResolveType(this);
         }

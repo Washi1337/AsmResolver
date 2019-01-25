@@ -31,7 +31,7 @@ namespace AsmResolver.Net.Metadata
             catch when (!ThrowOnInvalidMethodBody)
             {
                 // Ignore when flag is set.
-                return null;
+                return new DataSegment { StartOffset = reader.Position };
             }
         }
     }

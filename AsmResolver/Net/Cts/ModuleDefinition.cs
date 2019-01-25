@@ -47,59 +47,80 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return Assembly != null ? Assembly.Image : null; }
-        }
+        public override MetadataImage Image => Assembly?.Image;
 
+        /// <summary>
+        /// Gets or sets the generation of the module.
+        /// </summary>
         public ushort Generation
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public string Name
         {
-            get { return _name.Value; }
-            set { _name.Value = value; }
+            get => _name.Value;
+            set => _name.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the unique identifier for the module.
+        /// </summary>
         public Guid Mvid
         {
-            get { return _mvid.Value; }
-            set { _mvid.Value = value; }
+            get => _mvid.Value;
+            set => _mvid.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the unique Edit-n-Continue identification number. 
+        /// </summary>
         public Guid EncId
         {
-            get { return _encId.Value; }
-            set { _encId.Value = value; }
+            get => _encId.Value;
+            set => _encId.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the unique Edit-n-Continue base identification number. 
+        /// </summary>
         public Guid EncBaseId
         {
-            get { return _encBaseId.Value; }
-            set { _encBaseId.Value = value; }
+            get => _encBaseId.Value;
+            set => _encBaseId.Value = value;
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets the containing assembly definition that defines the module.
+        /// </summary>
         public AssemblyDefinition Assembly
         {
             get;
             internal set;
         }
 
+        /// <summary>
+        /// Gets a collection of the top-level type definitions declared in this module; that is, all types that are not
+        /// nested into another types.
+        /// </summary>
         public Collection<TypeDefinition> TopLevelTypes
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets a collection of all types declared in this module. This includes both top level types as well as
+        /// nested types.
+        /// </summary>
+        /// <returns>A collection of types defined in the module.</returns>
         public IEnumerable<TypeDefinition> GetAllTypes()
         {
             var stack = new Stack<TypeDefinition>();

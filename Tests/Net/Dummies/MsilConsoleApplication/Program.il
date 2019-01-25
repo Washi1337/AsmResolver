@@ -1,4 +1,9 @@
-﻿.assembly MsilConsoleApplication
+﻿.assembly extern mscorlib
+{
+  .ver 4:0:0:0
+}
+
+.assembly MsilConsoleApplication
 {
 }
 

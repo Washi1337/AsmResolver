@@ -3,6 +3,9 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts
 {
+    /// <summary>
+    /// Represents a reference to an external (unmanaged) module.
+    /// </summary>
     public class ModuleReference : MetadataMember<MetadataRow<uint>>, IHasCustomAttribute, IMemberRefParent, IResolutionScope
     {
         private readonly LazyValue<string> _name;
@@ -23,27 +26,30 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image
-        {
-            get { return Referrer != null ? Referrer.Image : null; }
-        }
+        public override MetadataImage Image => Referrer?.Image;
 
+        /// <summary>
+        /// Gets the assembly that refers to this module.
+        /// </summary>
         public AssemblyDefinition Referrer
         {
             get;
             internal set;
         }
 
+        /// <summary>
+        /// Gets or sets the name of the external module.
+        /// </summary>
         public string Name
         {
-            get { return _name.Value; }
-            set { _name.Value = value; }
+            get => _name.Value;
+            set => _name.Value = value;
         }
 
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;
-            private set;
         }
 
         public override string ToString()
