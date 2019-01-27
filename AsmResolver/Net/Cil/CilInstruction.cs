@@ -9,8 +9,27 @@ using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cil
 {
+    /// <summary>
+    /// Represents a single instruction found in a CIL method body. This includes offset, operation code and operand. 
+    /// </summary>
     public sealed class CilInstruction
     {
+        private static readonly ISet<CilCode> LdcI4Codes = new HashSet<CilCode>(new[]
+        {
+            CilCode.Ldc_I4,
+            CilCode.Ldc_I4_0,
+            CilCode.Ldc_I4_1,
+            CilCode.Ldc_I4_2,
+            CilCode.Ldc_I4_3,
+            CilCode.Ldc_I4_4,
+            CilCode.Ldc_I4_5,
+            CilCode.Ldc_I4_6,
+            CilCode.Ldc_I4_7,
+            CilCode.Ldc_I4_8,
+            CilCode.Ldc_I4_S,
+            CilCode.Ldc_I4_M1,
+        });
+        
         public static CilInstruction Create(CilOpCode code)
         {
             if (code.OperandType != CilOperandType.InlineNone)
@@ -115,29 +134,89 @@ namespace AsmResolver.Net.Cil
             Operand = operand;
         }
 
+        /// <summary>
+        /// Gets or sets the offset of the CIL instruction inside the method body.
+        /// </summary>
         public int Offset
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the operation code that is used upon evaluation of the instruction. 
+        /// </summary>
         public CilOpCode OpCode
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the operand that is used by the operation upon evaluation of the instruction. 
+        /// </summary>
         public object Operand
         {
             get;
             set;
         }
 
-        public int Size
+        /// <summary>
+        /// Gets the amount of bytes the instruction uses to encode itself.
+        /// </summary>
+        public int Size => OpCode.Size + GetOperandSize();
+
+        /// <summary>
+        /// Gets a value indicating whether the instruction is an ldc.i4 variant. That is, it loads an int32 onto the
+        /// stack.
+        /// </summary>
+        public bool IsLdcI4 => LdcI4Codes.Contains(OpCode.Code);
+
+        /// <summary>
+        /// When the instruction is an ldc.i4 variant ,gets the integer value that is pushed onto the stack.
+        /// </summary>
+        /// <returns>The integer that is pushed onto the stack.</returns>
+        /// <exception cref="ArgumentException">Occurs when the instruction is not an ldc.i4 instruction.</exception>
+        /// <remarks>
+        /// This includes extracting the integer value that is pushed by single byte macros of the ldc.i4 instruction.
+        /// </remarks>
+        public int GetLdcValue()
         {
-            get { return OpCode.Size + GetOperandSize(); }
+            switch (OpCode.Code)
+            {
+                case CilCode.Ldc_I4_M1:
+                    return -1;
+                case CilCode.Ldc_I4_0:
+                    return 0;
+                case CilCode.Ldc_I4_1:
+                    return 1;
+                case CilCode.Ldc_I4_2:
+                    return 2;
+                case CilCode.Ldc_I4_3:
+                    return 3;
+                case CilCode.Ldc_I4_4:
+                    return 4;
+                case CilCode.Ldc_I4_5:
+                    return 5;
+                case CilCode.Ldc_I4_6:
+                    return 6;
+                case CilCode.Ldc_I4_7:
+                    return 7;
+                case CilCode.Ldc_I4_8:
+                    return 8;
+                case CilCode.Ldc_I4:
+                case CilCode.Ldc_I4_S:
+                    return Convert.ToInt32(Operand);
+                default:
+                    throw new ArgumentException("Instruction is not an ldc.i4 variant.");
+            }
         }
 
+        /// <summary>
+        /// Calculates the size in bytes of the operand.
+        /// </summary>
+        /// <returns>The amount of bytes to encode the operand.</returns>
+        /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported instruction has been provided.</exception>
         public int GetOperandSize()
         {
             switch (OpCode.OperandType)
@@ -176,6 +255,11 @@ namespace AsmResolver.Net.Cil
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Attempts to stringify the operand.
+        /// </summary>
+        /// <returns>The stringified operand.</returns>
+        /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported operand type is provided.</exception>
         public string OperandToString()
         {
             if (Operand == null)
@@ -223,6 +307,11 @@ namespace AsmResolver.Net.Cil
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Determines the amount of values popped from the stack by this instruction.
+        /// </summary>
+        /// <param name="parent">The parent method body the instruction is residing in.</param>
+        /// <returns>A non-negative number representing the amount of values popped from the stack.</returns>
         public int GetStackPopCount(CilMethodBody parent)
         {
             MethodSignature signature = null;
@@ -279,6 +368,11 @@ namespace AsmResolver.Net.Cil
             return 0;
         }
 
+        /// <summary>
+        /// Determines the amount of values pushed onto the stack by this instruction.
+        /// </summary>
+        /// <param name="parent">The parent method body the instruction is residing in.</param>
+        /// <returns>A non-negative number representing the amount of values pushed onto the stack.</returns>
         public int GetStackPushCount(CilMethodBody parent)
         {
             MethodSignature signature = null;
@@ -312,6 +406,12 @@ namespace AsmResolver.Net.Cil
             return 0;
         }
         
+        /// <summary>
+        /// Determines the stack delta of the instruction. That is, the amount of values pushed onto the stack
+        /// subtracted from the amount of values popped from the stack.
+        /// </summary>
+        /// <param name="parent">The parent method body the instruction is residing in.</param>
+        /// <returns>A number representing the stack delta.</returns>
         public int GetStackDelta(CilMethodBody parent)
         {
             return GetStackPushCount(parent) - GetStackPopCount(parent);
