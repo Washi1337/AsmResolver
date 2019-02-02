@@ -155,7 +155,7 @@ namespace AsmResolver.Net
         public MetadataStream GetStream(string name)
         {
             var header = StreamHeaders.FirstOrDefault(x => x.Name == name);
-            return header != null ? header.Stream : null;
+            return header?.Stream;
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace AsmResolver.Net
             where TStream : MetadataStream
         {
             var header = StreamHeaders.FirstOrDefault(x => x.Stream is TStream);
-            return header != null ? (TStream)header.Stream : null;
+            return (TStream) header?.Stream;
         }
 
         public MetadataImage LockMetadata()

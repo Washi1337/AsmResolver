@@ -4,7 +4,11 @@
     {
         internal static CustomMetadataStream FromReadingContext(ReadingContext context)
         {
-            return new CustomMetadataStream(context.Reader.ReadBytes((int)context.Reader.Length));
+            long position = context.Reader.Position;
+            return new CustomMetadataStream(context.Reader.ReadBytes((int) context.Reader.Length))
+            {
+                StartOffset = position
+            };
         }
 
         public CustomMetadataStream()
