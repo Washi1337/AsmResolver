@@ -50,6 +50,12 @@ namespace AsmResolver.Net
         /// </summary>
         /// <returns>The signature.</returns>
         TypeSignature ToTypeSignature();
+
+        /// <summary>
+        /// Gets or creates a new type reference based on this type.
+        /// </summary>
+        /// <returns>The reference.</returns>
+        ITypeDefOrRef ToTypeDefOrRef();
     }
 
 }

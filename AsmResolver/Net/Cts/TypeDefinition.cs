@@ -594,6 +594,12 @@ namespace AsmResolver.Net.Cts
             return new TypeDefOrRefSignature(this);
         }
 
+        /// <inheritdoc />
+        ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef()
+        {
+            return this;
+        }
+
         /// <summary>
         /// Gets a collection of all the nested types declared in this type.
         /// The collection starts off with the type itself. 

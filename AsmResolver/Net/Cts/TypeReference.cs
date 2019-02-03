@@ -137,6 +137,12 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
+        ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef()
+        {
+            return this;
+        }
+
+        /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
         {
             get;

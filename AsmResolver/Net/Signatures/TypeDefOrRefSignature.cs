@@ -37,29 +37,22 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override string Name
-        {
-            get { return Type.Name; }
-        }
+        public override string Name => Type.Name;
 
-        public override string Namespace
-        {
-            get { return Type.Namespace; }
-        }
+        public override string Namespace => Type.Namespace;
 
-        public override ITypeDescriptor DeclaringTypeDescriptor
-        {
-            get { return Type.DeclaringTypeDescriptor; }
-        }
+        public override ITypeDescriptor DeclaringTypeDescriptor => Type.DeclaringTypeDescriptor;
 
-        public override IResolutionScope ResolutionScope
-        {
-            get { return Type.ResolutionScope; }
-        }
+        public override IResolutionScope ResolutionScope => Type.ResolutionScope;
 
         public override ITypeDescriptor GetElementType()
         {
             return Type.GetElementType();
+        }
+
+        public override ITypeDefOrRef ToTypeDefOrRef()
+        {
+            return Type;
         }
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)

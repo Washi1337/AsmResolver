@@ -143,6 +143,12 @@ namespace AsmResolver.Net.Signatures
             return this;
         }
 
+        /// <inheritdoc />
+        public virtual ITypeDefOrRef ToTypeDefOrRef()
+        {
+            return new TypeSpecification(this);
+        }
+
         TypeSignature ITypeDescriptor.ToTypeSignature()
         {
             return this;
