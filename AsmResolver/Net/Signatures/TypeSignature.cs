@@ -143,6 +143,11 @@ namespace AsmResolver.Net.Signatures
             return this;
         }
 
+        TypeSignature ITypeDescriptor.ToTypeSignature()
+        {
+            return this;
+        }
+
         public override string ToString()
         {
             return FullName;

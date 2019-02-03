@@ -1,6 +1,7 @@
 ﻿
 using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
@@ -127,6 +128,12 @@ namespace AsmResolver.Net.Cts
         public ITypeDescriptor GetElementType()
         {
             return this;
+        }
+
+        /// <inheritdoc />
+        public TypeSignature ToTypeSignature()
+        {
+            return new TypeDefOrRefSignature(this);
         }
 
         /// <inheritdoc />

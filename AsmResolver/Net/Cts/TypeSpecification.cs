@@ -63,9 +63,15 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public bool IsValueType => Signature.IsValueType;
 
+        /// <inheritdoc />
         public ITypeDescriptor GetElementType()
         {
             return Signature.GetElementType();
+        }
+
+        TypeSignature ITypeDescriptor.ToTypeSignature()
+        {
+            return Signature;
         }
 
         /// <inheritdoc />
