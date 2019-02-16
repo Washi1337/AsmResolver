@@ -94,9 +94,11 @@
     <Compile Include="Net\Cil\CilExtraSection.cs" />
     <Compile Include="Net\Cil\CilExtraSectionAttributes.cs" />
     <Compile Include="Net\Cil\CilInstructionCollection.cs" />
+    <Compile Include="Net\Cil\CilInstructionFormatter.cs" />
     <Compile Include="Net\Cil\CilRawFatMethodBody.cs" />
     <Compile Include="Net\Cil\CilRawMethodBody.cs" />
     <Compile Include="Net\Cil\CilRawSmallMethodBody.cs" />
+    <Compile Include="Net\Cil\ICilInstructionFormatter.cs" />
     <Compile Include="Net\Cts\Collections\ShallowTypeCollection.cs" />
     <Compile Include="Net\Cts\IReferenceImporter.cs" />
     <Compile Include="Net\Cts\MemberCloner.cs" />
