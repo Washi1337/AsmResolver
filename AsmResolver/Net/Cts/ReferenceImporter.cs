@@ -686,6 +686,8 @@ namespace AsmResolver.Net.Cts
                     return ImportType(typeRef);
                 case ModuleReference moduleRef:
                     return ImportModule(moduleRef);
+                case ModuleDefinition moduleDef when _image.Assembly.Modules[0].Name == scope.Name:
+                    return moduleDef;
                 default:
                     throw new NotSupportedException();
             }

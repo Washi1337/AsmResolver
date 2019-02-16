@@ -24,6 +24,16 @@ namespace AsmResolver.Net
         IEqualityComparer<MarshalDescriptor>
     {
         /// <summary>
+        /// Gets or sets a value indicating whether version numbers should be ignored in
+        /// a comparison between two assembly descriptors.
+        /// </summary>
+        public bool IgnoreAssemblyVersionNumbers
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
         /// Determines whether two assembly descriptors are considered equal according to their signature.
         /// </summary>
         /// <param name="info1">The first assembly to compare.</param>
@@ -46,7 +56,7 @@ namespace AsmResolver.Net
             }
 
             return info1.Name == info2.Name &&
-                   info1.Version == info2.Version &&
+                   (IgnoreAssemblyVersionNumbers || info1.Version == info2.Version) &&
                    ByteArrayMatches(info1.PublicKeyToken, info2.PublicKeyToken);
         }
 
