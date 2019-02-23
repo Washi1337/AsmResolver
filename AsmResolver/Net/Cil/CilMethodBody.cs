@@ -94,6 +94,8 @@ namespace AsmResolver.Net.Cil
             
             return body;
         }
+
+        private readonly LazyValue<ParameterSignature> _thisParameter;
         
         public CilMethodBody(MethodDefinition method)
         {
@@ -103,8 +105,9 @@ namespace AsmResolver.Net.Cil
             ExceptionHandlers = new List<ExceptionHandler>();
             ComputeMaxStackOnBuild = true;
 
-            // TODO: catch if method is not added to type yet.
-//            ThisParameter = new ParameterSignature(new TypeDefOrRefSignature(Method.DeclaringType));
+            _thisParameter = new LazyValue<ParameterSignature>(() => method.DeclaringType != null
+                    ? new ParameterSignature(method.DeclaringType.ToTypeSignature()) 
+                    : null);
         }
 
         /// <summary>
@@ -118,11 +121,7 @@ namespace AsmResolver.Net.Cil
         /// <summary>
         /// Gets the this parameter, if present.
         /// </summary>
-        public ParameterSignature ThisParameter
-        {
-            get;
-            private set;
-        }
+        public ParameterSignature ThisParameter => _thisParameter.Value;
 
         /// <summary>
         /// Gets a value indicating whether variables are initialized by the runtime to their default values.
