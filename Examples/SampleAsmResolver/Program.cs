@@ -19,7 +19,6 @@ namespace SampleAsmResolver
         {
             // Create new assembly.
             var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", false);
-            assembly.NetDirectory.Flags &= ~ImageNetDirectoryFlags.IlOnly; // Required for mixed mode apps.
             var header = assembly.NetDirectory.MetadataHeader;
             
             // Lock the metadata so that we can add and remove members safely.
@@ -36,29 +35,41 @@ namespace SampleAsmResolver
             image.Assembly.Modules[0].TopLevelTypes.Add(type);
             
             // Create a new main method.
-            var mainMethod = new MethodDefinition("Main", MethodAttributes.Public | MethodAttributes.Static,
-                new MethodSignature(image.TypeSystem.Void));
+            var mainMethod = CreateMainMethod(image, importer, nativeMethod);
             type.Methods.Add(mainMethod);
-            
-            var cilBody = new CilMethodBody(mainMethod);
-            cilBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ldstr, "The secret number is: {0}"));
-            cilBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Call, nativeMethod));
-            cilBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Box, importer.ImportType(typeof(int))));
-            cilBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Call,
-                importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string),typeof(object)}))));
-            cilBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-            mainMethod.MethodBody = cilBody;
+            image.ManagedEntrypoint = mainMethod;
             
             // Commit our changes.
-            var mapping = header.UnlockMetadata();
+            header.UnlockMetadata();
             
-            // Set entrypoint to our main method.
-            assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
-            
-            // Save!
+            // Save to disk!
+            assembly.NetDirectory.Flags &= ~ImageNetDirectoryFlags.IlOnly; // Required for mixed mode apps.
             string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output.exe");
             assembly.Write(outputPath, new CompactNetAssemblyBuilder(assembly));
 
+        }
+
+        private static MethodDefinition CreateMainMethod(
+            MetadataImage image, 
+            IReferenceImporter importer,
+            IMemberReference getSecretNumberMethod)
+        {
+            var mainMethod = new MethodDefinition("Main", MethodAttributes.Public | MethodAttributes.Static,
+                new MethodSignature(image.TypeSystem.Void));
+
+            var cilBody = new CilMethodBody(mainMethod);
+            var writeLine = importer.ImportMethod(
+                typeof(Console).GetMethod("WriteLine", new[] {typeof(string), typeof(object)}));
+            cilBody.Instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, "The secret number is: {0}"),
+                CilInstruction.Create(CilOpCodes.Call, getSecretNumberMethod),
+                CilInstruction.Create(CilOpCodes.Box, importer.ImportType(typeof(int))),
+                CilInstruction.Create(CilOpCodes.Call, writeLine),
+                CilInstruction.Create(CilOpCodes.Ret)
+            });
+            mainMethod.MethodBody = cilBody;
+            return mainMethod;
         }
 
         private static MethodDefinition CreateNativeMethod(MetadataImage image)
