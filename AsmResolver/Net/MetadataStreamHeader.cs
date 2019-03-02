@@ -13,21 +13,26 @@ namespace AsmResolver.Net
 
             var header = new MetadataStreamHeader
             {
-                _readingContext = context,
-
                 StartOffset = reader.Position,
 
                 Offset = reader.ReadUInt32(),
                 Size = reader.ReadUInt32(),
                 Name = reader.ReadAlignedAsciiString(4),
-
             };
+            
+            header._stream = new LazyValue<MetadataStream>(() =>
+            {
+                var mdHeader = context.Assembly.NetDirectory.MetadataHeader;
+                var stream = mdHeader.StreamParser.ReadStream(header.Name,
+                    context.CreateSubContext(mdHeader.StartOffset + header.Offset, (int) header.Size));
+                stream.StreamHeader = header;
+                return stream;
+            });
 
             return header;
         }
 
-        private ReadingContext _readingContext;
-        private MetadataStream _stream;
+        private LazyValue<MetadataStream> _stream;
 
         private MetadataStreamHeader()
         {
@@ -41,7 +46,7 @@ namespace AsmResolver.Net
         public MetadataStreamHeader(string name, MetadataStream stream)
         {
             Name = name;
-            Stream = stream;
+            _stream = new LazyValue<MetadataStream>(stream);
         }
 
         /// <summary>
@@ -76,52 +81,14 @@ namespace AsmResolver.Net
         /// </summary>
         public MetadataStream Stream
         {
-            get
-            {
-                if (_stream != null)
-                    return _stream;
-
-                if (_readingContext == null)
-                    _stream = new CustomMetadataStream();
-                else
-                {
-                    var context =
-                        _readingContext.CreateSubContext(
-                            _readingContext.Assembly.NetDirectory.MetadataHeader.StartOffset + Offset, (int)Size);
-
-                    switch (Name)
-                    {
-                        case "#-":
-                        case "#~":
-                            _stream = TableStream.FromReadingContext(context);
-                            break;
-                        case "#Strings":
-                            _stream = StringStream.FromReadingContext(context);
-                            break;
-                        case "#US":
-                            _stream = UserStringStream.FromReadingContext(context);
-                            break;
-                        case "#GUID":
-                            _stream = GuidStream.FromReadingContext(context);
-                            break;
-                        case "#Blob":
-                            _stream = BlobStream.FromReadingContext(context);
-                            break;
-                        default:
-                            _stream = CustomMetadataStream.FromReadingContext(context);
-                            break;
-                    }
-                }
-                _stream.StreamHeader = this;
-                return _stream;
-            }
+            get => _stream.Value;
             set
             {
-                if (_stream != null)
-                    _stream.StreamHeader = null;
-                _stream = value;
+                if (_stream.Value != null)
+                    _stream.Value.StreamHeader = null;
+                _stream.Value = value;
                 if (value != null)
-                    _stream.StreamHeader = this;
+                    value.StreamHeader = this;
             }
         }
 
@@ -137,7 +104,7 @@ namespace AsmResolver.Net
         public override uint GetPhysicalLength()
         {
             var length = Align((uint)(Encoding.ASCII.GetByteCount(Name) + 1), 4);
-            return (uint)(2 * sizeof (uint) + length);
+            return 2 * sizeof (uint) + length;
         }
 
         public override void Write(WritingContext context)

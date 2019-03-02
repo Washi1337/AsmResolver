@@ -124,7 +124,6 @@ namespace AsmResolver.Net
         public IList<MetadataStreamHeader> StreamHeaders
         {
             get;
-            private set;
         }
 
         public MetadataImage Image
@@ -133,10 +132,16 @@ namespace AsmResolver.Net
             private set;
         }
 
-        public bool IsLocked
+        public bool IsLocked => Image != null;
+
+        /// <summary>
+        /// Gets or sets the reader to use in parsing the metadata streams.
+        /// </summary>
+        public IMetadataStreamParser StreamParser
         {
-            get { return Image != null; }
-        }
+            get;
+            set;
+        } = new DefaultMetadataStreamParser();
         
         /// <summary>
         /// Gets all metadata heap streams defined in the metadata data directory.

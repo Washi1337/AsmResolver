@@ -102,6 +102,7 @@
     <Compile Include="Net\Cts\Collections\ShallowTypeCollection.cs" />
     <Compile Include="Net\Cts\IReferenceImporter.cs" />
     <Compile Include="Net\Cts\MemberCloner.cs" />
+    <Compile Include="Net\DefaultMetadataStreamParser.cs" />
     <Compile Include="Net\Emit\BlobStreamBuffer.cs" />
     <Compile Include="Net\Emit\BootstrapperSegment.cs" />
     <Compile Include="Net\Emit\CompactNetAssemblyBuilder.cs" />
@@ -173,6 +174,7 @@
     <Compile Include="Net\ImageNetDirectory.cs" />
     <Compile Include="Net\ImageNetDirectoryFlags.cs" />
     <Compile Include="Net\Cts\IMetadataResolver.cs" />
+    <Compile Include="Net\IMetadataStreamParser.cs" />
     <Compile Include="Net\IndexSize.cs" />
     <Compile Include="Net\Cts\INetAssemblyResolver.cs" />
     <Compile Include="Net\ITypeDescriptor.cs" />
