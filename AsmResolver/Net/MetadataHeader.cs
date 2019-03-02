@@ -186,7 +186,7 @@ namespace AsmResolver.Net
             var buffer = new MetadataBuffer(Image);
             buffer.TableStreamBuffer.AddAssembly(Image.Assembly);
             NetDirectory.ResourcesManifest = buffer.ResourcesBuffer.CreateDirectory();
-            
+
             var buffers = new MetadataStreamBuffer[]
             {
                 buffer.TableStreamBuffer,
@@ -195,7 +195,7 @@ namespace AsmResolver.Net
                 buffer.StringStreamBuffer,
                 buffer.UserStringStreamBuffer
             };
-            
+
             foreach (var streamBuffer in buffers)
             {
                 var header = StreamHeaders.FirstOrDefault(x => x.Name == streamBuffer.Name);
@@ -209,11 +209,14 @@ namespace AsmResolver.Net
                 header.Stream = streamBuffer.CreateStream();
             }
 
-            Image = null;
+            var newTokenMapping = buffer.TableStreamBuffer.GetNewTokenMapping();
+            if (Image.ManagedEntrypoint != null)
+                NetDirectory.EntryPointToken = newTokenMapping[Image.ManagedEntrypoint].ToUInt32();
 
-            return buffer.TableStreamBuffer.GetNewTokenMapping();
+            Image = null;
+            return newTokenMapping;
         }
-            
+
         public override uint GetPhysicalLength()
         {
             return (uint)(1 * sizeof (uint) +

@@ -16,6 +16,7 @@ namespace AsmResolver.Net.Cts
     public class MetadataImage
     {
         private readonly IDictionary<MetadataToken, IMetadataMember> _cachedMembers = new Dictionary<MetadataToken, IMetadataMember>();
+        private readonly LazyValue<MethodDefinition> _entrypoint;
 
         internal MetadataImage(MetadataHeader header)
         {
@@ -31,6 +32,11 @@ namespace AsmResolver.Net.Cts
 
             TypeSystem = new TypeSystem(this, Assembly.Name == "mscorlib");
             MetadataResolver = new DefaultMetadataResolver(new DefaultNetAssemblyResolver());
+
+            _entrypoint = new LazyValue<MethodDefinition>(() =>
+                TryResolveMember(new MetadataToken(header.NetDirectory.EntryPointToken), out var member)
+                    ? member as MethodDefinition
+                    : null);
         }
 
         /// <summary>
@@ -65,6 +71,15 @@ namespace AsmResolver.Net.Cts
         public AssemblyDefinition Assembly
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets or sets the managed entrypoint of this metadata image.
+        /// </summary>
+        public MethodDefinition ManagedEntrypoint
+        {
+            get => _entrypoint.Value;
+            set => _entrypoint.Value = value;
         }
        
         internal bool TryGetCachedMember(MetadataToken token, out IMetadataMember member)

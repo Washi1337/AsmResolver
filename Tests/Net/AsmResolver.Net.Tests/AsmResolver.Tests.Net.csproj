@@ -85,6 +85,7 @@
     <Compile Include="Cts\EventDefinitionTest.cs" />
     <Compile Include="Cts\FieldDefinitionTest.cs" />
     <Compile Include="Cts\ManifestResourceTest.cs" />
+    <Compile Include="Cts\MetadataImageTest.cs" />
     <Compile Include="Cts\MethodDefinitionTest.cs" />
     <Compile Include="Cts\ModuleDefinitionTest.cs" />
     <Compile Include="Cts\PropertyDefinitionTest.cs" />
