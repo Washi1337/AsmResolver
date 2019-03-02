@@ -228,7 +228,9 @@ namespace AsmResolver.Net
 
             // Update managed entrypoint.
             var newTokenMapping = buffer.TableStreamBuffer.GetNewTokenMapping();
-            NetDirectory.EntryPointToken = newTokenMapping[image.ManagedEntrypoint].ToUInt32();
+            NetDirectory.EntryPointToken = image.ManagedEntrypoint != null
+                ? newTokenMapping[image.ManagedEntrypoint].ToUInt32()
+                : 0u;
 
             return newTokenMapping;
         }
