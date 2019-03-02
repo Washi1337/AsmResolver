@@ -47,7 +47,7 @@ namespace AsmResolver.Tests.Net.Emit
             type.Methods.Add(mainMethod);
 
             mainMethod.MethodBody = new CilMethodBody(mainMethod);
-            
+            image.ManagedEntrypoint = mainMethod;
             return assembly;
         }
 
@@ -69,10 +69,8 @@ namespace AsmResolver.Tests.Net.Emit
                     importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}))),
                 CilInstruction.Create(CilOpCodes.Ret)
             });
-            
-            var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
-            
+
+            assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             _context.VerifyOutput(assembly, expectedOutput);
         }
 
@@ -100,8 +98,7 @@ namespace AsmResolver.Tests.Net.Emit
                 CilInstruction.Create(CilOpCodes.Ret)
             });
             
-            var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
+            assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             
             _context.VerifyOutput(assembly, expectedOutput);
         }
@@ -147,8 +144,7 @@ namespace AsmResolver.Tests.Net.Emit
                 CatchType = importer.ImportType(typeof(Exception))
             });
             
-            var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
+            assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             
             _context.VerifyOutput(assembly, expectedOutput);
         }
@@ -201,8 +197,7 @@ namespace AsmResolver.Tests.Net.Emit
                 CilInstruction.Create(CilOpCodes.Ret)
             });
             
-            var mapping = assembly.NetDirectory.MetadataHeader.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[mainMethod].ToUInt32();
+            assembly.NetDirectory.MetadataHeader.UnlockMetadata();
             
             _context.VerifyOutput(assembly, "The secret number is: 1337");
         }

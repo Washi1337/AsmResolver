@@ -48,9 +48,9 @@ namespace AsmResolver.Tests.Net.Emit
             main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
             
             image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(main);
-
-            var mapping = header.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[main].ToUInt32();
+            image.ManagedEntrypoint = main;
+            
+            header.UnlockMetadata();
             
             _context.VerifyOutput(assembly, "abc" + 12);
         }
@@ -84,9 +84,9 @@ namespace AsmResolver.Tests.Net.Emit
             main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
             
             image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(main);
-
-            var mapping = header.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[main].ToUInt32();
+            image.ManagedEntrypoint = main;
+            
+            header.UnlockMetadata();
             
             _context.VerifyOutput(assembly, "abc" + 12);
         }
@@ -120,9 +120,9 @@ namespace AsmResolver.Tests.Net.Emit
             main.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
             
             image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(main);
-
-            var mapping = header.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[main].ToUInt32();
+            image.ManagedEntrypoint = main;
+            
+            header.UnlockMetadata();
             
             _context.VerifyOutput(assembly, "abc" + 12);
         }
@@ -233,9 +233,9 @@ namespace AsmResolver.Tests.Net.Emit
             });
             
             image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(main);
-
-            var mapping = header.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[main].ToUInt32();
+            image.ManagedEntrypoint = main;
+            
+            header.UnlockMetadata();
             
             _context.VerifyOutput(assembly, "MyPropertyA: MyPropertyB");
         }
@@ -269,9 +269,9 @@ namespace AsmResolver.Tests.Net.Emit
 
             image.Assembly.Modules[0].TopLevelTypes.Add(clonedType);
             image.Assembly.Modules[0].TopLevelTypes[0].Methods.Add(main);
+            image.ManagedEntrypoint = main;
             
-            var mapping = header.UnlockMetadata();
-            assembly.NetDirectory.EntryPointToken = mapping[main].ToUInt32();
+            header.UnlockMetadata();
             
             _context.VerifyOutput(assembly, "4");
         }
