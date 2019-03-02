@@ -43,6 +43,11 @@ namespace AsmResolver.X86
 
         public override FileSegment CreateRawMethodBody(MetadataBuffer buffer)
         {
+            return CreateRawMethodBody();
+        }
+
+        public DataSegment CreateRawMethodBody()
+        {
             using (var stream = new MemoryStream())
             {
                 var writer = new BinaryStreamWriter(stream);
