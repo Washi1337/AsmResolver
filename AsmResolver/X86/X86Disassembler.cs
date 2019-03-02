@@ -18,9 +18,7 @@ namespace AsmResolver.X86
 
         public X86Disassembler(IBinaryStreamReader reader, long baseAddress)
         {
-            if (reader == null)
-                throw new ArgumentNullException("reader");
-            _reader = reader;
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
             BaseAddress = baseAddress;
         }
 
@@ -30,7 +28,6 @@ namespace AsmResolver.X86
         public long BaseAddress
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -42,8 +39,7 @@ namespace AsmResolver.X86
             long offset = BaseAddress + _reader.Position;
             var instruction = new X86Instruction(offset);
 
-            List<byte> prefixBytes;
-            byte nextCode = ReadNextOpCode(out prefixBytes);
+            byte nextCode = ReadNextOpCode(out var prefixBytes);
 
             instruction.OpCode = InterpretOpCodeByte(prefixBytes, nextCode);
             if (instruction.OpCode.Mnemonics == null)
@@ -226,6 +222,8 @@ namespace AsmResolver.X86
             {
                 case X86OperandSize.Byte:
                     return X86OperandUsage.BytePointer;
+                case X86OperandSize.Word:
+                    return X86OperandUsage.WordPointer;
                 case X86OperandSize.Dword:
                     return X86OperandUsage.DwordPointer;
                 case X86OperandSize.WordOrDword:
