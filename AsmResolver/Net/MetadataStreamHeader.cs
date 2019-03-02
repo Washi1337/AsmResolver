@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace AsmResolver.Net
 {
@@ -33,6 +34,9 @@ namespace AsmResolver.Net
         }
 
         private LazyValue<MetadataStream> _stream;
+        private uint _offset;
+        private uint _size;
+        private string _name;
 
         private MetadataStreamHeader()
         {
@@ -54,8 +58,12 @@ namespace AsmResolver.Net
         /// </summary>
         public uint Offset
         {
-            get;
-            set;
+            get => _offset;
+            set
+            {
+                AssertIsWritable();
+                _offset = value;
+            }
         }
 
         /// <summary>
@@ -63,8 +71,12 @@ namespace AsmResolver.Net
         /// </summary>
         public uint Size
         {
-            get;
-            set;
+            get => _size;
+            set
+            {
+                AssertIsWritable();
+                _size = value;
+            }
         }
 
         /// <summary>
@@ -72,10 +84,14 @@ namespace AsmResolver.Net
         /// </summary>
         public string Name
         {
-            get;
-            set;
+            get => _name;
+            set
+            {
+                AssertIsWritable();
+                _name = value;
+            }
         }
-        
+
         /// <summary>
         /// Gets or sets the metadata stream associated with the header.
         /// </summary>
@@ -84,6 +100,7 @@ namespace AsmResolver.Net
             get => _stream.Value;
             set
             {
+                AssertIsWritable();
                 if (_stream.Value != null)
                     _stream.Value.StreamHeader = null;
                 _stream.Value = value;
@@ -121,6 +138,12 @@ namespace AsmResolver.Net
                 context.Writer.WriteByte(0);
                 length++;
             } while (length % 4 != 0);
+        }
+
+        private void AssertIsWritable()
+        {
+            if (MetadataHeader != null && MetadataHeader.IsLocked)
+                throw new MetadataLockedException("edit stream header");
         }
     }
 }

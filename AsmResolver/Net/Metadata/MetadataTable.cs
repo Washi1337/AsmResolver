@@ -42,7 +42,7 @@ namespace AsmResolver.Net.Metadata
         /// </summary>
         public bool IsReadOnly
         {
-            get { return _isReadOnly; }
+            get => _isReadOnly;
             internal set
             {
                 if (_isReadOnly != value)
@@ -56,10 +56,7 @@ namespace AsmResolver.Net.Metadata
         /// <summary>
         /// Gets the size of an index to a single row of the table.
         /// </summary>
-        public IndexSize IndexSize
-        {
-            get { return Count > ushort.MaxValue ? IndexSize.Long : IndexSize.Short; }
-        }
+        public IndexSize IndexSize => Count > ushort.MaxValue ? IndexSize.Long : IndexSize.Short;
 
         /// <summary>
         /// Gets the amount of bytes a single row consists of in the table.
@@ -219,11 +216,11 @@ namespace AsmResolver.Net.Metadata
         /// <summary>
         /// Verifies the table is writable (i.e. not readonly).
         /// </summary>
-        /// <exception cref="InvalidOperationException">Occurs when the table is not writable.</exception>
+        /// <exception cref="MetadataLockedException">Occurs when the table is not writable.</exception>
         protected void AssertIsWritable()
         {
             if (IsReadOnly)
-                throw new InvalidOperationException("Table cannot be modified in read-only mode.");
+                throw new MetadataLockedException("edit table");
         }
         
         /// <summary>

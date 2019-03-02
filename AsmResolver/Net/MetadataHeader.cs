@@ -62,7 +62,7 @@ namespace AsmResolver.Net
         }
 
         /// <summary>
-        /// Gets or sets the signature of the metadata header. Must be 0x424A5342 (BSJB).
+        /// Gets or sets the signature of the metadata header. Must be 0x424A5342 (BSJB) for a valid .NET executable.
         /// </summary>
         public uint Signature
         {
@@ -177,7 +177,7 @@ namespace AsmResolver.Net
 
         public MetadataImage LockMetadata()
         {
-            if (Image != null)
+            if (IsLocked)
                 throw new InvalidOperationException("Cannot lock the metadata after the metadata has already been locked.");
 
             var tableStream = GetStream<TableStream>();
@@ -188,10 +188,22 @@ namespace AsmResolver.Net
 
         public IDictionary<IMetadataMember, MetadataToken> UnlockMetadata()
         {
-            var buffer = new MetadataBuffer(Image);
-            buffer.TableStreamBuffer.AddAssembly(Image.Assembly);
+            if (!IsLocked)
+                throw new InvalidOperationException("Cannot unlock the metadata if it has not already been locked.");
+            
+            var image = Image;
+            var buffer = new MetadataBuffer(image);
+            
+            // Add assembly to buffer.
+            buffer.TableStreamBuffer.AddAssembly(image.Assembly);
+            
+            // Create resources.
             NetDirectory.ResourcesManifest = buffer.ResourcesBuffer.CreateDirectory();
 
+            // Unlock metadata.
+            Image = null;
+            
+            // Replace old streams with new buffers.
             var buffers = new MetadataStreamBuffer[]
             {
                 buffer.TableStreamBuffer,
@@ -214,11 +226,10 @@ namespace AsmResolver.Net
                 header.Stream = streamBuffer.CreateStream();
             }
 
+            // Update managed entrypoint.
             var newTokenMapping = buffer.TableStreamBuffer.GetNewTokenMapping();
-            if (Image.ManagedEntrypoint != null)
-                NetDirectory.EntryPointToken = newTokenMapping[Image.ManagedEntrypoint].ToUInt32();
+            NetDirectory.EntryPointToken = newTokenMapping[image.ManagedEntrypoint].ToUInt32();
 
-            Image = null;
             return newTokenMapping;
         }
 

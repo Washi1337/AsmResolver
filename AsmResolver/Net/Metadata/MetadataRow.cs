@@ -54,7 +54,7 @@ namespace AsmResolver.Net.Metadata
         protected void AssertIsWritable()
         {
             if (IsReadOnly)
-                throw new InvalidOperationException("Metadata row cannot be modified in read-only mode.");
+                throw new MetadataLockedException("edit metadata row");
         }
 
         protected bool Equals(MetadataRow other)

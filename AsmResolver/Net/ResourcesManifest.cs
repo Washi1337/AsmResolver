@@ -35,7 +35,7 @@
 
         public override uint GetPhysicalLength()
         {
-            return (uint) (_reader != null ? _reader.Length : 0);
+            return (uint) (_reader?.Length ?? 0);
         }
 
         public override void Write(WritingContext context)

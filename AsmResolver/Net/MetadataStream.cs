@@ -14,9 +14,6 @@
             internal set;
         }
 
-        public MetadataHeader MetadataHeader
-        {
-            get { return StreamHeader != null ? StreamHeader.MetadataHeader : null; }
-        }
+        public MetadataHeader MetadataHeader => StreamHeader?.MetadataHeader;
     }
 }

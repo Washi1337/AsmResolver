@@ -168,7 +168,7 @@ namespace AsmResolver.Net
 
         public bool IsReadOnly
         {
-            get { return _isReadOnly; }
+            get => _isReadOnly;
             internal set
             {
                 if (_isReadOnly != value)
@@ -185,7 +185,7 @@ namespace AsmResolver.Net
         /// </summary>
         public uint Reserved
         {
-            get { return _reserved; }
+            get => _reserved;
             set
             {
                 AssertIsWriteable();
@@ -198,7 +198,7 @@ namespace AsmResolver.Net
         /// </summary>
         public byte MajorVersion
         {
-            get { return _majorVersion; }
+            get => _majorVersion;
             set
             {
                 AssertIsWriteable();
@@ -211,7 +211,7 @@ namespace AsmResolver.Net
         /// </summary>
         public byte MinorVersion
         {
-            get { return _minorVersion; }
+            get => _minorVersion;
             set
             {
                 AssertIsWriteable();
@@ -224,7 +224,7 @@ namespace AsmResolver.Net
         /// </summary>
         public byte HeapSizes
         {
-            get { return _heapSizes; }
+            get => _heapSizes;
             set
             {
                 AssertIsWriteable();
@@ -237,7 +237,7 @@ namespace AsmResolver.Net
         /// </summary>
         public byte Reserved2
         {
-            get { return _reserved2; }
+            get => _reserved2;
             set
             {
                 AssertIsWriteable();
@@ -250,7 +250,7 @@ namespace AsmResolver.Net
         /// </summary>
         public ulong ValidBitVector
         {
-            get { return _validBitVector; }
+            get => _validBitVector;
             set
             {
                 AssertIsWriteable();
@@ -263,7 +263,7 @@ namespace AsmResolver.Net
         /// </summary>
         public ulong SortedBitVector
         {
-            get { return _sortedBitVector; }
+            get => _sortedBitVector;
             set
             {
                 AssertIsWriteable();
@@ -445,7 +445,7 @@ namespace AsmResolver.Net
         private void AssertIsWriteable()
         {
             if (IsReadOnly)
-                throw new InvalidOperationException("Table stream cannot be modified in read-only mode.");
+                throw new MetadataLockedException("edit table stream");
         }
     }
 }

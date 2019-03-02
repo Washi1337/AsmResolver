@@ -347,6 +347,8 @@ namespace AsmResolver.Tests.Net.Emit
         public void PersistentExports()
         {
             var assembly = CreateTempAssembly();
+            assembly.NetDirectory.MetadataHeader.UnlockMetadata();
+            
             var exportDirectory = new ImageExportDirectory
             {
                 Name = "somefile.dll",

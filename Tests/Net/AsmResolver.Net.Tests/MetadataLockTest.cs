@@ -33,7 +33,7 @@ namespace AsmResolver.Tests.Net
             Assert.True(tableStream.IsReadOnly);
             Assert.All(tableStream.GetPresentTables(), x => Assert.True(x.IsReadOnly));
 
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<MetadataLockedException>(() =>
             {
                 tableStream.GetTable<TypeReferenceTable>()
                     .Add(new MetadataRow<uint, uint, uint>
@@ -44,7 +44,7 @@ namespace AsmResolver.Tests.Net
                     });
             });
 
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.Throws<MetadataLockedException>(() =>
             {
                 tableStream.GetTable<TypeReferenceTable>()[0].Column2 = 4;
             });

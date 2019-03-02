@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using AsmResolver.Net.Cil;
 using AsmResolver.Net.Metadata;
+using AsmResolver.Net.Signatures;
 
 namespace AsmResolver.Net.Cts
 {
@@ -80,6 +82,55 @@ namespace AsmResolver.Net.Cts
         {
             get => _entrypoint.Value;
             set => _entrypoint.Value = value;
+        }
+
+        /// <summary>
+        /// Gets the module static constructor of this metadata image. That is, the first method that is executed
+        /// upon loading the .NET module. 
+        /// </summary>
+        /// <returns>The module constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition GetModuleConstructor()
+        {
+            if (TryResolveMember(new MetadataToken(MetadataTokenType.Method, 1), out var member))
+            {
+                var cctor = (MethodDefinition) member;
+                if (cctor.IsConstructor && cctor.IsStatic)
+                    return cctor;
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// Gets or creates the module static constructor of this metadata image. That is, the first method that is
+        /// executed upon loading the .NET module. 
+        /// </summary>
+        /// <returns>The module constructor.</returns>
+        /// <remarks>
+        /// If the static constructor was not present in the image, the new one is automatically added.
+        /// </remarks>
+        public MethodDefinition GetOrCreateModuleConstructor()
+        {
+            var cctor = GetModuleConstructor();
+            if (cctor == null)
+            {
+                cctor = new MethodDefinition(".cctor",
+                    MethodAttributes.Static | MethodAttributes.SpecialName | MethodAttributes.RuntimeSpecialName,
+                    new MethodSignature(TypeSystem.Void));
+
+                cctor.CilMethodBody = new CilMethodBody(cctor);
+                cctor.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
+                GetModuleType().Methods.Insert(0, cctor);
+            }
+
+            return cctor;
+        }
+
+        public TypeDefinition GetModuleType()
+        {
+            return TryResolveMember(new MetadataToken(MetadataTokenType.TypeDef, 1), out var member)
+                ? (TypeDefinition) member
+                : null;
         }
        
         internal bool TryGetCachedMember(MetadataToken token, out IMetadataMember member)
