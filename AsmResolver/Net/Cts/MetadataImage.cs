@@ -115,7 +115,10 @@ namespace AsmResolver.Net.Cts
             if (cctor == null)
             {
                 cctor = new MethodDefinition(".cctor",
-                    MethodAttributes.Static | MethodAttributes.SpecialName | MethodAttributes.RuntimeSpecialName,
+                    MethodAttributes.Private
+                    | MethodAttributes.Static
+                    | MethodAttributes.SpecialName
+                    | MethodAttributes.RuntimeSpecialName,
                     new MethodSignature(TypeSystem.Void));
 
                 cctor.CilMethodBody = new CilMethodBody(cctor);

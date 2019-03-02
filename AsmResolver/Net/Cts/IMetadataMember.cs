@@ -44,10 +44,7 @@ namespace AsmResolver.Net.Cts
         /// <summary>
         /// Gets a value indicating whether the member is editable or not.
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return Image != null && !Image.Header.GetStream<TableStream>().IsReadOnly; }
-        }
+        public bool IsReadOnly => Image != null && !Image.Header.GetStream<TableStream>().IsReadOnly;
 
         /// <inheritdoc />
         public abstract MetadataImage Image
@@ -58,7 +55,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public MetadataToken MetadataToken
         {
-            get { return _metadataToken; }
+            get => _metadataToken;
             internal set
             {
                 AssertIsWriteable();

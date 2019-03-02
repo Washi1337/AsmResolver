@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AsmResolver.Net;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Emit;
@@ -291,6 +292,30 @@ namespace AsmResolver.Tests.Net.Cts
             image = header.LockMetadata();
             var newType = (TypeDefinition) image.ResolveMember(mapping[type]);
             Assert.Equal(type.GenericParameters, newType.GenericParameters, _comparer);
+        }
+
+        [Fact]
+        public void PersistentStaticConstructor()
+        {
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            var importer = new ReferenceImporter(image);
+
+            var type = new TypeDefinition("SomeNamespace", "SomeType", TypeAttributes.Public,
+                importer.ImportType(typeof(object)));
+            image.Assembly.Modules[0].TopLevelTypes.Add(type);
+
+            Assert.Null(type.GetStaticConstructor());
+            var cctor = type.GetOrCreateStaticConstructor();
+            Assert.Same(cctor, type.GetStaticConstructor());
+
+            var mapping = header.UnlockMetadata();
+            
+            image = header.LockMetadata();
+            type = (TypeDefinition) image.ResolveMember(mapping[type]);
+            Assert.NotNull(type.GetStaticConstructor());
         }
     }
 }
