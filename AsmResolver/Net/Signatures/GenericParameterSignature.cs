@@ -9,11 +9,9 @@ namespace AsmResolver.Net.Signatures
     {
         public static GenericParameterSignature FromReader(MetadataImage image, IBinaryStreamReader reader, GenericParameterType parameterType)
         {
-            uint index;
-            if (!reader.TryReadCompressedUInt32(out index))
-                return null;
-
-            return new GenericParameterSignature(parameterType, (int) index);
+            return reader.TryReadCompressedUInt32(out uint index) 
+                ? new GenericParameterSignature(parameterType, (int) index)
+                : null;
         }
 
         public GenericParameterSignature(GenericParameterType parameterType, int index)
@@ -64,15 +62,9 @@ namespace AsmResolver.Net.Signatures
             }
         }
 
-        public override string Namespace
-        {
-            get { return string.Empty; }
-        }
+        public override string Namespace => string.Empty;
 
-        public override IResolutionScope ResolutionScope
-        {
-            get { return null; }
-        }
+        public override IResolutionScope ResolutionScope => null;
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

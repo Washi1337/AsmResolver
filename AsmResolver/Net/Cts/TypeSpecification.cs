@@ -10,7 +10,9 @@ namespace AsmResolver.Net.Cts
     /// </summary>
     public class TypeSpecification : MetadataMember<MetadataRow<uint>>, ITypeDefOrRef
     {
+        private readonly MetadataImage _image;
         private readonly LazyValue<TypeSignature> _signature;
+        
         public TypeSpecification(TypeSignature signature)
             : base(new MetadataToken(MetadataTokenType.TypeSpec))
         {
@@ -21,13 +23,14 @@ namespace AsmResolver.Net.Cts
         public TypeSpecification(MetadataImage image, MetadataRow<uint> row)
             : base(row.MetadataToken)
         {
+            _image = image;
             _signature = new LazyValue<TypeSignature>(() => 
                 TypeSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column1), true));
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
         /// <inheritdoc />
-        public override MetadataImage Image => Signature?.ResolutionScope?.Image;
+        public override MetadataImage Image => Signature?.ResolutionScope?.Image ?? _image;
 
         /// <summary>
         /// Gets or sets the type signature that is referred to by this specification.
