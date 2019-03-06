@@ -9,5 +9,10 @@ namespace AsmResolver.Net
         {
             get;
         } = new HashSet<MetadataToken>();
+
+        public static RecursionProtection Create()
+        {
+            return new RecursionProtection();
+        }
     }
 }

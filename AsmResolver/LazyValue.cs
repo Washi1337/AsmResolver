@@ -4,7 +4,7 @@ namespace AsmResolver
 {
     public class LazyValue<TValue>
     {
-        private readonly Func<TValue> _getValue;
+        protected Func<TValue> GetValue;
         private bool _isInitialized;
         private TValue _value;
 
@@ -21,7 +21,7 @@ namespace AsmResolver
 
         public LazyValue(Func<TValue> getValue)
         {
-            _getValue = getValue;
+            GetValue = getValue;
         }
 
         public TValue Value
@@ -38,15 +38,12 @@ namespace AsmResolver
             }
         }
 
-        public bool IsInitialized
-        {
-            get { return _isInitialized; }
-        }
+        public bool IsInitialized => _isInitialized;
 
         public void EnsureIsInitialized()
         {
             if (!IsInitialized)
-                _value = _getValue();
+                _value = GetValue();
             _isInitialized = true;
         }
 
@@ -54,6 +51,31 @@ namespace AsmResolver
         {
             _isInitialized = false;
             _value = default(TValue);
+        }
+    }
+
+    public class TaggedLazyValue<TTag, TValue> : LazyValue<TValue>
+    {
+        private readonly Func<TTag, TValue> _getValue;
+
+        public TaggedLazyValue()
+        {
+        }
+
+        public TaggedLazyValue(TValue value)
+            : base(value)
+        {
+        }
+
+        public TaggedLazyValue(Func<TTag, TValue> getValue, Func<TTag> createTag)
+        {
+            _getValue = getValue;
+            base.GetValue = () => GetValue(createTag());
+        }
+
+        public TValue GetValue(TTag tag)
+        {
+            return _getValue(tag);
         }
     }
 }

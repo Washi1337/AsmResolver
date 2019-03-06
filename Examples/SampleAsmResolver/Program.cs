@@ -16,81 +16,6 @@ namespace SampleAsmResolver
 {
     internal class Program
     {
-        public class CustomArrayTypeSig : ArrayTypeSignature
-        {
-            private readonly TypeSignature _replace;
-
-            public CustomArrayTypeSig(TypeSignature dummy, TypeSignature replace) 
-                : base(dummy)
-            {
-                _replace = replace;
-            }
-
-            public override uint GetPhysicalLength(MetadataBuffer buffer)
-            {
-                return 1 + _replace.GetPhysicalLength(buffer)   + 3 * 4;
-            }
-
-            public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
-            {
-                writer.WriteByte((byte) ElementType.Array);
-                _replace.Write(buffer, writer);
-                
-                writer.WriteUInt32(0xDFDFDFDF); // Rank
-                writer.WriteUInt32(0xDFDFDFDF); // Sizes
-                writer.WriteUInt32(0xDFDFDFDF); // NumLoBounds
-            }
-        }
-        
-        public static void Main(string[] args)
-        {
-            var assembly = NetAssemblyFactory.CreateAssembly("SomeAssembly", false);
-            var mdHeader = assembly.NetDirectory.MetadataHeader;
-            var image = mdHeader.LockMetadata();
-            var importer = new ReferenceImporter(image);
-            var moduleType = image.Assembly.Modules[0].TopLevelTypes[0];
-            
-            
-            var maliciousType = new TypeDefinition("","temp", importer.ImportType(typeof(object)));
-            image.Assembly.Modules[0].TopLevelTypes.Add(maliciousType);
-            
-            var maliciousTypeSpec = new TypeSpecification(image.TypeSystem.Byte);
-            var maliciousTypeSig = new CustomArrayTypeSig(image.TypeSystem.Byte, new TypeDefOrRefSignature(maliciousTypeSpec));
-            maliciousTypeSpec.Signature = maliciousTypeSig;
-            
-            var maliciousMethod = new MethodDefinition("Test", MethodAttributes.Public | MethodAttributes.Static,
-                new MethodSignature(new[]
-                {
-                    new TypeDefOrRefSignature(maliciousTypeSpec), 
-                }, image.TypeSystem.Void));
-            maliciousMethod.CilMethodBody = new CilMethodBody(maliciousMethod);
-            maliciousMethod.CilMethodBody.Instructions.Add(CilInstruction.Create(CilOpCodes.Ret));
-            maliciousType.Methods.Add(maliciousMethod);
-            
-            var main = new MethodDefinition("Main", MethodAttributes.Public | MethodAttributes.Static,
-                new MethodSignature(image.TypeSystem.Void));
-
-            main.CilMethodBody = new CilMethodBody(main);
-            main.CilMethodBody.Instructions.AddRange(new[]
-            {
-                CilInstruction.Create(CilOpCodes.Ldstr, "Hello, world!"),
-                CilInstruction.Create(CilOpCodes.Call, importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[]{typeof(string)}))),
-                CilInstruction.Create(CilOpCodes.Ret), 
-            });
-            moduleType.Methods.Add(main);
-
-            image.ManagedEntrypoint = main;
-            
-            var mapping = mdHeader.UnlockMetadata();
-            
-            assembly.Write("D:\\Washi\\Desktop\\lolecksdee.exe", new CompactNetAssemblyBuilder(assembly));
-
-            image = mdHeader.LockMetadata();
-            Console.WriteLine(
-                image.ResolveMember(mapping[maliciousMethod]));
-
-        }
-        /*
         public static void Main(string[] args)
         {
             // Create new assembly.
@@ -176,6 +101,6 @@ namespace SampleAsmResolver
 
             nativeMethod.MethodBody = nativeBody;
             return nativeMethod;
-        }*/
+        }
     }
 }

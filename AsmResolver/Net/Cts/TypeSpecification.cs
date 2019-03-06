@@ -11,12 +11,12 @@ namespace AsmResolver.Net.Cts
     public class TypeSpecification : MetadataMember<MetadataRow<uint>>, ITypeDefOrRef
     {
         private readonly MetadataImage _image;
-        private readonly LazyValue<TypeSignature> _signature;
+        private readonly TaggedLazyValue<RecursionProtection, TypeSignature> _signature;
         
         public TypeSpecification(TypeSignature signature)
             : base(new MetadataToken(MetadataTokenType.TypeSpec))
         {
-            _signature = new LazyValue<TypeSignature>(signature);
+            _signature = new TaggedLazyValue<RecursionProtection, TypeSignature>(signature);
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
@@ -24,8 +24,13 @@ namespace AsmResolver.Net.Cts
             : base(row.MetadataToken)
         {
             _image = image;
-            _signature = new LazyValue<TypeSignature>(() => 
-                TypeSignature.FromReader(image, image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column1), true));
+            _signature = new TaggedLazyValue<RecursionProtection, TypeSignature>(protection =>
+                    TypeSignature.FromReader(
+                        image,
+                        image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column1),
+                        true,
+                        protection),
+                RecursionProtection.Create);
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
@@ -42,7 +47,7 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <inheritdoc />
-        public string Name => Signature.Name;
+        public string Name => Signature?.Name;
 
         string IMemberReference.Name
         {
@@ -53,18 +58,18 @@ namespace AsmResolver.Net.Cts
         /// <summary>
         /// Gets the namespace of the type.
         /// </summary>
-        public string Namespace => Signature.Namespace;
+        public string Namespace => Signature?.Namespace;
 
         ITypeDescriptor ITypeDescriptor.DeclaringTypeDescriptor => DeclaringType;
 
         /// <inheritdoc />
-        public IResolutionScope ResolutionScope => Signature.ResolutionScope;
+        public IResolutionScope ResolutionScope => Signature?.ResolutionScope;
 
         /// <inheritdoc />
-        public virtual string FullName => Signature.FullName;
+        public virtual string FullName => Signature?.FullName;
 
         /// <inheritdoc />
-        public bool IsValueType => Signature.IsValueType;
+        public bool IsValueType => Signature?.IsValueType ?? false;
 
         /// <inheritdoc />
         public ITypeDescriptor GetElementType()
