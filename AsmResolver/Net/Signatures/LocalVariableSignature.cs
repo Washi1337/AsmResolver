@@ -5,14 +5,34 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a signature used by CIL method bodies to define local variables.
+    /// </summary>
     public class LocalVariableSignature : CallingConventionSignature
     {
+        /// <summary>
+        /// Reads a single local variable signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <returns>The read signature.</returns>
         public new static LocalVariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader,
             bool readToEnd = false)
         {
             return FromReader(image, reader, readToEnd, new RecursionProtection());
         }
 
+        /// <summary>
+        /// Reads a single local variable signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read signature.</returns>
         public new static LocalVariableSignature FromReader(
             MetadataImage image, 
             IBinaryStreamReader reader,
@@ -48,12 +68,15 @@ namespace AsmResolver.Net.Signatures
             Variables = new List<VariableSignature>(variables);
         } 
 
+        /// <summary>
+        /// Gets a collection of variables that were defined in the method body.
+        /// </summary>
         public IList<VariableSignature> Variables
         {
             get;
-            private set;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint) (sizeof(byte) +
@@ -62,12 +85,14 @@ namespace AsmResolver.Net.Signatures
                    base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             foreach (var variable in Variables)
                 variable.Prepare(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte(0x07);

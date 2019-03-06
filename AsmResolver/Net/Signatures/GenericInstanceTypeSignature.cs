@@ -7,13 +7,30 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents the signature of a generic instance type. That is, a type reference that instantiates a generic
+    /// type with type arguments.
+    /// </summary>
     public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
+        /// <summary>
+        /// Reads a single generic instance type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read signature.</returns>
         public static GenericInstanceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return FromReader(image, reader, new RecursionProtection());
         }        
         
+        /// <summary>
+        /// Reads a single generic instance type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read signature.</returns>
         public static GenericInstanceTypeSignature FromReader(
             MetadataImage image, 
             IBinaryStreamReader reader,
@@ -45,33 +62,46 @@ namespace AsmResolver.Net.Signatures
             GenericArguments = new List<TypeSignature>();
         }
 
+        /// <inheritdoc />
         public override ElementType ElementType => ElementType.GenericInst;
 
+        /// <summary>
+        /// Gets or sets the generic type that is instantiated. 
+        /// </summary>
         public ITypeDefOrRef GenericType
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of type arguments used to instantiate the generic type.
+        /// </summary>
         public IList<TypeSignature> GenericArguments
         {
             get;
         }
 
-        public override string Name => GenericType.Name;
+        /// <inheritdoc />
+        public override string Name => GenericType?.Name;
 
-        public override string Namespace => GenericType.Namespace;
+        /// <inheritdoc />
+        public override string Namespace => GenericType?.Namespace;
 
+        /// <inheritdoc />
         public override string FullName =>
             base.FullName + '<' + string.Join(", ", GenericArguments.Select(x => x.FullName)) + '>';
 
-        public override IResolutionScope ResolutionScope => GenericType.ResolutionScope;
+        /// <inheritdoc />
+        public override IResolutionScope ResolutionScope => GenericType?.ResolutionScope;
 
+        /// <inheritdoc />
         public override ITypeDescriptor GetElementType()
         {
             return GenericType.GetElementType();
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             var encoder =
@@ -85,6 +115,7 @@ namespace AsmResolver.Net.Signatures
                    + base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             buffer.TableStreamBuffer.GetTypeToken(GenericType);
@@ -92,6 +123,7 @@ namespace AsmResolver.Net.Signatures
                 argument.Prepare(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)ElementType);

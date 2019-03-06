@@ -5,13 +5,29 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents the type of an object, using a type definition or reference defined in one of the metadata tables.
+    /// </summary>
     public class TypeDefOrRefSignature : TypeSignature, IResolvable
     {
+        /// <summary>
+        /// Reads a single type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read signature.</returns>
         public static TypeDefOrRefSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return FromReader(image, reader, new RecursionProtection());
         }
         
+        /// <summary>
+        /// Reads a single type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read signature.</returns>
         public static TypeDefOrRefSignature FromReader(
             MetadataImage image, 
             IBinaryStreamReader reader,
@@ -34,30 +50,40 @@ namespace AsmResolver.Net.Signatures
 
         public override ElementType ElementType => IsValueType ? ElementType.ValueType : ElementType.Class;
 
+        /// <summary>
+        /// Gets or sets the type definition or reference to use.   
+        /// </summary>
         public ITypeDefOrRef Type
         {
             get;
             set;
         }
 
-        public override string Name => Type.Name;
+        /// <inheritdoc />
+        public override string Name => Type?.Name;
 
-        public override string Namespace => Type.Namespace;
+        /// <inheritdoc />
+        public override string Namespace => Type?.Namespace;
 
-        public override ITypeDescriptor DeclaringTypeDescriptor => Type.DeclaringTypeDescriptor;
+        /// <inheritdoc />
+        public override ITypeDescriptor DeclaringTypeDescriptor => Type?.DeclaringTypeDescriptor;
 
-        public override IResolutionScope ResolutionScope => Type.ResolutionScope;
+        /// <inheritdoc />
+        public override IResolutionScope ResolutionScope => Type?.ResolutionScope;
 
+        /// <inheritdoc />
         public override ITypeDescriptor GetElementType()
         {
             return Type.GetElementType();
         }
 
+        /// <inheritdoc />
         public override ITypeDefOrRef ToTypeDefOrRef()
         {
             return Type;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             var encoder = buffer.TableStreamBuffer
@@ -67,12 +93,14 @@ namespace AsmResolver.Net.Signatures
                    base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             buffer.TableStreamBuffer.GetTypeToken(Type);
             buffer.TableStreamBuffer.GetResolutionScopeToken(ResolutionScope);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)ElementType);
@@ -80,6 +108,7 @@ namespace AsmResolver.Net.Signatures
             base.Write(buffer, writer);
         }
 
+        /// <inheritdoc />
         public IMetadataMember Resolve()
         {
             return Type.Resolve();

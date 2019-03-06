@@ -5,8 +5,16 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a chunk of raw data stored in the blob stream.
+    /// </summary>
     public class DataBlobSignature : BlobSignature
     {
+        /// <summary>
+        /// Reads all bytes from the stream reader and puts it in a data blob signature.
+        /// </summary>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read data blob.</returns>
         public static DataBlobSignature FromReader(IBinaryStreamReader reader)
         {
             return new DataBlobSignature(reader.ReadBytes((int) reader.Length));
@@ -17,26 +25,38 @@ namespace AsmResolver.Net.Signatures
             Data = data;
         }
 
+        /// <summary>
+        /// Gets or sets the raw data of the blob.
+        /// </summary>
         public byte[] Data
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint)Data.Length;
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteBytes(Data);
         }
 
+        /// <summary>
+        /// Attempts to interpret the data as a constant value.
+        /// </summary>
+        /// <param name="constantType">The type of the constant.</param>
+        /// <returns>The constant.</returns>
+        /// <exception cref="NotSupportedException">Occurs when the provided type is not supported.</exception>
         public object InterpretData(ElementType constantType)
         {
             switch (constantType)

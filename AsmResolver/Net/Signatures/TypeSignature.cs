@@ -5,13 +5,33 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Provides a base for all type signatures stored in the blob stream, representing a type of an object.
+    /// </summary>
     public abstract class TypeSignature : ExtendableBlobSignature, ITypeDescriptor
     {
+        /// <summary>
+        /// Reads a single type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <returns>The read signature.</returns>
         public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
             return FromReader(image, reader, readToEnd, new RecursionProtection());
         }
 
+        /// <summary>
+        /// Reads a single type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read signature.</returns>
         public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd, RecursionProtection protection)
         {
             var signature = ReadTypeSignature(image, reader, protection);
@@ -65,14 +85,26 @@ namespace AsmResolver.Net.Signatures
             }
         }
 
+        /// <summary>
+        /// Translates a fully qualified name of a type to a type signature.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="assemblyQualifiedName">The fully qualified name.</param>
+        /// <returns>The type signature.</returns>
         public static TypeSignature FromAssemblyQualifiedName(MetadataImage image, string assemblyQualifiedName)
         {
             return TypeNameParser.ParseType(image, assemblyQualifiedName);
         }
 
+        /// <summary>
+        /// Reads a single field or property type.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The type signature.</returns>
         public static TypeSignature ReadFieldOrPropType(MetadataImage image, IBinaryStreamReader reader)
         {
-            var elementType = (ElementType)reader.ReadByte();
+            var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
             {
                 case ElementType.Boxed:
@@ -86,6 +118,13 @@ namespace AsmResolver.Net.Signatures
             }
         }
 
+        /// <summary>
+        /// Reads a single coded index to a type definition or reference and resolves it.
+        /// </summary>
+        /// <param name="image">The image the type resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The type, or <c>null</c> if recursion was detected.</returns>
         protected static ITypeDefOrRef ReadTypeDefOrRef(MetadataImage image, IBinaryStreamReader reader, RecursionProtection protection)
         {
             var tableStream = image.Header.GetStream<TableStream>();
@@ -103,48 +142,61 @@ namespace AsmResolver.Net.Signatures
             return null;
         }
 
+        /// <summary>
+        /// Write a coded index to a type to the output stream.
+        /// </summary>
+        /// <param name="buffer">The metadata buffer to add the type to.</param>
+        /// <param name="writer">The writer to use.</param>
+        /// <param name="type">The type to write.</param>
         protected static void WriteTypeDefOrRef(MetadataBuffer buffer, IBinaryStreamWriter writer, ITypeDefOrRef type)
         {
             var encoder = buffer.TableStreamBuffer.GetIndexEncoder(CodedIndex.TypeDefOrRef);
             writer.WriteCompressedUInt32(encoder.EncodeToken(buffer.TableStreamBuffer.GetTypeToken(type)));
         }
 
+        /// <summary>
+        /// Gets the raw element type of the type signature. This is the first byte of every type signature.
+        /// </summary>
         public abstract ElementType ElementType
         {
             get;
         }
 
+        /// <inheritdoc />
         public abstract string Name
         {
             get;
         }
 
+        /// <inheritdoc />
         public abstract string Namespace
         {
             get;
         }
 
-        public virtual ITypeDescriptor DeclaringTypeDescriptor
-        {
-            get { return ResolutionScope as ITypeDescriptor; }
-        }
+        /// <inheritdoc />
+        public virtual ITypeDescriptor DeclaringTypeDescriptor => ResolutionScope as ITypeDescriptor;
 
+        /// <inheritdoc />
         public abstract IResolutionScope ResolutionScope
         {
             get;
         }
 
+        /// <inheritdoc />
         public virtual bool IsValueType
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public virtual string FullName =>
             DeclaringTypeDescriptor != null
                 ? DeclaringTypeDescriptor.FullName + "+" + Name
                 : (string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name);
 
+        /// <inheritdoc />
         public virtual ITypeDescriptor GetElementType()
         {
             return this;

@@ -2,6 +2,9 @@
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Provides members for describing all available attributes that can be used in a calling convention signature.
+    /// </summary>
     [Flags]
     public enum CallingConventionAttributes : byte
     {

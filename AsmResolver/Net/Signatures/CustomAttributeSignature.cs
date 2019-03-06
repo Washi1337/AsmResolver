@@ -6,8 +6,19 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a signature of a custom attribute associated to a member.
+    /// </summary>
     public class CustomAttributeSignature : ExtendableBlobSignature
     {
+        /// <summary>
+        /// Reads a single custom attribute at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="parent">The parent custom attribute the signature is associated to.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <returns>The read argument.</returns>
         public static CustomAttributeSignature FromReader(
             CustomAttribute parent,
             IBinaryStreamReader reader,
@@ -50,18 +61,23 @@ namespace AsmResolver.Net.Signatures
             NamedArguments = new List<CustomAttributeNamedArgument>();   
         }
 
+        /// <summary>
+        /// Gets a collection of fixed arguments that were required to call the constructor of the attribute.
+        /// </summary>
         public IList<CustomAttributeArgument> FixedArguments
         {
             get;
-            private set;
         }
 
+        /// <summary>
+        /// Gets a collection of named arguments that assign values to either fields or properties defined in the attribute.
+        /// </summary>
         public IList<CustomAttributeNamedArgument> NamedArguments
         {
             get;
-            private set;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint) (sizeof(ushort) +
@@ -71,6 +87,7 @@ namespace AsmResolver.Net.Signatures
                    + base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             foreach (var argument in FixedArguments)
@@ -80,6 +97,7 @@ namespace AsmResolver.Net.Signatures
                 argument.Prepare(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteUInt16(0x0001);

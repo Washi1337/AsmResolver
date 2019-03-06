@@ -7,8 +7,18 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a single fixed argument of a custom attribute associated to a member.
+    /// </summary>
     public class CustomAttributeArgument : BlobSignature
     {
+        /// <summary>
+        /// Reads a single custom attribute argument at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the argument was defined in.</param>
+        /// <param name="typeSignature">The type of the argument to read.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read argument.</returns>
         public static CustomAttributeArgument FromReader(
             MetadataImage image,
             TypeSignature typeSignature, 
@@ -58,12 +68,19 @@ namespace AsmResolver.Net.Signatures
                 Elements.Add(value);
         }
 
+        /// <summary>
+        /// Gets or sets the type of the argument.
+        /// </summary>
         public TypeSignature ArgumentType
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of elements that make up the argument's value. For simple arguments, this list contains
+        /// just one element. For array arguments, this list contains all the elements stored in the array.
+        /// </summary>
         public IList<ElementSignature> Elements
         {
             get;

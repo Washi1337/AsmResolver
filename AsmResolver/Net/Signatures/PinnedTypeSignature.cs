@@ -4,13 +4,29 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents the type of an object that is pinned at a fixed location in memory.
+    /// </summary>
     public class PinnedTypeSignature : TypeSpecificationSignature
     {
+        /// <summary>
+        /// Reads a single pinned type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read signature.</returns>
         public static PinnedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return FromReader(image, reader, new RecursionProtection());
         }        
         
+        /// <summary>
+        /// Reads a single pinned type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read signature.</returns>
         public static PinnedTypeSignature FromReader(
             MetadataImage image, 
             IBinaryStreamReader reader,
@@ -24,8 +40,10 @@ namespace AsmResolver.Net.Signatures
         {
         }
 
+        /// <inheritdoc />
         public override ElementType ElementType => ElementType.Pinned;
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return sizeof(byte) +
@@ -33,6 +51,7 @@ namespace AsmResolver.Net.Signatures
                    base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)ElementType);

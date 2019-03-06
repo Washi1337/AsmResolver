@@ -5,8 +5,18 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a single element in a custom attribute argument.
+    /// </summary>
     public class ElementSignature : BlobSignature
     {
+        /// <summary>
+        /// Reads a single element at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the custom attribute is defined in.</param>
+        /// <param name="typeSignature">The type of the element to read.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read element.</returns>
         public static ElementSignature FromReader(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
             return new ElementSignature(ReadValue(image, typeSignature, reader));
@@ -67,12 +77,16 @@ namespace AsmResolver.Net.Signatures
             Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the value of the argument element.
+        /// </summary>
         public object Value
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             if (Value == null)
@@ -100,17 +114,18 @@ namespace AsmResolver.Net.Signatures
                     return ((Value as string).GetSerStringSize());
             }
 
-            var typeSignature = Value as TypeSignature;
-            if (typeSignature != null)
+            if (Value is TypeSignature typeSignature)
                 return TypeNameBuilder.GetAssemblyQualifiedName(typeSignature).GetSerStringSize();
 
             throw new NotSupportedException("Invalid or unsupported argument element value in custom attribute.");
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             if (Value == null)
@@ -161,8 +176,7 @@ namespace AsmResolver.Net.Signatures
                     writer.WriteUInt64((ulong)Value);
                     break;
                 default:
-                    var typeSignature = Value as TypeSignature;
-                    if (typeSignature != null)
+                    if (Value is TypeSignature typeSignature)
                         writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(typeSignature));
                     else
                         throw new NotSupportedException();

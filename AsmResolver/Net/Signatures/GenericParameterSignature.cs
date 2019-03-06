@@ -5,8 +5,18 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a reference to a type parameter defined in either a generic method or type.
+    /// </summary>
     public class GenericParameterSignature : TypeSignature
     {
+        /// <summary>
+        /// Reads a single generic parameter signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the parameter was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="parameterType">Determines whether the parameter signature is referencing a type parameter from the enclosing method or type.</param>
+        /// <returns>The read signature.</returns>
         public static GenericParameterSignature FromReader(MetadataImage image, IBinaryStreamReader reader, GenericParameterType parameterType)
         {
             return reader.TryReadCompressedUInt32(out uint index) 
@@ -20,6 +30,7 @@ namespace AsmResolver.Net.Signatures
             Index = index;
         }
 
+        /// <inheritdoc />
         public override ElementType ElementType
         {
             get
@@ -36,18 +47,25 @@ namespace AsmResolver.Net.Signatures
             }
         }
         
+        /// <summary>
+        /// Gets or sets a value indicating whether a type parameter of the enclosing method or type is used.
+        /// </summary>
         public GenericParameterType ParameterType
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the index of the type parameter that was referenced.
+        /// </summary>
         public int Index
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         public override string Name
         {
             get
@@ -64,10 +82,13 @@ namespace AsmResolver.Net.Signatures
             }
         }
 
+        /// <inheritdoc />
         public override string Namespace => string.Empty;
 
+        /// <inheritdoc />
         public override IResolutionScope ResolutionScope => null;
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return sizeof(byte) +
@@ -75,10 +96,12 @@ namespace AsmResolver.Net.Signatures
                    base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)ElementType);

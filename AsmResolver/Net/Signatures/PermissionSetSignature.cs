@@ -6,8 +6,18 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Describes a set of security-related permissions associated to a member. 
+    /// </summary>
     public class PermissionSetSignature : ExtendableBlobSignature
     {
+        /// <summary>
+        /// Reads a set of permissions at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the permission set resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The permission set.</returns>
+        /// <exception cref="ArgumentException">Occurs when the reader does not point to a valid set of permissions.</exception>
         public static PermissionSetSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new PermissionSetSignature();
@@ -29,12 +39,15 @@ namespace AsmResolver.Net.Signatures
             Attributes = new List<SecurityAttributeSignature>();
         }
 
+        /// <summary>
+        /// Gets a collection of attributes defined in the permission set.
+        /// </summary>
         public IList<SecurityAttributeSignature> Attributes
         {
             get;
-            private set;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint) (sizeof(byte) +
@@ -43,12 +56,14 @@ namespace AsmResolver.Net.Signatures
                    base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             foreach (var attribute in Attributes)
                 attribute.Prepare(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)'.');

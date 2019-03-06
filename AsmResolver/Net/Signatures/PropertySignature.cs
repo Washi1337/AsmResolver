@@ -5,14 +5,34 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents the signature of a property, containing the type of the property.
+    /// </summary>
     public class PropertySignature : CallingConventionSignature, IHasTypeSignature
     {
+        /// <summary>
+        /// Reads a single property signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <returns>The read signature.</returns>
         public new static PropertySignature FromReader(MetadataImage image, IBinaryStreamReader reader,
             bool readToEnd = false)
         {
             return FromReader(image, reader, readToEnd, new RecursionProtection());
         }        
         
+        /// <summary>
+        /// Reads a single property signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read signature.</returns>
         public new static PropertySignature FromReader(
             MetadataImage image, 
             IBinaryStreamReader reader, 
@@ -54,6 +74,9 @@ namespace AsmResolver.Net.Signatures
             Parameters = new List<ParameterSignature>(parameters);
         }
 
+        /// <summary>
+        /// Gets or sets the type of the property.
+        /// </summary>
         public TypeSignature PropertyType
         {
             get;
@@ -62,11 +85,15 @@ namespace AsmResolver.Net.Signatures
 
         TypeSignature IHasTypeSignature.TypeSignature => PropertyType;
 
+        /// <summary>
+        /// Gets a collection of parameters that the property defines.
+        /// </summary>
         public IList<ParameterSignature> Parameters
         {
             get;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint)(sizeof (byte) +
@@ -76,6 +103,7 @@ namespace AsmResolver.Net.Signatures
                 + base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             PropertyType.Prepare(buffer);
@@ -83,6 +111,7 @@ namespace AsmResolver.Net.Signatures
                 parameter.Prepare(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)Attributes);

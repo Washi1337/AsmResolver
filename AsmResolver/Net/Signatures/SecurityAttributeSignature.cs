@@ -5,8 +5,17 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a single security attribute that restricts the ways a member can be used. 
+    /// </summary>
     public class SecurityAttributeSignature : ExtendableBlobSignature
     {
+        /// <summary>
+        /// Reads a single security attribute at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature resides in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read attribute.</returns>
         public static SecurityAttributeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             var signature = new SecurityAttributeSignature
@@ -14,10 +23,9 @@ namespace AsmResolver.Net.Signatures
                 TypeName = reader.ReadSerString(),
             };
 
-            reader.ReadCompressedUInt32(); 
+            reader.ReadCompressedUInt32();
 
-            uint argumentCount;
-            if (!reader.TryReadCompressedUInt32(out argumentCount))
+            if (!reader.TryReadCompressedUInt32(out uint argumentCount))
                 return signature;
 
             if (argumentCount == 0)
@@ -34,17 +42,24 @@ namespace AsmResolver.Net.Signatures
             NamedArguments = new List<CustomAttributeNamedArgument>();
         }
 
+        /// <summary>
+        /// Gets or sets the name of the security attribute referenced.
+        /// </summary>
         public string TypeName
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of named arguments that assign a value to a field or a property defined in the attribute. 
+        /// </summary>
         public IList<CustomAttributeNamedArgument> NamedArguments
         {
             get;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             uint argumentsSize = (uint)NamedArguments.Sum(x => x.GetPhysicalLength(buffer));
@@ -57,12 +72,14 @@ namespace AsmResolver.Net.Signatures
                    + base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             foreach (var argument in NamedArguments)
                 argument.Prepare(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteSerString(TypeName);

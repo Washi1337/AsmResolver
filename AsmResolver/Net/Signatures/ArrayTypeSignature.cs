@@ -7,21 +7,43 @@ using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a single (complex) array type signature, which encodes a variable amount of array dimensions,
+    /// as well as their sizes and lower bounds.
+    /// </summary>
+    /// <remarks>
+    /// For simple single-dimension arrays, use <see cref="SzArrayTypeSignature"/> instead.
+    /// </remarks>
     public class ArrayTypeSignature : TypeSpecificationSignature
     {
+        /// <summary>
+        /// Reads a single array type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the array was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read array.</returns>
         public static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return FromReader(image, reader, new RecursionProtection());
         }
         
+        /// <summary>
+        /// Reads a single array type signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the array was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read array.</returns>
         public static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader, RecursionProtection protection)
         {
             var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader, false, protection));
 
-            if (!reader.TryReadCompressedUInt32(out var rank))
+            // Rank
+            if (!reader.TryReadCompressedUInt32(out uint rank))
                 return signature;
 
-            if (!reader.TryReadCompressedUInt32(out var numSizes))
+            // Sizes.
+            if (!reader.TryReadCompressedUInt32(out uint numSizes))
                 return signature;
 
             var sizes = new List<uint>();
@@ -32,6 +54,7 @@ namespace AsmResolver.Net.Signatures
                 sizes.Add(size);
             }
 
+            // Lower bounds.
             if (!reader.TryReadCompressedUInt32(out uint numLoBounds))
                 return signature;
 
@@ -43,6 +66,7 @@ namespace AsmResolver.Net.Signatures
                 loBounds.Add(bound);
             }
 
+            // Create dimensions.
             for (int i = 0; i < rank; i++)
             {
                 var dimension = new ArrayDimension();
@@ -62,13 +86,18 @@ namespace AsmResolver.Net.Signatures
             Dimensions = new List<ArrayDimension>();
         }
 
+        /// <inheritdoc />
         public override ElementType ElementType => ElementType.Array;
 
+        /// <summary>
+        /// Gets a collection of dimensions this array type defines.
+        /// </summary>
         public IList<ArrayDimension> Dimensions
         {
             get;
         }
 
+        /// <inheritdoc />
         public override string Name => BaseType.Name + GetDimensionsString();
 
         private string GetDimensionsString()
@@ -92,10 +121,17 @@ namespace AsmResolver.Net.Signatures
             return $"{low}...{low + size - 1}";
         }
         
+        /// <summary>
+        /// Verifies that the array signature only contains dimensions that are valid.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// An array signature is valid if all bounded dimensions are in the front of the dimensions list.
+        /// </remarks>
         public bool Validate()
         {
-            var allowSizes = true;
-            var allowLowBounds = true;
+            bool allowSizes = true;
+            bool allowLowBounds = true;
             foreach (var dimension in Dimensions)
             {
                 if (dimension.Size.HasValue)
@@ -125,9 +161,9 @@ namespace AsmResolver.Net.Signatures
             if (!Validate())
                 throw new InvalidOperationException();
 
-            var numSizes = 0u;
-            var numLoBounds = 0u;
-            var sizesAndLoBoundsLength = 0u;
+            uint numSizes = 0u;
+            uint numLoBounds = 0u;
+            uint sizesAndLoBoundsLength = 0u;
 
             foreach (var dimension in Dimensions)
             {

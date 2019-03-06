@@ -5,14 +5,34 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents a signature of a method, describing its return type and parameter types. 
+    /// </summary>
     public class MethodSignature : MemberSignature
     {
+        /// <summary>
+        /// Reads a single method signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the field is defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <returns>The read signature.</returns>
         public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader,
             bool readToEnd = false)
         {
             return FromReader(image, reader, readToEnd, new RecursionProtection());
         }        
         
+        /// <summary>
+        /// Reads a single method signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the field is defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read signature.</returns>
         public new static MethodSignature FromReader(
             MetadataImage image, 
             IBinaryStreamReader reader, 
@@ -70,25 +90,42 @@ namespace AsmResolver.Net.Signatures
             ReturnType = returnType;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating the amount of generic parameters the method defines.
+        /// </summary>
+        /// <remarks>
+        /// When this signature is used by a method definition, this should match the number of elements in
+        /// <see cref="MethodDefinition.GenericParameters"/>.</remarks>
         public int GenericParameterCount
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of parameters defined by the method.
+        /// </summary>
+        /// <remarks>
+        /// When this signature is used by a method definition, this should at least have the number of elements in
+        /// <see cref="MethodDefinition.Parameters"/>.</remarks>
         public IList<ParameterSignature> Parameters
         {
             get;
         }
 
+        /// <summary>
+        /// Gets or sets the return type of the method.
+        /// </summary>
         public TypeSignature ReturnType
         {
             get;
             set;
         }
 
+        /// <inheritdoc />
         protected override TypeSignature TypeSignature => ReturnType;
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint) (sizeof(byte) +
@@ -99,6 +136,7 @@ namespace AsmResolver.Net.Signatures
                    + base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             foreach (var parameter in Parameters)
@@ -106,6 +144,7 @@ namespace AsmResolver.Net.Signatures
             ReturnType.Prepare(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte)Attributes);
@@ -121,6 +160,7 @@ namespace AsmResolver.Net.Signatures
             base.Write(buffer, writer);
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return (HasThis ? "instance " : "") 

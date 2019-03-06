@@ -1,6 +1,9 @@
 namespace AsmResolver.Net.Signatures
 {
     // ReSharper disable InconsistentNaming
+    /// <summary>
+    /// Provides all supported types used in native marshal descriptors.
+    /// </summary>
     public enum NativeType : byte
     {
         Boolean = 0x02,

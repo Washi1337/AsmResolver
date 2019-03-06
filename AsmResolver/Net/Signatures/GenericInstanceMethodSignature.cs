@@ -5,13 +5,30 @@ using AsmResolver.Net.Cts;
 
 namespace AsmResolver.Net.Signatures
 {
+    /// <summary>
+    /// Represents the signature of a generic instance method. That is, a method reference that instantiates a generic
+    /// method with type arguments.
+    /// </summary>
     public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
+        /// <summary>
+        /// Reads a single generic instance method signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <returns>The read signature.</returns>
         public static GenericInstanceMethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
             return FromReader(image, reader, new RecursionProtection());
         }
 
+        /// <summary>
+        /// Reads a single generic instance method signature at the current position of the provided stream reader.
+        /// </summary>
+        /// <param name="image">The image the signature was defined in.</param>
+        /// <param name="reader">The reader to use.</param>
+        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
+        /// <returns>The read signature.</returns>
         public static GenericInstanceMethodSignature FromReader(
             MetadataImage image,
             IBinaryStreamReader reader,
@@ -22,7 +39,7 @@ namespace AsmResolver.Net.Signatures
                 Attributes = (CallingConventionAttributes) reader.ReadByte()
             };
 
-            if (!reader.TryReadCompressedUInt32(out var count))
+            if (!reader.TryReadCompressedUInt32(out uint count))
                 return signature;
 
             for (int i = 0; i < count; i++)
@@ -47,11 +64,15 @@ namespace AsmResolver.Net.Signatures
             Attributes = CallingConventionAttributes.GenericInstance;
         }
 
+        /// <summary>
+        /// Gets a collection of type arguments used to instantiate the generic method.
+        /// </summary>
         public IList<TypeSignature> GenericArguments
         {
             get;
         }
 
+        /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
             return (uint) (sizeof(byte) +
@@ -60,12 +81,14 @@ namespace AsmResolver.Net.Signatures
                    + base.GetPhysicalLength(buffer);
         }
 
+        /// <inheritdoc />
         public override void Prepare(MetadataBuffer buffer)
         {
             foreach (var argument in GenericArguments)
                 argument.Prepare(buffer);
         }
 
+        /// <inheritdoc />
         public override void Write(MetadataBuffer buffer, IBinaryStreamWriter writer)
         {
             writer.WriteByte(0x0A);
