@@ -43,7 +43,6 @@ namespace AsmResolver.Net.Signatures
         public IList<CustomAttributeNamedArgument> NamedArguments
         {
             get;
-            private set;
         }
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)

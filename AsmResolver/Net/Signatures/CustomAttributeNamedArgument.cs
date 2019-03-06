@@ -5,7 +5,9 @@ namespace AsmResolver.Net.Signatures
 {
     public class CustomAttributeNamedArgument : BlobSignature
     {
-        public static CustomAttributeNamedArgument FromReader(MetadataImage image, IBinaryStreamReader reader)
+        public static CustomAttributeNamedArgument FromReader(
+            MetadataImage image,
+            IBinaryStreamReader reader)
         {
             var signature = new CustomAttributeNamedArgument
             {
@@ -24,7 +26,8 @@ namespace AsmResolver.Net.Signatures
         {
         }
 
-        public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType argumentMemberType, TypeSignature argumentType, string memberName, CustomAttributeArgument argument)
+        public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType argumentMemberType,
+            TypeSignature argumentType, string memberName, CustomAttributeArgument argument)
         {
             ArgumentMemberType = argumentMemberType;
             ArgumentType = argumentType;
@@ -60,7 +63,7 @@ namespace AsmResolver.Net.Signatures
         {
             return sizeof (byte) +
                    ArgumentType.GetPhysicalLength(buffer) +
-                   (MemberName == null ? sizeof (byte) : MemberName.GetSerStringSize()) +
+                   (MemberName?.GetSerStringSize() ?? sizeof (byte)) +
                    Argument.GetPhysicalLength(buffer);
         }
 

@@ -7,7 +7,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static SentinelTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new SentinelTypeSignature(TypeSignature.FromReader(image, reader));
+            return FromReader(image, reader, new RecursionProtection());
+        }        
+        
+        public static SentinelTypeSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
+            return new SentinelTypeSignature(TypeSignature.FromReader(image, reader, false, protection));
         }
 
         public SentinelTypeSignature(TypeSignature baseType)
@@ -15,10 +23,6 @@ namespace AsmResolver.Net.Signatures
         {
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.Sentinel; }
-        }
-
+        public override ElementType ElementType => ElementType.Sentinel;
     }
 }

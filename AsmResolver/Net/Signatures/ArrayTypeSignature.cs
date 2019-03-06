@@ -11,32 +11,36 @@ namespace AsmResolver.Net.Signatures
     {
         public static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader));
-            
-            uint rank;
-            if (!reader.TryReadCompressedUInt32(out rank))
+            return FromReader(image, reader, new RecursionProtection());
+        }
+        
+        public static ArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader, RecursionProtection protection)
+        {
+            var signature = new ArrayTypeSignature(TypeSignature.FromReader(image, reader, false, protection));
+
+            if (!reader.TryReadCompressedUInt32(out var rank))
                 return signature;
 
-            uint numSizes;
-            if (!reader.TryReadCompressedUInt32(out numSizes))
+            if (!reader.TryReadCompressedUInt32(out var numSizes))
                 return signature;
 
-            var sizes = new uint[numSizes];
+            var sizes = new List<uint>();
             for (int i = 0; i < numSizes; i++)
             {
-                if (!reader.TryReadCompressedUInt32(out sizes[i]))
+                if (!reader.TryReadCompressedUInt32(out uint size))
                     return signature;
+                sizes.Add(size);
             }
 
-            uint numLoBounds;
-            if (!reader.TryReadCompressedUInt32(out numLoBounds))
+            if (!reader.TryReadCompressedUInt32(out uint numLoBounds))
                 return signature;
 
-            var loBounds = new uint[numLoBounds];
+            var loBounds = new List<uint>();
             for (int i = 0; i < numLoBounds; i++)
             {
-                if (!reader.TryReadCompressedUInt32(out loBounds[i]))
+                if (!reader.TryReadCompressedUInt32(out uint bound))
                     return signature;
+                loBounds.Add(bound);
             }
 
             for (int i = 0; i < rank; i++)
@@ -58,22 +62,15 @@ namespace AsmResolver.Net.Signatures
             Dimensions = new List<ArrayDimension>();
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.Array; }
-        }
+        public override ElementType ElementType => ElementType.Array;
 
         public IList<ArrayDimension> Dimensions
         {
             get;
-            private set;
         }
 
-        public override string Name
-        {
-            get { return BaseType.Name + GetDimensionsString(); }
-        }
-        
+        public override string Name => BaseType.Name + GetDimensionsString();
+
         private string GetDimensionsString()
         {
             return "[" + string.Join(",", Dimensions.Select(x =>
@@ -92,7 +89,7 @@ namespace AsmResolver.Net.Signatures
 
         private static string FormatDimensionBounds(int low, int size)
         {
-            return string.Format("{0}...{1}", low, low + size - 1);
+            return $"{low}...{low + size - 1}";
         }
         
         public bool Validate()

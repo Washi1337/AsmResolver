@@ -1270,9 +1270,9 @@ namespace AsmResolver.Net.Emit
         
         public override MetadataStream CreateStream()
         {
-            foreach (var fixup in _fixups)
-                fixup();
-            
+            for (var i = 0; i < _fixups.Count; i++) 
+                _fixups[i]();
+
             _tableStream.BlobIndexSize = _parentBuffer.BlobStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;
             _tableStream.StringIndexSize = _parentBuffer.StringStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;
             _tableStream.GuidIndexSize = _parentBuffer.GuidStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;

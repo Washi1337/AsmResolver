@@ -14,10 +14,7 @@ namespace AsmResolver.Net.Signatures
             return descriptor;
         }
 
-        public override NativeType NativeType
-        {
-            get { return NativeType.SafeArray; }
-        }
+        public override NativeType NativeType => NativeType.SafeArray;
 
         public VariantType ElementType
         {

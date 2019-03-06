@@ -7,7 +7,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static SzArrayTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new SzArrayTypeSignature(TypeSignature.FromReader(image, reader));
+            return FromReader(image, reader, new RecursionProtection());
+        }        
+        
+        public static SzArrayTypeSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
+            return new SzArrayTypeSignature(TypeSignature.FromReader(image, reader, false, protection));
         }
 
         public SzArrayTypeSignature(TypeSignature baseType)
@@ -15,14 +23,8 @@ namespace AsmResolver.Net.Signatures
         {
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.SzArray; }
-        }
+        public override ElementType ElementType => ElementType.SzArray;
 
-        public override string Name
-        {
-            get { return BaseType.Name + "[]"; }
-        }
+        public override string Name => BaseType.Name + "[]";
     }
 }

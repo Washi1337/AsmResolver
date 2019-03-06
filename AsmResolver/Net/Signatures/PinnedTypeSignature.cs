@@ -8,7 +8,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static PinnedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new PinnedTypeSignature(TypeSignature.FromReader(image, reader));
+            return FromReader(image, reader, new RecursionProtection());
+        }        
+        
+        public static PinnedTypeSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
+            return new PinnedTypeSignature(TypeSignature.FromReader(image, reader, false, protection));
         }
 
         public PinnedTypeSignature(TypeSignature baseType)
@@ -16,10 +24,7 @@ namespace AsmResolver.Net.Signatures
         {
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.Pinned; }
-        }
+        public override ElementType ElementType => ElementType.Pinned;
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

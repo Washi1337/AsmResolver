@@ -7,7 +7,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static ParameterSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new ParameterSignature(TypeSignature.FromReader(image, reader));
+            return FromReader(image, reader, new RecursionProtection());
+        }        
+        
+        public static ParameterSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader, 
+            RecursionProtection protection)
+        {
+            return new ParameterSignature(TypeSignature.FromReader(image, reader, false, protection));
         }
 
         public ParameterSignature(TypeSignature parameterType)

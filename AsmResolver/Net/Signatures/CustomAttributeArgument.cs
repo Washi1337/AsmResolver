@@ -9,9 +9,12 @@ namespace AsmResolver.Net.Signatures
 {
     public class CustomAttributeArgument : BlobSignature
     {
-        public static CustomAttributeArgument FromReader(MetadataImage image, TypeSignature typeSignature, IBinaryStreamReader reader)
+        public static CustomAttributeArgument FromReader(
+            MetadataImage image,
+            TypeSignature typeSignature, 
+            IBinaryStreamReader reader)
         {
-            var signature = new CustomAttributeArgument()
+            var signature = new CustomAttributeArgument
             {
                 ArgumentType = typeSignature
             };
@@ -28,9 +31,7 @@ namespace AsmResolver.Net.Signatures
                 if (elementCount != uint.MaxValue)
                 {
                     for (uint i = 0; i < elementCount; i++)
-                    {
                         signature.Elements.Add(ElementSignature.FromReader(image, arrayType, reader));
-                    }
                 }
             }
             
@@ -50,11 +51,9 @@ namespace AsmResolver.Net.Signatures
         public CustomAttributeArgument(TypeSignature argumentType, params ElementSignature[] values)
             : this()
         {
-            if (argumentType == null)
-                throw new ArgumentNullException("argumentType");
             if (values == null)
-                throw new ArgumentNullException("values");
-            ArgumentType = argumentType;
+                throw new ArgumentNullException(nameof(values));
+            ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
             foreach (var value in values)
                 Elements.Add(value);
         }
@@ -68,16 +67,14 @@ namespace AsmResolver.Net.Signatures
         public IList<ElementSignature> Elements
         {
             get;
-            private set;
         }
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
-            return
-                (uint)
-                    (ArgumentType.ElementType != ElementType.SzArray
-                        ? Elements[0].GetPhysicalLength(buffer)
-                        : sizeof(uint) + Elements.Sum(x => x.GetPhysicalLength(buffer)));
+            return (uint)
+                (ArgumentType.ElementType != ElementType.SzArray
+                    ? Elements[0].GetPhysicalLength(buffer)
+                    : sizeof(uint) + Elements.Sum(x => x.GetPhysicalLength(buffer)));
         }
 
         public override void Prepare(MetadataBuffer buffer)

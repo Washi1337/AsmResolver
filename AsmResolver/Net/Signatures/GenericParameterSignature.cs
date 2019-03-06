@@ -30,8 +30,9 @@ namespace AsmResolver.Net.Signatures
                         return ElementType.Var;
                     case GenericParameterType.Method:
                         return ElementType.MVar;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-                throw new NotSupportedException();
             }
         }
         
@@ -57,8 +58,9 @@ namespace AsmResolver.Net.Signatures
                         return "!!" + Index.ToString();
                     case GenericParameterType.Type:
                         return "!" + Index.ToString();
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-                throw new NotSupportedException();
             }
         }
 

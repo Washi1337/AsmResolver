@@ -20,20 +20,11 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override string Name
-        {
-            get { return BaseType.Name; }
-        }
+        public override string Name => BaseType.Name;
 
-        public override string Namespace
-        {
-            get { return BaseType.Namespace; }
-        }
+        public override string Namespace => BaseType.Namespace;
 
-        public override IResolutionScope ResolutionScope
-        {
-            get { return BaseType.ResolutionScope; }
-        }
+        public override IResolutionScope ResolutionScope => BaseType.ResolutionScope;
 
         public override ITypeDescriptor GetElementType()
         {

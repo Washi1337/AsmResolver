@@ -9,45 +9,53 @@ namespace AsmResolver.Net.Signatures
     {
         public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
         {
-            var signature = ReadTypeSignature(image, reader);
+            return FromReader(image, reader, readToEnd, new RecursionProtection());
+        }
+
+        public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd, RecursionProtection protection)
+        {
+            var signature = ReadTypeSignature(image, reader, protection);
             if (readToEnd)
                 signature.ExtraData = reader.ReadToEnd();
             return signature;
         }
 
-        private static TypeSignature ReadTypeSignature(MetadataImage image, IBinaryStreamReader reader)
+        private static TypeSignature ReadTypeSignature(
+            MetadataImage image,
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
         {
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
             {
                 case ElementType.Array:
-                    return ArrayTypeSignature.FromReader(image, reader);
+                    return ArrayTypeSignature.FromReader(image, reader, protection);
                 case ElementType.Boxed:
-                    return BoxedTypeSignature.FromReader(image, reader);
+                    return BoxedTypeSignature.FromReader(image, reader, protection);
                 case ElementType.ByRef:
-                    return ByReferenceTypeSignature.FromReader(image, reader);
+                    return ByReferenceTypeSignature.FromReader(image, reader, protection);
                 case ElementType.CModOpt:
-                    return OptionalModifierSignature.FromReader(image, reader);
+                    return OptionalModifierSignature.FromReader(image, reader, protection);
                 case ElementType.CModReqD:
-                    return RequiredModifierSignature.FromReader(image, reader);
+                    return RequiredModifierSignature.FromReader(image, reader, protection);
                 case ElementType.Class:
-                    return TypeDefOrRefSignature.FromReader(image, reader);
+                    return TypeDefOrRefSignature.FromReader(image, reader, protection);
                 case ElementType.FnPtr:
-                    return FunctionPointerTypeSignature.FromReader(image, reader);
+                    return FunctionPointerTypeSignature.FromReader(image, reader, protection);
                 case ElementType.GenericInst:
-                    return GenericInstanceTypeSignature.FromReader(image, reader);
+                    return GenericInstanceTypeSignature.FromReader(image, reader, protection);
                 case ElementType.MVar:
                     return GenericParameterSignature.FromReader(image, reader, GenericParameterType.Method);
                 case ElementType.Pinned:
-                    return PinnedTypeSignature.FromReader(image, reader);
+                    return PinnedTypeSignature.FromReader(image, reader, protection);
                 case ElementType.Ptr:
-                    return PointerTypeSignature.FromReader(image, reader);
+                    return PointerTypeSignature.FromReader(image, reader, protection);
                 case ElementType.Sentinel:
-                    return SentinelTypeSignature.FromReader(image, reader);
+                    return SentinelTypeSignature.FromReader(image, reader, protection);
                 case ElementType.SzArray:
-                    return SzArrayTypeSignature.FromReader(image, reader);
+                    return SzArrayTypeSignature.FromReader(image, reader, protection);
                 case ElementType.ValueType:
-                    var type = TypeDefOrRefSignature.FromReader(image, reader);
+                    var type = TypeDefOrRefSignature.FromReader(image, reader, protection);
                     type.IsValueType = true;
                     return type;
                 case ElementType.Var:
@@ -78,18 +86,21 @@ namespace AsmResolver.Net.Signatures
             }
         }
 
-        protected static ITypeDefOrRef ReadTypeDefOrRef(MetadataImage image, IBinaryStreamReader reader)
+        protected static ITypeDefOrRef ReadTypeDefOrRef(MetadataImage image, IBinaryStreamReader reader, RecursionProtection protection)
         {
             var tableStream = image.Header.GetStream<TableStream>();
 
-            uint codedIndex;
-            if (!reader.TryReadCompressedUInt32(out codedIndex))
+            if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return null;
 
-            IMetadataMember type;
-            image.TryResolveMember(tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(codedIndex), out type);
+            var token = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(codedIndex);
+            if (protection.TraversedTokens.Add(token))
+            {
+                image.TryResolveMember(token, out var type);
+                return type as ITypeDefOrRef;
+            }
 
-            return type as ITypeDefOrRef;
+            return null;
         }
 
         protected static void WriteTypeDefOrRef(MetadataBuffer buffer, IBinaryStreamWriter writer, ITypeDefOrRef type)
@@ -129,14 +140,10 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public virtual string FullName
-        {
-            get {
-                return DeclaringTypeDescriptor != null
-                    ? DeclaringTypeDescriptor.FullName + "+" + Name
-                    : (string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name);
-            }
-        }
+        public virtual string FullName =>
+            DeclaringTypeDescriptor != null
+                ? DeclaringTypeDescriptor.FullName + "+" + Name
+                : (string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name);
 
         public virtual ITypeDescriptor GetElementType()
         {

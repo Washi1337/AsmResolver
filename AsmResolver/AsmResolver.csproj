@@ -181,6 +181,7 @@
     <Compile Include="Net\MetadataLockedException.cs" />
     <Compile Include="Net\Metadata\DefaultMethodBodyReader.cs" />
     <Compile Include="Net\Metadata\IRawMethodBodyReader.cs" />
+    <Compile Include="Net\RecursionProtection.cs" />
     <Compile Include="Net\ResourcesManifest.cs" />
     <Compile Include="Net\Metadata\SecurityAction.cs" />
     <Compile Include="Net\ReflectionAssemblyNameWrapper.cs" />

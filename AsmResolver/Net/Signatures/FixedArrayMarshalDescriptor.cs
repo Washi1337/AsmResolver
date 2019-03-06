@@ -8,20 +8,17 @@ namespace AsmResolver.Net.Signatures
         {
             var descriptor = new FixedArrayMarshalDescriptor();
 
-            uint value;
-            if (!reader.TryReadCompressedUInt32(out value))
+            if (!reader.TryReadCompressedUInt32(out uint value))
                 return descriptor;
             descriptor.NumberOfElements = (int)value;
 
             if (reader.CanRead(sizeof(byte)))
                 descriptor.ElementType = (NativeType)reader.ReadByte();
+            
             return descriptor;
         }
 
-        public override NativeType NativeType
-        {
-            get { return NativeType.FixedArray; }
-        }
+        public override NativeType NativeType => NativeType.FixedArray;
 
         public int NumberOfElements
         {

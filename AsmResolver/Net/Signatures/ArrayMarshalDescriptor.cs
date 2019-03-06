@@ -8,13 +8,13 @@ namespace AsmResolver.Net.Signatures
         {
             var descriptor = new ArrayMarshalDescriptor((NativeType) reader.ReadByte());
 
-            uint value;
+            if (!reader.TryReadCompressedUInt32(out uint value))
+                return descriptor;
+            descriptor.ParameterIndex = (int) value;
+            
             if (!reader.TryReadCompressedUInt32(out value))
                 return descriptor;
-            descriptor.ParameterIndex = (int)value;
-            if (!reader.TryReadCompressedUInt32(out value))
-                return descriptor;
-            descriptor.NumberOfElements = (int)value;
+            descriptor.NumberOfElements = (int) value;
             
             return descriptor;
         }
@@ -24,10 +24,7 @@ namespace AsmResolver.Net.Signatures
             ElementType = elementType;
         }
 
-        public override NativeType NativeType
-        {
-            get { return NativeType.Array; }
-        }
+        public override NativeType NativeType => NativeType.Array;
 
         public NativeType ElementType
         {

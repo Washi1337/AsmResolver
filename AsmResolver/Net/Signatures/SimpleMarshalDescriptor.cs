@@ -11,10 +11,7 @@ namespace AsmResolver.Net.Signatures
             _nativeType = nativeType;
         }
 
-        public override NativeType NativeType
-        {
-            get { return _nativeType; }
-        }
+        public override NativeType NativeType => _nativeType;
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

@@ -7,21 +7,30 @@ namespace AsmResolver.Net.Signatures
 {
     public class PropertySignature : CallingConventionSignature, IHasTypeSignature
     {
-        public new static PropertySignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
+        public new static PropertySignature FromReader(MetadataImage image, IBinaryStreamReader reader,
+            bool readToEnd = false)
+        {
+            return FromReader(image, reader, readToEnd, new RecursionProtection());
+        }        
+        
+        public new static PropertySignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader, 
+            bool readToEnd,
+            RecursionProtection protection)
         {
             var signature = new PropertySignature
             {
                 Attributes = (CallingConventionAttributes)reader.ReadByte(),
             };
 
-            uint paramCount;
-            if (!reader.TryReadCompressedUInt32(out paramCount))
+            if (!reader.TryReadCompressedUInt32(out uint paramCount))
                 return null;
 
-            signature.PropertyType = TypeSignature.FromReader(image, reader);
+            signature.PropertyType = TypeSignature.FromReader(image, reader, false, protection);
 
             for (int i = 0; i < paramCount; i++)
-                signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
+                signature.Parameters.Add(ParameterSignature.FromReader(image, reader, protection));
 
             if (readToEnd)
                 signature.ExtraData = reader.ReadToEnd();
@@ -51,15 +60,11 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        TypeSignature IHasTypeSignature.TypeSignature
-        {
-            get { return PropertyType; }
-        }
+        TypeSignature IHasTypeSignature.TypeSignature => PropertyType;
 
         public IList<ParameterSignature> Parameters
         {
             get;
-            private set;
         }
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)

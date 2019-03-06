@@ -8,8 +8,17 @@ namespace AsmResolver.Net.Signatures
     {
         public static OptionalModifierSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new OptionalModifierSignature(ReadTypeDefOrRef(image, reader),
-                TypeSignature.FromReader(image, reader));
+            return FromReader(image, reader, new RecursionProtection());
+        }        
+        
+        public static OptionalModifierSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
+            return new OptionalModifierSignature(
+                ReadTypeDefOrRef(image, reader, protection),
+                TypeSignature.FromReader(image, reader, false, protection));
         }
 
         public OptionalModifierSignature(ITypeDefOrRef modifierType, TypeSignature baseType)
@@ -18,10 +27,7 @@ namespace AsmResolver.Net.Signatures
             ModifierType = modifierType;
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.CModReqD; }
-        }
+        public override ElementType ElementType => ElementType.CModReqD;
 
         public ITypeDefOrRef ModifierType
         {
@@ -29,10 +35,7 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override string Name
-        {
-            get { return BaseType.Name + string.Format(" modopt({0})", ModifierType.FullName); }
-        }
+        public override string Name => BaseType.Name + $" modopt({ModifierType.FullName})";
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

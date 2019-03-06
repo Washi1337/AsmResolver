@@ -7,20 +7,29 @@ namespace AsmResolver.Net.Signatures
 {
     public class LocalVariableSignature : CallingConventionSignature
     {
-        public new static LocalVariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
+        public new static LocalVariableSignature FromReader(MetadataImage image, IBinaryStreamReader reader,
+            bool readToEnd = false)
+        {
+            return FromReader(image, reader, readToEnd, new RecursionProtection());
+        }
+
+        public new static LocalVariableSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader,
+            bool readToEnd, RecursionProtection protection)
         {
             var signature = new LocalVariableSignature
             {
-                Attributes = (CallingConventionAttributes)reader.ReadByte()
+                Attributes = (CallingConventionAttributes) reader.ReadByte()
             };
-            
+
             uint count = reader.ReadCompressedUInt32();
             for (int i = 0; i < count; i++)
-                signature.Variables.Add(VariableSignature.FromReader(image, reader));
+                signature.Variables.Add(VariableSignature.FromReader(image, reader, protection));
 
             if (readToEnd)
                 signature.ExtraData = reader.ReadToEnd();
-            
+
             return signature;
         }
 

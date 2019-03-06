@@ -8,7 +8,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static FunctionPointerTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new FunctionPointerTypeSignature(MethodSignature.FromReader(image, reader));
+            return FromReader(image, reader, new RecursionProtection());
+        }
+        
+        public static FunctionPointerTypeSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader, 
+            RecursionProtection protection)
+        {
+            return new FunctionPointerTypeSignature(MethodSignature.FromReader(image, reader, false, protection));
         }
 
         public FunctionPointerTypeSignature(MethodSignature signature)
@@ -16,10 +24,7 @@ namespace AsmResolver.Net.Signatures
             Signature = signature;
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.FnPtr; }
-        }
+        public override ElementType ElementType => ElementType.FnPtr;
 
         public MethodSignature Signature
         {
@@ -27,25 +32,13 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        public override string Name
-        {
-            get { return "*"; }
-        }
+        public override string Name => "*";
 
-        public override string Namespace
-        {
-            get { return string.Empty; }
-        }
+        public override string Namespace => string.Empty;
 
-        public override string FullName
-        {
-            get { return Signature.ToString(); }
-        }
+        public override string FullName => Signature.ToString();
 
-        public override IResolutionScope ResolutionScope
-        {
-            get { return null; }
-        }
+        public override IResolutionScope ResolutionScope => null;
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

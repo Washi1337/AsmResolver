@@ -20,10 +20,7 @@ namespace AsmResolver.Net.Signatures
             return descriptor;
         }
 
-        public override NativeType NativeType
-        {
-            get { return NativeType.CustomMarshaler; }
-        }
+        public override NativeType NativeType => NativeType.CustomMarshaler;
 
         public Guid Guid
         {

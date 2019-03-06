@@ -7,7 +7,14 @@ namespace AsmResolver.Net.Signatures
     {
         public static BoxedTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new BoxedTypeSignature(TypeSignature.FromReader(image, reader));
+            return FromReader(image, reader, new RecursionProtection());
+        }
+        
+        public static BoxedTypeSignature FromReader(MetadataImage image, 
+            IBinaryStreamReader reader, 
+            RecursionProtection protection)
+        {
+            return new BoxedTypeSignature(TypeSignature.FromReader(image, reader, false, protection));
         }
 
         public BoxedTypeSignature(TypeSignature baseType)
@@ -15,9 +22,6 @@ namespace AsmResolver.Net.Signatures
         {
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.Boxed; }
-        }
+        public override ElementType ElementType => ElementType.Boxed;
     }
 }

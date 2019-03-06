@@ -7,33 +7,40 @@ namespace AsmResolver.Net.Signatures
 {
     public class MethodSignature : MemberSignature
     {
-        public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd = false)
+        public new static MethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader,
+            bool readToEnd = false)
+        {
+            return FromReader(image, reader, readToEnd, new RecursionProtection());
+        }        
+        
+        public new static MethodSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader, 
+            bool readToEnd, 
+            RecursionProtection protection)
         {
             if (!reader.CanRead(sizeof (byte)))
                 return null;
 
             var signature = new MethodSignature
             {
-                Attributes = (CallingConventionAttributes)reader.ReadByte()
+                Attributes = (CallingConventionAttributes) reader.ReadByte()
             };
 
             if (signature.IsGeneric)
             {
-                uint genericParameterCount;
-                if (!reader.TryReadCompressedUInt32(out genericParameterCount))
+                if (!reader.TryReadCompressedUInt32(out uint genericParameterCount))
                     return signature;
                 signature.GenericParameterCount = (int)genericParameterCount;
             }
 
-            uint parameterCount;
-            if (!reader.TryReadCompressedUInt32(out parameterCount))
+            if (!reader.TryReadCompressedUInt32(out uint parameterCount))
                 return signature;
 
             signature.ReturnType = TypeSignature.FromReader(image, reader);
+            
             for (int i = 0; i < parameterCount; i++)
-            {
-                signature.Parameters.Add(ParameterSignature.FromReader(image, reader));
-            }
+                signature.Parameters.Add(ParameterSignature.FromReader(image, reader, protection));
 
             if (readToEnd)
                 signature.ExtraData = reader.ReadToEnd();
@@ -72,7 +79,6 @@ namespace AsmResolver.Net.Signatures
         public IList<ParameterSignature> Parameters
         {
             get;
-            private set;
         }
 
         public TypeSignature ReturnType
@@ -81,10 +87,7 @@ namespace AsmResolver.Net.Signatures
             set;
         }
 
-        protected override TypeSignature TypeSignature
-        {
-            get { return ReturnType; }
-        }
+        protected override TypeSignature TypeSignature => ReturnType;
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

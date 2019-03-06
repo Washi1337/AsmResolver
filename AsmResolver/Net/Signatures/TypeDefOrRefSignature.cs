@@ -9,7 +9,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static TypeDefOrRefSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            var type = ReadTypeDefOrRef(image, reader);
+            return FromReader(image, reader, new RecursionProtection());
+        }
+        
+        public static TypeDefOrRefSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
+            var type = ReadTypeDefOrRef(image, reader, protection);
             return type == null ? null : new TypeDefOrRefSignature(type);
         }
 
@@ -20,16 +28,11 @@ namespace AsmResolver.Net.Signatures
 
         public TypeDefOrRefSignature(ITypeDefOrRef type, bool isValueType)
         {
-            if (type == null)
-                throw new ArgumentNullException("type");
-            Type = type;
+            Type = type ?? throw new ArgumentNullException(nameof(type));
             IsValueType = isValueType;
         }
 
-        public override ElementType ElementType
-        {
-            get { return IsValueType ? ElementType.ValueType : ElementType.Class; }
-        }
+        public override ElementType ElementType => IsValueType ? ElementType.ValueType : ElementType.Class;
 
         public ITypeDefOrRef Type
         {

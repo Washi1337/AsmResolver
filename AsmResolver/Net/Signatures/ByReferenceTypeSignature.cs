@@ -7,7 +7,15 @@ namespace AsmResolver.Net.Signatures
     {
         public static ByReferenceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
-            return new ByReferenceTypeSignature(TypeSignature.FromReader(image, reader));
+            return FromReader(image, reader, new RecursionProtection());
+        }        
+        
+        public static ByReferenceTypeSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
+            return new ByReferenceTypeSignature(TypeSignature.FromReader(image, reader, false, protection));
         }
 
         public ByReferenceTypeSignature(TypeSignature baseType)
@@ -15,14 +23,8 @@ namespace AsmResolver.Net.Signatures
         {
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.ByRef; }
-        }
+        public override ElementType ElementType => ElementType.ByRef;
 
-        public override string Name
-        {
-            get { return BaseType.Name + '&'; }
-        }
+        public override string Name => BaseType.Name + '&';
     }
 }

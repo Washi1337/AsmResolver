@@ -9,17 +9,24 @@ namespace AsmResolver.Net.Signatures
     {
         public static GenericInstanceMethodSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
+            return FromReader(image, reader, new RecursionProtection());
+        }
+
+        public static GenericInstanceMethodSignature FromReader(
+            MetadataImage image,
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
             var signature = new GenericInstanceMethodSignature
             {
-                Attributes = (CallingConventionAttributes)reader.ReadByte()
+                Attributes = (CallingConventionAttributes) reader.ReadByte()
             };
 
-            uint count;
-            if (!reader.TryReadCompressedUInt32(out count))
+            if (!reader.TryReadCompressedUInt32(out var count))
                 return signature;
 
             for (int i = 0; i < count; i++)
-                signature.GenericArguments.Add(TypeSignature.FromReader(image, reader));
+                signature.GenericArguments.Add(TypeSignature.FromReader(image, reader, false, protection));
 
             return signature;
         }
@@ -43,7 +50,6 @@ namespace AsmResolver.Net.Signatures
         public IList<TypeSignature> GenericArguments
         {
             get;
-            private set;
         }
 
         public override uint GetPhysicalLength(MetadataBuffer buffer)

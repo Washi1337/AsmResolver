@@ -7,10 +7,7 @@
             get;
         }
 
-        TypeSignature IHasTypeSignature.TypeSignature
-        {
-            get { return TypeSignature; }
-        }
+        TypeSignature IHasTypeSignature.TypeSignature => TypeSignature;
 
         public override string ToString()
         {

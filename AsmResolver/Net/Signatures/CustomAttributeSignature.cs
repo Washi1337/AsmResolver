@@ -8,30 +8,30 @@ namespace AsmResolver.Net.Signatures
 {
     public class CustomAttributeSignature : ExtendableBlobSignature
     {
-        public static CustomAttributeSignature FromReader(CustomAttribute parent, IBinaryStreamReader reader, bool readToEnd = false)
+        public static CustomAttributeSignature FromReader(
+            CustomAttribute parent,
+            IBinaryStreamReader reader,
+            bool readToEnd = false)
         {
             if (!reader.CanRead(sizeof (ushort)) || reader.ReadUInt16() != 0x0001)
                 throw new ArgumentException("Signature doesn't refer to a valid custom attribute signature.");
 
             var signature = new CustomAttributeSignature();
 
-            if (parent.Constructor != null)
+            if (parent.Constructor?.Signature is MethodSignature methodSignature)
             {
-                var methodSignature = parent.Constructor.Signature as MethodSignature;
-                if (methodSignature != null)
+                foreach (var parameter in methodSignature.Parameters)
                 {
-                    foreach (var parameter in methodSignature.Parameters)
-                    {
-                        signature.FixedArguments.Add(CustomAttributeArgument.FromReader(parent.Image, parameter.ParameterType, reader));
-                    }
+                    signature.FixedArguments.Add(CustomAttributeArgument.FromReader(
+                        parent.Image, 
+                        parameter.ParameterType,
+                        reader));
                 }
             }
 
             var namedElementCount = reader.CanRead(sizeof (ushort)) ? reader.ReadUInt16() : 0;
             for (uint i = 0; i < namedElementCount; i++)
-            {
                 signature.NamedArguments.Add(CustomAttributeNamedArgument.FromReader(parent.Image, reader));
-            }
 
             if (readToEnd)
                 signature.ExtraData = reader.ReadToEnd();

@@ -12,12 +12,11 @@ namespace AsmResolver.Net.Signatures
         {
             var signature = new PermissionSetSignature();
             
-            var signatureHeader = reader.ReadByte();
+            byte signatureHeader = reader.ReadByte();
             if (signatureHeader != '.')
                 throw new ArgumentException("Signature doesn't refer to a valid permission set signature.");
 
-            uint attributeCount;
-            if (!reader.TryReadCompressedUInt32(out attributeCount))
+            if (!reader.TryReadCompressedUInt32(out uint attributeCount))
                 return signature;
 
             for (int i = 0; i < attributeCount; i++)

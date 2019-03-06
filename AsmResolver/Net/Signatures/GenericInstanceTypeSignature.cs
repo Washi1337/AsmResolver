@@ -11,42 +11,41 @@ namespace AsmResolver.Net.Signatures
     {
         public static GenericInstanceTypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader)
         {
+            return FromReader(image, reader, new RecursionProtection());
+        }        
+        
+        public static GenericInstanceTypeSignature FromReader(
+            MetadataImage image, 
+            IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
             if (!reader.CanRead(sizeof (byte)))
                 return null;
 
-            long position = reader.Position;
-
-            var elementType = (ElementType)reader.ReadByte();
-            
-            var type = ReadTypeDefOrRef(image, reader);
+            var elementType = (ElementType) reader.ReadByte();
+            var type = ReadTypeDefOrRef(image, reader, protection);
 
             var signature = new GenericInstanceTypeSignature(type)
             {
                 IsValueType = elementType == ElementType.ValueType
             };
 
-            uint count;
-            if (!reader.TryReadCompressedUInt32(out count))
+            if (!reader.TryReadCompressedUInt32(out uint count))
                 return signature;
 
             for (int i = 0; i < count; i++)
-                signature.GenericArguments.Add(TypeSignature.FromReader(image, reader));
+                signature.GenericArguments.Add(TypeSignature.FromReader(image, reader, false, protection));
 
             return signature;
         }
 
         public GenericInstanceTypeSignature(ITypeDefOrRef genericType)
         {
-            if (genericType == null)
-                throw new ArgumentNullException("genericType");
-            GenericType = genericType;
+            GenericType = genericType ?? throw new ArgumentNullException(nameof(genericType));
             GenericArguments = new List<TypeSignature>();
         }
 
-        public override ElementType ElementType
-        {
-            get { return ElementType.GenericInst; }
-        }
+        public override ElementType ElementType => ElementType.GenericInst;
 
         public ITypeDefOrRef GenericType
         {
@@ -57,31 +56,16 @@ namespace AsmResolver.Net.Signatures
         public IList<TypeSignature> GenericArguments
         {
             get;
-            private set;
         }
 
-        public override string Name
-        {
-            get { return GenericType.Name; }
-        }
+        public override string Name => GenericType.Name;
 
-        public override string Namespace
-        {
-            get { return GenericType.Namespace; }
-        }
+        public override string Namespace => GenericType.Namespace;
 
-        public override string FullName
-        {
-            get
-            {
-                return base.FullName +'<' + string.Join(", ", GenericArguments.Select(x => x.FullName)) + '>';
-            }
-        }
+        public override string FullName =>
+            base.FullName + '<' + string.Join(", ", GenericArguments.Select(x => x.FullName)) + '>';
 
-        public override IResolutionScope ResolutionScope
-        {
-            get { return GenericType.ResolutionScope; }
-        }
+        public override IResolutionScope ResolutionScope => GenericType.ResolutionScope;
 
         public override ITypeDescriptor GetElementType()
         {
