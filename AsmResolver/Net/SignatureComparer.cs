@@ -172,20 +172,36 @@ namespace AsmResolver.Net
             if (type1 == null || type2 == null)
                 return false;
 
-            var typeDefOrRef = type1 as ITypeDefOrRef;
-            if (typeDefOrRef != null)
-                return Equals(typeDefOrRef, type2);
-
-            var typeSig = type1 as TypeSignature;
-            if (typeSig != null)
-                return Equals(typeSig, type2);
-
-            return false;
+            switch (type1)
+            {
+                case ITypeDefOrRef typeDefOrRef:
+                    return Equals(typeDefOrRef, type2);
+                case TypeSignature typeSig:
+                    return Equals(typeSig, type2);
+                default:
+                    return false;
+            }
         }
 
         public int GetHashCode(ITypeDescriptor obj)
         {
             return obj.FullName.GetHashCode();
+        }
+        
+        /// <summary>
+        /// Determines whether two types are considered equal according to their signature.
+        /// </summary>
+        /// <param name="type1">The first type to compare.</param>
+        /// <param name="type2">The second type to compare.</param>
+        /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
+        public bool Equals(InvalidTypeDefOrRef type1, InvalidTypeDefOrRef type2)
+        {            
+            if (type1 == null && type2 == null)
+                return true;
+            if (type1 == null || type2 == null)
+                return false;
+
+            return type1.Error == type2.Error;
         }
 
         /// <summary>
@@ -196,6 +212,9 @@ namespace AsmResolver.Net
         /// <returns><c>True</c> if the types are considered equal, <c>False</c> otherwise.</returns>
         public bool Equals(ITypeDefOrRef type1, ITypeDefOrRef type2)
         {
+            if (type1 is InvalidTypeDefOrRef errorType)
+                return Equals(errorType, type2 as InvalidTypeDefOrRef); 
+                    
             if (type1 == null && type2 == null)
                 return true;
             if (type1 == null || type2 == null)
@@ -299,6 +318,7 @@ namespace AsmResolver.Net
             return false;
         }
 
+        
         /// <summary>
         /// Determines whether two types are considered equal according to their signature.
         /// </summary>

@@ -26,7 +26,7 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
-        public TypeReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
+        internal TypeReference(MetadataImage image, MetadataRow<uint, uint, uint> row)
             : base(row.MetadataToken)
         {
             _image = image;

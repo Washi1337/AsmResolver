@@ -91,6 +91,7 @@
     <Compile Include="Cts\PropertyDefinitionTest.cs" />
     <Compile Include="Cts\ReferenceImporterTest.cs" />
     <Compile Include="Cts\TypeDefinitionTest.cs" />
+    <Compile Include="Cts\TypeSpecificationTest.cs" />
     <Compile Include="Emit\CompactNetAssemblyTest.cs" />
     <Compile Include="Emit\MemberClonerTest.cs" />
     <Compile Include="Emit\MetadataLockingTest.cs" />

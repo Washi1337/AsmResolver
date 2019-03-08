@@ -57,9 +57,19 @@ namespace AsmResolver.Net.Signatures
         }
 
         public GenericInstanceTypeSignature(ITypeDefOrRef genericType)
+            : this (genericType, Enumerable.Empty<TypeSignature>())
+        {
+        }
+
+        public GenericInstanceTypeSignature(ITypeDefOrRef genericType, params TypeSignature[] arguments)
+            : this (genericType, arguments.AsEnumerable())
+        {
+        }
+
+        public GenericInstanceTypeSignature(ITypeDefOrRef genericType, IEnumerable<TypeSignature> arguments)
         {
             GenericType = genericType ?? throw new ArgumentNullException(nameof(genericType));
-            GenericArguments = new List<TypeSignature>();
+            GenericArguments = new List<TypeSignature>(arguments);
         }
 
         /// <inheritdoc />

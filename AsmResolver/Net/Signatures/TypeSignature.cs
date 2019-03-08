@@ -35,7 +35,7 @@ namespace AsmResolver.Net.Signatures
         public static TypeSignature FromReader(MetadataImage image, IBinaryStreamReader reader, bool readToEnd, RecursionProtection protection)
         {
             var signature = ReadTypeSignature(image, reader, protection);
-            if (readToEnd)
+            if (signature != null && readToEnd)
                 signature.ExtraData = reader.ReadToEnd();
             return signature;
         }
@@ -132,14 +132,14 @@ namespace AsmResolver.Net.Signatures
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return null;
 
+            // If the resolved type is a TypeSpec, it can be a (malicious) loop to the same blob signature that we
+            // were coming from. 
             var token = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(codedIndex);
-            if (protection.TraversedTokens.Add(token))
-            {
-                image.TryResolveMember(token, out var type);
-                return type as ITypeDefOrRef;
-            }
-
-            return null;
+            if (token.TokenType == MetadataTokenType.TypeSpec && !protection.TraversedTokens.Add(token))
+                return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
+            
+            image.TryResolveMember(token, out var type);
+            return type as ITypeDefOrRef;
         }
 
         /// <summary>

@@ -20,16 +20,19 @@ namespace AsmResolver.Net.Cts
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
-        public TypeSpecification(MetadataImage image, MetadataRow<uint> row)
+        internal TypeSpecification(MetadataImage image, MetadataRow<uint> row)
             : base(row.MetadataToken)
         {
             _image = image;
             _signature = new TaggedLazyValue<RecursionProtection, TypeSignature>(protection =>
-                    TypeSignature.FromReader(
+                {
+                    protection.TraversedTokens.Add(row.MetadataToken);
+                    return TypeSignature.FromReader(
                         image,
                         image.Header.GetStream<BlobStream>().CreateBlobReader(row.Column1),
                         true,
-                        protection),
+                        protection);
+                },
                 RecursionProtection.Create);
             CustomAttributes = new CustomAttributeCollection(this);
         }
