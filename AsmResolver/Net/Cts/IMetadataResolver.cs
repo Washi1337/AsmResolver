@@ -88,7 +88,9 @@ namespace AsmResolver.Net.Cts
             if (assemblyDescriptor == null)
                 return (TypeDefinition)ThrowOrReturn(type);
 
-            var assembly = AssemblyResolver.ResolveAssembly(assemblyDescriptor);
+            var assembly = assemblyDescriptor as AssemblyDefinition;
+            if (assembly == null)
+                assembly = AssemblyResolver.ResolveAssembly(assemblyDescriptor);
             if (assembly == null)
                 return (TypeDefinition)ThrowOrReturn(type);
 
