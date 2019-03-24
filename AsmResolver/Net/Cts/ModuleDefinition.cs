@@ -16,7 +16,6 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<Guid> _mvid;
         private readonly LazyValue<Guid> _encId;
         private readonly LazyValue<Guid> _encBaseId;
-        private MetadataImage _image;
 
         public ModuleDefinition(string name)
             : base(new MetadataToken(MetadataTokenType.Module))
@@ -32,16 +31,16 @@ namespace AsmResolver.Net.Cts
         internal ModuleDefinition(MetadataImage image, MetadataRow<ushort, uint, uint, uint, uint> row)
             : base(row.MetadataToken)
         {
-            _image = image;
+            Assembly = image.Assembly;
             var header = image.Header;
             var stringStream = header.GetStream<StringStream>();
             var guidStream = header.GetStream<GuidStream>();
 
             Generation = row.Column1;
-           _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
-           _mvid = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column3));
-           _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
-           _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
+            _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
+            _mvid = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column3));
+            _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
+            _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
             TopLevelTypes = new ShallowTypeCollection(this, header.GetStream<TableStream>().GetTable<TypeDefinitionTable>());
             CustomAttributes = new CustomAttributeCollection(this);
         }
