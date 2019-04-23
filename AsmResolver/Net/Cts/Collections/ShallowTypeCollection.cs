@@ -1,31 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.Net.Metadata;
 
 namespace AsmResolver.Net.Cts.Collections
 {
     public class ShallowTypeCollection : MemberCollection<ModuleDefinition, TypeDefinition>
     {
-        private readonly TypeDefinitionTable _table;
-        
-        public ShallowTypeCollection(ModuleDefinition owner, TypeDefinitionTable table) 
+        private readonly TypeDefinitionTable _typeTable;
+        private readonly ICollection<uint> _topLevelTypeTokens;
+
+        internal ShallowTypeCollection(ModuleDefinition owner, TypeDefinitionTable table, ICollection<uint> topLevelTypeTokens) 
             : base(owner)
         {
-            if (table == null) 
-                throw new ArgumentNullException("table");
-            _table = table;
+            _typeTable = table ?? throw new ArgumentNullException(nameof(table));
+            _topLevelTypeTokens = topLevelTypeTokens;
         }
 
         protected override void Initialize()
         {
             base.Initialize();
-            foreach (var row in _table)
+            foreach (var typeRid in _topLevelTypeTokens)
             {
-                var member = (TypeDefinition) _table.GetMemberFromRow(Owner.Image, row);
-                if (member.DeclaringType == null)
-                {
-                    SetOwner(member, Owner);
-                    Items.Add(member);
-                }
+                if (!_typeTable.TryGetRow((int) (typeRid - 1), out var typeRow))
+                    continue;
+                
+                var member = (TypeDefinition) _typeTable.GetMemberFromRow(Owner.Image, typeRow);
+                Items.Add(member);
+                SetOwner(member, Owner);
             }
         }
 

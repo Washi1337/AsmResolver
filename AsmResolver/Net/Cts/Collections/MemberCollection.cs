@@ -9,9 +9,7 @@ namespace AsmResolver.Net.Cts.Collections
     {
         protected MemberCollection(TOwner owner)
         {
-            if (owner == null)
-                throw new ArgumentNullException("owner");
-            Owner = owner;
+            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
         }
 
         public TOwner Owner
@@ -27,7 +25,7 @@ namespace AsmResolver.Net.Cts.Collections
         protected void AssertHasNoOwner(TMember item)
         {
             if (item == null)
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             if (GetOwner(item) != null)
                 throw new InvalidOperationException("Cannot add member when it is already present in another collection.");
         }
