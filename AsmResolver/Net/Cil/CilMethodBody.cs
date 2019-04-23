@@ -390,7 +390,10 @@ namespace AsmResolver.Net.Cil
                     return ThisParameter;
                 index--;
             }
-            return Method.Signature.Parameters[index];
+
+            return index >= 0 && index < Method.Signature.Parameters.Count 
+                ? Method.Signature.Parameters[index] 
+                : null;
         }
     }
 }
