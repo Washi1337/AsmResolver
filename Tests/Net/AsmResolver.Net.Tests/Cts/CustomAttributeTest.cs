@@ -126,7 +126,7 @@ namespace AsmResolver.Tests.Net.Cts
                     typeof(DesignerAttribute).GetConstructor(new[] {typeof(Type)})),
                 new CustomAttributeSignature(new[]
                 {
-                    new CustomAttributeArgument(image.TypeSystem.Type,
+                    new CustomAttributeArgument(importer.ImportTypeSignature(typeof(Type)),
                         new ElementSignature(argument))
                 }));
             
