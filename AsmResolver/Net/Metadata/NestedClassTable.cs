@@ -2,8 +2,13 @@
 
 namespace AsmResolver.Net.Metadata
 {
-    public class NestedClassTable : MetadataTable<MetadataRow<uint, uint>>
+    public class NestedClassTable : SortedMetadataTable<MetadataRow<uint, uint>>
     {
+        public NestedClassTable() 
+            : base(0)
+        {
+        }
+
         public override MetadataTokenType TokenType
         {
             get { return MetadataTokenType.NestedClass; }
