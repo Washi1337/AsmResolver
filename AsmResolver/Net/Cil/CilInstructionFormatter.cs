@@ -25,7 +25,7 @@ namespace AsmResolver.Net.Cil
             string minimal = FormatLabel(instruction.Offset) + ": " + FormatOpCode(instruction.OpCode);
             return instruction.Operand == null
                 ? minimal
-                : minimal + FormatOperand(instruction.OpCode.OperandType, instruction.Operand);
+                : minimal + " " + FormatOperand(instruction.OpCode.OperandType, instruction.Operand);
         }
 
         public virtual string FormatLabel(int offset)

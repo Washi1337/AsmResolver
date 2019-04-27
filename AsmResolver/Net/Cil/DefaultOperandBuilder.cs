@@ -63,7 +63,10 @@ namespace AsmResolver.Net.Cil
 
         public int GetParameterIndex(ParameterSignature parameter)
         {
-            return _methodBody.Method.Signature.Parameters.IndexOf(parameter) + (_methodBody.Method.Signature.HasThis ? 1 : 0);
+            int parameterIndex = _methodBody.Method.Signature.Parameters.IndexOf(parameter);
+            if (parameterIndex == -1)
+                return 0;
+            return parameterIndex + (_methodBody.Method.Signature.HasThis ? 1 : 0);
         }
     }
 }

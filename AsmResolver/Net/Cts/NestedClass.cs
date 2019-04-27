@@ -71,5 +71,10 @@ namespace AsmResolver.Net.Cts
                     _class.Value.DeclaringType = value;
             }
         }
+
+        public override string ToString()
+        {
+            return (EnclosingClass?.FullName ?? "?") + "+" + (Class?.Name ?? "?");
+        }
     }
 }

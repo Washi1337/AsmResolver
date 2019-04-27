@@ -99,6 +99,7 @@
     <Compile Include="Net\Cil\CilRawMethodBody.cs" />
     <Compile Include="Net\Cil\CilRawSmallMethodBody.cs" />
     <Compile Include="Net\Cil\ICilInstructionFormatter.cs" />
+    <Compile Include="Net\Cts\Collections\NestedClassCollection.cs" />
     <Compile Include="Net\Cts\Collections\ShallowTypeCollection.cs" />
     <Compile Include="Net\Cts\InvalidTypeDefOrRef.cs" />
     <Compile Include="Net\Cts\IReferenceImporter.cs" />

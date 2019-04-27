@@ -16,7 +16,8 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<Guid> _mvid;
         private readonly LazyValue<Guid> _encId;
         private readonly LazyValue<Guid> _encBaseId;
-
+        private readonly LazyValue<Collection<TypeDefinition>> _topLevelTypes;
+        
         public ModuleDefinition(string name)
             : base(new MetadataToken(MetadataTokenType.Module))
         {
@@ -24,7 +25,8 @@ namespace AsmResolver.Net.Cts
             _mvid = new LazyValue<Guid>();
             _encId = new LazyValue<Guid>();
             _encBaseId = new LazyValue<Guid>();
-            TopLevelTypes = new DelegatedMemberCollection<ModuleDefinition, TypeDefinition>(this, GetTypeOwner, SetTypeOwner);
+            _topLevelTypes = new LazyValue<Collection<TypeDefinition>>(
+                new DelegatedMemberCollection<ModuleDefinition, TypeDefinition>(this, GetTypeOwner, SetTypeOwner));
             CustomAttributes = new CustomAttributeCollection(this);
         }
 
@@ -35,14 +37,18 @@ namespace AsmResolver.Net.Cts
             var header = image.Header;
             var stringStream = header.GetStream<StringStream>();
             var guidStream = header.GetStream<GuidStream>();
+            var tableStream = header.GetStream<TableStream>();
 
             Generation = row.Column1;
             _name = new LazyValue<string>(() => stringStream.GetStringByOffset(row.Column2));
             _mvid = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column3));
             _encId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column4));
             _encBaseId = new LazyValue<Guid>(() => guidStream.GetGuidByOffset(row.Column5));
-            TopLevelTypes = new ShallowTypeCollection(this, header.GetStream<TableStream>().GetTable<TypeDefinitionTable>());
             CustomAttributes = new CustomAttributeCollection(this);
+            _topLevelTypes = new LazyValue<Collection<TypeDefinition>>(() =>
+                new ShallowTypeCollection(this,
+                    (TypeDefinitionTable) tableStream.GetTable(MetadataTokenType.TypeDef),
+                    image.GetTopLevelTypes()));
         }
 
         /// <inheritdoc />
@@ -110,10 +116,7 @@ namespace AsmResolver.Net.Cts
         /// Gets a collection of the top-level type definitions declared in this module; that is, all types that are not
         /// nested into another types.
         /// </summary>
-        public Collection<TypeDefinition> TopLevelTypes
-        {
-            get;
-        }
+        public Collection<TypeDefinition> TopLevelTypes => _topLevelTypes.Value;
 
         /// <summary>
         /// Gets a collection of all types declared in this module. This includes both top level types as well as
