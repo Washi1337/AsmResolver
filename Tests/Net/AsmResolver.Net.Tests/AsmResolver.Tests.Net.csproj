@@ -89,6 +89,7 @@
     <Compile Include="Cts\MetadataImageTest.cs" />
     <Compile Include="Cts\MethodDefinitionTest.cs" />
     <Compile Include="Cts\ModuleDefinitionTest.cs" />
+    <Compile Include="Cts\ParameterDefinitionTest.cs" />
     <Compile Include="Cts\PropertyDefinitionTest.cs" />
     <Compile Include="Cts\ReferenceImporterTest.cs" />
     <Compile Include="Cts\TypeDefinitionTest.cs" />

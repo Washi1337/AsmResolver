@@ -837,6 +837,10 @@ namespace AsmResolver.Net.Emit
             // Add field marshal if present.
             if (parameter.FieldMarshal != null)
                 AddFieldMarshal(parameter.FieldMarshal);
+
+            // Add constant if present.
+            if (parameter.Constant != null)
+                AddConstant(parameter.Constant);
             
             AddCustomAttributes(parameter);
         }
