@@ -2,8 +2,13 @@
 
 namespace AsmResolver.Net.Metadata
 {
-    public class GenericParameterTable : MetadataTable<MetadataRow<ushort, GenericParameterAttributes, uint, uint>>
+    public class GenericParameterTable : SortedMetadataTable<MetadataRow<ushort, GenericParameterAttributes, uint, uint>>
     {
+        public GenericParameterTable() 
+            : base(2)
+        {
+        }
+
         public override MetadataTokenType TokenType
         {
             get { return MetadataTokenType.GenericParam; }
