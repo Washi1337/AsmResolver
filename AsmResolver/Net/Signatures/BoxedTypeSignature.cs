@@ -40,5 +40,10 @@ namespace AsmResolver.Net.Signatures
 
         /// <inheritdoc />
         public override ElementType ElementType => ElementType.Boxed;
+
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            return new BoxedTypeSignature(BaseType.InstantiateGenericTypes(context));
+        }
     }
 }

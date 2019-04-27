@@ -48,5 +48,10 @@ namespace AsmResolver.Net.Signatures
 
         /// <inheritdoc />
         public override string Name => BaseType.Name + "[]";
+
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            return new SzArrayTypeSignature(BaseType.InstantiateGenericTypes(context));
+        }
     }
 }

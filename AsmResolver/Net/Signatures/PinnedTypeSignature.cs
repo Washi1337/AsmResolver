@@ -43,6 +43,11 @@ namespace AsmResolver.Net.Signatures
         /// <inheritdoc />
         public override ElementType ElementType => ElementType.Pinned;
 
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            return new PinnedTypeSignature(BaseType.InstantiateGenericTypes(context));
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

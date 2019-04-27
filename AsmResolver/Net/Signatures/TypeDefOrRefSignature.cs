@@ -83,6 +83,13 @@ namespace AsmResolver.Net.Signatures
             return Type;
         }
 
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            if (Type is TypeSpecification typeSpec)
+                return typeSpec.Signature.InstantiateGenericTypes(context);
+            return this;
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

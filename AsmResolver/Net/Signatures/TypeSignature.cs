@@ -213,6 +213,8 @@ namespace AsmResolver.Net.Signatures
             return this;
         }
 
+        public abstract TypeSignature InstantiateGenericTypes(IGenericContext context);
+
         public override string ToString()
         {
             return FullName;

@@ -24,5 +24,10 @@ namespace AsmResolver.Net.Signatures
         }
 
         public override ElementType ElementType => ElementType.Sentinel;
+        
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            return new SentinelTypeSignature(BaseType.InstantiateGenericTypes(context));
+        }
     }
 }
