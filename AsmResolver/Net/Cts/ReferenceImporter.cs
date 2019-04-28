@@ -400,7 +400,10 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public virtual TypeSignature ImportTypeSignature(ITypeDefOrRef typeDefOrRef)
         {
-            return new TypeDefOrRefSignature(ImportType(typeDefOrRef));
+            return new TypeDefOrRefSignature(ImportType(typeDefOrRef))
+            {
+                IsValueType = typeDefOrRef.IsValueType
+            };
         }
 
         /// <inheritdoc />

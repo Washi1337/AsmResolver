@@ -592,7 +592,10 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public TypeSignature ToTypeSignature()
         {
-            return new TypeDefOrRefSignature(this);
+            return new TypeDefOrRefSignature(this)
+            {
+                IsValueType = IsValueType
+            };
         }
 
         /// <inheritdoc />

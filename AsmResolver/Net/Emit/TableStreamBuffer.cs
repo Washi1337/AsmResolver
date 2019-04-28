@@ -1275,8 +1275,8 @@ namespace AsmResolver.Net.Emit
         public override MetadataStream CreateStream()
         {
             _tableStream.ValidBitVector = _tableStream.ComputeValidBitVector();
-            
-            foreach (var table in _tableStream.GetPresentTables())
+
+            foreach (var table in _tableStream.GetPresentTables().Where(t => t.IsSorted))
                 table.UpdateTokens();
             
             for (var i = 0; i < _fixups.Count; i++) 
