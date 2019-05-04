@@ -133,6 +133,10 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public TypeSignature ToTypeSignature()
         {
+            var corlibType = Image?.TypeSystem.GetMscorlibType(this);
+            if (corlibType != null)
+                return corlibType;
+
             return new TypeDefOrRefSignature(this)
             {
                 IsValueType = IsValueType
