@@ -77,6 +77,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Cil\CilInstructionCollectionTest.cs" />
     <Compile Include="Cil\CilInstructionComparer.cs" />
     <Compile Include="Cil\CilMethodBodyTest.cs" />
     <Compile Include="Cts\AssemblyDefinitionTest.cs" />
