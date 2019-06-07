@@ -1,9 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using AsmResolver;
 using AsmResolver.Net;
 using AsmResolver.Net.Cil;
 using AsmResolver.Net.Cts;

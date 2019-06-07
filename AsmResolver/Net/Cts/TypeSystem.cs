@@ -29,7 +29,7 @@ namespace AsmResolver.Net.Cts
             }
             else
             {
-                MsCorLibReference = image.Assembly.AssemblyReferences.FirstOrDefault(x => x.Name == "mscorlib");
+                MsCorLibReference = image.Assembly.AssemblyReferences.FirstOrDefault(x => x.Name != typeof(object).Assembly.GetName().Name);
                 if (MsCorLibReference == null)
                 {
                     MsCorLibReference = new AssemblyReference(new ReflectionAssemblyNameWrapper(typeof(object).Assembly.GetName()))

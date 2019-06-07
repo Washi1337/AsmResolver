@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows.Forms;
+using System.Xml;
 using AsmResolver.Net;
 using AsmResolver.Net.Cts;
 using AsmResolver.Net.Metadata;
@@ -70,7 +69,7 @@ namespace AsmResolver.Tests.Net.Cts
             var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
             var importer = new ReferenceImporter(image);
 
-            var assemblyName = typeof(Form).Assembly.GetName();
+            var assemblyName = typeof(XmlReader).Assembly.GetName();
 
             var wrapper = new ReflectionAssemblyNameWrapper(assemblyName);
             var newReference = importer.ImportAssembly(assemblyName);
@@ -108,7 +107,7 @@ namespace AsmResolver.Tests.Net.Cts
             const string typeNamespace = "System.Windows.Forms";
             const string typeName = "Form";
 
-            var assemblyDescr = new ReflectionAssemblyNameWrapper(typeof(Form).Assembly.GetName());
+            var assemblyDescr = new ReflectionAssemblyNameWrapper(typeof(XmlReader).Assembly.GetName());
             var reference = new TypeReference(importer.ImportAssembly(assemblyDescr), typeNamespace, typeName);
 
             var newReference = importer.ImportType(reference);
@@ -130,10 +129,10 @@ namespace AsmResolver.Tests.Net.Cts
             var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
             var importer = new ReferenceImporter(image);
 
-            var assemblyDescr = new ReflectionAssemblyNameWrapper(typeof(Form).Assembly.GetName());
+            var assemblyDescr = new ReflectionAssemblyNameWrapper(typeof(XmlReader).Assembly.GetName());
 
-            var expected = new TypeReference(new AssemblyReference(assemblyDescr), typeof(Form).Namespace, typeof(Form).Name);
-            var newReference = importer.ImportType(typeof(Form));
+            var expected = new TypeReference(new AssemblyReference(assemblyDescr), typeof(XmlReader).Namespace, typeof(XmlReader).Name);
+            var newReference = importer.ImportType(typeof(XmlReader));
 
             Assert.Equal(expected, newReference, _comparer);
             Assert.Equal(image, newReference.Image);
@@ -209,7 +208,7 @@ namespace AsmResolver.Tests.Net.Cts
             var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
             var importer = new ReferenceImporter(image);
 
-            var signature = CreateTypeDefOrRef(typeof(Form));
+            var signature = CreateTypeDefOrRef(typeof(XmlReader));
 
             var newSignature = importer.ImportTypeSignature(signature);
 
@@ -253,7 +252,7 @@ namespace AsmResolver.Tests.Net.Cts
         [Fact]
         public void ImportArrayType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             var arrayType = new ArrayTypeSignature(baseType);
 
             arrayType.Dimensions.Add(new ArrayDimension(null, 0));
@@ -273,21 +272,21 @@ namespace AsmResolver.Tests.Net.Cts
         [Fact]
         public void ImportBoxedType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             TestTypeSpecification(new BoxedTypeSignature(baseType), baseType.Type);
         }
 
         [Fact]
         public void ImportByReferenceType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             TestTypeSpecification(new ByReferenceTypeSignature(baseType), baseType.Type);
         }
 
         [Fact]
         public void ImportOptionalModifierType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             var modifierType = CreateTypeReference(typeof(IsVolatile));
             var modOptType = new OptionalModifierSignature(modifierType, baseType);
             var newType = TestTypeSpecification(modOptType, baseType.Type);
@@ -298,21 +297,21 @@ namespace AsmResolver.Tests.Net.Cts
         [Fact]
         public void ImportPinnedType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             TestTypeSpecification(new PinnedTypeSignature(baseType), baseType.Type);
         }
 
         [Fact]
         public void ImportPointerType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             TestTypeSpecification(new PointerTypeSignature(baseType), baseType.Type);
         }
 
         [Fact]
         public void ImportRequiredModifierType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             var modifierType = CreateTypeReference(typeof(IsVolatile));
             var modOptType = new RequiredModifierSignature(modifierType, baseType);
             var newType = TestTypeSpecification(modOptType, baseType.Type);
@@ -323,14 +322,14 @@ namespace AsmResolver.Tests.Net.Cts
         [Fact]
         public void ImportSentinelType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             TestTypeSpecification(new SentinelTypeSignature(baseType), baseType.Type);
         }
 
         [Fact]
         public void ImportSzArrayType()
         {
-            var baseType = CreateTypeDefOrRef(typeof(Form));
+            var baseType = CreateTypeDefOrRef(typeof(XmlReader));
             TestTypeSpecification(new SzArrayTypeSignature(baseType), baseType.Type);
         }
 
@@ -342,7 +341,7 @@ namespace AsmResolver.Tests.Net.Cts
             var importer = new ReferenceImporter(image);
 
             var signature = new GenericInstanceTypeSignature(CreateTypeReference(typeof(List<>)));
-            var genericArg = CreateTypeDefOrRef(typeof(Form));
+            var genericArg = CreateTypeDefOrRef(typeof(XmlReader));
             signature.GenericArguments.Add(genericArg);
 
             var newSignature = importer.ImportTypeSignature(signature);
@@ -367,10 +366,10 @@ namespace AsmResolver.Tests.Net.Cts
             var importer = new ReferenceImporter(image);
 
             var signature = new GenericInstanceTypeSignature(CreateTypeReference(typeof(List<>)));
-            var genericArg = CreateTypeDefOrRef(typeof(Form));
+            var genericArg = CreateTypeDefOrRef(typeof(XmlReader));
             signature.GenericArguments.Add(genericArg);
 
-            var newSignature = importer.ImportTypeSignature(typeof(List<Form>));
+            var newSignature = importer.ImportTypeSignature(typeof(List<XmlReader>));
             
             Assert.NotSame(signature, newSignature);
             Assert.Equal(signature, newSignature, _comparer);
@@ -393,7 +392,7 @@ namespace AsmResolver.Tests.Net.Cts
             var image = assembly.NetDirectory.MetadataHeader.LockMetadata();
             var importer = new ReferenceImporter(image);
 
-            var typeSpec = new TypeSpecification(CreateTypeDefOrRef(typeof(Form)));
+            var typeSpec = new TypeSpecification(CreateTypeDefOrRef(typeof(XmlReader)));
 
             var newSpec = importer.ImportType(typeSpec);
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Windows.Forms;
+using System.Xml;
 using AsmResolver.Net;
 using AsmResolver.Net.Cil;
 using AsmResolver.Net.Cts;
@@ -662,11 +662,11 @@ namespace AsmResolver.Tests.Net.Cil
 
             var instructions = methodBody.Instructions;
 
-            var simpleType = importer.ImportType(typeof(Form));
+            var simpleType = importer.ImportType(typeof(XmlReader));
             instructions.Add(CilInstruction.Create(CilOpCodes.Ldtoken, simpleType));
             instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
 
-            var genericType = importer.ImportType(typeof(List<Form>));
+            var genericType = importer.ImportType(typeof(List<XmlReader>));
             instructions.Add(CilInstruction.Create(CilOpCodes.Ldtoken, genericType));
             instructions.Add(CilInstruction.Create(CilOpCodes.Pop));
 
