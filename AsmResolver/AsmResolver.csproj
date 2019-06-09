@@ -110,6 +110,7 @@
     <Compile Include="Net\Emit\CompactNetAssemblyBuilder.cs" />
     <Compile Include="Net\Emit\CompactNetTextContents.cs" />
     <Compile Include="Net\Emit\GuidStreamBuffer.cs" />
+    <Compile Include="Net\Emit\IMetadataBuilder.cs" />
     <Compile Include="Net\Emit\MetadataBuffer.cs" />
     <Compile Include="Net\Emit\MemberNotImportedException.cs" />
     <Compile Include="Net\Emit\MetadataDirectoryBuffer.cs" />

@@ -188,20 +188,24 @@ namespace AsmResolver.Net
 
         public IDictionary<IMetadataMember, MetadataToken> UnlockMetadata()
         {
+            return UnlockMetadata(new DefaultMetadataBuilder());
+        }
+        
+        public IDictionary<IMetadataMember, MetadataToken> UnlockMetadata(IMetadataBuilder builder)
+        {
             if (!IsLocked)
                 throw new InvalidOperationException("Cannot unlock the metadata if it has not already been locked.");
             
             var image = Image;
-            var buffer = new MetadataBuffer(image);
             
-            // Add assembly to buffer.
-            buffer.TableStreamBuffer.AddAssembly(image.Assembly);
+            // Construct new metadata streams.
+            var buffer = builder.Rebuild(image);
+            
+            // Unlock metadata.
+            Image = null;
             
             // Create resources.
             NetDirectory.ResourcesManifest = buffer.ResourcesBuffer.CreateDirectory();
-
-            // Unlock metadata.
-            Image = null;
             
             // Replace old streams with new buffers.
             var buffers = new MetadataStreamBuffer[]
@@ -233,6 +237,7 @@ namespace AsmResolver.Net
                 : 0u;
 
             return newTokenMapping;
+            
         }
 
         public override uint GetPhysicalLength()
@@ -264,5 +269,4 @@ namespace AsmResolver.Net
         }
 
     }
-
 }
