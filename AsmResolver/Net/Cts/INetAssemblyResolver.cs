@@ -55,9 +55,10 @@ namespace AsmResolver.Net.Cts
 
         private static IEnumerable<GacDirectory> GetGacDirectories(string assemblyDirectory, bool is40)
         {
-            return
-                Directory.EnumerateDirectories(assemblyDirectory)
-                    .Select(directory => new GacDirectory(directory, is40 ? "v4.0_" : string.Empty));
+            return Directory.Exists(assemblyDirectory)
+                ? Directory.EnumerateDirectories(assemblyDirectory)
+                    .Select(directory => new GacDirectory(directory, is40 ? "v4.0_" : string.Empty))
+                : Enumerable.Empty<GacDirectory>();
         }
 
         public event AssemblyResolutionEventHandler AssemblyResolutionFailed;
