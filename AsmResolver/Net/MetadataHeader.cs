@@ -201,41 +201,51 @@ namespace AsmResolver.Net
             // Construct new metadata streams.
             var buffer = builder.Rebuild(image);
             
-            // Unlock metadata.
-            Image = null;
-            
             // Create resources.
             NetDirectory.ResourcesManifest = buffer.ResourcesBuffer.CreateDirectory();
             
-            // Replace old streams with new buffers.
-            var buffers = new MetadataStreamBuffer[]
+            // Serialize new streams.
+            var newStreams = new MetadataStreamBuffer[]
             {
                 buffer.TableStreamBuffer,
                 buffer.BlobStreamBuffer,
                 buffer.GuidStreamBuffer,
                 buffer.StringStreamBuffer,
                 buffer.UserStringStreamBuffer
-            };
+            }.ToDictionary(x => x, x => x.CreateStream());
 
-            foreach (var streamBuffer in buffers)
+            // Determine new entrypoint token.
+            var newTokenMapping = buffer.TableStreamBuffer.GetNewTokenMapping();
+            uint entrypointToken;
+            if (image.ManagedEntrypoint == null)
             {
-                var header = StreamHeaders.FirstOrDefault(x => x.Name == streamBuffer.Name);
+                entrypointToken = 0u;
+            }
+            else
+            {
+                if (newTokenMapping.TryGetValue(image.ManagedEntrypoint, out var token))
+                    entrypointToken = token.ToUInt32();
+                else
+                    throw new MemberNotImportedException(image.ManagedEntrypoint);
+            }
+
+            // Unlock metadata, commit changes to streams.
+            Image = null;
+            foreach (var entry in newStreams)
+            {
+                var header = StreamHeaders.FirstOrDefault(x => x.Name == entry.Key.Name);
 
                 if (header == null)
                 {
-                    header = new MetadataStreamHeader(streamBuffer.Name);
+                    header = new MetadataStreamHeader(entry.Key.Name);
                     StreamHeaders.Add(header);
                 }
 
-                header.Stream = streamBuffer.CreateStream();
+                header.Stream = entry.Value;
             }
 
             // Update managed entrypoint.
-            var newTokenMapping = buffer.TableStreamBuffer.GetNewTokenMapping();
-            NetDirectory.EntryPointToken = image.ManagedEntrypoint != null
-                ? newTokenMapping[image.ManagedEntrypoint].ToUInt32()
-                : 0u;
-
+            NetDirectory.EntryPointToken = entrypointToken;
             return newTokenMapping;
             
         }

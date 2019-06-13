@@ -97,6 +97,7 @@
     <Compile Include="Cts\TypeSpecificationTest.cs" />
     <Compile Include="Emit\CompactNetAssemblyTest.cs" />
     <Compile Include="Emit\MemberClonerTest.cs" />
+    <Compile Include="Emit\MetadataBuilderTest.cs" />
     <Compile Include="Emit\MetadataLockingTest.cs" />
     <Compile Include="Emit\TemporaryDirectoryFixture.cs" />
     <Compile Include="MetadataLockTest.cs" />
