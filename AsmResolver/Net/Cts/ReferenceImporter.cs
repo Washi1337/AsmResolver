@@ -11,7 +11,6 @@ namespace AsmResolver.Net.Cts
     /// </summary>
     public class ReferenceImporter : IReferenceImporter
     {
-        private readonly MetadataImage _image;
         private readonly SignatureComparer _signatureComparer;
         private readonly TypeSystem _typeSystem;
 
@@ -22,9 +21,17 @@ namespace AsmResolver.Net.Cts
 
         public ReferenceImporter(MetadataImage image, SignatureComparer signatureComparer)
         {
-            _image = image ?? throw new ArgumentNullException(nameof(image));
+            TargetImage = image ?? throw new ArgumentNullException(nameof(image));
             _signatureComparer = signatureComparer;
             _typeSystem = image.TypeSystem;
+        }
+
+        /// <summary>
+        /// Gets the image that each member is imported into.
+        /// </summary>
+        public MetadataImage TargetImage
+        {
+            get;
         }
 
         #region Assembly
@@ -38,13 +45,13 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public virtual AssemblyReference ImportAssembly(IAssemblyDescriptor assemblyInfo)
         {
-            var reference = _image.Assembly.AssemblyReferences.FirstOrDefault(x =>
+            var reference = TargetImage.Assembly.AssemblyReferences.FirstOrDefault(x =>
                 _signatureComparer.Equals(x, assemblyInfo));
 
             if (reference == null)
             {
                 reference = new AssemblyReference(assemblyInfo);
-                _image.Assembly.AssemblyReferences.Add(reference);
+                TargetImage.Assembly.AssemblyReferences.Add(reference);
             }
             return reference;
         }
@@ -128,7 +135,7 @@ namespace AsmResolver.Net.Cts
         /// definition was already present in the target image.</returns>
         public virtual ITypeDefOrRef ImportType(TypeDefinition definition)
         {
-            if (definition.Image == _image)
+            if (definition.Image == TargetImage)
                 return definition;
 
             var resolutionScope = definition.DeclaringType != null
@@ -172,7 +179,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public virtual IMemberReference ImportField(FieldDefinition field)
         {
-            if (field.Image == _image)
+            if (field.Image == TargetImage)
                 return field;
 
             return new MemberReference(
@@ -232,7 +239,7 @@ namespace AsmResolver.Net.Cts
         /// definition was already present in the target image.</returns>
         public virtual IMethodDefOrRef ImportMethod(MethodDefinition definition)
         {
-            if (definition.Image == _image)
+            if (definition.Image == TargetImage)
                 return definition;
 
             return new MemberReference(
@@ -244,7 +251,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public virtual MethodSpecification ImportMethod(MethodSpecification specification)
         {
-            if (specification.Image == _image)
+            if (specification.Image == TargetImage)
                 return specification;
 
             return new MethodSpecification(ImportMethod(specification.Method),
@@ -271,7 +278,7 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public virtual StandAloneSignature ImportStandAloneSignature(StandAloneSignature signature)
         {
-            return new StandAloneSignature(ImportCallingConventionSignature(signature.Signature), _image);
+            return new StandAloneSignature(ImportCallingConventionSignature(signature.Signature), TargetImage);
         }
 
         /// <inheritdoc />
@@ -514,7 +521,7 @@ namespace AsmResolver.Net.Cts
 
         private TypeSignature ImportCorlibTypeSignature(MsCorLibTypeSignature corlibType)
         {
-            return _image.TypeSystem.GetMscorlibType(corlibType);
+            return TargetImage.TypeSystem.GetMscorlibType(corlibType);
         }
 
         #endregion
@@ -689,7 +696,7 @@ namespace AsmResolver.Net.Cts
                     return ImportType(typeRef);
                 case ModuleReference moduleRef:
                     return ImportModule(moduleRef);
-                case ModuleDefinition moduleDef when _image.Assembly.Modules[0].Name == scope.Name:
+                case ModuleDefinition moduleDef when TargetImage.Assembly.Modules[0].Name == scope.Name:
                     return moduleDef;
                 default:
                     throw new NotSupportedException();
@@ -700,9 +707,9 @@ namespace AsmResolver.Net.Cts
         public virtual ModuleReference ImportModule(ModuleReference reference)
         {
             var newReference =
-                _image.Assembly.ModuleReferences.FirstOrDefault(x => _signatureComparer.Equals(x, reference));
+                TargetImage.Assembly.ModuleReferences.FirstOrDefault(x => _signatureComparer.Equals(x, reference));
             if (newReference == null)
-                _image.Assembly.ModuleReferences.Add(newReference = new ModuleReference(reference.Name));
+                TargetImage.Assembly.ModuleReferences.Add(newReference = new ModuleReference(reference.Name));
             return newReference;
         }
 
