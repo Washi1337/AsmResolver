@@ -8,7 +8,13 @@ namespace AsmResolver.Net.Cts
     /// <summary>
     /// Represents a field definition that is declared in a type.
     /// </summary>
-    public class FieldDefinition : MetadataMember<MetadataRow<FieldAttributes, uint, uint>>, ICallableMemberReference, IHasConstant, IHasFieldMarshal, IMemberForwarded
+    public class FieldDefinition : 
+        MetadataMember<MetadataRow<FieldAttributes, uint, uint>>,
+        IMemberDefinition,
+        ICallableMemberReference, 
+        IHasConstant, 
+        IHasFieldMarshal, 
+        IMemberForwarded
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<FieldSignature> _signature;
@@ -369,6 +375,20 @@ namespace AsmResolver.Net.Cts
         public override string ToString()
         {
             return FullName;
+        }
+
+        public bool IsAccessibleFromType(TypeDefinition type)
+        {
+            if (!DeclaringType.IsAccessibleFromType(type))
+                return false;
+            
+            var comparer = new SignatureComparer();
+            bool isInSameAssembly = comparer.Equals(DeclaringType.Module, type.Module);
+
+            return IsPublic
+                   || isInSameAssembly && IsAssembly
+                   || comparer.Equals(DeclaringType, type);
+            // TODO: check if in the same family of declaring types.
         }
 
         IMetadataMember IResolvable.Resolve()

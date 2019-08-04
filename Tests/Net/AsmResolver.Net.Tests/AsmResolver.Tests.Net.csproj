@@ -80,6 +80,7 @@
     <Compile Include="Cil\CilInstructionCollectionTest.cs" />
     <Compile Include="Cil\CilInstructionComparer.cs" />
     <Compile Include="Cil\CilMethodBodyTest.cs" />
+    <Compile Include="Cts\AccessibilityTest.cs" />
     <Compile Include="Cts\AssemblyDefinitionTest.cs" />
     <Compile Include="Cts\AssemblyReferenceTest.cs" />
     <Compile Include="Cts\CustomAttributeTest.cs" />

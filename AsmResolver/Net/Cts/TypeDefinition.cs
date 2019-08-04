@@ -14,7 +14,12 @@ namespace AsmResolver.Net.Cts
     /// Represents a type defined in a .NET metadata image. A type is the base of every .NET image and may contain
     /// methods, fields, properties, events and other nested types.
     /// </summary>
-    public class TypeDefinition : MetadataMember<MetadataRow<TypeAttributes, uint, uint, uint, uint, uint>>, ITypeDefOrRef, IHasSecurityAttribute, IGenericParameterProvider
+    public class TypeDefinition : 
+        MetadataMember<MetadataRow<TypeAttributes, uint, uint, uint, uint, uint>>,
+        IMemberDefinition, 
+        ITypeDefOrRef,
+        IHasSecurityAttribute, 
+        IGenericParameterProvider
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<string> _namespace;
@@ -265,6 +270,11 @@ namespace AsmResolver.Net.Cts
                 return _fullName = string.IsNullOrEmpty(Namespace) ? Name : Namespace + "." + Name;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the type is enclosed by another type. 
+        /// </summary>
+        public bool IsNested => DeclaringType != null;
 
         /// <summary>
         /// When the type is nested, gets the enclosing type that declares this type.
@@ -684,26 +694,41 @@ namespace AsmResolver.Net.Cts
             return cctor;
         }
         
+        /// <inheritdoc />
         public override string ToString()
         {
             return FullName;
+        }
+
+        /// <inheritdoc />
+        public bool IsAccessibleFromType(TypeDefinition type)
+        {
+            // TODO: Check types of the same family.
+            
+            if (this == type)
+                return true;
+
+            var comparer = new SignatureComparer();
+            bool isInSameAssembly = comparer.Equals(Module, type.Module);
+
+            if (IsNested)
+            {
+                if (!DeclaringType.IsAccessibleFromType(type))
+                    return false;
+                
+                return IsNestedPublic
+                       || isInSameAssembly && IsNestedAssembly
+                       || DeclaringType == type;
+            }
+
+            return IsPublic
+                   || isInSameAssembly;
         }
 
         IMetadataMember IResolvable.Resolve()
         {
             return this;
         }
-
-        // TODO
-        //IGenericParameterProvider IGenericContext.Type
-        //{
-        //    get { return this; }
-        //}
-
-        //IGenericParameterProvider IGenericContext.Method
-        //{
-        //    get { return null; }
-        //}
 
         private static TypeDefinition GetFieldOwner(FieldDefinition field)
         {

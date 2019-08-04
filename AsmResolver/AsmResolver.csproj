@@ -101,6 +101,7 @@
     <Compile Include="Net\Cil\ICilInstructionFormatter.cs" />
     <Compile Include="Net\Cts\Collections\NestedClassCollection.cs" />
     <Compile Include="Net\Cts\Collections\ShallowTypeCollection.cs" />
+    <Compile Include="Net\Cts\IMemberDefinition.cs" />
     <Compile Include="Net\Cts\InvalidTypeDefOrRef.cs" />
     <Compile Include="Net\Cts\IReferenceImporter.cs" />
     <Compile Include="Net\Cts\MemberCloner.cs" />

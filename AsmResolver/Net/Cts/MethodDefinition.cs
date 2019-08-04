@@ -24,14 +24,22 @@ namespace AsmResolver.Net.Cts
     /// structure defined by the CLR itself), it is necessary to implement a custom method body reader to accomodate
     /// for these shortcomings.
     /// </remarks> 
-    public class MethodDefinition : MetadataMember<MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>>, ICallableMemberReference, IHasSecurityAttribute, IMemberForwarded, IGenericParameterProvider, IMemberRefParent, ICustomAttributeType
+    public class MethodDefinition :
+        MetadataMember<MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint>>,
+        IMemberDefinition,
+        ICallableMemberReference,
+        IHasSecurityAttribute,
+        IMemberForwarded,
+        IGenericParameterProvider,
+        IMemberRefParent,
+        ICustomAttributeType
     {
         private readonly LazyValue<string> _name;
         private readonly LazyValue<MethodSignature> _signature;
         private readonly LazyValue<TypeDefinition> _declaringType;
         private readonly LazyValue<MethodBody> _methodBody;
         private readonly LazyValue<ImplementationMap> _pinvokeMap;
-        
+
         private string _fullName;
         private MetadataImage _image;
 
@@ -47,17 +55,20 @@ namespace AsmResolver.Net.Cts
             Attributes = attributes;
             ImplAttributes = MethodImplAttributes.IL | MethodImplAttributes.Managed;
             _signature = new LazyValue<MethodSignature>(signature);
-            Parameters = new DelegatedMemberCollection<MethodDefinition, ParameterDefinition>(this, GetParamOwner, SetParamOwner);
+            Parameters =
+                new DelegatedMemberCollection<MethodDefinition, ParameterDefinition>(this, GetParamOwner,
+                    SetParamOwner);
             _methodBody = new LazyValue<MethodBody>();
             _pinvokeMap = new LazyValue<ImplementationMap>();
-            
+
             _declaringType = new LazyValue<TypeDefinition>();
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             GenericParameters = new GenericParameterCollection(this);
         }
 
-        internal MethodDefinition(MetadataImage image, MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
+        internal MethodDefinition(MetadataImage image,
+            MetadataRow<FileSegment, MethodImplAttributes, MethodAttributes, uint, uint, uint> row)
             : base(row.MetadataToken)
         {
             _image = image;
@@ -79,26 +90,28 @@ namespace AsmResolver.Net.Cts
                 // TODO: handler for native methods.
                 return null;
             });
-            
+
             _declaringType = new LazyValue<TypeDefinition>(() =>
             {
                 var table = image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.TypeDef);
                 var typeRow = table.GetRowClosestToKey(5, row.MetadataToken.Rid);
                 return (TypeDefinition) table.GetMemberFromRow(image, typeRow);
             });
-            
+
             _pinvokeMap = new LazyValue<ImplementationMap>(() =>
             {
-                if (!row.Column3.HasFlag(MethodAttributes.PInvokeImpl)) 
+                if (!row.Column3.HasFlag(MethodAttributes.PInvokeImpl))
                     return null;
-                
-                var table = (ImplementationMapTable) image.Header.GetStream<TableStream>().GetTable(MetadataTokenType.ImplMap);
+
+                var table = (ImplementationMapTable) image.Header.GetStream<TableStream>()
+                    .GetTable(MetadataTokenType.ImplMap);
                 var mapRow = table.FindImplementationMapOfOwner(row.MetadataToken);
                 return mapRow != null ? (ImplementationMap) table.GetMemberFromRow(image, mapRow) : null;
             });
 
-            Parameters = new RangedMemberCollection<MethodDefinition, ParameterDefinition>(this, MetadataTokenType.Param, 5, GetParamOwner, SetParamOwner);
-            
+            Parameters = new RangedMemberCollection<MethodDefinition, ParameterDefinition>(this,
+                MetadataTokenType.Param, 5, GetParamOwner, SetParamOwner);
+
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
             GenericParameters = new GenericParameterCollection(this);
@@ -106,7 +119,7 @@ namespace AsmResolver.Net.Cts
 
         /// <inheritdoc />
         public override MetadataImage Image => _declaringType.IsInitialized && _declaringType.Value != null
-            ? _declaringType.Value.Image 
+            ? _declaringType.Value.Image
             : _image;
 
         /// <summary>
@@ -237,7 +250,7 @@ namespace AsmResolver.Net.Cts
             get => _pinvokeMap.Value;
             set => this.SetPInvokeMap(_pinvokeMap, value);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the method is private.
         /// </summary>
@@ -514,26 +527,28 @@ namespace AsmResolver.Net.Cts
 
         private bool GetMethodAccessAttribute(MethodAttributes attribute)
         {
-            return ((uint)Attributes).GetMaskedAttribute((uint)MethodAttributes.MemberAccessMask,
-                (uint)attribute);
+            return ((uint) Attributes).GetMaskedAttribute((uint) MethodAttributes.MemberAccessMask,
+                (uint) attribute);
         }
 
         private void SetMethodAccessAttribute(MethodAttributes attribute, bool value)
         {
-            Attributes = (MethodAttributes)((uint)Attributes).SetMaskedAttribute((uint)MethodAttributes.MemberAccessMask,
-                (uint)attribute, value);
+            Attributes = (MethodAttributes) ((uint) Attributes).SetMaskedAttribute(
+                (uint) MethodAttributes.MemberAccessMask,
+                (uint) attribute, value);
         }
 
         private bool GetMethodCodeTypeAttribute(MethodImplAttributes attribute)
         {
-            return ((uint)ImplAttributes).GetMaskedAttribute((uint)MethodImplAttributes.CodeTypeMask,
-                (uint)attribute);
+            return ((uint) ImplAttributes).GetMaskedAttribute((uint) MethodImplAttributes.CodeTypeMask,
+                (uint) attribute);
         }
 
         private void SetMethodCodeTypeAttribute(MethodImplAttributes attribute, bool value)
         {
-            ImplAttributes = (MethodImplAttributes)((uint)ImplAttributes).SetMaskedAttribute((uint)MethodImplAttributes.CodeTypeMask,
-                (uint)attribute, value);
+            ImplAttributes = (MethodImplAttributes) ((uint) ImplAttributes).SetMaskedAttribute(
+                (uint) MethodImplAttributes.CodeTypeMask,
+                (uint) attribute, value);
         }
 
         public override string ToString()
@@ -541,21 +556,24 @@ namespace AsmResolver.Net.Cts
             return FullName;
         }
 
-        public IMetadataMember Resolve()
+        public bool IsAccessibleFromType(TypeDefinition type)
+        {
+            if (!DeclaringType.IsAccessibleFromType(type))
+                return false;
+            
+            var comparer = new SignatureComparer();
+            bool isInSameAssembly = comparer.Equals(DeclaringType.Module, type.Module);
+
+            return IsPublic
+                   || isInSameAssembly && IsAssembly
+                   || comparer.Equals(DeclaringType, type);
+            // TODO: check if in the same family of declaring types.
+        }
+
+        IMetadataMember IResolvable.Resolve()
         {
             return this;
         }
-
-        // TODO
-        //IGenericParameterProvider IGenericContext.Type
-        //{
-        //    get { return DeclaringType; }
-        //}
-
-        //IGenericParameterProvider IGenericContext.Method
-        //{
-        //    get { return this; }
-        //}
 
         private static void SetParamOwner(ParameterDefinition param, MethodDefinition method)
         {
