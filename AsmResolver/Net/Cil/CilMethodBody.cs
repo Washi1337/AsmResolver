@@ -105,9 +105,17 @@ namespace AsmResolver.Net.Cil
             ExceptionHandlers = new List<ExceptionHandler>();
             ComputeMaxStackOnBuild = true;
 
-            _thisParameter = new LazyValue<ParameterSignature>(() => method.DeclaringType != null
-                    ? new ParameterSignature(method.DeclaringType.ToTypeSignature()) 
-                    : null);
+            _thisParameter = new LazyValue<ParameterSignature>(() =>
+            {
+                if (method.DeclaringType == null)
+                    return null;
+                
+                var typeSig = method.DeclaringType.ToTypeSignature();
+                if (method.DeclaringType.IsValueType)
+                    typeSig = new ByReferenceTypeSignature(typeSig);
+                
+                return new ParameterSignature(typeSig);
+            });
         }
 
         /// <summary>
