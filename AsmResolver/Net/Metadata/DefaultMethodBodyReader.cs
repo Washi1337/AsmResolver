@@ -23,10 +23,10 @@ namespace AsmResolver.Net.Metadata
         {
             try
             {
-                return row.Column2.HasFlag(MethodImplAttributes.IL)
-                    ? (FileSegment) CilRawMethodBody.FromReader(reader)
-                    : new DataSegment(new byte[0])
-                        {StartOffset = reader.Position}; // TODO: add support for native methods?
+                return row.Column2.HasFlag(MethodImplAttributes.Native)
+                    ? new DataSegment(new byte[0])
+                        {StartOffset = reader.Position} // TODO: add support for native methods?
+                    : (FileSegment) CilRawMethodBody.FromReader(reader);
             }
             catch when (!ThrowOnInvalidMethodBody)
             {
