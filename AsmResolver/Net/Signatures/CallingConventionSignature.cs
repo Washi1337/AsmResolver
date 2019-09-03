@@ -16,6 +16,8 @@ namespace AsmResolver.Net.Signatures
         /// </summary>
         /// <param name="image">The image the signature is defined in.</param>
         /// <param name="reader">The reader to use.</param>
+        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
+        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
         /// <returns>The read signature.</returns>
         public static CallingConventionSignature FromReader(MetadataImage image, IBinaryStreamReader reader,
             bool readToEnd = false)

@@ -480,7 +480,7 @@ namespace AsmResolver.Net.Cts
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the type has a <see cref="ComImportAttribute"> attribute applied,
+        /// Gets or sets a value indicating whether the type has a <see cref="ComImportAttribute" /> attribute applied,
         /// indicating that it was imported from a COM type library.
         /// </summary>
         public bool IsImport

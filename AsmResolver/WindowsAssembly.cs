@@ -363,6 +363,7 @@ namespace AsmResolver
         /// Rebuilds and writes the assembly to a specific file path.
         /// </summary>
         /// <param name="file">The file path to write the image to.</param>
+        /// <param name="builder">Specifies the builder engine that reassembles the PE file.</param>
         public void Write(string file, WindowsAssemblyBuilder builder)
         {
             using (var stream = File.Create(file))
@@ -375,6 +376,7 @@ namespace AsmResolver
         /// Rebuilds and writes the assembly to a specific binary stream.
         /// </summary>
         /// <param name="writer">The writer to write the image to.</param>
+        /// /// <param name="builder">Specifies the builder engine that reassembles the PE file.</param>
         public void Write(IBinaryStreamWriter writer, WindowsAssemblyBuilder builder)
         {
             builder.Build();

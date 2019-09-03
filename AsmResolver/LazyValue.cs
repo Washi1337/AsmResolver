@@ -77,7 +77,7 @@ namespace AsmResolver
             base.GetValue = () => GetValue(createTag());
         }
 
-        public TValue GetValue(TTag tag)
+        public new TValue GetValue(TTag tag)
         {
             return _getValue(tag);
         }

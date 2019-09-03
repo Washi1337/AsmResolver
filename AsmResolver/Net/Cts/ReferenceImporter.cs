@@ -118,7 +118,7 @@ namespace AsmResolver.Net.Cts
         /// Imports a type reference into the assembly.
         /// </summary>
         /// <param name="reference">The reference to import.</param>
-        /// <returns>The imported reference, or the same reference provided in <<paramref name="reference"/> if the
+        /// <returns>The imported reference, or the same reference provided in <paramref name="reference"/> if the
         /// reference was already imported.</returns>
         public virtual TypeReference ImportType(TypeReference reference)
         {
@@ -131,7 +131,7 @@ namespace AsmResolver.Net.Cts
         /// Imports a type reference into the assembly.
         /// </summary>
         /// <param name="definition">The reference to import.</param>
-        /// <returns>The imported reference, or the same definition provided in <<paramref name="definition"/> if the
+        /// <returns>The imported reference, or the same definition provided in <paramref name="definition"/> if the
         /// definition was already present in the target image.</returns>
         public virtual ITypeDefOrRef ImportType(TypeDefinition definition)
         {
@@ -152,7 +152,7 @@ namespace AsmResolver.Net.Cts
         /// Imports a type specification into the assembly.
         /// </summary>
         /// <param name="specification">The reference to import.</param>
-        /// <returns>The imported reference, or the same reference provided in <<paramref name="specification"/> if the
+        /// <returns>The imported reference, or the same reference provided in <paramref name="specification"/> if the
         /// reference was already imported.</returns>
         public virtual ITypeDefOrRef ImportType(TypeSpecification specification)
         {

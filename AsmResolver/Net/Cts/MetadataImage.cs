@@ -14,7 +14,7 @@ namespace AsmResolver.Net.Cts
     ///
     /// When a metadata image is instantiated from a <see cref="MetadataHeader"/>, the metadata header is automatically
     /// locked and cannot be changed until the image has been committed to the .NET streams. This is done by
-    /// <see cref="MetadataHeader.UnlockMetadata"/>.
+    /// <see cref="MetadataHeader.UnlockMetadata()"/>.
     /// </summary>
     public class MetadataImage
     {
