@@ -1162,7 +1162,7 @@ namespace AsmResolver.Net.Emit
             var table = (ManifestResourceTable) _tableStream.GetTable(MetadataTokenType.ManifestResource);
             var resourceRow = new MetadataRow<uint, ManifestResourceAttributes, uint, uint>
             {
-                Column1 = _parentBuffer.ResourcesBuffer.GetResourceOffset(resource), 
+                Column1 = resource.IsEmbedded ? _parentBuffer.ResourcesBuffer.GetResourceOffset(resource) : resource.Offset, 
                 Column2 = resource.Attributes,
                 Column3 = _parentBuffer.StringStreamBuffer.GetStringOffset(resource.Name),
                 Column4 = !resource.IsEmbedded
