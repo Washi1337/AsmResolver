@@ -31,9 +31,10 @@ namespace AsmResolver.Net.Emit
         private readonly IDictionary<TypeReference, MetadataToken> _typeRefs;
         private readonly IDictionary<TypeSpecification, MetadataToken> _typeSpecs;
         private readonly IDictionary<MetadataRow<ushort, ushort, ushort, ushort, AssemblyAttributes, uint, uint, uint, uint>, MetadataToken> _assemblyRefs;
-        private readonly IDictionary<MetadataRow<uint>, MetadataToken> _moduleRefs;        
+        private readonly IDictionary<MetadataRow<uint>, MetadataToken> _moduleRefs;
         private readonly IDictionary<MemberReference, MetadataToken> _memberRefs;
         private readonly IDictionary<MetadataRow<uint, uint>, MetadataToken> _methodSpecs;
+        private readonly IDictionary<MetadataRow<FileAttributes, uint, uint>, MetadataToken> _files;
         
         private readonly TableStream _tableStream;
         private readonly IList<Action> _fixups = new List<Action>();
@@ -57,6 +58,7 @@ namespace AsmResolver.Net.Emit
             _moduleRefs = new Dictionary<MetadataRow<uint>, MetadataToken>(rowComparer);
             _memberRefs = new Dictionary<MemberReference, MetadataToken>(sigComparer);
             _methodSpecs = new Dictionary<MetadataRow<uint, uint>, MetadataToken>(rowComparer);
+            _files = new Dictionary<MetadataRow<FileAttributes, uint, uint>, MetadataToken>(rowComparer);
         }
 
         public override string Name => "#~";
@@ -404,8 +406,45 @@ namespace AsmResolver.Net.Emit
 
         public MetadataToken GetImplementationToken(IImplementation implementation)
         {
-            // TODO
-            throw new NotImplementedException();
+            switch (implementation.MetadataToken.TokenType)
+            {
+                case MetadataTokenType.AssemblyRef:
+                    return GetAssemblyReferenceToken((AssemblyReference) implementation);
+                
+                case MetadataTokenType.File:
+                    return GetFileToken((FileReference) implementation);
+                
+                case MetadataTokenType.ExportedType:
+                    // TODO
+                    throw new NotImplementedException();
+                
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(implementation));
+            }
+        }
+
+        public MetadataToken GetFileToken(FileReference fileReference)
+        {
+            if (_members.TryGetValue(fileReference, out var row))
+                return row.MetadataToken;
+            
+            var fileRow = new MetadataRow<FileAttributes, uint, uint>
+            {
+                Column1 = fileReference.Attributes,
+                Column2 = _parentBuffer.StringStreamBuffer.GetStringOffset(fileReference.Name),
+                Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(fileReference.HashValue)
+            };
+
+            if (!_files.TryGetValue(fileRow, out var token))
+            {
+                var table = (FileReferenceTable) _tableStream.GetTable(MetadataTokenType.File);
+                token = fileRow.MetadataToken;
+                table.Add(fileRow);
+                _files.Add(fileRow, token);
+                _members.Add(fileReference, fileRow);
+            }
+
+            return token;
         }
 
         /// <summary>
