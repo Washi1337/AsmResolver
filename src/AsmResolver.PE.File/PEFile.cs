@@ -41,23 +41,19 @@ namespace AsmResolver.PE.File
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEFile FromReader(IBinaryStreamReader reader)
         {
-            var dosHeader = Headers.DosHeader.FromReader(reader);
+            var dosHeader = DosHeader.FromReader(reader);
             reader.FileOffset += dosHeader.NextHeaderOffset;
 
             uint signature = reader.ReadUInt32();
             if (signature != ValidPESignature)
                 throw new BadImageFormatException();
 
-            var fileHeader = Headers.FileHeader.FromReader(reader);
-            
-            var file = new PEFile
+            return new PEFile
             {
                 DosHeader = dosHeader,
-                FileHeader = fileHeader,
-                
+                FileHeader = FileHeader.FromReader(reader),
+                OptionalHeader = OptionalHeader.FromReader(reader)
             };
-
-            return file;
         }
 
         private PEFile()
@@ -77,6 +73,15 @@ namespace AsmResolver.PE.File
         /// Gets or sets the COFF file header of the PE file.
         /// </summary>
         public FileHeader FileHeader
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the optional header of the PE file.
+        /// </summary>
+        public OptionalHeader OptionalHeader
         {
             get;
             set;

@@ -20,11 +20,7 @@ namespace AsmResolver.PE.File.Headers
             };
         }
 
-        public FileHeader()
-        {
-        }
-        
-          /// <summary>
+        /// <summary>
         /// Gets or sets the machine the portable executable file is compiled for.
         /// </summary>
         public MachineType Machine
