@@ -12,7 +12,15 @@ namespace AsmResolver
         /// <summary>
         /// Gets the starting position of the reader.
         /// </summary>
-        long StartPosition
+        uint StartPosition
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the starting virtual address of the reader.
+        /// </summary>
+        uint StartRva
         {
             get;
         }
@@ -20,16 +28,24 @@ namespace AsmResolver
         /// <summary>
         /// Gets the current position of the reader.
         /// </summary>
-        long Position
+        uint Position
         {
             get;
             set;
         }
 
         /// <summary>
+        /// Gets the current relative virtual address of the reader.
+        /// </summary>
+        uint Rva
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the maximum length of data the reader can read from the stream.
         /// </summary>
-        long Length
+        uint Length
         {
             get;
         }
@@ -42,7 +58,7 @@ namespace AsmResolver
         /// <returns>A forked binary stream reader with the same data source, but a different address and size.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="address"/> does not fall within the range of the current reader.</exception>
         /// <exception cref="EndOfStreamException">Occurs when <paramref name="size"/> results in the new reader to reach out of the stream.</exception>
-        IBinaryStreamReader Fork(long address, int size);
+        IBinaryStreamReader Fork(uint address, uint size);
 
         /// <summary>
         /// Reads data from the stream until a specific byte is encountered.
@@ -122,7 +138,7 @@ namespace AsmResolver
         
     }
 
-    public static class BinaryStreamReaderExtensions
+    public static partial class Extensions
     {
         /// <summary>
         /// Determines whether the reader can read up to a specific amount of bytes.
@@ -151,9 +167,9 @@ namespace AsmResolver
         /// <param name="reader">The reader to fork.</param>
         /// <param name="address">The address of the forked reader to start at.</param>
         /// <returns>A forked binary stream reader with the same data source, but a different address.</returns>
-        public static IBinaryStreamReader CreateSubReader(this IBinaryStreamReader reader, long address)
+        public static IBinaryStreamReader Fork(this IBinaryStreamReader reader, uint address)
         {
-            return reader.Fork(address, (int)(reader.Length - (address - reader.StartPosition)));
+            return reader.Fork(address, reader.Length - (address - reader.StartPosition));
         }
 
         /// <summary>
@@ -187,12 +203,10 @@ namespace AsmResolver
         /// Aligns the reader to a specified boundary.
         /// </summary>
         /// <param name="reader">The reader to align.</param>
-        /// <param name="align">The boundary to use.</param>
-        public static void Align(this IBinaryStreamReader reader, int align)
+        /// <param name="alignment">The boundary to use.</param>
+        public static void Align(this IBinaryStreamReader reader, uint alignment)
         {
-            align--;
-            long currentPosition = reader.Position;
-            reader.Position += ((currentPosition + align) & ~align) - currentPosition;
+            reader.Position = reader.Position.Align(alignment);
         }
         
     }

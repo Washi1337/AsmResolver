@@ -10,7 +10,7 @@ namespace AsmResolver.Tests
         public void EmptyArray()
         {
             var reader = new ByteArrayReader(new byte[0]);
-            Assert.Equal(0, reader.Length);
+            Assert.Equal(0u, reader.Length);
 
             Assert.Throws<EndOfStreamException>(() => reader.ReadByte());
             Assert.Equal(0, reader.ReadBytes(new byte[10], 0, 10));
@@ -26,7 +26,7 @@ namespace AsmResolver.Tests
             });
 
             Assert.Equal((byte) 0x80, reader.ReadByte());
-            Assert.Equal(1, reader.Position);
+            Assert.Equal(1u, reader.Position);
             Assert.Equal((sbyte) -128, reader.ReadSByte());
 
             Assert.Throws<EndOfStreamException>(() => reader.ReadByte());
@@ -42,9 +42,9 @@ namespace AsmResolver.Tests
             });
 
             Assert.Equal((ushort) 0x8001, reader.ReadUInt16());
-            Assert.Equal(2, reader.Position);
+            Assert.Equal(2u, reader.Position);
             Assert.Equal((short) -32766, reader.ReadInt16());
-            Assert.Equal(4, reader.Position);
+            Assert.Equal(4u, reader.Position);
         }
 
         [Fact]
@@ -57,9 +57,9 @@ namespace AsmResolver.Tests
             });
 
             Assert.Equal(0x81020304u, reader.ReadUInt32());
-            Assert.Equal(4, reader.Position);
+            Assert.Equal(4u, reader.Position);
             Assert.Equal(-2063202552, reader.ReadInt32());
-            Assert.Equal(8, reader.Position);
+            Assert.Equal(8u, reader.Position);
         }
 
 
@@ -73,9 +73,9 @@ namespace AsmResolver.Tests
             });
 
             Assert.Equal(0x8001020304050607ul, reader.ReadUInt64());
-            Assert.Equal(8, reader.Position);
+            Assert.Equal(8u, reader.Position);
             Assert.Equal(-8644366967197856241, reader.ReadInt64());
-            Assert.Equal(16, reader.Position);
+            Assert.Equal(16u, reader.Position);
         }
 
         [Fact]
@@ -88,9 +88,9 @@ namespace AsmResolver.Tests
 
             var fork = reader.Fork(2, 3);
             
-            Assert.Equal(2, fork.StartPosition);
-            Assert.Equal(2, fork.Position);
-            Assert.Equal(3, fork.Length);
+            Assert.Equal(2u, fork.StartPosition);
+            Assert.Equal(2u, fork.Position);
+            Assert.Equal(3u, fork.Length);
         }
 
         [Fact]
@@ -138,8 +138,8 @@ namespace AsmResolver.Tests
             var fork = reader.Fork(0, 2);
             fork.ReadUInt16();
                 
-            Assert.Equal(0, reader.Position);
-            Assert.Equal(2, fork.Position);
+            Assert.Equal(0u, reader.Position);
+            Assert.Equal(2u, fork.Position);
         }
 
         [Fact]

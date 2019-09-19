@@ -9,14 +9,14 @@ namespace AsmResolver
     public class ByteArrayReader : IBinaryStreamReader
     {
         private readonly byte[] _data;
-        private long _position;
+        private uint _position;
 
         /// <summary>
         /// Creates a new byte array reader that spans the entire array.
         /// </summary>
         /// <param name="data">The data source.</param>
         public ByteArrayReader(byte[] data)
-            : this(data, 0L, data.Length)
+            : this(data, 0u, (uint) data.Length, 0)
         {
         }
 
@@ -26,9 +26,10 @@ namespace AsmResolver
         /// <param name="data">The data source.</param>
         /// <param name="start">The starting index of the chunk to read.</param>
         /// <param name="length">The number of bytes the chunk will consist of at most.</param>
+        /// <param name="startRva">The starting rva of the chunk to read.</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="start"/> is outside of the array.</exception>
         /// <exception cref="EndOfStreamException">Occurs when the reader reaches outside of the data source.</exception>
-        private ByteArrayReader(byte[] data, long start, int length)
+        private ByteArrayReader(byte[] data, uint start, uint length, uint startRva)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
             if (start > data.Length)
@@ -37,24 +38,34 @@ namespace AsmResolver
                 throw new EndOfStreamException();
             StartPosition = start;
             Length = length;
+            StartRva = startRva;
             _position = start;
         }
 
         /// <inheritdoc />
-        public long StartPosition
+        public uint StartPosition
         {
             get;
         }
 
         /// <inheritdoc />
-        public long Position
+        public uint StartRva
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public uint Position
         {
             get => _position;
             set => _position = value;
         }
 
         /// <inheritdoc />
-        public long Length
+        public uint Rva => _position - StartPosition + StartRva;
+
+        /// <inheritdoc />
+        public uint Length
         {
             get;
         }
@@ -66,11 +77,11 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader Fork(long address, int size)
+        public IBinaryStreamReader Fork(uint address, uint size)
         {
             if (address < StartPosition || address >= StartPosition + Length)
                 throw new ArgumentOutOfRangeException(nameof(address));
-            return new ByteArrayReader(_data, address, size);
+            return new ByteArrayReader(_data, address, size, address - StartPosition + StartRva);
         }
 
         /// <inheritdoc />

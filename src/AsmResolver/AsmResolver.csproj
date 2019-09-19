@@ -2,6 +2,15 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <PackageVersion>4.0.0</PackageVersion>
+        <Title>AsmResolver</Title>
+        <Description>The base library for the AsmResolver executable file inspection toolsuite.</Description>
+        <Copyright>Copyright © Washi 2016-2019</Copyright>
+        <PackageProjectUrl>https://github.com/Washi1337/AsmResolver</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>exe pe dotnet cil inspection manipulation assembly disassembly</PackageTags>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -11,5 +20,9 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="DataSegment.cs" />
+    </ItemGroup>
 
 </Project>

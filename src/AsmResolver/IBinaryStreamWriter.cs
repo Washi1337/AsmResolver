@@ -10,7 +10,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets or sets the current position of the writer.
         /// </summary>
-        long Position
+        uint Position
         {
             get;
             set;
@@ -19,7 +19,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets or sets the current length of the stream.
         /// </summary>
-        long Length
+        uint Length
         {
             get;
         }
@@ -94,10 +94,7 @@ namespace AsmResolver
 
     }
 
-    /// <summary>
-    /// Provides extensions for the <see cref="IBinaryStreamWriter"/> interface.
-    /// </summary>
-    public static class OutputStreamExtensions
+    public static partial class Extensions
     {
         /// <summary>
         /// Writes a buffer of data to the stream.
@@ -134,10 +131,10 @@ namespace AsmResolver
         /// </summary>
         /// <param name="writer">The writer to align.</param>
         /// <param name="align">The boundary to use.</param>
-        public static void Align(this IBinaryStreamWriter writer, int align)
+        public static void Align(this IBinaryStreamWriter writer, uint align)
         {
-            align--;
-            writer.WriteZeroes((((int)writer.Position + align) & ~align) - (int)writer.Position);
+            uint currentPosition = writer.Position;
+            writer.WriteZeroes((int) (currentPosition.Align(align) - writer.Position));
         }
         
     }

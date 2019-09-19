@@ -20,14 +20,14 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public long Position
+        public uint Position
         {
-            get => _stream.Position;
+            get => (uint) _stream.Position;
             set => _stream.Position = value;
         }
 
         /// <inheritdoc />
-        public long Length => _stream.Length;
+        public uint Length => (uint) _stream.Length;
 
         /// <inheritdoc />
         public void WriteBytes(byte[] buffer, int startIndex, int count)
