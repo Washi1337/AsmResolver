@@ -23,6 +23,7 @@ namespace AsmResolver.Net.Cts
         private readonly LazyValue<PropertyMap> _propertyMap;
         private readonly LazyValue<EventMap> _eventMap;
         private readonly LazyValue<TypeDefinition> _declaringType;
+        private readonly LazyValue<NestedClassCollection> _nestedClasses;
         
         private string _fullName;
         private ModuleDefinition _module;
@@ -49,7 +50,7 @@ namespace AsmResolver.Net.Cts
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
-            NestedClasses = new NestedClassCollection(this);
+            _nestedClasses = new LazyValue<NestedClassCollection>(new NestedClassCollection(this));
             GenericParameters = new GenericParameterCollection(this);
             Interfaces = new InterfaceImplementationCollection(this);
             MethodImplementations = new MethodImplementationCollection(this);
@@ -71,8 +72,7 @@ namespace AsmResolver.Net.Cts
                 var baseTypeToken = tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).DecodeIndex(row.Column4);
                 if (baseTypeToken.Rid != 0)
                 {
-                    IMetadataMember baseType;
-                    if (image.TryResolveMember(baseTypeToken, out baseType))
+                    if (image.TryResolveMember(baseTypeToken, out var baseType))
                         return baseType as ITypeDefOrRef;
                 }
                 return null;
@@ -113,7 +113,10 @@ namespace AsmResolver.Net.Cts
             
             CustomAttributes = new CustomAttributeCollection(this);
             SecurityDeclarations = new SecurityDeclarationCollection(this);
-            NestedClasses = new NestedClassCollection(this);
+            _nestedClasses = new LazyValue<NestedClassCollection>(() =>
+                new NestedClassCollection(this,
+                    (NestedClassTable) tableStream.GetTable(MetadataTokenType.NestedClass),
+                    image.GetNestedClasses(row.MetadataToken.Rid)));
             GenericParameters = new GenericParameterCollection(this);
             Interfaces = new InterfaceImplementationCollection(this);
             MethodImplementations = new MethodImplementationCollection(this);
@@ -201,7 +204,7 @@ namespace AsmResolver.Net.Cts
                 if (_module != value)
                 {
                     _module = value;
-                    if (NestedClasses != null)
+                    if (_nestedClasses != null)
                     {
                         foreach (var nestedClass in NestedClasses)
                             nestedClass.Class.Module = value;
@@ -279,10 +282,7 @@ namespace AsmResolver.Net.Cts
         /// <summary>
         /// Gets a collection of nested classes declared in this type.
         /// </summary>
-        public NestedClassCollection NestedClasses
-        {
-            get;
-        }
+        public NestedClassCollection NestedClasses => _nestedClasses.Value;
 
         /// <inheritdoc />
         public CustomAttributeCollection CustomAttributes
@@ -592,7 +592,14 @@ namespace AsmResolver.Net.Cts
         /// <inheritdoc />
         public TypeSignature ToTypeSignature()
         {
-            return new TypeDefOrRefSignature(this);
+            var corlibType = Image?.TypeSystem.GetMscorlibType(this);
+            if (corlibType != null)
+                return corlibType;
+
+            return new TypeDefOrRefSignature(this)
+            {
+                IsValueType = IsValueType
+            };
         }
 
         /// <inheritdoc />

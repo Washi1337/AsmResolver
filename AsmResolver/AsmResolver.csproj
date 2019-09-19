@@ -99,6 +99,7 @@
     <Compile Include="Net\Cil\CilRawMethodBody.cs" />
     <Compile Include="Net\Cil\CilRawSmallMethodBody.cs" />
     <Compile Include="Net\Cil\ICilInstructionFormatter.cs" />
+    <Compile Include="Net\Cts\Collections\NestedClassCollection.cs" />
     <Compile Include="Net\Cts\Collections\ShallowTypeCollection.cs" />
     <Compile Include="Net\Cts\InvalidTypeDefOrRef.cs" />
     <Compile Include="Net\Cts\IReferenceImporter.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Net\Emit\CompactNetAssemblyBuilder.cs" />
     <Compile Include="Net\Emit\CompactNetTextContents.cs" />
     <Compile Include="Net\Emit\GuidStreamBuffer.cs" />
+    <Compile Include="Net\Emit\IMetadataBuilder.cs" />
     <Compile Include="Net\Emit\MetadataBuffer.cs" />
     <Compile Include="Net\Emit\MemberNotImportedException.cs" />
     <Compile Include="Net\Emit\MetadataDirectoryBuffer.cs" />
@@ -188,6 +190,7 @@
     <Compile Include="Net\ReflectionAssemblyNameWrapper.cs" />
     <Compile Include="Net\Signatures\CallingConventionAttributes.cs" />
     <Compile Include="Net\Signatures\CustomAttributeArgumentMemberType.cs" />
+    <Compile Include="Net\Signatures\GenericContext.cs" />
     <Compile Include="Net\Signatures\GenericParameterType.cs" />
     <Compile Include="Net\VTableAttributes.cs" />
     <Compile Include="Net\VTableHeader.cs" />

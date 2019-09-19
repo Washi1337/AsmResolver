@@ -58,6 +58,11 @@ namespace AsmResolver.Net.Signatures
         /// <inheritdoc />
         public override string Name => BaseType.Name + $" modopt({ModifierType.FullName})";
 
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            return new OptionalModifierSignature(ModifierType, BaseType.InstantiateGenericTypes(context));
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

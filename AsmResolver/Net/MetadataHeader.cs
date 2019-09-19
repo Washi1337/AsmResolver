@@ -188,51 +188,66 @@ namespace AsmResolver.Net
 
         public IDictionary<IMetadataMember, MetadataToken> UnlockMetadata()
         {
+            return UnlockMetadata(new DefaultMetadataBuilder());
+        }
+        
+        public IDictionary<IMetadataMember, MetadataToken> UnlockMetadata(IMetadataBuilder builder)
+        {
             if (!IsLocked)
                 throw new InvalidOperationException("Cannot unlock the metadata if it has not already been locked.");
             
             var image = Image;
-            var buffer = new MetadataBuffer(image);
             
-            // Add assembly to buffer.
-            buffer.TableStreamBuffer.AddAssembly(image.Assembly);
+            // Construct new metadata streams.
+            var buffer = builder.Rebuild(image);
             
             // Create resources.
             NetDirectory.ResourcesManifest = buffer.ResourcesBuffer.CreateDirectory();
-
-            // Unlock metadata.
-            Image = null;
             
-            // Replace old streams with new buffers.
-            var buffers = new MetadataStreamBuffer[]
+            // Serialize new streams.
+            var newStreams = new MetadataStreamBuffer[]
             {
                 buffer.TableStreamBuffer,
                 buffer.BlobStreamBuffer,
                 buffer.GuidStreamBuffer,
                 buffer.StringStreamBuffer,
                 buffer.UserStringStreamBuffer
-            };
+            }.ToDictionary(x => x, x => x.CreateStream());
 
-            foreach (var streamBuffer in buffers)
+            // Determine new entrypoint token.
+            var newTokenMapping = buffer.TableStreamBuffer.GetNewTokenMapping();
+            uint entrypointToken;
+            if (image.ManagedEntrypoint == null)
             {
-                var header = StreamHeaders.FirstOrDefault(x => x.Name == streamBuffer.Name);
+                entrypointToken = 0u;
+            }
+            else
+            {
+                if (newTokenMapping.TryGetValue(image.ManagedEntrypoint, out var token))
+                    entrypointToken = token.ToUInt32();
+                else
+                    throw new MemberNotImportedException(image.ManagedEntrypoint);
+            }
+
+            // Unlock metadata, commit changes to streams.
+            Image = null;
+            foreach (var entry in newStreams)
+            {
+                var header = StreamHeaders.FirstOrDefault(x => x.Name == entry.Key.Name);
 
                 if (header == null)
                 {
-                    header = new MetadataStreamHeader(streamBuffer.Name);
+                    header = new MetadataStreamHeader(entry.Key.Name);
                     StreamHeaders.Add(header);
                 }
 
-                header.Stream = streamBuffer.CreateStream();
+                header.Stream = entry.Value;
             }
 
             // Update managed entrypoint.
-            var newTokenMapping = buffer.TableStreamBuffer.GetNewTokenMapping();
-            NetDirectory.EntryPointToken = image.ManagedEntrypoint != null
-                ? newTokenMapping[image.ManagedEntrypoint].ToUInt32()
-                : 0u;
-
+            NetDirectory.EntryPointToken = entrypointToken;
             return newTokenMapping;
+            
         }
 
         public override uint GetPhysicalLength()
@@ -264,5 +279,4 @@ namespace AsmResolver.Net
         }
 
     }
-
 }

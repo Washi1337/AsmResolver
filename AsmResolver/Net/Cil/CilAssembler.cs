@@ -55,17 +55,17 @@ namespace AsmResolver.Net.Cil
             switch (instruction.OpCode.OperandType)
             {
                 case CilOperandType.InlineArgument:
-                    _writer.WriteUInt16((ushort)_builder.GetParameterIndex((ParameterSignature)instruction.Operand));
+                    _writer.WriteUInt16((ushort)_builder.GetParameterIndex(instruction.Operand as ParameterSignature));
                     break;
                 case CilOperandType.ShortInlineArgument:
-                    _writer.WriteByte((byte)_builder.GetParameterIndex((ParameterSignature)instruction.Operand));
+                    _writer.WriteByte((byte)_builder.GetParameterIndex(instruction.Operand as ParameterSignature));
                     break;
 
                 case CilOperandType.InlineVar:
-                    _writer.WriteUInt16((ushort)_builder.GetVariableIndex((VariableSignature)instruction.Operand));
+                    _writer.WriteUInt16((ushort)_builder.GetVariableIndex(instruction.Operand as VariableSignature));
                     break;
                 case CilOperandType.ShortInlineVar:
-                    _writer.WriteByte((byte)_builder.GetVariableIndex((VariableSignature)instruction.Operand));
+                    _writer.WriteByte((byte)_builder.GetVariableIndex(instruction.Operand as VariableSignature));
                     break;
 
                 case CilOperandType.ShortInlineI:

@@ -100,6 +100,14 @@ namespace AsmResolver.Net.Signatures
         /// <inheritdoc />
         public override string Name => BaseType.Name + GetDimensionsString();
 
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            var arrayType = new ArrayTypeSignature(BaseType.InstantiateGenericTypes(context));
+            foreach (var dimension in Dimensions)
+                arrayType.Dimensions.Add(new ArrayDimension(dimension.Size, dimension.LowerBound));
+            return arrayType;
+        }
+
         private string GetDimensionsString()
         {
             return "[" + string.Join(",", Dimensions.Select(x =>

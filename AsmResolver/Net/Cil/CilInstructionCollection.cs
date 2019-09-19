@@ -12,11 +12,15 @@ namespace AsmResolver.Net.Cil
     public class CilInstructionCollection : IList<CilInstruction>
     {
         private readonly List<CilInstruction> _items = new List<CilInstruction>();
-        private readonly CilMethodBody _body;
 
         public CilInstructionCollection(CilMethodBody body)
         {
-            _body = body ?? throw new ArgumentNullException(nameof(body));
+            Owner = body ?? throw new ArgumentNullException(nameof(body));
+        }
+
+        public CilMethodBody Owner
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -246,7 +250,7 @@ namespace AsmResolver.Net.Cil
                 case CilCode.Ldloc_1:
                 case CilCode.Ldloc_2:
                 case CilCode.Ldloc_3:
-                    instruction.Operand = ((IOperandResolver) _body).ResolveVariable(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
+                    instruction.Operand = ((IOperandResolver) Owner).ResolveVariable(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
                     instruction.OpCode = CilOpCodes.Ldloc;
                     break;
 
@@ -258,7 +262,7 @@ namespace AsmResolver.Net.Cil
                 case CilCode.Stloc_1:
                 case CilCode.Stloc_2:
                 case CilCode.Stloc_3:
-                    instruction.Operand = ((IOperandResolver) _body).ResolveVariable(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
+                    instruction.Operand = ((IOperandResolver) Owner).ResolveVariable(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
                     instruction.OpCode = CilOpCodes.Stloc;
                     break;
 
@@ -274,7 +278,7 @@ namespace AsmResolver.Net.Cil
                 case CilCode.Ldarg_1:
                 case CilCode.Ldarg_2:
                 case CilCode.Ldarg_3:
-                    instruction.Operand = ((IOperandResolver) _body).ResolveParameter(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
+                    instruction.Operand = ((IOperandResolver) Owner).ResolveParameter(instruction.OpCode.Name[instruction.OpCode.Name.Length - 1] - 48);
                     instruction.OpCode = CilOpCodes.Ldarg;
                     break;
 
@@ -409,7 +413,7 @@ namespace AsmResolver.Net.Cil
         private void TryOptimizeVariable(CilInstruction instruction)
         {
             var variable = instruction.Operand as VariableSignature;
-            if (!(_body.Signature?.Signature is LocalVariableSignature localVarSig) || variable == null)
+            if (!(Owner.Signature?.Signature is LocalVariableSignature localVarSig) || variable == null)
                 return;
             
             int index = localVarSig.Variables.IndexOf(variable);
@@ -452,10 +456,13 @@ namespace AsmResolver.Net.Cil
         /// <param name="instruction">The instruction to optimize.</param>
         private void TryOptimizeArgument(CilInstruction instruction)
         {
-            if (_body.Method?.Signature == null || !(instruction.Operand is ParameterSignature parameter))
+            if (Owner.Method?.Signature == null || !(instruction.Operand is ParameterSignature parameter))
                 return;
             
-            int index = _body.Method.Signature.Parameters.IndexOf(parameter);
+            int index = Owner.Method.Signature.Parameters.IndexOf(parameter);
+            if (Owner.Method.Signature.HasThis)
+                index++;
+
             if (index < 0 || index > byte.MaxValue)
                 return;
 

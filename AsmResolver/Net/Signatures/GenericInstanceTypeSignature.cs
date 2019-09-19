@@ -111,6 +111,18 @@ namespace AsmResolver.Net.Signatures
             return GenericType.GetElementType();
         }
 
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            var result = new GenericInstanceTypeSignature(GenericType)
+            {
+                IsValueType = IsValueType
+            };
+            
+            foreach (var argument in GenericArguments)
+                result.GenericArguments.Add(argument.InstantiateGenericTypes(context));
+            return result;
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {

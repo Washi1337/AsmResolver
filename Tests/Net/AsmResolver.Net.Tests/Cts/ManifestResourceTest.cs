@@ -40,6 +40,41 @@ namespace AsmResolver.Tests.Net.Cts
         }
 
         [Fact]
+        public void PersistentDataMultipleResources()
+        {
+            var newData1 = new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+            var newData2 = new byte[] {11, 12, 13, 14, 15, 16, 17, 18, 19, 20};
+            
+            var assembly = NetAssemblyFactory.CreateAssembly(DummyAssemblyName, true);
+            var header = assembly.NetDirectory.MetadataHeader;
+
+            var image = header.LockMetadata();
+            
+            var resource1 = CreateDummyResource();
+            resource1.Data = newData1;
+            var resource2 = CreateDummyResource();
+            resource2.Data = newData2;
+            
+            image.Assembly.Resources.Add(resource1);
+            image.Assembly.Resources.Add(resource2);
+
+            var mapping = header.UnlockMetadata();
+
+            var manifestResourceTable = header.GetStream<TableStream>().GetTable<ManifestResourceTable>();
+
+            var resourceRow1 = manifestResourceTable[(int) (mapping[resource1].Rid - 1)];
+            Assert.Equal(newData1, header.NetDirectory.ResourcesManifest.GetResourceData(resourceRow1.Column1));
+            var resourceRow2 = manifestResourceTable[(int) (mapping[resource2].Rid - 1)];
+            Assert.Equal(newData2, header.NetDirectory.ResourcesManifest.GetResourceData(resourceRow2.Column1));
+
+            image = header.LockMetadata();
+            resource1 = (ManifestResource) image.ResolveMember(mapping[resource1]);
+            resource2 = (ManifestResource) image.ResolveMember(mapping[resource2]);
+            Assert.Equal(newData1, resource1.Data);
+            Assert.Equal(newData2, resource2.Data);
+        }
+
+        [Fact]
         public void PersistentAttributes()
         {
             const ManifestResourceAttributes newAttributes = ManifestResourceAttributes.Private;

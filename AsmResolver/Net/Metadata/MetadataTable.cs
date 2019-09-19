@@ -38,6 +38,14 @@ namespace AsmResolver.Net.Metadata
         }
         
         /// <summary>
+        /// Gets a value indicating whether the table is sorted or not by a key column.
+        /// </summary>
+        public abstract bool IsSorted
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Gets a value indicating whether the metadata table is locked or not.
         /// </summary>
         public bool IsReadOnly
@@ -283,6 +291,9 @@ namespace AsmResolver.Net.Metadata
 
         /// <inheritdoc cref="MetadataTable.Count" />
         public override int Count => _rows.Count;
+        
+        /// <inheritdoc />
+        public override bool IsSorted => false;
 
         /// <summary>
         /// Reads a single row using the given reading context.
@@ -490,7 +501,10 @@ namespace AsmResolver.Net.Metadata
         {
             KeyColumnIndex = keyColumnIndex;
         }
-        
+
+        /// <inheritdoc />
+        public override bool IsSorted => true;
+
         /// <summary>
         /// Gets the index of the column that is used as the key to sort the table. 
         /// </summary>
@@ -498,7 +512,7 @@ namespace AsmResolver.Net.Metadata
         {
             get;
         }
-        
+
         /// <inheritdoc />
         public override void Add(TRow item)
         {

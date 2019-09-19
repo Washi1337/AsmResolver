@@ -102,26 +102,7 @@ namespace AsmResolver.Net.Cts.Collections
             item.Association = owner;
         }
     }
-
-    public class NestedClassCollection : KeyedMemberCollection<TypeDefinition, NestedClass>
-    {
-        public NestedClassCollection(TypeDefinition owner)
-            : base(owner, MetadataTokenType.NestedClass, MetadataTokenType.TypeDef, 1)
-        {
-        }
-
-        protected override TypeDefinition GetOwner(NestedClass item)
-        {
-            return item.EnclosingClass;
-        }
-
-        protected override void SetOwner(NestedClass item, TypeDefinition owner)
-        {
-            item.EnclosingClass = owner;
-            item.Class.Module = owner == null ? null : owner.Module;
-        }
-    }
-
+    
     public class SecurityDeclarationCollection : KeyedMemberCollection<IHasSecurityAttribute, SecurityDeclaration>
     {
         public SecurityDeclarationCollection(IHasSecurityAttribute owner)

@@ -61,6 +61,12 @@ namespace AsmResolver.Net.Signatures
         /// <inheritdoc />
         public override string FullName => Signature.ToString();
 
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            var result = new FunctionPointerTypeSignature(Signature);
+            return result;
+        }
+
         /// <inheritdoc />
         public override IResolutionScope ResolutionScope => null;
 

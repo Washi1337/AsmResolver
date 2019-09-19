@@ -736,5 +736,6 @@ namespace AsmResolver.Tests.Net.Cil
             var newSignature = (StandAloneSignature) instructions[0].Operand;
             Assert.Equal(signature.Signature as MethodSignature, newSignature.Signature as MethodSignature, _comparer);
         }
+        
     }
 }

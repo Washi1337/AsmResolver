@@ -26,7 +26,7 @@ namespace AsmResolver.Net.Emit
         
         private readonly MetadataBuffer _parentBuffer;
         
-        private readonly IDictionary<IMetadataMember, MetadataToken> _members = new Dictionary<IMetadataMember, MetadataToken>();
+        private readonly IDictionary<IMetadataMember, MetadataRow> _members = new Dictionary<IMetadataMember, MetadataRow>();
         
         private readonly IDictionary<TypeReference, MetadataToken> _typeRefs;
         private readonly IDictionary<TypeSpecification, MetadataToken> _typeSpecs;
@@ -34,7 +34,7 @@ namespace AsmResolver.Net.Emit
         private readonly IDictionary<MetadataRow<uint>, MetadataToken> _moduleRefs;        
         private readonly IDictionary<MemberReference, MetadataToken> _memberRefs;
         private readonly IDictionary<MetadataRow<uint, uint>, MetadataToken> _methodSpecs;
-
+        
         private readonly TableStream _tableStream;
         private readonly IList<Action> _fixups = new List<Action>();
 
@@ -69,7 +69,7 @@ namespace AsmResolver.Net.Emit
         /// <returns></returns>
         public IDictionary<IMetadataMember, MetadataToken> GetNewTokenMapping()
         {
-            return _members;
+            return _members.ToDictionary(x => x.Key, x => x.Value.MetadataToken);
         }
         
         /// <summary>
@@ -102,9 +102,9 @@ namespace AsmResolver.Net.Emit
         /// table stream.</exception>
         public MetadataToken GetNewToken(IMetadataMember member)
         {
-            if (!_members.TryGetValue(member, out var token))
+            if (!_members.TryGetValue(member, out var row))
                 throw new MemberNotImportedException(member);
-            return token;
+            return row.MetadataToken;
         }
 
         /// <summary>
@@ -139,10 +139,10 @@ namespace AsmResolver.Net.Emit
         /// <returns>The new metadata token assigned to the type reference.</returns>
         private MetadataToken GetTypeReferenceToken(TypeReference reference)
         {
-            if (_members.TryGetValue(reference, out var token))
-                return token;
+            if (_members.TryGetValue(reference, out var row))
+                return row.MetadataToken;
             
-            if (!_typeRefs.TryGetValue(reference, out token))
+            if (!_typeRefs.TryGetValue(reference, out var token))
             {
                 // Type ref is not added yet, check if imported and build new metadata row.
                 AssertIsImported(reference);
@@ -160,7 +160,7 @@ namespace AsmResolver.Net.Emit
                 // Register tokens.
                 token = typeRefRow.MetadataToken;
                 _typeRefs.Add(reference, token);
-                _members.Add(reference, token);
+                _members.Add(reference, typeRefRow);
                 
                 AddCustomAttributes(reference);
             }
@@ -175,10 +175,10 @@ namespace AsmResolver.Net.Emit
         /// <returns>The new metadata token assigned to the type specification.</returns>
         private MetadataToken GetTypeSpecificationToken(TypeSpecification specification)
         {
-            if (_members.TryGetValue(specification, out var token))
-                return token;
+            if (_members.TryGetValue(specification, out var row))
+                return row.MetadataToken;
 
-            if (!_typeSpecs.TryGetValue(specification, out token))
+            if (!_typeSpecs.TryGetValue(specification, out var token))
             {
                 AssertIsImported(specification);
 
@@ -193,7 +193,7 @@ namespace AsmResolver.Net.Emit
                 // Register tokens.
                 token = typeSpecRow.MetadataToken;
                 _typeSpecs.Add(specification, token);
-                _members.Add(specification, token);
+                _members.Add(specification, typeSpecRow);
                 
                 AddCustomAttributes(specification);
             }
@@ -237,8 +237,8 @@ namespace AsmResolver.Net.Emit
         /// <returns>The new metadata token assigned to the assembly reference.</returns>
         private MetadataToken GetAssemblyReferenceToken(AssemblyReference assemblyRef)
         {
-            if (_members.TryGetValue(assemblyRef, out var token))
-                return token;
+            if (_members.TryGetValue(assemblyRef, out var row))
+                return row.MetadataToken;
             
             AssertIsImported(assemblyRef);
 
@@ -256,7 +256,7 @@ namespace AsmResolver.Net.Emit
                         : assemblyRef.Culture),
                 };
 
-            if (!_assemblyRefs.TryGetValue(assemblyRow, out token))
+            if (!_assemblyRefs.TryGetValue(assemblyRow, out var token))
             {
                 assemblyRef.PublicKey?.Prepare(_parentBuffer);
                 assemblyRef.HashValue?.Prepare(_parentBuffer);
@@ -271,7 +271,7 @@ namespace AsmResolver.Net.Emit
                 table.Add(assemblyRow);
                 token = assemblyRow.MetadataToken;
                 _assemblyRefs.Add(assemblyRow, token);
-                _members.Add(assemblyRef, token);
+                _members.Add(assemblyRef, assemblyRow);
                 
                 AddCustomAttributes(assemblyRef);
                 
@@ -311,10 +311,10 @@ namespace AsmResolver.Net.Emit
         /// <returns>The new metadata token assigned to the reference.</returns>
         public MetadataToken GetMemberReferenceToken(MemberReference reference)
         {
-            if (_members.TryGetValue(reference, out var token))
-                return token;
+            if (_members.TryGetValue(reference, out var row))
+                return row.MetadataToken;
 
-            if (!_memberRefs.TryGetValue(reference, out token))
+            if (!_memberRefs.TryGetValue(reference, out var token))
             {
                 // Reference is not added yet. Check if imported and build row.
                 AssertIsImported(reference);
@@ -336,7 +336,7 @@ namespace AsmResolver.Net.Emit
                 // Register tokens.
                 token = memberRow.MetadataToken;
                 _memberRefs.Add(reference, token);
-                _members.Add(reference, token);
+                _members.Add(reference, memberRow);
                 
                 AddCustomAttributes(reference);
             }
@@ -378,8 +378,8 @@ namespace AsmResolver.Net.Emit
         /// <returns>The new metadata token assigned to the reference.</returns>
         private MetadataToken GetModuleReferenceToken(ModuleReference reference)
         {
-            if (_members.TryGetValue(reference, out var token))
-                return token;
+            if (_members.TryGetValue(reference, out var row))
+                return row.MetadataToken;
             
             AssertIsImported(reference);
 
@@ -388,13 +388,13 @@ namespace AsmResolver.Net.Emit
                 Column1 = _parentBuffer.StringStreamBuffer.GetStringOffset(reference.Name)
             };
 
-            if (!_moduleRefs.TryGetValue(referenceRow, out token))
+            if (!_moduleRefs.TryGetValue(referenceRow, out var token))
             {
                 var table = (ModuleReferenceTable) _tableStream.GetTable(MetadataTokenType.ModuleRef);
                 table.Add(referenceRow);
                 token = referenceRow.MetadataToken;
                 _moduleRefs.Add(referenceRow, token);
-                _members.Add(reference, token);
+                _members.Add(reference, referenceRow);
 
                 AddCustomAttributes(reference);
             }
@@ -416,8 +416,8 @@ namespace AsmResolver.Net.Emit
         /// <returns>The new metadata token assigned to the specification.</returns>
         public MetadataToken GetMethodSpecificationToken(MethodSpecification specification)
         {
-            if (_members.TryGetValue(specification, out var token))
-                return token;
+            if (_members.TryGetValue(specification, out var row))
+                return row.MetadataToken;
 
             AssertIsImported(specification);
 
@@ -427,7 +427,7 @@ namespace AsmResolver.Net.Emit
                     .EncodeToken(GetMethodToken(specification.Method))
             };
 
-            if (!_methodSpecs.TryGetValue(specificationRow, out token))
+            if (!_methodSpecs.TryGetValue(specificationRow, out var token))
             {
                 specification.Signature.Prepare(_parentBuffer);
                 _fixups.Add(() =>
@@ -437,7 +437,7 @@ namespace AsmResolver.Net.Emit
                 table.Add(specificationRow);
                 token = specificationRow.MetadataToken;
                 _methodSpecs.Add(specificationRow, token);
-                _members.Add(specification, token);
+                _members.Add(specification, specificationRow);
             }
 
             return token;
@@ -469,7 +469,7 @@ namespace AsmResolver.Net.Emit
                 assemblyRow.Column7 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(assembly.PublicKey));
             
             assemblyTable.Add(assemblyRow);
-            _members.Add(assembly, assemblyRow.MetadataToken);
+            _members.Add(assembly, assemblyRow);
             
             // Add main module.
             AddModule(assembly.Modules[0]);
@@ -502,7 +502,7 @@ namespace AsmResolver.Net.Emit
                 Column5 = _parentBuffer.GuidStreamBuffer.GetGuidOffset(module.EncBaseId)
             };
             moduleTable.Add(moduleRow);
-            _members.Add(module, moduleRow.MetadataToken);
+            _members.Add(module, moduleRow);
 
             // Add children.
             AddTypes(module.GetAllTypes().ToArray());
@@ -555,7 +555,7 @@ namespace AsmResolver.Net.Emit
                 Column6 = _methodList
             };
             typeTable.Add(typeRow);
-            _members.Add(type, typeRow.MetadataToken);
+            _members.Add(type, typeRow);
 
             // Add dummy fields.
             foreach (var field in type.Fields)
@@ -584,7 +584,7 @@ namespace AsmResolver.Net.Emit
                 Column3 = 0 // Signature, updated later.
             };
             fieldTable.Add(fieldRow);
-            _members.Add(field, fieldRow.MetadataToken);
+            _members.Add(field, fieldRow);
         }
 
         /// <summary>
@@ -604,7 +604,7 @@ namespace AsmResolver.Net.Emit
                 Column6 = _paramList
             };
             methodTable.Add(methodRow);
-            _members.Add(method, methodRow.MetadataToken);
+            _members.Add(method, methodRow);
             _paramList += (uint) method.Parameters.Count;
         }
 
@@ -742,7 +742,7 @@ namespace AsmResolver.Net.Emit
                 Column2 = GetNewToken(fieldLayout.Field).Rid
             };
             table.Add(layoutRow);
-            _members.Add(fieldLayout, layoutRow.MetadataToken);
+            _members.Add(fieldLayout, layoutRow);
         }
 
         /// <summary>
@@ -767,7 +767,7 @@ namespace AsmResolver.Net.Emit
                 marshalRow.Column2 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(fieldMarshal.MarshalDescriptor));
             
             table.Add(marshalRow);
-            _members.Add(fieldMarshal, marshalRow.MetadataToken);
+            _members.Add(fieldMarshal, marshalRow);
         }
 
         /// <summary>
@@ -788,7 +788,7 @@ namespace AsmResolver.Net.Emit
                 Column2 = GetNewToken(fieldRva.Field).Rid
             };
             table.Add(rvaRow);
-            _members.Add(fieldRva, rvaRow.MetadataToken);
+            _members.Add(fieldRva, rvaRow);
         }
 
         /// <summary>
@@ -813,7 +813,7 @@ namespace AsmResolver.Net.Emit
                 Column4 = GetModuleReferenceToken(implementationMap.ImportScope).Rid
             };
             table.Add(mapRow);
-            _members.Add(implementationMap, mapRow.MetadataToken);   
+            _members.Add(implementationMap, mapRow);   
         }
 
         /// <summary>
@@ -832,11 +832,15 @@ namespace AsmResolver.Net.Emit
                 Column3 = _parentBuffer.StringStreamBuffer.GetStringOffset(parameter.Name)
             };
             table.Add(parameterRow);
-            _members.Add(parameter, parameterRow.MetadataToken);
+            _members.Add(parameter, parameterRow);
 
             // Add field marshal if present.
             if (parameter.FieldMarshal != null)
                 AddFieldMarshal(parameter.FieldMarshal);
+
+            // Add constant if present.
+            if (parameter.Constant != null)
+                AddConstant(parameter.Constant);
             
             AddCustomAttributes(parameter);
         }
@@ -859,7 +863,7 @@ namespace AsmResolver.Net.Emit
                 Column2 = _tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(GetTypeToken(@interface.Interface))
             };
             table.Add(interfaceRow);
-            _members.Add(@interface, interfaceRow.MetadataToken);
+            _members.Add(@interface, interfaceRow);
             
             AddCustomAttributes(@interface);
         }
@@ -884,7 +888,7 @@ namespace AsmResolver.Net.Emit
                 Column3 = encoder.EncodeToken(GetMethodToken(implementation.MethodDeclaration))
             };
             table.Add(implementationRow);
-            _members.Add(implementation, implementationRow.MetadataToken);
+            _members.Add(implementation, implementationRow);
         }
 
         /// <summary>
@@ -906,7 +910,7 @@ namespace AsmResolver.Net.Emit
                 Column3 = GetNewToken(classLayout.Parent).Rid
             };
             table.Add(layoutRow);
-            _members.Add(classLayout, layoutRow.MetadataToken);
+            _members.Add(classLayout, layoutRow);
         }
 
         /// <summary>
@@ -927,7 +931,7 @@ namespace AsmResolver.Net.Emit
                 Column2 = _propertyList
             };
             table.Add(mapRow);
-            _members.Add(propertyMap, mapRow.MetadataToken);
+            _members.Add(propertyMap, mapRow);
 
             // Update property list for next property map.
             _propertyList += (uint) propertyMap.Properties.Count;
@@ -959,7 +963,7 @@ namespace AsmResolver.Net.Emit
             _fixups.Add(() => propertyRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(property.Signature));
             
             table.Add(propertyRow);
-            _members.Add(property, propertyRow.MetadataToken);
+            _members.Add(property, propertyRow);
 
             // Add associated methods.
             foreach (var semantics in property.Semantics)
@@ -988,7 +992,7 @@ namespace AsmResolver.Net.Emit
                 Column2 = _eventList
             };
             table.Add(mapRow);
-            _members.Add(eventMap, mapRow.MetadataToken);
+            _members.Add(eventMap, mapRow);
 
             _eventList += (uint) eventMap.Events.Count;
 
@@ -1015,7 +1019,7 @@ namespace AsmResolver.Net.Emit
                 Column3 = _tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef).EncodeToken(GetTypeToken(@event.EventType)),
             };
             table.Add(eventRow);
-            _members.Add(@event, eventRow.MetadataToken);
+            _members.Add(@event, eventRow);
 
             // Add associated methods.
             foreach (var semantic in @event.Semantics)
@@ -1044,7 +1048,7 @@ namespace AsmResolver.Net.Emit
                     .EncodeToken(GetNewToken(semantics.Association))
             };
             table.Add(semanticsRow);
-            _members.Add(semantics, semanticsRow.MetadataToken);
+            _members.Add(semantics, semanticsRow);
         }
 
         /// <summary>
@@ -1071,7 +1075,7 @@ namespace AsmResolver.Net.Emit
             _fixups.Add(() => constantRow.Column4 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(constant.Value));
                 
             table.Add(constantRow);
-            _members.Add(constant, constantRow.MetadataToken);
+            _members.Add(constant, constantRow);
         }
 
         /// <summary>
@@ -1090,7 +1094,7 @@ namespace AsmResolver.Net.Emit
                 Column2 = GetNewToken(nestedClass.EnclosingClass).Rid
             };
             table.Add(classRow);
-            _members.Add(nestedClass, classRow.MetadataToken);
+            _members.Add(nestedClass, classRow);
         }
 
         /// <summary>
@@ -1120,7 +1124,7 @@ namespace AsmResolver.Net.Emit
                 Column4 = _parentBuffer.StringStreamBuffer.GetStringOffset(parameter.Name),
             };
             table.Add(parameterRow);
-            _members.Add(parameter, parameterRow.MetadataToken);
+            _members.Add(parameter, parameterRow);
             
             // Add parameter constraints
             foreach (var constraint in parameter.Constraints)
@@ -1141,12 +1145,12 @@ namespace AsmResolver.Net.Emit
             // Create and add row.
             var constraintRow = new MetadataRow<uint, uint>
             {
-                Column1 = GetNewToken(constraint.Owner).Rid,
                 Column2 = _tableStream.GetIndexEncoder(CodedIndex.TypeDefOrRef)
                     .EncodeToken(GetTypeToken(constraint.Constraint))
             };
+            _fixups.Add(() => constraintRow.Column1 = GetNewToken(constraint.Owner).Rid);
             table.Add(constraintRow);
-            _members.Add(constraint, constraintRow.MetadataToken);
+            _members.Add(constraint, constraintRow);
         }
 
         /// <summary>
@@ -1167,7 +1171,7 @@ namespace AsmResolver.Net.Emit
                     : 0,
             };
             table.Add(resourceRow);
-            _members.Add(resource, resourceRow.MetadataToken);
+            _members.Add(resource, resourceRow);
             
             AddCustomAttributes(resource);
         }
@@ -1183,8 +1187,8 @@ namespace AsmResolver.Net.Emit
             if (signature == null)
                 return MetadataToken.Zero;
 
-            if (_members.TryGetValue(signature, out var token))
-                return token;
+            if (_members.TryGetValue(signature, out var row))
+                return row.MetadataToken;
             
             var table = (StandAloneSignatureTable) _tableStream.GetTable(MetadataTokenType.StandAloneSig);
             var signatureRow = new MetadataRow<uint>();
@@ -1193,11 +1197,11 @@ namespace AsmResolver.Net.Emit
             _fixups.Add(() => signatureRow.Column1 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(signature.Signature));
             
             table.Add(signatureRow);
-            _members.Add(signature, token = signatureRow.MetadataToken);
+            _members.Add(signature, signatureRow);
 
             AddCustomAttributes(signature);
 
-            return token;
+            return signatureRow.MetadataToken;
         }
         
         /// <summary>
@@ -1229,7 +1233,7 @@ namespace AsmResolver.Net.Emit
             _fixups.Add(() => attributeRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(attribute.Signature));
             
             table.Add(attributeRow);
-            _members.Add(attribute, attributeRow.MetadataToken);
+            _members.Add(attribute, attributeRow);
         }
 
 
@@ -1263,20 +1267,24 @@ namespace AsmResolver.Net.Emit
                 declarationRow.Column3 = _parentBuffer.BlobStreamBuffer.GetBlobOffset(declaration.PermissionSet));
             
             table.Add(declarationRow);
-            _members.Add(declaration, declarationRow.MetadataToken);
+            _members.Add(declaration, declarationRow);
             
             AddCustomAttributes(declaration);
         }
         
         public override MetadataStream CreateStream()
         {
+            _tableStream.ValidBitVector = _tableStream.ComputeValidBitVector();
+
+            foreach (var table in _tableStream.GetPresentTables().Where(t => t.IsSorted))
+                table.UpdateTokens();
+            
             for (var i = 0; i < _fixups.Count; i++) 
                 _fixups[i]();
 
             _tableStream.BlobIndexSize = _parentBuffer.BlobStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;
             _tableStream.StringIndexSize = _parentBuffer.StringStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;
             _tableStream.GuidIndexSize = _parentBuffer.GuidStreamBuffer.Length > 0xFFFF ? IndexSize.Long : IndexSize.Short;
-            _tableStream.ValidBitVector = _tableStream.ComputeValidBitVector();
 
             return _tableStream;
         }

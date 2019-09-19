@@ -57,7 +57,6 @@ namespace AsmResolver.Net.Cts
             Object = CreateSignature(ElementType.Object, "Object", false);
             Char = CreateSignature(ElementType.Char, "Char", true);
             String = CreateSignature(ElementType.String, "String", false);
-            Type = CreateSignature(ElementType.Type, "Type", false);
             TypedReference = CreateSignature(ElementType.TypedByRef, "TypedReference", true);
             Void = CreateSignature(ElementType.Void, "Void", true);
         }
@@ -221,14 +220,6 @@ namespace AsmResolver.Net.Cts
         /// Gets the System.String element type signature.
         /// </summary>
         public MsCorLibTypeSignature String
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the System.Type element type signature.
-        /// </summary>
-        public MsCorLibTypeSignature Type
         {
             get;
         }

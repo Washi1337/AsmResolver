@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AsmResolver.Net.Cil;
+using AsmResolver.Net.Cts.Collections;
 using AsmResolver.Net.Metadata;
 using AsmResolver.Net.Signatures;
 
@@ -20,6 +21,9 @@ namespace AsmResolver.Net.Cts
         private readonly IDictionary<MetadataToken, IMetadataMember> _cachedMembers = new Dictionary<MetadataToken, IMetadataMember>();
         private readonly LazyValue<MethodDefinition> _entrypoint;
 
+        private IDictionary<uint, ICollection<uint>> _nestedClasses = null;
+        private ICollection<uint> _topLevelTypes = null;
+        
         internal MetadataImage(MetadataHeader header)
         {
             Header = header ?? throw new ArgumentNullException(nameof(header));
@@ -134,6 +138,62 @@ namespace AsmResolver.Net.Cts
             return TryResolveMember(new MetadataToken(MetadataTokenType.TypeDef, 1), out var member)
                 ? (TypeDefinition) member
                 : null;
+        }
+
+        private void EnsureTypeTreeIsInitialized()
+        {
+            if (_nestedClasses == null)
+                InitializeTypeTree();
+        }
+
+        private void InitializeTypeTree()
+        {
+            _nestedClasses = new Dictionary<uint, ICollection<uint>>();
+
+            var tableStream = Header.GetStream<TableStream>();
+            var typeTable = (TypeDefinitionTable) tableStream.GetTable(MetadataTokenType.TypeDef);
+            var nestedClassTable = (NestedClassTable) tableStream.GetTable(MetadataTokenType.NestedClass);
+
+            var allNestedTypes = new HashSet<uint>();
+            foreach (var row in nestedClassTable)
+            {
+                uint type = row.Column1;
+                uint enclosingType = row.Column2;
+
+                if (!_nestedClasses.TryGetValue(enclosingType, out var nestedTypes))
+                {
+                    nestedTypes = new List<uint>();
+                    _nestedClasses.Add(enclosingType, nestedTypes);
+                }
+
+                nestedTypes.Add(row.MetadataToken.Rid);
+                allNestedTypes.Add(type);
+            }
+
+            _topLevelTypes = new List<uint>();
+            foreach (var row in typeTable)
+            {
+                if (!allNestedTypes.Contains(row.MetadataToken.Rid)) 
+                    _topLevelTypes.Add(row.MetadataToken.Rid);
+            }
+        }
+
+        internal ICollection<uint> GetTopLevelTypes()
+        {
+            EnsureTypeTreeIsInitialized();
+            return _topLevelTypes;
+        }
+
+        internal ICollection<uint> GetNestedClasses(uint typeRid)
+        {
+            EnsureTypeTreeIsInitialized();
+            if (!_nestedClasses.TryGetValue(typeRid, out var collection))
+            {
+                collection = new List<uint>();
+                _nestedClasses.Add(typeRid, collection);
+            }
+             
+            return collection;
         }
        
         internal bool TryGetCachedMember(MetadataToken token, out IMetadataMember member)

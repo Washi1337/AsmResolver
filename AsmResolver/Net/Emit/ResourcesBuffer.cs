@@ -13,9 +13,9 @@ namespace AsmResolver.Net.Emit
         {
             if (!_resources.TryGetValue(resource, out uint offset))
             {
-                _resources.Add(resource, _length);
+                offset = _length;
+                _resources.Add(resource, offset);
                 _length += (uint) resource.Data.Length + sizeof(uint);
-                return offset;
             }
             return offset;
         }

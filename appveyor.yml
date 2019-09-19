@@ -30,7 +30,7 @@
       - development
   
   image: Visual Studio 2017
-  version: 3.0.3-{branch}-build{build}
+  version: 3.0.4-{branch}-build{build}
   configuration: Release
 
   before_build:

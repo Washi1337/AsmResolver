@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/Washi1337/AsmResolver</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright $author$ 2016-2018</copyright>
+    <copyright>Copyright $author$ 2016-2019</copyright>
     <tags>.NET assembly inspector editor CIL x86 disassembler assembler metadata</tags>
   </metadata>
 </package>

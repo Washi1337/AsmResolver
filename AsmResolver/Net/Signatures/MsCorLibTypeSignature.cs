@@ -12,7 +12,7 @@ namespace AsmResolver.Net.Signatures
     /// Use this type of signature if you want to reference common types like <c>Int32</c> or <c>String</c>, as they
     /// result in fewer bytes emitted to the assembly.
     /// </remarks>
-    public sealed class MsCorLibTypeSignature : TypeSignature, IResolvable
+    public sealed class MsCorLibTypeSignature : TypeSignature
     {
         /// <summary>
         /// Translates a raw element type to a corlib type signature.
@@ -63,6 +63,11 @@ namespace AsmResolver.Net.Signatures
         public override ITypeDefOrRef ToTypeDefOrRef()
         {
             return Type;
+        }
+
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            return this;
         }
 
         /// <inheritdoc />

@@ -11,14 +11,22 @@ namespace AsmResolver.Net
     {
         internal static string GetFullName(this IMemberReference reference, IHasTypeSignature signature)
         {
-            var methodSignature = signature as MethodSignature;
-
-            var parameterString = methodSignature != null
+            var parameterString = signature is MethodSignature methodSignature
                 ? "(" + methodSignature.Parameters.Select(x => x.ParameterType).GetTypeArrayString() + ")"
                 : string.Empty;
 
+            if (reference.DeclaringType == null)
+            {
+                return string.Format("{0} {1}{2}", 
+                    signature.TypeSignature.FullName, 
+                    reference.Name, parameterString);
+            }
+            
             return string.Format("{0} {1}::{2}{3}",
-                signature.TypeSignature.FullName, reference.DeclaringType.FullName, reference.Name, parameterString);
+                signature.TypeSignature.FullName,
+                reference.DeclaringType.FullName, 
+                reference.Name,
+                parameterString);
         }
 
         internal static string GetTypeArrayString(this IEnumerable<ITypeDescriptor> types)

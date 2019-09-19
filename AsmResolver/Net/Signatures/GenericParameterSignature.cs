@@ -88,6 +88,26 @@ namespace AsmResolver.Net.Signatures
         /// <inheritdoc />
         public override IResolutionScope ResolutionScope => null;
 
+        public override TypeSignature InstantiateGenericTypes(IGenericContext context)
+        {
+            IGenericArgumentsProvider provider;
+            switch (ParameterType)
+            {
+                case GenericParameterType.Type:
+                    provider = context.Type;
+                    break;
+                case GenericParameterType.Method:
+                    provider = context.Method;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            if (Index >= 0 && Index < provider.GenericArguments.Count)
+                return provider.GenericArguments[Index];
+            return this;
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalLength(MetadataBuffer buffer)
         {
