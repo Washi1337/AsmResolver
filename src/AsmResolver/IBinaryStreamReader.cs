@@ -28,7 +28,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets the current position of the reader.
         /// </summary>
-        uint Position
+        uint FileOffset
         {
             get;
             set;
@@ -148,12 +148,12 @@ namespace AsmResolver
         /// <returns></returns>
         public static bool CanRead(this IBinaryStreamReader reader, int size)
         {
-            return (reader.Position - reader.StartPosition) + size <= reader.Length;
+            return (reader.FileOffset - reader.StartPosition) + size <= reader.Length;
         }
 
         public static byte[] ReadToEnd(this IBinaryStreamReader reader)
         {
-            int remainingByteCount = (int) (reader.Length - (reader.Position - reader.StartPosition));
+            int remainingByteCount = (int) (reader.Length - (reader.FileOffset - reader.StartPosition));
             var buffer = new byte[remainingByteCount];
             int read = reader.ReadBytes(buffer, 0, remainingByteCount);
             if (read != remainingByteCount)
@@ -190,12 +190,12 @@ namespace AsmResolver
         /// <returns>The string that was read from the stream.</returns>
         public static string ReadAlignedAsciiString(this IBinaryStreamReader reader, int align)
         {
-            var position = reader.Position;
+            var position = reader.FileOffset;
             var value = reader.ReadAsciiString();
             do
             {
-                reader.Position++;
-            } while ((reader.Position - position) % align != 0);
+                reader.FileOffset++;
+            } while ((reader.FileOffset - position) % align != 0);
             return value;
         }
         
@@ -206,7 +206,7 @@ namespace AsmResolver
         /// <param name="alignment">The boundary to use.</param>
         public static void Align(this IBinaryStreamReader reader, uint alignment)
         {
-            reader.Position = reader.Position.Align(alignment);
+            reader.FileOffset = reader.FileOffset.Align(alignment);
         }
         
     }

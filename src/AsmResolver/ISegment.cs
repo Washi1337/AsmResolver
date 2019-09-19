@@ -8,7 +8,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets the physical starting offset of the segment.
         /// </summary>
-        uint StartOffset
+        uint FileOffset
         {
             get;
         }

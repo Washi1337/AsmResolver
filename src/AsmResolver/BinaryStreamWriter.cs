@@ -20,7 +20,7 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public uint Position
+        public uint FileOffset
         {
             get => (uint) _stream.Position;
             set => _stream.Position = value;

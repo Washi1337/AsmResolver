@@ -9,7 +9,7 @@ namespace AsmResolver
     public class ByteArrayReader : IBinaryStreamReader
     {
         private readonly byte[] _data;
-        private uint _position;
+        private uint _fileOffset;
 
         /// <summary>
         /// Creates a new byte array reader that spans the entire array.
@@ -39,7 +39,7 @@ namespace AsmResolver
             StartPosition = start;
             Length = length;
             StartRva = startRva;
-            _position = start;
+            _fileOffset = start;
         }
 
         /// <inheritdoc />
@@ -55,14 +55,14 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public uint Position
+        public uint FileOffset
         {
-            get => _position;
-            set => _position = value;
+            get => _fileOffset;
+            set => _fileOffset = value;
         }
 
         /// <inheritdoc />
-        public uint Rva => _position - StartPosition + StartRva;
+        public uint Rva => _fileOffset - StartPosition + StartRva;
 
         /// <inheritdoc />
         public uint Length
@@ -87,11 +87,11 @@ namespace AsmResolver
         /// <inheritdoc />
         public byte[] ReadBytesUntil(byte value)
         {
-            int index = Array.IndexOf(_data, value, (int) _position);
+            int index = Array.IndexOf(_data, value, (int) _fileOffset);
             if (index == -1)
                 index = (int) (Length - 1);
 
-            var data = new byte[index - _position + 1];
+            var data = new byte[index - _fileOffset + 1];
             ReadBytes(data, 0, data.Length);
             return data;
         }
@@ -102,8 +102,8 @@ namespace AsmResolver
             if (count < 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
             
-            count = (int) Math.Min(count, (StartPosition + Length) - Position);
-            Buffer.BlockCopy(_data, (int) _position, buffer, startIndex, count);
+            count = (int) Math.Min(count, (StartPosition + Length) - FileOffset);
+            Buffer.BlockCopy(_data, (int) _fileOffset, buffer, startIndex, count);
             return count;
         }
 
@@ -111,16 +111,16 @@ namespace AsmResolver
         public byte ReadByte()
         {
             AssertCanRead(1);
-            return _data[_position++];
+            return _data[_fileOffset++];
         }
 
         /// <inheritdoc />
         public ushort ReadUInt16()
         {
             AssertCanRead(2);
-            ushort value = (ushort) (_data[_position]
-                                     | (_data[_position + 1] << 8));
-            _position += 2;
+            ushort value = (ushort) (_data[_fileOffset]
+                                     | (_data[_fileOffset + 1] << 8));
+            _fileOffset += 2;
             return value;
         }
 
@@ -128,11 +128,11 @@ namespace AsmResolver
         public uint ReadUInt32()
         {
             AssertCanRead(4);
-            uint value = unchecked((uint) (_data[_position]
-                                           | (_data[_position + 1] << 8)
-                                           | (_data[_position + 2] << 16)
-                                           | (_data[_position + 3] << 24)));
-            _position += 4;
+            uint value = unchecked((uint) (_data[_fileOffset]
+                                           | (_data[_fileOffset + 1] << 8)
+                                           | (_data[_fileOffset + 2] << 16)
+                                           | (_data[_fileOffset + 3] << 24)));
+            _fileOffset += 4;
             return value;
         }
 
@@ -140,15 +140,15 @@ namespace AsmResolver
         public ulong ReadUInt64()
         {
             AssertCanRead(8);
-            ulong value = unchecked((ulong) (_data[_position]
-                                             | ( (long) _data[_position + 1] << 8)
-                                             | ( (long) _data[_position + 2] << 16)
-                                             | ( (long) _data[_position + 3] << 24)
-                                             | ( (long) _data[_position + 4] << 32)
-                                             | ( (long) _data[_position + 5] << 40)
-                                             | ( (long) _data[_position + 6] << 48)
-                                             | ( (long) _data[_position + 7] << 56)));
-            _position += 8;
+            ulong value = unchecked((ulong) (_data[_fileOffset]
+                                             | ( (long) _data[_fileOffset + 1] << 8)
+                                             | ( (long) _data[_fileOffset + 2] << 16)
+                                             | ( (long) _data[_fileOffset + 3] << 24)
+                                             | ( (long) _data[_fileOffset + 4] << 32)
+                                             | ( (long) _data[_fileOffset + 5] << 40)
+                                             | ( (long) _data[_fileOffset + 6] << 48)
+                                             | ( (long) _data[_fileOffset + 7] << 56)));
+            _fileOffset += 8;
             return value;
         }
 
@@ -156,16 +156,16 @@ namespace AsmResolver
         public sbyte ReadSByte()
         {
             AssertCanRead(1);
-            return unchecked((sbyte) _data[_position++]);
+            return unchecked((sbyte) _data[_fileOffset++]);
         }
 
         /// <inheritdoc />
         public short ReadInt16()
         {
             AssertCanRead(2);
-            short value = (short) (_data[_position]
-                                   | (_data[_position + 1] << 8));
-            _position += 2;
+            short value = (short) (_data[_fileOffset]
+                                   | (_data[_fileOffset + 1] << 8));
+            _fileOffset += 2;
             return value;
         }
 
@@ -173,11 +173,11 @@ namespace AsmResolver
         public int ReadInt32()
         {
             AssertCanRead(4);
-            int value = _data[_position]
-                        | (_data[_position + 1] << 8)
-                        | (_data[_position + 2] << 16)
-                        | (_data[_position + 3] << 24);
-            _position += 4;
+            int value = _data[_fileOffset]
+                        | (_data[_fileOffset + 1] << 8)
+                        | (_data[_fileOffset + 2] << 16)
+                        | (_data[_fileOffset + 3] << 24);
+            _fileOffset += 4;
             return value;
         }
 
@@ -185,15 +185,15 @@ namespace AsmResolver
         public long ReadInt64()
         {
             AssertCanRead(8);
-            long value = (_data[_position]
-                          | ((long) _data[_position + 1] << 8)
-                          | ((long) _data[_position + 2] << 16)
-                          | ((long) _data[_position + 3] << 24)
-                          | ((long) _data[_position + 4] << 32)
-                          | ((long) _data[_position + 5] << 40)
-                          | ((long) _data[_position + 6] << 48)
-                          | ((long) _data[_position + 7] << 56));
-            _position += 8;
+            long value = (_data[_fileOffset]
+                          | ((long) _data[_fileOffset + 1] << 8)
+                          | ((long) _data[_fileOffset + 2] << 16)
+                          | ((long) _data[_fileOffset + 3] << 24)
+                          | ((long) _data[_fileOffset + 4] << 32)
+                          | ((long) _data[_fileOffset + 5] << 40)
+                          | ((long) _data[_fileOffset + 6] << 48)
+                          | ((long) _data[_fileOffset + 7] << 56));
+            _fileOffset += 8;
             return value;
         }
 

@@ -21,8 +21,4 @@
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Compile Remove="DataSegment.cs" />
-    </ItemGroup>
-
 </Project>
