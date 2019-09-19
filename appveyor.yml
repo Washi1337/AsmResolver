@@ -53,6 +53,10 @@
   version: 4.0.0-alpha-build{build}
   configuration: Release
 
+  skip_commits:
+    files:
+      - docs/*
+      
   before_build:
     - dotnet restore
     

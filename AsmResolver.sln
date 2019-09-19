@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{ACBC3012-21B2-463C-8A8C-1621AA2D4E9D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34A95168-A162-4F6A-803B-B6F221FE9EA6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{786C1732-8C96-45DD-97BB-639C9AA7F45B}"
@@ -9,6 +7,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver", "src\AsmResolver\AsmResolver.csproj", "{4EA3F800-1A1B-4465-931F-4E9949C3373B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Tests", "test\AsmResolver.Tests\AsmResolver.Tests.csproj", "{7609C0D1-B65C-4C12-B520-EAF611B0E68F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{58937D3F-B878-468B-AE3C-1C9CCEF74179}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
