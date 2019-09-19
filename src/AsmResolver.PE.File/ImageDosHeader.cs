@@ -5,7 +5,7 @@ namespace AsmResolver.PE.File
     /// <summary>
     /// Represents the DOS header (also known as the MZ header) in the portable executable (PE) file format.
     /// </summary>
-    public class DosHeader : ISegment
+    public class ImageDosHeader : ISegment
     {
         public const ushort ValidPEMagic = 0x5A4D;
         public const int MinimalDosHeaderLength = 0x40;
@@ -33,12 +33,12 @@ namespace AsmResolver.PE.File
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The read DOS header.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the input stream does not point to a valid DOS header.</exception>
-        public static DosHeader FromReader(IBinaryStreamReader reader)
+        public static ImageDosHeader FromReader(IBinaryStreamReader reader)
         {
             var header = new byte[MinimalDosHeaderLength];
             if (reader.ReadBytes(header, 0, header.Length) != header.Length)
                 throw new BadImageFormatException();
-            return new DosHeader(header);
+            return new ImageDosHeader(header);
         }
 
         private readonly byte[] _stub;
@@ -46,7 +46,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Creates a new DOS header with the default contents.
         /// </summary>
-        public DosHeader()
+        public ImageDosHeader()
             : this(DefaultDosHeader)
         {
         }
@@ -56,7 +56,7 @@ namespace AsmResolver.PE.File
         /// </summary>
         /// <param name="stub">The raw contents of the header.</param>
         /// <exception cref="BadImageFormatException">Occurs when the input data does not contain a valid DOS header.</exception>
-        public DosHeader(byte[] stub)
+        public ImageDosHeader(byte[] stub)
         {
             _stub = stub ?? throw new ArgumentNullException(nameof(stub));
 
