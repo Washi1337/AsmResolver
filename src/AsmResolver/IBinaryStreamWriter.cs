@@ -23,13 +23,14 @@ namespace AsmResolver
         {
             get;
         }
-        
+
         /// <summary>
         /// Writes a buffer of data to the stream.
         /// </summary>
         /// <param name="buffer">The buffer to write to the stream.</param>
+        /// <param name="startIndex">The index to start reading from the buffer.</param>
         /// <param name="count">The amount of bytes of the buffer to write.</param>
-        void WriteBytes(byte[] buffer, int count);
+        void WriteBytes(byte[] buffer, int startIndex, int count);
 
         /// <summary>
         /// Writes a single byte to the stream.
@@ -105,7 +106,7 @@ namespace AsmResolver
         /// <param name="buffer">The data to write.</param>
         public static void WriteBytes(this IBinaryStreamWriter writer, byte[] buffer)
         {
-            writer.WriteBytes(buffer, buffer.Length);
+            writer.WriteBytes(buffer, 0, buffer.Length);
         }
 
         /// <summary>
@@ -138,5 +139,6 @@ namespace AsmResolver
             align--;
             writer.WriteZeroes((((int)writer.Position + align) & ~align) - (int)writer.Position);
         }
+        
     }
 }
