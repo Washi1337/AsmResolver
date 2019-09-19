@@ -1,6 +1,9 @@
 namespace AsmResolver.PE.File
 {
-    public enum ImageMachineType : ushort
+    /// <summary>
+    /// Provides members for each processor architecture that a portable executable (PE) file can encode for. 
+    /// </summary>
+    public enum MachineType : ushort
     {
         Unknown = 0x0000,
         Am33 = 0x01D3,

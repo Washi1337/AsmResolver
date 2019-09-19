@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {
@@ -8,7 +9,7 @@ namespace AsmResolver.PE.File
     /// </summary>
     public class PEFile
     {
-        public const uint ValidPESignature = 0x4550; //
+        public const uint ValidPESignature = 0x4550; // "PE\0\0"
         
         /// <summary>
         /// Reads a PE file from the disk.
@@ -40,14 +41,14 @@ namespace AsmResolver.PE.File
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEFile FromReader(IBinaryStreamReader reader)
         {
-            var dosHeader = ImageDosHeader.FromReader(reader);
+            var dosHeader = Headers.DosHeader.FromReader(reader);
             reader.FileOffset += dosHeader.NextHeaderOffset;
 
             uint signature = reader.ReadUInt32();
             if (signature != ValidPESignature)
                 throw new BadImageFormatException();
 
-            var fileHeader = ImageFileHeader.FromReader(reader);
+            var fileHeader = Headers.FileHeader.FromReader(reader);
             
             var file = new PEFile
             {
@@ -64,15 +65,18 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Gets the DOS header of the PE file.
+        /// Gets or sets the DOS header of the PE file.
         /// </summary>
-        public ImageDosHeader DosHeader
+        public DosHeader DosHeader
         {
             get;
             set;
         }
 
-        public ImageFileHeader FileHeader
+        /// <summary>
+        /// Gets or sets the COFF file header of the PE file.
+        /// </summary>
+        public FileHeader FileHeader
         {
             get;
             set;

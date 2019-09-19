@@ -1,12 +1,12 @@
 using System;
 
-namespace AsmResolver.PE.File
+namespace AsmResolver.PE.File.Headers
 {
     /// <summary>
-    /// Provides valid attributes for describing a windows image.
+    /// Provides valid attributes for describing a portable executable file.
     /// </summary>
     [Flags]
-    public enum ImageCharacteristics : ushort
+    public enum Characteristics : ushort
     {
         RelocsStripped = 0x0001,
         Image = 0x0002,
