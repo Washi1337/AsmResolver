@@ -16,7 +16,7 @@ Get the latest stable build from the [nuget feed](https://www.nuget.org/packages
 |--------|--------|
 | master | [![Master branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/master.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/master) |
 | development | [![Development branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/development.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/development)
-
+| v4     |  [![Version 4 branch build status](https://img.shields.io/appveyor/ci/Washi1337/AsmResolver/v4.svg)](https://ci.appveyor.com/project/Washi1337/asmresolver/branch/v4) |
 
 Alternatively, you can build the project yourself using MSBuild or an IDE that works with MSBuild (such as Visual Studio and JetBrains Rider). The project is built upon .NET Framework 4.0. If you want to compile the test libraries as well, make sure to also restore all nuget packages.
 

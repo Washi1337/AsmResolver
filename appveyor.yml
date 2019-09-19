@@ -4,7 +4,7 @@
       - master
 
   image: Visual Studio 2017
-  version: 3.0.2-{branch}-build{build}
+  version: 3.0.3-{branch}-build{build}
   configuration: Release
   
   before_build:
@@ -30,7 +30,7 @@
       - development
   
   image: Visual Studio 2017
-  version: 3.0.2-{branch}-build{build}
+  version: 3.0.3-{branch}-build{build}
   configuration: Release
 
   before_build:
@@ -43,3 +43,23 @@
   artifacts:
     - path: AsmResolver/bin/Release
       name: Bleeding edge
+
+-
+  branches:
+    only:
+      - v4
+  
+  image: Visual Studio 2019
+  version: 4.0.0-alpha-build{build}
+  configuration: Release
+
+  before_build:
+    - dotnet restore
+    
+  build:
+    publish_nuget: false
+    verbosity: minimal
+
+  artifacts:
+    - path: src/AsmResolver/bin/Release
+      name: alpha-v4
