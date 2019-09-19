@@ -59,11 +59,15 @@ namespace AsmResolver
             private set;
         }
 
+        /// <summary>
+        /// Gets the data that is stored in the segment.
+        /// </summary>
         public byte[] Data
         {
             get;
         }
 
+        /// <inheritdoc />
         public void UpdateOffsets(uint newFileOffset, uint newRva)
         {
             FileOffset = newFileOffset;
