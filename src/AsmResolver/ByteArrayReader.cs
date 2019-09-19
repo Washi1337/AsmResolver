@@ -104,6 +104,8 @@ namespace AsmResolver
             
             count = (int) Math.Min(count, (StartPosition + Length) - FileOffset);
             Buffer.BlockCopy(_data, (int) _fileOffset, buffer, startIndex, count);
+            _fileOffset += (uint) count;
+            
             return count;
         }
 

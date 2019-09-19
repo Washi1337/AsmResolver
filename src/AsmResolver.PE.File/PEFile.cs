@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -42,18 +43,29 @@ namespace AsmResolver.PE.File
         public static PEFile FromReader(IBinaryStreamReader reader)
         {
             var dosHeader = DosHeader.FromReader(reader);
-            reader.FileOffset += dosHeader.NextHeaderOffset;
+            reader.FileOffset = dosHeader.NextHeaderOffset;
 
             uint signature = reader.ReadUInt32();
             if (signature != ValidPESignature)
                 throw new BadImageFormatException();
 
-            return new PEFile
+            var peFile = new PEFile
             {
                 DosHeader = dosHeader,
                 FileHeader = FileHeader.FromReader(reader),
                 OptionalHeader = OptionalHeader.FromReader(reader)
             };
+
+            reader.FileOffset = peFile.OptionalHeader.FileOffset + peFile.FileHeader.SizeOfOptionalHeader;
+
+            for (int i = 0; i < peFile.FileHeader.NumberOfSections; i++)
+            {
+                var header = SectionHeader.FromReader(reader);
+                var contentsReader = reader.Fork(header.PointerToRawData, header.SizeOfRawData);
+                peFile.Sections.Add(new PESection(header, DataDirectory.FromReader(contentsReader)));
+            }
+            
+            return peFile;
         }
 
         private PEFile()
@@ -70,7 +82,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Gets or sets the COFF file header of the PE file.
+        /// Gets or sets the COFF file header of the portable executable (PE) file.
         /// </summary>
         public FileHeader FileHeader
         {
@@ -79,12 +91,25 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Gets or sets the optional header of the PE file.
+        /// Gets or sets the optional header of the portable executable (PE) file.
         /// </summary>
         public OptionalHeader OptionalHeader
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets a collection of sections present in the portable executable (PE) file.
+        /// </summary>
+        public IList<PESection> Sections
+        {
+            get;
+        } = new List<PESection>();
+
+        public void Write(IBinaryStreamWriter writer)
+        {
+            
         }
         
     }

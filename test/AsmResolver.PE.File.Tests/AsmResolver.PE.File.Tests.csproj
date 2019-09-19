@@ -17,8 +17,4 @@
       <ProjectReference Include="..\TestBinaries\DotNet\HelloWorld\HelloWorld.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Class1.cs" />
-    </ItemGroup>
-
 </Project>

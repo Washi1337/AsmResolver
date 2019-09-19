@@ -8,7 +8,6 @@ namespace AsmResolver.PE.File.Tests
         public void t()
         {
             var peFile = PEFile.FromFile(typeof(HelloWorld.Program).Assembly.Location);
-            
         }
     }
 }
