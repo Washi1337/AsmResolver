@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <PackageVersion>4.0.0</PackageVersion>
         <Title>AsmResolver</Title>
         <Description>The base library for the AsmResolver executable file inspection toolsuite.</Description>
@@ -11,6 +10,7 @@
         <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>exe pe dotnet cil inspection manipulation assembly disassembly</PackageTags>
+        <TargetFrameworks>net40;netstandard2.0</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
