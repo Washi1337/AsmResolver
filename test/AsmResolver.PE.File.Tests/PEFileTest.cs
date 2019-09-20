@@ -14,6 +14,34 @@ namespace AsmResolver.PE.File.Tests
         {
             _fixture = fixture;
         }
+
+        [Fact]
+        public void ValidRvaToFileOffset()
+        {
+            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Equal(0x0000088Eu, peFile.RvaToFileOffset(0x0000268Eu));
+        }
+
+        [Fact]
+        public void InvalidRvaToFileOffset()
+        {
+            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Throws<ArgumentOutOfRangeException>(() => peFile.RvaToFileOffset(0x3000));
+        }
+
+        [Fact]
+        public void ValidFileOffsetToRva()
+        {
+            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Equal(0x0000268Eu, peFile.FileOffsetToRva(0x0000088Eu));
+        }
+
+        [Fact]
+        public void InvalidFileOffsetToRva()
+        {
+            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Throws<ArgumentOutOfRangeException>(() => peFile.FileOffsetToRva(0x2000));
+        }
         
         [Fact]
         public void RebuildNetPENoChange()

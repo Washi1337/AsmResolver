@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -97,6 +98,5 @@ namespace AsmResolver.PE.File
         {
             return Header.Name;
         }
-        
     }
 }

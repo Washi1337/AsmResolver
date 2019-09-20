@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -25,7 +26,7 @@ namespace AsmResolver.PE.File
     /// Models a file using the portable executable (PE) file format. It provides access to various PE headers, as well
     /// as the raw contents of each section present in the file. 
     /// </summary>
-    public class PEFile
+    public class PEFile : IOffsetConverter
     {
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
         
@@ -80,8 +81,12 @@ namespace AsmResolver.PE.File
             for (int i = 0; i < peFile.FileHeader.NumberOfSections; i++)
             {
                 var header = SectionHeader.FromReader(reader);
+                
                 var contentsReader = reader.Fork(header.PointerToRawData, header.SizeOfRawData);
-                peFile.Sections.Add(new PESection(header, DataSegment.FromReader(contentsReader)));
+                var contents = DataSegment.FromReader(contentsReader);
+                contents.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
+                
+                peFile.Sections.Add(new PESection(header, contents));
             }
             
             // Data between section headers and sections.
@@ -132,10 +137,31 @@ namespace AsmResolver.PE.File
         } = new List<PESection>();
 
 
+        /// <summary>
+        /// Gets or sets the padding data in between the last section header and the first section.
+        /// </summary>
         public IReadableSegment ExtraSectionData
         {
             get;
             set;
+        }
+
+        /// <inheritdoc />
+        public uint FileOffsetToRva(uint fileOffset)
+        {
+            var section = Sections.FirstOrDefault(s => s.Header.ContainsFileOffset(fileOffset));
+            if (section ==null)
+                throw new ArgumentOutOfRangeException(nameof(fileOffset));
+            return section.Header.FileOffsetToRva(fileOffset);
+        }
+
+        /// <inheritdoc />
+        public uint RvaToFileOffset(uint rva)
+        {
+            var section = Sections.FirstOrDefault(s => s.Header.ContainsRva(rva));
+            if (section ==null)
+                throw new ArgumentOutOfRangeException(nameof(rva));
+            return section.Header.RvaToFileOffset(rva);
         }
 
         public void UpdateHeaders()

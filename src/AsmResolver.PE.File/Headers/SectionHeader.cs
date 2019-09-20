@@ -23,7 +23,7 @@ namespace AsmResolver.PE.File.Headers
     /// <summary>
     /// Represents a single section header in the portable executable (PE) file format.
     /// </summary>
-    public class SectionHeader : ISegment
+    public class SectionHeader : ISegment, IOffsetConverter
     {
         public const int SectionHeaderSize = 8 * sizeof(byte) +
                                              6 * sizeof (uint) +
@@ -207,6 +207,43 @@ namespace AsmResolver.PE.File.Headers
         {
             return GetPhysicalSize();
         }
+
+        /// <summary>
+        /// Determines whether the provided file offset falls within the section that the header describes. 
+        /// </summary>
+        /// <param name="fileOffset">The offset to check.</param>
+        /// <returns><c>true</c> if the file offset falls within the section, <c>false</c> otherwise.</returns>
+        public bool ContainsFileOffset(uint fileOffset)
+        {
+            return PointerToRawData <= fileOffset && fileOffset < PointerToRawData + SizeOfRawData;
+        }
+        
+        /// <summary>
+        /// Determines whether the provided virtual address falls within the section that the header describes. 
+        /// </summary>
+        /// <param name="rva">The virtual address to check.</param>
+        /// <returns><c>true</c> if the virtual address falls within the section, <c>false</c> otherwise.</returns>
+        public bool ContainsRva(uint rva)
+        {
+            return VirtualAddress <= rva && rva < VirtualAddress + VirtualSize;
+        }
+        
+        /// <inheritdoc />
+        public uint FileOffsetToRva(uint fileOffset)
+        {
+            if (!ContainsFileOffset(fileOffset))
+                throw new ArgumentOutOfRangeException(nameof(fileOffset));
+            return fileOffset - PointerToRawData + VirtualAddress;
+        }
+
+        /// <inheritdoc />
+        public uint RvaToFileOffset(uint rva)
+        {
+            if (!ContainsRva(rva))
+                throw new ArgumentOutOfRangeException(nameof(rva));
+            return rva - VirtualAddress + PointerToRawData;
+        }
+
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
