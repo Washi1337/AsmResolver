@@ -149,21 +149,83 @@ namespace AsmResolver.PE.File
         /// <inheritdoc />
         public uint FileOffsetToRva(uint fileOffset)
         {
-            var section = Sections.FirstOrDefault(s => s.Header.ContainsFileOffset(fileOffset));
-            if (section ==null)
-                throw new ArgumentOutOfRangeException(nameof(fileOffset));
-            return section.Header.FileOffsetToRva(fileOffset);
+            return GetSectionContainingOffset(fileOffset)
+                .Header.FileOffsetToRva(fileOffset);
         }
 
         /// <inheritdoc />
         public uint RvaToFileOffset(uint rva)
         {
-            var section = Sections.FirstOrDefault(s => s.Header.ContainsRva(rva));
-            if (section ==null)
-                throw new ArgumentOutOfRangeException(nameof(rva));
-            return section.Header.RvaToFileOffset(rva);
+            return GetSectionContainingRva(rva)
+                .Header.RvaToFileOffset(rva);
         }
 
+        /// <summary>
+        /// Finds the section containing the provided file offset.
+        /// </summary>
+        /// <param name="fileOffset">The file offset.</param>
+        /// <returns>The section containing the file offset.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the file offset does not fall within any of the sections.</exception>
+        public PESection GetSectionContainingOffset(uint fileOffset)
+        {
+            var section = Sections.FirstOrDefault(s => s.Header.ContainsFileOffset(fileOffset));
+            if (section == null)
+                throw new ArgumentOutOfRangeException(nameof(fileOffset));
+            return section;
+        }
+
+        /// <summary>
+        /// Finds the section containing the provided virtual address.
+        /// </summary>
+        /// <param name="rva">The virtual address.</param>
+        /// <returns>The section containing the virtual address.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the virtual address does not fall within any of the sections.</exception>
+        public PESection GetSectionContainingRva(uint rva)
+        {
+            var section = Sections.FirstOrDefault(s => s.Header.ContainsRva(rva));
+            if (section == null)
+                throw new ArgumentOutOfRangeException(nameof(rva));
+            return section;
+        }
+
+        /// <summary>
+        /// Obtains a reader that spans the provided data directory.
+        /// </summary>
+        /// <param name="dataDirectory">The data directory to read.</param>
+        /// <returns>The reader.</returns>
+        public IBinaryStreamReader GetDataDirectoryReader(DataDirectory dataDirectory)
+        {
+            var section = GetSectionContainingRva(dataDirectory.VirtualAddress);
+            uint fileOffset = section.Header.RvaToFileOffset(dataDirectory.VirtualAddress);
+            return section.Contents.CreateReader(fileOffset, dataDirectory.Size);
+        }
+
+        /// <summary>
+        /// Recomputes file offsets and sizes in the file, optional and section headers.
+        /// </summary>
+        /// <remarks>
+        /// Affected fields in the file header include:
+        /// <list type="bullet">
+        ///     <item>
+        ///         <term>SizeOfOptionalHeader</term>
+        ///     </item>
+        /// </list>
+        /// Affected fields in the optional header include:
+        /// <list type="bullet">
+        ///     <item>
+        ///         <term>SizeOfHeaders</term>
+        ///     </item>
+        /// </list>
+        /// Affected fields in the section header include:
+        /// <list type="bullet">
+        ///     <item>
+        ///         <term>VirtualAddress</term>
+        ///         <term>VirtualSize</term>
+        ///         <term>PointerToRawData</term>
+        ///         <term>SizeOfRawData</term>
+        ///     </item>
+        /// </list>
+        /// </remarks>
         public void UpdateHeaders()
         {
             FileHeader.NumberOfSections = (ushort) Sections.Count;
@@ -188,6 +250,9 @@ namespace AsmResolver.PE.File
 
         }
 
+        /// <summary>
+        /// Aligns all sections according to the file and section alignment properties in the optional header. 
+        /// </summary>
         public void AlignSections()
         {
             for (int i = 0; i < Sections.Count; i++)
@@ -211,6 +276,10 @@ namespace AsmResolver.PE.File
             }
         }
         
+        /// <summary>
+        /// Writes the PE file to the provided output stream.
+        /// </summary>
+        /// <param name="writer">The output stream to write to.</param>
         public void Write(IBinaryStreamWriter writer)
         {
             UpdateHeaders();

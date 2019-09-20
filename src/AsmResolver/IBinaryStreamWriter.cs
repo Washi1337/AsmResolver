@@ -1,4 +1,3 @@
-using System.Text;
 // AsmResolver - Executable file format inspection library 
 // Copyright (C) 2016-2019 Washi
 // 
@@ -15,6 +14,8 @@ using System.Text;
 // You should have received a copy of the GNU Lesser General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+using System.Text;
 
 namespace AsmResolver
 {
