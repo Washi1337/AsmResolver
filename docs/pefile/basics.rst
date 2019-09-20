@@ -1,5 +1,5 @@
-Raw PE files
-============
+Basic PE File operations
+========================
 
 Every raw PE file interaction is done through classes defined by the **AsmResolver.PE.File** namespace:
 
