@@ -8,7 +8,17 @@ namespace AsmResolver.PE.File
     public class PESection : ISegment
     {
         /// <summary>
-        /// Creates a new section.
+        /// Creates a new empty section.
+        /// </summary>
+        /// <param name="name">The name of the section.</param>
+        /// <param name="characteristics">The section flags.</param>
+        public PESection(string name, SectionFlags characteristics)
+        {
+            Header = new SectionHeader(name, characteristics);
+        }
+        
+        /// <summary>
+        /// Creates a new section with the provided contents.
         /// </summary>
         /// <param name="header">The header to associate to the section.</param>
         /// <param name="contents">The contents of the section.</param>

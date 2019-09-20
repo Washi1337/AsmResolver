@@ -8,6 +8,11 @@ namespace AsmResolver.PE.File.Headers
     /// </summary>
     public class SectionHeader : ISegment
     {
+        public const int SectionHeaderSize = 8 * sizeof(byte) +
+                                             6 * sizeof (uint) +
+                                             2 * sizeof (ushort) +
+                                             1 * sizeof (uint);
+
         private uint _fileOffset;
         private string _name;
 
@@ -23,7 +28,7 @@ namespace AsmResolver.PE.File.Headers
             var nameBytes = new byte[8];
             reader.ReadBytes(nameBytes, 0, nameBytes.Length);
             
-            return new SectionHeader(Encoding.UTF8.GetString(nameBytes).TrimEnd())
+            return new SectionHeader(Encoding.UTF8.GetString(nameBytes).Replace("\0", ""), 0)
             {
                 _fileOffset = offset,
                 VirtualSize = reader.ReadUInt32(),
@@ -37,14 +42,16 @@ namespace AsmResolver.PE.File.Headers
                 Characteristics = (SectionFlags) reader.ReadUInt32()
             };
         }
-        
+
         /// <summary>
         /// Creates a new section header with the provided name.
         /// </summary>
         /// <param name="name">The name of the new section.</param>
-        public SectionHeader(string name)
+        /// <param name="characteristics">The section flags to assign.</param>
+        public SectionHeader(string name, SectionFlags characteristics)
         {
             Name = name;
+            Characteristics = characteristics;
         }
 
         /// <inheritdoc />
@@ -175,10 +182,7 @@ namespace AsmResolver.PE.File.Headers
         /// <inheritdoc />
         public uint GetPhysicalSize()
         {
-            return 8 * sizeof(byte) +
-                   6 * sizeof (uint) +
-                   2 * sizeof (ushort) +
-                   1 * sizeof (uint);
+            return SectionHeaderSize;
         }
 
         /// <inheritdoc />
@@ -208,7 +212,11 @@ namespace AsmResolver.PE.File.Headers
         /// <inheritdoc />
         public override string ToString()
         {
-            return$"{Name} ({nameof(VirtualAddress)}: {VirtualAddress:X8}, {nameof(VirtualSize)}: {VirtualSize:X8}, {nameof(PointerToRawData)}: {PointerToRawData:X8}, {nameof(SizeOfRawData)}: {SizeOfRawData:X8})";
+            return $"{Name} ({nameof(VirtualAddress)}: {VirtualAddress:X8}, " +
+                   $"{nameof(VirtualSize)}: {VirtualSize:X8}, " +
+                   $"{nameof(PointerToRawData)}: {PointerToRawData:X8}, " +
+                   $"{nameof(SizeOfRawData)}: {SizeOfRawData:X8}, " +
+                   $"{nameof(Characteristics)}: {Characteristics})";
         }
         
     }

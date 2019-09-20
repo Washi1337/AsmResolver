@@ -28,13 +28,18 @@ namespace AsmResolver.Tests
             return path;
         }
 
+        public string GetTestExecutable(string testClass, string testMethod, string fileName)
+        {
+            return Path.Combine(GetTestDirectory(testClass, testMethod), fileName + ".exe");
+        }
+
         public void RebuildAndRunExe(string testClass, string testMethod, 
             PEFile peFile, 
             string fileName, 
             string expectedOutput,
             int timeout = 5000)
         {
-            string fullName = Path.Combine(GetTestDirectory(testClass, testMethod), fileName + ".exe");
+            string fullName = GetTestExecutable(testClass, testMethod, fileName);
 
             using (var fs = File.Create(fullName))
             {

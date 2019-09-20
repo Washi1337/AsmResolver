@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -134,27 +133,45 @@ namespace AsmResolver.PE.File
                 FileHeader.FileOffset + FileHeader.GetVirtualSize());
 
             FileHeader.SizeOfOptionalHeader = (ushort) OptionalHeader.GetPhysicalSize();
-
+            OptionalHeader.SizeOfHeaders = (OptionalHeader.FileOffset
+                                            + FileHeader.SizeOfOptionalHeader
+                                            + SectionHeader.SectionHeaderSize * (uint) Sections.Count)
+                .Align(OptionalHeader.FileAlignment);
+            
             AlignSections();
+
+            var lastSection = Sections[Sections.Count - 1];
+            OptionalHeader.SizeOfImage = lastSection.Header.VirtualAddress + lastSection.Header.VirtualSize;
+
         }
 
         public void AlignSections()
         {
-            foreach (var section in Sections)
+            for (int i = 0; i < Sections.Count; i++)
             {
+                var section = Sections[i];
                 var header = section.Header;
-                
-                header.PointerToRawData = header.PointerToRawData.Align(OptionalHeader.FileAlignment);
+
+                uint fileOffset = i > 0
+                    ? Sections[i - 1].FileOffset + Sections[i - 1].GetPhysicalSize()
+                    : OptionalHeader.SizeOfHeaders;
+                uint rva = i > 0
+                    ? Sections[i - 1].Rva + Sections[i - 1].GetVirtualSize()
+                    : OptionalHeader.SizeOfHeaders.Align(OptionalHeader.SectionAlignment);
+
+                header.PointerToRawData = fileOffset.Align(OptionalHeader.FileAlignment);
                 header.SizeOfRawData = section.Contents.GetPhysicalSize().Align(OptionalHeader.FileAlignment);
-                header.VirtualAddress = header.PointerToRawData.Align(OptionalHeader.SectionAlignment);
+                header.VirtualAddress = rva.Align(OptionalHeader.SectionAlignment);
                 header.VirtualSize = section.Contents.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
-                
+
                 section.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
             }
         }
         
         public void Write(IBinaryStreamWriter writer)
         {
+            UpdateHeaders();
+            
             // Dos header.
             DosHeader.Write(writer);
             
@@ -179,6 +196,7 @@ namespace AsmResolver.PE.File
             {
                 writer.FileOffset = section.Header.PointerToRawData;
                 section.Contents.Write(writer);
+                writer.Align(OptionalHeader.FileAlignment);
             }
         }
         
