@@ -75,8 +75,6 @@ The **Sections** property is mutable, which means you can add new sections and r
 
         peFile.Sections.Add(section);
 
-Note that while this is possible, it does not update the contents of the existing sections. 
-
 Writing PE files
 ----------------
 
@@ -88,3 +86,5 @@ Writing PE files can be done through the **PEFile.Write** method:
     {
         peFile.Write(new BinaryStreamWriter(fs));
     }
+
+AsmResolver will then reassemble the file with all the changes you made. Note that this will also recalculate some fields in the headers, such as **FileHeader.NumberOfSections**. Furthermore, it will also recalculate the offsets and virtual addresses of each section.

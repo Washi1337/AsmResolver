@@ -16,9 +16,9 @@ The higher level of abstraction you go, the easier the library is to use and typ
 
 
 Table of Contents:
+------------------
 
 .. toctree::
    :maxdepth: 2
 
-   index
    pefile
