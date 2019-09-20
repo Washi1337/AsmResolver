@@ -9,7 +9,7 @@ namespace AsmResolver.PE.File.Headers
     {
         public const ushort ValidPEMagic = 0x5A4D;
         public const int MinimalDosHeaderLength = 0x40;
-        public const int NewHeaderFieldOffset = 0x3C;
+        public const int NextHeaderFieldOffset = 0x3C;
         public const int DefaultNewHeaderOffset = 0x80;
 
         private static readonly byte[] DefaultDosHeader = {
@@ -35,10 +35,25 @@ namespace AsmResolver.PE.File.Headers
         /// <exception cref="BadImageFormatException">Occurs when the input stream does not point to a valid DOS header.</exception>
         public static DosHeader FromReader(IBinaryStreamReader reader)
         {
-            var header = new byte[MinimalDosHeaderLength];
-            if (reader.ReadBytes(header, 0, header.Length) != header.Length)
+            var stub = new byte[DefaultNewHeaderOffset];
+            
+            ushort magic = reader.ReadUInt16();
+            if (magic != ValidPEMagic)
                 throw new BadImageFormatException();
-            return new DosHeader(header);
+
+            reader.FileOffset += NextHeaderFieldOffset - 2;
+            uint nextHeaderOffset = reader.ReadUInt32();
+
+            if (nextHeaderOffset != DefaultNewHeaderOffset)
+                Array.Resize(ref stub, (int) nextHeaderOffset);
+
+            reader.FileOffset -= NextHeaderFieldOffset + 4;
+            reader.ReadBytes(stub, 0, stub.Length);
+
+            return new DosHeader(stub)
+            {
+                NextHeaderOffset = nextHeaderOffset
+            };
         }
 
         private readonly byte[] _stub;
@@ -50,24 +65,15 @@ namespace AsmResolver.PE.File.Headers
             : this(DefaultDosHeader)
         {
         }
-
+        
         /// <summary>
         /// Creates a new DOS header with the provided contents.
         /// </summary>
         /// <param name="stub">The raw contents of the header.</param>
         /// <exception cref="BadImageFormatException">Occurs when the input data does not contain a valid DOS header.</exception>
-        public DosHeader(byte[] stub)
+        private DosHeader(byte[] stub)
         {
             _stub = stub ?? throw new ArgumentNullException(nameof(stub));
-
-            var reader = new ByteArrayReader(stub);
-
-            ushort magic = reader.ReadUInt16();
-            if (magic != ValidPEMagic)
-                throw new BadImageFormatException();
-
-            reader.FileOffset += NewHeaderFieldOffset - 2;
-            NextHeaderOffset = reader.ReadUInt32();
         }
 
         /// <summary>
@@ -105,9 +111,9 @@ namespace AsmResolver.PE.File.Headers
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            writer.WriteBytes(_stub, 0, NewHeaderFieldOffset);
+            writer.WriteBytes(_stub, 0, NextHeaderFieldOffset);
             writer.WriteUInt32(NextHeaderOffset);
-            writer.WriteBytes(_stub, NewHeaderFieldOffset + 4, _stub.Length - NewHeaderFieldOffset - 4);
+            writer.WriteBytes(_stub, NextHeaderFieldOffset + 4, _stub.Length - NextHeaderFieldOffset - 4);
         }
         
     }

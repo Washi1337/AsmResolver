@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -42,6 +43,7 @@ namespace AsmResolver.PE.File
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEFile FromReader(IBinaryStreamReader reader)
         {
+            // DOS header.
             var dosHeader = DosHeader.FromReader(reader);
             reader.FileOffset = dosHeader.NextHeaderOffset;
 
@@ -49,6 +51,7 @@ namespace AsmResolver.PE.File
             if (signature != ValidPESignature)
                 throw new BadImageFormatException();
 
+            // NT headers.
             var peFile = new PEFile
             {
                 DosHeader = dosHeader,
@@ -56,14 +59,19 @@ namespace AsmResolver.PE.File
                 OptionalHeader = OptionalHeader.FromReader(reader)
             };
 
+            // Section headers.
             reader.FileOffset = peFile.OptionalHeader.FileOffset + peFile.FileHeader.SizeOfOptionalHeader;
-
             for (int i = 0; i < peFile.FileHeader.NumberOfSections; i++)
             {
                 var header = SectionHeader.FromReader(reader);
                 var contentsReader = reader.Fork(header.PointerToRawData, header.SizeOfRawData);
                 peFile.Sections.Add(new PESection(header, DataSegment.FromReader(contentsReader)));
             }
+            
+            // Data between section headers and sections.
+            int extraSectionDataLength = (int) (peFile.OptionalHeader.SizeOfHeaders - reader.FileOffset);
+            if (extraSectionDataLength != 0)
+                peFile.ExtraSectionData = DataSegment.FromReader(reader, extraSectionDataLength);
             
             return peFile;
         }
@@ -107,6 +115,44 @@ namespace AsmResolver.PE.File
             get;
         } = new List<PESection>();
 
+
+        public IReadableSegment ExtraSectionData
+        {
+            get;
+            set;
+        }
+
+        public void UpdateHeaders()
+        {
+            FileHeader.NumberOfSections = (ushort) Sections.Count;
+            
+            FileHeader.UpdateOffsets(
+                DosHeader.NextHeaderOffset + 4, 
+                DosHeader.NextHeaderOffset + 4);
+            OptionalHeader.UpdateOffsets(
+                FileHeader.FileOffset + FileHeader.GetPhysicalSize(),
+                FileHeader.FileOffset + FileHeader.GetVirtualSize());
+
+            FileHeader.SizeOfOptionalHeader = (ushort) OptionalHeader.GetPhysicalSize();
+
+            AlignSections();
+        }
+
+        public void AlignSections()
+        {
+            foreach (var section in Sections)
+            {
+                var header = section.Header;
+                
+                header.PointerToRawData = header.PointerToRawData.Align(OptionalHeader.FileAlignment);
+                header.SizeOfRawData = section.Contents.GetPhysicalSize().Align(OptionalHeader.FileAlignment);
+                header.VirtualAddress = header.PointerToRawData.Align(OptionalHeader.SectionAlignment);
+                header.VirtualSize = section.Contents.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
+                
+                section.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
+            }
+        }
+        
         public void Write(IBinaryStreamWriter writer)
         {
             // Dos header.
@@ -114,16 +160,21 @@ namespace AsmResolver.PE.File
             
             // NT headers
             writer.FileOffset = DosHeader.NextHeaderOffset;
+            
             writer.WriteUInt32(ValidPESignature);
             FileHeader.Write(writer);
             OptionalHeader.Write(writer);
 
             // Section headers.
             writer.FileOffset = OptionalHeader.FileOffset + FileHeader.SizeOfOptionalHeader;
-            foreach (var section in Sections)
+            foreach (var section in Sections) 
                 section.Header.Write(writer);
-            
+
+            // Data between section headers and sections.
+            ExtraSectionData?.Write(writer);
+
             // Sections.
+            writer.FileOffset = OptionalHeader.SizeOfHeaders;
             foreach (var section in Sections)
             {
                 writer.FileOffset = section.Header.PointerToRawData;
