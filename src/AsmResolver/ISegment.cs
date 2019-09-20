@@ -53,7 +53,7 @@ namespace AsmResolver
         public static uint Align(this uint value, uint alignment)
         {
             alignment--;
-            return ((value + alignment) & ~alignment) - value;
+            return (value + alignment) & ~alignment;
         }
     }
 }
