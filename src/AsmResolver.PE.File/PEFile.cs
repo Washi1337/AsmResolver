@@ -62,7 +62,7 @@ namespace AsmResolver.PE.File
             {
                 var header = SectionHeader.FromReader(reader);
                 var contentsReader = reader.Fork(header.PointerToRawData, header.SizeOfRawData);
-                peFile.Sections.Add(new PESection(header, DataDirectory.FromReader(contentsReader)));
+                peFile.Sections.Add(new PESection(header, DataSegment.FromReader(contentsReader)));
             }
             
             return peFile;
@@ -109,7 +109,26 @@ namespace AsmResolver.PE.File
 
         public void Write(IBinaryStreamWriter writer)
         {
+            // Dos header.
+            DosHeader.Write(writer);
             
+            // NT headers
+            writer.FileOffset = DosHeader.NextHeaderOffset;
+            writer.WriteUInt32(ValidPESignature);
+            FileHeader.Write(writer);
+            OptionalHeader.Write(writer);
+
+            // Section headers.
+            writer.FileOffset = OptionalHeader.FileOffset + FileHeader.SizeOfOptionalHeader;
+            foreach (var section in Sections)
+                section.Header.Write(writer);
+            
+            // Sections.
+            foreach (var section in Sections)
+            {
+                writer.FileOffset = section.Header.PointerToRawData;
+                section.Contents.Write(writer);
+            }
         }
         
     }

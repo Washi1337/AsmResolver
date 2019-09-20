@@ -29,7 +29,7 @@ namespace AsmResolver
         /// <param name="startRva">The starting rva of the chunk to read.</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="start"/> is outside of the array.</exception>
         /// <exception cref="EndOfStreamException">Occurs when the reader reaches outside of the data source.</exception>
-        private ByteArrayReader(byte[] data, uint start, uint length, uint startRva)
+        public ByteArrayReader(byte[] data, uint start, uint length, uint startRva)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
             if (start > data.Length)

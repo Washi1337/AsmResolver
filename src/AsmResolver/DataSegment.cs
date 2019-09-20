@@ -1,9 +1,12 @@
+using System;
+using System.IO;
+
 namespace AsmResolver
 {
     /// <summary>
     /// Provides an implementation of a segment using a byte array to represent its contents. 
     /// </summary>
-    public class DataSegment : ISegment
+    public class DataSegment : IReadableSegment
     {
         /// <summary>
         /// Puts the remaining data of the provided input stream into a new data segment. 
@@ -90,6 +93,20 @@ namespace AsmResolver
         public void Write(IBinaryStreamWriter writer)
         {
             writer.WriteBytes(Data, 0, Data.Length);
+        }
+
+        /// <inheritdoc />
+        public IBinaryStreamReader CreateReader(uint fileOffset, uint size)
+        {
+            if (fileOffset < FileOffset || fileOffset > FileOffset + Data.Length)
+                throw new ArgumentOutOfRangeException(nameof(fileOffset));
+            if (fileOffset + size > FileOffset + Data.Length)
+                throw new EndOfStreamException();
+            
+            return new ByteArrayReader(Data, 
+                fileOffset - FileOffset, 
+                size, 
+                fileOffset - FileOffset + Rva);
         }
         
     }

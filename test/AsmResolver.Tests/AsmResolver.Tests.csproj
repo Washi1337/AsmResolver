@@ -13,6 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
       <ProjectReference Include="..\..\src\AsmResolver\AsmResolver.csproj" />
     </ItemGroup>
 

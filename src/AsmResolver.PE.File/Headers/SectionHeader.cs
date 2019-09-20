@@ -202,6 +202,7 @@ namespace AsmResolver.PE.File.Headers
             writer.WriteUInt32(PointerToLineNumbers);
             writer.WriteUInt16(NumberOfRelocations);
             writer.WriteUInt16(NumberOfLineNumbers);
+            writer.WriteUInt32((uint) Characteristics);
         }
 
         /// <inheritdoc />

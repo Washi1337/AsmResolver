@@ -12,7 +12,7 @@ namespace AsmResolver.PE.File
         /// </summary>
         /// <param name="header">The header to associate to the section.</param>
         /// <param name="contents">The contents of the section.</param>
-        public PESection(SectionHeader header, ISegment contents)
+        public PESection(SectionHeader header, IReadableSegment contents)
         {
             Header = header;
             Contents = contents;
@@ -29,7 +29,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the contents of the section.
         /// </summary>
-        public ISegment Contents
+        public IReadableSegment Contents
         {
             get;
             set;
