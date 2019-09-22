@@ -225,6 +225,17 @@ namespace AsmResolver
         {
             reader.FileOffset = reader.FileOffset.Align(alignment);
         }
-        
+
+        /// <summary>
+        /// Either reads a 32 bit number or a 64 bit number.
+        /// </summary>
+        /// <param name="reader">The reader to use for reading the data.</param>
+        /// <param name="is32Bit">Determines whether to read a 32 or a 64 bit integer.</param>
+        /// <returns>The read integer.</returns>
+        public static ulong ReadNativeInt(this IBinaryStreamReader reader, bool is32Bit)
+        {
+            return is32Bit ? reader.ReadUInt32() : reader.ReadUInt64();
+        }
+
     }
 }
