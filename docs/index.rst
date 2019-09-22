@@ -15,8 +15,18 @@ Table of Contents:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Abstraction Layer 1: The PE File
+   :caption: Abstraction Layer 1: PE Files
    :name: sec-pefile
 
    pefile/index
    pefile/basics
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Abstraction Layer 2: PE Images
+   :name: sec-peimage
+
+   peimage/index
+   peimage/basics
+   peimage/imports

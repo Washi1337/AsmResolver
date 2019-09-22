@@ -1,0 +1,24 @@
+Imports Directory
+=================
+
+Most portable executables import functions and fields from other, external libraries. These are stored in a table in the imports data directory of the PE file. Each entry in this table defines a module that is loaded upon runtime, and a set of members that are looked up.
+
+The **PEImageBase** class exposes the **Imports** property, which contains all members that ere resolved at runtime, grouped by the defining module. Below is an example of a program that lists all members imported by a given **PEImageBase** instance: 
+
+.. code-block:: csharp
+
+    foreach (var module in peImage.Imports)
+    {
+        Console.WriteLine("Module: " + module.Name);
+
+        foreach (var member in module.Members)
+        {
+            if (member.IsImportByName)
+                Console.WriteLine("\t- " + member.Name);
+            else
+                Console.WriteLine("\t- #" + member.Ordinal);
+        }
+
+        Console.WriteLine();
+    }
+
