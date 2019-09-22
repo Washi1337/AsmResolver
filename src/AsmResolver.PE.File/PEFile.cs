@@ -193,13 +193,25 @@ namespace AsmResolver.PE.File
         /// </summary>
         /// <param name="dataDirectory">The data directory to read.</param>
         /// <returns>The reader.</returns>
-        public IBinaryStreamReader GetDataDirectoryReader(DataDirectory dataDirectory)
+        public IBinaryStreamReader CreateDataDirectoryReader(DataDirectory dataDirectory)
         {
             var section = GetSectionContainingRva(dataDirectory.VirtualAddress);
             uint fileOffset = section.Header.RvaToFileOffset(dataDirectory.VirtualAddress);
             return section.Contents.CreateReader(fileOffset, dataDirectory.Size);
         }
 
+        public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset)
+        {
+            var section = GetSectionContainingOffset(fileOffset);
+            return section.Contents.CreateReader(fileOffset);
+        } 
+
+        public IBinaryStreamReader CreateReaderAtRva(uint rva)
+        {
+            var section = GetSectionContainingRva(rva);
+            return section.Contents.CreateReader(section.Header.RvaToFileOffset(rva));
+        } 
+            
         /// <summary>
         /// Recomputes file offsets and sizes in the file, optional and section headers.
         /// </summary>
