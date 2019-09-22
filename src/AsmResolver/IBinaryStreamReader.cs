@@ -196,7 +196,14 @@ namespace AsmResolver
         /// <returns>The string that was read from the stream.</returns>
         public static string ReadAsciiString(this IBinaryStreamReader reader)
         {
-            return Encoding.ASCII.GetString(reader.ReadBytesUntil(0));
+            var data = reader.ReadBytesUntil(0);
+            int length = data.Length;
+            
+            // Exclude trailing 0 byte.
+            if (data[data.Length - 1] == 0)
+                length--;
+            
+            return Encoding.ASCII.GetString(data, 0, length);
         }
 
         /// <summary>

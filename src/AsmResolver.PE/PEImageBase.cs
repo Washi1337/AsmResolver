@@ -32,6 +32,7 @@ namespace AsmResolver.PE
         /// </summary>
         /// <param name="filePath">The </param>
         /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEImageBase FromFile(string filePath)
         {
             return FromPEFile(PEFile.FromFile(filePath));
@@ -42,6 +43,7 @@ namespace AsmResolver.PE
         /// </summary>
         /// <param name="bytes">The bytes to interpret.</param>
         /// <returns>The PE iamge that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEImageBase FromBytes(byte[] bytes)
         {
             return FromPEFile(PEFile.FromBytes(bytes));
@@ -52,6 +54,7 @@ namespace AsmResolver.PE
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEImageBase FromReader(IBinaryStreamReader reader)
         {
             return FromPEFile(PEFile.FromReader(reader));
