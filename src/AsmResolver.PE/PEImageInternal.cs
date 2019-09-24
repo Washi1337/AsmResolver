@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Imports.Internal;
-
 namespace AsmResolver.PE
 {
     internal class PEImageInternal : PEImageBase
@@ -36,7 +35,7 @@ namespace AsmResolver.PE
         public override IList<ModuleImportEntryBase> Imports
         {
             get;
-        } 
-        
+        }
+
     }
 }

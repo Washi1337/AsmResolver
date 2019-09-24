@@ -30,6 +30,6 @@ namespace AsmResolver.PE
         {
             get;
         } = new List<ModuleImportEntryBase>();
-        
+
     }
 }

@@ -168,6 +168,11 @@ namespace AsmResolver
             return (reader.FileOffset - reader.StartPosition) + size <= reader.Length;
         }
 
+        /// <summary>
+        /// Reads all remaining data from the input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The remaining bytes of the input stream.</returns>
         public static byte[] ReadToEnd(this IBinaryStreamReader reader)
         {
             int remainingByteCount = (int) (reader.Length - (reader.FileOffset - reader.StartPosition));
@@ -176,6 +181,17 @@ namespace AsmResolver
             if (read != remainingByteCount)
                 Array.Resize(ref buffer, read);
             return buffer;
+        }
+
+        /// <summary>
+        /// Forks the reader at th current position by creating a new instance of a binary stream reader, using the same data source.
+        /// </summary>
+        /// <param name="reader">The reader to fork.</param>
+        /// <returns>A forked binary stream reader with the same data source.</returns>
+        public static IBinaryStreamReader Fork(this IBinaryStreamReader reader)
+        {
+            uint address = reader.FileOffset;
+            return reader.Fork(address, reader.Length - (address - reader.StartPosition));
         }
 
         /// <summary>
