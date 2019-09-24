@@ -23,56 +23,34 @@ namespace AsmResolver.PE.Imports.Internal
     internal class ModuleImportEntryInternal : ModuleImportEntryBase
     {
         private readonly PEFile _peFile;
-        private readonly uint _nameRva;
+        private readonly uint _lookupRva;
+        private readonly uint _addressRva;
         
-        private string _name;
-
-        public static ModuleImportEntryInternal FromReader(PEFile peFile, IBinaryStreamReader reader)
-        {
-            uint lookupRva = reader.ReadUInt32();
-            uint timeDateStamp = reader.ReadUInt32();
-            uint forwarderChain = reader.ReadUInt32();
-            uint nameRva = reader.ReadUInt32();
-            uint addressRva = reader.ReadUInt32();
-
-            if (lookupRva == 0 && timeDateStamp == 0 && forwarderChain == 0 && nameRva == 0 && addressRva == 0)
-                return null;
-            
-            return new ModuleImportEntryInternal(
-                peFile,
-                lookupRva,
-                timeDateStamp,
-                forwarderChain,
-                nameRva,
-                addressRva);
-        }
-        
-        public ModuleImportEntryInternal(
-            PEFile peFile,
-            uint lookupRva, 
-            uint timeDateStamp,
-            uint forwarderChain,
-            uint nameRva,
-            uint addressRva)
+        public ModuleImportEntryInternal(PEFile peFile, IBinaryStreamReader reader)
         {
             _peFile = peFile;
-            _nameRva = nameRva;
-            TimeDateStamp = timeDateStamp;
-            ForwarderChain = forwarderChain;
-
-            Members = new MemberImportEntryList(peFile, lookupRva, addressRva);
+            _lookupRva = reader.ReadUInt32();
+            TimeDateStamp = reader.ReadUInt32();
+            ForwarderChain = reader.ReadUInt32();
+            uint nameRva = reader.ReadUInt32();
+            if (nameRva != 0)
+                Name = _peFile.CreateReaderAtRva(nameRva).ReadAsciiString();
+            _addressRva = reader.ReadUInt32();
         }
 
-        public override string Name
+        public bool IsEmpty =>
+            _lookupRva == 0
+            && TimeDateStamp == 0
+            && ForwarderChain == 0
+            && Name == null
+            && _addressRva == 0;
+
+        protected override IList<MemberImportEntry> GetMembers()
         {
-            get => _name ?? (_name = _peFile.CreateReaderAtRva(_nameRva).ReadAsciiString());
-            set => _name = value;
+            if (IsEmpty)
+                return new List<MemberImportEntry>();
+            return new MemberImportEntryList(_peFile, _lookupRva, _addressRva);
         }
 
-        public override IList<MemberImportEntry> Members
-        {
-            get;
-        }
-        
     }
 }

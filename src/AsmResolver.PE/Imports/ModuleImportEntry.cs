@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using System.Collections.Generic;
 
 namespace AsmResolver.PE.Imports
@@ -31,21 +32,14 @@ namespace AsmResolver.PE.Imports
         /// <param name="name">The name of the module to import.</param>
         public ModuleImportEntry(string name)
         {
-            Name = name;
-            Members = new List<MemberImportEntry>();
+            Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
         /// <inheritdoc />
-        public override string Name
+        protected override IList<MemberImportEntry> GetMembers()
         {
-            get;
-            set;
+            return new List<MemberImportEntry>();
         }
-
-        /// <inheritdoc />
-        public override IList<MemberImportEntry> Members
-        {
-            get;
-        }
+        
     }
 }

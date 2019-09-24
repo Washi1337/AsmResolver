@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
 
@@ -65,14 +66,23 @@ namespace AsmResolver.PE
         {
             return new PEImageInternal(peFile);
         }
+        
+        private IList<ModuleImportEntryBase> _imports;
 
         /// <summary>
         /// Gets a collection of modules that were imported into the PE, according to the import data directory.
         /// </summary>
-        public abstract IList<ModuleImportEntryBase> Imports
+        public IList<ModuleImportEntryBase> Imports
         {
-            get;
+            get
+            {
+                if (_imports is null) 
+                    Interlocked.CompareExchange(ref _imports, GetImports(), null);
+                return _imports;
+            }
         }
+
+        protected abstract IList<ModuleImportEntryBase> GetImports();
         
     }
 }

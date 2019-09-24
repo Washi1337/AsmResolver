@@ -16,6 +16,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Collections.Generic;
+using System.Threading;
+using AsmResolver.PE.File;
+using AsmResolver.PE.Imports.Internal;
 
 namespace AsmResolver.PE.Imports
 {
@@ -25,10 +28,18 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public abstract class ModuleImportEntryBase
     {
+        public static ModuleImportEntryBase FromReader(PEFile peFile, IBinaryStreamReader reader)
+        {
+            var entry = new ModuleImportEntryInternal(peFile, reader);
+            return entry.IsEmpty ? null : entry;
+        }
+        
+        private IList<MemberImportEntry> _members;
+
         /// <summary>
         /// Gets or sets the name of the module that was imported.
         /// </summary>
-        public abstract string Name
+        public string Name
         {
             get;
             set;
@@ -58,10 +69,24 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Gets a collection of members from the module that were imported.
         /// </summary>
-        public abstract IList<MemberImportEntry> Members
+        public IList<MemberImportEntry> Members
         {
-            get;
+            get
+            {
+                if (_members is null) 
+                    Interlocked.CompareExchange(ref _members, GetMembers(), null);
+                return _members;
+            }
         }
+
+        /// <summary>
+        /// Obtains the collection of members that were imported.
+        /// </summary>
+        /// <remarks>
+        /// This method is called to initialize the value of <see cref="Members" /> property.
+        /// </remarks>
+        /// <returns>The members list.</returns>
+        protected abstract IList<MemberImportEntry> GetMembers();
 
         /// <inheritdoc />
         public override string ToString()

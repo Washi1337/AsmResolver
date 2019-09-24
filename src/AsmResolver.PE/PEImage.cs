@@ -26,10 +26,9 @@ namespace AsmResolver.PE
     public class PEImage : PEImageBase
     {
         /// <inheritdoc />
-        public override IList<ModuleImportEntryBase> Imports
+        protected override IList<ModuleImportEntryBase> GetImports()
         {
-            get;
-        } = new List<ModuleImportEntryBase>();
-
+            return new List<ModuleImportEntryBase>();
+        }
     }
 }

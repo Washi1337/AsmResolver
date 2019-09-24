@@ -27,12 +27,10 @@ namespace AsmResolver.PE.Imports.Internal
         private readonly PEFile _peFile;
         private readonly IBinaryStreamReader _reader;
 
-        public ModuleImportEntryList(PEFile peFile)
+        public ModuleImportEntryList(PEFile peFile, IBinaryStreamReader reader)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            
-            var importDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
-            _reader = _peFile.CreateDataDirectoryReader(importDirectory);
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
         
         protected override void Initialize()

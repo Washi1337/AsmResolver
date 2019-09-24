@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Imports.Internal;
 namespace AsmResolver.PE
@@ -29,13 +30,14 @@ namespace AsmResolver.PE
         public PEImageInternal(PEFile peFile)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            Imports = new ModuleImportEntryList(_peFile);
-        }
-        
-        public override IList<ModuleImportEntryBase> Imports
-        {
-            get;
         }
 
+        protected override IList<ModuleImportEntryBase> GetImports()
+        {
+            var importDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
+            var directoryReader = _peFile.CreateDataDirectoryReader(importDirectory);
+            return new ModuleImportEntryList(_peFile, directoryReader);
+        }
+        
     }
 }
