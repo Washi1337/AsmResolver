@@ -79,6 +79,11 @@ namespace AsmResolver.PE.File.Headers
             set;
         }
 
+        /// <summary>
+        /// Gets a value indicating the data directory is present in the portable executable file. 
+        /// </summary>
+        public bool IsPresentInPE => VirtualAddress == 0 && Size == 0;
+        
         /// <inheritdoc />
         public void UpdateOffsets(uint newFileOffset, uint newRva)
         {
