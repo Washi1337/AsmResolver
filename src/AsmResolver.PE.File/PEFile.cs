@@ -200,16 +200,50 @@ namespace AsmResolver.PE.File
             return section.Contents.CreateReader(fileOffset, dataDirectory.Size);
         }
 
+        /// <summary>
+        /// Creates a new reader at the provided file offset.
+        /// </summary>
+        /// <param name="fileOffset">The file offset to start reading at.</param>
+        /// <returns>The reader.</returns>
         public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset)
         {
             var section = GetSectionContainingOffset(fileOffset);
             return section.Contents.CreateReader(fileOffset);
+        }
+
+        /// <summary>
+        /// Creates a new reader of a chunk of data at the provided file offset.
+        /// </summary>
+        /// <param name="fileOffset">The file offset to start reading at.</param>
+        /// <param name="size">The number of bytes in the chunk.</param>
+        /// <returns>The reader.</returns>
+        public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size)
+        {
+            var section = GetSectionContainingOffset(fileOffset);
+            return section.Contents.CreateReader(fileOffset, size);
         } 
 
+        /// <summary>
+        /// Creates a new reader at the provided virtual address.
+        /// </summary>
+        /// <param name="rva">The virtual address to start reading at.</param>
+        /// <returns>The reader.</returns>
         public IBinaryStreamReader CreateReaderAtRva(uint rva)
         {
             var section = GetSectionContainingRva(rva);
             return section.Contents.CreateReader(section.Header.RvaToFileOffset(rva));
+        } 
+
+        /// <summary>
+        /// Creates a new reader of a chunk of data at the provided virtual address.
+        /// </summary>
+        /// <param name="rva">The virtual address to start reading at.</param>
+        /// <param name="size">The number of bytes in the chunk.</param>
+        /// <returns>The reader.</returns>
+        public IBinaryStreamReader CreateReaderAtRva(uint rva, uint size)
+        {
+            var section = GetSectionContainingRva(rva);
+            return section.Contents.CreateReader(section.Header.RvaToFileOffset(rva), size);
         } 
             
         /// <summary>
