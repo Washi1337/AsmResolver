@@ -64,5 +64,10 @@ namespace AsmResolver.PE.Win32Resources.Internal
         public bool IsData => (_dataOrSubDirOffset & 0x80000000) == 0;
         
         public bool IsSubDirectory => (_dataOrSubDirOffset & 0x80000000) != 0;
+
+        public override string ToString()
+        {
+            return $"Entry: {(IsByName ? Name : IdOrNameOffset.ToString())}, Offset: {DataOrSubDirOffset:X8}";
+        }
     }
 }
