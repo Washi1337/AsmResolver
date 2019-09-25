@@ -25,21 +25,22 @@ namespace AsmResolver.PE.Win32Resources.Internal
     {
         public const int EntrySize = 2 * sizeof(uint);
 
+        private readonly uint _idOrNameOffset;
         private readonly uint _dataOrSubDirOffset;
-        
-        public ResourceDirectoryEntry(PEFile peFile, IBinaryStreamReader reader, bool isByName)
+
+        public ResourceDirectoryEntry(PEFile peFile, IBinaryStreamReader reader)
         {
-            IdOrNameOffset = reader.ReadUInt32();
+            _idOrNameOffset = reader.ReadUInt32();
             _dataOrSubDirOffset = reader.ReadUInt32();
 
-            if (isByName)
+            if (IsByName)
             {
                 uint baseRva = peFile.OptionalHeader
                     .DataDirectories[OptionalHeader.ResourceDirectoryIndex]
                     .VirtualAddress;
                 var nameReader = peFile.CreateReaderAtRva(baseRva + IdOrNameOffset);
 
-                int length = nameReader.ReadUInt16();
+                int length = nameReader.ReadUInt16() * 2;
                 var data = new byte[length];
                 length = nameReader.ReadBytes(data, 0, length);
 
@@ -52,12 +53,9 @@ namespace AsmResolver.PE.Win32Resources.Internal
             get;
         }
 
-        public uint IdOrNameOffset
-        {
-            get;
-        }
+        public uint IdOrNameOffset => _idOrNameOffset & 0x7FFFFFFF;
 
-        public bool IsByName => Name != null;
+        public bool IsByName => (_idOrNameOffset & 0x80000000) != 0;
 
         public uint DataOrSubDirOffset => _dataOrSubDirOffset & 0x7FFFFFFF;
 

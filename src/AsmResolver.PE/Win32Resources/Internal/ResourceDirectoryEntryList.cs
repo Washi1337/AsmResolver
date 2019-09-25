@@ -48,7 +48,7 @@ namespace AsmResolver.PE.Win32Resources.Internal
 
             for (int i = 0; i < _namedEntries + _idEntries; i++)
             {
-                var rawEntry = new ResourceDirectoryEntry(_peFile, entriesReader, i < _namedEntries);
+                var rawEntry = new ResourceDirectoryEntry(_peFile, entriesReader);
                 var entryReader = _peFile.CreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset);
 
                 var entry = rawEntry.IsSubDirectory

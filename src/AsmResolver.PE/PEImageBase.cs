@@ -101,6 +101,9 @@ namespace AsmResolver.PE
             set => _resources.Value = value;
         }
 
+        /// <summary>
+        /// Gets a collection of base relocations that are to be applied when loading the PE into memory for execution. 
+        /// </summary>
         public IList<RelocationBlockBase> Relocations
         {
             get
@@ -129,6 +132,13 @@ namespace AsmResolver.PE
         /// </remarks>
         protected abstract ResourceDirectoryBase GetResources();
 
+        /// <summary>
+        /// Obtains the base relocation blocks in the PE. 
+        /// </summary>
+        /// <returns>The base relocation blocks.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Relocations"/> property.
+        /// </remarks>
         protected abstract IList<RelocationBlockBase> GetRelocations();
     }
 }
