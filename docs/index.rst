@@ -7,14 +7,14 @@ Table of Contents:
 ------------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: General
    :name: sec-general
 
    overview
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Abstraction Layer 1: PE Files
    :name: sec-pefile
 
@@ -23,7 +23,7 @@ Table of Contents:
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Abstraction Layer 2: PE Images
    :name: sec-peimage
 

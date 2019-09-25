@@ -1,7 +1,7 @@
 Basic I/O
 =========
 
-Every PE image interaction is done through classes defined by the **AsmResolver.PE** namespace:
+Every PE image interaction is done through classes defined by the ``AsmResolver.PE`` namespace:
 
 .. code-block:: csharp
 
@@ -10,7 +10,7 @@ Every PE image interaction is done through classes defined by the **AsmResolver.
 Creating a new PE image
 -----------------------
 
-Creating a new image can be done by instantiating a **PEImage** class:
+Creating a new image can be done by instantiating a ``PEImage`` class:
 
 .. code-block:: csharp
 
@@ -20,7 +20,7 @@ Creating a new image can be done by instantiating a **PEImage** class:
 Opening a PE image
 ------------------
 
-Opening an image can be done through one of the `FromXXX` methods from the **PEImageBase** class:
+Opening an image can be done through one of the `FromXXX` methods from the ``PEImageBase`` class:
 
 .. code-block:: csharp
 

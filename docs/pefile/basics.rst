@@ -1,7 +1,7 @@
 Basic I/O
 =========
 
-Every raw PE file interaction is done through classes defined by the **AsmResolver.PE.File** namespace:
+Every raw PE file interaction is done through classes defined by the ``AsmResolver.PE.File`` namespace:
 
 .. code-block:: csharp
 
@@ -31,7 +31,7 @@ Opening a file can be done through one of the `FromXXX` methods:
 Inspecting the PE headers
 -------------------------
 
-After you obtained an instance of the **PEFile** class, it is possible to read and edit various properties in the DOS header, COFF file header and optional header. They each have a designated property:
+After you obtained an instance of the ``PEFile`` class, it is possible to read and edit various properties in the DOS header, COFF file header and optional header. They each have a designated property:
 
 .. code-block:: csharp
 
@@ -44,7 +44,7 @@ Every change made to these headers will be reflected in the output executable, h
 Inspecting the PE sections
 --------------------------
 
-Sections can be read and modified by accessing the **PEFile.Sections** property, which is a collection of **PESection** objects. Each of these objects has a **Header** property, representing the section header as it appears in the PE header:
+Sections can be read and modified by accessing the ``PEFile.Sections`` property, which is a collection of ``PESection`` objects. Each of these objects has a ``Header`` property, representing the section header as it appears in the PE header:
 
 .. code-block:: csharp
 
@@ -53,20 +53,20 @@ Sections can be read and modified by accessing the **PEFile.Sections** property,
             Console.WriteLine(section.Header.Name);
         }
 
-Each **PESection** object also has the **Contents** property defined, which is a `IReadableSegment`. This object is capable of creating a `IBinaryStreamReader` instance:
+Each ``PESection`` object also has the ``Contents`` property defined, which is a `IReadableSegment`. This object is capable of creating a `IBinaryStreamReader` instance:
 
 .. code-block:: csharp
 
         var reader = section.CreateReader();
 
-This can be used to read the data that is present in the section. If you want to get the entire section in a byte array, you can take the **ToArray** shortcut:
+This can be used to read the data that is present in the section. If you want to get the entire section in a byte array, you can take the ``ToArray`` shortcut:
 
 .. code-block:: csharp
 
         byte[] data = section.ToArray();
         
 
-The **Sections** property is mutable, which means you can add new sections and remove others from the PE.
+The ``Sections`` property is mutable, which means you can add new sections and remove others from the PE.
 
 .. code-block:: csharp
 
@@ -78,7 +78,7 @@ The **Sections** property is mutable, which means you can add new sections and r
 Writing PE files
 ----------------
 
-Writing PE files can be done through the **PEFile.Write** method:
+Writing PE files can be done through the ``PEFile.Write`` method:
 
 .. code-block:: csharp
 
@@ -87,4 +87,4 @@ Writing PE files can be done through the **PEFile.Write** method:
         peFile.Write(new BinaryStreamWriter(fs));
     }
 
-AsmResolver will then reassemble the file with all the changes you made. Note that this will also recalculate some fields in the headers, such as **FileHeader.NumberOfSections**. Furthermore, it will also recalculate the offsets and virtual addresses of each section.
+AsmResolver will then reassemble the file with all the changes you made. Note that this will also recalculate some fields in the headers, such as ``FileHeader.NumberOfSections``. Furthermore, it will also recalculate the offsets and virtual addresses of each section.

@@ -26,7 +26,7 @@ namespace AsmResolver
     public class ByteArrayReader : IBinaryStreamReader
     {
         private readonly byte[] _data;
-        private int _startIndex;
+        private readonly int _startIndex;
         private int _index;
 
         /// <summary>
