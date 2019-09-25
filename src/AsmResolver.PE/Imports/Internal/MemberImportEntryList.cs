@@ -16,12 +16,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Imports.Internal
 {
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     internal class MemberImportEntryList : LazyList<MemberImportEntry>
     {
         private readonly PEFile _peFile;

@@ -1,10 +1,12 @@
 using System;
+using System.Diagnostics;
 using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Win32Resources.Internal
 {
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     internal class ResourceDirectoryEntryList : LazyList<IResourceDirectoryEntry>
     {
         private readonly PEFile _peFile;
