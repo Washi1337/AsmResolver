@@ -37,15 +37,21 @@ namespace AsmResolver.PE
 
         protected override IList<ModuleImportEntryBase> GetImports()
         {
-            var importDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
-            var directoryReader = _peFile.CreateDataDirectoryReader(importDirectory);
+            var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
+            if (!dataDirectory.IsPresentInPE)
+                return new List<ModuleImportEntryBase>();
+            
+            var directoryReader = _peFile.CreateDataDirectoryReader(dataDirectory);
             return new ModuleImportEntryList(_peFile, directoryReader);
         }
 
         protected override ResourceDirectoryBase GetResources()
         {
-            var resourceDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
-            var directoryReader = _peFile.CreateDataDirectoryReader(resourceDirectory);
+            var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
+            if (!dataDirectory.IsPresentInPE)
+                return null;
+            
+            var directoryReader = _peFile.CreateDataDirectoryReader(dataDirectory);
             return new ResourceDirectoryInternal(_peFile, null, directoryReader);
         }
     }
