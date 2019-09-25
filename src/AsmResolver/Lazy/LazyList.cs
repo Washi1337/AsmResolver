@@ -18,7 +18,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace AsmResolver.Collections
+namespace AsmResolver.Lazy
 {
     /// <summary>
     /// Provides a base for lists that are lazy initialized.
