@@ -119,11 +119,12 @@ namespace AsmResolver
                 throw new ArgumentOutOfRangeException(nameof(fileOffset));
             if (fileOffset + size > FileOffset + Data.Length)
                 throw new EndOfStreamException();
-            
-            return new ByteArrayReader(Data, 
-                fileOffset - FileOffset, 
-                size, 
-                fileOffset - FileOffset + Rva);
+
+            return new ByteArrayReader(Data,
+                (int) (fileOffset - FileOffset),
+                size,
+                FileOffset,
+                fileOffset + Rva);
         }
         
     }

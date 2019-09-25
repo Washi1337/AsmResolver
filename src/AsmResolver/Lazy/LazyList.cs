@@ -28,8 +28,6 @@ namespace AsmResolver.Lazy
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public abstract class LazyList<TItem> : IList<TItem>
     {
-        private bool _initialized;
-
         /// <inheritdoc />
         public TItem this[int index]
         {
@@ -46,7 +44,7 @@ namespace AsmResolver.Lazy
         }
 
         /// <inheritdoc />
-        public int Count
+        public virtual int Count
         {
             get
             {
@@ -57,6 +55,15 @@ namespace AsmResolver.Lazy
 
         /// <inheritdoc />
         public bool IsReadOnly => false;
+
+        /// <summary>
+        /// Gets a value indicating the list is initialized or not.
+        /// </summary>
+        protected bool Initialized
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Gets the underlying list.
@@ -73,14 +80,14 @@ namespace AsmResolver.Lazy
 
         private void EnsureIsInitialized()
         {
-            if (!_initialized)
+            if (!Initialized)
             {
                 lock (this)
                 {
-                    if (!_initialized)
+                    if (!Initialized)
                     {
                         Initialize();
-                        _initialized = true;
+                        Initialized = true;
                     }
                 }
             }
@@ -97,7 +104,7 @@ namespace AsmResolver.Lazy
         public void Clear()
         {
             Items.Clear();
-            _initialized = true;
+            Initialized = true;
         }
 
         /// <inheritdoc />
