@@ -40,11 +40,9 @@ namespace AsmResolver.PE
         protected override IList<ModuleImportEntryBase> GetImports()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
-            if (!dataDirectory.IsPresentInPE)
-                return new List<ModuleImportEntryBase>();
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(dataDirectory);
-            return new ModuleImportEntryList(_peFile, directoryReader);
+            return dataDirectory.IsPresentInPE
+                ? new ModuleImportEntryList(_peFile, dataDirectory)
+                : (IList<ModuleImportEntryBase>) new List<ModuleImportEntryBase>();
         }
 
         protected override ResourceDirectoryBase GetResources()
@@ -60,10 +58,9 @@ namespace AsmResolver.PE
         protected override IList<RelocationBlockBase> GetRelocations()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
-            if (!dataDirectory.IsPresentInPE)
-                return new List<RelocationBlockBase>();
-            
-            return new RelocationBlockList(_peFile, dataDirectory.VirtualAddress, dataDirectory.Size);
+            return dataDirectory.IsPresentInPE
+                ? new RelocationBlockList(_peFile, dataDirectory)
+                : (IList<RelocationBlockBase>) new List<RelocationBlockBase>();
         }
         
     }

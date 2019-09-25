@@ -19,6 +19,7 @@ using System;
 using System.Diagnostics;
 using AsmResolver.Lazy;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Imports.Internal
 {
@@ -26,19 +27,20 @@ namespace AsmResolver.PE.Imports.Internal
     internal class ModuleImportEntryList : LazyList<ModuleImportEntryBase>
     {
         private readonly PEFile _peFile;
-        private readonly IBinaryStreamReader _reader;
+        private readonly DataDirectory _dataDirectory;
 
-        public ModuleImportEntryList(PEFile peFile, IBinaryStreamReader reader)
+        public ModuleImportEntryList(PEFile peFile, DataDirectory dataDirectory)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            _dataDirectory = dataDirectory;
         }
         
         protected override void Initialize()
         {
+            var reader = _peFile.CreateDataDirectoryReader(_dataDirectory);
             while (true)
             {
-                var entry = ModuleImportEntryInternal.FromReader(_peFile, _reader);
+                var entry = ModuleImportEntryBase.FromReader(_peFile, reader);
                 if (entry == null)
                     break;
                 Items.Add(entry);

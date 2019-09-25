@@ -19,6 +19,7 @@ using System;
 using System.Diagnostics;
 using AsmResolver.Lazy;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Relocations.Internal
 {
@@ -26,19 +27,17 @@ namespace AsmResolver.PE.Relocations.Internal
     internal class RelocationBlockList : LazyList<RelocationBlockBase>
     {
         private readonly PEFile _peFile;
-        private readonly uint _rva;
-        private readonly uint _size;
+        private readonly DataDirectory _dataDirectory;
 
-        public RelocationBlockList(PEFile peFile, uint rva, uint size)
+        public RelocationBlockList(PEFile peFile, DataDirectory dataDirectory)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _rva = rva;
-            _size = size;
+            _dataDirectory = dataDirectory ?? throw new ArgumentNullException(nameof(dataDirectory));
         }
         
         protected override void Initialize()
         {
-            var reader = _peFile.CreateReaderAtRva(_rva, _size);
+            var reader = _peFile.CreateDataDirectoryReader(_dataDirectory);
             while (reader.FileOffset < reader.StartPosition + reader.Length)
                 Items.Add(new RelocationBlockInternal(_peFile, reader));
         }
