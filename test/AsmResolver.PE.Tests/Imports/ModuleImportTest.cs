@@ -3,7 +3,7 @@ using Xunit;
 
 namespace AsmResolver.PE.Tests.Imports
 {
-    public class UnitTest1
+    public class ModuleImportTest
     {
         [Fact]
         public void ReadDotNetHelloWorld()

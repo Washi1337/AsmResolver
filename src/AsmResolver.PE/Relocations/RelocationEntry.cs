@@ -1,4 +1,4 @@
-﻿// AsmResolver - Executable file format inspection library 
+// AsmResolver - Executable file format inspection library 
 // Copyright (C) 2016-2019 Washi
 // 
 // This library is free software; you can redistribute it and/or
@@ -15,33 +15,28 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System.Collections.Generic;
-using AsmResolver.PE.Imports;
-using AsmResolver.PE.Relocations;
-using AsmResolver.PE.Win32Resources;
-
-namespace AsmResolver.PE
+namespace AsmResolver.PE.Relocations
 {
     /// <summary>
-    /// Provides an implementation for a portable executable (PE) image.
+    /// Represents one single relocation that is applied upon loading the PE into memory.
     /// </summary>
-    public class PEImage : PEImageBase
+    public readonly struct RelocationEntry
     {
-        /// <inheritdoc />
-        protected override IList<ModuleImportEntryBase> GetImports()
+        private readonly ushort _value;
+
+        public RelocationEntry(ushort value)
         {
-            return new List<ModuleImportEntryBase>();
+            _value = value;
         }
 
-        /// <inheritdoc />
-        protected override ResourceDirectoryBase GetResources()
-        {
-            return null;
-        }
+        /// <summary>
+        /// Gets the type of the relocation to apply.
+        /// </summary>
+        public RelocationType RelocationType => (RelocationType) (_value >> 12);
 
-        protected override IList<RelocationBlockBase> GetRelocations()
-        {
-            return new List<RelocationBlockBase>();
-        }
+        /// <summary>
+        /// Gets the offset (relative to the current relocation block) to the pointer to relocate.
+        /// </summary>
+        public int Offset => _value & 0xFFF;
     }
 }

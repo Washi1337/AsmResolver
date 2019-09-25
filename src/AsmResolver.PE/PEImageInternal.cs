@@ -21,6 +21,8 @@ using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Imports.Internal;
+using AsmResolver.PE.Relocations;
+using AsmResolver.PE.Relocations.Internal;
 using AsmResolver.PE.Win32Resources;
 using AsmResolver.PE.Win32Resources.Internal;
 
@@ -54,5 +56,15 @@ namespace AsmResolver.PE
             var directoryReader = _peFile.CreateDataDirectoryReader(dataDirectory);
             return new ResourceDirectoryInternal(_peFile, null, directoryReader);
         }
+
+        protected override IList<RelocationBlockBase> GetRelocations()
+        {
+            var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
+            if (!dataDirectory.IsPresentInPE)
+                return new List<RelocationBlockBase>();
+            
+            return new RelocationBlockList(_peFile, dataDirectory.VirtualAddress, dataDirectory.Size);
+        }
+        
     }
 }

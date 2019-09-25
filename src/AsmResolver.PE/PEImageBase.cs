@@ -21,6 +21,7 @@ using System.Threading;
 using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
+using AsmResolver.PE.Relocations;
 using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
@@ -71,6 +72,7 @@ namespace AsmResolver.PE
 
         private IList<ModuleImportEntryBase> _imports;
         private readonly LazyVariable<ResourceDirectoryBase> _resources;
+        private IList<RelocationBlockBase> _relocations;
 
         protected PEImageBase()
         {
@@ -99,6 +101,16 @@ namespace AsmResolver.PE
             set => _resources.Value = value;
         }
 
+        public IList<RelocationBlockBase> Relocations
+        {
+            get
+            {
+                if (_relocations is null)
+                    Interlocked.CompareExchange(ref _relocations, GetRelocations(), null);
+                return _relocations;
+            }
+        }
+
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.
         /// </summary>
@@ -107,7 +119,7 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="Imports"/> property.
         /// </remarks>
         protected abstract IList<ModuleImportEntryBase> GetImports();
-        
+
         /// <summary>
         /// Obtains the root resource directory in the PE.
         /// </summary>
@@ -116,5 +128,7 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="Resources"/> property.
         /// </remarks>
         protected abstract ResourceDirectoryBase GetResources();
+
+        protected abstract IList<RelocationBlockBase> GetRelocations();
     }
 }

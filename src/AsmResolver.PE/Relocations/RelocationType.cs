@@ -1,4 +1,4 @@
-﻿// AsmResolver - Executable file format inspection library 
+// AsmResolver - Executable file format inspection library 
 // Copyright (C) 2016-2019 Washi
 // 
 // This library is free software; you can redistribute it and/or
@@ -15,33 +15,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System.Collections.Generic;
-using AsmResolver.PE.Imports;
-using AsmResolver.PE.Relocations;
-using AsmResolver.PE.Win32Resources;
-
-namespace AsmResolver.PE
+namespace AsmResolver.PE.Relocations
 {
     /// <summary>
-    /// Provides an implementation for a portable executable (PE) image.
+    /// Provides members for all possible types of relocations that can be applied while loading a PE into memory. 
     /// </summary>
-    public class PEImage : PEImageBase
+    public enum RelocationType
     {
-        /// <inheritdoc />
-        protected override IList<ModuleImportEntryBase> GetImports()
-        {
-            return new List<ModuleImportEntryBase>();
-        }
-
-        /// <inheritdoc />
-        protected override ResourceDirectoryBase GetResources()
-        {
-            return null;
-        }
-
-        protected override IList<RelocationBlockBase> GetRelocations()
-        {
-            return new List<RelocationBlockBase>();
-        }
+        Absolute = 0,
+        High = 1,
+        Low = 2,
+        HighLow = 3,
+        HighAdj = 4,
+        MipsJmpAddr = 5,
+        ArmMov32 = 5,
+        RiscVHigh20 = 5,
+        ThumbMov32 = 7,
+        RiscVLow12I = 7,
+        RiscVLow12S = 8,
+        MipsJmpAddr16 = 9,
+        Dir64 = 10
     }
 }
