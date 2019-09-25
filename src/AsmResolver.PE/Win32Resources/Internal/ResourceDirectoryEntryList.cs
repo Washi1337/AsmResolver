@@ -15,7 +15,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System;
 using System.Diagnostics;
 using AsmResolver.Lazy;
 using AsmResolver.PE.File;
@@ -27,34 +26,38 @@ namespace AsmResolver.PE.Win32Resources.Internal
     internal class ResourceDirectoryEntryList : LazyList<IResourceDirectoryEntry>
     {
         private readonly PEFile _peFile;
-        private readonly IBinaryStreamReader _reader;
+        private readonly uint _entriesOffset;
         private readonly int _namedEntries;
         private readonly int _idEntries;
 
-        public ResourceDirectoryEntryList(PEFile peFile, IBinaryStreamReader reader, int namedEntries, int idEntries)
+        public ResourceDirectoryEntryList(PEFile peFile, uint entriesOffset, int namedEntries, int idEntries)
         {
-            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
             _namedEntries = namedEntries;
             _idEntries = idEntries;
             _peFile = peFile;
+            _entriesOffset = entriesOffset;
         }
 
         protected override void Initialize()
         {
+            var entriesReader = _peFile.CreateReaderAtFileOffset(
+                _entriesOffset,
+                (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize));
+
             uint baseRva = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex].VirtualAddress;
-            
+
             for (int i = 0; i < _namedEntries + _idEntries; i++)
             {
-                var rawEntry = new ResourceDirectoryEntry(_peFile, _reader, i < _namedEntries);
+                var rawEntry = new ResourceDirectoryEntry(_peFile, entriesReader, i < _namedEntries);
                 var entryReader = _peFile.CreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset);
 
                 var entry = rawEntry.IsSubDirectory
                     ? (IResourceDirectoryEntry) new ResourceDirectoryInternal(_peFile, rawEntry, entryReader)
                     : new ResourceDataInternal(_peFile, rawEntry, entryReader);
-                    
+
                 Items.Add(entry);
             }
         }
-        
+
     }
 }

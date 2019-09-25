@@ -123,8 +123,8 @@ namespace AsmResolver
             return new ByteArrayReader(Data,
                 (int) (fileOffset - FileOffset),
                 size,
-                FileOffset,
-                fileOffset + Rva);
+                fileOffset,
+                fileOffset - FileOffset + Rva);
         }
         
     }

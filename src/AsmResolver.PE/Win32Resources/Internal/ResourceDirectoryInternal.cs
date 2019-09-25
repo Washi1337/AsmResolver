@@ -23,10 +23,9 @@ namespace AsmResolver.PE.Win32Resources.Internal
     internal class ResourceDirectoryInternal : ResourceDirectoryBase
     {
         private readonly PEFile _peFile;
-        private ushort _namedEntries;
-        private ushort _idEntries;
-        private IBinaryStreamReader _entriesReader;
-        private string _name;
+        private readonly ushort _namedEntries;
+        private readonly ushort _idEntries;
+        private readonly uint _entriesOffset;
 
         internal ResourceDirectoryInternal(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader reader)
         {
@@ -47,14 +46,14 @@ namespace AsmResolver.PE.Win32Resources.Internal
             
             _namedEntries = reader.ReadUInt16();
             _idEntries = reader.ReadUInt16();
-            _entriesReader = reader.Fork();
+            _entriesOffset = reader.FileOffset;
             
             reader.FileOffset = (uint) (reader.FileOffset + (_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
         }
 
         protected override IList<IResourceDirectoryEntry> GetEntries()
         {
-            return new ResourceDirectoryEntryList(_peFile, _entriesReader, _namedEntries, _idEntries);
+            return new ResourceDirectoryEntryList(_peFile, _entriesOffset, _namedEntries, _idEntries);
         }
         
     }

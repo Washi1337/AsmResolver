@@ -23,7 +23,6 @@ namespace AsmResolver.PE.Win32Resources.Internal
     internal class ResourceDataInternal : ResourceDataBase
     {
         private readonly PEFile _peFile;
-        private readonly ResourceDirectoryEntry _entry;
         private readonly uint _contentsRva;
         private readonly uint _contentsSize;
 
@@ -33,12 +32,13 @@ namespace AsmResolver.PE.Win32Resources.Internal
             IBinaryStreamReader reader)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _entry = entry ?? throw new ArgumentNullException(nameof(entry));
+            if (entry == null) 
+                throw new ArgumentNullException(nameof(entry));
 
-            if (_entry.IsByName)
+            if (entry.IsByName)
                 Name = entry.Name;
             else
-                Id = _entry.IdOrNameOffset;
+                Id = entry.IdOrNameOffset;
             
             _contentsRva = reader.ReadUInt32();
             _contentsSize = reader.ReadUInt32();
