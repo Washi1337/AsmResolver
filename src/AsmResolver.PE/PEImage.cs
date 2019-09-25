@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using AsmResolver.PE.Imports;
+using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
 {
@@ -30,5 +31,12 @@ namespace AsmResolver.PE
         {
             return new List<ModuleImportEntryBase>();
         }
+
+        /// <inheritdoc />
+        protected override ResourceDirectoryBase GetResources()
+        {
+            return null;
+        }
+        
     }
 }

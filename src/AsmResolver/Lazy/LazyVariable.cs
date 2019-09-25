@@ -40,7 +40,7 @@ namespace AsmResolver.Lazy
         {
             get
             {
-                _lock.EnterReadLock();
+                _lock.EnterUpgradeableReadLock();
                 try
                 {
                     if (!_initialized) 
@@ -50,7 +50,7 @@ namespace AsmResolver.Lazy
                 }
                 finally
                 {
-                    _lock.ExitReadLock();
+                    _lock.ExitUpgradeableReadLock();
                 }
             }
             set
@@ -71,7 +71,6 @@ namespace AsmResolver.Lazy
                 {
                     _value = _getValue();
                     _initialized = true;
-                    _lock.ExitWriteLock();
                 }
             }
             finally

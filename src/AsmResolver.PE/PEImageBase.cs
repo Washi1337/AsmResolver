@@ -18,8 +18,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
+using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
 {
@@ -66,9 +68,15 @@ namespace AsmResolver.PE
         {
             return new PEImageInternal(peFile);
         }
-        
-        private IList<ModuleImportEntryBase> _imports;
 
+        private IList<ModuleImportEntryBase> _imports;
+        private readonly LazyVariable<ResourceDirectoryBase> _resources;
+
+        protected PEImageBase()
+        {
+            _resources = new LazyVariable<ResourceDirectoryBase>(GetResources);
+        }
+        
         /// <summary>
         /// Gets a collection of modules that were imported into the PE, according to the import data directory.
         /// </summary>
@@ -82,7 +90,31 @@ namespace AsmResolver.PE
             }
         }
 
+        /// <summary>
+        /// Gets or sets the root resource directory in the PE, if available.
+        /// </summary>
+        public ResourceDirectoryBase Resources
+        {
+            get => _resources.Value;
+            set => _resources.Value = value;
+        }
+
+        /// <summary>
+        /// Obtains the list of modules that were imported into the PE.
+        /// </summary>
+        /// <returns>The imported modules.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Imports"/> property.
+        /// </remarks>
         protected abstract IList<ModuleImportEntryBase> GetImports();
         
+        /// <summary>
+        /// Obtains the root resource directory in the PE.
+        /// </summary>
+        /// <returns>The root resource directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Resources"/> property.
+        /// </remarks>
+        protected abstract ResourceDirectoryBase GetResources();
     }
 }

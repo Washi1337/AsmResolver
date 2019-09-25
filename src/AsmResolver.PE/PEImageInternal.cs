@@ -21,6 +21,9 @@ using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Imports.Internal;
+using AsmResolver.PE.Win32Resources;
+using AsmResolver.PE.Win32Resources.Internal;
+
 namespace AsmResolver.PE
 {
     internal class PEImageInternal : PEImageBase
@@ -38,6 +41,12 @@ namespace AsmResolver.PE
             var directoryReader = _peFile.CreateDataDirectoryReader(importDirectory);
             return new ModuleImportEntryList(_peFile, directoryReader);
         }
-        
+
+        protected override ResourceDirectoryBase GetResources()
+        {
+            var resourceDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
+            var directoryReader = _peFile.CreateDataDirectoryReader(resourceDirectory);
+            return new ResourceDirectoryInternal(_peFile, null, directoryReader);
+        }
     }
 }

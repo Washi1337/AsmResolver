@@ -17,6 +17,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace AsmResolver.Lazy
 {
@@ -24,6 +25,7 @@ namespace AsmResolver.Lazy
     /// Provides a base for lists that are lazy initialized.
     /// </summary>
     /// <typeparam name="TItem">The type of elements the list stores.</typeparam>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public abstract class LazyList<TItem> : IList<TItem>
     {
         private bool _initialized;
