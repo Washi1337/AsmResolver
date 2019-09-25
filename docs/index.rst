@@ -30,3 +30,4 @@ Table of Contents:
    peimage/index
    peimage/basics
    peimage/imports
+   peimage/win32resources
