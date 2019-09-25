@@ -47,7 +47,9 @@ namespace AsmResolver.PE.Win32Resources.Internal
 
         protected override IReadableSegment GetContents()
         {
-            return DataSegment.FromReader(_peFile.CreateReaderAtRva(_contentsRva, _contentsSize));
+            return _peFile.TryCreateReaderAtRva(_contentsRva, _contentsSize, out var reader)
+                ? DataSegment.FromReader(reader)
+                : null;
         }
         
     }

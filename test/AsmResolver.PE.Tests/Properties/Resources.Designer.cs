@@ -73,6 +73,46 @@ namespace AsmResolver.PE.Tests.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        public static byte[] HelloWorld_MaliciousWIn32ResDataOffset {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_MaliciousWIn32ResDataOffset", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_MaliciousWin32ResDirName {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_MaliciousWin32ResDirName", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_MaliciousWIn32ResDirOffset {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_MaliciousWIn32ResDirOffset", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_MaliciousWin32ResLoop {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_MaliciousWin32ResLoop", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         public static byte[] SimpleDll {
             get {
                 object obj = ResourceManager.GetObject("SimpleDll", resourceCulture);

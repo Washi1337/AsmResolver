@@ -38,13 +38,15 @@ namespace AsmResolver.PE.Win32Resources.Internal
                 uint baseRva = peFile.OptionalHeader
                     .DataDirectories[OptionalHeader.ResourceDirectoryIndex]
                     .VirtualAddress;
-                var nameReader = peFile.CreateReaderAtRva(baseRva + IdOrNameOffset);
+                
+                if (peFile.TryCreateReaderAtRva(baseRva + IdOrNameOffset, out var nameReader))
+                {
+                    int length = nameReader.ReadUInt16() * 2;
+                    var data = new byte[length];
+                    length = nameReader.ReadBytes(data, 0, length);
 
-                int length = nameReader.ReadUInt16() * 2;
-                var data = new byte[length];
-                length = nameReader.ReadBytes(data, 0, length);
-
-                Name = Encoding.Unicode.GetString(data, 0, length);
+                    Name = Encoding.Unicode.GetString(data, 0, length);
+                }
             }
         }
 

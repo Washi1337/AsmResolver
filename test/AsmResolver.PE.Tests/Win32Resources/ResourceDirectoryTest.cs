@@ -46,7 +46,6 @@ namespace AsmResolver.PE.Tests.Win32Resources
                     }
                 }
             }
-
         }
         
         [Fact]
@@ -101,6 +100,62 @@ namespace AsmResolver.PE.Tests.Win32Resources
             };
 
             AssertStructure(expected, peImage.Resources);
+        }
+
+        [Fact]
+        public void MaliciousSelfLoop()
+        {
+            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResLoop);
+
+            const int maxDirCount = 20;
+            int dirCount = 0;
+            
+            var stack = new Stack<IResourceDirectoryEntry>();
+            stack.Push(peImage.Resources);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                if (current.IsDirectory)
+                {
+                    Assert.True(dirCount < maxDirCount, "Traversal reached limit of resource directories.");
+                    
+                    dirCount++;
+                    foreach (var entry in ((ResourceDirectoryBase)current).Entries)
+                        stack.Push(entry);
+                }
+            }
+        }
+
+        [Fact]
+        public void MaliciousDirectoryName()
+        {
+            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDirName);
+            Assert.Null(peImage.Resources.Entries[0].Name);
+        }
+
+        [Fact]
+        public void MaliciousDirectoryOffset()
+        {
+            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld_MaliciousWIn32ResDirOffset);
+            
+            var entry = peImage.Resources.Entries[0];
+            Assert.Equal(16u, entry.Id);
+            Assert.True(entry.IsDirectory);
+
+            var directory = (ResourceDirectoryBase) entry;
+            Assert.Empty(directory.Entries);
+        }
+
+        [Fact]
+        public void MaliciousDataOffset()
+        {
+            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld_MaliciousWIn32ResDataOffset);
+
+            var directory = (ResourceDirectoryBase) peImage.Resources.Entries[0];
+            directory = (ResourceDirectoryBase) directory.Entries[0];
+            var data = (ResourceDataBase) directory.Entries[0];
+            
+            Assert.Null(data.Contents);
         }
         
     }

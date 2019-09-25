@@ -52,7 +52,7 @@ namespace AsmResolver.PE
                 return null;
             
             var directoryReader = _peFile.CreateDataDirectoryReader(dataDirectory);
-            return new ResourceDirectoryInternal(_peFile, null, directoryReader);
+            return new ResourceDirectoryInternal(_peFile, null, directoryReader, 0);
         }
 
         protected override IList<RelocationBlockBase> GetRelocations()

@@ -22,14 +22,18 @@ namespace AsmResolver.PE.Win32Resources.Internal
 {
     internal class ResourceDirectoryInternal : ResourceDirectoryBase
     {
+        public const int MaxDepth = 10;
+            
         private readonly PEFile _peFile;
         private readonly ushort _namedEntries;
         private readonly ushort _idEntries;
         private readonly uint _entriesOffset;
+        private readonly int _depth;
 
-        internal ResourceDirectoryInternal(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader reader)
+        internal ResourceDirectoryInternal(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader reader, int depth)
         {
             _peFile = peFile;
+            _depth = depth;
 
             if (entry != null)
             {
@@ -39,22 +43,33 @@ namespace AsmResolver.PE.Win32Resources.Internal
                     Id = entry.IdOrNameOffset;
             }
 
-            Characteristics = reader.ReadUInt32();
-            TimeDateStamp = reader.ReadUInt32();
-            MajorVersion = reader.ReadUInt16();
-            MinorVersion = reader.ReadUInt16();
-            
-            _namedEntries = reader.ReadUInt16();
-            _idEntries = reader.ReadUInt16();
-            _entriesOffset = reader.FileOffset;
-            
-            reader.FileOffset = (uint) (reader.FileOffset + (_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
+            if (reader != null)
+            {
+                Characteristics = reader.ReadUInt32();
+                TimeDateStamp = reader.ReadUInt32();
+                MajorVersion = reader.ReadUInt16();
+                MinorVersion = reader.ReadUInt16();
+
+                _namedEntries = reader.ReadUInt16();
+                _idEntries = reader.ReadUInt16();
+                _entriesOffset = reader.FileOffset;
+
+                reader.FileOffset =
+                    (uint) (reader.FileOffset + (_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
+            }
         }
 
         protected override IList<IResourceDirectoryEntry> GetEntries()
         {
-            return new ResourceDirectoryEntryList(_peFile, _entriesOffset, _namedEntries, _idEntries);
+            if (_namedEntries + _idEntries == 0 // Optimisation + check for invalid resource directory offset. 
+                || _depth >= MaxDepth           // Prevent self loops.
+            )
+            {
+                return new List<IResourceDirectoryEntry>();
+            }
+
+            return new ResourceDirectoryEntryList(_peFile, _entriesOffset, _namedEntries, _idEntries, _depth + 1);
         }
-        
+
     }
 }

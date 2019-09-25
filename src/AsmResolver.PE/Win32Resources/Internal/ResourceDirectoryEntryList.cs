@@ -29,11 +29,13 @@ namespace AsmResolver.PE.Win32Resources.Internal
         private readonly uint _entriesOffset;
         private readonly int _namedEntries;
         private readonly int _idEntries;
+        private readonly int _depth;
 
-        public ResourceDirectoryEntryList(PEFile peFile, uint entriesOffset, int namedEntries, int idEntries)
+        public ResourceDirectoryEntryList(PEFile peFile, uint entriesOffset, int namedEntries, int idEntries, int depth)
         {
             _namedEntries = namedEntries;
             _idEntries = idEntries;
+            _depth = depth;
             _peFile = peFile;
             _entriesOffset = entriesOffset;
         }
@@ -49,10 +51,10 @@ namespace AsmResolver.PE.Win32Resources.Internal
             for (int i = 0; i < _namedEntries + _idEntries; i++)
             {
                 var rawEntry = new ResourceDirectoryEntry(_peFile, entriesReader);
-                var entryReader = _peFile.CreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset);
+                _peFile.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader);
 
                 var entry = rawEntry.IsSubDirectory
-                    ? (IResourceDirectoryEntry) new ResourceDirectoryInternal(_peFile, rawEntry, entryReader)
+                    ? (IResourceDirectoryEntry) new ResourceDirectoryInternal(_peFile, rawEntry, entryReader, _depth)
                     : new ResourceDataInternal(_peFile, rawEntry, entryReader);
 
                 Items.Add(entry);
