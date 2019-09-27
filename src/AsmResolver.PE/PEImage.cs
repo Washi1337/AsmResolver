@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.Lazy;
+using AsmResolver.PE.DotNet;
 using AsmResolver.PE.File;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
@@ -26,11 +27,11 @@ using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
 {
-    
     /// <summary>
     /// Provides an implementation for a portable executable (PE) image.
     /// </summary>
     public class PEImage : IPEImage
+    
     {
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -44,7 +45,8 @@ namespace AsmResolver.PE
         }
         
         /// <summary>
-        /// Opens a PE image from a buffer.
+        /// Opens a
+        /// PE image from a buffer.
         /// </summary>
         /// <param name="bytes">The bytes to interpret.</param>
         /// <returns>The PE iamge that was opened.</returns>
@@ -73,12 +75,14 @@ namespace AsmResolver.PE
         private IList<IModuleImportEntry> _imports;
         private readonly LazyVariable<IResourceDirectory> _resources;
         private IList<IRelocationBlock> _relocations;
+        private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
 
         protected PEImage()
         {
             _resources = new LazyVariable<IResourceDirectory>(GetResources);
+            _dotNetDirectory = new LazyVariable<IDotNetDirectory>(GetDotNetDirectory);
         }
-        
+
         /// <summary>
         /// Gets a collection of modules that were imported into the PE, according to the import data directory.
         /// </summary>
@@ -112,6 +116,13 @@ namespace AsmResolver.PE
                     Interlocked.CompareExchange(ref _relocations, GetRelocations(), null);
                 return _relocations;
             }
+        }
+
+        /// <inheritdoc />
+        public IDotNetDirectory DotNetDirectory
+        {
+            get => _dotNetDirectory.Value;
+            set => _dotNetDirectory.Value = value;
         }
 
         /// <summary>
@@ -148,6 +159,18 @@ namespace AsmResolver.PE
         protected virtual IList<IRelocationBlock> GetRelocations()
         {
             return new List<IRelocationBlock>();
+        }
+
+        /// <summary>
+        /// Obtains the data directory containing the CLR 2.0 header of a .NET binary.
+        /// </summary>
+        /// <returns>The data directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DotNetDirectory"/> property.
+        /// </remarks>
+        protected virtual IDotNetDirectory GetDotNetDirectory()
+        {
+            return null;
         }
         
     }

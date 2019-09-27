@@ -15,30 +15,22 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System.Collections.Generic;
+using System;
 
-namespace AsmResolver.PE.Relocations
+namespace AsmResolver.PE.DotNet
 {
     /// <summary>
-    /// Represents one block of relocations to be applied when the PE is loaded into memory.
+    /// Provides all possible values for the .NET data directory flags.
     /// </summary>
-    public interface IRelocationBlock
+    [Flags]
+    public enum DotNetDirectoryFlags
     {
-        /// <summary>
-        /// Gets or sets the RVA of the page to relocate.
-        /// </summary>
-        uint PageRva
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets a collection of relocations that need to be applied in this block.
-        /// </summary>
-        IList<RelocationEntry> Entries
-        {
-            get;
-        }
+        ILOnly = 0x00000001,
+        Bit32Required = 0x00000002,
+        ILLibrary = 0x00000004,
+        StrongNameSigned = 0x00000008,
+        NativeEntrypoint = 0x00000010,
+        TrackDebugData = 0x00010000,
+        Bit32Preferred = 0x00020000
     }
 }

@@ -17,6 +17,8 @@
 
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Internal;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
@@ -62,6 +64,15 @@ namespace AsmResolver.PE
                 ? new RelocationBlockList(_peFile, dataDirectory)
                 : (IList<IRelocationBlock>) new List<IRelocationBlock>();
         }
-        
+
+        protected override IDotNetDirectory GetDotNetDirectory()
+        {
+            var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ClrDirectoryIndex];
+            if (!dataDirectory.IsPresentInPE)
+                return null;
+            
+            var directoryReader = _peFile.CreateDataDirectoryReader(dataDirectory);
+            return new DotNetDirectoryInternal(_peFile, directoryReader);
+        }
     }
 }

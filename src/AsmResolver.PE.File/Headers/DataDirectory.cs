@@ -33,7 +33,7 @@ namespace AsmResolver.PE.File.Headers
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The data directory that was read.</returns>
-        internal static DataDirectory FromReader(IBinaryStreamReader reader)
+        public static DataDirectory FromReader(IBinaryStreamReader reader)
         {
             uint offset = reader.FileOffset;
             uint rva = reader.Rva;
