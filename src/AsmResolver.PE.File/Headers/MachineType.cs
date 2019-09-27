@@ -15,7 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-namespace AsmResolver.PE.File
+namespace AsmResolver.PE.File.Headers
 {
     /// <summary>
     /// Provides members for each processor architecture that a portable executable (PE) file can encode for. 

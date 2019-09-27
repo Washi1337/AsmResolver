@@ -44,7 +44,7 @@ namespace AsmResolver.PE.Imports.Internal
             var result = new List<ulong>();
             var itemReader = _peFile.CreateReaderAtRva(rva);
             
-            ulong currentItem = 0;
+            ulong currentItem;
             while (true)
             {
                 currentItem = itemReader.ReadNativeInt(_is32Bit);

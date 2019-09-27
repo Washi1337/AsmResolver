@@ -23,8 +23,8 @@ namespace AsmResolver.PE.Relocations.Internal
     internal class RelocationBlockInternal : RelocationBlock
     {
         private readonly PEFile _peFile;
-        private uint _offset;
-        private uint _size;
+        private readonly uint _offset;
+        private readonly uint _size;
 
         public RelocationBlockInternal(PEFile peFile, IBinaryStreamReader reader)
         {

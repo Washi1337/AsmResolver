@@ -46,7 +46,7 @@ namespace AsmResolver
         /// <param name="length">The number of bytes the chunk will consist of at most.</param>
         /// <param name="startFileOffset">The starting file offset of the chunk to read.</param>
         /// <param name="startRva">The starting rva of the chunk to read.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="start"/> is outside of the array.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="index"/> is outside of the array.</exception>
         /// <exception cref="EndOfStreamException">Occurs when the reader reaches outside of the data source.</exception>
         public ByteArrayReader(byte[] data, int index, uint length, uint startFileOffset, uint startRva)
         {
@@ -111,7 +111,7 @@ namespace AsmResolver
         /// <inheritdoc />
         public byte[] ReadBytesUntil(byte value)
         {
-            int index = Array.IndexOf(_data, value, (int) _index);
+            int index = Array.IndexOf(_data, value, _index);
             if (index == -1)
                 index = (int) (Length - 1);
 
@@ -127,7 +127,7 @@ namespace AsmResolver
                 throw new ArgumentOutOfRangeException(nameof(count));
             
             count = (int) Math.Min(count, (StartPosition + Length) - FileOffset);
-            Buffer.BlockCopy(_data, (int) _index, buffer, startIndex, count);
+            Buffer.BlockCopy(_data, _index, buffer, startIndex, count);
             _index += count;
             
             return count;
