@@ -50,11 +50,10 @@ namespace AsmResolver.PE
         protected override IResourceDirectory GetResources()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
-            if (!dataDirectory.IsPresentInPE)
+            if (!dataDirectory.IsPresentInPE || !_peFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(dataDirectory);
-            return new ResourceDirectoryInternal(_peFile, null, directoryReader, 0);
+
+            return new ResourceDirectoryInternal(_peFile, null, reader, 0);
         }
 
         protected override IList<IRelocationBlock> GetRelocations()
@@ -68,11 +67,10 @@ namespace AsmResolver.PE
         protected override IDotNetDirectory GetDotNetDirectory()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ClrDirectoryIndex];
-            if (!dataDirectory.IsPresentInPE)
+            if (!dataDirectory.IsPresentInPE || !_peFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
             
-            var directoryReader = _peFile.CreateDataDirectoryReader(dataDirectory);
-            return new DotNetDirectoryInternal(_peFile, directoryReader);
+            return new DotNetDirectoryInternal(_peFile, reader);
         }
     }
 }

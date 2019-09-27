@@ -37,7 +37,9 @@ namespace AsmResolver.PE.Relocations.Internal
         
         protected override void Initialize()
         {
-            var reader = _peFile.CreateDataDirectoryReader(_dataDirectory);
+            if (!_peFile.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
+                return;
+            
             while (reader.FileOffset < reader.StartPosition + reader.Length)
                 Items.Add(new RelocationBlockInternal(_peFile, reader));
         }

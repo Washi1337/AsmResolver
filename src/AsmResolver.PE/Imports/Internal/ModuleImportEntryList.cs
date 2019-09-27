@@ -37,7 +37,9 @@ namespace AsmResolver.PE.Imports.Internal
         
         protected override void Initialize()
         {
-            var reader = _peFile.CreateDataDirectoryReader(_dataDirectory);
+            if (!_peFile.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
+                return;
+            
             while (true)
             {
                 var entry = ModuleImportEntry.FromReader(_peFile, reader);

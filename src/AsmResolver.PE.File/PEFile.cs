@@ -223,6 +223,25 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
+        /// Attempts to create a reader that spans the provided data directory.
+        /// </summary>
+        /// <param name="dataDirectory">The data directory to read.</param>
+        /// <param name="reader">The reader that was created.</param>
+        /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
+        public bool TryCreateDataDirectoryReader(DataDirectory dataDirectory, out IBinaryStreamReader reader)
+        {
+            if (TryGetSectionContainingRva(dataDirectory.VirtualAddress, out var section))
+            {
+                uint fileOffset = section.Header.RvaToFileOffset(dataDirectory.VirtualAddress);
+                reader = section.Contents.CreateReader(fileOffset, dataDirectory.Size);
+                return true;
+            }
+
+            reader = null;
+            return false;
+        }
+
+        /// <summary>
         /// Creates a new reader at the provided file offset.
         /// </summary>
         /// <param name="fileOffset">The file offset to start reading at.</param>
