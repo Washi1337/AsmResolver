@@ -20,19 +20,18 @@ Creating a new image can be done by instantiating a ``PEImage`` class:
 Opening a PE image
 ------------------
 
-Opening an image can be done through one of the `FromXXX` methods from the ``PEImageBase`` class:
+Opening an image can be done through one of the `FromXXX` methods from the ``PEImage`` class:
 
 .. code-block:: csharp
 
-    var peImage = PEImageBase.FromFile(@"C:\myfile.exe");
+    var peImage = PEImage.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
 
     byte[] raw = ...
-    var peImage = PEImageBase.FromBytes(raw);
+    var peImage = PEImage.FromBytes(raw);
 
 .. code-block:: csharp
 
     IBinaryStreamReader reader = ...
-    var peImage = PEImageBase.FromReader(reader);
-
+    var peImage = PEImage.FromReader(reader);

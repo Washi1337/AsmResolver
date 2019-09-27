@@ -3,7 +3,7 @@ Win32 Resources
 
 Win32 resources are additional files embedded into the PE image, and are typically stored in the ``.rsrc`` section.
 
-Resources are exposed by the ``PEImageBase.Resources`` property. This is an instance of a ``ResourceDirectoryBase``, which contains the ``Entries`` property. Entries in a directory can either be another sub directory containing more entries, or a data entry (an instance of ``ResourceDataBase``) with the raw contents of the resource.
+Resources are exposed by the ``IPEImage.Resources`` property. This is an instance of an ``IResourceDirectory``, which contains the ``Entries`` property. Entries in a directory can either be another sub directory containing more entries, or a data entry (an instance of ``IResourceData``) with the raw contents of the resource.
 
 Example
 -------
@@ -28,12 +28,12 @@ The following example is a program that dumps the resources tree from a single P
     {
         // Decide if we are dealing with a sub directory or a data entry.
         if (entry.IsDirectory)
-            PrintResourceDirectory((ResourceDirectoryBase) entry, indentationLevel);
+            PrintResourceDirectory((IResourceDirectory) entry, indentationLevel);
         else if (entry.IsData)
-            PrintResourcData((ResourceDataBase) entry, indentationLevel);
+            PrintResourcData((IResourceData) entry, indentationLevel);
     }
 
-    private static void PrintResourceDirectory(ResourceDirectoryBase directory, int indentationLevel = 0)
+    private static void PrintResourceDirectory(IResourceDirectory directory, int indentationLevel = 0)
     {
         string indentation = new string(' ', indentationLevel * IndentationWidth);
         
@@ -46,7 +46,7 @@ The following example is a program that dumps the resources tree from a single P
             PrintResourceEntry(entry, indentationLevel + 1);
     }
 
-    private static void PrintResourcData(ResourceDataBase data, int indentationLevel)
+    private static void PrintResourcData(IResourceData data, int indentationLevel)
     {
         string indentation = new string(' ', indentationLevel * IndentationWidth);
         
