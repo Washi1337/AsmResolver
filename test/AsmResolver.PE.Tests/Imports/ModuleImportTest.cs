@@ -8,7 +8,7 @@ namespace AsmResolver.PE.Tests.Imports
         [Fact]
         public void ReadDotNetHelloWorld()
         {
-            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             
             Assert.Single(peImage.Imports);
             Assert.Equal("mscoree.dll", peImage.Imports[0].Name);
@@ -19,7 +19,7 @@ namespace AsmResolver.PE.Tests.Imports
         [Fact]
         public void ReadSimpleDll()
         {
-            var peImage = PEImageBase.FromBytes(Properties.Resources.SimpleDll);
+            var peImage = PEImage.FromBytes(Properties.Resources.SimpleDll);
             
             var module = peImage.Imports.First(m => m.Name == "ucrtbased.dll");
             Assert.NotNull(module);

@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace AsmResolver.PE.Win32Resources
 {
@@ -24,8 +25,14 @@ namespace AsmResolver.PE.Win32Resources
     /// Provides a basic implementation of a resource directory that can be initialized and added to another resource
     /// directory or used as a root resource directory of a PE image.
     /// </summary>
-    public class ResourceDirectory : ResourceDirectoryBase
+    public class ResourceDirectory : IResourceDirectory
     {
+        private IList<IResourceDirectoryEntry> _entries;
+
+        protected ResourceDirectory()
+        {
+        }
+        
         /// <summary>
         /// Creates a new named resource directory. 
         /// </summary>
@@ -43,11 +50,82 @@ namespace AsmResolver.PE.Win32Resources
         {
             Id = id;
         }
+        
+        /// <inheritdoc />
+        public string Name
+        {
+            get;
+            set;
+        }
 
         /// <inheritdoc />
-        protected override IList<IResourceDirectoryEntry> GetEntries()
+        public uint Id
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        bool IResourceDirectoryEntry.IsDirectory => true;
+
+        /// <inheritdoc />
+        bool IResourceDirectoryEntry.IsData => false;
+
+        /// <inheritdoc />
+        public uint Characteristics
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public uint TimeDateStamp
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public ushort MajorVersion
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public ushort MinorVersion
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public IList<IResourceDirectoryEntry> Entries
+        {
+            get
+            {
+                if (_entries is null)
+                    Interlocked.CompareExchange(ref _entries, GetEntries(), null);
+                return _entries;
+            }
+        }
+
+        /// <summary>
+        /// Obtains the list of entries in the directory.
+        /// </summary>
+        /// <returns>The list of entries.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Entries"/> property.
+        /// </remarks> 
+        protected virtual IList<IResourceDirectoryEntry> GetEntries()
         {
             return new List<IResourceDirectoryEntry>();
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"Directory ({Name ?? Id.ToString()})";
         }
         
     }

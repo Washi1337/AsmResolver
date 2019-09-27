@@ -20,7 +20,7 @@ using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Relocations.Internal
 {
-    internal class RelocationBlockInternal : RelocationBlockBase
+    internal class RelocationBlockInternal : RelocationBlock
     {
         private readonly PEFile _peFile;
         private uint _offset;

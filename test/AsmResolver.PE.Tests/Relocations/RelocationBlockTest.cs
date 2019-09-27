@@ -8,7 +8,7 @@ namespace AsmResolver.PE.Tests.Relocations
         [Fact]
         public void DotNetHelloWorld()
         {
-            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             
             Assert.Equal(1, peImage.Relocations.Count);
            

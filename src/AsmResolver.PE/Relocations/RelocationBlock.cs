@@ -16,14 +16,21 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System.Collections.Generic;
+using System.Threading;
 
 namespace AsmResolver.PE.Relocations
 {
     /// <summary>
     /// Provides a basic implementation of a base relocation block, which can be instantiated and added to a PE.
     /// </summary>
-    public class RelocationBlock : RelocationBlockBase
+    public class RelocationBlock : IRelocationBlock
     {
+        private IList<RelocationEntry> _entries;
+
+        protected RelocationBlock()
+        {
+        }
+
         /// <summary>
         /// Creates a new base relocation block for the provided page.
         /// </summary>
@@ -32,9 +39,32 @@ namespace AsmResolver.PE.Relocations
         {
             PageRva = pageRva;
         }
+        
+        /// <inheritdoc />
+        public uint PageRva
+        {
+            get;
+            set;
+        }
 
         /// <inheritdoc />
-        protected override IList<RelocationEntry> GetEntries()
+        public IList<RelocationEntry> Entries
+        {
+            get
+            {
+                if (_entries is null)
+                    Interlocked.CompareExchange(ref _entries, GetEntries(), null);
+                return _entries;
+            }
+        }
+
+        /// <summary>
+        /// Obtains the relocations that need to be applied.
+        /// </summary>
+        /// <returns>The relocations.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Entries"/> property.</remarks>
+        protected virtual IList<RelocationEntry> GetEntries()
         {
             return new List<RelocationEntry>();
         }

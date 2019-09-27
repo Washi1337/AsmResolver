@@ -24,7 +24,7 @@ using AsmResolver.PE.File.Headers;
 namespace AsmResolver.PE.Relocations.Internal
 {
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    internal class RelocationBlockList : LazyList<RelocationBlockBase>
+    internal class RelocationBlockList : LazyList<IRelocationBlock>
     {
         private readonly PEFile _peFile;
         private readonly DataDirectory _dataDirectory;

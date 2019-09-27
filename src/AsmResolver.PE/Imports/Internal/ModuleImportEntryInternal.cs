@@ -20,7 +20,7 @@ using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Imports.Internal
 {
-    internal class ModuleImportEntryInternal : ModuleImportEntryBase
+    internal class ModuleImportEntryInternal : ModuleImportEntry
     {
         private readonly PEFile _peFile;
         private readonly uint _lookupRva;

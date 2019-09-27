@@ -15,14 +15,19 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using AsmResolver.Lazy;
+
 namespace AsmResolver.PE.Win32Resources
 {
-    /// <summary>
-    /// Provides a basic implementation of a data entry that can be initialized and added to a resource
-    /// directory in a PE image.
-    /// </summary>
-    public class ResourceData : ResourceDataBase
+    public class ResourceData : IResourceData
     {
+        private readonly LazyVariable<IReadableSegment> _contents;
+
+        protected ResourceData()
+        {
+            _contents = new LazyVariable<IReadableSegment>(GetContents);
+        }
+        
         /// <summary>
         /// Creates a new named data entry.
         /// </summary>
@@ -32,6 +37,7 @@ namespace AsmResolver.PE.Win32Resources
         {
             Name = name;
             Contents = contents;
+            _contents = new LazyVariable<IReadableSegment>(contents);
         }
 
         /// <summary>
@@ -43,12 +49,59 @@ namespace AsmResolver.PE.Win32Resources
         {
             Contents = contents;
             Id = id;
+            _contents = new LazyVariable<IReadableSegment>(contents);
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetContents()
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public uint Id
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        bool IResourceDirectoryEntry.IsDirectory => false;
+
+        /// <inheritdoc />
+        bool IResourceDirectoryEntry.IsData => true;
+        
+        /// <inheritdoc />
+        public IReadableSegment Contents
+        {
+            get => _contents.Value;
+            set => _contents.Value = value;
+        }
+        
+        /// <inheritdoc />
+        public uint CodePage
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Obtains the contents of the data entry.
+        /// </summary>
+        /// <returns>The contents.</returns>
+        /// <remarks>
+        /// This method is called upon initializing the value for the <see cref="Contents"/> property.
+        /// </remarks>
+        protected virtual IReadableSegment GetContents()
         {
             return null;
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"Data ({Name ?? Id.ToString()})";
         }
         
     }

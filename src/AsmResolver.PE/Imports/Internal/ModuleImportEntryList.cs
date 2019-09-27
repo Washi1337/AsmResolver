@@ -24,7 +24,7 @@ using AsmResolver.PE.File.Headers;
 namespace AsmResolver.PE.Imports.Internal
 {
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    internal class ModuleImportEntryList : LazyList<ModuleImportEntryBase>
+    internal class ModuleImportEntryList : LazyList<IModuleImportEntry>
     {
         private readonly PEFile _peFile;
         private readonly DataDirectory _dataDirectory;
@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Imports.Internal
             var reader = _peFile.CreateDataDirectoryReader(_dataDirectory);
             while (true)
             {
-                var entry = ModuleImportEntryBase.FromReader(_peFile, reader);
+                var entry = ModuleImportEntry.FromReader(_peFile, reader);
                 if (entry == null)
                     break;
                 Items.Add(entry);

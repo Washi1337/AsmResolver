@@ -31,12 +31,12 @@ namespace AsmResolver.PE.Tests.Win32Resources
 
                 if (expected.IsData)
                 {
-                    Assert.IsAssignableFrom<ResourceDataBase>(current);
+                    Assert.IsAssignableFrom<IResourceData>(current);
                 }
                 else
                 {
-                    Assert.IsAssignableFrom<ResourceDirectoryBase>(current);
-                    var subEntries = ((ResourceDirectoryBase) current).Entries;
+                    Assert.IsAssignableFrom<IResourceDirectory>(current);
+                    var subEntries = ((IResourceDirectory) current).Entries;
                     Assert.Equal(expected.Entries.Count, subEntries.Count);
 
                     for (int i = 0; i < subEntries.Count; i++)
@@ -51,7 +51,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         [Fact]
         public void DotNetHelloWorld()
         {
-            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             
             var expected = new ResourceEntryInfo
             {
@@ -105,7 +105,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         [Fact]
         public void MaliciousSelfLoop()
         {
-            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResLoop);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResLoop);
 
             const int maxDirCount = 20;
             int dirCount = 0;
@@ -120,7 +120,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
                     Assert.True(dirCount < maxDirCount, "Traversal reached limit of resource directories.");
                     
                     dirCount++;
-                    foreach (var entry in ((ResourceDirectoryBase)current).Entries)
+                    foreach (var entry in ((IResourceDirectory) current).Entries)
                         stack.Push(entry);
                 }
             }
@@ -129,31 +129,31 @@ namespace AsmResolver.PE.Tests.Win32Resources
         [Fact]
         public void MaliciousDirectoryName()
         {
-            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDirName);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDirName);
             Assert.Null(peImage.Resources.Entries[0].Name);
         }
 
         [Fact]
         public void MaliciousDirectoryOffset()
         {
-            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld_MaliciousWIn32ResDirOffset);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWIn32ResDirOffset);
             
             var entry = peImage.Resources.Entries[0];
             Assert.Equal(16u, entry.Id);
             Assert.True(entry.IsDirectory);
 
-            var directory = (ResourceDirectoryBase) entry;
+            var directory = (IResourceDirectory) entry;
             Assert.Empty(directory.Entries);
         }
 
         [Fact]
         public void MaliciousDataOffset()
         {
-            var peImage = PEImageBase.FromBytes(Properties.Resources.HelloWorld_MaliciousWIn32ResDataOffset);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWIn32ResDataOffset);
 
-            var directory = (ResourceDirectoryBase) peImage.Resources.Entries[0];
-            directory = (ResourceDirectoryBase) directory.Entries[0];
-            var data = (ResourceDataBase) directory.Entries[0];
+            var directory = (IResourceDirectory) peImage.Resources.Entries[0];
+            directory = (IResourceDirectory) directory.Entries[0];
+            var data = (IResourceData) directory.Entries[0];
             
             Assert.Null(data.Contents);
         }

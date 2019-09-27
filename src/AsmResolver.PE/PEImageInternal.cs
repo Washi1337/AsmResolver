@@ -28,7 +28,7 @@ using AsmResolver.PE.Win32Resources.Internal;
 
 namespace AsmResolver.PE
 {
-    internal class PEImageInternal : PEImageBase
+    internal class PEImageInternal : PEImage
     {
         private readonly PEFile _peFile;
 
@@ -37,15 +37,15 @@ namespace AsmResolver.PE
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
         }
 
-        protected override IList<ModuleImportEntryBase> GetImports()
+        protected override IList<IModuleImportEntry> GetImports()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
             return dataDirectory.IsPresentInPE
-                ? new ModuleImportEntryList(_peFile, dataDirectory)
-                : (IList<ModuleImportEntryBase>) new List<ModuleImportEntryBase>();
+                ? (IList<IModuleImportEntry>) new ModuleImportEntryList(_peFile, dataDirectory)
+                : new List<IModuleImportEntry>();
         }
 
-        protected override ResourceDirectoryBase GetResources()
+        protected override IResourceDirectory GetResources()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
             if (!dataDirectory.IsPresentInPE)
@@ -55,12 +55,12 @@ namespace AsmResolver.PE
             return new ResourceDirectoryInternal(_peFile, null, directoryReader, 0);
         }
 
-        protected override IList<RelocationBlockBase> GetRelocations()
+        protected override IList<IRelocationBlock> GetRelocations()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
             return dataDirectory.IsPresentInPE
                 ? new RelocationBlockList(_peFile, dataDirectory)
-                : (IList<RelocationBlockBase>) new List<RelocationBlockBase>();
+                : (IList<IRelocationBlock>) new List<IRelocationBlock>();
         }
         
     }

@@ -15,30 +15,75 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System;
 using System.Collections.Generic;
+using System.Threading;
+using AsmResolver.PE.File;
+using AsmResolver.PE.Imports.Internal;
 
 namespace AsmResolver.PE.Imports
 {
     /// <summary>
-    /// Provides an implementation of the <see cref="ModuleImportEntryBase"/> class, which can be instantiated and added
+    /// Provides an implementation of the <see cref="IModuleImportEntry"/> class, which can be instantiated and added
     /// to an existing portable executable image.
     /// </summary>
-    public class ModuleImportEntry : ModuleImportEntryBase
+    public class ModuleImportEntry : IModuleImportEntry
     {
-        /// <summary>
-        /// Creates a new module import.
-        /// </summary>
-        /// <param name="name">The name of the module to import.</param>
-        public ModuleImportEntry(string name)
+        public static IModuleImportEntry FromReader(PEFile peFile, IBinaryStreamReader reader)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            var entry = new ModuleImportEntryInternal(peFile, reader);
+            return entry.IsEmpty ? null : entry;
+        }
+        
+        private IList<MemberImportEntry> _members;
+
+        /// <inheritdoc />
+        public string Name
+        {
+            get;
+            set;
         }
 
         /// <inheritdoc />
-        protected override IList<MemberImportEntry> GetMembers()
+        public uint TimeDateStamp
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public uint ForwarderChain
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public IList<MemberImportEntry> Members
+        {
+            get
+            {
+                if (_members is null) 
+                    Interlocked.CompareExchange(ref _members, GetMembers(), null);
+                return _members;
+            }
+        }
+
+        /// <summary>
+        /// Obtains the collection of members that were imported.
+        /// </summary>
+        /// <remarks>
+        /// This method is called to initialize the value of <see cref="Members" /> property.
+        /// </remarks>
+        /// <returns>The members list.</returns>
+        protected virtual IList<MemberImportEntry> GetMembers()
         {
             return new List<MemberImportEntry>();
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{Name} ({Members.Count} members)";
         }
         
     }

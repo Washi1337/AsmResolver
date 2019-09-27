@@ -20,7 +20,7 @@ using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Win32Resources.Internal
 {
-    internal class ResourceDirectoryInternal : ResourceDirectoryBase
+    internal class ResourceDirectoryInternal : ResourceDirectory
     {
         public const int MaxDepth = 10;
             

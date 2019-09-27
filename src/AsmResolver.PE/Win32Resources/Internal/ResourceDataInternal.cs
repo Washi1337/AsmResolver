@@ -20,7 +20,7 @@ using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Win32Resources.Internal
 {
-    internal class ResourceDataInternal : ResourceDataBase
+    internal class ResourceDataInternal : ResourceData
     {
         private readonly PEFile _peFile;
         private readonly uint _contentsRva;
