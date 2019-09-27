@@ -56,72 +56,94 @@ namespace AsmResolver.PE.DotNet.Internal
         /// <inheritdoc />
         protected override IReadableSegment GetMetadata()
         {
-            if (!_metadataDirectory.IsPresentInPE)
-                return null;
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(_metadataDirectory);
-            return DataSegment.FromReader(directoryReader); // TODO: interpretation instead of raw contents.
+            if (_metadataDirectory.IsPresentInPE
+                && _peFile.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
+            {
+                // TODO: interpretation instead of raw contents.
+                return DataSegment.FromReader(directoryReader);
+            }
+
+            return null;
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetResources()
         {
-            if (!_resourcesDirectory.IsPresentInPE)
-                return null;
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(_resourcesDirectory);
-            return DataSegment.FromReader(directoryReader); // TODO: interpretation instead of raw contents.
+            if (_resourcesDirectory.IsPresentInPE
+                && _peFile.TryCreateDataDirectoryReader(_resourcesDirectory, out var directoryReader))
+            {
+                // TODO: interpretation instead of raw contents.
+                return DataSegment.FromReader(directoryReader);
+            }
+
+            return null;
+
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetStrongName()
         {
-            if (!_strongNameDirectory.IsPresentInPE)
-                return null;
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(_strongNameDirectory);
-            return DataSegment.FromReader(directoryReader); // TODO: interpretation instead of raw contents.
+            if (_strongNameDirectory.IsPresentInPE
+                && _peFile.TryCreateDataDirectoryReader(_strongNameDirectory, out var directoryReader))
+            {
+                // TODO: interpretation instead of raw contents.
+                return DataSegment.FromReader(directoryReader);
+            }
+
+            return null;
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetCodeManagerTable()
         {
-            if (!_codeManagerDirectory.IsPresentInPE)
-                return null;
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(_codeManagerDirectory);
-            return DataSegment.FromReader(directoryReader); // TODO: interpretation instead of raw contents.
+            if (_codeManagerDirectory.IsPresentInPE
+            && _peFile.TryCreateDataDirectoryReader(_codeManagerDirectory, out var directoryReader))
+            {
+                // TODO: interpretation instead of raw contents.
+                return DataSegment.FromReader(directoryReader);
+            }
+
+            return null;
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetVTableFixups()
         {
-            if (!_vtableFixupsDirectory.IsPresentInPE)
-                return null;
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(_vtableFixupsDirectory);
-            return DataSegment.FromReader(directoryReader); // TODO: interpretation instead of raw contents.
+            if (_vtableFixupsDirectory.IsPresentInPE
+                && _peFile.TryCreateDataDirectoryReader(_vtableFixupsDirectory, out var directoryReader))
+            {
+                // TODO: interpretation instead of raw contents.
+                return DataSegment.FromReader(directoryReader);
+            }
+
+            return null;
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetExportAddressTable()
         {
-            if (!_exportsDirectory.IsPresentInPE)
-                return null;
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(_exportsDirectory);
-            return DataSegment.FromReader(directoryReader); // TODO: interpretation instead of raw contents.
+            if (_exportsDirectory.IsPresentInPE
+                && _peFile.TryCreateDataDirectoryReader(_exportsDirectory, out var directoryReader))
+            {
+                // TODO: interpretation instead of raw contents.
+                return DataSegment.FromReader(directoryReader);
+            }
+
+            return null;
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetManagedNativeHeader()
         {
-            if (!_nativeHeaderDirectory.IsPresentInPE)
-                return null;
-            
-            var directoryReader = _peFile.CreateDataDirectoryReader(_nativeHeaderDirectory);
-            return DataSegment.FromReader(directoryReader); // TODO: interpretation instead of raw contents.
+            if (_nativeHeaderDirectory.IsPresentInPE
+                && _peFile.TryCreateDataDirectoryReader(_nativeHeaderDirectory, out var directoryReader))
+            {
+                // TODO: interpretation instead of raw contents.
+                return DataSegment.FromReader(directoryReader);
+            }
+
+            return null;
         }
-        
+
     }
 }
