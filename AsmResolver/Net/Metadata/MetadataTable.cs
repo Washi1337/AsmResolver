@@ -260,7 +260,7 @@ namespace AsmResolver.Net.Metadata
 
     /// <summary>
     /// Represents a single raw metadata table in the metadata table stream (#~ or #-) containing
-    /// elements of type <see cref="TRow"/>.
+    /// elements of type <typeparamref name="TRow"/>.
     /// </summary>
     /// <typeparam name="TRow">The type of the elements in the table.</typeparam>
     public abstract class MetadataTable<TRow> : MetadataTable, ICollection<TRow>

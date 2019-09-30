@@ -133,7 +133,13 @@ namespace AsmResolver.Tests.Native.Properties {
         ///cdq
         ///
         ///wait
-        ///pus [rest of string was truncated]&quot;;.
+        ///pushfd
+        ///popfd
+        ///sahf
+        ///lahf
+        ///
+        ///mov al, byte [0x1337]
+        ///mov eax, dword [0x1 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Misc_source {
             get {
@@ -185,7 +191,8 @@ namespace AsmResolver.Tests.Native.Properties {
         ///rol byte [0x1337], 0x5
         ///ror byte [0x1337], 0x5
         ///rcl byte [0x1337], 0x5
-        ///rcr byte [0x1 [rest of string was truncated]&quot;;.
+        ///rcr byte [0x1337], 0x5
+        ///shl byte [0x1 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string OpCodeRegisterToken_source {
             get {
@@ -233,7 +240,8 @@ namespace AsmResolver.Tests.Native.Properties {
         ///add dl, byte [esi]
         ///add dl, byte [edi]
         ///
-        ///add bl,  [rest of string was truncated]&quot;;.
+        ///add bl, byte [eax]
+        ///add bl, byte [ecx] [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Reg8_RegOrMem8_source {
             get {
@@ -281,7 +289,8 @@ namespace AsmResolver.Tests.Native.Properties {
         ///add word [esi], dx
         ///add word [edi], dx
         ///
-        ///add word [rest of string was truncated]&quot;;.
+        ///add word [eax], bx
+        ///add word [ecx], bx [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string RegOrMem16_Reg16_source {
             get {
@@ -333,7 +342,8 @@ namespace AsmResolver.Tests.Native.Properties {
         ///add byte [eax+edx*4], al
         ///add byte [eax+ebx*4], al
         ///add byte [eax+ebp*4], al
-        ///add byte [eax+esi*4 [rest of string was truncated]&quot;;.
+        ///add byte [eax+esi*4], al
+        ///add byte [eax+edi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string RegOrMem8_Reg8_sib_source {
             get {
@@ -371,7 +381,8 @@ namespace AsmResolver.Tests.Native.Properties {
         ///add byte [esi], dl
         ///add byte [edi], dl
         ///
-        ///add byte [rest of string was truncated]&quot;;.
+        ///add byte [eax], bl
+        ///add byte [ecx], bl [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string RegOrMem8_Reg8_source {
             get {

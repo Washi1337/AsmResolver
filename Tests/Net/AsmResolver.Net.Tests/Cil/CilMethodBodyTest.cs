@@ -736,6 +736,36 @@ namespace AsmResolver.Tests.Net.Cil
             var newSignature = (StandAloneSignature) instructions[0].Operand;
             Assert.Equal(signature.Signature as MethodSignature, newSignature.Signature as MethodSignature, _comparer);
         }
-        
+
+        [Fact]
+        public void ThisParameterFromReferenceType()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var method = methodBody.Method;
+
+            method.IsStatic = false;
+            method.Signature.HasThis = true;
+
+            Assert.Equal(method.DeclaringType.ToTypeSignature(),
+                methodBody.ThisParameter.ParameterType,
+                _comparer);
+        }
+
+        [Fact]
+        public void ThisParameterFromValueType()
+        {
+            var methodBody = CreateDummyMethodBody();
+            var method = methodBody.Method;
+            
+            var importer = new ReferenceImporter(method.Image);
+            method.DeclaringType.BaseType = importer.ImportType(typeof(ValueType));
+            
+            method.IsStatic = false;
+            method.Signature.HasThis = true;
+
+            Assert.Equal(new ByReferenceTypeSignature(method.DeclaringType.ToTypeSignature()),
+                methodBody.ThisParameter.ParameterType,
+                _comparer);
+        }
     }
 }
