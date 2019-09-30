@@ -80,28 +80,28 @@ namespace AsmResolver.X86
         
         public static readonly X86OpCode Cmpxchg_RegOrMem8_Reg8 = new X86OpCode(X86Mnemonic.Cmpxchg, 0x000FB000,
             ((byte)X86OperandType.RegisterOrMemoryAddress << 0x18) | ((byte)X86OperandSize.Byte << 0x10) |
-            ((byte)X86OperandType.Register << 0x08) | (byte)X86OperandSize.Byte, false);
+            ((byte)X86OperandType.Register << 0x08) | (byte)X86OperandSize.Byte, true);
         
         public static readonly X86OpCode Cmpxchg_RegOrMem1632_Reg1632 = new X86OpCode(X86Mnemonic.Cmpxchg, 0x000FB100,
             ((byte)X86OperandType.RegisterOrMemoryAddress << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.Register << 0x08) | (byte)X86OperandSize.WordOrDword, false);
+            ((byte)X86OperandType.Register << 0x08) | (byte)X86OperandSize.WordOrDword, true);
         
         // LSS
         
         public static readonly X86OpCode Btr_RegOrMem1632_Reg1632 = new X86OpCode(X86Mnemonic.Cmpxchg, 0x000FB400,
             ((byte)X86OperandType.RegisterOrMemoryAddress << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.Register << 0x08) | (byte)X86OperandSize.WordOrDword, false);
+            ((byte)X86OperandType.Register << 0x08) | (byte)X86OperandSize.WordOrDword, true);
         
         // LFS
         // LGS
         
         public static readonly X86OpCode Movzx_Reg1632_RegOrMem8 = new X86OpCode(X86Mnemonic.Movzx, 0x000FB600,
             ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.Byte, false);
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.Byte, true);
         
         public static readonly X86OpCode Movzx_Reg1632_RegOrMem1632 = new X86OpCode(X86Mnemonic.Movzx, 0x000FB700,
             ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.Byte, false);
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.Byte, true);
         
         // POPCNT
         
@@ -109,23 +109,23 @@ namespace AsmResolver.X86
         
         public static readonly X86OpCode Btc_RegOrMem1632_Reg1632 = new X86OpCode(X86Mnemonic.Btc, 0x000FBB00,
             ((byte)X86OperandType.RegisterOrMemoryAddress << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.Register << 0x08) | (byte)X86OperandSize.WordOrDword, false);
+            ((byte)X86OperandType.Register << 0x08) | (byte)X86OperandSize.WordOrDword, true);
         
         public static readonly X86OpCode Bsf_Reg1632_RegOrMem1632 = new X86OpCode(X86Mnemonic.Bsf, 0x000FBC00,
             ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, false);
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, true);
         
         public static readonly X86OpCode Bsr_Reg1632_RegOrMem1632 = new X86OpCode(X86Mnemonic.Bsr, 0x000FBD00,
             ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, false);
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.WordOrDword, true);
         
         public static readonly X86OpCode Movsx_Reg1632_RegOrMem8 = new X86OpCode(X86Mnemonic.Movsx, 0x000FBE00,
             ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.Byte, false);
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.Byte, true);
         
         public static readonly X86OpCode Movsx_Reg1632_RegOrMem1632 = new X86OpCode(X86Mnemonic.Movsx, 0x000FBF00,
             ((byte)X86OperandType.Register << 0x18) | ((byte)X86OperandSize.WordOrDword << 0x10) |
-            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.Byte, false);
+            ((byte)X86OperandType.RegisterOrMemoryAddress << 0x08) | (byte)X86OperandSize.Byte, true);
         
         
         #endregion
