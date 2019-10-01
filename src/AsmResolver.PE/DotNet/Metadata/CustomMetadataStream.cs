@@ -21,6 +21,11 @@ namespace AsmResolver.PE.DotNet.Metadata
 {
     public class CustomMetadataStream : IMetadataStream
     {
+        public CustomMetadataStream(string name, byte[] data)
+            : this(name, new DataSegment(data))
+        {
+        }
+
         public CustomMetadataStream(string name, ISegment contents)
         {
             Name = name;
