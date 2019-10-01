@@ -16,6 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using AsmResolver.Lazy;
+using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.PE.DotNet
 {
@@ -24,7 +25,7 @@ namespace AsmResolver.PE.DotNet
     /// </summary>
     public class DotNetDirectory : IDotNetDirectory
     {
-        private readonly LazyVariable<IReadableSegment> _metadata;
+        private readonly LazyVariable<IMetadata> _metadata;
         private readonly LazyVariable<IReadableSegment> _resources;
         private readonly LazyVariable<IReadableSegment> _strongName;
         private readonly LazyVariable<IReadableSegment> _codeManagerTable;
@@ -34,7 +35,7 @@ namespace AsmResolver.PE.DotNet
 
         public DotNetDirectory()
         {
-            _metadata = new LazyVariable<IReadableSegment>(GetMetadata);
+            _metadata = new LazyVariable<IMetadata>(GetMetadata);
             _resources = new LazyVariable<IReadableSegment>(GetResources);
             _strongName = new LazyVariable<IReadableSegment>(GetStrongName);
             _codeManagerTable = new LazyVariable<IReadableSegment>(GetCodeManagerTable);
@@ -58,7 +59,7 @@ namespace AsmResolver.PE.DotNet
         } = 5;
 
         /// <inheritdoc />
-        public IReadableSegment Metadata
+        public IMetadata Metadata
         {
             get => _metadata.Value;
             set => _metadata.Value = value;
@@ -127,7 +128,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Metadata"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetMetadata()
+        protected virtual IMetadata GetMetadata()
         {
             return null;
         }

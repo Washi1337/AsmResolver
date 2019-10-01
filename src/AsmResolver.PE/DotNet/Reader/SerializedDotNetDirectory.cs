@@ -16,6 +16,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
+using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Reader;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
@@ -54,13 +56,12 @@ namespace AsmResolver.PE.DotNet.Reader
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetMetadata()
+        protected override IMetadata GetMetadata()
         {
             if (_metadataDirectory.IsPresentInPE
                 && _peFile.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
             {
-                // TODO: interpretation instead of raw contents.
-                return DataSegment.FromReader(directoryReader);
+                return new SerializedMetadata(_peFile, directoryReader);
             }
 
             return null;

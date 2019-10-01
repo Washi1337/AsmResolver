@@ -15,6 +15,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using AsmResolver.PE.DotNet.Metadata;
+
 namespace AsmResolver.PE.DotNet
 {
     /// <summary>
@@ -49,7 +51,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the metadata of the .NET binary.
         /// </summary>
-        IReadableSegment Metadata
+        IMetadata Metadata
         {
             get;
             set;

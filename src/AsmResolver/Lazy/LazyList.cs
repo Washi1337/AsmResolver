@@ -59,7 +59,7 @@ namespace AsmResolver.Lazy
         /// <summary>
         /// Gets a value indicating the list is initialized or not.
         /// </summary>
-        protected bool Initialized
+        protected bool IsInitialized
         {
             get;
             private set;
@@ -74,20 +74,20 @@ namespace AsmResolver.Lazy
         } = new List<TItem>();
 
         /// <summary>
-        /// Initializes the list
+        /// Initializes the list. This method is called in a thread-safe manner.
         /// </summary>
         protected abstract void Initialize();
 
         private void EnsureIsInitialized()
         {
-            if (!Initialized)
+            if (!IsInitialized)
             {
                 lock (this)
                 {
-                    if (!Initialized)
+                    if (!IsInitialized)
                     {
                         Initialize();
-                        Initialized = true;
+                        IsInitialized = true;
                     }
                 }
             }
@@ -104,7 +104,7 @@ namespace AsmResolver.Lazy
         public void Clear()
         {
             Items.Clear();
-            Initialized = true;
+            IsInitialized = true;
         }
 
         /// <inheritdoc />
