@@ -31,3 +31,4 @@ Table of Contents:
    peimage/basics
    peimage/imports
    peimage/win32resources
+   peimage/dotnet
