@@ -6,7 +6,7 @@ Managed executables (applications written using a .NET language) contain an extr
 .NET Directory
 --------------
 
-The .NET data directory can be accessed by the `IPEImage.DotNetDirectory` property.
+The .NET data directory can be accessed by the ``IPEImage.DotNetDirectory`` property.
 
 .. code-block:: csharp
 
@@ -20,7 +20,7 @@ The .NET data directory can be accessed by the `IPEImage.DotNetDirectory` proper
 
 The metadata data directory is perhaps the most important data directory that is referenced by the .NET directory. It contains the metadata streams, such as the table and the blob stream, which play a key role in the execution of a .NET binary.
 
-To access the metadata directory, access the `IDotNetDirectory.Metadata` property, which will provide you an instance of the `IMetadata` interface:
+To access the metadata directory, access the ``IDotNetDirectory.Metadata`` property, which will provide you an instance of the ``IMetadata`` interface:
 
 .. code-block:: csharp
 
@@ -33,7 +33,7 @@ To access the metadata directory, access the `IDotNetDirectory.Metadata` propert
 .NET metadata streams
 ---------------------
 
-The `IMetadata` interface also exposes the `Streams` property, a list of `IMetadataStream` instances.
+The ``IMetadata`` interface also exposes the ``Streams`` property, a list of ``IMetadataStream`` instances.
 
 .. code-block:: csharp
 
@@ -41,7 +41,7 @@ The `IMetadata` interface also exposes the `Streams` property, a list of `IMetad
         Console.WriteLine("Name: " + stream.Name);
 
 
-Some streams support reading the raw contents using a `IBinaryStreamReader`. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
+Some streams support reading the raw contents using a ``IBinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
 
 .. code-block:: csharp
 
@@ -56,7 +56,7 @@ Some streams support reading the raw contents using a `IBinaryStreamReader`. Eff
     }
 
 
-The `Streams` property is mutable. You can add new streams, or remove existing streams:
+The ``Streams`` property is mutable. You can add new streams, or remove existing streams:
 
 .. code-block:: csharp
 
