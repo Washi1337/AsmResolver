@@ -8,6 +8,16 @@ namespace AsmResolver.PE.Tests.Win32Resources
     {
         private class ResourceEntryInfo
         {
+            public ResourceEntryInfo(uint id)
+            {
+                Id = id;
+            }
+
+            public ResourceEntryInfo(string name)
+            {
+                Name = name;
+            }
+            
             public uint Id { get; set; }
             public string Name { get; set; }
             public bool IsData { get; set; }
@@ -52,46 +62,34 @@ namespace AsmResolver.PE.Tests.Win32Resources
         public void DotNetHelloWorld()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            
-            var expected = new ResourceEntryInfo
+
+            var expected = new ResourceEntryInfo(0)
             {
                 Entries =
                 {
-                    new ResourceEntryInfo
+                    new ResourceEntryInfo(16)
                     {
-                        Id = 16,
                         Entries =
                         {
-                            new ResourceEntryInfo
+                            new ResourceEntryInfo(1)
                             {
-                                Id = 1,
                                 Entries =
                                 {
-                                    new ResourceEntryInfo
-                                    {
-                                        Id = 0,
-                                        IsData = true
-                                    }
+                                    new ResourceEntryInfo(0) {IsData = true}
                                 }
                             }
                         }
                     },
 
-                    new ResourceEntryInfo
+                    new ResourceEntryInfo(24)
                     {
-                        Id = 24,
                         Entries =
                         {
-                            new ResourceEntryInfo
+                            new ResourceEntryInfo(1)
                             {
-                                Id = 1,
                                 Entries =
                                 {
-                                    new ResourceEntryInfo
-                                    {
-                                        Id = 0,
-                                        IsData = true
-                                    }
+                                    new ResourceEntryInfo(0) { IsData = true }
                                 }
                             }
                         }

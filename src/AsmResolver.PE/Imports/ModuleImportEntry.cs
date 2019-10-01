@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.PE.File;
-using AsmResolver.PE.Imports.Internal;
+using AsmResolver.PE.Imports.Reader;
 
 namespace AsmResolver.PE.Imports
 {
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.Imports
     {
         public static IModuleImportEntry FromReader(PEFile peFile, IBinaryStreamReader reader)
         {
-            var entry = new ModuleImportEntryInternal(peFile, reader);
+            var entry = new SerializedModuleImportEntry(peFile, reader);
             return entry.IsEmpty ? null : entry;
         }
         

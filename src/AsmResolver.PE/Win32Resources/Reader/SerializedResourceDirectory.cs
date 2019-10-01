@@ -18,9 +18,9 @@
 using System.Collections.Generic;
 using AsmResolver.PE.File;
 
-namespace AsmResolver.PE.Win32Resources.Internal
+namespace AsmResolver.PE.Win32Resources.Reader
 {
-    internal class ResourceDirectoryInternal : ResourceDirectory
+    public class SerializedResourceDirectory : ResourceDirectory
     {
         public const int MaxDepth = 10;
             
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.Win32Resources.Internal
         private readonly uint _entriesOffset;
         private readonly int _depth;
 
-        internal ResourceDirectoryInternal(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader reader, int depth)
+        public SerializedResourceDirectory(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader reader, int depth)
         {
             _peFile = peFile;
             _depth = depth;

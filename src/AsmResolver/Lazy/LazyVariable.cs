@@ -25,9 +25,9 @@ namespace AsmResolver.Lazy
         }
 
         /// <summary>
-        /// Creates a new lazy variable and delays the initialization of the value.
+        /// Creates a new lazy variable and delays the initialization of the default value.
         /// </summary>
-        /// <param name="getValue">The method to execute when initializing the value.</param>
+        /// <param name="getValue">The method to execute when initializing the default value.</param>
         public LazyVariable(Func<T> getValue)
         {
             _getValue = getValue ?? throw new ArgumentNullException(nameof(getValue));

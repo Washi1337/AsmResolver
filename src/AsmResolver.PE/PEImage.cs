@@ -31,7 +31,6 @@ namespace AsmResolver.PE
     /// Provides an implementation for a portable executable (PE) image.
     /// </summary>
     public class PEImage : IPEImage
-    
     {
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
@@ -45,8 +44,7 @@ namespace AsmResolver.PE
         }
         
         /// <summary>
-        /// Opens a
-        /// PE image from a buffer.
+        /// Opens a PE image from a buffer.
         /// </summary>
         /// <param name="bytes">The bytes to interpret.</param>
         /// <returns>The PE iamge that was opened.</returns>
@@ -69,7 +67,7 @@ namespace AsmResolver.PE
 
         private static IPEImage FromPEFile(PEFile peFile)
         {
-            return new PEImageInternal(peFile);
+            return new SerializedPEImage(peFile);
         }
 
         private IList<IModuleImportEntry> _imports;

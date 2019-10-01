@@ -21,18 +21,18 @@ using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.Imports.Internal
+namespace AsmResolver.PE.Relocations.Reader
 {
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    internal class ModuleImportEntryList : LazyList<IModuleImportEntry>
+    public class RelocationBlockList : LazyList<IRelocationBlock>
     {
         private readonly PEFile _peFile;
         private readonly DataDirectory _dataDirectory;
 
-        public ModuleImportEntryList(PEFile peFile, DataDirectory dataDirectory)
+        public RelocationBlockList(PEFile peFile, DataDirectory dataDirectory)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _dataDirectory = dataDirectory;
+            _dataDirectory = dataDirectory ?? throw new ArgumentNullException(nameof(dataDirectory));
         }
         
         protected override void Initialize()
@@ -40,13 +40,8 @@ namespace AsmResolver.PE.Imports.Internal
             if (!_peFile.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
                 return;
             
-            while (true)
-            {
-                var entry = ModuleImportEntry.FromReader(_peFile, reader);
-                if (entry == null)
-                    break;
-                Items.Add(entry);
-            }
+            while (reader.FileOffset < reader.StartPosition + reader.Length)
+                Items.Add(new SerializedRelocationBlock(_peFile, reader));
         }
         
     }

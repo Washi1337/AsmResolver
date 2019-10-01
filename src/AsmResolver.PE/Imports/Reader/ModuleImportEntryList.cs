@@ -15,38 +15,38 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System.Collections.Generic;
+using System;
+using System.Diagnostics;
+using AsmResolver.Lazy;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.Relocations.Internal
+namespace AsmResolver.PE.Imports.Reader
 {
-    internal class RelocationBlockInternal : RelocationBlock
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
+    public class ModuleImportEntryList : LazyList<IModuleImportEntry>
     {
         private readonly PEFile _peFile;
-        private readonly uint _offset;
-        private readonly uint _size;
+        private readonly DataDirectory _dataDirectory;
 
-        public RelocationBlockInternal(PEFile peFile, IBinaryStreamReader reader)
+        public ModuleImportEntryList(PEFile peFile, DataDirectory dataDirectory)
         {
-            _peFile = peFile;
-            PageRva = reader.ReadUInt32();
-            
-            _size = reader.ReadUInt32() - sizeof(uint) * 2;
-            _offset = reader.FileOffset;
-            
-            reader.FileOffset += _size;
+            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            _dataDirectory = dataDirectory;
         }
         
-        protected override IList<RelocationEntry> GetEntries()
+        protected override void Initialize()
         {
-            var result = new List<RelocationEntry>();
-            var reader = _peFile.CreateReaderAtFileOffset(_offset, _size);
-
-            uint count = _size / sizeof(ushort);
-            for (int i = 0; i < count; i++) 
-                result.Add(new RelocationEntry(reader.ReadUInt16()));
-
-            return result;
+            if (!_peFile.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
+                return;
+            
+            while (true)
+            {
+                var entry = ModuleImportEntry.FromReader(_peFile, reader);
+                if (entry == null)
+                    break;
+                Items.Add(entry);
+            }
         }
         
     }

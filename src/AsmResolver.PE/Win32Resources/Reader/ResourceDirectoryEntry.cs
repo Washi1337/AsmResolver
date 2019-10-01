@@ -19,9 +19,9 @@ using System.Text;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.Win32Resources.Internal
+namespace AsmResolver.PE.Win32Resources.Reader
 {
-    internal class ResourceDirectoryEntry
+    public class ResourceDirectoryEntry
     {
         public const int EntrySize = 2 * sizeof(uint);
 

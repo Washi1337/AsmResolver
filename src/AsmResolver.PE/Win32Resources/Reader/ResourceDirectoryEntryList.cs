@@ -20,10 +20,10 @@ using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.Win32Resources.Internal
+namespace AsmResolver.PE.Win32Resources.Reader
 {
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    internal class ResourceDirectoryEntryList : LazyList<IResourceDirectoryEntry>
+    public class ResourceDirectoryEntryList : LazyList<IResourceDirectoryEntry>
     {
         private readonly PEFile _peFile;
         private readonly uint _entriesOffset;
@@ -54,8 +54,8 @@ namespace AsmResolver.PE.Win32Resources.Internal
                 _peFile.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader);
 
                 var entry = rawEntry.IsSubDirectory
-                    ? (IResourceDirectoryEntry) new ResourceDirectoryInternal(_peFile, rawEntry, entryReader, _depth)
-                    : new ResourceDataInternal(_peFile, rawEntry, entryReader);
+                    ? (IResourceDirectoryEntry) new SerializedResourceDirectory(_peFile, rawEntry, entryReader, _depth)
+                    : new SerializedResourceData(_peFile, rawEntry, entryReader);
 
                 Items.Add(entry);
             }

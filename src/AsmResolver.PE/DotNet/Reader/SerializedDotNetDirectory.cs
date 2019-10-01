@@ -19,9 +19,9 @@ using System;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.DotNet.Internal
+namespace AsmResolver.PE.DotNet.Reader
 {
-    internal class DotNetDirectoryInternal : DotNetDirectory
+    public class SerializedDotNetDirectory : DotNetDirectory
     {
         private readonly PEFile _peFile;
         private readonly DataDirectory _metadataDirectory;
@@ -32,7 +32,7 @@ namespace AsmResolver.PE.DotNet.Internal
         private readonly DataDirectory _exportsDirectory;
         private readonly DataDirectory _nativeHeaderDirectory;
 
-        public DotNetDirectoryInternal(PEFile peFile, IBinaryStreamReader reader)
+        public SerializedDotNetDirectory(PEFile peFile, IBinaryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));

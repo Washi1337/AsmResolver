@@ -18,15 +18,15 @@
 using System;
 using AsmResolver.PE.File;
 
-namespace AsmResolver.PE.Win32Resources.Internal
+namespace AsmResolver.PE.Win32Resources.Reader
 {
-    internal class ResourceDataInternal : ResourceData
+    public class SerializedResourceData : ResourceData
     {
         private readonly PEFile _peFile;
         private readonly uint _contentsRva;
         private readonly uint _contentsSize;
 
-        public ResourceDataInternal(
+        public SerializedResourceData(
             PEFile peFile,
             ResourceDirectoryEntry entry, 
             IBinaryStreamReader reader)

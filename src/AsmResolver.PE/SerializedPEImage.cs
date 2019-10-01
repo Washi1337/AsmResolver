@@ -18,23 +18,23 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Internal;
+using AsmResolver.PE.DotNet.Reader;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
-using AsmResolver.PE.Imports.Internal;
+using AsmResolver.PE.Imports.Reader;
 using AsmResolver.PE.Relocations;
-using AsmResolver.PE.Relocations.Internal;
+using AsmResolver.PE.Relocations.Reader;
 using AsmResolver.PE.Win32Resources;
-using AsmResolver.PE.Win32Resources.Internal;
+using AsmResolver.PE.Win32Resources.Reader;
 
 namespace AsmResolver.PE
 {
-    internal class PEImageInternal : PEImage
+    internal class SerializedPEImage : PEImage
     {
         private readonly PEFile _peFile;
 
-        public PEImageInternal(PEFile peFile)
+        public SerializedPEImage(PEFile peFile)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
         }
@@ -53,7 +53,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !_peFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return new ResourceDirectoryInternal(_peFile, null, reader, 0);
+            return new SerializedResourceDirectory(_peFile, null, reader, 0);
         }
 
         protected override IList<IRelocationBlock> GetRelocations()
@@ -70,7 +70,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !_peFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
             
-            return new DotNetDirectoryInternal(_peFile, reader);
+            return new SerializedDotNetDirectory(_peFile, reader);
         }
     }
 }

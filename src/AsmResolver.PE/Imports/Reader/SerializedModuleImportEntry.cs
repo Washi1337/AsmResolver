@@ -18,15 +18,15 @@
 using System.Collections.Generic;
 using AsmResolver.PE.File;
 
-namespace AsmResolver.PE.Imports.Internal
+namespace AsmResolver.PE.Imports.Reader
 {
-    internal class ModuleImportEntryInternal : ModuleImportEntry
+    public class SerializedModuleImportEntry : ModuleImportEntry
     {
         private readonly PEFile _peFile;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
         
-        public ModuleImportEntryInternal(PEFile peFile, IBinaryStreamReader reader)
+        public SerializedModuleImportEntry(PEFile peFile, IBinaryStreamReader reader)
         {
             _peFile = peFile;
             _lookupRva = reader.ReadUInt32();

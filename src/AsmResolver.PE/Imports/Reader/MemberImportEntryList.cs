@@ -21,10 +21,10 @@ using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.Imports.Internal
+namespace AsmResolver.PE.Imports.Reader
 {
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    internal class MemberImportEntryList : LazyList<MemberImportEntry>
+    public class MemberImportEntryList : LazyList<MemberImportEntry>
     {
         private readonly PEFile _peFile;
         private readonly uint _lookupRva;
