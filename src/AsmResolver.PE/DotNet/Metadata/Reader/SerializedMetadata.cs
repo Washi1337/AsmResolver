@@ -70,7 +70,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
         {
             if (_numberOfStreams == 0)
                 return base.GetStreams();
-            return new MetadataStreamList(_streamContentsReader.Fork(), _streamEntriesReader.Fork(), _numberOfStreams);
+            
+            return new MetadataStreamList(
+                _streamContentsReader.Fork(),
+                _streamEntriesReader.Fork(),
+                _numberOfStreams);
         }
 
     }

@@ -30,7 +30,7 @@ using AsmResolver.PE.Win32Resources.Reader;
 
 namespace AsmResolver.PE
 {
-    internal class SerializedPEImage : PEImage
+    public class SerializedPEImage : PEImage
     {
         private readonly PEFile _peFile;
 

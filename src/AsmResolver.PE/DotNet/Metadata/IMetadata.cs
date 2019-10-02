@@ -83,6 +83,12 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             get;
         }
-        
+
+        /// <summary>
+        /// Gets a stream by its name.
+        /// </summary>
+        /// <param name="name">The name of the stream to search.</param>
+        /// <returns>The stream, or <c>null</c> if none was found.</returns>
+        IMetadataStream GetStream(string name);
     }
 }

@@ -73,6 +73,21 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
         }
 
+        /// <inheritdoc />
+        public virtual IMetadataStream GetStream(string name)
+        {
+            var streams = Streams;
+            
+            // Reversed order search. CLR counts the last stream.  
+            for (int i = streams.Count - 1; i >= 0; i--)
+            {
+                if (streams[i].Name == name)
+                    return streams[i];
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Obtains the list of streams defined in the data directory.
         /// </summary>

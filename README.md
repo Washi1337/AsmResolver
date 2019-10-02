@@ -22,7 +22,7 @@ Alternatively, you can build the project yourself using MSBuild or an IDE that w
 
 Documentation
 -------------
-Check out the [wiki](https://readthedocs.org/projects/asmresolver/) for guides and information on how to use the library!
+Check out the [wiki](https://asmresolver.readthedocs.org/) for guides and information on how to use the library!
 
 Found a bug or have questions?
 ------------------------------

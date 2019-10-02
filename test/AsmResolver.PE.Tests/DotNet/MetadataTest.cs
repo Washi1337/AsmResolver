@@ -1,4 +1,5 @@
 using System.Linq;
+using AsmResolver.PE.DotNet.Metadata;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet
@@ -28,5 +29,17 @@ namespace AsmResolver.PE.Tests.DotNet
             var expectedNames = new[] {"#~", "#Strings", "#US", "#GUID", "#Blob"};
             Assert.Equal(expectedNames, metadata.Streams.Select(s => s.Name));
         }
+
+        [Fact]
+        public void DetectStringsStream()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var metadata = peImage.DotNetDirectory.Metadata;
+
+            var stream = metadata.GetStream(StringsStream.DefaultName);
+            Assert.NotNull(stream);
+            Assert.IsAssignableFrom<StringsStream>(stream);
+        }
+        
     }
 }

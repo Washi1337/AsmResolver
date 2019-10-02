@@ -62,8 +62,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
         /// </remarks>
         protected virtual IMetadataStream ReadStream(MetadataStreamHeader header, IBinaryStreamReader reader)
         {
-            // TODO: interpretation of metadata streams.
-            return new CustomMetadataStream(header.Name, DataSegment.FromReader(reader));
+            // TODO: interpretation of remaining metadata streams.
+            switch (header.Name)
+            {
+                case StringsStream.DefaultName:
+                    return new SerializedStringsStream(DataSegment.FromReader(reader));
+                
+                default:
+                    return new CustomMetadataStream(header.Name, DataSegment.FromReader(reader));
+            }
+            
         }
         
     }
