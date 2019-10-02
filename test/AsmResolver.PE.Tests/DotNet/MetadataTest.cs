@@ -62,6 +62,17 @@ namespace AsmResolver.PE.Tests.DotNet
             Assert.NotNull(stream);
             Assert.IsAssignableFrom<BlobStream>(stream);
         }
+
+        [Fact]
+        public void DetectGuidStream()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var metadata = peImage.DotNetDirectory.Metadata;
+
+            var stream = metadata.GetStream(GuidStream.DefaultName);
+            Assert.NotNull(stream);
+            Assert.IsAssignableFrom<GuidStream>(stream);
+        }
         
     }
 }

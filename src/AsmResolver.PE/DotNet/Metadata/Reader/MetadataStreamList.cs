@@ -74,6 +74,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
                 case BlobStream.DefaultName:
                     return new SerializedBlobStream(DataSegment.FromReader(reader));
 
+                case GuidStream.DefaultName:
+                    return new SerializedGuidStream(DataSegment.FromReader(reader));
+
                 default:
                     return new CustomMetadataStream(header.Name, DataSegment.FromReader(reader));
             }

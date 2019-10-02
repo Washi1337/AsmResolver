@@ -7,7 +7,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// Like most metadata streams, the blob stream does not necessarily contain just valid strings. It can contain
     /// (garbage) data that is never referenced by any of the tables in the tables stream. The only guarantee that the
     /// blob heap provides, is that any blob index in the tables stream is the start address (relative to the start of
-    /// the strings stream) of a blob signature that is prefixed by a length.
+    /// the blob stream) of a blob signature that is prefixed by a length.
     /// </remarks>
     public abstract class BlobStream : IMetadataStream
     {
