@@ -58,7 +58,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             get;
             set;
-        }
+        } = 2;
 
         /// <summary>
         /// Gets or sets the minor version number of the schema.
@@ -67,7 +67,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             get;
             set;
-        }
+        } = 0;
 
         /// <summary>
         /// Gets or sets the flags of the tables stream.
@@ -78,6 +78,80 @@ namespace AsmResolver.PE.DotNet.Metadata
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating each string index in the tables stream is a 4 byte integer instead of a
+        /// 2 byte integer.
+        /// </summary>
+        public bool HasLongStringIndices
+        {
+            get => (Flags & TablesStreamFlags.LongStringIndices) != 0;
+            set => Flags = (Flags & ~TablesStreamFlags.LongStringIndices)
+                           | (value ? TablesStreamFlags.LongStringIndices : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating each GUID index in the tables stream is a 4 byte integer instead of a
+        /// 2 byte integer.
+        /// </summary>
+        public bool HasLongGuidIndices
+        {
+            get => (Flags & TablesStreamFlags.LongGuidIndices) != 0;
+            set => Flags = (Flags & ~TablesStreamFlags.LongGuidIndices)
+                           | (value ? TablesStreamFlags.LongGuidIndices : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating each blob index in the tables stream is a 4 byte integer instead of a
+        /// 2 byte integer.
+        /// </summary>
+        public bool HasLongBlobIndices
+        {
+            get => (Flags & TablesStreamFlags.LongBlobIndices) != 0;
+            set => Flags = (Flags & ~TablesStreamFlags.LongBlobIndices)
+                           | (value ? TablesStreamFlags.LongBlobIndices : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the tables were created with an extra bit in columns.
+        /// </summary>
+        public bool HasPaddingBit
+        {
+            get => (Flags & TablesStreamFlags.LongBlobIndices) != 0;
+            set => Flags = (Flags & ~TablesStreamFlags.LongBlobIndices)
+                           | (value ? TablesStreamFlags.LongBlobIndices : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the tables stream contains only deltas.
+        /// </summary>
+        public bool HasDeltaOnly
+        {
+            get => (Flags & TablesStreamFlags.DeltaOnly) != 0;
+            set => Flags = (Flags & ~TablesStreamFlags.DeltaOnly)
+                           | (value ? TablesStreamFlags.DeltaOnly : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the tables stream persists an extra 4 bytes of data.
+        /// </summary>
+        public bool HasExtraData
+        {
+            get => (Flags & TablesStreamFlags.ExtraData) != 0;
+            set => Flags = (Flags & ~TablesStreamFlags.ExtraData)
+                           | (value ? TablesStreamFlags.ExtraData : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the tables stream may contain _Delete tokens.
+        /// This only occurs in ENC metadata.
+        /// </summary>
+        public bool HasDeletedTokens
+        {
+            get => (Flags & TablesStreamFlags.HasDelete) != 0;
+            set => Flags = (Flags & ~TablesStreamFlags.HasDelete)
+                           | (value ? TablesStreamFlags.HasDelete : 0);
+        }
+        
         /// <summary>
         /// Gets the bit-length of the largest relative identifier (RID) in the table stream.
         /// </summary>
@@ -90,6 +164,20 @@ namespace AsmResolver.PE.DotNet.Metadata
             get;
             protected set;
         } = 1;
+
+        /// <summary>
+        /// Gets or sets the extra 4 bytes data that is persisted after the row counts of the tables stream.
+        /// </summary>
+        /// <remarks>
+        /// This value is not specified by the ECMA-335 and is only present when <see cref="HasExtraData"/> is
+        /// set to <c>true</c>. Writing to this value does not automatically update <see cref="HasExtraData"/>,
+        /// and is only persisted in the final output if <see cref="HasExtraData"/> is set to <c>true</c>.
+        /// </remarks>
+        public uint ExtraData
+        {
+            get;
+            set;
+        }
         
         // TODO: tables.
 

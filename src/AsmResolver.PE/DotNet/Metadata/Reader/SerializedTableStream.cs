@@ -16,6 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
+using System.Collections.Generic;
 
 namespace AsmResolver.PE.DotNet.Metadata.Reader
 {
@@ -42,6 +43,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
             Log2LargestRid = reader.ReadByte();
             _validMask = reader.ReadUInt64();
             _sortedMask = reader.ReadUInt64();
+
+            var rowCounts = ReadRowCounts(reader);
+            // TODO: initialize tables using row counts.
+
+            if (HasExtraData)
+                ExtraData = reader.ReadUInt32();
         }
 
         public override bool CanRead => true;
@@ -49,6 +56,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
         public override IBinaryStreamReader CreateReader()
         {
             return _contents.CreateReader();
+        }
+
+        protected bool HasTable(MetadataTableIndex table)
+        {
+            return ((_validMask >> (int) table) & 1) != 0;
+        }
+
+        protected bool IsSorted(MetadataTableIndex table)
+        {
+            return ((_sortedMask >> (int) table) & 1) != 0;
+        }
+
+        private IList<uint> ReadRowCounts(IBinaryStreamReader reader)
+        {
+            var result = new List<uint>();
+
+            const MetadataTableIndex maxTableIndex = MetadataTableIndex.GenericParamConstraint;
+            for (MetadataTableIndex i = 0; i <= maxTableIndex; i++)
+            {
+                if (HasTable(i)) 
+                    result.Add(reader.ReadUInt32());
+            }
+            
+            return result;
         }
         
     }
