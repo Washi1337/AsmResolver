@@ -3,8 +3,8 @@
 
 Managed executables (applications written using a .NET language) contain an extra data directory in the optional header of the PE file format. This small data directory contains a header which is also known as the CLR 2.0 header, and references other structures such as the metadata directory, raw data for manifest resources and sometimes an extra native header in the case of mixed mode applications or zapped (ngen'ed) applications. 
 
-.NET Directory
---------------
+.NET directory / CLR 2.0 header
+-------------------------------
 
 The .NET data directory can be accessed by the ``IPEImage.DotNetDirectory`` property.
 
@@ -40,6 +40,27 @@ The ``IMetadata`` interface also exposes the ``Streams`` property, a list of ``I
     foreach (var stream in metadata.Streams)
         Console.WriteLine("Name: " + stream.Name);
 
+Alternatively, it is possible to get a stream by its name using the ``GetStream(string)`` shortcut:
+
+.. code-block:: csharp
+
+    var stringsStream = metadata.GetStream("#Strings");
+
+AsmResolver supports parsing streams using the names in the table below. Any stream with a different name will be converted to a ``CustomMetadataStream``.
+
++---------------+------------------------+
+| Name          | Class                  |
++===============+========================+
+| ``#~`` ``#-`` | ``TablesStream``       |
++---------------+------------------------+
+| ``#Blob``     | ``BlobStream``         |
++---------------+------------------------+
+| ``#GUID``     | ``GuidStream``         |
++---------------+------------------------+
+| ``#Strings``  | ``StringsStream``      |
++---------------+------------------------+
+| ``#US``       | ``UserStringsStream``  |
++---------------+------------------------+
 
 Some streams support reading the raw contents using a ``IBinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
 
