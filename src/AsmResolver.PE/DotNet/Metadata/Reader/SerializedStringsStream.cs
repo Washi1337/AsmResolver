@@ -45,7 +45,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
 
         public override string GetStringByIndex(int index)
         {
-            if (!_cachedStrings.TryGetValue(index, out string value))
+            if (!_cachedStrings.TryGetValue(index, out string value) && index < _contents.GetPhysicalSize())
             {
                 var stringsReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
                 var data = stringsReader.ReadBytesUntil(0);
@@ -55,6 +55,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
 
             return value;
         }
-        
+
     }
 }

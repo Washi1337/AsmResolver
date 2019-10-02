@@ -16,58 +16,50 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AsmResolver.PE.DotNet.Metadata.Reader
 {
-    public class SerializedUserStringsStream : UserStringsStream
+    public class SerializedBlobStream : BlobStream
     {
-        private readonly IDictionary<int, string> _cachedStrings = new Dictionary<int, string>();
         private readonly IReadableSegment _contents;
 
-        public SerializedUserStringsStream(byte[] rawData)
+        public SerializedBlobStream(byte[] rawData)
             : this(new DataSegment(rawData))
         {
         }
 
-        public SerializedUserStringsStream(IReadableSegment contents)
+        public SerializedBlobStream(IReadableSegment contents)
         {
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
-        /// <inheritdoc />
         public override bool CanRead => true;
 
-        /// <inheritdoc />
         public override IBinaryStreamReader CreateReader()
         {
             return _contents.CreateReader();
         }
 
-        /// <inheritdoc />
-        public override string GetStringByIndex(int index)
+        public override byte[] GetBlobByIndex(int index)
         {
-            if (!_cachedStrings.TryGetValue(index, out string value) && index < _contents.GetPhysicalSize())
-            {
-                var stringsReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
-                
-                // Try read length.
-                if (stringsReader.TryReadCompressedUInt32(out uint length))
-                {
-                    // Read unicode bytes.
-                    var data = new byte[length];
-                    int actualLength = stringsReader.ReadBytes(data, 0, (int) length);
-                    
-                    // Exclude the terminator byte.
-                    value = Encoding.Unicode.GetString(data, 0, actualLength - 1);
-                }
-                
-                _cachedStrings[index] = value;
-            }
-
-            return value;
+            return GetBlobReaderByIndex(index)?.ReadToEnd();
         }
 
+        public override IBinaryStreamReader GetBlobReaderByIndex(int index)
+        {
+            if (index >= _contents.GetPhysicalSize()) 
+                return null;
+            
+            var blobReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
+            if (blobReader.TryReadCompressedUInt32(out uint length))
+            {
+                uint headerSize = blobReader.FileOffset - blobReader.StartPosition; 
+                blobReader.ChangeSize(length + headerSize);
+                return blobReader;
+            }
+
+            return null;
+        }
+        
     }
 }

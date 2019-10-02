@@ -33,7 +33,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// Gets a string by its string index.
         /// </summary>
         /// <param name="index">The offset into the heap to start reading.</param>
-        /// <returns>The string.</returns>
+        /// <returns>The string, or <c>null</c> if the index was invalid.</returns>
         public abstract string GetStringByIndex(int index);
     }
 }

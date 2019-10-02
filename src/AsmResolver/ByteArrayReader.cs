@@ -87,6 +87,7 @@ namespace AsmResolver
         public uint Length
         {
             get;
+            private set;
         }
 
         private void AssertCanRead(int count)
@@ -106,6 +107,15 @@ namespace AsmResolver
                 size,
                 address,
                 address - StartPosition + StartRva);
+        }
+
+        /// <inheritdoc />
+        public void ChangeSize(uint newSize)
+        {
+            if (newSize > Length)
+                throw new EndOfStreamException();
+            
+            Length = newSize;
         }
 
         /// <inheritdoc />

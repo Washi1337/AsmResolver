@@ -77,6 +77,8 @@ namespace AsmResolver
         /// <exception cref="EndOfStreamException">Occurs when <paramref name="size"/> results in the new reader to reach out of the stream.</exception>
         IBinaryStreamReader Fork(uint address, uint size);
 
+        void ChangeSize(uint newSize);
+
         /// <summary>
         /// Reads data from the stream until a specific byte is encountered.
         /// </summary>
