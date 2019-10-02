@@ -40,6 +40,17 @@ namespace AsmResolver.PE.Tests.DotNet
             Assert.NotNull(stream);
             Assert.IsAssignableFrom<StringsStream>(stream);
         }
+
+        [Fact]
+        public void DetectUserStringsStream()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var metadata = peImage.DotNetDirectory.Metadata;
+
+            var stream = metadata.GetStream(UserStringsStream.DefaultName);
+            Assert.NotNull(stream);
+            Assert.IsAssignableFrom<UserStringsStream>(stream);
+        }
         
     }
 }

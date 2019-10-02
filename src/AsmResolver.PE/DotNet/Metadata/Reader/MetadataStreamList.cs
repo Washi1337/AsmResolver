@@ -67,7 +67,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
             {
                 case StringsStream.DefaultName:
                     return new SerializedStringsStream(DataSegment.FromReader(reader));
-                
+
+                case UserStringsStream.DefaultName:
+                    return new SerializedUserStringsStream(DataSegment.FromReader(reader));
+
                 default:
                     return new CustomMetadataStream(header.Name, DataSegment.FromReader(reader));
             }

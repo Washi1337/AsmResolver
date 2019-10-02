@@ -260,5 +260,53 @@ namespace AsmResolver
             return is32Bit ? reader.ReadUInt32() : reader.ReadUInt64();
         }
 
+
+        /// <summary>
+        /// Reads a compressed unsigned integer from the stream.
+        /// </summary>
+        /// <param name="reader">The reader to use for reading the data.</param>
+        /// <returns>The unsigned integer that was read from the stream.</returns>
+        public static uint ReadCompressedUInt32(this IBinaryStreamReader reader)
+        {
+            var firstByte = reader.ReadByte();
+
+            if ((firstByte & 0x80) == 0)
+                return firstByte;
+
+            if ((firstByte & 0x40) == 0)
+                return (uint)(((firstByte & 0x7F) << 8) | reader.ReadByte());
+
+            return (uint)(((firstByte & 0x3F) << 0x18) |
+                          (reader.ReadByte() << 0x10) |
+                          (reader.ReadByte() << 0x08) |
+                          reader.ReadByte());
+        }
+
+        /// <summary>
+        /// Tries to reads a compressed unsigned integer from the stream.
+        /// </summary>
+        /// <param name="reader">The reader to use for reading the data.</param>
+        /// <param name="value">The unsigned integer that was read from the stream.</param>
+        /// <returns><c>True</c> if the method succeeded, false otherwise.</returns>
+        public static bool TryReadCompressedUInt32(this IBinaryStreamReader reader, out uint value)
+        {
+            value = 0;
+            if (!reader.CanRead(sizeof(byte)))
+                return false;
+
+            var firstByte = reader.ReadByte();
+            reader.FileOffset--;
+
+            if (((firstByte & 0x80) == 0 && reader.CanRead(sizeof(byte))) ||
+                ((firstByte & 0x40) == 0 && reader.CanRead(sizeof(ushort))) ||
+                (reader.CanRead(sizeof(uint))))
+            {
+                value = ReadCompressedUInt32(reader);
+                return true;
+            }
+
+            return false;
+        }
+        
     }
 }
