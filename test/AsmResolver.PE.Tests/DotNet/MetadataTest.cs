@@ -73,6 +73,17 @@ namespace AsmResolver.PE.Tests.DotNet
             Assert.NotNull(stream);
             Assert.IsAssignableFrom<GuidStream>(stream);
         }
+
+        [Fact]
+        public void DetectCompressedTableStream()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var metadata = peImage.DotNetDirectory.Metadata;
+
+            var stream = metadata.GetStream(TablesStream.CompressedStreamName);
+            Assert.NotNull(stream);
+            Assert.IsAssignableFrom<TablesStream>(stream);
+        }
         
     }
 }
