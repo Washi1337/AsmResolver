@@ -9,10 +9,10 @@ namespace AsmResolver.Lazy
     /// <typeparam name="T">The type of the values that the variable stores.</typeparam>
     public class LazyVariable<T>
     {
-        private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         private T _value;
         private bool _initialized;
         private readonly Func<T> _getValue;
+        private readonly object _lockObject = new object();
 
         /// <summary>
         /// Creates a new lazy variable and initialize it with a constant.
@@ -32,7 +32,7 @@ namespace AsmResolver.Lazy
         {
             _getValue = getValue ?? throw new ArgumentNullException(nameof(getValue));
         }
-        
+
         /// <summary>
         /// Gets or sets the value of the variable.
         /// </summary>
@@ -40,42 +40,29 @@ namespace AsmResolver.Lazy
         {
             get
             {
-                _lock.EnterUpgradeableReadLock();
-                try
-                {
-                    if (!_initialized) 
-                        InitializeValue();
-
-                    return _value;
-                }
-                finally
-                {
-                    _lock.ExitUpgradeableReadLock();
-                }
+                if (!_initialized)
+                    InitializeValue();
+                return _value;
             }
             set
             {
-                _lock.EnterWriteLock();
-                _value = value;
-                _initialized = true;
-                _lock.ExitWriteLock();
+                lock (_lockObject)
+                {
+                    _value = value;
+                    _initialized = true;
+                }
             }
         }
 
         private void InitializeValue()
         {
-            _lock.EnterWriteLock();
-            try
+            lock (_lockObject)
             {
                 if (!_initialized)
                 {
                     _value = _getValue();
                     _initialized = true;
                 }
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
             }
         }
         

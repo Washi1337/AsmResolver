@@ -28,7 +28,10 @@ namespace AsmResolver.PE.DotNet.Metadata
         public const string EncStreamName = "#-";
         public const string MinimalStreamName = "#JTD";
         public const string UncompressedStreamName = "#Schema";
+        private const int MaxTableCount = (int) MetadataTableIndex.GenericParamConstraint;
 
+//        private IList<IMetadataTable> _tables = new List<IMetadataTable>(MaxTableCount);
+        
         /// <inheritdoc />
         public string Name
         {
@@ -178,14 +181,9 @@ namespace AsmResolver.PE.DotNet.Metadata
             get;
             set;
         }
-        
-        // TODO: tables.
 
         /// <inheritdoc />
-        public virtual IBinaryStreamReader CreateReader()
-        {
-            throw new NotSupportedException();
-        }
+        public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
         
     }
 }
