@@ -17,7 +17,7 @@
 
 using System;
 
-namespace AsmResolver.PE.DotNet.Metadata.Reader
+namespace AsmResolver.PE.DotNet.Metadata
 {
     public readonly struct MetadataStreamHeader
     {

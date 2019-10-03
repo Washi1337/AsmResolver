@@ -17,7 +17,7 @@
 
 using System;
 
-namespace AsmResolver.PE.DotNet.Metadata
+namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>
     /// Represents the metadata stream containing tables defining each member in a .NET assembly. 
@@ -28,7 +28,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         public const string EncStreamName = "#-";
         public const string MinimalStreamName = "#JTD";
         public const string UncompressedStreamName = "#Schema";
-        private const int MaxTableCount = (int) MetadataTableIndex.GenericParamConstraint;
+        private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
 //        private IList<IMetadataTable> _tables = new List<IMetadataTable>(MaxTableCount);
         

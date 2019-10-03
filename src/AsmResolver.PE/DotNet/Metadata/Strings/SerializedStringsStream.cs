@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AsmResolver.PE.DotNet.Metadata.Reader
+namespace AsmResolver.PE.DotNet.Metadata.Strings
 {
     public class SerializedStringsStream : StringsStream
     {

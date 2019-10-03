@@ -17,7 +17,7 @@
 
 using System;
 
-namespace AsmResolver.PE.DotNet.Metadata
+namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>
     /// Provides members for all possible flags that the tables stream defines.

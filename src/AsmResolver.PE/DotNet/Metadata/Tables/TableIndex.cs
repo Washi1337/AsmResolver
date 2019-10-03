@@ -1,6 +1,6 @@
-namespace AsmResolver.PE.DotNet.Metadata
+namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
-    public enum MetadataTableIndex : byte
+    public enum TableIndex : byte
     {
         Module = 0,
         TypeRef = 1,

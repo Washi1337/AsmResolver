@@ -17,7 +17,6 @@
 
 using System;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Reader;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 

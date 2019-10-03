@@ -15,7 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-namespace AsmResolver.PE.DotNet.Metadata
+namespace AsmResolver.PE.DotNet.Metadata.Blob
 {
     /// <summary>
     /// Represents the metadata stream containing blob signatures referenced by entries in the tables stream. 

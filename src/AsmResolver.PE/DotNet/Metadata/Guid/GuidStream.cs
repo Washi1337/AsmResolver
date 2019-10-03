@@ -15,9 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System;
-
-namespace AsmResolver.PE.DotNet.Metadata
+namespace AsmResolver.PE.DotNet.Metadata.Guid
 {
     /// <summary>
     /// Represents the metadata stream containing GUIDs referenced by entries in the tables stream. 
@@ -53,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <param name="index">The offset into the heap to start reading.</param>
         /// <returns>The GUID.</returns>
-        public abstract Guid GetGuidByIndex(int index);
+        public abstract System.Guid GetGuidByIndex(int index);
         
     }
 }

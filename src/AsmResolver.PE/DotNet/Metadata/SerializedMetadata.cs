@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 using AsmResolver.PE.File;
 
-namespace AsmResolver.PE.DotNet.Metadata.Reader
+namespace AsmResolver.PE.DotNet.Metadata
 {
     public class SerializedMetadata : Metadata
     {

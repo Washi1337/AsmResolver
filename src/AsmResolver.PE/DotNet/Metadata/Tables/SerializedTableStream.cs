@@ -18,7 +18,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AsmResolver.PE.DotNet.Metadata.Reader
+namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     public class SerializedTableStream : TablesStream
     {
@@ -58,12 +58,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
             return _contents.CreateReader();
         }
 
-        protected bool HasTable(MetadataTableIndex table)
+        protected bool HasTable(TableIndex table)
         {
             return ((_validMask >> (int) table) & 1) != 0;
         }
 
-        protected bool IsSorted(MetadataTableIndex table)
+        protected bool IsSorted(TableIndex table)
         {
             return ((_sortedMask >> (int) table) & 1) != 0;
         }
@@ -72,8 +72,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
         {
             var result = new List<uint>();
 
-            const MetadataTableIndex maxTableIndex = MetadataTableIndex.GenericParamConstraint;
-            for (MetadataTableIndex i = 0; i <= maxTableIndex; i++)
+            const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
+            for (TableIndex i = 0; i <= maxTableIndex; i++)
             {
                 if (HasTable(i)) 
                     result.Add(reader.ReadUInt32());

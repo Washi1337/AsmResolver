@@ -1,6 +1,6 @@
 using System;
 
-namespace AsmResolver.PE.DotNet.Metadata
+namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>
     /// Represents a metadata token, referencing a member using a table and a row index. 
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="table">The table.</param>
         /// <param name="rid">The row index.</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <see cref="rid"/> is too large.</exception>
-        public MetadataToken(MetadataTableIndex table, uint rid)
+        public MetadataToken(TableIndex table, uint rid)
             : this((uint) (((byte)table << 24) | rid & 0x00FFFFFF))
         {
             if (rid > 0x00FFFFFF)
@@ -34,7 +34,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <summary>
         /// Gets the table that the metadata token references.
         /// </summary>
-        public MetadataTableIndex Table => (MetadataTableIndex) (_value >> 24);
+        public TableIndex Table => (TableIndex) (_value >> 24);
 
         /// <summary>
         /// Gets the row index within the table specified by <see cref="Table"/> that the metadata token references.

@@ -17,18 +17,18 @@
 
 using System;
 
-namespace AsmResolver.PE.DotNet.Metadata.Reader
+namespace AsmResolver.PE.DotNet.Metadata.Blob
 {
-    public class SerializedGuidStream : GuidStream
+    public class SerializedBlobStream : BlobStream
     {
         private readonly IReadableSegment _contents;
 
-        public SerializedGuidStream(byte[] rawData)
+        public SerializedBlobStream(byte[] rawData)
             : this(new DataSegment(rawData))
         {
         }
 
-        public SerializedGuidStream(IReadableSegment contents)
+        public SerializedBlobStream(IReadableSegment contents)
         {
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
@@ -40,18 +40,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Reader
             return _contents.CreateReader();
         }
 
-        public override Guid GetGuidByIndex(int index)
+        public override byte[] GetBlobByIndex(int index)
         {
-            index--;
-            if (index < _contents.GetPhysicalSize())
+            return GetBlobReaderByIndex(index)?.ReadToEnd();
+        }
+
+        public override IBinaryStreamReader GetBlobReaderByIndex(int index)
+        {
+            if (index >= _contents.GetPhysicalSize()) 
+                return null;
+            
+            var blobReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
+            if (blobReader.TryReadCompressedUInt32(out uint length))
             {
-                var guidReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
-                var data = new byte[16];
-                guidReader.ReadBytes(data, 0, data.Length);
-                return new Guid(data);
+                uint headerSize = blobReader.FileOffset - blobReader.StartPosition; 
+                blobReader.ChangeSize(length + headerSize);
+                return blobReader;
             }
 
-            return Guid.Empty;
+            return null;
         }
         
     }
