@@ -309,6 +309,25 @@ namespace AsmResolver
 
             return false;
         }
-        
+
+        /// <summary>
+        /// Reads a short or a long index from the stream.
+        /// </summary>
+        /// <param name="reader">The reader to use for reading the data.</param>
+        /// <param name="size">The size of the index to read.</param>
+        /// <returns>The index, zero extended to 32 bits if necessary.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static uint ReadIndex(this IBinaryStreamReader reader, IndexSize size)
+        {
+            switch (size)
+            {
+                case IndexSize.Short:
+                    return reader.ReadUInt16();
+                case IndexSize.Long:
+                    return reader.ReadUInt32();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(size));
+            }
+        }
     }
 }
