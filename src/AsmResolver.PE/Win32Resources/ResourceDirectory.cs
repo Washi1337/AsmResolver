@@ -27,7 +27,7 @@ namespace AsmResolver.PE.Win32Resources
     /// </summary>
     public class ResourceDirectory : IResourceDirectory
     {
-        private IList<IResourceDirectoryEntry> _entries;
+        private IList<IResourceEntry> _entries;
 
         protected ResourceDirectory()
         {
@@ -66,10 +66,10 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        bool IResourceDirectoryEntry.IsDirectory => true;
+        bool IResourceEntry.IsDirectory => true;
 
         /// <inheritdoc />
-        bool IResourceDirectoryEntry.IsData => false;
+        bool IResourceEntry.IsData => false;
 
         /// <inheritdoc />
         public uint Characteristics
@@ -100,7 +100,7 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        public IList<IResourceDirectoryEntry> Entries
+        public IList<IResourceEntry> Entries
         {
             get
             {
@@ -117,9 +117,9 @@ namespace AsmResolver.PE.Win32Resources
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Entries"/> property.
         /// </remarks> 
-        protected virtual IList<IResourceDirectoryEntry> GetEntries()
+        protected virtual IList<IResourceEntry> GetEntries()
         {
-            return new List<IResourceDirectoryEntry>();
+            return new List<IResourceEntry>();
         }
 
         /// <inheritdoc />

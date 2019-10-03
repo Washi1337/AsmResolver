@@ -25,7 +25,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="rid">The row index.</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <see cref="rid"/> is too large.</exception>
         public MetadataToken(TableIndex table, uint rid)
-            : this((uint) (((byte)table << 24) | rid & 0x00FFFFFF))
+            : this((uint) table << 24 | rid & 0x00FFFFFF)
         {
             if (rid > 0x00FFFFFF)
                 throw new ArgumentOutOfRangeException(nameof(rid));

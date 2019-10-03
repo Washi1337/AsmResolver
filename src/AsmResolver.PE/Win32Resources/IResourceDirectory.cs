@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Win32Resources
     /// <summary>
     /// Represents a single directory containing Win32 resources of a PE image. 
     /// </summary>
-    public interface IResourceDirectory : IResourceDirectoryEntry
+    public interface IResourceDirectory : IResourceEntry
     {
         /// <summary>
         /// Gets or sets the flags of the directory.
@@ -66,7 +66,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets a collection of entries that are stored in the directory.
         /// </summary>
-        IList<IResourceDirectoryEntry> Entries
+        IList<IResourceEntry> Entries
         {
             get;
         }

@@ -15,38 +15,38 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System;
-using System.Diagnostics;
-using AsmResolver.Lazy;
+using System.Collections.Generic;
 using AsmResolver.PE.File;
-using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.Imports.Reader
+namespace AsmResolver.PE.Relocations
 {
-    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class ModuleImportEntryList : LazyList<IModuleImportEntry>
+    public class SerializedRelocationBlock : RelocationBlock
     {
         private readonly PEFile _peFile;
-        private readonly DataDirectory _dataDirectory;
+        private readonly uint _offset;
+        private readonly uint _size;
 
-        public ModuleImportEntryList(PEFile peFile, DataDirectory dataDirectory)
+        public SerializedRelocationBlock(PEFile peFile, IBinaryStreamReader reader)
         {
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _dataDirectory = dataDirectory;
+            _peFile = peFile;
+            PageRva = reader.ReadUInt32();
+            
+            _size = reader.ReadUInt32() - sizeof(uint) * 2;
+            _offset = reader.FileOffset;
+            
+            reader.FileOffset += _size;
         }
         
-        protected override void Initialize()
+        protected override IList<RelocationEntry> GetEntries()
         {
-            if (!_peFile.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
-                return;
-            
-            while (true)
-            {
-                var entry = ModuleImportEntry.FromReader(_peFile, reader);
-                if (entry == null)
-                    break;
-                Items.Add(entry);
-            }
+            var result = new List<RelocationEntry>();
+            var reader = _peFile.CreateReaderAtFileOffset(_offset, _size);
+
+            uint count = _size / sizeof(ushort);
+            for (int i = 0; i < count; i++) 
+                result.Add(new RelocationEntry(reader.ReadUInt16()));
+
+            return result;
         }
         
     }

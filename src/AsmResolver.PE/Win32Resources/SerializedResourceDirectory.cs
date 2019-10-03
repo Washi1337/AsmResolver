@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using AsmResolver.PE.File;
 
-namespace AsmResolver.PE.Win32Resources.Reader
+namespace AsmResolver.PE.Win32Resources
 {
     public class SerializedResourceDirectory : ResourceDirectory
     {
@@ -59,16 +59,16 @@ namespace AsmResolver.PE.Win32Resources.Reader
             }
         }
 
-        protected override IList<IResourceDirectoryEntry> GetEntries()
+        protected override IList<IResourceEntry> GetEntries()
         {
             if (_namedEntries + _idEntries == 0 // Optimisation + check for invalid resource directory offset. 
                 || _depth >= MaxDepth           // Prevent self loops.
             )
             {
-                return new List<IResourceDirectoryEntry>();
+                return new List<IResourceEntry>();
             }
 
-            return new ResourceDirectoryEntryList(_peFile, _entriesOffset, _namedEntries, _idEntries, _depth + 1);
+            return new SerializedResourceEntryList(_peFile, _entriesOffset, _namedEntries, _idEntries, _depth + 1);
         }
 
     }

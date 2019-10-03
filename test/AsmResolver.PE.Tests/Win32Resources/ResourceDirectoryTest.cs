@@ -24,10 +24,10 @@ namespace AsmResolver.PE.Tests.Win32Resources
             public IList<ResourceEntryInfo> Entries { get; } = new List<ResourceEntryInfo>();
         }
 
-        private void AssertStructure(ResourceEntryInfo expectedStructure, IResourceDirectoryEntry directory)
+        private void AssertStructure(ResourceEntryInfo expectedStructure, IResourceEntry directory)
         {
             var expectedStack = new Stack<ResourceEntryInfo>();
-            var stack = new Stack<IResourceDirectoryEntry>();
+            var stack = new Stack<IResourceEntry>();
             expectedStack.Push(expectedStructure);
             stack.Push(directory);
 
@@ -108,7 +108,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
             const int maxDirCount = 20;
             int dirCount = 0;
             
-            var stack = new Stack<IResourceDirectoryEntry>();
+            var stack = new Stack<IResourceEntry>();
             stack.Push(peImage.Resources);
             while (stack.Count > 0)
             {

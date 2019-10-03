@@ -67,10 +67,10 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        bool IResourceDirectoryEntry.IsDirectory => false;
+        bool IResourceEntry.IsDirectory => false;
 
         /// <inheritdoc />
-        bool IResourceDirectoryEntry.IsData => true;
+        bool IResourceEntry.IsData => true;
         
         /// <inheritdoc />
         public IReadableSegment Contents

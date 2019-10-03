@@ -18,7 +18,7 @@
 using System;
 using AsmResolver.PE.File;
 
-namespace AsmResolver.PE.Win32Resources.Reader
+namespace AsmResolver.PE.Win32Resources
 {
     public class SerializedResourceData : ResourceData
     {

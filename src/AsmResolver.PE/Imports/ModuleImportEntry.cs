@@ -18,7 +18,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.PE.File;
-using AsmResolver.PE.Imports.Reader;
 
 namespace AsmResolver.PE.Imports
 {

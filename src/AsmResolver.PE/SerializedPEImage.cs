@@ -18,15 +18,11 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Reader;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
-using AsmResolver.PE.Imports.Reader;
 using AsmResolver.PE.Relocations;
-using AsmResolver.PE.Relocations.Reader;
 using AsmResolver.PE.Win32Resources;
-using AsmResolver.PE.Win32Resources.Reader;
 
 namespace AsmResolver.PE
 {
@@ -43,7 +39,7 @@ namespace AsmResolver.PE
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
             return dataDirectory.IsPresentInPE
-                ? (IList<IModuleImportEntry>) new ModuleImportEntryList(_peFile, dataDirectory)
+                ? (IList<IModuleImportEntry>) new SerializedModuleImportEntryList(_peFile, dataDirectory)
                 : new List<IModuleImportEntry>();
         }
 
@@ -60,7 +56,7 @@ namespace AsmResolver.PE
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
             return dataDirectory.IsPresentInPE
-                ? new RelocationBlockList(_peFile, dataDirectory)
+                ? new SerializedRelocationBlockList(_peFile, dataDirectory)
                 : (IList<IRelocationBlock>) new List<IRelocationBlock>();
         }
 

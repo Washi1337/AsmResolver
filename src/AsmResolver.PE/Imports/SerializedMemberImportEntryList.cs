@@ -21,17 +21,17 @@ using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.Imports.Reader
+namespace AsmResolver.PE.Imports
 {
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class MemberImportEntryList : LazyList<MemberImportEntry>
+    public class SerializedMemberImportEntryList : LazyList<MemberImportEntry>
     {
         private readonly PEFile _peFile;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
         private readonly bool _is32Bit;
         
-        public MemberImportEntryList(PEFile peFile, uint lookupRva, uint addressRva)
+        public SerializedMemberImportEntryList(PEFile peFile, uint lookupRva, uint addressRva)
         {
             _is32Bit = peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
             _peFile = peFile;

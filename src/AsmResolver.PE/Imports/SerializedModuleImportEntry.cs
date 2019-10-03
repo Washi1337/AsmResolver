@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using AsmResolver.PE.File;
 
-namespace AsmResolver.PE.Imports.Reader
+namespace AsmResolver.PE.Imports
 {
     public class SerializedModuleImportEntry : ModuleImportEntry
     {
@@ -49,7 +49,7 @@ namespace AsmResolver.PE.Imports.Reader
         {
             if (IsEmpty)
                 return new List<MemberImportEntry>();
-            return new MemberImportEntryList(_peFile, _lookupRva, _addressRva);
+            return new SerializedMemberImportEntryList(_peFile, _lookupRva, _addressRva);
         }
 
     }

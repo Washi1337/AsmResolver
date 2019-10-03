@@ -19,7 +19,7 @@ using System.Text;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.Win32Resources.Reader
+namespace AsmResolver.PE.Win32Resources
 {
     public class ResourceDirectoryEntry
     {

@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Win32Resources
     /// <summary>
     /// Represents one entry in a win32 resource directory.
     /// </summary>
-    public interface IResourceDirectoryEntry
+    public interface IResourceEntry
     {
         /// <summary>
         /// Gets or sets the name of the entry.

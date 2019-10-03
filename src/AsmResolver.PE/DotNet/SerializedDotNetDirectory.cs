@@ -20,7 +20,7 @@ using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
-namespace AsmResolver.PE.DotNet.Reader
+namespace AsmResolver.PE.DotNet
 {
     public class SerializedDotNetDirectory : DotNetDirectory
     {
