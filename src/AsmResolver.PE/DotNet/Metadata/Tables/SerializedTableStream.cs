@@ -25,6 +25,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly IReadableSegment _contents;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
+        private IList<uint> _rowCounts;
+        private TableLayout[] _layouts;
 
         public SerializedTableStream(byte[] rawData)
             : this(new DataSegment(rawData))
@@ -44,11 +46,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _validMask = reader.ReadUInt64();
             _sortedMask = reader.ReadUInt64();
 
-            var rowCounts = ReadRowCounts(reader);
-            // TODO: initialize tables using row counts.
+            _rowCounts = ReadRowCounts(reader);
 
             if (HasExtraData)
                 ExtraData = reader.ReadUInt32();
+
+            _layouts = InitializeTableLayouts(_rowCounts);
+            
+            // TODO: initialize tables using table layouts and row counts.
+            
         }
 
         public override bool CanRead => true;
@@ -70,17 +76,29 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private IList<uint> ReadRowCounts(IBinaryStreamReader reader)
         {
-            var result = new List<uint>();
-
             const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
+            
+            var result = new uint[(int) maxTableIndex + 1];
             for (TableIndex i = 0; i <= maxTableIndex; i++)
+                result[(int) i] = HasTable(i) ? reader.ReadUInt32() : 0;
+
+            return result;
+        }
+
+        private TableLayout[] InitializeTableLayouts(IList<uint> rowCounts)
+        {
+            var result = new[]
             {
-                if (HasTable(i)) 
-                    result.Add(reader.ReadUInt32());
-            }
+                new TableLayout(
+                    new ColumnLayout("Generation", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, (int) StringIndexSize),
+                    new ColumnLayout("Mvid", ColumnType.Guid, (int) GuidIndexSize),
+                    new ColumnLayout("EncId", ColumnType.Guid, (int) GuidIndexSize),
+                    new ColumnLayout("EncBaseId", ColumnType.Guid, (int) GuidIndexSize))
+            };
             
             return result;
         }
-        
+
     }
 }

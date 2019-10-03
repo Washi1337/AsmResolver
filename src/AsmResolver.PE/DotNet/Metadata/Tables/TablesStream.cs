@@ -16,6 +16,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
+using System.Collections.Generic;
+using AsmResolver.Lazy;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -30,15 +32,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public const string UncompressedStreamName = "#Schema";
         private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
-//        private IList<IMetadataTable> _tables = new List<IMetadataTable>(MaxTableCount);
-        
+        private readonly LazyVariable<IList<IMetadataTable>> _tables;
+
+        public TablesStream()
+        {
+            _tables = new LazyVariable<IList<IMetadataTable>>(GetTables);
+        }
+
         /// <inheritdoc />
         public string Name
         {
             get;
             set;
         } = CompressedStreamName;
-        
+
         /// <inheritdoc />
         public virtual bool CanRead => false;
 
@@ -85,33 +92,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Gets or sets a value indicating each string index in the tables stream is a 4 byte integer instead of a
         /// 2 byte integer.
         /// </summary>
-        public bool HasLongStringIndices
+        public IndexSize StringIndexSize
         {
-            get => (Flags & TablesStreamFlags.LongStringIndices) != 0;
-            set => Flags = (Flags & ~TablesStreamFlags.LongStringIndices)
-                           | (value ? TablesStreamFlags.LongStringIndices : 0);
+            get => GetIndexSize(0);
+            set => SetIndexSize(0, value);
         }
 
         /// <summary>
         /// Gets or sets a value indicating each GUID index in the tables stream is a 4 byte integer instead of a
         /// 2 byte integer.
         /// </summary>
-        public bool HasLongGuidIndices
+        public IndexSize GuidIndexSize
         {
-            get => (Flags & TablesStreamFlags.LongGuidIndices) != 0;
-            set => Flags = (Flags & ~TablesStreamFlags.LongGuidIndices)
-                           | (value ? TablesStreamFlags.LongGuidIndices : 0);
+            get => GetIndexSize(1);
+            set => SetIndexSize(1, value);
         }
 
         /// <summary>
         /// Gets or sets a value indicating each blob index in the tables stream is a 4 byte integer instead of a
         /// 2 byte integer.
         /// </summary>
-        public bool HasLongBlobIndices
+        public IndexSize BlobIndexSize
         {
-            get => (Flags & TablesStreamFlags.LongBlobIndices) != 0;
-            set => Flags = (Flags & ~TablesStreamFlags.LongBlobIndices)
-                           | (value ? TablesStreamFlags.LongBlobIndices : 0);
+            get => GetIndexSize(2);
+            set => SetIndexSize(2, value);
         }
 
         /// <summary>
@@ -182,8 +186,34 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of all tables in the tables stream.
+        /// </summary>
+        /// <remarks>
+        /// This collection always contains all tables, in the same order as <see cref="TableIndex"/> defines, regardless
+        /// of whether a table actually has elements or not.
+        /// </remarks>
+        protected IList<IMetadataTable> Tables => _tables.Value;
+
         /// <inheritdoc />
         public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
-        
+
+        /// <summary>
+        /// Obtains the collection of tables in the tables stream.
+        /// </summary>
+        /// <returns>The tables, including empty tables if there are any.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Tables"/> property.
+        /// </remarks>
+        protected virtual IList<IMetadataTable> GetTables() => new List<IMetadataTable>();
+
+        private IndexSize GetIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
+
+
+        private void SetIndexSize(int bitIndex, IndexSize newSize)
+        {
+            Flags = (TablesStreamFlags) (((int) Flags & ~(1 << bitIndex))
+                                         | (newSize == IndexSize.Long ? 1 << bitIndex : 0));
+        }
     }
 }
