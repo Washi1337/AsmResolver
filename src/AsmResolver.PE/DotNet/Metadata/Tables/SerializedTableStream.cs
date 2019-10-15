@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
@@ -28,6 +29,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly ulong _sortedMask;
         private readonly uint[] _rowCounts;
         private readonly TableLayout[] _layouts;
+        private readonly IndexSize[] _indexSizes;
         private readonly uint _headerSize;
 
         public SerializedTableStream(byte[] rawData)
@@ -54,8 +56,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 ExtraData = reader.ReadUInt32();
 
             _headerSize = reader.FileOffset - reader.StartPosition;
-            
-            _layouts = InitializeTableLayouts(_rowCounts);
+
+            _indexSizes = InitializeCodedIndices();
+            _layouts = InitializeTableLayouts();
         }
 
         public override bool CanRead => true;
@@ -86,24 +89,84 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return result;
         }
 
-        private TableLayout[] InitializeTableLayouts(IList<uint> rowCounts)
+        private TableLayout[] InitializeTableLayouts()
         {
             var result = new[]
             {
                 new TableLayout(
                     new ColumnLayout("Generation", ColumnType.UInt16),
-                    new ColumnLayout("Name", ColumnType.String, (uint) StringIndexSize),
-                    new ColumnLayout("Mvid", ColumnType.Guid, (uint) GuidIndexSize),
-                    new ColumnLayout("EncId", ColumnType.Guid, (uint) GuidIndexSize),
-                    new ColumnLayout("EncBaseId", ColumnType.Guid, (uint) GuidIndexSize)),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Mvid", ColumnType.Guid, GuidIndexSize),
+                    new ColumnLayout("EncId", ColumnType.Guid, GuidIndexSize),
+                    new ColumnLayout("EncBaseId", ColumnType.Guid, GuidIndexSize)),
                 new TableLayout(
-                    // TODO: calculate resolution scope size.
-                    new ColumnLayout("ResolutionScope", ColumnType.ResolutionScope, 2),
-                    new ColumnLayout("Name", ColumnType.String, (uint) StringIndexSize),
-                    new ColumnLayout("Namespace", ColumnType.Guid, (uint) StringIndexSize))
+                    new ColumnLayout("ResolutionScope", ColumnType.ResolutionScope,
+                        _indexSizes[(int) CodedIndex.ResolutionScope]),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Namespace", ColumnType.Guid, StringIndexSize))
             };
             
             return result;
+        }
+
+        private IndexSize[] InitializeCodedIndices()
+        {
+            return new[]
+            {
+                // TypeDefOrRef
+                GetCodedIndexSize(TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.TypeSpec),
+
+                // HasConstant
+                GetCodedIndexSize(TableIndex.Field, TableIndex.Param, TableIndex.Property),
+
+                // HasCustomAttribute
+                GetCodedIndexSize(
+                    TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef,
+                    TableIndex.Param, TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module,
+                    TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig,
+                    TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
+                    TableIndex.File, TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
+                    TableIndex.GenericParamConstraint, TableIndex.MethodSpec),
+
+                // HasFieldMarshal
+                GetCodedIndexSize(TableIndex.Field, TableIndex.Param),
+
+                // HasDeclSecurity
+                GetCodedIndexSize(TableIndex.TypeDef, TableIndex.Method, TableIndex.Assembly),
+
+                // MemberRefParent
+                GetCodedIndexSize(
+                    TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.ModuleRef,
+                    TableIndex.Method, TableIndex.TypeSpec),
+
+                // HasSemantics
+                GetCodedIndexSize(TableIndex.Event, TableIndex.Property),
+
+                // MethodDefOrRef
+                GetCodedIndexSize(TableIndex.Method, TableIndex.MemberRef),
+
+                // MemberForwarded
+                GetCodedIndexSize(TableIndex.Field, TableIndex.Method),
+
+                // Implementation
+                GetCodedIndexSize(TableIndex.File, TableIndex.AssemblyRef, TableIndex.ExportedType),
+
+                // CustomAttributeType
+                GetCodedIndexSize(0, 0, TableIndex.Method, TableIndex.MemberRef, 0),
+
+                // ResolutionScope
+                GetCodedIndexSize(TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
+            };
+        }
+
+        private IndexSize GetCodedIndexSize(params TableIndex[] tables)
+        {
+            int tableIndexBitCount = (int) Math.Ceiling(Math.Log(tables.Length, 2));
+            int maxSmallTableMemberCount = ushort.MaxValue >> tableIndexBitCount;
+
+            return tables.Select(t => _rowCounts[(int) t]).All(c => c < maxSmallTableMemberCount)
+                ? IndexSize.Short
+                : IndexSize.Long;
         }
 
         protected override IList<IMetadataTable> GetTables()

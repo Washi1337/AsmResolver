@@ -15,7 +15,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 throw new ArgumentException("Size was not explicitly defined.");
             Size = (uint) type & 0xFF;
         }
-        
+
+        public ColumnLayout(string name, ColumnType type, IndexSize size)
+            : this(name, type, (uint) size)
+        {
+        }
+
         public ColumnLayout(string name, ColumnType type, uint size)
         {
             Name = name;

@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -35,7 +36,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
         private readonly LazyVariable<IList<IMetadataTable>> _tables;
-
+        
         public TablesStream()
         {
             _tables = new LazyVariable<IList<IMetadataTable>>(GetTables);
@@ -160,7 +161,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             set => Flags = (Flags & ~TablesStreamFlags.HasDelete)
                            | (value ? TablesStreamFlags.HasDelete : 0);
         }
-        
+
         /// <summary>
         /// Gets the bit-length of the largest relative identifier (RID) in the table stream.
         /// </summary>
@@ -229,12 +230,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private IndexSize GetIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
 
-
         private void SetIndexSize(int bitIndex, IndexSize newSize)
         {
             Flags = (TablesStreamFlags) (((int) Flags & ~(1 << bitIndex))
                                          | (newSize == IndexSize.Long ? 1 << bitIndex : 0));
         }
-        
     }
 }
