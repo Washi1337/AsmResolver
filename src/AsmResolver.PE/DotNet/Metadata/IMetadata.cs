@@ -90,5 +90,13 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="name">The name of the stream to search.</param>
         /// <returns>The stream, or <c>null</c> if none was found.</returns>
         IMetadataStream GetStream(string name);
+
+        /// <summary>
+        /// Gets a stream by its type.
+        /// </summary>
+        /// <typeparam name="TStream">The type of the stream.</typeparam>
+        /// <returns>The stream, or <c>null</c> if none was found.</returns>
+        TStream GetStream<TStream>()
+            where TStream : IMetadataStream;
     }
 }

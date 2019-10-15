@@ -96,6 +96,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Mvid", ColumnType.Guid, (uint) GuidIndexSize),
                     new ColumnLayout("EncId", ColumnType.Guid, (uint) GuidIndexSize),
                     new ColumnLayout("EncBaseId", ColumnType.Guid, (uint) GuidIndexSize)),
+                new TableLayout(
+                    // TODO: calculate resolution scope size.
+                    new ColumnLayout("ResolutionScope", ColumnType.ResolutionScope, 2),
+                    new ColumnLayout("Name", ColumnType.String, (uint) StringIndexSize),
+                    new ColumnLayout("Namespace", ColumnType.Guid, (uint) StringIndexSize))
             };
             
             return result;
@@ -108,6 +113,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             {
                 new SerializedMetadataTable<ModuleDefinitionRow>(
                     CreateNextRawTableReader(TableIndex.Module, ref offset), _layouts[0], ModuleDefinitionRow.FromReader),
+                new SerializedMetadataTable<TypeReferenceRow>(
+                    CreateNextRawTableReader(TableIndex.TypeRef, ref offset), _layouts[1], TypeReferenceRow.FromReader),
             };
         }
 

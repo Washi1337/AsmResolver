@@ -5,5 +5,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     /// </summary>
     public interface IMetadataRow
     {
+        TableIndex TableIndex
+        {
+            get;
+        }
     }
 }

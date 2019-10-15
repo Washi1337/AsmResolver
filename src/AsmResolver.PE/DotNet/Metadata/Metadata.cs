@@ -88,6 +88,22 @@ namespace AsmResolver.PE.DotNet.Metadata
             return null;
         }
 
+        /// <inheritdoc />
+        public TStream GetStream<TStream>()
+            where TStream : IMetadataStream
+        {
+            var streams = Streams;
+            
+            // Reversed order search. CLR counts the last stream.  
+            for (int i = streams.Count - 1; i >= 0; i--)
+            {
+                if (streams[i] is TStream stream)
+                    return stream;
+            }
+
+            return default;
+        }
+
         /// <summary>
         /// Obtains the list of streams defined in the data directory.
         /// </summary>

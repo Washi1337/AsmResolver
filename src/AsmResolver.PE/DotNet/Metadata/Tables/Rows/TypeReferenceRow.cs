@@ -18,71 +18,61 @@
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
-    /// Represents a single row in the module definition metadata table.
+    /// Represents a single row in the type reference metadata table.
     /// </summary>
-    public readonly struct ModuleDefinitionRow : IMetadataRow
+    public struct TypeReferenceRow : IMetadataRow
     {
         /// <summary>
-        /// Reads a single module definition row from an input stream.
+        /// Reads a single type reference row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the module definition table.</param>
         /// <returns>The row.</returns>
-        public static ModuleDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static TypeReferenceRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
-            return new ModuleDefinitionRow(
-                reader.ReadUInt16(),
+            return new TypeReferenceRow(
+                reader.ReadIndex((IndexSize) layout.Columns[0].Size),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size),
-                reader.ReadIndex((IndexSize) layout.Columns[2].Size),
-                reader.ReadIndex((IndexSize) layout.Columns[3].Size),
-                reader.ReadIndex((IndexSize) layout.Columns[4].Size));
+                reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
-        public ModuleDefinitionRow(ushort generation, uint name, uint mvid, uint encId, uint encBaseId)
+        public TypeReferenceRow(uint resolutionScope, uint name, uint ns)
         {
-            Generation = generation;
+            ResolutionScope = resolutionScope;
             Name = name;
-            Mvid = mvid;
-            EncId = encId;
-            EncBaseId = encBaseId;
+            Namespace = ns;
         }
 
-        public TableIndex TableIndex => TableIndex.Module;
+        /// <inheritdoc />
+        public TableIndex TableIndex => TableIndex.TypeRef;
 
         /// <summary>
-        /// Gets the generation number of the module.  
+        /// Gets a ResolutionScope coded index (an index to a row in either the Module, ModuleRef, AssemblyRef or TypeRef table)
+        /// containing the scope that can resolve this type reference. 
         /// </summary>
-        /// <remarks>
-        /// This value is reserved and should be set to zero.
-        /// </remarks>
-        public ushort Generation
+        public uint ResolutionScope
         {
             get;
-        }
-
+        } 
+        
         /// <summary>
-        /// Gets an index into the #Strings heap containing the name of the module. 
+        /// Gets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
+        /// <remarks>
+        /// This value should always index a non-empty string.
+        /// </remarks>
         public uint Name
         {
             get;
         }
 
         /// <summary>
-        /// Gets an index into the #GUID heap containing the unique identifier to distinguish between two versions
-        /// of the same module.
+        /// Gets an index into the #Strings heap containing the namespace of the type reference.
         /// </summary>
-        public uint Mvid
-        {
-            get;
-        }
-
-        public uint EncId
-        {
-            get;
-        }
-
-        public uint EncBaseId
+        /// <remarks>
+        /// This value can be zero. If it is not, it should always index a non-empty string.
+        /// </remarks>
+        public uint Namespace
         {
             get;
         }
@@ -90,7 +80,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"({Generation:X4}, {Name:X8}, {Mvid:X8}, {EncId:X8}, {EncBaseId:X8}";
+            return $"({ResolutionScope:X8}, {Name:X8}, {Namespace:X8})";
         }
 
         /// <summary>
@@ -98,19 +88,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// </summary>
         /// <param name="other">The other row.</param>
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
-        public bool Equals(ModuleDefinitionRow other)
+        public bool Equals(TypeReferenceRow other)
         {
-            return Generation == other.Generation
-                   && Name == other.Name
-                   && Mvid == other.Mvid
-                   && EncId == other.EncId
-                   && EncBaseId == other.EncBaseId;
+            return ResolutionScope == other.ResolutionScope 
+                   && Name == other.Name 
+                   && Namespace == other.Namespace;
         }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is ModuleDefinitionRow other && Equals(other);
+            return obj is TypeReferenceRow other && Equals(other);
         }
 
         /// <inheritdoc />
@@ -118,13 +106,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             unchecked
             {
-                int hashCode = Generation.GetHashCode();
+                int hashCode = (int) ResolutionScope;
                 hashCode = (hashCode * 397) ^ (int) Name;
-                hashCode = (hashCode * 397) ^ (int) Mvid;
-                hashCode = (hashCode * 397) ^ (int) EncId;
-                hashCode = (hashCode * 397) ^ (int) EncBaseId;
+                hashCode = (hashCode * 397) ^ (int) Namespace;
                 return hashCode;
             }
         }
+        
     }
 }

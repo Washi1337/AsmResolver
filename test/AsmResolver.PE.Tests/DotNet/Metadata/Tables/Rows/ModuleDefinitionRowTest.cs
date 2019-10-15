@@ -2,7 +2,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
-namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
+namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
 {
     public class ModuleDefinitionRowTest
     {
@@ -10,8 +10,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         public void ReadRowSmallStringSmallGuid()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            var tablesStream =
-                (TablesStream) peImage.DotNetDirectory.Metadata.GetStream(TablesStream.CompressedStreamName);
+            var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
 
             var moduleTable = tablesStream.GetTable<ModuleDefinitionRow>();
             Assert.Single(moduleTable);
