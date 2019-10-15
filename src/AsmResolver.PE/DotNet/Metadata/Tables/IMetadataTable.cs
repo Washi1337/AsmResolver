@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {

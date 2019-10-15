@@ -1,4 +1,20 @@
-using System.Collections.Generic;
+// AsmResolver - Executable file format inspection library 
+// Copyright (C) 2016-2019 Washi
+// 
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 3.0 of the License, or (at your option) any later version.
+// 
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
 using System.Linq;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
@@ -12,7 +28,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public TableLayout(params ColumnLayout[] columns)
         {
             Columns = columns;
-            RowSize = columns.Sum(c => c.Size);
+            RowSize = (uint) columns.Sum(c => c.Size);
         }
         
         /// <summary>
@@ -26,7 +42,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <summary>
         /// Gets the total size in bytes of a single row in the table.
         /// </summary>
-        public int RowSize
+        public uint RowSize
         {
             get;
         }

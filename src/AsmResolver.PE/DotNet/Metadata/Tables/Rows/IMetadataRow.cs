@@ -1,4 +1,4 @@
-namespace AsmResolver.PE.DotNet.Metadata.Tables
+namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
     /// Represents a single row in a metadata table.

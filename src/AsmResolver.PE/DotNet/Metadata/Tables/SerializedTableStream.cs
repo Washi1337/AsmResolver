@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -25,8 +26,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly IReadableSegment _contents;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
-        private IList<uint> _rowCounts;
-        private TableLayout[] _layouts;
+        private readonly uint[] _rowCounts;
+        private readonly TableLayout[] _layouts;
+        private readonly uint _headerSize;
 
         public SerializedTableStream(byte[] rawData)
             : this(new DataSegment(rawData))
@@ -51,10 +53,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             if (HasExtraData)
                 ExtraData = reader.ReadUInt32();
 
+            _headerSize = reader.FileOffset - reader.StartPosition;
+            
             _layouts = InitializeTableLayouts(_rowCounts);
-            
-            // TODO: initialize tables using table layouts and row counts.
-            
         }
 
         public override bool CanRead => true;
@@ -74,7 +75,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return ((_sortedMask >> (int) table) & 1) != 0;
         }
 
-        private IList<uint> ReadRowCounts(IBinaryStreamReader reader)
+        private uint[] ReadRowCounts(IBinaryStreamReader reader)
         {
             const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
             
@@ -91,14 +92,33 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             {
                 new TableLayout(
                     new ColumnLayout("Generation", ColumnType.UInt16),
-                    new ColumnLayout("Name", ColumnType.String, (int) StringIndexSize),
-                    new ColumnLayout("Mvid", ColumnType.Guid, (int) GuidIndexSize),
-                    new ColumnLayout("EncId", ColumnType.Guid, (int) GuidIndexSize),
-                    new ColumnLayout("EncBaseId", ColumnType.Guid, (int) GuidIndexSize))
+                    new ColumnLayout("Name", ColumnType.String, (uint) StringIndexSize),
+                    new ColumnLayout("Mvid", ColumnType.Guid, (uint) GuidIndexSize),
+                    new ColumnLayout("EncId", ColumnType.Guid, (uint) GuidIndexSize),
+                    new ColumnLayout("EncBaseId", ColumnType.Guid, (uint) GuidIndexSize)),
             };
             
             return result;
         }
 
+        protected override IList<IMetadataTable> GetTables()
+        {
+            uint offset = _contents.FileOffset + _headerSize;
+            return new IMetadataTable[]
+            {
+                new SerializedMetadataTable<ModuleDefinitionRow>(
+                    CreateNextRawTableReader(TableIndex.Module, ref offset), _layouts[0], ModuleDefinitionRow.FromReader),
+            };
+        }
+
+        private IBinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref uint currentOffset)
+        {
+            int index = (int) currentIndex;
+            uint rawSize = _layouts[index].RowSize * _rowCounts[index];
+            var tableReader = _contents.CreateReader(currentOffset, rawSize);
+            currentOffset += rawSize;
+            return tableReader;
+        }
+        
     }
 }

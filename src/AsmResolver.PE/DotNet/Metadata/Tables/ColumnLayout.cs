@@ -13,10 +13,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Type = type;
             if (type < ColumnType.Byte)
                 throw new ArgumentException("Size was not explicitly defined.");
-            Size = (int) type & 0xFF;
+            Size = (uint) type & 0xFF;
         }
         
-        public ColumnLayout(string name, ColumnType type, int size)
+        public ColumnLayout(string name, ColumnType type, uint size)
         {
             Name = name;
             Type = type;
@@ -42,7 +42,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <summary>
         /// Gets the size in bytes of each cell in this column.
         /// </summary>
-        public int Size
+        public uint Size
         {
             get;
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -34,6 +35,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             set => this[index] = (TRow) value;
         }
 
+        /// <summary>
+        /// Gets the internal list of rows that are stored in the metadata table.
+        /// </summary>
         protected IList<TRow> Rows
         {
             get
@@ -44,9 +48,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             }
         }
 
-        /// <inheritdoc cref="ICollection{T}.Count" />
-        public virtual int Count => _items.Count;
+        /// <summary>
+        /// Gets a value indicating the <see cref="Rows"/> property is initialized or not.
+        /// </summary>
+        protected bool IsInitialized => _items != null;
 
+        /// <inheritdoc cref="ICollection{T}.Count" />
+        public virtual int Count => Rows.Count;
+        
         /// <inheritdoc />
         public bool IsReadOnly => false; // TODO: it might be necessary later to make this configurable.
 

@@ -1,5 +1,4 @@
 using System.Linq;
-using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -7,7 +6,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
 using Xunit;
 
-namespace AsmResolver.PE.Tests.DotNet
+namespace AsmResolver.PE.Tests.DotNet.Metadata
 {
     public class MetadataTest
     {

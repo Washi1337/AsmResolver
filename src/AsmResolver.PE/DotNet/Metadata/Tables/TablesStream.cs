@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.Lazy;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
@@ -207,6 +209,24 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </remarks>
         protected virtual IList<IMetadataTable> GetTables() => new List<IMetadataTable>();
 
+        /// <summary>
+        /// Gets a table by its table index. 
+        /// </summary>
+        /// <param name="index">The table index.</param>
+        /// <returns>The table.</returns>
+        public virtual IMetadataTable GetTable(TableIndex index) => Tables[(int) index];
+
+        /// <summary>
+        /// Gets a table by its row type.
+        /// </summary>
+        /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
+        /// <returns>The table.</returns>
+        public virtual MetadataTable<TRow> GetTable<TRow>() 
+            where TRow : struct, IMetadataRow
+        {
+            return Tables.OfType<MetadataTable<TRow>>().First();
+        }
+
         private IndexSize GetIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
 
 
@@ -215,5 +235,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Flags = (TablesStreamFlags) (((int) Flags & ~(1 << bitIndex))
                                          | (newSize == IndexSize.Long ? 1 << bitIndex : 0));
         }
+        
     }
 }
