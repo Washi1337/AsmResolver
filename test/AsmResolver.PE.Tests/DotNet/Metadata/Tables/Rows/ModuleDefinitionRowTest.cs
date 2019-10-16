@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
     public class ModuleDefinitionRowTest
     {
         [Fact]
-        public void ReadRowSmallStringSmallGuid()
+        public void ReadRow_SmallString_SmallGuid()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();

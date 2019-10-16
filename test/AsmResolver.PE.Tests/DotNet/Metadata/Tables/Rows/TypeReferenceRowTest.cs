@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
     public class TypeReferenceRowTest
     {
         [Fact]
-        public void ReadRowSmallStringSmallGuid()
+        public void ReadRow_SmallResolutionScope_SmallStrings()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
