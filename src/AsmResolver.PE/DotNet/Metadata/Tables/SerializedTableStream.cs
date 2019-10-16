@@ -112,6 +112,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                         _indexSizes[(int) ColumnType.TypeDefOrRef]),
                     new ColumnLayout("FieldList", ColumnType.Field, _indexSizes[(int) ColumnType.Field]),
                     new ColumnLayout("MethodList", ColumnType.Method, _indexSizes[(int) ColumnType.Method])),
+                new TableLayout(
+                    new ColumnLayout("Field", ColumnType.Field, _indexSizes[(int) ColumnType.Field])),
             };
             
             return result;
@@ -199,6 +201,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     CreateNextRawTableReader(TableIndex.TypeRef, ref offset), _layouts[1], TypeReferenceRow.FromReader),
                 new SerializedMetadataTable<TypeDefinitionRow>(
                     CreateNextRawTableReader(TableIndex.TypeDef, ref offset), _layouts[2], TypeDefinitionRow.FromReader),
+                new SerializedMetadataTable<FieldPointerRow>(
+                    CreateNextRawTableReader(TableIndex.FieldPtr, ref offset), _layouts[3], FieldPointerRow.FromReader),
             };
         }
 

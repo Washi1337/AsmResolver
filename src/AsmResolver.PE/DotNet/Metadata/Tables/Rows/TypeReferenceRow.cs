@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Reads a single type reference row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the module definition table.</param>
+        /// <param name="layout">The layout of the type reference table.</param>
         /// <returns>The row.</returns>
         public static TypeReferenceRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
