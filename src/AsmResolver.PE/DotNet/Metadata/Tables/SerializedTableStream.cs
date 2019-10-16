@@ -57,7 +57,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
             _headerSize = reader.FileOffset - reader.StartPosition;
 
-            _indexSizes = InitializeCodedIndices();
+            _indexSizes = InitializeIndexSizes();
             _layouts = InitializeTableLayouts();
         }
 
@@ -82,7 +82,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
             
-            var result = new uint[(int) maxTableIndex + 1];
+            var result = new uint[(int) maxTableIndex + 1 ];
             for (TableIndex i = 0; i <= maxTableIndex; i++)
                 result[(int) i] = HasTable(i) ? reader.ReadUInt32() : 0;
 
@@ -101,17 +101,34 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("EncBaseId", ColumnType.Guid, GuidIndexSize)),
                 new TableLayout(
                     new ColumnLayout("ResolutionScope", ColumnType.ResolutionScope,
-                        _indexSizes[(int) CodedIndex.ResolutionScope]),
+                        _indexSizes[(int) ColumnType.ResolutionScope]),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Namespace", ColumnType.Guid, StringIndexSize))
+                    new ColumnLayout("Namespace", ColumnType.Guid, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Namespace", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Extends", ColumnType.TypeDefOrRef,
+                        _indexSizes[(int) ColumnType.TypeDefOrRef]),
+                    new ColumnLayout("FieldList", ColumnType.Field, _indexSizes[(int) ColumnType.Field]),
+                    new ColumnLayout("MethodList", ColumnType.Method, _indexSizes[(int) ColumnType.Method])),
             };
             
             return result;
         }
 
-        private IndexSize[] InitializeCodedIndices()
+        private IndexSize[] InitializeIndexSizes()
         {
-            return new[]
+            const ColumnType maxColumnType = ColumnType.String;
+
+            var result = new List<IndexSize>((int) maxColumnType);
+
+            // Add index sizes for each table:
+            foreach (uint t in _rowCounts)
+                result.Add(t > 0xFFFF ? IndexSize.Long : IndexSize.Short);
+
+            // Add index sizes for each coded index:
+            result.AddRange(new[]
             {
                 // TypeDefOrRef
                 GetCodedIndexSize(TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.TypeSpec),
@@ -156,7 +173,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
                 // ResolutionScope
                 GetCodedIndexSize(TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
-            };
+            });
+
+            return result.ToArray();
         }
 
         private IndexSize GetCodedIndexSize(params TableIndex[] tables)
@@ -178,6 +197,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     CreateNextRawTableReader(TableIndex.Module, ref offset), _layouts[0], ModuleDefinitionRow.FromReader),
                 new SerializedMetadataTable<TypeReferenceRow>(
                     CreateNextRawTableReader(TableIndex.TypeRef, ref offset), _layouts[1], TypeReferenceRow.FromReader),
+                new SerializedMetadataTable<TypeDefinitionRow>(
+                    CreateNextRawTableReader(TableIndex.TypeDef, ref offset), _layouts[2], TypeDefinitionRow.FromReader),
             };
         }
 

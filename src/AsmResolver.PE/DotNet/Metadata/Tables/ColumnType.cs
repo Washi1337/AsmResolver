@@ -51,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         MethodSpec = 43,
         GenericParamConstraint = 44,
         
-        TypeDefOrRef = 0x0100,
+        TypeDefOrRef,
         HasConstant,
         HasCustomAttribute,
         HasFieldMarshal,
@@ -65,12 +65,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         ResolutionScope,
         TypeOrMethodDef,
         
-        String = 0x0200, 
+        String, 
         Blob,
         Guid,
         
-        Byte = 0x0401,
-        UInt16 = 0x0402,
-        UInt32 = 0x0404,
+        Byte = 0x8000001,
+        UInt16 = 0x8000002,
+        UInt32 = 0x8000004,
     }
 }
