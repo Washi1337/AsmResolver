@@ -69,6 +69,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return (int) Field;
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"({Field:X8})";
+        }
         
     }
 }

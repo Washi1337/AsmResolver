@@ -100,6 +100,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 return hashCode;
             }
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"({(ushort) Attributes:X4}, {Name:X8}, {Signature:X8})";
+        }
         
     }
 }
