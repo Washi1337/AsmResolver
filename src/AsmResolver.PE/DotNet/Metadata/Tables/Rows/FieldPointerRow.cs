@@ -47,6 +47,28 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             get;
         }
+
+        /// <summary>
+        /// Determines whether this row is considered equal to the provided field pointer row.
+        /// </summary>
+        /// <param name="other">The other row.</param>
+        /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        public bool Equals(FieldPointerRow other)
+        {
+            return Field == other.Field;
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return obj is FieldPointerRow other && Equals(other);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return (int) Field;
+        }
         
     }
 }

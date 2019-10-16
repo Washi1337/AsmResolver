@@ -113,7 +113,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Determines whether this row is considered equal to the provided module row.
+        /// Determines whether this row is considered equal to the provided type definition row.
         /// </summary>
         /// <param name="other">The other row.</param>
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>

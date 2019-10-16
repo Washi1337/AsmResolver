@@ -18,43 +18,42 @@
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
-    /// Represents a single row in the type reference metadata table.
+    /// Represents a single row in the field definition metadata table.
     /// </summary>
-    public struct TypeReferenceRow : IMetadataRow
+    public readonly struct FieldDefinitionRow : IMetadataRow
     {
         /// <summary>
-        /// Reads a single type reference row from an input stream.
+        /// Reads a single field definition row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the type reference table.</param>
+        /// <param name="layout">The layout of the field pointer table.</param>
         /// <returns>The row.</returns>
-        public static TypeReferenceRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static FieldDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
-            return new TypeReferenceRow(
-                reader.ReadIndex((IndexSize) layout.Columns[0].Size),
+            return new FieldDefinitionRow(
+                (FieldAttributes) reader.ReadUInt32(),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size),
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
-        public TypeReferenceRow(uint resolutionScope, uint name, uint ns)
+        public FieldDefinitionRow(FieldAttributes attributes, uint name, uint signature)
         {
-            ResolutionScope = resolutionScope;
+            Attributes = attributes;
             Name = name;
-            Namespace = ns;
+            Signature = signature;
         }
 
         /// <inheritdoc />
-        public TableIndex TableIndex => TableIndex.TypeRef;
+        public TableIndex TableIndex => TableIndex.Field;
 
         /// <summary>
-        /// Gets a ResolutionScope coded index (an index to a row in either the Module, ModuleRef, AssemblyRef or TypeRef table)
-        /// containing the scope that can resolve this type reference. 
+        /// Gets the attributes associated to the field definition.
         /// </summary>
-        public uint ResolutionScope
+        public FieldAttributes Attributes
         {
             get;
-        } 
-        
+        }
+
         /// <summary>
         /// Gets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
@@ -67,38 +66,27 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets an index into the #Strings heap containing the namespace of the type reference.
+        /// Gets an index into the #Blob heap containing the signature of the field. This includes the field type.
         /// </summary>
-        /// <remarks>
-        /// This value can be zero. If it is not, it should always index a non-empty string.
-        /// </remarks>
-        public uint Namespace
+        public uint Signature
         {
             get;
         }
 
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"({ResolutionScope:X8}, {Name:X8}, {Namespace:X8})";
-        }
-
         /// <summary>
-        /// Determines whether this row is considered equal to the provided type reference row.
+        /// Determines whether this row is considered equal to the provided field definition row.
         /// </summary>
         /// <param name="other">The other row.</param>
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
-        public bool Equals(TypeReferenceRow other)
+        public bool Equals(FieldDefinitionRow other)
         {
-            return ResolutionScope == other.ResolutionScope 
-                   && Name == other.Name 
-                   && Namespace == other.Namespace;
+            return Attributes == other.Attributes && Name == other.Name && Signature == other.Signature;
         }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is TypeReferenceRow other && Equals(other);
+            return obj is FieldDefinitionRow other && Equals(other);
         }
 
         /// <inheritdoc />
@@ -106,9 +94,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             unchecked
             {
-                int hashCode = (int) ResolutionScope;
+                int hashCode = (int) Attributes;
                 hashCode = (hashCode * 397) ^ (int) Name;
-                hashCode = (hashCode * 397) ^ (int) Namespace;
+                hashCode = (hashCode * 397) ^ (int) Signature;
                 return hashCode;
             }
         }
