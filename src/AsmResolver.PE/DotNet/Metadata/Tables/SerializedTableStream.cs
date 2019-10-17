@@ -129,6 +129,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("ParamList", ColumnType.Param, _indexSizes[(int) ColumnType.Param])),
                 new TableLayout(
                     new ColumnLayout("Parameter", ColumnType.Param, _indexSizes[(int) ColumnType.Param])),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Sequence", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize))
             };
             
             return result;
@@ -218,6 +222,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.MethodPtr, ref offset, MethodPointerRow.FromReader),
                 CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.ParamPtr, ref offset, ParameterPointerRow.FromReader),
+                CreateNextTable(TableIndex.Param, ref offset, ParameterDefinitionRow.FromReader),
             };
         }
 

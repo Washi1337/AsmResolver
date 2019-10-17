@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Reads a single parameter pointer row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the field pointer table.</param>
+        /// <param name="layout">The layout of the parameter pointer table.</param>
         /// <returns>The row.</returns>
         public static ParameterPointerRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
