@@ -135,7 +135,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Class", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef]),
-                    new ColumnLayout("Interface", ColumnType.TypeDefOrRef, _indexSizes[(int) ColumnType.TypeDefOrRef]))
+                    new ColumnLayout("Interface", ColumnType.TypeDefOrRef, _indexSizes[(int) ColumnType.TypeDefOrRef])),
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.MemberRefParent, _indexSizes[(int) ColumnType.MemberRefParent]),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize))
             };
             
             return result;
@@ -227,6 +231,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ParamPtr, ref offset, ParameterPointerRow.FromReader),
                 CreateNextTable(TableIndex.Param, ref offset, ParameterDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.InterfaceImpl, ref offset, InterfaceImplementationRow.FromReader),
+                CreateNextTable(TableIndex.MemberRef, ref offset, MemberReferenceRow.FromReader),
             };
         }
 
