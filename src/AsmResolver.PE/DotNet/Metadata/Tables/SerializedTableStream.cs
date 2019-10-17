@@ -117,7 +117,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Flags", ColumnType.UInt32),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize))
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Method", ColumnType.Method, _indexSizes[(int) ColumnType.Method])),
             };
             
             return result;
@@ -209,6 +211,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     CreateNextRawTableReader(TableIndex.FieldPtr, ref offset), _layouts[3], FieldPointerRow.FromReader),
                 new SerializedMetadataTable<FieldDefinitionRow>(
                     CreateNextRawTableReader(TableIndex.Field, ref offset), _layouts[4], FieldDefinitionRow.FromReader),
+                new SerializedMetadataTable<MethodPointerRow>(
+                    CreateNextRawTableReader(TableIndex.MethodPtr, ref offset), _layouts[5], MethodPointerRow.FromReader),
             };
         }
 
