@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Reads a single field definition row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the field pointer table.</param>
+        /// <param name="layout">The layout of the field definition table.</param>
         /// <returns>The row.</returns>
         public static FieldDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
@@ -68,6 +68,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <summary>
         /// Gets an index into the #Blob heap containing the signature of the field. This includes the field type.
         /// </summary>
+        /// <remarks>
+        /// This value should always index a valid field signature.
+        /// </remarks>
         public uint Signature
         {
             get;

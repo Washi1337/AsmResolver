@@ -99,7 +99,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets an index into the Method (or MethodPtr) table, representing the first field defined in the type. 
+        /// Gets an index into the Method (or MethodPtr) table, representing the first method defined in the type. 
         /// </summary>
         public uint MethodList
         {

@@ -120,6 +120,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Method", ColumnType.Method, _indexSizes[(int) ColumnType.Method])),
+                new TableLayout(
+                    new ColumnLayout("RVA", ColumnType.UInt32),
+                    new ColumnLayout("ImplFlags", ColumnType.UInt16),
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize),
+                    new ColumnLayout("ParamList", ColumnType.Param, _indexSizes[(int) ColumnType.Param])),
             };
             
             return result;
@@ -201,18 +208,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             uint offset = _contents.FileOffset + _headerSize;
             return new IMetadataTable[]
             {
-                new SerializedMetadataTable<ModuleDefinitionRow>(
-                    CreateNextRawTableReader(TableIndex.Module, ref offset), _layouts[0], ModuleDefinitionRow.FromReader),
-                new SerializedMetadataTable<TypeReferenceRow>(
-                    CreateNextRawTableReader(TableIndex.TypeRef, ref offset), _layouts[1], TypeReferenceRow.FromReader),
-                new SerializedMetadataTable<TypeDefinitionRow>(
-                    CreateNextRawTableReader(TableIndex.TypeDef, ref offset), _layouts[2], TypeDefinitionRow.FromReader),
-                new SerializedMetadataTable<FieldPointerRow>(
-                    CreateNextRawTableReader(TableIndex.FieldPtr, ref offset), _layouts[3], FieldPointerRow.FromReader),
-                new SerializedMetadataTable<FieldDefinitionRow>(
-                    CreateNextRawTableReader(TableIndex.Field, ref offset), _layouts[4], FieldDefinitionRow.FromReader),
-                new SerializedMetadataTable<MethodPointerRow>(
-                    CreateNextRawTableReader(TableIndex.MethodPtr, ref offset), _layouts[5], MethodPointerRow.FromReader),
+                CreateNextTable(TableIndex.Module, ref offset, ModuleDefinitionRow.FromReader),
+                CreateNextTable(TableIndex.TypeRef, ref offset, TypeReferenceRow.FromReader),
+                CreateNextTable(TableIndex.TypeDef, ref offset, TypeDefinitionRow.FromReader),
+                CreateNextTable(TableIndex.FieldPtr, ref offset, FieldPointerRow.FromReader),
+                CreateNextTable(TableIndex.Field, ref offset, FieldDefinitionRow.FromReader),
+                CreateNextTable(TableIndex.MethodPtr, ref offset, MethodPointerRow.FromReader),
+                CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader),
             };
         }
 
@@ -223,6 +225,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             var tableReader = _contents.CreateReader(currentOffset, rawSize);
             currentOffset += rawSize;
             return tableReader;
+        }
+
+        private SerializedMetadataTable<TRow> CreateNextTable<TRow>(
+            TableIndex index,
+            ref uint offset,
+            SerializedMetadataTable<TRow>.ReadRowDelegate readRow)
+            where TRow : struct, IMetadataRow
+        {
+            return new SerializedMetadataTable<TRow>(
+                CreateNextRawTableReader(index, ref offset), _layouts[(int) index], readRow);
         }
         
     }
