@@ -127,6 +127,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize),
                     new ColumnLayout("ParamList", ColumnType.Param, _indexSizes[(int) ColumnType.Param])),
+                new TableLayout(
+                    new ColumnLayout("Parameter", ColumnType.Param, _indexSizes[(int) ColumnType.Param])),
             };
             
             return result;
@@ -215,6 +217,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.Field, ref offset, FieldDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.MethodPtr, ref offset, MethodPointerRow.FromReader),
                 CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader),
+                CreateNextTable(TableIndex.ParamPtr, ref offset, ParameterPointerRow.FromReader),
             };
         }
 
