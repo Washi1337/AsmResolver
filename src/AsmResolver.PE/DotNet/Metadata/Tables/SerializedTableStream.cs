@@ -170,6 +170,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("EventList", ColumnType.Event, _indexSizes[(int) ColumnType.Event])),
                 new TableLayout(
                     new ColumnLayout("Event", ColumnType.Event, _indexSizes[(int) ColumnType.Event])),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("EventType", ColumnType.TypeDefOrRef, _indexSizes[(int) ColumnType.TypeDefOrRef])),
             };
             
             return result;
@@ -271,6 +275,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.StandAloneSig, ref offset, StandAloneSignatureRow.FromReader),
                 CreateNextTable(TableIndex.EventMap, ref offset, EventMapRow.FromReader),
                 CreateNextTable(TableIndex.EventPtr, ref offset, EventPointerRow.FromReader),
+                CreateNextTable(TableIndex.Event, ref offset, EventDefinitionRow.FromReader),
             };
         }
 
