@@ -163,6 +163,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Offset", ColumnType.UInt32),
                     new ColumnLayout("Field", ColumnType.TypeDef, _indexSizes[(int) ColumnType.Field])),
+                new TableLayout(
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
             };
             
             return result;
@@ -261,6 +263,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.DeclSecurity, ref offset, SecurityDeclarationRow.FromReader),
                 CreateNextTable(TableIndex.ClassLayout, ref offset, ClassLayoutRow.FromReader),
                 CreateNextTable(TableIndex.FieldLayout, ref offset, FieldLayoutRow.FromReader),
+                CreateNextTable(TableIndex.StandAloneSig, ref offset, StandAloneSignatureRow.FromReader),
             };
         }
 
