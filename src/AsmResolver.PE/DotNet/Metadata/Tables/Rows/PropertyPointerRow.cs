@@ -1,4 +1,4 @@
-﻿// AsmResolver - Executable file format inspection library 
+// AsmResolver - Executable file format inspection library 
 // Copyright (C) 2016-2019 Washi
 // 
 // This library is free software; you can redistribute it and/or
@@ -18,62 +18,62 @@
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
-    /// Represents a single row in the event pointer metadata table.
+    /// Represents a single row in the property pointer metadata table.
     /// </summary>
-    public readonly struct EventPointerRow : IMetadataRow
+    public readonly struct PropertyPointerRow : IMetadataRow
     {
         /// <summary>
-        /// Reads a single event pointer row from an input stream.
+        /// Reads a single property pointer row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the event pointer table.</param>
+        /// <param name="layout">The layout of the property pointer table.</param>
         /// <returns>The row.</returns>
-        public static EventPointerRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static PropertyPointerRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
-            return new EventPointerRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
+            return new PropertyPointerRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
         
-        public EventPointerRow(uint @event)
+        public PropertyPointerRow(uint property)
         {
-            Event = @event;
+            Property = property;
         }
 
-        public TableIndex TableIndex => TableIndex.EventPtr;
+        public TableIndex TableIndex => TableIndex.PropertyPtr;
         
         /// <summary>
-        /// Gets an index into the Event table that this pointer references.
+        /// Gets an index into the Property table that this pointer references.
         /// </summary>
-        public uint Event
+        public uint Property
         {
             get;
         }
 
         /// <summary>
-        /// Determines whether this row is considered equal to the provided event pointer row.
+        /// Determines whether this row is considered equal to the provided property pointer row.
         /// </summary>
         /// <param name="other">The other row.</param>
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
-        public bool Equals(EventPointerRow other)
+        public bool Equals(PropertyPointerRow other)
         {
-            return Event == other.Event;
+            return Property == other.Property;
         }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is EventPointerRow other && Equals(other);
+            return obj is PropertyPointerRow other && Equals(other);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return (int) Event;
+            return (int) Property;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"({Event:X8})";
+            return $"({Property:X8})";
         }
 
     }
