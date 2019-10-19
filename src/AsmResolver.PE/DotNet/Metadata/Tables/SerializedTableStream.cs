@@ -143,19 +143,23 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Type", ColumnType.Byte),
                     new ColumnLayout("Padding", ColumnType.Byte),
-                    new ColumnLayout("Parent", ColumnType.HasConstant, _indexSizes[(int) CodedIndex.HasConstant]),
+                    new ColumnLayout("Parent", ColumnType.HasConstant, _indexSizes[(int) ColumnType.HasConstant]),
                     new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)), 
                 new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.HasCustomAttribute, _indexSizes[(int) CodedIndex.HasCustomAttribute]),
-                    new ColumnLayout("Type", ColumnType.CustomAttributeType, _indexSizes[(int) CodedIndex.CustomAttributeType]),
+                    new ColumnLayout("Parent", ColumnType.HasCustomAttribute, _indexSizes[(int) ColumnType.HasCustomAttribute]),
+                    new ColumnLayout("Type", ColumnType.CustomAttributeType, _indexSizes[(int) ColumnType.CustomAttributeType]),
                     new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.HasFieldMarshal, _indexSizes[(int) CodedIndex.HasFieldMarshal]),
+                    new ColumnLayout("Parent", ColumnType.HasFieldMarshal, _indexSizes[(int) ColumnType.HasFieldMarshal]),
                     new ColumnLayout("NativeType", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Action", ColumnType.UInt16),
-                    new ColumnLayout("Parent", ColumnType.HasDeclSecurity, _indexSizes[(int) CodedIndex.HasDeclSecurity]),
+                    new ColumnLayout("Parent", ColumnType.HasDeclSecurity, _indexSizes[(int) ColumnType.HasDeclSecurity]),
                     new ColumnLayout("PermissionSet", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("PackingSize", ColumnType.UInt16),
+                    new ColumnLayout("ClassSize", ColumnType.UInt32),
+                    new ColumnLayout("Parent", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef])),
             };
             
             return result;
@@ -252,6 +256,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.CustomAttribute, ref offset, CustomAttributeRow.FromReader),
                 CreateNextTable(TableIndex.FieldMarshal, ref offset, FieldMarshalRow.FromReader),
                 CreateNextTable(TableIndex.DeclSecurity, ref offset, SecurityDeclarationRow.FromReader),
+                CreateNextTable(TableIndex.ClassLayout, ref offset, ClassLayoutRow.FromReader),
             };
         }
 
