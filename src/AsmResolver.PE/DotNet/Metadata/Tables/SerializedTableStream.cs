@@ -168,6 +168,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Parent", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef]),
                     new ColumnLayout("EventList", ColumnType.Event, _indexSizes[(int) ColumnType.Event])),
+                new TableLayout(
+                    new ColumnLayout("Event", ColumnType.Event, _indexSizes[(int) ColumnType.Event])),
             };
             
             return result;
@@ -268,6 +270,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.FieldLayout, ref offset, FieldLayoutRow.FromReader),
                 CreateNextTable(TableIndex.StandAloneSig, ref offset, StandAloneSignatureRow.FromReader),
                 CreateNextTable(TableIndex.EventMap, ref offset, EventMapRow.FromReader),
+                CreateNextTable(TableIndex.EventPtr, ref offset, EventPointerRow.FromReader),
             };
         }
 
