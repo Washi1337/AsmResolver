@@ -160,6 +160,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("PackingSize", ColumnType.UInt16),
                     new ColumnLayout("ClassSize", ColumnType.UInt32),
                     new ColumnLayout("Parent", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef])),
+                new TableLayout(
+                    new ColumnLayout("Offset", ColumnType.UInt32),
+                    new ColumnLayout("Field", ColumnType.TypeDef, _indexSizes[(int) ColumnType.Field])),
             };
             
             return result;
@@ -257,6 +260,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.FieldMarshal, ref offset, FieldMarshalRow.FromReader),
                 CreateNextTable(TableIndex.DeclSecurity, ref offset, SecurityDeclarationRow.FromReader),
                 CreateNextTable(TableIndex.ClassLayout, ref offset, ClassLayoutRow.FromReader),
+                CreateNextTable(TableIndex.FieldLayout, ref offset, FieldLayoutRow.FromReader),
             };
         }
 
