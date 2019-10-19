@@ -111,6 +111,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 return hashCode;
             }
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"({(int) Type:X2}, {Padding:X2}, {Value:X8})";
+        }
         
     }
 }

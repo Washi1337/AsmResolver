@@ -145,6 +145,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Padding", ColumnType.Byte),
                     new ColumnLayout("Parent", ColumnType.HasConstant, _indexSizes[(int) CodedIndex.HasConstant]),
                     new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)), 
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.HasCustomAttribute, _indexSizes[(int) CodedIndex.HasCustomAttribute]),
+                    new ColumnLayout("Type", ColumnType.CustomAttributeType, _indexSizes[(int) CodedIndex.CustomAttributeType]),
+                    new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)),
             };
             
             return result;
@@ -238,6 +242,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.InterfaceImpl, ref offset, InterfaceImplementationRow.FromReader),
                 CreateNextTable(TableIndex.MemberRef, ref offset, MemberReferenceRow.FromReader),
                 CreateNextTable(TableIndex.Constant, ref offset, ConstantRow.FromReader),
+                CreateNextTable(TableIndex.CustomAttribute, ref offset, CustomAttributeRow.FromReader),
             };
         }
 
