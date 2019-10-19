@@ -152,6 +152,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Parent", ColumnType.HasFieldMarshal, _indexSizes[(int) CodedIndex.HasFieldMarshal]),
                     new ColumnLayout("NativeType", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Action", ColumnType.UInt16),
+                    new ColumnLayout("Parent", ColumnType.HasDeclSecurity, _indexSizes[(int) CodedIndex.HasDeclSecurity]),
+                    new ColumnLayout("PermissionSet", ColumnType.Blob, BlobIndexSize)),
             };
             
             return result;
@@ -247,6 +251,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.Constant, ref offset, ConstantRow.FromReader),
                 CreateNextTable(TableIndex.CustomAttribute, ref offset, CustomAttributeRow.FromReader),
                 CreateNextTable(TableIndex.FieldMarshal, ref offset, FieldMarshalRow.FromReader),
+                CreateNextTable(TableIndex.DeclSecurity, ref offset, SecurityDeclarationRow.FromReader),
             };
         }
 
