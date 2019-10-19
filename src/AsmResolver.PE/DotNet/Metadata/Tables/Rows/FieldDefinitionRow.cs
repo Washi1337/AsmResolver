@@ -31,7 +31,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public static FieldDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
             return new FieldDefinitionRow(
-                (FieldAttributes) reader.ReadUInt32(),
+                (FieldAttributes) reader.ReadUInt16(),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size),
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }

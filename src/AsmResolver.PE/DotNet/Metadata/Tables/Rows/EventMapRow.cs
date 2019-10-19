@@ -18,63 +18,62 @@
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
-    /// Represents a single row in the interface implementation metadata table.
+    /// Represents a single row in the event map metadata table.
     /// </summary>
-    public readonly struct InterfaceImplementationRow : IMetadataRow
+    public readonly struct EventMapRow : IMetadataRow
     {
         /// <summary>
-        /// Reads a single interface implementation row from an input stream.
+        /// Reads a single event map row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the interface implementation table.</param>
+        /// <param name="layout">The layout of the event map table.</param>
         /// <returns>The row.</returns>
-        public static InterfaceImplementationRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static EventMapRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
-            return new InterfaceImplementationRow(
+            return new EventMapRow(
                 reader.ReadIndex((IndexSize) layout.Columns[0].Size),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
-        
-        public InterfaceImplementationRow(uint @class, uint @interface)
+
+        public EventMapRow(uint parent, uint eventList)
         {
-            Class = @class;
-            Interface = @interface;
+            Parent = parent;
+            EventList = eventList;
         }
 
         /// <inheritdoc />
-        public TableIndex TableIndex => TableIndex.InterfaceImpl;
+        public TableIndex TableIndex => TableIndex.EventMap;
 
         /// <summary>
-        /// Gets an index into the TypeDef table indicating the type that implements the interface.
+        /// Gets an index into the TypeDef table that this mapping is associating to an event list.
         /// </summary>
-        public uint Class
+        public uint Parent
         {
             get;
         }
 
         /// <summary>
-        /// Gets a TypeDefOrRef (an index to a row in either the TypeRef, TypeDef or TypeSpec table) indicating the
-        /// interface that was implemented by the type.
+        /// Gets an index into the Event table indicating the first event that is defined in the event list.
         /// </summary>
-        public uint Interface
+        public uint EventList
         {
             get;
         }
 
         /// <summary>
-        /// Determines whether this row is considered equal to the provided interface implementation row.
+        /// Determines whether this row is considered equal to the provided event map row.
         /// </summary>
         /// <param name="other">The other row.</param>
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
-        public bool Equals(InterfaceImplementationRow other)
+        public bool Equals(EventMapRow other)
         {
-            return Class == other.Class && Interface == other.Interface;
+            return Parent == other.Parent && EventList == other.EventList;
         }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is InterfaceImplementationRow other && Equals(other);
+            return obj is EventMapRow other && Equals(other);
         }
 
         /// <inheritdoc />
@@ -82,14 +81,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             unchecked
             {
-                return ((int) Class * 397) ^ (int) Interface;
+                return ((int) Parent * 397) ^ (int) EventList;
             }
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"({Class:X8}, {Interface:X8})";
+            return $"({Parent:X8}, {EventList:X8})";
         }
         
     }

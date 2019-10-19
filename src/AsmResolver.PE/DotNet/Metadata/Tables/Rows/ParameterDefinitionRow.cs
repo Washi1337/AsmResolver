@@ -101,7 +101,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         public override string ToString()
         {
-            return $"({(int) Attributes: X4}, {Sequence: X4}, {Name:X8})";
+            return $"({(int) Attributes:X4}, {Sequence:X4}, {Name:X8})";
         }
         
     }

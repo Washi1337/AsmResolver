@@ -115,7 +115,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Field", ColumnType.Field, _indexSizes[(int) ColumnType.Field])),
                 new TableLayout(
-                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("Flags", ColumnType.UInt16),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
@@ -165,6 +165,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Field", ColumnType.TypeDef, _indexSizes[(int) ColumnType.Field])),
                 new TableLayout(
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef]),
+                    new ColumnLayout("EventList", ColumnType.Event, _indexSizes[(int) ColumnType.Event])),
             };
             
             return result;
@@ -264,6 +267,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ClassLayout, ref offset, ClassLayoutRow.FromReader),
                 CreateNextTable(TableIndex.FieldLayout, ref offset, FieldLayoutRow.FromReader),
                 CreateNextTable(TableIndex.StandAloneSig, ref offset, StandAloneSignatureRow.FromReader),
+                CreateNextTable(TableIndex.EventMap, ref offset, EventMapRow.FromReader),
             };
         }
 

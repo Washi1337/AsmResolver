@@ -146,6 +146,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 return hashCode;
             }
         }
+
+        public override string ToString()
+        {
+            return $"({Rva:X8}, {(int)ImplAttributes:X4}, {(int) Attributes:X4}, {Name:X8}, {Signature:X8}, {ParameterList:X8})";
+        }
         
     }
 }
