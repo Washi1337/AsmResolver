@@ -1,6 +1,3 @@
-// AsmResolver - Executable file format inspection library 
-// Copyright (C) 2016-2019 Washi
-// 
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
@@ -18,44 +15,44 @@
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
-    /// Represents a single row in the event map metadata table.
+    /// Represents a single row in the property definition metadata table.
     /// </summary>
-    public readonly struct EventDefinitionRow : IMetadataRow
+    public readonly struct PropertyDefinitionRow : IMetadataRow
     {
         /// <summary>
-        /// Reads a single event definition row from an input stream.
+        /// Reads a single property definition row from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="layout">The layout of the event definition table.</param>
+        /// <param name="layout">The layout of the property definition table.</param>
         /// <returns>The row.</returns>
-        public static EventDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static PropertyDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
-            return new EventDefinitionRow(
-                (EventAttributes) reader.ReadUInt16(),
+            return new PropertyDefinitionRow(
+                (PropertyAttributes) reader.ReadUInt16(),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size),
-                reader.ReadIndex((IndexSize) layout.Columns[1].Size));
+                reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
-        
-        public EventDefinitionRow(EventAttributes attributes, uint name, uint eventType)
+
+        public PropertyDefinitionRow(PropertyAttributes attributes, uint name, uint type)
         {
             Attributes = attributes;
             Name = name;
-            EventType = eventType;
+            Type = type;
         }
 
         /// <inheritdoc />
-        public TableIndex TableIndex => TableIndex.Event;
+        public TableIndex TableIndex => TableIndex.Property;
 
         /// <summary>
-        /// Gets the attributes associated to the event definition. 
+        /// Gets the attributes associated to the property definition.
         /// </summary>
-        public EventAttributes Attributes
+        public PropertyAttributes Attributes
         {
             get;
         }
 
         /// <summary>
-        /// Gets an index into the #Strings stream referencing the name of the event.
+        /// Gets an index into the #Strings stream referencing the name of the property.
         /// </summary>
         /// <remarks>
         /// This value should always index a non-empty string.
@@ -66,28 +63,28 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets a TypeDefOrRef index (an index into either the TypeRef, TypeDef or TypeSpec table) indicating the
-        /// type of the event.
+        /// Gets an index into the #Blob stream referencing the signature of the property. This includes the property
+        /// type.
         /// </summary>
-        public uint EventType
+        public uint Type
         {
             get;
         }
 
         /// <summary>
-        /// Determines whether this row is considered equal to the provided event definitino row.
+        /// Determines whether this row is considered equal to the provided parameter definition row.
         /// </summary>
         /// <param name="other">The other row.</param>
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
-        public bool Equals(EventDefinitionRow other)
+        public bool Equals(PropertyDefinitionRow other)
         {
-            return Attributes == other.Attributes && Name == other.Name && EventType == other.EventType;
+            return Attributes == other.Attributes && Name == other.Name && Type == other.Type;
         }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is EventDefinitionRow other && Equals(other);
+            return obj is PropertyDefinitionRow other && Equals(other);
         }
 
         /// <inheritdoc />
@@ -97,7 +94,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             {
                 int hashCode = (int) Attributes;
                 hashCode = (hashCode * 397) ^ (int) Name;
-                hashCode = (hashCode * 397) ^ (int) EventType;
+                hashCode = (hashCode * 397) ^ (int) Type;
                 return hashCode;
             }
         }
@@ -105,7 +102,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"({(int) Attributes:X4}, {Name:X8}, {EventType:X8})";
+            return $"({(int) Attributes:X4}, {Name:X8}, {Type:X8})";
         }
         
     }

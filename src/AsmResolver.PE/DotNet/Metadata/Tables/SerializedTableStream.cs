@@ -177,6 +177,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Parent", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef]),
                     new ColumnLayout("PropertyList", ColumnType.Event, _indexSizes[(int) ColumnType.Property])),
+                new TableLayout(
+                    new ColumnLayout("Property", ColumnType.Property, _indexSizes[(int) ColumnType.Property])),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("PropertyType", ColumnType.Blob, BlobIndexSize)),
             };
             
             return result;
@@ -281,6 +287,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.Event, ref offset, EventDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.PropertyMap, ref offset, PropertyMapRow.FromReader),
                 CreateNextTable(TableIndex.PropertyPtr, ref offset, PropertyPointerRow.FromReader),
+                CreateNextTable(TableIndex.Property, ref offset, PropertyDefinitionRow.FromReader),
             };
         }
 
