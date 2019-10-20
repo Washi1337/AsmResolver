@@ -242,6 +242,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("MajorVersion", ColumnType.UInt32),
                     new ColumnLayout("MinorVersion", ColumnType.UInt32),
                     new ColumnLayout("AssemblyRef", ColumnType.AssemblyRef, GetIndexSize(ColumnType.AssemblyRef))),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("HashValue", ColumnType.Blob, BlobIndexSize)),
             };
             
             return result;
@@ -365,7 +369,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.AssemblyOS, ref offset, AssemblyOSRow.FromReader),
                 CreateNextTable(TableIndex.AssemblyRef, ref offset, AssemblyReferenceRow.FromReader),
                 CreateNextTable(TableIndex.AssemblyRefProcessor, ref offset, AssemblyRefProcessorRow.FromReader),
-                CreateNextTable(TableIndex.AssemblyRefProcessor, ref offset, AssemblyRefProcessorRow.FromReader),
+                CreateNextTable(TableIndex.AssemblyRefOS, ref offset, AssemblyRefOSRow.FromReader),
+                CreateNextTable(TableIndex.File, ref offset, FileReferenceRow.FromReader),
             };
         }
 
