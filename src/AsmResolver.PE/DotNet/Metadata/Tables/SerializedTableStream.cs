@@ -101,7 +101,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("EncBaseId", ColumnType.Guid, GuidIndexSize)),
                 new TableLayout(
                     new ColumnLayout("ResolutionScope", ColumnType.ResolutionScope,
-                        _indexSizes[(int) ColumnType.ResolutionScope]),
+                        GetIndexSize(ColumnType.ResolutionScope)),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Namespace", ColumnType.Guid, StringIndexSize)),
                 new TableLayout(
@@ -109,87 +109,96 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Namespace", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Extends", ColumnType.TypeDefOrRef,
-                        _indexSizes[(int) ColumnType.TypeDefOrRef]),
-                    new ColumnLayout("FieldList", ColumnType.Field, _indexSizes[(int) ColumnType.Field]),
-                    new ColumnLayout("MethodList", ColumnType.Method, _indexSizes[(int) ColumnType.Method])),
+                        GetIndexSize(ColumnType.TypeDefOrRef)),
+                    new ColumnLayout("FieldList", ColumnType.Field, GetIndexSize(ColumnType.Field)),
+                    new ColumnLayout("MethodList", ColumnType.Method, GetIndexSize(ColumnType.Method))),
                 new TableLayout(
-                    new ColumnLayout("Field", ColumnType.Field, _indexSizes[(int) ColumnType.Field])),
+                    new ColumnLayout("Field", ColumnType.Field, GetIndexSize(ColumnType.Field))),
                 new TableLayout(
                     new ColumnLayout("Flags", ColumnType.UInt16),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
-                    new ColumnLayout("Method", ColumnType.Method, _indexSizes[(int) ColumnType.Method])),
+                    new ColumnLayout("Method", ColumnType.Method, GetIndexSize(ColumnType.Method))),
                 new TableLayout(
                     new ColumnLayout("RVA", ColumnType.UInt32),
                     new ColumnLayout("ImplFlags", ColumnType.UInt16),
                     new ColumnLayout("Flags", ColumnType.UInt16),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize),
-                    new ColumnLayout("ParamList", ColumnType.Param, _indexSizes[(int) ColumnType.Param])),
+                    new ColumnLayout("ParamList", ColumnType.Param, GetIndexSize(ColumnType.Param))),
                 new TableLayout(
-                    new ColumnLayout("Parameter", ColumnType.Param, _indexSizes[(int) ColumnType.Param])),
+                    new ColumnLayout("Parameter", ColumnType.Param, GetIndexSize(ColumnType.Param))),
                 new TableLayout(
                     new ColumnLayout("Flags", ColumnType.UInt16),
                     new ColumnLayout("Sequence", ColumnType.UInt16),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize)),
                 new TableLayout(
-                    new ColumnLayout("Class", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef]),
-                    new ColumnLayout("Interface", ColumnType.TypeDefOrRef, _indexSizes[(int) ColumnType.TypeDefOrRef])),
+                    new ColumnLayout("Class", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef)),
+                    new ColumnLayout("Interface", ColumnType.TypeDefOrRef, GetIndexSize(ColumnType.TypeDefOrRef))),
                 new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.MemberRefParent, _indexSizes[(int) ColumnType.MemberRefParent]),
+                    new ColumnLayout("Parent", ColumnType.MemberRefParent, GetIndexSize(ColumnType.MemberRefParent)),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Type", ColumnType.Byte),
                     new ColumnLayout("Padding", ColumnType.Byte),
-                    new ColumnLayout("Parent", ColumnType.HasConstant, _indexSizes[(int) ColumnType.HasConstant]),
+                    new ColumnLayout("Parent", ColumnType.HasConstant, GetIndexSize(ColumnType.HasConstant)),
                     new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)), 
                 new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.HasCustomAttribute, _indexSizes[(int) ColumnType.HasCustomAttribute]),
-                    new ColumnLayout("Type", ColumnType.CustomAttributeType, _indexSizes[(int) ColumnType.CustomAttributeType]),
+                    new ColumnLayout("Parent", ColumnType.HasCustomAttribute, GetIndexSize(ColumnType.HasCustomAttribute)),
+                    new ColumnLayout("Type", ColumnType.CustomAttributeType, GetIndexSize(ColumnType.CustomAttributeType)),
                     new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.HasFieldMarshal, _indexSizes[(int) ColumnType.HasFieldMarshal]),
+                    new ColumnLayout("Parent", ColumnType.HasFieldMarshal, GetIndexSize(ColumnType.HasFieldMarshal)),
                     new ColumnLayout("NativeType", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Action", ColumnType.UInt16),
-                    new ColumnLayout("Parent", ColumnType.HasDeclSecurity, _indexSizes[(int) ColumnType.HasDeclSecurity]),
+                    new ColumnLayout("Parent", ColumnType.HasDeclSecurity, GetIndexSize(ColumnType.HasDeclSecurity)),
                     new ColumnLayout("PermissionSet", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("PackingSize", ColumnType.UInt16),
                     new ColumnLayout("ClassSize", ColumnType.UInt32),
-                    new ColumnLayout("Parent", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef])),
+                    new ColumnLayout("Parent", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef))),
                 new TableLayout(
                     new ColumnLayout("Offset", ColumnType.UInt32),
-                    new ColumnLayout("Field", ColumnType.TypeDef, _indexSizes[(int) ColumnType.Field])),
+                    new ColumnLayout("Field", ColumnType.TypeDef, GetIndexSize(ColumnType.Field))),
                 new TableLayout(
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef]),
-                    new ColumnLayout("EventList", ColumnType.Event, _indexSizes[(int) ColumnType.Event])),
+                    new ColumnLayout("Parent", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef)),
+                    new ColumnLayout("EventList", ColumnType.Event, GetIndexSize(ColumnType.Event))),
                 new TableLayout(
-                    new ColumnLayout("Event", ColumnType.Event, _indexSizes[(int) ColumnType.Event])),
+                    new ColumnLayout("Event", ColumnType.Event, GetIndexSize(ColumnType.Event))),
                 new TableLayout(
                     new ColumnLayout("Flags", ColumnType.UInt16),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
-                    new ColumnLayout("EventType", ColumnType.TypeDefOrRef, _indexSizes[(int) ColumnType.TypeDefOrRef])),
+                    new ColumnLayout("EventType", ColumnType.TypeDefOrRef, GetIndexSize(ColumnType.TypeDefOrRef))),
                 new TableLayout(
-                    new ColumnLayout("Parent", ColumnType.TypeDef, _indexSizes[(int) ColumnType.TypeDef]),
-                    new ColumnLayout("PropertyList", ColumnType.Event, _indexSizes[(int) ColumnType.Property])),
+                    new ColumnLayout("Parent", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef)),
+                    new ColumnLayout("PropertyList", ColumnType.Event, GetIndexSize(ColumnType.Property))),
                 new TableLayout(
-                    new ColumnLayout("Property", ColumnType.Property, _indexSizes[(int) ColumnType.Property])),
+                    new ColumnLayout("Property", ColumnType.Property, GetIndexSize(ColumnType.Property))),
                 new TableLayout(
                     new ColumnLayout("Flags", ColumnType.UInt16),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("PropertyType", ColumnType.Blob, BlobIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Semantic", ColumnType.UInt16),
-                    new ColumnLayout("Method", ColumnType.Method, _indexSizes[(int) ColumnType.Method]),
-                    new ColumnLayout("Association", ColumnType.HasSemantics, _indexSizes[(int) ColumnType.HasSemantics])),
+                    new ColumnLayout("Method", ColumnType.Method, GetIndexSize(ColumnType.Method)),
+                    new ColumnLayout("Association", ColumnType.HasSemantics, GetIndexSize(ColumnType.HasSemantics))),
+                new TableLayout(
+                    new ColumnLayout("Class", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef)),
+                    new ColumnLayout("MethodBody", ColumnType.MethodDefOrRef, GetIndexSize(ColumnType.MethodDefOrRef)),
+                    new ColumnLayout("MethodDeclaration", ColumnType.MethodDefOrRef, GetIndexSize(ColumnType.MethodDefOrRef))),
             };
             
             return result;
+        }
+
+        private IndexSize GetIndexSize(ColumnType columnType)
+        {
+            return _indexSizes[(int) columnType];
         }
 
         private IndexSize[] InitializeIndexSizes()
@@ -293,6 +302,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.PropertyPtr, ref offset, PropertyPointerRow.FromReader),
                 CreateNextTable(TableIndex.Property, ref offset, PropertyDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.MethodSemantics, ref offset, MethodSemanticsRow.FromReader),
+                CreateNextTable(TableIndex.MethodImpl, ref offset, MethodImplementationRow.FromReader),
             };
         }
 
