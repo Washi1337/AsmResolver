@@ -319,6 +319,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.TypeSpec, ref offset, TypeSpecificationRow.FromReader),
                 CreateNextTable(TableIndex.ImplMap, ref offset, ImplementationMapRow.FromReader),
                 CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader),
+                CreateNextTable(TableIndex.EncLog, ref offset, EncLogRow.FromReader),
             };
         }
 

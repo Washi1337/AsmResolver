@@ -7,6 +7,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public readonly struct MetadataToken : IComparable<MetadataToken>
     {
+        public static implicit operator MetadataToken(int token)
+        {
+            return new MetadataToken(unchecked((uint) token));
+        }
+
+        public static implicit operator MetadataToken(uint token)
+        {
+            return new MetadataToken(token);
+        }
+
         private readonly uint _value;
 
         /// <summary>

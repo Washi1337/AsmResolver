@@ -17,6 +17,9 @@
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Represents a single row in the custom attribute metadata table.
+    /// </summary>
     public readonly struct CustomAttributeRow : IMetadataRow
     {
         /// <summary>
