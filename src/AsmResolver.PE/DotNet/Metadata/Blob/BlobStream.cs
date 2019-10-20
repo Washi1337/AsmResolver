@@ -53,7 +53,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <returns>
         /// The blob, excluding the bytes encoding the length of the blob, or <c>null</c> if the index was invalid.
         /// </returns>
-        public abstract byte[] GetBlobByIndex(int index);
+        public abstract byte[] GetBlobByIndex(uint index);
 
         /// <summary>
         /// Gets a blob binary reader by its blob index.
@@ -63,6 +63,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// The blob reader, starting at the first byte after the length of the blob, or <c>null</c> if the index
         /// was invalid.
         /// </returns>
-        public abstract IBinaryStreamReader GetBlobReaderByIndex(int index);
+        public abstract IBinaryStreamReader GetBlobReaderByIndex(uint index);
     }
 }

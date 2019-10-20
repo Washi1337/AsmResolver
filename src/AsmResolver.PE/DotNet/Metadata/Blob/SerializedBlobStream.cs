@@ -40,12 +40,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
             return _contents.CreateReader();
         }
 
-        public override byte[] GetBlobByIndex(int index)
+        public override byte[] GetBlobByIndex(uint index)
         {
             return GetBlobReaderByIndex(index)?.ReadToEnd();
         }
 
-        public override IBinaryStreamReader GetBlobReaderByIndex(int index)
+        public override IBinaryStreamReader GetBlobReaderByIndex(uint index)
         {
             if (index >= _contents.GetPhysicalSize()) 
                 return null;

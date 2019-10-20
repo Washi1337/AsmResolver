@@ -51,6 +51,6 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         /// </summary>
         /// <param name="index">The offset into the heap to start reading.</param>
         /// <returns>The string, or <c>null</c> if the index was invalid.</returns>
-        public abstract string GetStringByIndex(int index);
+        public abstract string GetStringByIndex(uint index);
     }
 }

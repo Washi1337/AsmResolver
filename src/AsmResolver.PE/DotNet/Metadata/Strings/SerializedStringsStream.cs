@@ -23,7 +23,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
 {
     public class SerializedStringsStream : StringsStream
     {
-        private readonly IDictionary<int, string> _cachedStrings = new Dictionary<int, string>();
+        private readonly IDictionary<uint, string> _cachedStrings = new Dictionary<uint, string>();
         private readonly IReadableSegment _contents;
 
         public SerializedStringsStream(byte[] rawData)
@@ -43,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
             return _contents.CreateReader();
         }
 
-        public override string GetStringByIndex(int index)
+        public override string GetStringByIndex(uint index)
         {
             if (!_cachedStrings.TryGetValue(index, out string value) && index < _contents.GetPhysicalSize())
             {

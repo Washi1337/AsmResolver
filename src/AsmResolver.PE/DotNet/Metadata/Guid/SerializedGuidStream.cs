@@ -40,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
             return _contents.CreateReader();
         }
 
-        public override System.Guid GetGuidByIndex(int index)
+        public override System.Guid GetGuidByIndex(uint index)
         {
             index--;
             if (index < _contents.GetPhysicalSize())

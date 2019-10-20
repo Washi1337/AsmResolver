@@ -51,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         /// </summary>
         /// <param name="index">The offset into the heap to start reading.</param>
         /// <returns>The GUID.</returns>
-        public abstract System.Guid GetGuidByIndex(int index);
+        public abstract System.Guid GetGuidByIndex(uint index);
         
     }
 }
