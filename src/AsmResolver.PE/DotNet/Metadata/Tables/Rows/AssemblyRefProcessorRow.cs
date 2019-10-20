@@ -36,7 +36,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets the assembly reference that was associated to this processor identifier.
+        /// Gets an index into the AssemblyRef table referencing the assembly reference that this processor row
+        /// was assigned to.
         /// </summary>
         public uint AssemblyReference
         {
