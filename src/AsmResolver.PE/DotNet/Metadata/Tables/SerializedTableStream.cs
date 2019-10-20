@@ -260,6 +260,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("NestedClass", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef)),
                     new ColumnLayout("EnclosingClass", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef))),
+                new TableLayout(
+                    new ColumnLayout("Number", ColumnType.UInt16),
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Owner", ColumnType.TypeOrMethodDef, GetIndexSize(ColumnType.TypeOrMethodDef)),
+                    new ColumnLayout("EnclosingClass", ColumnType.String, StringIndexSize)),
             };
             
             return result;
@@ -326,6 +331,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
                 // ResolutionScope
                 GetCodedIndexSize(TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
+                
+                // TypeOrMethodDef
+                GetCodedIndexSize(TableIndex.TypeDef, TableIndex.Method),
             });
 
             return result.ToArray();
@@ -388,6 +396,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ExportedType, ref offset, ExportedTypeRow.FromReader),
                 CreateNextTable(TableIndex.ManifestResource, ref offset, ManifestResourceRow.FromReader),
                 CreateNextTable(TableIndex.NestedClass, ref offset, NestedClassRow.FromReader),
+                CreateNextTable(TableIndex.GenericParam, ref offset, GenericParameterRow.FromReader),
             };
         }
 
