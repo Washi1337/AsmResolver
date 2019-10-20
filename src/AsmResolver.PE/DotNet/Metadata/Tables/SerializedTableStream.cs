@@ -193,6 +193,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("MethodDeclaration", ColumnType.MethodDefOrRef, GetIndexSize(ColumnType.MethodDefOrRef))),
                 new TableLayout(
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
             };
             
             return result;
@@ -306,6 +308,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.MethodSemantics, ref offset, MethodSemanticsRow.FromReader),
                 CreateNextTable(TableIndex.MethodImpl, ref offset, MethodImplementationRow.FromReader),
                 CreateNextTable(TableIndex.ModuleRef, ref offset, ModuleReferenceRow.FromReader),
+                CreateNextTable(TableIndex.TypeSpec, ref offset, TypeSpecificationRow.FromReader),
             };
         }
 
