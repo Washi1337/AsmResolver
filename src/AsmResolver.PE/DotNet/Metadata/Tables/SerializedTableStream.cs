@@ -268,6 +268,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("Method", ColumnType.Method, GetIndexSize(ColumnType.Method)),
                     new ColumnLayout("Instantiation", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Owner", ColumnType.GenericParam, GetIndexSize(ColumnType.GenericParam)),
+                    new ColumnLayout("Constraint", ColumnType.TypeDefOrRef, GetIndexSize(ColumnType.TypeDefOrRef))),
             };
             
             return result;
@@ -401,6 +404,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.NestedClass, ref offset, NestedClassRow.FromReader),
                 CreateNextTable(TableIndex.GenericParam, ref offset, GenericParameterRow.FromReader),
                 CreateNextTable(TableIndex.MethodSpec, ref offset, MethodSpecificationRow.FromReader),
+                CreateNextTable(TableIndex.GenericParamConstraint, ref offset, GenericParameterConstraintRow.FromReader),
             };
         }
 
