@@ -257,6 +257,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Flags", ColumnType.UInt32),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Implementation", ColumnType.Implementation, GetIndexSize(ColumnType.Implementation))),
+                new TableLayout(
+                    new ColumnLayout("NestedClass", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef)),
+                    new ColumnLayout("EnclosingClass", ColumnType.TypeDef, GetIndexSize(ColumnType.TypeDef))),
             };
             
             return result;
@@ -384,6 +387,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.File, ref offset, FileReferenceRow.FromReader),
                 CreateNextTable(TableIndex.ExportedType, ref offset, ExportedTypeRow.FromReader),
                 CreateNextTable(TableIndex.ManifestResource, ref offset, ManifestResourceRow.FromReader),
+                CreateNextTable(TableIndex.NestedClass, ref offset, NestedClassRow.FromReader),
             };
         }
 
