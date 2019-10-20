@@ -208,6 +208,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("FuncCode", ColumnType.UInt32)),
                 new TableLayout(
                     new ColumnLayout("Token", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("HashAlgId", ColumnType.UInt32),
+                    new ColumnLayout("MajorVersion", ColumnType.UInt16),
+                    new ColumnLayout("MinorVersion", ColumnType.UInt16),
+                    new ColumnLayout("BuildNumber", ColumnType.UInt16),
+                    new ColumnLayout("RevisionNumber", ColumnType.UInt16),
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("PublicKey", ColumnType.Blob, BlobIndexSize),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Culture", ColumnType.String, StringIndexSize)),
             };
             
             return result;
@@ -326,6 +336,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader),
                 CreateNextTable(TableIndex.EncLog, ref offset, EncLogRow.FromReader),
                 CreateNextTable(TableIndex.EncMap, ref offset, EncMapRow.FromReader),
+                CreateNextTable(TableIndex.Assembly, ref offset, AssemblyDefinitionRow.FromReader),
             };
         }
 
