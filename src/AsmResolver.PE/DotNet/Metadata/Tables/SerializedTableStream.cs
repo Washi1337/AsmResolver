@@ -224,6 +224,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("PlatformId", ColumnType.UInt32),
                     new ColumnLayout("MajorVersion", ColumnType.UInt32),
                     new ColumnLayout("MinorVersion", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("MajorVersion", ColumnType.UInt16),
+                    new ColumnLayout("MinorVersion", ColumnType.UInt16),
+                    new ColumnLayout("BuildNumber", ColumnType.UInt16),
+                    new ColumnLayout("RevisionNumber", ColumnType.UInt16),
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("PublicKeyOrToken", ColumnType.Blob, BlobIndexSize),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Culture", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("HashValue", ColumnType.Blob, BlobIndexSize)),
             };
             
             return result;
@@ -345,6 +355,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.Assembly, ref offset, AssemblyDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.AssemblyProcessor, ref offset, AssemblyProcessorRow.FromReader),
                 CreateNextTable(TableIndex.AssemblyOS, ref offset, AssemblyOSRow.FromReader),
+                CreateNextTable(TableIndex.AssemblyRef, ref offset, AssemblyReferenceRow.FromReader),
             };
         }
 
