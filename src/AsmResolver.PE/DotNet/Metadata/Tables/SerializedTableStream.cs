@@ -252,6 +252,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Namespace", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Implementation", ColumnType.Implementation, GetIndexSize(ColumnType.Implementation))),
+                new TableLayout(
+                    new ColumnLayout("Offset", ColumnType.UInt32),
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Implementation", ColumnType.Implementation, GetIndexSize(ColumnType.Implementation))),
             };
             
             return result;
@@ -378,6 +383,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.AssemblyRefOS, ref offset, AssemblyRefOSRow.FromReader),
                 CreateNextTable(TableIndex.File, ref offset, FileReferenceRow.FromReader),
                 CreateNextTable(TableIndex.ExportedType, ref offset, ExportedTypeRow.FromReader),
+                CreateNextTable(TableIndex.ManifestResource, ref offset, ManifestResourceRow.FromReader),
             };
         }
 
