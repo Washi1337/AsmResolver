@@ -220,6 +220,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Culture", ColumnType.String, StringIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Processor", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("PlatformId", ColumnType.UInt32),
+                    new ColumnLayout("MajorVersion", ColumnType.UInt32),
+                    new ColumnLayout("MinorVersion", ColumnType.UInt32)),
             };
             
             return result;
@@ -340,6 +344,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.EncMap, ref offset, EncMapRow.FromReader),
                 CreateNextTable(TableIndex.Assembly, ref offset, AssemblyDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.AssemblyProcessor, ref offset, AssemblyProcessorRow.FromReader),
+                CreateNextTable(TableIndex.AssemblyOS, ref offset, AssemblyOSRow.FromReader),
             };
         }
 
