@@ -46,21 +46,27 @@ Alternatively, it is possible to get a stream by its name using the ``GetStream(
 
     var stringsStream = metadata.GetStream("#Strings");
 
+Or grab the stream by its type:
+
+.. code-block:: csharp
+
+    var stringsStream = metadata.GetStream<StringsStream>;
+
 AsmResolver supports parsing streams using the names in the table below. Any stream with a different name will be converted to a ``CustomMetadataStream``.
 
-+---------------+------------------------+
-| Name          | Class                  |
-+===============+========================+
-| ``#~`` ``#-`` | ``TablesStream``       |
-+---------------+------------------------+
-| ``#Blob``     | ``BlobStream``         |
-+---------------+------------------------+
-| ``#GUID``     | ``GuidStream``         |
-+---------------+------------------------+
-| ``#Strings``  | ``StringsStream``      |
-+---------------+------------------------+
-| ``#US``       | ``UserStringsStream``  |
-+---------------+------------------------+
++---------------------------+------------------------+
+| Name                      | Class                  |
++===========================+========================+
+| ``#~`` ``#-`` ``#Schema`` | ``TablesStream``       |
++---------------------------+------------------------+
+| ``#Blob``                 | ``BlobStream``         |
++---------------------------+------------------------+
+| ``#GUID``                 | ``GuidStream``         |
++---------------------------+------------------------+
+| ``#Strings``              | ``StringsStream``      |
++---------------------------+------------------------+
+| ``#US``                   | ``UserStringsStream``  |
++---------------------------+------------------------+
 
 Some streams support reading the raw contents using a ``IBinaryStreamReader``. Effectively, every stream that was read from the disk is readable in this way. Below an example of a program that dumps for each readable stream the contents to a file on the disk:
 
@@ -90,3 +96,187 @@ The ``Streams`` property is mutable. You can add new streams, or remove existing
 
     // Remove it again.
     metadata.Streams.RemoveAt(metadata.Streams.Count - 1);
+
+
+Blob, Strings, User-strings and GUID streams
+--------------------------------------------
+
+The blob, strings, user-strings and GUID streams are all very similar in the sense that they all provide a storage for data referenced by the tables stream. Each of these streams have a very similar API in AsmResolver.
+
++------------------------+----------------------+
+| Class                  | Method               |
++========================+======================+
+| ``BlobStream``         | ``GetBlobByIndex``   |
++------------------------+----------------------+
+| ``GuidStream``         | ``GetGuidByIndex``   |
++------------------------+----------------------+
+| ``StringsStream``      | ``GetStringByIndex`` |
++------------------------+----------------------+
+| ``UserStringsStream``  | ``GetStringByIndex`` |
++------------------------+----------------------+
+
+Example:
+
+.. code-block:: csharp
+
+    var stringsStream = metadata.GetStream<StringsStream>();
+    string value = stringsStream.GetStringByIndex(0x1234);
+
+Since blobs in the blob stream have a specific format, just obtaining the `byte[]` of a blob might not be all that useful. Therefore, the ``BlobStream`` has an extra ``GetBlobReaderByIndex`` method, that allows for parsing each blob using an ``IBinaryStreamReader`` object instead:
+
+
+.. code-block:: csharp
+
+    var blobStream = metadata.GetStream<BlobStream>();
+    var reader = blobStream.GetBlobReaderByIndex(0x1234);
+
+    // Use reader to parse the blob signature ...
+
+Tables stream
+-------------
+
+The tables stream (``#~``, ``#-`` or ``#Schema``) is the main stream stored in the .NET binary. It provides tables for all members defined in the assembly, as well as all references that the assembly uses. 
+
+.. code-block:: csharp
+
+    TablesStream tablesStream = metadata.GetStream<TablesStream>();
+
+
+Individal tables can be accessed using the `GetTable` method:
+
+.. code-block:: csharp
+
+    IMetadatatable typeDefTable = tablesStream.GetTable(TableIndex.TypeDef);
+
+Tables can also be obtained by their row type:
+
+.. code-block:: csharp
+
+    MetadataTable<TypeDefinitionRow> typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
+
+The latter option allows for a more type-safe interaction with the table as well, as each metadata table is associated with its own row structure. Below a table of all row definitions:
+
++-------------+-----------------------------+--------------------------------+
+| Table index | Name (as per specification) | AsmResolver row structure name |
++=============+=============================+================================+
+| 0           | Module                      | ``ModuleDefinitionRow``        |
++-------------+-----------------------------+--------------------------------+
+| 1           | TypeRef                     | ``TypeDefinitionRow``          |
++-------------+-----------------------------+--------------------------------+
+| 2           | TypeDef                     | ``TypeReferenceRow``           |
++-------------+-----------------------------+--------------------------------+
+| 3           | FieldPtr                    | ``FieldPointerRow``            |
++-------------+-----------------------------+--------------------------------+
+| 4           | Field                       | ``FieldDefinitionRow``         |
++-------------+-----------------------------+--------------------------------+
+| 5           | MethodPtr                   | ``MethodPointerRow``           |
++-------------+-----------------------------+--------------------------------+
+| 6           | Method                      | ``MethodDefinitionRow``        |
++-------------+-----------------------------+--------------------------------+
+| 7           | ParamPtr                    | ``ParameterPointerRow``        |
++-------------+-----------------------------+--------------------------------+
+| 8           | Param                       | ``ParameterDefinitionRow``     |
++-------------+-----------------------------+--------------------------------+
+| 9           | InterfaceImpl               | ``InterfaceImplementationRow`` |
++-------------+-----------------------------+--------------------------------+
+| 10          | MemberRef                   | ``MemberReferenceRow``         |
++-------------+-----------------------------+--------------------------------+
+| 11          | Constant                    | ``ConstantRow``                |
++-------------+-----------------------------+--------------------------------+
+| 12          | CustomAttribute             | ``CustomAttributeRow``         |
++-------------+-----------------------------+--------------------------------+
+| 13          | FieldMarshal                | ``FieldMarshalRow``            |
++-------------+-----------------------------+--------------------------------+
+| 14          | DeclSecurity                | ``SecurityDeclarationRow``     |
++-------------+-----------------------------+--------------------------------+
+| 15          | ClassLayout                 | ``ClassLayoutRow``             |
++-------------+-----------------------------+--------------------------------+
+| 16          | FieldLayout                 | ``FieldLayoutRow``             |
++-------------+-----------------------------+--------------------------------+
+| 17          | StandAloneSig               | ``StandAloneSignatureRow``     |
++-------------+-----------------------------+--------------------------------+
+| 18          | EventMap                    | ``EventMapRow``                |
++-------------+-----------------------------+--------------------------------+
+| 19          | EventPtr                    | ``EventPointerRow``            |
++-------------+-----------------------------+--------------------------------+
+| 20          | Event                       | ``EventDefinitionRow``         |
++-------------+-----------------------------+--------------------------------+
+| 21          | PropertyMap                 | ``PropertyMapRow``             |
++-------------+-----------------------------+--------------------------------+
+| 22          | PropertyPtr                 | ``PropertyPointerRow``         |
++-------------+-----------------------------+--------------------------------+
+| 23          | Property                    | ``PropertyDefinitionRow``      |
++-------------+-----------------------------+--------------------------------+
+| 24          | MethodSemantics             | ``MethodSemanticsRow``         |
++-------------+-----------------------------+--------------------------------+
+| 25          | MethodImpl                  | ``MethodImplementationRow``    |
++-------------+-----------------------------+--------------------------------+
+| 26          | ModuleRef                   | ``ModuleReferenceRow``         |
++-------------+-----------------------------+--------------------------------+
+| 27          | TypeSpec                    | ``TypeSpecificationRow``       |
++-------------+-----------------------------+--------------------------------+
+| 28          | ImplMap                     | ``ImplementatinoMappingRow``   |
++-------------+-----------------------------+--------------------------------+
+| 29          | FieldRva                    | ``FieldRvaRow``                |
++-------------+-----------------------------+--------------------------------+
+| 30          | EncLog                      | ``EncLogRow``                  |
++-------------+-----------------------------+--------------------------------+
+| 31          | EncMap                      | ``EncMapRow``                  |
++-------------+-----------------------------+--------------------------------+
+| 32          | Assembly                    | ``AssemblyDefinitionRow``      |
++-------------+-----------------------------+--------------------------------+
+| 33          | AssemblyProcessor           | ``AssemblyProcessorRow``       |
++-------------+-----------------------------+--------------------------------+
+| 34          | AssemblyOS                  | ``AssemblyOSRow``              |
++-------------+-----------------------------+--------------------------------+
+| 35          | AssemblyRef                 | ``AssemblyReferenceRow``       |
++-------------+-----------------------------+--------------------------------+
+| 36          | AssemblyRefProcessor        | ``AssemblyRefProcessorRow``    |
++-------------+-----------------------------+--------------------------------+
+| 37          | AssemblyRefOS               | ``AssemblyRefOSRow``           |
++-------------+-----------------------------+--------------------------------+
+| 38          | File                        | ``FileReferenceRow``           |
++-------------+-----------------------------+--------------------------------+
+| 39          | ExportedType                | ``ExportedTypeRow``            |
++-------------+-----------------------------+--------------------------------+
+| 40          | ManifestResource            | ``ManifestResourceRow``        |
++-------------+-----------------------------+--------------------------------+
+| 41          | NestedClass                 | ``NestedClassRow``             |
++-------------+-----------------------------+--------------------------------+
+| 42          | GenericParam                | ``GenericParamRow``            |
++-------------+-----------------------------+--------------------------------+
+| 43          | MethodSpec                  | ``MethodSpecificationRow``     |
++-------------+-----------------------------+--------------------------------+
+| 44          | GenericParamConstraint      | ``GenericParamConstraintRow``  |
++-------------+-----------------------------+--------------------------------+
+
+Metadata tables are similar to normal ``ICollection<T>`` instances. They provide enumerators, indexers and methods to add or remove rows from the table.
+
+.. code-block:: csharp
+
+    Console.WriteLine("Number of types: " + typeDefTable.Count);
+
+    TypeDefinitionRow firstType = typeDefTable[0];
+
+    foreach (var typeRow in typeDefTable)
+    {
+        // ...
+    }
+
+Using the other metadata streams, it is possible to resolve all columns. Below an example that prints the name and namespace of each type row in the type definition table in a file.
+
+.. code-block:: csharp
+
+    var peImage = PEImage.FromFile(@"C:\file.exe");
+    var metadata = peImage.DotNetDirectory.Metadata;
+
+    var tablesStream = metadata.GetStream<TablesStream>();
+    var stringsStream = metadata.GetStream<StringsStream>();
+    
+    var typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
+    foreach (var typeRow in typeDefTable)
+    {
+        string ns = stringsStream.GetStringByIndex(typeRow.Namespace);
+        string name = stringsStream.GetStringByIndex(typeRow.Name);
+        Console.WriteLine(string.IsNullOrEmpty(ns) ? name : $"{ns}.{name}");
+    }
