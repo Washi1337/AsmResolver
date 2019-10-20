@@ -203,6 +203,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new TableLayout(
                     new ColumnLayout("RVA", ColumnType.UInt32),
                     new ColumnLayout("Field", ColumnType.Field, GetIndexSize(ColumnType.Field))),
+                new TableLayout(
+                    new ColumnLayout("Token", ColumnType.UInt32),
+                    new ColumnLayout("FuncCode", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("Token", ColumnType.UInt32)),
             };
             
             return result;
@@ -320,6 +325,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ImplMap, ref offset, ImplementationMapRow.FromReader),
                 CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader),
                 CreateNextTable(TableIndex.EncLog, ref offset, EncLogRow.FromReader),
+                CreateNextTable(TableIndex.EncMap, ref offset, EncMapRow.FromReader),
             };
         }
 
