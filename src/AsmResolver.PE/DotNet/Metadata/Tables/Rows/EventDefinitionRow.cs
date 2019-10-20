@@ -33,7 +33,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new EventDefinitionRow(
                 (EventAttributes) reader.ReadUInt16(),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size),
-                reader.ReadIndex((IndexSize) layout.Columns[1].Size));
+                reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
         
         public EventDefinitionRow(EventAttributes attributes, uint name, uint eventType)
