@@ -200,6 +200,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("MemberForwarded", ColumnType.MemberForwarded, GetIndexSize(ColumnType.MemberForwarded)),
                     new ColumnLayout("ImportName", ColumnType.String, StringIndexSize),
                     new ColumnLayout("ImportScope", ColumnType.ModuleRef, GetIndexSize(ColumnType.ModuleRef))),
+                new TableLayout(
+                    new ColumnLayout("RVA", ColumnType.UInt32),
+                    new ColumnLayout("Field", ColumnType.Field, GetIndexSize(ColumnType.Field))),
             };
             
             return result;
@@ -315,6 +318,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ModuleRef, ref offset, ModuleReferenceRow.FromReader),
                 CreateNextTable(TableIndex.TypeSpec, ref offset, TypeSpecificationRow.FromReader),
                 CreateNextTable(TableIndex.ImplMap, ref offset, ImplementationMapRow.FromReader),
+                CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader),
             };
         }
 
