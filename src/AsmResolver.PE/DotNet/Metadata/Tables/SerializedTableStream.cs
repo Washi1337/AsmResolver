@@ -218,6 +218,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("PublicKey", ColumnType.Blob, BlobIndexSize),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("Culture", ColumnType.String, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Processor", ColumnType.UInt32)),
             };
             
             return result;
@@ -337,6 +339,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.EncLog, ref offset, EncLogRow.FromReader),
                 CreateNextTable(TableIndex.EncMap, ref offset, EncMapRow.FromReader),
                 CreateNextTable(TableIndex.Assembly, ref offset, AssemblyDefinitionRow.FromReader),
+                CreateNextTable(TableIndex.AssemblyProcessor, ref offset, AssemblyProcessorRow.FromReader),
             };
         }
 
