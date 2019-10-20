@@ -15,7 +15,7 @@ The .NET data directory can be accessed by the ``IPEImage.DotNetDirectory`` prop
     Console.WriteLine("Managed entrypoint: {0:X8}", peImage.DotNetDirectory.Entrypoint);
 
 
-.NET metadata directory 
+Metadata directory 
 -----------------------
 
 The metadata data directory is perhaps the most important data directory that is referenced by the .NET directory. It contains the metadata streams, such as the table and the blob stream, which play a key role in the execution of a .NET binary.
@@ -30,7 +30,7 @@ To access the metadata directory, access the ``IDotNetDirectory.Metadata`` prope
     Console.WriteLine("Target .NET runtime version: " + metadata.VersionString);
 
 
-.NET metadata streams
+Metadata streams
 ---------------------
 
 The ``IMetadata`` interface also exposes the ``Streams`` property, a list of ``IMetadataStream`` instances.
@@ -98,8 +98,8 @@ The ``Streams`` property is mutable. You can add new streams, or remove existing
     metadata.Streams.RemoveAt(metadata.Streams.Count - 1);
 
 
-Blob, Strings, User-strings and GUID streams
---------------------------------------------
+Blob, Strings, US and GUID streams
+----------------------------------
 
 The blob, strings, user-strings and GUID streams are all very similar in the sense that they all provide a storage for data referenced by the tables stream. Each of these streams have a very similar API in AsmResolver.
 
@@ -135,18 +135,17 @@ Since blobs in the blob stream have a specific format, just obtaining the `byte[
 Tables stream
 -------------
 
-The tables stream (``#~``, ``#-`` or ``#Schema``) is the main stream stored in the .NET binary. It provides tables for all members defined in the assembly, as well as all references that the assembly uses. 
+The tables stream (``#~``, ``#-`` or ``#Schema``) is the main stream stored in the .NET binary. It provides tables for all members defined in the assembly, as well as all references that the assembly uses. The tables stream is represented by the ``TablesStream`` class and can be obtained in the same way as any other metadata stream:
 
 .. code-block:: csharp
 
     TablesStream tablesStream = metadata.GetStream<TablesStream>();
 
-
-Individal tables can be accessed using the `GetTable` method:
+Metadata tables are represented by the ``IMetadataTable`` interface. Individal tables can be accessed using the `GetTable` method:
 
 .. code-block:: csharp
 
-    IMetadatatable typeDefTable = tablesStream.GetTable(TableIndex.TypeDef);
+    IMetadataTable typeDefTable = tablesStream.GetTable(TableIndex.TypeDef);
 
 Tables can also be obtained by their row type:
 
@@ -267,16 +266,22 @@ Using the other metadata streams, it is possible to resolve all columns. Below a
 
 .. code-block:: csharp
 
+    // Load PE image.
     var peImage = PEImage.FromFile(@"C:\file.exe");
-    var metadata = peImage.DotNetDirectory.Metadata;
 
+    // Obtain relevant streams.
+    var metadata = peImage.DotNetDirectory.Metadata;
     var tablesStream = metadata.GetStream<TablesStream>();
     var stringsStream = metadata.GetStream<StringsStream>();
     
+    // Go over each type definition in the file.
     var typeDefTable = tablesStream.GetTable<TypeDefinitionRow>();
     foreach (var typeRow in typeDefTable)
     {
+        // Resolve name and namespace columns using the #Strings stream.
         string ns = stringsStream.GetStringByIndex(typeRow.Namespace);
         string name = stringsStream.GetStringByIndex(typeRow.Name);
+
+        // Print name and namespace:
         Console.WriteLine(string.IsNullOrEmpty(ns) ? name : $"{ns}.{name}");
     }
