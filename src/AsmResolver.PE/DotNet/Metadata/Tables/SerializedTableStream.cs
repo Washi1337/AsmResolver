@@ -195,6 +195,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize)),
                 new TableLayout(
                     new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("MappingFlags", ColumnType.UInt16),
+                    new ColumnLayout("MemberForwarded", ColumnType.MemberForwarded, GetIndexSize(ColumnType.MemberForwarded)),
+                    new ColumnLayout("ImportName", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("ImportScope", ColumnType.ModuleRef, GetIndexSize(ColumnType.ModuleRef))),
             };
             
             return result;
@@ -309,6 +314,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.MethodImpl, ref offset, MethodImplementationRow.FromReader),
                 CreateNextTable(TableIndex.ModuleRef, ref offset, ModuleReferenceRow.FromReader),
                 CreateNextTable(TableIndex.TypeSpec, ref offset, TypeSpecificationRow.FromReader),
+                CreateNextTable(TableIndex.ImplMap, ref offset, ImplementationMapRow.FromReader),
             };
         }
 
