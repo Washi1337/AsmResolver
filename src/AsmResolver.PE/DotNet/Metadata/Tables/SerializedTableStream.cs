@@ -265,6 +265,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Flags", ColumnType.UInt16),
                     new ColumnLayout("Owner", ColumnType.TypeOrMethodDef, GetIndexSize(ColumnType.TypeOrMethodDef)),
                     new ColumnLayout("EnclosingClass", ColumnType.String, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Method", ColumnType.Method, GetIndexSize(ColumnType.Method)),
+                    new ColumnLayout("Instantiation", ColumnType.Blob, BlobIndexSize)),
             };
             
             return result;
@@ -397,6 +400,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ManifestResource, ref offset, ManifestResourceRow.FromReader),
                 CreateNextTable(TableIndex.NestedClass, ref offset, NestedClassRow.FromReader),
                 CreateNextTable(TableIndex.GenericParam, ref offset, GenericParameterRow.FromReader),
+                CreateNextTable(TableIndex.MethodSpec, ref offset, MethodSpecificationRow.FromReader),
             };
         }
 
