@@ -183,6 +183,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                     new ColumnLayout("Flags", ColumnType.UInt16),
                     new ColumnLayout("Name", ColumnType.String, StringIndexSize),
                     new ColumnLayout("PropertyType", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Semantic", ColumnType.UInt16),
+                    new ColumnLayout("Method", ColumnType.Method, _indexSizes[(int) ColumnType.Method]),
+                    new ColumnLayout("Association", ColumnType.HasSemantics, _indexSizes[(int) ColumnType.HasSemantics])),
             };
             
             return result;
@@ -288,6 +292,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.PropertyMap, ref offset, PropertyMapRow.FromReader),
                 CreateNextTable(TableIndex.PropertyPtr, ref offset, PropertyPointerRow.FromReader),
                 CreateNextTable(TableIndex.Property, ref offset, PropertyDefinitionRow.FromReader),
+                CreateNextTable(TableIndex.MethodSemantics, ref offset, MethodSemanticsRow.FromReader),
             };
         }
 
