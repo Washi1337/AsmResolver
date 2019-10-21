@@ -39,13 +39,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         public TableIndex TableIndex => TableIndex.EventPtr;
-        
+
         /// <summary>
         /// Gets an index into the Event table that this pointer references.
         /// </summary>
         public uint Event
         {
             get;
+        }
+        
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Event,(IndexSize) layout.Columns[0].Size);
         }
 
         /// <summary>

@@ -81,6 +81,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt16((ushort) Attributes);
+            writer.WriteIndex(MemberForwarded, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(ImportName, (IndexSize) layout.Columns[2].Size);
+            writer.WriteIndex(ImportScope, (IndexSize) layout.Columns[3].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided implementation map row.
         /// </summary>

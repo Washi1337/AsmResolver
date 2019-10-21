@@ -53,8 +53,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint ResolutionScope
         {
             get;
-        } 
-        
+        }
+
         /// <summary>
         /// Gets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
@@ -75,6 +75,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Namespace
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(ResolutionScope, (IndexSize) layout.Columns[0].Size);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(Namespace, (IndexSize) layout.Columns[2].Size);
         }
 
         /// <inheritdoc />

@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using System.Text;
 
 namespace AsmResolver
@@ -152,6 +153,28 @@ namespace AsmResolver
         {
             uint currentPosition = writer.FileOffset;
             writer.WriteZeroes((int) (currentPosition.Align(align) - writer.FileOffset));
+        }
+
+        /// <summary>
+        /// Writes a single index to the output stream.
+        /// </summary>
+        /// <param name="writer">The writer to use.</param>
+        /// <param name="value">The index to write.</param>
+        /// <param name="size"></param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static void WriteIndex(this IBinaryStreamWriter writer, uint value, IndexSize size)
+        {
+            switch (size)
+            {
+                case IndexSize.Short:
+                    writer.WriteUInt16((ushort) value);
+                    break;
+                case IndexSize.Long:
+                    writer.WriteUInt32(value);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(size), size, null);
+            }
         }
         
     }

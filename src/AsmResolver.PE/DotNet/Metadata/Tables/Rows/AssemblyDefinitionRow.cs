@@ -83,7 +83,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets the build number of the assembly.
         /// </summary>
@@ -139,6 +139,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32((uint) HashAlgorithm);
+            writer.WriteUInt16(MajorVersion);
+            writer.WriteUInt16(MinorVersion);
+            writer.WriteUInt16(BuildNumber);
+            writer.WriteUInt16(RevisionNumber);
+            writer.WriteUInt32((uint) Attributes);
+            writer.WriteIndex(PublicKey, (IndexSize) layout.Columns[6].Size);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[7].Size);
+            writer.WriteIndex(Culture, (IndexSize) layout.Columns[8].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided assembly definition row.
         /// </summary>
@@ -186,6 +200,5 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({(int) HashAlgorithm:X8}, {MajorVersion:X4}, {MinorVersion:X4}, {BuildNumber:X4}, {RevisionNumber:X4}, {(int) Attributes:X8}, {PublicKey:X8}, {Name:X8}, {Culture:X8})";
         }
-        
     }
 }

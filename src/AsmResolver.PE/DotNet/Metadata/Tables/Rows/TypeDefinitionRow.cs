@@ -49,6 +49,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             MethodList = methodList;
         }
 
+        /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.TypeDef;
 
         /// <summary>
@@ -58,7 +59,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
@@ -104,6 +105,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint MethodList
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32((uint) Attributes);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(Namespace, (IndexSize) layout.Columns[2].Size);
+            writer.WriteIndex(Extends, (IndexSize) layout.Columns[3].Size);
+            writer.WriteIndex(FieldList, (IndexSize) layout.Columns[4].Size);
+            writer.WriteIndex(MethodList, (IndexSize) layout.Columns[5].Size);
         }
 
         /// <inheritdoc />

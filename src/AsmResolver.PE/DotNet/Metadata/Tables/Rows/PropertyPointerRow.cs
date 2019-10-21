@@ -39,13 +39,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         public TableIndex TableIndex => TableIndex.PropertyPtr;
-        
+
         /// <summary>
         /// Gets an index into the Property table that this pointer references.
         /// </summary>
         public uint Property
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Property, (IndexSize) layout.Columns[0].Size);
         }
 
         /// <summary>

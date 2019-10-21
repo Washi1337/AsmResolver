@@ -71,6 +71,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32(Token.ToUInt32());
+            writer.WriteUInt32((uint) FuncCode);
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is EncLogRow other && Equals(other);

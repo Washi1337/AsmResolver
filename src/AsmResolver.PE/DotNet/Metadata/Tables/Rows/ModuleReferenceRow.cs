@@ -49,6 +49,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[0].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided module row.
         /// </summary>

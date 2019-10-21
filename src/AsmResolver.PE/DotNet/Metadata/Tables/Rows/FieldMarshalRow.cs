@@ -58,6 +58,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Parent, (IndexSize) layout.Columns[0].Size);
+            writer.WriteIndex(NativeType, (IndexSize) layout.Columns[1].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided field marshal row.
         /// </summary>

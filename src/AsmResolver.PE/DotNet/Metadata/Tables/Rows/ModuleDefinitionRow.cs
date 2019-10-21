@@ -88,6 +88,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt16(Generation);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(Mvid, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(EncId, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(EncBaseId, (IndexSize) layout.Columns[1].Size);
+        }
+
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"({Generation:X4}, {Name:X8}, {Mvid:X8}, {EncId:X8}, {EncBaseId:X8})";

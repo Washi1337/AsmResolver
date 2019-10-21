@@ -39,13 +39,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         public TableIndex TableIndex => TableIndex.MethodPtr;
-        
+
         /// <summary>
         /// Gets an index into the Method table that this pointer references.
         /// </summary>
         public uint Method
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Method, (IndexSize) layout.Columns[0].Size);
         }
 
         /// <summary>

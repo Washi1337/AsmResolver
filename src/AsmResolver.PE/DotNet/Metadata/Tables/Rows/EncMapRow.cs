@@ -48,7 +48,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             get;
         }
-        
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided edit-and-continue remap row.
         /// </summary>
@@ -57,6 +57,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public bool Equals(EncMapRow other)
         {
             return Token.Equals(other.Token);
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32(Token.ToUInt32());
         }
 
         /// <inheritdoc />

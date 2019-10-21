@@ -60,6 +60,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Parent, (IndexSize) layout.Columns[0].Size);
+            writer.WriteIndex(EventList, (IndexSize) layout.Columns[1].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided event map row.
         /// </summary>
@@ -90,6 +97,5 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({Parent:X8}, {EventList:X8})";
         }
-        
     }
 }

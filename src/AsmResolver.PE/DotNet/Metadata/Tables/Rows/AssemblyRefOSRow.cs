@@ -64,6 +64,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32(PlatformId);
+            writer.WriteUInt32(MajorVersion);
+            writer.WriteUInt32(MinorVersion);
+            writer.WriteIndex(AssemblyReference, (IndexSize) layout.Columns[3].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided assembly operating system row.
         /// </summary>

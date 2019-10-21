@@ -60,6 +60,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(NestedClass, (IndexSize) layout.Columns[0].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided nested class row.
         /// </summary>

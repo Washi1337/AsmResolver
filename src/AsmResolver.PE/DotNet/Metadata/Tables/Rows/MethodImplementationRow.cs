@@ -69,6 +69,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Class, (IndexSize) layout.Columns[0].Size);
+            writer.WriteIndex(MethodBody, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(MethodDeclaration, (IndexSize) layout.Columns[2].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided method implementation row.
         /// </summary>

@@ -39,13 +39,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         public TableIndex TableIndex => TableIndex.FieldPtr;
-        
+
         /// <summary>
         /// Gets an index into the Field table that this pointer references.
         /// </summary>
         public uint Field
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Field, (IndexSize) layout.Columns[0].Size);
         }
 
         /// <summary>

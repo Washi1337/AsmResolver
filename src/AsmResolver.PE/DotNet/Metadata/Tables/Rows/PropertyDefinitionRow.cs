@@ -71,6 +71,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt16((ushort) Attributes);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(Type, (IndexSize) layout.Columns[2].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided parameter definition row.
         /// </summary>

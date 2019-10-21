@@ -94,6 +94,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteByte((byte) Type);
+            writer.WriteByte(Padding);
+            writer.WriteIndex(Parent, (IndexSize) layout.Columns[2].Size);
+            writer.WriteIndex(Value, (IndexSize) layout.Columns[3].Size);
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is ConstantRow other && Equals(other);

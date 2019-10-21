@@ -59,7 +59,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             get;
         }
-        
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32(Rva);
+            writer.WriteIndex(Field, (IndexSize) layout.Columns[1].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided field RVA row.
         /// </summary>

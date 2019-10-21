@@ -61,6 +61,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Class, (IndexSize) layout.Columns[0].Size);
+            writer.WriteIndex(Interface, (IndexSize) layout.Columns[1].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided interface implementation row.
         /// </summary>

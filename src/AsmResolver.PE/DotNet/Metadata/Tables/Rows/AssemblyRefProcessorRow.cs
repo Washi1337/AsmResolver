@@ -44,6 +44,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32(ProcessorId);
+            writer.WriteIndex(AssemblyReference, (IndexSize) layout.Columns[1].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided assembly processor row.
         /// </summary>

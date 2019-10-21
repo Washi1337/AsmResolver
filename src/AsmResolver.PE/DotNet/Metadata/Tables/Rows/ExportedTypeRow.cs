@@ -69,8 +69,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint TypeDefinitionId
         {
             get;
-        }  
-        
+        }
+
         /// <summary>
         /// Gets an index into the #Strings heap containing the name of the type reference.
         /// </summary>
@@ -100,6 +100,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Implementation
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32((uint) Attributes);
+            writer.WriteUInt32(TypeDefinitionId);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[2].Size);
+            writer.WriteIndex(Namespace, (IndexSize) layout.Columns[3].Size);
+            writer.WriteIndex(Implementation, (IndexSize) layout.Columns[4].Size);
         }
 
         /// <summary>

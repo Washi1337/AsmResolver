@@ -111,6 +111,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32(Rva);
+            writer.WriteUInt16((ushort) ImplAttributes);
+            writer.WriteUInt16((ushort) Attributes);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[3].Size);
+            writer.WriteIndex(Signature, (IndexSize) layout.Columns[4].Size);
+            writer.WriteIndex(ParameterList, (IndexSize) layout.Columns[5].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided method definition row.
         /// </summary>

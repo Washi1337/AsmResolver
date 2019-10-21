@@ -138,6 +138,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt16(MajorVersion);
+            writer.WriteUInt16(MinorVersion);
+            writer.WriteUInt16(BuildNumber);
+            writer.WriteUInt16(RevisionNumber);
+            writer.WriteUInt32((uint) Attributes);
+            writer.WriteIndex(PublicKeyOrToken, (IndexSize) layout.Columns[5].Size);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[6].Size);
+            writer.WriteIndex(Culture, (IndexSize) layout.Columns[7].Size);
+            writer.WriteIndex(HashValue, (IndexSize) layout.Columns[8].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided assembly reference row.
         /// </summary>

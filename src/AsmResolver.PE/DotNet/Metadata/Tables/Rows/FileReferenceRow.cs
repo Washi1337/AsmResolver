@@ -70,6 +70,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32((uint) Attributes);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(HashValue, (IndexSize) layout.Columns[2].Size);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided file row.
         /// </summary>

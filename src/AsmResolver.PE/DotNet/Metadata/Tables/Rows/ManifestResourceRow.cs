@@ -47,7 +47,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ManifestResource;
-        
+
         /// <summary>
         /// Gets the byte offset within the referenced file at which the resource record begins. 
         /// </summary>
@@ -55,7 +55,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets the attributes associated with this resource.
         /// </summary>
@@ -82,6 +82,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint Implementation
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32(Offset);
+            writer.WriteUInt32((uint) Attributes);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[2].Size);
+            writer.WriteIndex(Implementation, (IndexSize) layout.Columns[3].Size);
         }
 
         /// <summary>

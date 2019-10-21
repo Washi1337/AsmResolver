@@ -70,6 +70,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteUInt32(PlatformId);
+            writer.WriteUInt32(MajorVersion);
+            writer.WriteUInt32(MinorVersion);
+        }
+
         /// <summary>
         /// Determines whether this row is considered equal to the provided assembly operating system row.
         /// </summary>
@@ -105,6 +113,5 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({PlatformId:X8}, {MajorVersion:X8}, {MinorVersion:X8})";
         }
-        
     }
 }

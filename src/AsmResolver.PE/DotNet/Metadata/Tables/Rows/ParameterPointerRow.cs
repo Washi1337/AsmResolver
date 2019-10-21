@@ -39,13 +39,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         public TableIndex TableIndex => TableIndex.ParamPtr;
-        
+
         /// <summary>
         /// Gets an index into the Parameter table that this pointer references.
         /// </summary>
         public uint Parameter
         {
             get;
+        }
+
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer, TableLayout layout)
+        {
+            writer.WriteIndex(Parameter, (IndexSize) layout.Columns[0].Size);
         }
 
         /// <summary>
