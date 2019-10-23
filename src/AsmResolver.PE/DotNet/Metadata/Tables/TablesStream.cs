@@ -97,8 +97,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         public IndexSize StringIndexSize
         {
-            get => GetIndexSize(0);
-            set => SetIndexSize(0, value);
+            get => GetStreamIndexSize(0);
+            set => SetStreamIndexSize(0, value);
         }
 
         /// <summary>
@@ -107,8 +107,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         public IndexSize GuidIndexSize
         {
-            get => GetIndexSize(1);
-            set => SetIndexSize(1, value);
+            get => GetStreamIndexSize(1);
+            set => SetStreamIndexSize(1, value);
         }
 
         /// <summary>
@@ -117,8 +117,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         public IndexSize BlobIndexSize
         {
-            get => GetIndexSize(2);
-            set => SetIndexSize(2, value);
+            get => GetStreamIndexSize(2);
+            set => SetStreamIndexSize(2, value);
         }
 
         /// <summary>
@@ -208,7 +208,56 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Tables"/> property.
         /// </remarks>
-        protected virtual IList<IMetadataTable> GetTables() => new List<IMetadataTable>();
+        protected virtual IList<IMetadataTable> GetTables()
+        {
+            return new IMetadataTable[]
+            {
+                new MetadataTable<ModuleDefinitionRow>(), 
+                new MetadataTable<TypeReferenceRow>(), 
+                new MetadataTable<TypeDefinitionRow>(), 
+                new MetadataTable<FieldPointerRow>(), 
+                new MetadataTable<FieldDefinitionRow>(), 
+                new MetadataTable<MethodPointerRow>(), 
+                new MetadataTable<MethodDefinitionRow>(), 
+                new MetadataTable<ParameterPointerRow>(), 
+                new MetadataTable<ParameterDefinitionRow>(), 
+                new MetadataTable<InterfaceImplementationRow>(), 
+                new MetadataTable<MemberReferenceRow>(), 
+                new MetadataTable<ConstantRow>(), 
+                new MetadataTable<CustomAttributeRow>(), 
+                new MetadataTable<FieldMarshalRow>(), 
+                new MetadataTable<SecurityDeclarationRow>(), 
+                new MetadataTable<ClassLayoutRow>(), 
+                new MetadataTable<FieldLayoutRow>(), 
+                new MetadataTable<StandAloneSignatureRow>(), 
+                new MetadataTable<EventMapRow>(), 
+                new MetadataTable<EventDefinitionRow>(), 
+                new MetadataTable<PropertyMapRow>(), 
+                new MetadataTable<PropertyPointerRow>(), 
+                new MetadataTable<PropertyDefinitionRow>(), 
+                new MetadataTable<MethodSemanticsRow>(), 
+                new MetadataTable<MethodImplementationRow>(), 
+                new MetadataTable<ModuleReferenceRow>(), 
+                new MetadataTable<TypeSpecificationRow>(), 
+                new MetadataTable<ImplementationMapRow>(), 
+                new MetadataTable<FieldRvaRow>(), 
+                new MetadataTable<EncLogRow>(), 
+                new MetadataTable<EncMapRow>(), 
+                new MetadataTable<AssemblyDefinitionRow>(), 
+                new MetadataTable<AssemblyProcessorRow>(), 
+                new MetadataTable<AssemblyOSRow>(), 
+                new MetadataTable<AssemblyReferenceRow>(), 
+                new MetadataTable<AssemblyRefProcessorRow>(), 
+                new MetadataTable<AssemblyRefOSRow>(), 
+                new MetadataTable<FileReferenceRow>(), 
+                new MetadataTable<ExportedTypeRow>(), 
+                new MetadataTable<ManifestResourceRow>(), 
+                new MetadataTable<NestedClassRow>(), 
+                new MetadataTable<GenericParameterRow>(), 
+                new MetadataTable<MethodSpecificationRow>(), 
+                new MetadataTable<GenericParameterConstraintRow>(), 
+            };
+        }
 
         /// <summary>
         /// Gets a table by its table index. 
@@ -228,12 +277,205 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return Tables.OfType<MetadataTable<TRow>>().First();
         }
 
-        private IndexSize GetIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
+        private IndexSize GetStreamIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
 
-        private void SetIndexSize(int bitIndex, IndexSize newSize)
+        private void SetStreamIndexSize(int bitIndex, IndexSize newSize)
         {
             Flags = (TablesStreamFlags) (((int) Flags & ~(1 << bitIndex))
                                          | (newSize == IndexSize.Long ? 1 << bitIndex : 0));
         }
+
+        protected virtual IndexSize GetColumnSize(ColumnType columnType)
+        {
+            return IndexSize.Long;
+        }
+
+        protected TableLayout[] InitializeTableLayouts()
+        {
+            var result = new[]
+            {
+                new TableLayout(
+                    new ColumnLayout("Generation", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Mvid", ColumnType.Guid, GuidIndexSize),
+                    new ColumnLayout("EncId", ColumnType.Guid, GuidIndexSize),
+                    new ColumnLayout("EncBaseId", ColumnType.Guid, GuidIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("ResolutionScope", ColumnType.ResolutionScope,
+                        GetColumnSize(ColumnType.ResolutionScope)),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Namespace", ColumnType.Guid, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Namespace", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Extends", ColumnType.TypeDefOrRef,
+                        GetColumnSize(ColumnType.TypeDefOrRef)),
+                    new ColumnLayout("FieldList", ColumnType.Field, GetColumnSize(ColumnType.Field)),
+                    new ColumnLayout("MethodList", ColumnType.Method, GetColumnSize(ColumnType.Method))),
+                new TableLayout(
+                    new ColumnLayout("Field", ColumnType.Field, GetColumnSize(ColumnType.Field))),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.Method))),
+                new TableLayout(
+                    new ColumnLayout("RVA", ColumnType.UInt32),
+                    new ColumnLayout("ImplFlags", ColumnType.UInt16),
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize),
+                    new ColumnLayout("ParamList", ColumnType.Param, GetColumnSize(ColumnType.Param))),
+                new TableLayout(
+                    new ColumnLayout("Parameter", ColumnType.Param, GetColumnSize(ColumnType.Param))),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Sequence", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Class", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
+                    new ColumnLayout("Interface", ColumnType.TypeDefOrRef, GetColumnSize(ColumnType.TypeDefOrRef))),
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.MemberRefParent, GetColumnSize(ColumnType.MemberRefParent)),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Type", ColumnType.Byte),
+                    new ColumnLayout("Padding", ColumnType.Byte),
+                    new ColumnLayout("Parent", ColumnType.HasConstant, GetColumnSize(ColumnType.HasConstant)),
+                    new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)), 
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.HasCustomAttribute, GetColumnSize(ColumnType.HasCustomAttribute)),
+                    new ColumnLayout("Type", ColumnType.CustomAttributeType, GetColumnSize(ColumnType.CustomAttributeType)),
+                    new ColumnLayout("Value", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.HasFieldMarshal, GetColumnSize(ColumnType.HasFieldMarshal)),
+                    new ColumnLayout("NativeType", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Action", ColumnType.UInt16),
+                    new ColumnLayout("Parent", ColumnType.HasDeclSecurity, GetColumnSize(ColumnType.HasDeclSecurity)),
+                    new ColumnLayout("PermissionSet", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("PackingSize", ColumnType.UInt16),
+                    new ColumnLayout("ClassSize", ColumnType.UInt32),
+                    new ColumnLayout("Parent", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef))),
+                new TableLayout(
+                    new ColumnLayout("Offset", ColumnType.UInt32),
+                    new ColumnLayout("Field", ColumnType.TypeDef, GetColumnSize(ColumnType.Field))),
+                new TableLayout(
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
+                    new ColumnLayout("EventList", ColumnType.Event, GetColumnSize(ColumnType.Event))),
+                new TableLayout(
+                    new ColumnLayout("Event", ColumnType.Event, GetColumnSize(ColumnType.Event))),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("EventType", ColumnType.TypeDefOrRef, GetColumnSize(ColumnType.TypeDefOrRef))),
+                new TableLayout(
+                    new ColumnLayout("Parent", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
+                    new ColumnLayout("PropertyList", ColumnType.Event, GetColumnSize(ColumnType.Property))),
+                new TableLayout(
+                    new ColumnLayout("Property", ColumnType.Property, GetColumnSize(ColumnType.Property))),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("PropertyType", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Semantic", ColumnType.UInt16),
+                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.Method)),
+                    new ColumnLayout("Association", ColumnType.HasSemantics, GetColumnSize(ColumnType.HasSemantics))),
+                new TableLayout(
+                    new ColumnLayout("Class", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
+                    new ColumnLayout("MethodBody", ColumnType.MethodDefOrRef, GetColumnSize(ColumnType.MethodDefOrRef)),
+                    new ColumnLayout("MethodDeclaration", ColumnType.MethodDefOrRef, GetColumnSize(ColumnType.MethodDefOrRef))),
+                new TableLayout(
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Signature", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("MappingFlags", ColumnType.UInt16),
+                    new ColumnLayout("MemberForwarded", ColumnType.MemberForwarded, GetColumnSize(ColumnType.MemberForwarded)),
+                    new ColumnLayout("ImportName", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("ImportScope", ColumnType.ModuleRef, GetColumnSize(ColumnType.ModuleRef))),
+                new TableLayout(
+                    new ColumnLayout("RVA", ColumnType.UInt32),
+                    new ColumnLayout("Field", ColumnType.Field, GetColumnSize(ColumnType.Field))),
+                new TableLayout(
+                    new ColumnLayout("Token", ColumnType.UInt32),
+                    new ColumnLayout("FuncCode", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("Token", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("HashAlgId", ColumnType.UInt32),
+                    new ColumnLayout("MajorVersion", ColumnType.UInt16),
+                    new ColumnLayout("MinorVersion", ColumnType.UInt16),
+                    new ColumnLayout("BuildNumber", ColumnType.UInt16),
+                    new ColumnLayout("RevisionNumber", ColumnType.UInt16),
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("PublicKey", ColumnType.Blob, BlobIndexSize),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Culture", ColumnType.String, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Processor", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("PlatformId", ColumnType.UInt32),
+                    new ColumnLayout("MajorVersion", ColumnType.UInt32),
+                    new ColumnLayout("MinorVersion", ColumnType.UInt32)),
+                new TableLayout(
+                    new ColumnLayout("MajorVersion", ColumnType.UInt16),
+                    new ColumnLayout("MinorVersion", ColumnType.UInt16),
+                    new ColumnLayout("BuildNumber", ColumnType.UInt16),
+                    new ColumnLayout("RevisionNumber", ColumnType.UInt16),
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("PublicKeyOrToken", ColumnType.Blob, BlobIndexSize),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Culture", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("HashValue", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Processor", ColumnType.UInt32),
+                    new ColumnLayout("AssemblyRef", ColumnType.AssemblyRef, GetColumnSize(ColumnType.AssemblyRef))),
+                new TableLayout(
+                    new ColumnLayout("PlatformId", ColumnType.UInt32),
+                    new ColumnLayout("MajorVersion", ColumnType.UInt32),
+                    new ColumnLayout("MinorVersion", ColumnType.UInt32),
+                    new ColumnLayout("AssemblyRef", ColumnType.AssemblyRef, GetColumnSize(ColumnType.AssemblyRef))),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("HashValue", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("TypeDefId", ColumnType.UInt32),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Namespace", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Implementation", ColumnType.Implementation, GetColumnSize(ColumnType.Implementation))),
+                new TableLayout(
+                    new ColumnLayout("Offset", ColumnType.UInt32),
+                    new ColumnLayout("Flags", ColumnType.UInt32),
+                    new ColumnLayout("Name", ColumnType.String, StringIndexSize),
+                    new ColumnLayout("Implementation", ColumnType.Implementation, GetColumnSize(ColumnType.Implementation))),
+                new TableLayout(
+                    new ColumnLayout("NestedClass", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef)),
+                    new ColumnLayout("EnclosingClass", ColumnType.TypeDef, GetColumnSize(ColumnType.TypeDef))),
+                new TableLayout(
+                    new ColumnLayout("Number", ColumnType.UInt16),
+                    new ColumnLayout("Flags", ColumnType.UInt16),
+                    new ColumnLayout("Owner", ColumnType.TypeOrMethodDef, GetColumnSize(ColumnType.TypeOrMethodDef)),
+                    new ColumnLayout("EnclosingClass", ColumnType.String, StringIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Method", ColumnType.Method, GetColumnSize(ColumnType.Method)),
+                    new ColumnLayout("Instantiation", ColumnType.Blob, BlobIndexSize)),
+                new TableLayout(
+                    new ColumnLayout("Owner", ColumnType.GenericParam, GetColumnSize(ColumnType.GenericParam)),
+                    new ColumnLayout("Constraint", ColumnType.TypeDefOrRef, GetColumnSize(ColumnType.TypeDefOrRef))),
+            };
+            
+            return result;
+        }
+        
     }
 }
