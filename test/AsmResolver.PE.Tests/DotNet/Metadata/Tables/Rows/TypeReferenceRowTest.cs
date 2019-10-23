@@ -1,3 +1,4 @@
+using System.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -20,6 +21,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
             Assert.Equal(
                 new TypeReferenceRow(0x0006, 0x001E, 0x0177),
                 typeRefTable[typeRefTable.Count - 1]);
+        }
+
+        [Fact]
+        public void WriteRow_SmallResolutionScope_SmallStrings()
+        {
+            RowTestUtils.AssertWriteThenReadIsSame(
+                new TypeReferenceRow(0x0006, 0x00D6, 0x01AE),
+                TypeReferenceRow.FromReader);
         }
         
     }

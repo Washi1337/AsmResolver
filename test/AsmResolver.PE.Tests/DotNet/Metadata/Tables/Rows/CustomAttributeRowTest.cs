@@ -27,6 +27,17 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x00A2),
                 customAttributeTable[customAttributeTable.Count - 1]);
         }
+
+        [Fact]
+        public void WriteRow_SmallHasCA_SmallCAType_SmallBlob()
+        {
+            RowTestUtils.AssertWriteThenReadIsSame(
+                new CustomAttributeRow(
+                    0x002E,
+                    0x000B,
+                    0x0029),
+                CustomAttributeRow.FromReader);
+        }
         
     }
 }

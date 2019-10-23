@@ -21,5 +21,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 new TypeDefinitionRow((TypeAttributes) 0x00100001, 0x016F, 0x013, 0x0031, 0x0001, 0x0001),
                 typeDefTable[typeDefTable.Count - 1]);
         }
+
+        [Fact]
+        public void WriteRow_SmallString_Small_Extends_SmallField_SmallMethod()
+        {
+            RowTestUtils.AssertWriteThenReadIsSame(
+                new TypeDefinitionRow(0, 0x0001, 0x0000, 0x0000, 0x0001, 0x0001),
+                TypeDefinitionRow.FromReader);
+        }
+        
     }
 }

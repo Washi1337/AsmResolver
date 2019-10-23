@@ -27,5 +27,23 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x0000), 
                 assemblyTable[0]);
         }
+
+        [Fact]
+        public void WriteRow_SmallBlob_SmallString()
+        {
+            RowTestUtils.AssertWriteThenReadIsSame(
+                new AssemblyReferenceRow(
+                    0x0004,
+                    0x0000,
+                    0x0000,
+                    0x0000,
+                    0x00000000,
+                    0x001A,
+                    0x000A,
+                    0x0000,
+                    0x0000),
+                AssemblyReferenceRow.FromReader);
+        }
+        
     }
 }

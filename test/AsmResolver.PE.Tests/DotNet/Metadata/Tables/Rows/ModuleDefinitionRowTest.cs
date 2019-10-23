@@ -1,3 +1,4 @@
+using System.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -21,6 +22,17 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x0001,
                     0x0000, 0x0000),
                 moduleTable[0]);
+        }
+
+        [Fact]
+        public void WriteRow_SmallString_SmallGuid()
+        {
+            RowTestUtils.AssertWriteThenReadIsSame(new ModuleDefinitionRow(
+                0x0000,
+                0x0146,
+                0x0001,
+                0x0000, 0x0000),
+                ModuleDefinitionRow.FromReader);
         }
         
     }

@@ -27,5 +27,17 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x0006),
                 memberRefTable[memberRefTable.Count - 1]);
         }
+
+        [Fact]
+        public void WriteRow_SmallMemberRefParent_SmallString_SmallBlob()
+        {
+            RowTestUtils.AssertWriteThenReadIsSame(
+                new MemberReferenceRow(
+                    0x0009,
+                    0x0195,
+                    0x0001),
+                MemberReferenceRow.FromReader);
+        }
+        
     }
 }

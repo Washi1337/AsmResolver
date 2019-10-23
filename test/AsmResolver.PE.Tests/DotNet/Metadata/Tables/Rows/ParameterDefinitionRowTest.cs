@@ -18,5 +18,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 new ParameterDefinitionRow(0x0000, 0x001, 0x01DD),
                 paramTable[0]);
         }
+
+        [Fact]
+        public void WriteRow_SmallString()
+        {
+            RowTestUtils.AssertWriteThenReadIsSame(
+                new ParameterDefinitionRow(0x0000, 0x001, 0x01DD),
+                ParameterDefinitionRow.FromReader);
+        }
+        
     }
 }

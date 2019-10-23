@@ -33,5 +33,19 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x0002),
                 methodTable[1]);
         }
+
+        [Fact]
+        public void WriteRow_SmallString_SmallBlob_SmallParam()
+        {
+            RowTestUtils.AssertWriteThenReadIsSame(new MethodDefinitionRow(
+                    0x00002050,
+                    0x0000,
+                    (MethodAttributes) 0x0091,
+                    0x017E,
+                    0x0023,
+                    0x0001),
+                MethodDefinitionRow.FromReader);
+        }
+        
     }
 }
