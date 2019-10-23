@@ -22,6 +22,6 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x0000, 0x0000),
                 moduleTable[0]);
         }
-
+        
     }
 }
