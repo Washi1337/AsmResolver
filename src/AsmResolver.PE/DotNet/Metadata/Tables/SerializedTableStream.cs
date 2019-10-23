@@ -28,7 +28,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
         private readonly uint[] _rowCounts;
-        private readonly TableLayout[] _layouts;
         private readonly IndexSize[] _indexSizes;
         private readonly uint _headerSize;
 
@@ -58,7 +57,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _headerSize = reader.FileOffset - reader.StartPosition;
 
             _indexSizes = InitializeIndexSizes();
-            _layouts = InitializeTableLayouts();
         }
 
         public override bool CanRead => true;
@@ -224,7 +222,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private IBinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref uint currentOffset)
         {
             int index = (int) currentIndex;
-            uint rawSize = _layouts[index].RowSize * _rowCounts[index];
+            uint rawSize = TableLayouts[index].RowSize * _rowCounts[index];
             var tableReader = _contents.CreateReader(currentOffset, rawSize);
             currentOffset += rawSize;
             return tableReader;
@@ -237,7 +235,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             where TRow : struct, IMetadataRow
         {
             return new SerializedMetadataTable<TRow>(
-                CreateNextRawTableReader(index, ref offset), _layouts[(int) index], readRow);
+                CreateNextRawTableReader(index, ref offset), TableLayouts[(int) index], readRow);
         }
         
     }

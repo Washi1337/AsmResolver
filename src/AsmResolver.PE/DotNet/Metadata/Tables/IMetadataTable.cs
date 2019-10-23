@@ -10,6 +10,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     public interface IMetadataTable : ICollection
     {
         /// <summary>
+        /// Gets the layout of the table.
+        /// </summary>
+        TableLayout Layout
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Gets or sets the row at the provided index.
         /// </summary>
         /// <param name="index">The index of the row to get.</param>
@@ -19,6 +27,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             get;
             set;
         }
-        
+
+        /// <summary>
+        /// Updates the table layout.
+        /// </summary>
+        /// <param name="layout">The new table layout.</param>
+        /// <remarks>
+        /// This method is used to update the sizes of each column, and therefore requires the new layout to have the
+        /// same names and column types as the original one.
+        /// </remarks>
+        void UpdateTableLayout(TableLayout layout);
     }
 }

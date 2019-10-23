@@ -10,15 +10,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public delegate TRow ReadRowDelegate(IBinaryStreamReader reader, TableLayout layout);
 
         private readonly IBinaryStreamReader _reader;
-        private readonly TableLayout _layout;
+        private readonly TableLayout _originalLayout;
         private readonly int _rowCount;
         private readonly ReadRowDelegate _readRow;
 
-        public SerializedMetadataTable(IBinaryStreamReader reader, TableLayout layout, ReadRowDelegate readRow)
+        public SerializedMetadataTable(IBinaryStreamReader reader, TableLayout originalLayout, ReadRowDelegate readRow)
+            : base(originalLayout)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
-            _layout = layout ?? throw new ArgumentNullException(nameof(layout));
-            _rowCount = (int) (reader.Length / layout.RowSize);
+            _originalLayout = originalLayout;
+            _rowCount = (int) (reader.Length / originalLayout.RowSize);
             _readRow = readRow ?? throw new ArgumentNullException(nameof(readRow));
         }
 
@@ -31,7 +32,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             var result = new List<TRow>();
 
             for (int i = 0; i < _rowCount; i++) 
-                result.Add(_readRow(_reader, _layout));
+                result.Add(_readRow(_reader, _originalLayout));
 
             return result;
         }

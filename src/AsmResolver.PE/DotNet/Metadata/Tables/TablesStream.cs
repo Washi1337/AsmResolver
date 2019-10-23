@@ -36,9 +36,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
         private readonly LazyVariable<IList<IMetadataTable>> _tables;
-        
+        private readonly LazyVariable<IList<TableLayout>> _layouts;
+
         public TablesStream()
         {
+            _layouts = new LazyVariable<IList<TableLayout>>(GetTableLayouts);
             _tables = new LazyVariable<IList<IMetadataTable>>(GetTables);
         }
 
@@ -198,6 +200,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </remarks>
         protected IList<IMetadataTable> Tables => _tables.Value;
 
+        protected IList<TableLayout> TableLayouts => _layouts.Value;
+        
         /// <inheritdoc />
         public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
 
@@ -210,52 +214,54 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </remarks>
         protected virtual IList<IMetadataTable> GetTables()
         {
+            var layouts = TableLayouts;
             return new IMetadataTable[]
             {
-                new MetadataTable<ModuleDefinitionRow>(), 
-                new MetadataTable<TypeReferenceRow>(), 
-                new MetadataTable<TypeDefinitionRow>(), 
-                new MetadataTable<FieldPointerRow>(), 
-                new MetadataTable<FieldDefinitionRow>(), 
-                new MetadataTable<MethodPointerRow>(), 
-                new MetadataTable<MethodDefinitionRow>(), 
-                new MetadataTable<ParameterPointerRow>(), 
-                new MetadataTable<ParameterDefinitionRow>(), 
-                new MetadataTable<InterfaceImplementationRow>(), 
-                new MetadataTable<MemberReferenceRow>(), 
-                new MetadataTable<ConstantRow>(), 
-                new MetadataTable<CustomAttributeRow>(), 
-                new MetadataTable<FieldMarshalRow>(), 
-                new MetadataTable<SecurityDeclarationRow>(), 
-                new MetadataTable<ClassLayoutRow>(), 
-                new MetadataTable<FieldLayoutRow>(), 
-                new MetadataTable<StandAloneSignatureRow>(), 
-                new MetadataTable<EventMapRow>(), 
-                new MetadataTable<EventDefinitionRow>(), 
-                new MetadataTable<PropertyMapRow>(), 
-                new MetadataTable<PropertyPointerRow>(), 
-                new MetadataTable<PropertyDefinitionRow>(), 
-                new MetadataTable<MethodSemanticsRow>(), 
-                new MetadataTable<MethodImplementationRow>(), 
-                new MetadataTable<ModuleReferenceRow>(), 
-                new MetadataTable<TypeSpecificationRow>(), 
-                new MetadataTable<ImplementationMapRow>(), 
-                new MetadataTable<FieldRvaRow>(), 
-                new MetadataTable<EncLogRow>(), 
-                new MetadataTable<EncMapRow>(), 
-                new MetadataTable<AssemblyDefinitionRow>(), 
-                new MetadataTable<AssemblyProcessorRow>(), 
-                new MetadataTable<AssemblyOSRow>(), 
-                new MetadataTable<AssemblyReferenceRow>(), 
-                new MetadataTable<AssemblyRefProcessorRow>(), 
-                new MetadataTable<AssemblyRefOSRow>(), 
-                new MetadataTable<FileReferenceRow>(), 
-                new MetadataTable<ExportedTypeRow>(), 
-                new MetadataTable<ManifestResourceRow>(), 
-                new MetadataTable<NestedClassRow>(), 
-                new MetadataTable<GenericParameterRow>(), 
-                new MetadataTable<MethodSpecificationRow>(), 
-                new MetadataTable<GenericParameterConstraintRow>(), 
+                new MetadataTable<ModuleDefinitionRow>(layouts[0]), 
+                new MetadataTable<TypeReferenceRow>(layouts[1]), 
+                new MetadataTable<TypeDefinitionRow>(layouts[2]), 
+                new MetadataTable<FieldPointerRow>(layouts[3]), 
+                new MetadataTable<FieldDefinitionRow>(layouts[4]), 
+                new MetadataTable<MethodPointerRow>(layouts[5]), 
+                new MetadataTable<MethodDefinitionRow>(layouts[6]), 
+                new MetadataTable<ParameterPointerRow>(layouts[7]), 
+                new MetadataTable<ParameterDefinitionRow>(layouts[8]), 
+                new MetadataTable<InterfaceImplementationRow>(layouts[9]), 
+                new MetadataTable<MemberReferenceRow>(layouts[10]), 
+                new MetadataTable<ConstantRow>(layouts[11]), 
+                new MetadataTable<CustomAttributeRow>(layouts[12]), 
+                new MetadataTable<FieldMarshalRow>(layouts[13]), 
+                new MetadataTable<SecurityDeclarationRow>(layouts[14]), 
+                new MetadataTable<ClassLayoutRow>(layouts[15]), 
+                new MetadataTable<FieldLayoutRow>(layouts[16]), 
+                new MetadataTable<StandAloneSignatureRow>(layouts[17]), 
+                new MetadataTable<EventMapRow>(layouts[18]), 
+                new MetadataTable<EventPointerRow>(layouts[19]),
+                new MetadataTable<EventDefinitionRow>(layouts[20]), 
+                new MetadataTable<PropertyMapRow>(layouts[21]), 
+                new MetadataTable<PropertyPointerRow>(layouts[22]), 
+                new MetadataTable<PropertyDefinitionRow>(layouts[23]), 
+                new MetadataTable<MethodSemanticsRow>(layouts[24]), 
+                new MetadataTable<MethodImplementationRow>(layouts[25]), 
+                new MetadataTable<ModuleReferenceRow>(layouts[26]), 
+                new MetadataTable<TypeSpecificationRow>(layouts[27]), 
+                new MetadataTable<ImplementationMapRow>(layouts[28]), 
+                new MetadataTable<FieldRvaRow>(layouts[29]), 
+                new MetadataTable<EncLogRow>(layouts[30]), 
+                new MetadataTable<EncMapRow>(layouts[31]), 
+                new MetadataTable<AssemblyDefinitionRow>(layouts[32]), 
+                new MetadataTable<AssemblyProcessorRow>(layouts[33]), 
+                new MetadataTable<AssemblyOSRow>(layouts[34]), 
+                new MetadataTable<AssemblyReferenceRow>(layouts[35]), 
+                new MetadataTable<AssemblyRefProcessorRow>(layouts[36]), 
+                new MetadataTable<AssemblyRefOSRow>(layouts[37]), 
+                new MetadataTable<FileReferenceRow>(layouts[38]), 
+                new MetadataTable<ExportedTypeRow>(layouts[39]), 
+                new MetadataTable<ManifestResourceRow>(layouts[40]),
+                new MetadataTable<NestedClassRow>(layouts[41]), 
+                new MetadataTable<GenericParameterRow>(layouts[42]), 
+                new MetadataTable<MethodSpecificationRow>(layouts[43]), 
+                new MetadataTable<GenericParameterConstraintRow>(layouts[44]), 
             };
         }
 
@@ -290,7 +296,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return IndexSize.Long;
         }
 
-        protected TableLayout[] InitializeTableLayouts()
+        protected TableLayout[] GetTableLayouts()
         {
             var result = new[]
             {

@@ -17,11 +17,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     {
         private IList<TRow> _items;
 
-        /// <summary>
-        /// Gets or sets the row at the provided index.
-        /// </summary>
-        /// <param name="index">The index of the row to get.</param>
-        /// <exception cref="IndexOutOfRangeException">Occurs when the index is too small or too large for this table.</exception>
+        public MetadataTable(TableLayout layout)
+        {
+            Layout = layout ?? throw new ArgumentNullException(nameof(layout));
+        }
+        
+        /// <inheritdoc />
+        public TableLayout Layout
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc cref="IMetadataTable" />
         public TRow this[int index]
         {
             get => Rows[index];
@@ -105,6 +113,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected virtual IList<TRow> GetRows()
         {
             return new List<TRow>();
+        }
+
+        /// <inheritdoc />
+        public virtual void UpdateTableLayout(TableLayout layout)
+        {
+            for (int i = 0; i < Layout.Columns.Length; i++)
+            {
+                if (Layout.Columns[i].Name != layout.Columns[i].Name
+                    || Layout.Columns[i].Type != layout.Columns[i].Type)
+                {
+                    throw new ArgumentException("New table layout does not match the original one.");
+                }
+            }
+
+            Layout = layout;
         }
 
     }
