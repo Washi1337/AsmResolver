@@ -37,5 +37,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// same names and column types as the original one.
         /// </remarks>
         void UpdateTableLayout(TableLayout layout);
+
+        /// <summary>
+        /// Serializes the table to an output stream, according to the table layout provided in <see cref="Layout" />.
+        /// </summary>
+        /// <param name="writer">The output stream to write to.</param>
+        void Write(IBinaryStreamWriter writer);
     }
 }

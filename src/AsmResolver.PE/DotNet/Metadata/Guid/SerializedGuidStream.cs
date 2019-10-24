@@ -40,6 +40,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
             return _contents.CreateReader();
         }
 
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            _contents.Write(writer);
+        }
+
         public override System.Guid GetGuidByIndex(uint index)
         {
             index--;

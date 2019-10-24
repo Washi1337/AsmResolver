@@ -130,5 +130,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Layout = layout;
         }
 
+        /// <inheritdoc />
+        public void Write(IBinaryStreamWriter writer)
+        {
+            foreach (var row in Rows) 
+                row.Write(writer, Layout);
+        }
+        
     }
 }

@@ -46,6 +46,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         /// <inheritdoc />
         public abstract IBinaryStreamReader CreateReader();
 
+        /// <inheritdoc />
+        public abstract void Write(IBinaryStreamWriter writer);
+
         /// <summary>
         /// Gets a GUID by its GUID index.
         /// </summary>

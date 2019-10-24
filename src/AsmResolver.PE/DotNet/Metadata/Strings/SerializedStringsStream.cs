@@ -43,6 +43,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
             return _contents.CreateReader();
         }
 
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            _contents.Write(writer);
+        }
+
         public override string GetStringByIndex(uint index)
         {
             if (index == 0)

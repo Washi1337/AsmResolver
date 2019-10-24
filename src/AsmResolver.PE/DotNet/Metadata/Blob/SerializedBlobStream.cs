@@ -40,6 +40,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
             return _contents.CreateReader();
         }
 
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            _contents.Write(writer);
+        }
+
         public override byte[] GetBlobByIndex(uint index)
         {
             return GetBlobReaderByIndex(index)?.ReadToEnd();

@@ -46,6 +46,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <inheritdoc />
         public abstract IBinaryStreamReader CreateReader();
 
+        /// <inheritdoc />
+        public abstract void Write(IBinaryStreamWriter writer);
+
         /// <summary>
         /// Gets a blob by its blob index.
         /// </summary>

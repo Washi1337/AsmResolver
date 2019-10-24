@@ -46,6 +46,12 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         }
 
         /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            _contents.Write(writer);
+        }
+
+        /// <inheritdoc />
         public override string GetStringByIndex(uint index)
         {
             if (!_cachedStrings.TryGetValue(index, out string value) && index < _contents.GetPhysicalSize())
@@ -68,6 +74,5 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
 
             return value;
         }
-
     }
 }

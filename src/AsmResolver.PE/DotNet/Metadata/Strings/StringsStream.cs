@@ -46,6 +46,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <inheritdoc />
         public abstract IBinaryStreamReader CreateReader();
 
+        /// <inheritdoc />
+        public abstract void Write(IBinaryStreamWriter writer);
+
         /// <summary>
         /// Gets a string by its string index.
         /// </summary>

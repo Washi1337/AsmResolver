@@ -47,7 +47,11 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <returns>The reader.</returns>
         /// <exception cref="InvalidOperationException">Occurs when <see cref="CanRead"/> is <c>false</c>.</exception>
         IBinaryStreamReader CreateReader();
+
+        /// <summary>
+        /// Serializes the metadata stream to an output stream buffer.
+        /// </summary>
+        /// <param name="writer">The output stream to write to.</param>
+        void Write(IBinaryStreamWriter writer);
     }
-    
-    
 }

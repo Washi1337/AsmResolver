@@ -52,6 +52,11 @@ namespace AsmResolver.PE.DotNet.Metadata
                 throw new InvalidOperationException("Contents of the metadata stream is not readable.");
             return ((IReadableSegment) Contents).CreateReader();
         }
+
+        public void Write(IBinaryStreamWriter writer)
+        {
+            Contents.Write(writer);
+        }
         
     }
 }

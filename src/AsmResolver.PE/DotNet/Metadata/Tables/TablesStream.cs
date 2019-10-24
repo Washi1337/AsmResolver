@@ -205,6 +205,75 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
 
+        /// <inheritdoc />
+        public virtual void Write(IBinaryStreamWriter writer)
+        {
+            writer.WriteUInt32(Reserved);
+            writer.WriteByte(MajorVersion);
+            writer.WriteByte(MinorVersion);
+            writer.WriteByte((byte) Flags);
+            writer.WriteByte(Log2LargestRid);
+            ulong validBitmask = ComputeValidBitmask();
+            writer.WriteUInt64(validBitmask);
+            writer.WriteUInt64(ComputeSortedBitmask());
+
+            WriteRowCounts(writer, validBitmask);
+
+            if (HasExtraData)
+                writer.WriteUInt32(ExtraData);
+
+            WriteTables(writer, validBitmask);
+        }
+
+        protected virtual ulong ComputeValidBitmask()
+        {
+            // TODO: make more configurable (maybe add IMetadataTable.IsPresent property?).
+            
+            ulong result = 0;
+            for (int i = 0; i < Tables.Count; i++)
+            {
+                if (Tables[i].Count > 0)
+                    result |= 1UL << i;
+            }
+            
+            return result;
+        }
+
+        protected virtual ulong ComputeSortedBitmask()
+        {
+            // TODO: make more configurable (maybe add IMetadataTable.IsSorted property?).
+            
+            return 0x000016003301FA00;
+        }
+
+        protected virtual void WriteRowCounts(IBinaryStreamWriter writer, ulong validBitmask)
+        {
+            for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
+            {
+                if (HasTable(validBitmask, i))
+                    writer.WriteInt32(GetTable(i).Count);
+            }
+        }
+
+        protected virtual void WriteTables(IBinaryStreamWriter writer, ulong validBitmask)
+        {
+            for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
+            {
+                if (HasTable(validBitmask, i))
+                    GetTable(i).Write(writer);
+            }
+        }
+
+        protected static bool HasTable(ulong validMask, TableIndex table)
+        {
+            return ((validMask >> (int) table) & 1) != 0;
+        }
+
+        protected static bool IsSorted(ulong sortedMask, TableIndex table)
+        {
+            return ((sortedMask >> (int) table) & 1) != 0;
+        }
+
         /// <summary>
         /// Obtains the collection of tables in the tables stream.
         /// </summary>

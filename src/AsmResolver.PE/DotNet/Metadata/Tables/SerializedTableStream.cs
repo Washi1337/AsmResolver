@@ -66,23 +66,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return _contents.CreateReader();
         }
 
-        protected bool HasTable(TableIndex table)
-        {
-            return ((_validMask >> (int) table) & 1) != 0;
-        }
-
-        protected bool IsSorted(TableIndex table)
-        {
-            return ((_sortedMask >> (int) table) & 1) != 0;
-        }
-
         private uint[] ReadRowCounts(IBinaryStreamReader reader)
         {
             const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
             
             var result = new uint[(int) maxTableIndex + 1 ];
             for (TableIndex i = 0; i <= maxTableIndex; i++)
-                result[(int) i] = HasTable(i) ? reader.ReadUInt32() : 0;
+                result[(int) i] = HasTable(_validMask, i) ? reader.ReadUInt32() : 0;
 
             return result;
         }
