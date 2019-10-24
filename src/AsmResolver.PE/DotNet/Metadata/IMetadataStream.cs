@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// <summary>
     /// Represents a single metadata stream in the metadata directory of a managed executable file.
     /// </summary>
-    public interface IMetadataStream
+    public interface IMetadataStream : ISegment
     {
         /// <summary>
         /// Gets or sets the name of the metadata stream.
@@ -47,11 +47,5 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <returns>The reader.</returns>
         /// <exception cref="InvalidOperationException">Occurs when <see cref="CanRead"/> is <c>false</c>.</exception>
         IBinaryStreamReader CreateReader();
-
-        /// <summary>
-        /// Serializes the metadata stream to an output stream buffer.
-        /// </summary>
-        /// <param name="writer">The output stream to write to.</param>
-        void Write(IBinaryStreamWriter writer);
     }
 }

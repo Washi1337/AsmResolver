@@ -1,4 +1,6 @@
+using System.IO;
 using System.Linq;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -88,6 +90,38 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             Assert.NotNull(stream);
             Assert.IsAssignableFrom<TablesStream>(stream);
         }
+
+        [Fact]
+        public void PreserveMetadataNoChange()
+        {
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var metadata = peImage.DotNetDirectory.Metadata;
+
+            using var tempStream = new MemoryStream();
+            metadata.Write(new BinaryStreamWriter(tempStream));
+
+            var newMetadata = new SerializedMetadata(new ByteArrayReader(tempStream.ToArray())); 
+            
+            Assert.Equal(metadata.MajorVersion, newMetadata.MajorVersion);
+            Assert.Equal(metadata.MinorVersion, newMetadata.MinorVersion);
+            Assert.Equal(metadata.Reserved, newMetadata.Reserved);
+            Assert.Equal(metadata.VersionString, newMetadata.VersionString);
+            Assert.Equal(metadata.Flags, newMetadata.Flags);
+            
+            Assert.Equal(metadata.Streams.Count, newMetadata.Streams.Count);
+            for (int i = 0; i < metadata.Streams.Count; i++)
+            {
+                var oldStream = metadata.Streams[i];
+                var newStream = newMetadata.Streams[i];
+                
+                Assert.Equal(oldStream.Name, newStream.Name);
+                var oldData = oldStream.CreateReader().ReadToEnd();
+                var newData = newStream.CreateReader().ReadToEnd();
+                Assert.Equal(oldData, newData);
+
+            }
+        }
+        
         
     }
 }

@@ -23,28 +23,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
     {
         private readonly IReadableSegment _contents;
 
-        public SerializedGuidStream(byte[] rawData)
-            : this(new DataSegment(rawData))
+        public SerializedGuidStream(string name, byte[] rawData)
+            : this(name, new DataSegment(rawData))
         {
         }
 
-        public SerializedGuidStream(IReadableSegment contents)
+        public SerializedGuidStream(string name, IReadableSegment contents)
+            : base(name)
         {
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
+        /// <inheritdoc />
         public override bool CanRead => true;
 
-        public override IBinaryStreamReader CreateReader()
-        {
-            return _contents.CreateReader();
-        }
+        /// <inheritdoc />
+        public override IBinaryStreamReader CreateReader() => _contents.CreateReader();
 
-        public override void Write(IBinaryStreamWriter writer)
-        {
-            _contents.Write(writer);
-        }
+        /// <inheritdoc />
+        public override uint GetPhysicalSize() => _contents.GetPhysicalSize();
 
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer) => _contents.Write(writer);
+
+        /// <inheritdoc />
         public override System.Guid GetGuidByIndex(uint index)
         {
             index--;

@@ -23,33 +23,33 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
     {
         private readonly IReadableSegment _contents;
 
-        public SerializedBlobStream(byte[] rawData)
-            : this(new DataSegment(rawData))
+        public SerializedBlobStream(string name, byte[] rawData)
+            : this(name, new DataSegment(rawData))
         {
         }
 
-        public SerializedBlobStream(IReadableSegment contents)
+        public SerializedBlobStream(string name, IReadableSegment contents)
+            : base(name)
         {
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
+        /// <inheritdoc />
         public override bool CanRead => true;
 
-        public override IBinaryStreamReader CreateReader()
-        {
-            return _contents.CreateReader();
-        }
+        /// <inheritdoc />
+        public override IBinaryStreamReader CreateReader() => _contents.CreateReader();
 
-        public override void Write(IBinaryStreamWriter writer)
-        {
-            _contents.Write(writer);
-        }
+        /// <inheritdoc />
+        public override uint GetPhysicalSize() => _contents.GetPhysicalSize();
 
-        public override byte[] GetBlobByIndex(uint index)
-        {
-            return GetBlobReaderByIndex(index)?.ReadToEnd();
-        }
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer) => _contents.Write(writer);
 
+        /// <inheritdoc />
+        public override byte[] GetBlobByIndex(uint index) => GetBlobReaderByIndex(index)?.ReadToEnd();
+
+        /// <inheritdoc />
         public override IBinaryStreamReader GetBlobReaderByIndex(uint index)
         {
             if (index >= _contents.GetPhysicalSize()) 

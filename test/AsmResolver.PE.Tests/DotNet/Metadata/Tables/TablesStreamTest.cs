@@ -26,7 +26,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         }
 
         [Fact]
-        public void PreserveTableStream()
+        public void PreserveTableStreamNoChange()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             var tablesStream = (TablesStream) peImage.DotNetDirectory.Metadata.GetStream(TablesStream.CompressedStreamName);
@@ -34,7 +34,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
             using var tempStream = new MemoryStream();
             tablesStream.Write(new BinaryStreamWriter(tempStream));
 
-            var newTablesStream = new SerializedTableStream(tempStream.ToArray());
+            var newTablesStream = new SerializedTableStream(tablesStream.Name, tempStream.ToArray());
             
             Assert.Equal(tablesStream.Reserved, newTablesStream.Reserved);
             Assert.Equal(tablesStream.MajorVersion, newTablesStream.MajorVersion);

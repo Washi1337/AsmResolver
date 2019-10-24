@@ -26,28 +26,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
     /// blob heap provides, is that any blob index in the tables stream is the start address (relative to the start of
     /// the blob stream) of a blob signature that is prefixed by a length.
     /// </remarks>
-    public abstract class BlobStream : IMetadataStream
+    public abstract class BlobStream : MetadataHeap
     {
         public const string DefaultName = "#Blob";
 
-        /// <inheritdoc />
-        public string Name
+        protected BlobStream()
+            : base(DefaultName)
         {
-            get;
-            set;
-        } = DefaultName;
-
-        /// <inheritdoc />
-        public abstract bool CanRead
-        {
-            get;
         }
 
-        /// <inheritdoc />
-        public abstract IBinaryStreamReader CreateReader();
-
-        /// <inheritdoc />
-        public abstract void Write(IBinaryStreamWriter writer);
+        protected BlobStream(string name)
+            : base(name)
+        {
+        }
 
         /// <summary>
         /// Gets a blob by its blob index.

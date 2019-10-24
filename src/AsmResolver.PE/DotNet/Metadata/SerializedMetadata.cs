@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -28,10 +27,8 @@ namespace AsmResolver.PE.DotNet.Metadata
         private readonly IBinaryStreamReader _streamContentsReader;
         private readonly int _numberOfStreams;
 
-        public SerializedMetadata(PEFile peFile, IBinaryStreamReader reader)
+        public SerializedMetadata(IBinaryStreamReader reader)
         {
-            if (peFile == null) 
-                throw new ArgumentNullException(nameof(peFile));
             if (reader == null) 
                 throw new ArgumentNullException(nameof(reader));
 
@@ -55,7 +52,7 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             int versionLength = reader.ReadInt32();
             if (!reader.CanRead(versionLength))
-                throw new BadImageFormatException("Invalid version length in metadata header.");
+                throw new BadImageFormatException($"Invalid version length in metadata header ({versionLength} characters).");
 
             var versionBytes = new byte[versionLength];
             reader.ReadBytes(versionBytes, 0, versionBytes.Length);

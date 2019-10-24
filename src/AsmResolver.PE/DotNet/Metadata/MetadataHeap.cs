@@ -19,25 +19,30 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
-    public class CustomMetadataStream : IMetadataStream
+    /// <summary>
+    /// Provides a base implementation of a metadata heap. 
+    /// </summary>
+    public abstract class MetadataHeap : IMetadataStream
     {
-        public CustomMetadataStream(string name, byte[] data)
-            : this(name, new DataSegment(data))
+        protected MetadataHeap(string name)
         {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
         }
-
-        public CustomMetadataStream(string name, ISegment contents)
-        {
-            Name = name;
-            Contents = contents;
-        }
-
-        /// <inheritdoc />
-        public uint FileOffset => Contents.FileOffset;
-
-        /// <inheritdoc />
-        public uint Rva => Contents.Rva;
         
+        /// <inheritdoc />
+        public uint FileOffset
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc />
+        public uint Rva
+        {
+            get;
+            private set;
+        }
+
         /// <inheritdoc />
         public string Name
         {
@@ -46,32 +51,26 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public bool CanRead => Contents is IReadableSegment;
+        public virtual bool CanRead => false;
 
-        public ISegment Contents
+        /// <inheritdoc />
+        public virtual void UpdateOffsets(uint newFileOffset, uint newRva)
         {
-            get;
-            set;
+            FileOffset = newFileOffset;
+            Rva = newRva;
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader()
-        {
-            if (!CanRead)
-                throw new InvalidOperationException("Contents of the metadata stream is not readable.");
-            return ((IReadableSegment) Contents).CreateReader();
-        }
-
-        /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva) => Contents.UpdateOffsets(newFileOffset, newRva);
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize() => Contents.GetPhysicalSize();
+        public abstract uint GetPhysicalSize();
 
         /// <inheritdoc />
         public uint GetVirtualSize() => GetPhysicalSize();
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => Contents.Write(writer);
+        public abstract void Write(IBinaryStreamWriter writer);
+        
+        /// <inheritdoc />
+        public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
+        
     }
 }

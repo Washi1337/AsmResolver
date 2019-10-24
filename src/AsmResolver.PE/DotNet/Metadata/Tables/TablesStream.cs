@@ -45,6 +45,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
+        public uint FileOffset
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc />
+        public uint Rva
+        {
+            get;
+            private set;
+        }
+        
+        /// <inheritdoc />
         public string Name
         {
             get;
@@ -206,6 +220,29 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
 
         /// <inheritdoc />
+        public void UpdateOffsets(uint newFileOffset, uint newRva)
+        {
+            FileOffset = newFileOffset;
+            Rva = newRva;
+        }
+
+        /// <inheritdoc />
+        public uint GetPhysicalSize()
+        {
+            ulong validBitmask = ComputeValidBitmask();
+            return (uint) (sizeof(uint)
+                           + 4 * sizeof(byte)
+                           + sizeof(ulong)
+                           + sizeof(ulong)
+                           + GetTablesCount(validBitmask) * sizeof(uint)
+                           + (HasExtraData ? sizeof(ulong) : 0)
+                           + GetTablesSize(validBitmask))
+                           + sizeof(uint);
+        }
+
+        public uint GetVirtualSize() => GetPhysicalSize();
+
+        /// <inheritdoc />
         public virtual void Write(IBinaryStreamWriter writer)
         {
             writer.WriteUInt32(Reserved);
@@ -223,6 +260,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 writer.WriteUInt32(ExtraData);
 
             WriteTables(writer, validBitmask);
+
+            writer.WriteUInt32(0);
         }
 
         protected virtual ulong ComputeValidBitmask()
@@ -246,6 +285,33 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return 0x000016003301FA00;
         }
 
+        protected virtual int GetTablesCount(ulong validBitmask)
+        {
+            int count = 0;
+            for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
+            {
+                if (HasTable(validBitmask, i))
+                    count++;
+            }
+
+            return count;
+        }
+
+        protected virtual uint GetTablesSize(ulong validBitmask)
+        {
+            long size = 0;
+            for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
+            {
+                if (HasTable(validBitmask, i))
+                {
+                    var table = GetTable(i);
+                    size += table.Count * table.Layout.RowSize;
+                }
+            }
+
+            return (uint) size;
+        }
+        
         protected virtual void WriteRowCounts(IBinaryStreamWriter writer, ulong validBitmask)
         {
             for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)

@@ -26,29 +26,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
     /// GUID heap provides, is that any blob index in the tables stream is the start address (relative to the start of
     /// the GUID stream) of a GUID.
     /// </remarks>
-    public abstract class GuidStream : IMetadataStream
+    public abstract class GuidStream : MetadataHeap
     {
         public const string DefaultName = "#GUID";
 
-        /// <inheritdoc />
-        public string Name
+        protected GuidStream()
+            : base(DefaultName)
         {
-            get;
-            set;
-        } = DefaultName;
-
-        /// <inheritdoc />
-        public abstract bool CanRead
-        {
-            get;
         }
 
-        /// <inheritdoc />
-        public abstract IBinaryStreamReader CreateReader();
-
-        /// <inheritdoc />
-        public abstract void Write(IBinaryStreamWriter writer);
-
+        protected GuidStream(string name)
+            : base(name)
+        {
+        }
+        
         /// <summary>
         /// Gets a GUID by its GUID index.
         /// </summary>

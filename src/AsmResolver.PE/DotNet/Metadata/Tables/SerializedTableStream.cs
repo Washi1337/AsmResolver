@@ -30,14 +30,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly uint[] _rowCounts;
         private readonly IndexSize[] _indexSizes;
         private readonly uint _headerSize;
-
-        public SerializedTableStream(byte[] rawData)
-            : this(new DataSegment(rawData))
+        
+        public SerializedTableStream(string name, byte[] rawData)
+            : this(name, new DataSegment(rawData))
         {
         }
 
-        public SerializedTableStream(IReadableSegment contents)
+        public SerializedTableStream(string name, IReadableSegment contents)
         {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
 
             var reader = contents.CreateReader();

@@ -26,28 +26,19 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
     /// strings heap provides, is that any string index in a CIL method body is the start address (relative to the start
     /// of the #US stream) of a unicode string, prefixed by a length, and suffixed by one extra terminator byte.
     /// </remarks>
-    public abstract class UserStringsStream : IMetadataStream
+    public abstract class UserStringsStream : MetadataHeap
     {
         public const string DefaultName = "#US";
 
-        /// <inheritdoc />
-        public string Name
+        protected UserStringsStream()
+            : base(DefaultName)
         {
-            get;
-            set;
-        } = DefaultName;
-
-        /// <inheritdoc />
-        public abstract bool CanRead
-        {
-            get;
         }
 
-        /// <inheritdoc />
-        public abstract IBinaryStreamReader CreateReader();
-
-        /// <inheritdoc />
-        public abstract void Write(IBinaryStreamWriter writer);
+        protected UserStringsStream(string name)
+            : base(name)
+        {
+        }
 
         /// <summary>
         /// Gets a string by its string index.

@@ -26,29 +26,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
     /// strings heap provides, is that any string index in the tables stream is the start address (relative to the
     /// start of the strings stream) of a UTF-8 string that is zero terminated.
     /// </remarks>
-    public abstract class StringsStream : IMetadataStream
+    public abstract class StringsStream : MetadataHeap
     {
         public const string DefaultName = "#Strings";
 
-        /// <inheritdoc />
-        public string Name
+        protected StringsStream()
+            : base(DefaultName)
         {
-            get;
-            set;
-        } = DefaultName;
-
-        /// <inheritdoc />
-        public abstract bool CanRead
-        {
-            get;
         }
 
-        /// <inheritdoc />
-        public abstract IBinaryStreamReader CreateReader();
-
-        /// <inheritdoc />
-        public abstract void Write(IBinaryStreamWriter writer);
-
+        protected StringsStream(string name)
+            : base(name)
+        {
+        }
+        
         /// <summary>
         /// Gets a string by its string index.
         /// </summary>

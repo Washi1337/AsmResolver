@@ -23,7 +23,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// Represents a data directory containing metadata for a managed executable, including fields from the metadata
     /// header, as well as the streams containing metadata tables and blob signatures. 
     /// </summary>
-    public interface IMetadata
+    public interface IMetadata : ISegment
     {
         /// <summary>
         /// Gets or sets the major version of the metadata directory format. 
