@@ -5,7 +5,7 @@
         <LangVersion>8</LangVersion>
         <PackageVersion>4.0.0</PackageVersion>
     </PropertyGroup>
-
+    
     <ItemGroup>
       <ProjectReference Include="..\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
     </ItemGroup>
