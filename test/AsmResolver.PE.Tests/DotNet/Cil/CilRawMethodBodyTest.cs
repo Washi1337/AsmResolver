@@ -14,6 +14,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
             var peImage = new SerializedPEImage(peFile);
             var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            
             var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
 
             var reader = peFile.CreateReaderAtRva(methodTable[0].Rva);

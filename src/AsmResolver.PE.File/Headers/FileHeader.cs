@@ -108,7 +108,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        uint ISegment.Rva => FileOffset;
+        uint IFileOffsetProvider.Rva => FileOffset;
 
         /// <inheritdoc />
         public void UpdateOffsets(uint newFileOffset, uint newRva)

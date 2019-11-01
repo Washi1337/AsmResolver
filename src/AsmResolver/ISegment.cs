@@ -20,24 +20,8 @@ namespace AsmResolver
     /// <summary>
     /// Represents a single chunk of data residing in a file or memory space.
     /// </summary>
-    public interface ISegment
+    public interface ISegment : IFileOffsetProvider
     {
-        /// <summary>
-        /// Gets the physical starting offset of the segment.
-        /// </summary>
-        uint FileOffset
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the virtual address relative to the beginning of the section that the segment is located in. 
-        /// </summary>
-        uint Rva
-        {
-            get;
-        }
-
         /// <summary>
         /// Assigns a new file and virtual offset to the segment and all its sub-components.
         /// </summary>

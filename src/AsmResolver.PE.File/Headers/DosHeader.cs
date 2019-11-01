@@ -103,10 +103,10 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        uint ISegment.FileOffset => 0;
+        uint IFileOffsetProvider.FileOffset => 0;
 
         /// <inheritdoc />
-        uint ISegment.Rva => 0;
+        uint IFileOffsetProvider.Rva => 0;
 
         /// <inheritdoc />
         void ISegment.UpdateOffsets(uint newFileOffset, uint newRva)
