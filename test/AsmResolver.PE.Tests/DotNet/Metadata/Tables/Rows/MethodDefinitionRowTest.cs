@@ -16,7 +16,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
             Assert.Equal(2, methodTable.Count);
             Assert.Equal(
                 new MethodDefinitionRow(
-                    0x00002050,
+                    new VirtualAddress( 0x00002050),
                     0x0000,
                     (MethodAttributes) 0x0091,
                     0x017E,
@@ -25,7 +25,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 methodTable[0]);
             Assert.Equal(
                 new MethodDefinitionRow(
-                    0x0000205C,
+                    new VirtualAddress( 0x0000205C),
                     0x0000,
                     (MethodAttributes) 0x1886,
                     0x0195,
@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
         public void WriteRow_SmallString_SmallBlob_SmallParam()
         {
             RowTestUtils.AssertWriteThenReadIsSame(new MethodDefinitionRow(
-                    0x00002050,
+                    new VirtualAddress( 0x00002050),
                     0x0000,
                     (MethodAttributes) 0x0091,
                     0x017E,

@@ -21,5 +21,19 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
             
             Assert.Equal(expected, newRow);
         }
+        
+        public static void AssertWriteThenReadIsSame<TRow>(TRow expected,
+            SerializedMetadataTable<TRow>.ReadRowExtendedDelegate readRow) 
+            where TRow : struct, IMetadataRow
+        {
+            var tablesStream = new TablesStream();
+            var table = tablesStream.GetTable<TRow>();
+
+            using var tempStream = new MemoryStream();
+            expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
+            var newRow = readRow(new ByteArrayReader(tempStream.ToArray()), table.Layout, VirtualAddressResolver.Instance);
+            
+            Assert.Equal(expected, newRow);
+        }
     }
 }

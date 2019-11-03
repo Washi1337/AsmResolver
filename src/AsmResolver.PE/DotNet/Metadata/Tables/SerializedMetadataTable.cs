@@ -8,6 +8,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         where TRow : struct, IMetadataRow
     {
         public delegate TRow ReadRowDelegate(IBinaryStreamReader reader, TableLayout layout);
+        
+        public delegate TRow ReadRowExtendedDelegate(IBinaryStreamReader reader,
+            TableLayout layout,
+            ISegmentReferenceResolver resolver);
 
         private readonly IBinaryStreamReader _reader;
         private readonly TableLayout _originalLayout;
@@ -21,6 +25,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _originalLayout = originalLayout;
             _rowCount = (int) (reader.Length / originalLayout.RowSize);
             _readRow = readRow ?? throw new ArgumentNullException(nameof(readRow));
+        }
+
+        public SerializedMetadataTable(IBinaryStreamReader reader, TableLayout originalLayout,
+            ReadRowExtendedDelegate readRow, ISegmentReferenceResolver referenceResolver)
+            : this(reader, originalLayout, (r, l) => readRow(r, l, referenceResolver))
+        {
         }
 
         /// <inheritdoc />

@@ -27,11 +27,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the method definition table.</param>
+        /// <param name="referenceResolver">The resolver to use for resolving the virtual address of the method body.</param>
         /// <returns>The row.</returns>
-        public static MethodDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static MethodDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout, ISegmentReferenceResolver referenceResolver)
         {
             return new MethodDefinitionRow(
-                reader.ReadUInt32(),
+                referenceResolver.GetReferenceToRva(reader.ReadUInt32()),
                 (MethodImplAttributes) reader.ReadUInt16(),
                 (MethodAttributes) reader.ReadUInt16(),
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size),
@@ -39,10 +40,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[5].Size));
         }
 
-        public MethodDefinitionRow(uint rva, MethodImplAttributes implAttributes, MethodAttributes attributes, 
+        public MethodDefinitionRow(ISegmentReference body, MethodImplAttributes implAttributes, MethodAttributes attributes, 
             uint name, uint signature, uint parameterList)
         {
-            Rva = rva;
+            Body = body;
             ImplAttributes = implAttributes;
             Attributes = attributes;
             Name = name;
@@ -54,12 +55,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public TableIndex TableIndex => TableIndex.Method;
 
         /// <summary>
-        /// Gets the starting virtual address of the method body. 
+        /// Gets a reference to the beginning of the method body. 
         /// </summary>
         /// <remarks>
-        /// If this value is zero, the method does not define any method body.
+        /// This field deviates from the original specification as described in ECMA-335. It replaces the RVA column of
+        /// the method definition row. Only the RVA of this reference is only considered when comparing two method definition
+        /// rows for equality.
+        ///
+        /// If this value is null, the method does not define any method body.
         /// </remarks>
-        public uint Rva
+        public ISegmentReference Body
         {
             get;
         }
@@ -114,7 +119,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer, TableLayout layout)
         {
-            writer.WriteUInt32(Rva);
+            writer.WriteUInt32(Body.Rva);
             writer.WriteUInt16((ushort) ImplAttributes);
             writer.WriteUInt16((ushort) Attributes);
             writer.WriteIndex(Name, (IndexSize) layout.Columns[3].Size);
@@ -127,9 +132,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// </summary>
         /// <param name="other">The other row.</param>
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// When comparing both method bodies, only the RVA is considered in this equality test. The exact type is ignored.
+        /// </remarks>
         public bool Equals(MethodDefinitionRow other)
         {
-            return Rva == other.Rva
+            return Body?.Rva == other.Body?.Rva
                    && ImplAttributes == other.ImplAttributes
                    && Attributes == other.Attributes 
                    && Name == other.Name
@@ -148,7 +156,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             unchecked
             {
-                int hashCode = (int) Rva;
+                int hashCode = (int) (Body?.Rva ?? 0);
                 hashCode = (hashCode * 397) ^ (int) ImplAttributes;
                 hashCode = (hashCode * 397) ^ (int) Attributes;
                 hashCode = (hashCode * 397) ^ (int) Name;
@@ -160,7 +168,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         public override string ToString()
         {
-            return $"({Rva:X8}, {(int)ImplAttributes:X4}, {(int) Attributes:X4}, {Name:X8}, {Signature:X8}, {ParameterList:X8})";
+            return $"({Body.Rva:X8}, {(int)ImplAttributes:X4}, {(int) Attributes:X4}, {Name:X8}, {Signature:X8}, {ParameterList:X8})";
         }
         
     }

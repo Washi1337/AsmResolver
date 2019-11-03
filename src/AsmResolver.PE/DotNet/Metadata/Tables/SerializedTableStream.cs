@@ -170,7 +170,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.FieldPtr, ref offset, FieldPointerRow.FromReader),
                 CreateNextTable(TableIndex.Field, ref offset, FieldDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.MethodPtr, ref offset, MethodPointerRow.FromReader),
-                CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader),
+                CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader, _referenceResolver),
                 CreateNextTable(TableIndex.ParamPtr, ref offset, ParameterPointerRow.FromReader),
                 CreateNextTable(TableIndex.Param, ref offset, ParameterDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.InterfaceImpl, ref offset, InterfaceImplementationRow.FromReader),
@@ -229,6 +229,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return new SerializedMetadataTable<TRow>(
                 CreateNextRawTableReader(index, ref offset), TableLayouts[(int) index], readRow);
+        }
+
+        private SerializedMetadataTable<TRow> CreateNextTable<TRow>(
+            TableIndex index,
+            ref uint offset,
+            SerializedMetadataTable<TRow>.ReadRowExtendedDelegate readRow,
+            ISegmentReferenceResolver referenceResolver)
+            where TRow : struct, IMetadataRow
+        {
+            return new SerializedMetadataTable<TRow>(
+                CreateNextRawTableReader(index, ref offset), TableLayouts[(int) index], readRow, referenceResolver);
         }
         
     }
