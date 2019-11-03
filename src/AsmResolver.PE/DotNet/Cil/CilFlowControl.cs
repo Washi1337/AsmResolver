@@ -40,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Indicates the operation is a conditional branching operation.
         /// </summary>
-        CondBranch,
+        ConditionalBranch,
         
         /// <summary>
         /// Indicates the operation provides information about a subsequent instruction.

@@ -35,12 +35,12 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Indicates the operation code is a reserved instruction.
         /// </summary>
-        Nternal,
+        Internal,
         
         /// <summary>
         /// Indicates the operation code applies to objects.
         /// </summary>
-        Objmodel,
+        ObjModel,
         
         /// <summary>
         /// Indicates the operation code is a prefix to another instruction.

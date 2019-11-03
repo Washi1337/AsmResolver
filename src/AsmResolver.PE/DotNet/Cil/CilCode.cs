@@ -240,7 +240,7 @@ namespace AsmResolver.PE.DotNet.Cil
         Endfilter = 0xFE11,
         Unaligned,
         Volatile,
-        Tail,
+        Tailcall,
         Initobj,
         Constrained,
         Cpblk,

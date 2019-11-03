@@ -1,8 +1,8 @@
 namespace AsmResolver.PE.DotNet.Cil
 {
-    public static partial class CilOpCodes
+    internal static class CilOpCodeNames
     {
-        internal static readonly string[] OpCodeNames = {
+        internal static readonly string[] Names = {
             "nop",
             "break",
             "ldarg.0",
