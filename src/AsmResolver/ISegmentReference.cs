@@ -1,0 +1,23 @@
+namespace AsmResolver
+{
+    /// <summary>
+    /// Represents a reference to a segment in a binary file, such as the beginning of a function or method body, or
+    /// a reference to a chunk of initialization data of a field. 
+    /// </summary>
+    public interface ISegmentReference : IOffsetProvider
+    {
+        /// <summary>
+        /// Gets a value indicating whether the referenced segment is bounded to a fixed size.
+        /// </summary>
+        bool IsBounded
+        {
+            get;
+        }
+        
+        /// <summary>
+        /// Creates a binary reader starting at the beginning of the segment.
+        /// </summary>
+        /// <returns>The binary reader.</returns>
+        IBinaryStreamReader CreateReader();
+    }
+}
