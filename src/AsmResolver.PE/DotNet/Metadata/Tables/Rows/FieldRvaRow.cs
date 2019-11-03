@@ -28,16 +28,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the field RVA table.</param>
         /// <returns>The row.</returns>
-        public static FieldRvaRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static FieldRvaRow FromReader(IBinaryStreamReader reader, TableLayout layout, ISegmentReferenceResolver referenceResolver)
         {
             return new FieldRvaRow(
-                reader.ReadUInt32(),
+                 referenceResolver.GetReferenceToRva(reader.ReadUInt32()),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
         
-        public FieldRvaRow(uint rva, uint field)
+        public FieldRvaRow(ISegmentReference data, uint field)
         {
-            Rva = rva;
+            Data = data;
             Field = field;
         }
         
@@ -45,9 +45,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public TableIndex TableIndex => TableIndex.FieldRva;
 
         /// <summary>
-        /// Gets the virtual address referencing the initial value of the field. 
+        /// Gets a reference to the start of the initial data. 
         /// </summary>
-        public uint Rva
+        /// <remarks>
+        /// This field deviates from the original specification as described in ECMA-335. It replaces the RVA column of
+        /// the field RVA row. Only the RVA of this reference is only considered when comparing two field RVA rows
+        /// for equality.
+        /// </remarks>
+        public ISegmentReference Data
         {
             get;
         }
@@ -63,7 +68,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer, TableLayout layout)
         {
-            writer.WriteUInt32(Rva);
+            writer.WriteUInt32(Data.Rva);
             writer.WriteIndex(Field, (IndexSize) layout.Columns[1].Size);
         }
 
@@ -72,9 +77,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// </summary>
         /// <param name="other">The other row.</param>
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
+        /// <remarks>
+        /// When comparing both data fields, only the RVA is considered in this equality test. The exact type is ignored.
+        /// </remarks>
         public bool Equals(FieldRvaRow other)
         {
-            return Rva == other.Rva && Field == other.Field;
+            return Data?.Rva == other.Data?.Rva && Field == other.Field;
         }
 
         /// <inheritdoc />
@@ -88,14 +96,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             unchecked
             {
-                return ((int) Rva * 397) ^ (int) Field;
+                return ((int) Data.Rva * 397) ^ (int) Field;
             }
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"({Rva:X8}, {Field:X8})";
+            return $"({Data.Rva:X8}, {Field:X8})";
         }
         
     }

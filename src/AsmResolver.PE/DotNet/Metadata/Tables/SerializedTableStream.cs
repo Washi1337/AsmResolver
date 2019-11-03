@@ -193,7 +193,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ModuleRef, ref offset, ModuleReferenceRow.FromReader),
                 CreateNextTable(TableIndex.TypeSpec, ref offset, TypeSpecificationRow.FromReader),
                 CreateNextTable(TableIndex.ImplMap, ref offset, ImplementationMapRow.FromReader),
-                CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader),
+                CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader, _referenceResolver),
                 CreateNextTable(TableIndex.EncLog, ref offset, EncLogRow.FromReader),
                 CreateNextTable(TableIndex.EncMap, ref offset, EncMapRow.FromReader),
                 CreateNextTable(TableIndex.Assembly, ref offset, AssemblyDefinitionRow.FromReader),

@@ -35,7 +35,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
         }
 
         [Fact]
-        public void WriteRow_SmallString_SmallBlob_SmallParam()
+        public void WriteRow_SmallStrinmg_SmallBlob_SmallParam()
         {
             RowTestUtils.AssertWriteThenReadIsSame(new MethodDefinitionRow(
                     new VirtualAddress( 0x00002050),
