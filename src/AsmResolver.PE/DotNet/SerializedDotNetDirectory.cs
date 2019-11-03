@@ -60,7 +60,7 @@ namespace AsmResolver.PE.DotNet
             if (_metadataDirectory.IsPresentInPE
                 && _peFile.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
             {
-                return new SerializedMetadata(directoryReader);
+                return new SerializedMetadata(directoryReader, _peFile);
             }
 
             return null;

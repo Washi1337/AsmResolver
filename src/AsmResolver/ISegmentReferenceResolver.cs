@@ -18,23 +18,15 @@
 namespace AsmResolver
 {
     /// <summary>
-    /// Represents a reference to a segment in a binary file, such as the beginning of a function or method body, or
-    /// a reference to a chunk of initialization data of a field. 
+    /// Provides members for resolving virtual addresses to a segment in a binary file.
     /// </summary>
-    public interface ISegmentReference : IOffsetProvider
+    public interface ISegmentReferenceResolver
     {
         /// <summary>
-        /// Gets a value indicating whether the referenced segment is bounded to a fixed size.
+        /// Resolves the provided virtual address to a segment reference.  
         /// </summary>
-        bool IsBounded
-        {
-            get;
-        }
-        
-        /// <summary>
-        /// Creates a binary reader starting at the beginning of the segment.
-        /// </summary>
-        /// <returns>The binary reader.</returns>
-        IBinaryStreamReader CreateReader();
+        /// <param name="rva">The virtual address of the segment.</param>
+        /// <returns>The reference to the segment.</returns>
+        ISegmentReference GetReferenceToRva(uint rva);
     }
 }

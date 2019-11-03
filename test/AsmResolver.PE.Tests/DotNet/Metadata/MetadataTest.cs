@@ -6,6 +6,7 @@ using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
+using AsmResolver.PE.File;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Metadata
@@ -94,13 +95,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
         [Fact]
         public void PreserveMetadataNoChange()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromFile(peFile);
             var metadata = peImage.DotNetDirectory.Metadata;
 
             using var tempStream = new MemoryStream();
             metadata.Write(new BinaryStreamWriter(tempStream));
 
-            var newMetadata = new SerializedMetadata(new ByteArrayReader(tempStream.ToArray())); 
+            var newMetadata = new SerializedMetadata(new ByteArrayReader(tempStream.ToArray()), peFile); 
             
             Assert.Equal(metadata.MajorVersion, newMetadata.MajorVersion);
             Assert.Equal(metadata.MinorVersion, newMetadata.MinorVersion);

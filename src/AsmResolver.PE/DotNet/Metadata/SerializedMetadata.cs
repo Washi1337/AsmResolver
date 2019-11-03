@@ -23,14 +23,16 @@ namespace AsmResolver.PE.DotNet.Metadata
 {
     public class SerializedMetadata : Metadata
     {
+        private readonly ISegmentReferenceResolver _referenceResolver;
         private readonly IBinaryStreamReader _streamEntriesReader;
         private readonly IBinaryStreamReader _streamContentsReader;
         private readonly int _numberOfStreams;
 
-        public SerializedMetadata(IBinaryStreamReader reader)
+        public SerializedMetadata(IBinaryStreamReader reader, ISegmentReferenceResolver referenceResolver)
         {
             if (reader == null) 
                 throw new ArgumentNullException(nameof(reader));
+            _referenceResolver = referenceResolver ?? throw new ArgumentNullException(nameof(referenceResolver));
 
             _streamContentsReader = reader.Fork();
             
@@ -71,7 +73,8 @@ namespace AsmResolver.PE.DotNet.Metadata
             return new MetadataStreamList(
                 _streamContentsReader.Fork(),
                 _streamEntriesReader.Fork(),
-                _numberOfStreams);
+                _numberOfStreams,
+                _referenceResolver);
         }
 
     }

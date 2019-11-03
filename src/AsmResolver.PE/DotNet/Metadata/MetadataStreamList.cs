@@ -30,12 +30,15 @@ namespace AsmResolver.PE.DotNet.Metadata
         private readonly IBinaryStreamReader _metadataReader;
         private readonly IBinaryStreamReader _entriesReader;
         private readonly int _numberOfStreams;
+        private readonly ISegmentReferenceResolver _referenceResolver;
 
-        public MetadataStreamList(IBinaryStreamReader metadataReader, IBinaryStreamReader reader, int numberOfStreams)
+        public MetadataStreamList(IBinaryStreamReader metadataReader, IBinaryStreamReader reader, int numberOfStreams, 
+            ISegmentReferenceResolver referenceResolver)
         {
             _metadataReader = metadataReader;
             _entriesReader = reader ?? throw new ArgumentNullException(nameof(reader));
             _numberOfStreams = numberOfStreams;
+            _referenceResolver = referenceResolver ?? throw new ArgumentNullException(nameof(referenceResolver));
         }
 
         /// <inheritdoc />
@@ -71,7 +74,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             {
                 case TablesStream.CompressedStreamName:
                 case TablesStream.EncStreamName:
-                    return new SerializedTableStream(header.Name,DataSegment.FromReader(reader));
+                    return new SerializedTableStream(header.Name,DataSegment.FromReader(reader), _referenceResolver);
                     
                 case StringsStream.DefaultName:
                     return new SerializedStringsStream(header.Name, DataSegment.FromReader(reader));

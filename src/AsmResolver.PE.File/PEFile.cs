@@ -26,7 +26,7 @@ namespace AsmResolver.PE.File
     /// Models a file using the portable executable (PE) file format. It provides access to various PE headers, as well
     /// as the raw contents of each section present in the file. 
     /// </summary>
-    public class PEFile : ISegmentReferenceFactory, IOffsetConverter
+    public class PEFile : ISegmentReferenceResolver, IOffsetConverter
     {
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
         
@@ -147,7 +147,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public ISegmentReference CreateReferenceToRva(uint rva) => new PESegmentReference(this, rva);
+        public ISegmentReference GetReferenceToRva(uint rva) => new PESegmentReference(this, rva);
 
         /// <inheritdoc />
         public uint FileOffsetToRva(uint fileOffset)

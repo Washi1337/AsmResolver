@@ -1,5 +1,6 @@
 using System.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.File;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
@@ -28,13 +29,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
         [Fact]
         public void PreserveTableStreamNoChange()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
+            var peImage = PEImage.FromFile(peFile);
             var tablesStream = (TablesStream) peImage.DotNetDirectory.Metadata.GetStream(TablesStream.CompressedStreamName);
 
             using var tempStream = new MemoryStream();
             tablesStream.Write(new BinaryStreamWriter(tempStream));
 
-            var newTablesStream = new SerializedTableStream(tablesStream.Name, tempStream.ToArray());
+            var newTablesStream = new SerializedTableStream(tablesStream.Name, tempStream.ToArray(), peFile);
             
             Assert.Equal(tablesStream.Reserved, newTablesStream.Reserved);
             Assert.Equal(tablesStream.MajorVersion, newTablesStream.MajorVersion);

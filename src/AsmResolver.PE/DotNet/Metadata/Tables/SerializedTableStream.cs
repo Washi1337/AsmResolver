@@ -25,21 +25,23 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     public class SerializedTableStream : TablesStream
     {
         private readonly IReadableSegment _contents;
+        private readonly ISegmentReferenceResolver _referenceResolver;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
         private readonly uint[] _rowCounts;
         private readonly IndexSize[] _indexSizes;
         private readonly uint _headerSize;
         
-        public SerializedTableStream(string name, byte[] rawData)
-            : this(name, new DataSegment(rawData))
+        public SerializedTableStream(string name, byte[] rawData, ISegmentReferenceResolver referenceResolver)
+            : this(name, new DataSegment(rawData), referenceResolver)
         {
         }
 
-        public SerializedTableStream(string name, IReadableSegment contents)
+        public SerializedTableStream(string name, IReadableSegment contents, ISegmentReferenceResolver referenceResolver)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
+            _referenceResolver = referenceResolver ?? throw new ArgumentNullException(nameof(referenceResolver));
 
             var reader = contents.CreateReader();
             Reserved = reader.ReadUInt32();
