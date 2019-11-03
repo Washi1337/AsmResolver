@@ -61,6 +61,11 @@ namespace AsmResolver.PE.DotNet.Cil
             else
                 CilOpCodes.SingleByteOpCodes[Byte1] = this;
         }
+        
+        /// <summary>
+        /// Gets the mnemonic of the operation code.
+        /// </summary>
+        public string Mnemonic => CilOpCodes.OpCodeNames[(ushort) Value];
 
         /// <summary>
         /// Gets the value of the operation code.
@@ -118,5 +123,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Gets a value indicating the flow control behaviour of the operation.
         /// </summary>
         public CilFlowControl FlowControl => (CilFlowControl) ((_value >> FlowControlOffset) & 0b1111);
+
+        /// <inheritdoc />
+        public override string ToString() => Mnemonic;
     }
 }

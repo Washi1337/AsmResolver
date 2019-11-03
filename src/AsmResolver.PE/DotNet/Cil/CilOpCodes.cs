@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Cil
     /// <summary>
     /// Provides members defining the entire CIL instruction set.
     /// </summary>
-    public static class CilOpCodes
+    public static partial class CilOpCodes
     {
         public static readonly CilOpCode[] SingleByteOpCodes = new CilOpCode[256];
         public static readonly CilOpCode[] MultiByteOpCodes = new CilOpCode[256];
