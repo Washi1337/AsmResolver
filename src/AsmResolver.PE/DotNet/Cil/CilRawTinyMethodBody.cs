@@ -23,7 +23,11 @@ namespace AsmResolver.PE.DotNet.Cil
     /// Represents a CIL method body using the tiny format.
     /// </summary>
     /// <remarks>
-    /// This class does not do any verification on the bytes that make up the actual CIL instructions.
+    /// The tiny method body format is used when a CIL method body's code size is less than 64 bytes, has no local
+    /// variables, its max stack size is less than or equal to 8, and has no extra sections (e.g. no exception handlers).
+    ///  
+    /// This class does not do any encoding/decoding of the bytes that make up the actual CIL instructions, nor does
+    /// it do any verification of the code.
     /// </remarks>
     public class CilRawTinyMethodBody : CilRawMethodBody
     {

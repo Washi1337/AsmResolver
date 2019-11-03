@@ -24,7 +24,6 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
                 0x28, 0x0B, 0x00, 0x00, 0x0A, // call void [mscorlib] System.Console::WriteLine(string)
                 0x2A                          // ret
             }, methodBody.Code);
-            
         }
     }
 }

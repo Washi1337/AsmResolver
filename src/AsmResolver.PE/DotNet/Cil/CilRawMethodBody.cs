@@ -36,12 +36,10 @@ namespace AsmResolver.PE.DotNet.Cil
             var flag = (CilMethodBodyAttributes) reader.ReadByte();
             reader.FileOffset--;
 
+            if ((flag & CilMethodBodyAttributes.Fat) == CilMethodBodyAttributes.Fat)
+                return CilRawFatMethodBody.FromReader(reader);
             if ((flag & CilMethodBodyAttributes.Tiny) == CilMethodBodyAttributes.Tiny)
                 return CilRawTinyMethodBody.FromReader(reader);
-            
-            // TODO:
-            // if ((flag & CilMethodBodyAttributes.Fat) == CilMethodBodyAttributes.Fat)
-            //    return CilRawFatMethodBody.FromReader(reader);
             
             throw new NotSupportedException("Invalid or unsupported method body format.");
         }
