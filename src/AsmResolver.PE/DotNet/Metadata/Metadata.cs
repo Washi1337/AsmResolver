@@ -40,7 +40,9 @@ namespace AsmResolver.PE.DotNet.Metadata
             get;
             private set;
         }
-        
+
+        public bool CanUpdateOffsets => true;
+
         /// <inheritdoc />
         public ushort MajorVersion
         {

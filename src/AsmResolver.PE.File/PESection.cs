@@ -69,6 +69,9 @@ namespace AsmResolver.PE.File
         public uint Rva => Contents?.Rva ?? Header.VirtualAddress;
 
         /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
+        /// <inheritdoc />
         public void UpdateOffsets(uint newFileOffset, uint newRva)
         {
             Contents.UpdateOffsets(newFileOffset, newRva);

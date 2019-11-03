@@ -72,10 +72,13 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        uint IFileOffsetProvider.FileOffset => _fileOffset;
+        uint IOffsetProvider.FileOffset => _fileOffset;
 
         /// <inheritdoc />
-        uint IFileOffsetProvider.Rva => _fileOffset;
+        uint IOffsetProvider.Rva => _fileOffset;
+
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
 
         /// <summary>
         /// Gets or sets the name of the section.

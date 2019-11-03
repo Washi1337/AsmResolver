@@ -79,6 +79,9 @@ namespace AsmResolver
             private set;
         }
 
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
         /// <summary>
         /// Gets the data that is stored in the segment.
         /// </summary>

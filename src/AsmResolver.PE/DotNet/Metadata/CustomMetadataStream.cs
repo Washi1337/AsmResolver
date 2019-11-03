@@ -37,7 +37,10 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         /// <inheritdoc />
         public uint Rva => Contents.Rva;
-        
+
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
         /// <inheritdoc />
         public string Name
         {

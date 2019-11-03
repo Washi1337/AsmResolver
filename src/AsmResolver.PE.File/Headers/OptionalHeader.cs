@@ -123,8 +123,11 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        uint IFileOffsetProvider.Rva => FileOffset;
-        
+        uint IOffsetProvider.Rva => FileOffset;
+
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
         /// <summary>
         /// Gets or sets the magic optional header signature, determining whether the image is a PE32 (32-bit) or a PE32+ (64-bit) image.
         /// </summary>

@@ -57,7 +57,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             get;
             private set;
         }
-        
+
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
         /// <inheritdoc />
         public string Name
         {

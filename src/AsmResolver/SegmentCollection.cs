@@ -66,7 +66,10 @@ namespace AsmResolver
         {
             get;
         }
-        
+
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
         /// <inheritdoc />
         public void UpdateOffsets(uint newFileOffset, uint newRva)
         {

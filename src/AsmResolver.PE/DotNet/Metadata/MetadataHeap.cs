@@ -44,6 +44,9 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
+        /// <inheritdoc />
         public string Name
         {
             get;

@@ -62,6 +62,9 @@ namespace AsmResolver.PE.DotNet.Cil
             private set;
         }
 
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
+
         /// <summary>
         /// Gets a value indicating whether the method body is using the fat format.
         /// </summary>

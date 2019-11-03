@@ -56,10 +56,13 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        uint IFileOffsetProvider.FileOffset => _fileOffset;
+        uint IOffsetProvider.FileOffset => _fileOffset;
 
         /// <inheritdoc />
-        uint IFileOffsetProvider.Rva => _rva;
+        uint IOffsetProvider.Rva => _rva;
+
+        /// <inheritdoc />
+        public bool CanUpdateOffsets => true;
 
         /// <summary>
         /// Gets or sets the relative virtual address (RVA) of the directory.

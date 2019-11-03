@@ -103,15 +103,16 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        uint IFileOffsetProvider.FileOffset => 0;
+        uint IOffsetProvider.FileOffset => 0;
 
         /// <inheritdoc />
-        uint IFileOffsetProvider.Rva => 0;
+        uint IOffsetProvider.Rva => 0;
 
         /// <inheritdoc />
-        void ISegment.UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-        }
+        bool IOffsetProvider.CanUpdateOffsets => false;
+
+        /// <inheritdoc />
+        void IOffsetProvider.UpdateOffsets(uint newFileOffset, uint newRva) => throw new NotSupportedException();
 
         /// <inheritdoc />
         public uint GetPhysicalSize()
