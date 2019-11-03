@@ -285,3 +285,42 @@ Using the other metadata streams, it is possible to resolve all columns. Below a
         // Print name and namespace:
         Console.WriteLine(string.IsNullOrEmpty(ns) ? name : $"{ns}.{name}");
     }
+
+
+Method and FieldRVA
+-------------------
+
+Every row structure defined in AsmResolver respects the specification described by the CLR itself. However, there are two exceptions to this rule, and those are the **Method** and **FieldRVA** rows. According to the specification, both of these rows have an **RVA** column that references a segment in the original PE file. Since this second layer of abstraction attempts to abstract away any file offset or virtual address, these columns are replaced with properties called ``Body`` and ``Data`` respectively, both of type ``ISegmentReference`` instead.
+
+``ISegmentReference`` exposes a method ``CreateReader()``, which automatically resolves the RVA that was stored in the row, and creates a new input stream that can be used to parse e.g. method bodies or field data.
+
+**Reading method bodies:**
+
+Reading a managed CIL method body can be done using ``CilRawMethodBody.FromReader`` method:
+
+.. code-block:: csharp
+
+    var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
+    var firstMethod = methodTable[0];
+    var methodBody = CilRawMethodBody.FromReader(firstMethod.Body.CreateReader());
+
+It is important to note that the user is not bound to use ``CilRawMethodBody``. In the case that the ``Native`` (``0x0001``) flag is set in ``MethodDefinitionRow.ImplAttributes``, the implementation of the method body is not written in CIL, but using native code that uses an instruction set dependent on the platform that this application is targeting. Since the bounds of such a method body is not always well-defined, AsmResolver does not do any parsing on its own. However, using the ``CreateReader()`` method, it is still possible to decode instructions from this method body, using a custom instruction decoder.
+
+**Reading field data:**
+
+Reading field data can be done in a similar fashion as reading method bodies. Again use the ``CreateReader()`` method to gain access to the raw data of the initial value of the field referenced by a **FieldRVA** row.
+
+.. code-block:: csharp
+
+    var fieldRvaTable = tablesStream.GetTable<FieldRvaRow>();
+    var firstRva = fieldRvaTable[0];
+    var reader = firstRva.Data.CreateReader();
+
+**Creating new segment references:**
+
+Creating new segment references not present in the current PE image yet can for example be done by creating an instance of ``SegmentReference``, which is a wrapper for any ``IReadableSegment`` object.
+
+.. code-block:: csharp
+
+    var myData = new DataSegment(new byte[] {1, 2, 3, 4});
+    var fieldRva = new FieldRvaRow(new SegmentReference(myData), 0);
