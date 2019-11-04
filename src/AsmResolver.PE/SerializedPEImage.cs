@@ -26,15 +26,23 @@ using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
 {
+    /// <summary>
+    /// Provides an implementation of a PE image that gets its data from a PE file.
+    /// </summary>
     public class SerializedPEImage : PEImage
     {
         private readonly PEFile _peFile;
 
+        /// <summary>
+        /// Opens a PE image from a file.
+        /// </summary>
+        /// <param name="peFile">The file to base the image from.</param>
         public SerializedPEImage(PEFile peFile)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
         }
 
+        /// <inheritdoc />
         protected override IList<IModuleImportEntry> GetImports()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
@@ -43,6 +51,7 @@ namespace AsmResolver.PE
                 : new List<IModuleImportEntry>();
         }
 
+        /// <inheritdoc />
         protected override IResourceDirectory GetResources()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
@@ -52,6 +61,7 @@ namespace AsmResolver.PE
             return new SerializedResourceDirectory(_peFile, null, reader, 0);
         }
 
+        /// <inheritdoc />
         protected override IList<IRelocationBlock> GetRelocations()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
@@ -60,6 +70,7 @@ namespace AsmResolver.PE
                 : (IList<IRelocationBlock>) new List<IRelocationBlock>();
         }
 
+        /// <inheritdoc />
         protected override IDotNetDirectory GetDotNetDirectory()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ClrDirectoryIndex];
