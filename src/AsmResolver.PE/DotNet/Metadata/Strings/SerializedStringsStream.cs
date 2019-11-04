@@ -22,7 +22,7 @@ using System.Text;
 namespace AsmResolver.PE.DotNet.Metadata.Strings
 {
     /// <summary>
-    /// Represents an implementation of a strings stream that obtains strings from a readable segment in a file.  
+    /// Provides an implementation of a strings stream that obtains strings from a readable segment in a file.  
     /// </summary>
     public class SerializedStringsStream : StringsStream
     {

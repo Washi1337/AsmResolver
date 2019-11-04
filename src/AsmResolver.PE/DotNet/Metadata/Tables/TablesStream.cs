@@ -27,17 +27,36 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents the metadata stream containing tables defining each member in a .NET assembly. 
     /// </summary>
-    public class TablesStream : IMetadataStream 
+    public class TablesStream : IMetadataStream
     {
+        /// <summary>
+        /// The default name of a table stream using the compressed format.
+        /// </summary>
         public const string CompressedStreamName = "#~";
+            
+        /// <summary>
+        /// The default name of a table stream using the Edit-and-Continue, uncompressed format.
+        /// </summary>
         public const string EncStreamName = "#-";
+        
+        /// <summary>
+        /// The default name of a table stream using the minimal format.
+        /// </summary>
         public const string MinimalStreamName = "#JTD";
+        
+        /// <summary>
+        /// The default name of a table stream using the uncompressed format.
+        /// </summary>
         public const string UncompressedStreamName = "#Schema";
+        
         private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
         private readonly LazyVariable<IList<IMetadataTable>> _tables;
         private readonly LazyVariable<IList<TableLayout>> _layouts;
 
+        /// <summary>
+        /// Creates a new, empty tables stream.
+        /// </summary>
         public TablesStream()
         {
             _layouts = new LazyVariable<IList<TableLayout>>(GetTableLayouts);
@@ -267,6 +286,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             writer.WriteUInt32(0);
         }
 
+        /// <summary>
+        /// Computes the valid bitmask of the tables stream, which is a 64-bit integer where each bit specifies whether
+        /// a table is present in the stream or not.
+        /// </summary>
+        /// <returns>The valid bitmask.</returns>
         protected virtual ulong ComputeValidBitmask()
         {
             // TODO: make more configurable (maybe add IMetadataTable.IsPresent property?).
@@ -281,6 +305,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return result;
         }
 
+        /// <summary>
+        /// Computes the sorted bitmask of the tables stream, which is a 64-bit integer where each bit specifies whether
+        /// a table is sorted or not.
+        /// </summary>
+        /// <returns>The valid bitmask.</returns>
         protected virtual ulong ComputeSortedBitmask()
         {
             // TODO: make more configurable (maybe add IMetadataTable.IsSorted property?).
@@ -288,6 +317,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return 0x000016003301FA00;
         }
 
+        /// <summary>
+        /// Gets a value indicating the total number of tables in the stream.
+        /// </summary>
+        /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
+        /// <returns>The number of tables.</returns>
         protected virtual int GetTablesCount(ulong validBitmask)
         {
             int count = 0;
@@ -300,6 +334,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return count;
         }
 
+        /// <summary>
+        /// Computes the total amount of bytes that each table combined needs.
+        /// </summary>
+        /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
+        /// <returns>The total amount of bytes.</returns>
         protected virtual uint GetTablesSize(ulong validBitmask)
         {
             long size = 0;
@@ -315,6 +354,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return (uint) size;
         }
         
+        /// <summary>
+        /// Writes for each present table the row count to the output stream.
+        /// </summary>
+        /// <param name="writer">The output stream to write to.</param>
+        /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
         protected virtual void WriteRowCounts(IBinaryStreamWriter writer, ulong validBitmask)
         {
             for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
@@ -324,6 +368,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             }
         }
 
+        /// <summary>
+        /// Writes each present table to the output stream.
+        /// </summary>
+        /// <param name="writer">The output stream to write to.</param>
+        /// <param name="validBitmask">The valid bitmask, indicating all present tables in the stream.</param>
         protected virtual void WriteTables(IBinaryStreamWriter writer, ulong validBitmask)
         {
             for (TableIndex i = 0; i < (TableIndex) Tables.Count; i++)
@@ -333,11 +382,23 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             }
         }
 
+        /// <summary>
+        /// Determines whether a table is present in the tables stream, based on a valid bitmask.
+        /// </summary>
+        /// <param name="validMask">The valid bitmask, indicating all present tables in the stream.</param>
+        /// <param name="table">The table to verify existence of.</param>
+        /// <returns><c>true</c> if the table is present, <c>false</c> otherwise.</returns>
         protected static bool HasTable(ulong validMask, TableIndex table)
         {
             return ((validMask >> (int) table) & 1) != 0;
         }
 
+        /// <summary>
+        /// Determines whether a table is sorted in the tables stream, based on a sorted bitmask.
+        /// </summary>
+        /// <param name="sortedMask">The sorted bitmask, indicating all sorted tables in the stream.</param>
+        /// <param name="table">The table to verify.</param>
+        /// <returns><c>true</c> if the table is sorted, <c>false</c> otherwise.</returns>
         protected static bool IsSorted(ulong sortedMask, TableIndex table)
         {
             return ((sortedMask >> (int) table) & 1) != 0;
@@ -429,11 +490,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                                          | (newSize == IndexSize.Long ? 1 << bitIndex : 0));
         }
 
+        /// <summary>
+        /// Gets a value indicating the size of a column in a table.
+        /// </summary>
+        /// <param name="columnType">The column type to verify.</param>
+        /// <returns>The column size.</returns>
         protected virtual IndexSize GetColumnSize(ColumnType columnType)
         {
             return IndexSize.Long;
         }
 
+        /// <summary>
+        /// Gets an ordered collection of the current table layouts.
+        /// </summary>
+        /// <returns>The table layouts.</returns>
         protected TableLayout[] GetTableLayouts()
         {
             var result = new[]

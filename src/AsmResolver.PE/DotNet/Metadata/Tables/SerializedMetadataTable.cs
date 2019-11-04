@@ -4,11 +4,26 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
+    /// <summary>
+    /// Provides an implementation of a metadata table that was serialized to a PE file.
+    /// </summary>
+    /// <typeparam name="TRow">The type of rows that this table stores.</typeparam>
     public class SerializedMetadataTable<TRow> : MetadataTable<TRow> 
         where TRow : struct, IMetadataRow
     {
+        /// <summary>
+        /// Defines a method that reads a single row from an input stream, using the provided table layout.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="layout">The layout of the table.</param>
         public delegate TRow ReadRowDelegate(IBinaryStreamReader reader, TableLayout layout);
         
+        /// <summary>
+        /// Defines a method that reads a single row from an input stream, using the provided table layout.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="layout">The layout of the table.</param>
+        /// <param name="resolver">The instance used to resolve RVAs to segments.</param>
         public delegate TRow ReadRowExtendedDelegate(IBinaryStreamReader reader,
             TableLayout layout,
             ISegmentReferenceResolver resolver);
@@ -18,6 +33,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly int _rowCount;
         private readonly ReadRowDelegate _readRow;
 
+        /// <summary>
+        /// Reads a metadata table from an input stream. 
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="originalLayout">The layout of the table.</param>
+        /// <param name="readRow">The method to use for reading each row in the table.</param>
         public SerializedMetadataTable(IBinaryStreamReader reader, TableLayout originalLayout, ReadRowDelegate readRow)
             : base(originalLayout)
         {
@@ -27,6 +48,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _readRow = readRow ?? throw new ArgumentNullException(nameof(readRow));
         }
 
+        /// <summary>
+        /// Reads a metadata table from an input stream. 
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="originalLayout">The layout of the table.</param>
+        /// <param name="readRow">The method to use for reading each row in the table.</param>
+        /// <param name="referenceResolver">The instance used to resolve RVAs to segments.</param>
         public SerializedMetadataTable(IBinaryStreamReader reader, TableLayout originalLayout,
             ReadRowExtendedDelegate readRow, ISegmentReferenceResolver referenceResolver)
             : this(reader, originalLayout, (r, l) => readRow(r, l, referenceResolver))

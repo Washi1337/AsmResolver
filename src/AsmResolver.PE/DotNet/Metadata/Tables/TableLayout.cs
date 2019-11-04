@@ -25,6 +25,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public class TableLayout
     {
+        /// <summary>
+        /// Defines a new layout for a metadata table.
+        /// </summary>
+        /// <param name="columns">The column layouts.</param>
         public TableLayout(params ColumnLayout[] columns)
         {
             Columns = columns;

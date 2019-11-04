@@ -17,6 +17,9 @@
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
+    /// <summary>
+    /// Provides members defining all metadata tables that can be present in a tables stream.
+    /// </summary>
     public enum TableIndex : byte
     {
         Module = 0,

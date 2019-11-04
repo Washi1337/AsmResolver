@@ -7,11 +7,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public readonly struct MetadataToken : IComparable<MetadataToken>
     {
+        /// <summary>
+        /// Converts a 32-bit integer to a metadata token.
+        /// </summary>
+        /// <param name="token">The token to convert.</param>
+        /// <returns>The metadata token.</returns>
         public static implicit operator MetadataToken(int token)
         {
             return new MetadataToken(unchecked((uint) token));
         }
 
+        /// <summary>
+        /// Converts a 32-bit unsigned integer to a metadata token.
+        /// </summary>
+        /// <param name="token">The token to convert.</param>
+        /// <returns>The metadata token.</returns>
         public static implicit operator MetadataToken(uint token)
         {
             return new MetadataToken(token);

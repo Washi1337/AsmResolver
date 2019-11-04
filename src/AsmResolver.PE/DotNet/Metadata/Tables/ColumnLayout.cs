@@ -7,6 +7,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public class ColumnLayout
     {
+        /// <summary>
+        /// Defines a new column layout, using a fixed size column type.
+        /// </summary>
+        /// <param name="name">The name of the column.</param>
+        /// <param name="type">The value type of the column.</param>
+        /// <exception cref="ArgumentException">Occurs when the provided column type does not have a fixed size.</exception>
         public ColumnLayout(string name, ColumnType type)
         {
             Name = name;
@@ -16,11 +22,23 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Size = (uint) type & 0xFF;
         }
 
+        /// <summary>
+        /// Defines a new column layout, using a fixed size column type.
+        /// </summary>
+        /// <param name="name">The name of the column.</param>
+        /// <param name="type">The value type of the column.</param>
+        /// <param name="size">The size of the column.</param>
         public ColumnLayout(string name, ColumnType type, IndexSize size)
             : this(name, type, (uint) size)
         {
         }
 
+        /// <summary>
+        /// Defines a new column layout, using a fixed size column type.
+        /// </summary>
+        /// <param name="name">The name of the column.</param>
+        /// <param name="type">The value type of the column.</param>
+        /// <param name="size">The size of the column.</param>
         public ColumnLayout(string name, ColumnType type, uint size)
         {
             Name = name;

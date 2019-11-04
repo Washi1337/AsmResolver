@@ -20,7 +20,7 @@ using System;
 namespace AsmResolver.PE.DotNet.Metadata.Blob
 {
     /// <summary>
-    /// Represents an implementation of a blob stream that obtains blobs from a readable segment in a file.  
+    /// Provides an implementation of a blob stream that obtains blobs from a readable segment in a file.  
     /// </summary>
     public class SerializedBlobStream : BlobStream
     {

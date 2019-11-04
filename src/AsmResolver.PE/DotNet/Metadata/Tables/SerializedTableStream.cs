@@ -22,6 +22,9 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
+    /// <summary>
+    /// Provides an implementation of a tables stream that obtains tables from a readable segment in a file.  
+    /// </summary>
     public class SerializedTableStream : TablesStream
     {
         private readonly IReadableSegment _contents;
@@ -31,12 +34,24 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly uint[] _rowCounts;
         private readonly IndexSize[] _indexSizes;
         private readonly uint _headerSize;
-        
+
+        /// <summary>
+        /// Creates a new tables stream based on a byte array.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="rawData">The raw contents of the stream.</param>
+        /// <param name="referenceResolver">The instance that resolves references to other segments in the file to segments.</param>
         public SerializedTableStream(string name, byte[] rawData, ISegmentReferenceResolver referenceResolver)
             : this(name, new DataSegment(rawData), referenceResolver)
         {
         }
 
+        /// <summary>
+        /// Creates a new tables stream based on a segment in a file.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="contents">The raw contents of the stream.</param>
+        /// <param name="referenceResolver">The instance that resolves references to other segments in the file to segments.</param>
         public SerializedTableStream(string name, IReadableSegment contents, ISegmentReferenceResolver referenceResolver)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -62,8 +77,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _indexSizes = InitializeIndexSizes();
         }
 
+        /// <inheritdoc />
         public override bool CanRead => true;
 
+        /// <inheritdoc />
         public override IBinaryStreamReader CreateReader()
         {
             return _contents.CreateReader();
@@ -80,6 +97,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return result;
         }
 
+        /// <inheritdoc />
         protected override IndexSize GetColumnSize(ColumnType columnType)
         {
             return _indexSizes[(int) columnType];
@@ -159,6 +177,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 : IndexSize.Long;
         }
 
+        /// <inheritdoc />
         protected override IList<IMetadataTable> GetTables()
         {
             uint offset = _contents.FileOffset + _headerSize;

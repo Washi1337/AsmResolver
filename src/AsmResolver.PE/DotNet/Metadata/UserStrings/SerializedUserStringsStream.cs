@@ -22,7 +22,7 @@ using System.Text;
 namespace AsmResolver.PE.DotNet.Metadata.UserStrings
 {
     /// <summary>
-    /// Represents an implementation of a user-strings stream that obtains strings from a readable segment in a file.  
+    /// Provides an implementation of a user-strings stream that obtains strings from a readable segment in a file.  
     /// </summary>
     public class SerializedUserStringsStream : UserStringsStream
     {

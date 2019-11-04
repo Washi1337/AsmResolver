@@ -1,3 +1,6 @@
+// Disable xmldoc warnings.
+#pragma warning disable 1591
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>

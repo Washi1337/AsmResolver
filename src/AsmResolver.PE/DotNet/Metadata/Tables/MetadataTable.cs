@@ -17,6 +17,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     {
         private IList<TRow> _items;
 
+        /// <summary>
+        /// Creates a new metadata table using the provided layout.
+        /// </summary>
+        /// <param name="layout">The layout of the table.</param>
         public MetadataTable(TableLayout layout)
         {
             Layout = layout ?? throw new ArgumentNullException(nameof(layout));

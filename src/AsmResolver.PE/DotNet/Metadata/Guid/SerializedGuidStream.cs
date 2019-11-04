@@ -20,7 +20,7 @@ using System;
 namespace AsmResolver.PE.DotNet.Metadata.Guid
 {
     /// <summary>
-    /// Represents an implementation of a GUID stream that obtains GUIDs from a readable segment in a file.  
+    /// Provides an implementation of a GUID stream that obtains GUIDs from a readable segment in a file.  
     /// </summary>
     public class SerializedGuidStream : GuidStream
     {
