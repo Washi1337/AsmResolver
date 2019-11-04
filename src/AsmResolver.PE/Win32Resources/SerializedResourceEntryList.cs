@@ -22,6 +22,9 @@ using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Win32Resources
 {
+    /// <summary>
+    /// Provides an implementation of a lazy-initialized list of resource directory entries, read from an existing PE file.
+    /// </summary>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedResourceEntryList : LazyList<IResourceEntry>
     {
@@ -31,6 +34,14 @@ namespace AsmResolver.PE.Win32Resources
         private readonly int _idEntries;
         private readonly int _depth;
 
+        /// <summary>
+        /// Prepares a new lazy-initializes resource entry list.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the resources.</param>
+        /// <param name="entriesOffset">The offset to the entries of the list.</param>
+        /// <param name="namedEntries">The number of named entries.</param>
+        /// <param name="idEntries">The number of unnamed entries.</param>
+        /// <param name="depth">The current depth of the resource directory tree structure.</param>
         public SerializedResourceEntryList(PEFile peFile, uint entriesOffset, int namedEntries, int idEntries, int depth)
         {
             _namedEntries = namedEntries;
@@ -40,6 +51,7 @@ namespace AsmResolver.PE.Win32Resources
             _entriesOffset = entriesOffset;
         }
 
+        /// <inheritdoc />
         protected override void Initialize()
         {
             var entriesReader = _peFile.CreateReaderAtFileOffset(

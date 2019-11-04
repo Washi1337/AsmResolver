@@ -19,6 +19,9 @@ using AsmResolver.Lazy;
 
 namespace AsmResolver.PE.Win32Resources
 {
+    /// <summary>
+    /// Provides an implementation for a single data entry in a Win32 resource directory.
+    /// </summary>
     public class ResourceData : IResourceData
     {
         private readonly LazyVariable<IReadableSegment> _contents;

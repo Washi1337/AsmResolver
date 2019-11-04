@@ -58,7 +58,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !_peFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return new SerializedResourceDirectory(_peFile, null, reader, 0);
+            return new SerializedResourceDirectory(_peFile, null, reader);
         }
 
         /// <inheritdoc />

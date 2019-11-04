@@ -20,20 +20,25 @@ using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Win32Resources
 {
+    /// <summary>
+    /// Provides an implementation for a single data entry in a Win32 resource directory, that was read from an existing
+    /// PE file.
+    /// </summary>
     public class SerializedResourceData : ResourceData
     {
         private readonly PEFile _peFile;
         private readonly uint _contentsRva;
         private readonly uint _contentsSize;
 
-        public SerializedResourceData(
-            PEFile peFile,
-            ResourceDirectoryEntry entry, 
-            IBinaryStreamReader reader)
+        /// <summary>
+        /// Reads a resource data entry from the provided input stream.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the resource.</param>
+        /// <param name="entry">The entry to read.</param>
+        /// <param name="reader">The input stream to read the data from.</param>
+        public SerializedResourceData(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader reader)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            if (entry == null) 
-                throw new ArgumentNullException(nameof(entry));
 
             if (entry.IsByName)
                 Name = entry.Name;
@@ -45,6 +50,7 @@ namespace AsmResolver.PE.Win32Resources
             CodePage = reader.ReadUInt32();
         }
 
+        /// <inheritdoc />
         protected override IReadableSegment GetContents()
         {
             return _peFile.TryCreateReaderAtRva(_contentsRva, _contentsSize, out var reader)

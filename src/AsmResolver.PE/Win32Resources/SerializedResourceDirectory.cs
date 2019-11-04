@@ -20,6 +20,9 @@ using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Win32Resources
 {
+    /// <summary>
+    /// Provides an implementation of a resource directory that was read from an existing PE file.
+    /// </summary>
     public class SerializedResourceDirectory : ResourceDirectory
     {
         public const int MaxDepth = 10;
@@ -30,17 +33,29 @@ namespace AsmResolver.PE.Win32Resources
         private readonly uint _entriesOffset;
         private readonly int _depth;
 
-        public SerializedResourceDirectory(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader reader, int depth)
+        /// <summary>
+        /// Reads a single resource directory from an input stream.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the resource.</param>
+        /// <param name="entry">The entry to read. If this value is <c>null</c>, the root directory is assumed.</param>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="depth">
+        /// The current depth of the resource directory tree structure.
+        /// If this value exceeds <see cref="MaxDepth"/>, this class will not initialize any entries.
+        /// </param>
+        public SerializedResourceDirectory(PEFile peFile, ResourceDirectoryEntry? entry, IBinaryStreamReader reader, 
+            int depth = 0)
         {
             _peFile = peFile;
             _depth = depth;
 
-            if (entry != null)
+            if (entry.HasValue)
             {
-                if (entry.IsByName)
-                    Name = entry.Name;
+                var value = entry.Value;
+                if (value.IsByName)
+                    Name = value.Name;
                 else
-                    Id = entry.IdOrNameOffset;
+                    Id = value.IdOrNameOffset;
             }
 
             if (reader != null)
@@ -59,6 +74,7 @@ namespace AsmResolver.PE.Win32Resources
             }
         }
 
+        /// <inheritdoc />
         protected override IList<IResourceEntry> GetEntries()
         {
             if (_namedEntries + _idEntries == 0 // Optimisation + check for invalid resource directory offset. 
