@@ -70,7 +70,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Gets the value of the operation code.
         /// </summary>
-        public CilCode Value => (CilCode) ((ushort) ((_value >> ValueOffset) & 0xFF) | (IsLarge ? 0xFE00 : 0));
+        public CilCode Code => (CilCode) ((ushort) ((_value >> ValueOffset) & 0xFF) | (IsLarge ? 0xFE00 : 0));
 
         /// <summary>
         /// Gets a value indicating whether the operation code is large or not. If this value is <c>true</c>, the code

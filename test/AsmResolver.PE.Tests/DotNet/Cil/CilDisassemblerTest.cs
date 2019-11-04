@@ -1,3 +1,4 @@
+using System.Linq;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
@@ -227,6 +228,116 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
                 new CilInstruction(0, CilOpCodes.Ldarg_0), 
                 new CilInstruction(1, CilOpCodes.Ldtoken, new MetadataToken(0x11000002)), 
                 new CilInstruction(6, CilOpCodes.Ret), 
+            };
+            
+            var disassembler = new CilDisassembler(rawCode.CreateReader());
+            Assert.Equal(expected, disassembler.ReadAllInstructions());
+        }
+
+        [Fact]
+        public void InlineArgument()
+        {
+            var rawCode = new DataSegment(new byte[]
+            {
+                0xFE, 0x09, 0x01, 0x00,  // ldarg 1
+                0x2A                     // ret
+            });
+            
+            var expected = new[]
+            {
+                new CilInstruction(0, CilOpCodes.Ldarg, (ushort) 1), 
+                new CilInstruction(4, CilOpCodes.Ret), 
+            };
+            
+            var disassembler = new CilDisassembler(rawCode.CreateReader());
+            Assert.Equal(expected, disassembler.ReadAllInstructions());
+        }
+
+        [Fact]
+        public void ShortInlineArgument()
+        {
+            var rawCode = new DataSegment(new byte[]
+            {
+                0x0E, 0x01,  // ldarg.s 1
+                0x2A         // ret
+            });
+            
+            var expected = new[]
+            {
+                new CilInstruction(0, CilOpCodes.Ldarg_S, (byte) 1), 
+                new CilInstruction(2, CilOpCodes.Ret), 
+            };
+            
+            var disassembler = new CilDisassembler(rawCode.CreateReader());
+            Assert.Equal(expected, disassembler.ReadAllInstructions());
+        }
+
+        [Fact]
+        public void InlineVariable()
+        {
+            var rawCode = new DataSegment(new byte[]
+            {
+                0xFE, 0x0C, 0x01, 0x00,  // ldloc 1
+                0x2A                     // ret
+            });
+            
+            var expected = new[]
+            {
+                new CilInstruction(0, CilOpCodes.Ldloc, (ushort) 1), 
+                new CilInstruction(4, CilOpCodes.Ret), 
+            };
+            
+            var disassembler = new CilDisassembler(rawCode.CreateReader());
+            Assert.Equal(expected, disassembler.ReadAllInstructions());
+        }
+
+        [Fact]
+        public void ShortInlineVariable()
+        {
+            var rawCode = new DataSegment(new byte[]
+            {
+                0x11, 0x01,  // ldloc.s 1
+                0x2A         // ret
+            });
+            
+            var expected = new[]
+            {
+                new CilInstruction(0, CilOpCodes.Ldloc_S, (byte) 1), 
+                new CilInstruction(2, CilOpCodes.Ret), 
+            };
+            
+            var disassembler = new CilDisassembler(rawCode.CreateReader());
+            Assert.Equal(expected, disassembler.ReadAllInstructions());
+        }
+
+        [Fact]
+        public void InlineSwitch()
+        {
+            var rawCode = new DataSegment(new byte[]
+            {
+                0x45, 0x03, 0x00, 0x00, 0x00,  // switch 
+                      0x02, 0x00, 0x00, 0x00,  // + 0x0000000002
+                      0x04, 0x00, 0x00, 0x00,  // + 0x0000000004
+                      0x06, 0x00, 0x00, 0x00,  // + 0x0000000006
+                0x00,                          // nop
+                0x00,                          // nop
+                0x00,                          // nop
+                0x00,                          // nop
+                0x00,                          // nop
+                0x00,                          // nop
+                0x2A                           // ret
+            });
+
+            var expected = new[]
+            {
+                new CilInstruction(0, CilOpCodes.Switch, new[] {2, 4, 6}.ToList()),
+                new CilInstruction(17, CilOpCodes.Nop),
+                new CilInstruction(18, CilOpCodes.Nop),
+                new CilInstruction(19, CilOpCodes.Nop),
+                new CilInstruction(20, CilOpCodes.Nop),
+                new CilInstruction(21, CilOpCodes.Nop),
+                new CilInstruction(22, CilOpCodes.Nop),
+                new CilInstruction(23, CilOpCodes.Ret)
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());

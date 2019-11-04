@@ -15,6 +15,9 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System.Collections;
+using System.Linq;
+
 namespace AsmResolver.PE.DotNet.Cil
 {
     /// <summary>
@@ -118,7 +121,17 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns><c>true</c> if the instructions are equal, <c>false</c> otherwise.</returns>
         protected bool Equals(CilInstruction other)
         {
-            return Offset == other.Offset && OpCode.Equals(other.OpCode) && Equals(Operand, other.Operand);
+            if (Offset != other.Offset || !OpCode.Equals(other.OpCode)) 
+                return false;
+
+            if (OpCode.Code == CilCode.Switch 
+                && Operand is IEnumerable list1
+                && other.Operand is IEnumerable list2)
+            {
+                return list1.Cast<object>().SequenceEqual(list2.Cast<object>());
+            }
+            
+            return Equals(Operand, other.Operand);
         }
 
         /// <inheritdoc />

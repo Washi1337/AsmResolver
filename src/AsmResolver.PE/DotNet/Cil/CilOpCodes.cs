@@ -173,7 +173,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((ushort) Push1 << StackBehaviourPushOffset)
             | ((ushort) Pop0 << StackBehaviourPopOffset)
             | ((byte) Macro << OpCodeTypeOffset)
-            | ((byte) ShortInlineVar << OperandTypeOffset)
+            | ((byte) ShortInlineArgument << OperandTypeOffset)
             | ((byte) Next << FlowControlOffset));
 
         public static readonly CilOpCode Ldarga_S = new CilOpCode(
@@ -1910,7 +1910,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((ushort) Push1 << StackBehaviourPushOffset)
             | ((ushort) Pop0 << StackBehaviourPopOffset)
             | ((byte) Primitive << OpCodeTypeOffset)
-            | ((byte) InlineVar << OperandTypeOffset)
+            | ((byte) InlineArgument << OperandTypeOffset)
             | ((byte) Next << FlowControlOffset));
 
         public static readonly CilOpCode Ldarga = new CilOpCode(
