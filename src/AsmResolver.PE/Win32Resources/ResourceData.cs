@@ -26,6 +26,9 @@ namespace AsmResolver.PE.Win32Resources
     {
         private readonly LazyVariable<IReadableSegment> _contents;
 
+        /// <summary>
+        /// Initializes a new resource data entry.
+        /// </summary>
         protected ResourceData()
         {
             _contents = new LazyVariable<IReadableSegment>(GetContents);

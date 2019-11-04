@@ -81,6 +81,9 @@ namespace AsmResolver.PE
         private IList<IRelocationBlock> _relocations;
         private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
 
+        /// <summary>
+        /// Initializes a new PE image.
+        /// </summary>
         protected PEImage()
         {
             _resources = new LazyVariable<IResourceDirectory>(GetResources);

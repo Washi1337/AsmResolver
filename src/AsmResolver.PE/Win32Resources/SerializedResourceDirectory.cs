@@ -25,6 +25,10 @@ namespace AsmResolver.PE.Win32Resources
     /// </summary>
     public class SerializedResourceDirectory : ResourceDirectory
     {
+        /// <summary>
+        /// Indicates the maximum depth of sub directories a resource directory can have before AsmResolver aborts
+        /// reading the resource tree branch. 
+        /// </summary>
         public const int MaxDepth = 10;
             
         private readonly PEFile _peFile;

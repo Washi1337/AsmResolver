@@ -30,6 +30,9 @@ namespace AsmResolver.PE.Win32Resources
     /// </remarks>
     public readonly struct ResourceDirectoryEntry
     {
+        /// <summary>
+        /// The size of a single resource directory entry.
+        /// </summary>
         public const int EntrySize = 2 * sizeof(uint);
 
         private readonly uint _idOrNameOffset;

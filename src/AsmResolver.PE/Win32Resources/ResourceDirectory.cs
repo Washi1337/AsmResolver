@@ -29,6 +29,9 @@ namespace AsmResolver.PE.Win32Resources
     {
         private IList<IResourceEntry> _entries;
 
+        /// <summary>
+        /// Initializes a new resource directory entry.
+        /// </summary>
         protected ResourceDirectory()
         {
         }
