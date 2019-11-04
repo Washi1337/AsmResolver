@@ -20,12 +20,20 @@ using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Imports
 {
+    /// <summary>
+    /// Provides an implementation of a module import entry present in a PE file.
+    /// </summary>
     public class SerializedModuleImportEntry : ModuleImportEntry
     {
         private readonly PEFile _peFile;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
         
+        /// <summary>
+        /// Reads a module import entry from an input stream.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the module import.</param>
+        /// <param name="reader">The input stream.</param>
         public SerializedModuleImportEntry(PEFile peFile, IBinaryStreamReader reader)
         {
             _peFile = peFile;
@@ -38,6 +46,12 @@ namespace AsmResolver.PE.Imports
             _addressRva = reader.ReadUInt32();
         }
 
+        /// <summary>
+        /// Determines whether the module import is empty, that is whether every field is 0.
+        /// </summary>
+        /// <remarks>
+        /// The PE file format uses an empty module import entry to indicate the end of the list of imported modules.
+        /// </remarks>
         public bool IsEmpty =>
             _lookupRva == 0
             && TimeDateStamp == 0
@@ -45,6 +59,7 @@ namespace AsmResolver.PE.Imports
             && Name == null
             && _addressRva == 0;
 
+        /// <inheritdoc />
         protected override IList<MemberImportEntry> GetMembers()
         {
             if (IsEmpty)

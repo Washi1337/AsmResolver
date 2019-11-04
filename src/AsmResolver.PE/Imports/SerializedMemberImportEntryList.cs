@@ -23,6 +23,9 @@ using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Imports
 {
+    /// <summary>
+    /// Provides an implementation for a lazy-initialized list of member imports that is stored in a PE file.
+    /// </summary>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedMemberImportEntryList : LazyList<MemberImportEntry>
     {
@@ -31,6 +34,12 @@ namespace AsmResolver.PE.Imports
         private readonly uint _addressRva;
         private readonly bool _is32Bit;
         
+        /// <summary>
+        /// Prepares a new lazy-initialized member import entry list.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the member imports.</param>
+        /// <param name="lookupRva">The virtual address referencing the start of the lookup table.</param>
+        /// <param name="addressRva">The virtual address referencing the start of the address table.</param>
         public SerializedMemberImportEntryList(PEFile peFile, uint lookupRva, uint addressRva)
         {
             _is32Bit = peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
@@ -56,6 +65,7 @@ namespace AsmResolver.PE.Imports
             return result;
         }
 
+        /// <inheritdoc />
         protected override void Initialize()
         {
             ulong ordinalMask = _is32Bit

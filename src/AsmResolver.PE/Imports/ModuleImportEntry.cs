@@ -27,6 +27,12 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public class ModuleImportEntry : IModuleImportEntry
     {
+        /// <summary>
+        /// Reads a single module import entry from an input stream.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the import entry.</param>
+        /// <param name="reader">The input stream.</param>
+        /// <returns></returns>
         public static IModuleImportEntry FromReader(PEFile peFile, IBinaryStreamReader reader)
         {
             var entry = new SerializedModuleImportEntry(peFile, reader);
