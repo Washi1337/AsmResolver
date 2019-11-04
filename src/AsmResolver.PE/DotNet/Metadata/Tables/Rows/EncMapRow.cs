@@ -33,6 +33,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new EncMapRow(reader.ReadUInt32());
         }
 
+        /// <summary>
+        /// Creates a new row for the edit-and-continue remap metadata table.
+        /// </summary>
+        /// <param name="token">The token that was remapped.</param>
         public EncMapRow(MetadataToken token)
         {
             Token = token;

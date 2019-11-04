@@ -38,6 +38,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[4].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the module definition metadata table.
+        /// </summary>
+        /// <param name="generation">The generation number of the module.</param>
+        /// <param name="name">The index into the #Strings heap containing the name of the module. </param>
+        /// <param name="mvid">The index into the #GUID heap containing the unique identifier to distinguish
+        /// between two versions of the same module.</param>
+        /// <param name="encId"></param>
+        /// <param name="encBaseId"></param>
         public ModuleDefinitionRow(ushort generation, uint name, uint mvid, uint encId, uint encBaseId)
         {
             Generation = generation;
@@ -77,11 +86,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             get;
         }
 
+        /// <summary>
+        /// Gets an index into the #GUID heap containing the unique identifier to distinguish between two
+        /// edit-and-continue generations.
+        /// </summary>
         public uint EncId
         {
             get;
         }
 
+        /// <summary>
+        /// Gets an index into the #GUID heap containing the base identifier of an edit-and-continue generation.
+        /// </summary>
         public uint EncBaseId
         {
             get;

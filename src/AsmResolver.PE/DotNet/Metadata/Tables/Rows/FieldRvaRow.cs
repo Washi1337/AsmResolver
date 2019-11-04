@@ -35,6 +35,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the field RVA metadata table.
+        /// </summary>
+        /// <param name="data">The reference to the start of the initial field data.</param>
+        /// <param name="field">The index into the Field table indicating the field that was assigned an initial value.</param>
         public FieldRvaRow(ISegmentReference data, uint field)
         {
             Data = data;
@@ -45,7 +50,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public TableIndex TableIndex => TableIndex.FieldRva;
 
         /// <summary>
-        /// Gets a reference to the start of the initial data. 
+        /// Gets a reference to the start of the initial field data. 
         /// </summary>
         /// <remarks>
         /// This field deviates from the original specification as described in ECMA-335. It replaces the RVA column of

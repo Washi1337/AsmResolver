@@ -33,11 +33,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new PropertyPointerRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the property pointer metadata table.
+        /// </summary>
+        /// <param name="property">The index into the Property table that this pointer references.</param>
         public PropertyPointerRow(uint property)
         {
             Property = property;
         }
 
+        /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.PropertyPtr;
 
         /// <summary>

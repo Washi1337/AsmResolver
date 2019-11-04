@@ -33,6 +33,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the property definition metadata table.
+        /// </summary>
+        /// <param name="attributes">The attributes associated to the property definition.</param>
+        /// <param name="name">The index into the #Strings stream referencing the name of the property.</param>
+        /// <param name="type">The index into the #Blob stream referencing the signature of the property.</param>
         public PropertyDefinitionRow(PropertyAttributes attributes, uint name, uint type)
         {
             Attributes = attributes;

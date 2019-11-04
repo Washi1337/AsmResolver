@@ -2,6 +2,9 @@
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be associated to a field definition.
+    /// </summary>
     [Flags]
     public enum FieldAttributes : ushort
     {

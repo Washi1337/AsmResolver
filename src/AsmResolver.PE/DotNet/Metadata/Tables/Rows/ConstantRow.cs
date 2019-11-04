@@ -36,7 +36,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size),
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
+
+        /// <summary>
+        /// Creates a new row for the constants metadata table.
+        /// </summary>
+        /// <param name="type">The type of constant that is stored in the blob stream. </param>
+        /// <param name="parent">The HasConstant index (an index into either the Field, Parameter or Property table)
+        /// that is the owner of the constant.</param>
+        /// <param name="value">The index into the #Blob stream containing the serialized constant value.</param>
+        public ConstantRow(ElementType type, uint parent, uint value)
+        {
+            Type = type;
+            Padding = 0;
+            Parent = parent;
+            Value = value;
+        }
         
+        /// <summary>
+        /// Creates a new row for the constants metadata table.
+        /// </summary>
+        /// <param name="type">The type of constant that is stored in the blob stream. </param>
+        /// <param name="padding">The single padding byte between the type and parent columns.</param>
+        /// <param name="parent">The HasConstant index (an index into either the Field, Parameter or Property table)
+        /// that is the owner of the constant.</param>
+        /// <param name="value">The index into the #Blob stream containing the serialized constant value.</param>
         public ConstantRow(ElementType type, byte padding, uint parent, uint value)
         {
             Type = type;

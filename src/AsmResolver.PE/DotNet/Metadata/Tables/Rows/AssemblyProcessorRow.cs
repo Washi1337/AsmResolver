@@ -33,6 +33,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new AssemblyProcessorRow(reader.ReadUInt32());
         }
         
+        /// <summary>
+        /// Creates a new row for the assembly processor metadata table.
+        /// </summary>
+        /// <param name="processorId">The processor identifier the assembly is targeting.</param>
         public AssemblyProcessorRow(uint processorId)
         {
             ProcessorId = processorId;

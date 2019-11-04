@@ -35,6 +35,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the nested class metadata table.
+        /// </summary>
+        /// <param name="nestedClass">The index into the TypeDef table indicating the class that was nested into another class.</param>
+        /// <param name="enclosingClass">The index into the TypeDef table indicating the enclosing class.</param>
         public NestedClassRow(uint nestedClass, uint enclosingClass)
         {
             NestedClass = nestedClass;

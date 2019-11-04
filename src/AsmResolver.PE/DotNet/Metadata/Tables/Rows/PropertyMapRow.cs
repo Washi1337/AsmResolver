@@ -32,6 +32,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the property map metadata table.
+        /// </summary>
+        /// <param name="parent">The index into the TypeDef table that this mapping is associating to an property list.</param>
+        /// <param name="propertyList">The index into the Event table indicating the first property that is defined in
+        /// the property list.</param>
         public PropertyMapRow(uint parent, uint propertyList)
         {
             Parent = parent;

@@ -2,6 +2,9 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all possible flags that can be assigned to an assembly definition or reference.
+    /// </summary>
     [Flags]
     public enum AssemblyAttributes : uint
     {
@@ -36,9 +39,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <summary>
         /// Bits describing the processor architecture.
         /// </summary>
-        Mask = 0x0070, // Bits describing the processor architecture
-        FullMask = 0x00F0, // Bits describing the PA incl. Specified
-        Shift = 0x0004, // NOT A FLAG, shift count in PA flags <--> index conversion
+        Mask = 0x0070,
+        /// <summary>
+        /// Bits describing the PA incl. Specified.
+        /// </summary>
+        FullMask = 0x00F0,
         /// <summary>
         /// From "DebuggableAttribute".
         /// </summary>

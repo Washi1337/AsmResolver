@@ -36,6 +36,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the field definition metadata table.
+        /// </summary>
+        /// <param name="attributes">The attributes associated to the field definition.</param>
+        /// <param name="name">The index into the #Strings heap containing the name of the type reference.</param>
+        /// <param name="signature">The index into the #Blob heap containing the signature of the field.</param>
         public FieldDefinitionRow(FieldAttributes attributes, uint name, uint signature)
         {
             Attributes = attributes;

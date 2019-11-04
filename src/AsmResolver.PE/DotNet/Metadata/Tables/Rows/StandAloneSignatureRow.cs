@@ -33,6 +33,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new StandAloneSignatureRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the stand-alone signature metadata table.
+        /// </summary>
+        /// <param name="signature">The index into the #Blob stream referencing the signature that was exposed by this row.</param>
         public StandAloneSignatureRow(uint signature)
         {
             Signature = signature;

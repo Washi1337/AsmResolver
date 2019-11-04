@@ -35,6 +35,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the interface implementation metadata table.
+        /// </summary>
+        /// <param name="class">The index into the TypeDef table indicating the type that implements the interface.</param>
+        /// <param name="interface">The TypeDefOrRef (an index to a row in either the TypeRef, TypeDef or TypeSpec table)
+        /// indicating the interface that was implemented by the type.</param>
         public InterfaceImplementationRow(uint @class, uint @interface)
         {
             Class = @class;

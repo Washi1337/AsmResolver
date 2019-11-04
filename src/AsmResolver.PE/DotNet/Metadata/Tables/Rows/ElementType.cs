@@ -1,5 +1,11 @@
+// Disable xmldoc warnings.
+#pragma warning disable 1591
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all element types that can be used to indicate the type of a blob signature or constant.
+    /// </summary>
     public enum ElementType : byte
     {
         None = 0x00,

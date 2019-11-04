@@ -2,6 +2,9 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be assigned to a parmeter definition.
+    /// </summary>
     [Flags]
     public enum ParameterAttributes : ushort
     {
@@ -17,8 +20,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Parameter is an optional parameter.
         /// </summary>
         Optional = 0x0010,
-        // Reserved flags for Runtime use only.
-        ReservedMask = 0xf000,
         /// <summary>
         /// Parameter has got a default value.
         /// </summary>

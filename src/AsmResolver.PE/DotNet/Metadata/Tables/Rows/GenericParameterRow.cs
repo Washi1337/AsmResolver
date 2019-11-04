@@ -37,6 +37,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the generic parameter metadata table.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <param name="attributes"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
         public GenericParameterRow(ushort number, GenericParameterAttributes attributes, uint owner, uint name)
         {
             Number = number;
@@ -103,11 +110,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                    && Name == other.Name;
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is GenericParameterRow other && Equals(other);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             unchecked
@@ -120,6 +129,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"({Number:X4}, {(int) Attributes:X4}, {Owner:X8}, {Name:X8})";

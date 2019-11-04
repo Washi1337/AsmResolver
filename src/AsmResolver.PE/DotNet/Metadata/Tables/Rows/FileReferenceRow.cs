@@ -36,6 +36,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the file reference metadata table.
+        /// </summary>
+        /// <param name="attributes">The attributes associated to the file reference.</param>
+        /// <param name="name">The index into the #Strings stream referencing the name of the file.</param>
+        /// <param name="hashValue">The  index into the #Blob stream referencing the hash value of the file.</param>
         public FileReferenceRow(FileAttributes attributes, uint name, uint hashValue)
         {
             Attributes = attributes;
@@ -88,11 +94,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return Attributes == other.Attributes && Name == other.Name && HashValue == other.HashValue;
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is FileReferenceRow other && Equals(other);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             unchecked
@@ -104,6 +112,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"({(int) Attributes:X8}, {Name:X8}, {HashValue:X8})";

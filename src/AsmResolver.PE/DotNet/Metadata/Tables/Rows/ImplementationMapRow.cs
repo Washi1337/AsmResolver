@@ -37,6 +37,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the implementation map metadata table.
+        /// </summary>
+        /// <param name="attributes">The attributes associated to the implementation mapping.</param>
+        /// <param name="memberForwarded">The MemberForwarded index (an index into either the Field or Method table)
+        /// indicating the member that was assigned P/Invoke information.</param>
+        /// <param name="importName">The index into the #Strings stream referencing the name of the imported member.</param>
+        /// <param name="importScope">The  index into the ModuleRef table indicating the module that this imported member defines.</param>
         public ImplementationMapRow(ImplementationMapAttributes attributes, uint memberForwarded, uint importName, uint importScope)
         {
             Attributes = attributes;

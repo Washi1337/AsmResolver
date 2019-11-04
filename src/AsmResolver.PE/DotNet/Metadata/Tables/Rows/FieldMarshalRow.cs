@@ -17,6 +17,9 @@
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Represents a single row in the field marshal metadata table.
+    /// </summary>
     public readonly struct FieldMarshalRow : IMetadataRow
     {
         /// <summary>
@@ -32,6 +35,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the field marshal metadata table.
+        /// </summary>
+        /// <param name="parent">The HasFieldMarshal index (an index into either the Field or Parameter table) that this
+        /// field marshaller is assigned to.</param>
+        /// <param name="nativeType">The index into the #Blob stream containing the marshaller data.</param>
         public FieldMarshalRow(uint parent, uint nativeType)
         {
             Parent = parent;

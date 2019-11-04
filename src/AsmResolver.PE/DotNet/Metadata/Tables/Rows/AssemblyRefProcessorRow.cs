@@ -18,6 +18,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the assembly processor metadata table.
+        /// </summary>
+        /// <param name="processorId">The processor identifier the assembly is targeting.</param>
+        /// <param name="assemblyReference">The index of the AssemblyRef that this processor row was assigned to.</param>
         public AssemblyRefProcessorRow(uint processorId, uint assemblyReference)
         {
             ProcessorId = processorId;
@@ -61,11 +66,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return ProcessorId == other.ProcessorId && AssemblyReference == other.AssemblyReference;
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is AssemblyRefProcessorRow other && Equals(other);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             unchecked

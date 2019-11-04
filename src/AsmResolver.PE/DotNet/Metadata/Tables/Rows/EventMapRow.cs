@@ -35,6 +35,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the event map metadata table.
+        /// </summary>
+        /// <param name="parent">The index into the TypeDef table that this mapping is associating to an event list.</param>
+        /// <param name="eventList">The index into the Event table indicating the first event that is defined in the event list.</param>
         public EventMapRow(uint parent, uint eventList)
         {
             Parent = parent;

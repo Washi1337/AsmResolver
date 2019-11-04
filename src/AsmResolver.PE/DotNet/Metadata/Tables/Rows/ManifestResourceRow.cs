@@ -37,6 +37,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the manifest resource metadata table.
+        /// </summary>
+        /// <param name="offset">The byte offset within the referenced file at which the resource record begins. </param>
+        /// <param name="attributes">The attributes associated with this resource.</param>
+        /// <param name="name">The index into the #Strings heap referencing the name of the resource.</param>
+        /// <param name="implementation">The Implementation index (an index into either the File, AssemblyRef or
+        /// ExportedType table) indicating the file that contains the resource data. </param>
         public ManifestResourceRow(uint offset, ManifestResourceAttributes attributes, uint name, uint implementation)
         {
             Offset = offset;

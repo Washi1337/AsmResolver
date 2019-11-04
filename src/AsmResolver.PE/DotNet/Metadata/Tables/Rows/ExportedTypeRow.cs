@@ -38,6 +38,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[4].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the exported type metadata table.
+        /// </summary>
+        /// <param name="attributes">The attributes associated to the exported type.</param>
+        /// <param name="typeDefinitionId">The RID hint of the type definition that was exported.</param>
+        /// <param name="name">The index into the #Strings heap containing the name of the type reference.</param>
+        /// <param name="ns">The index into the #Strings heap containing the namespace of the type reference.</param>
+        /// <param name="implementation">The Implementation index (an index into either the File, ExportedType or AssemblyRef table),
+        /// indicating the scope that can be used to resolve the exported type.</param>
         public ExportedTypeRow(TypeAttributes attributes, uint typeDefinitionId, uint name, uint ns, uint implementation)
         {
             Attributes = attributes;

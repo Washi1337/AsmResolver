@@ -1,5 +1,11 @@
+// Disable xmldoc warnings.
+#pragma warning disable 1591
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all hash algorithms that can be used to hash public keys of assemblies.
+    /// </summary>
     public enum AssemblyHashAlgorithm : uint
     {
         None = 0x0000,

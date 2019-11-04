@@ -39,6 +39,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[5].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the type definition metadata table.
+        /// </summary>
+        /// <param name="attributes">The attributes associated to the type.</param>
+        /// <param name="name">The index into the #Strings heap containing the name of the type reference.</param>
+        /// <param name="ns">The index into the #Strings heap containing the namespace of the type reference.</param>
+        /// <param name="extends">The TypeDefOrRef coded index representing the base type of this type.</param>
+        /// <param name="fieldList">The index into the Field (or FieldPtr) table, representing the first field defined
+        /// in the type. </param>
+        /// <param name="methodList">The index into the Method (or MethodPtr) table, representing the first method defined
+        /// in the type. </param>
         public TypeDefinitionRow(TypeAttributes attributes, uint name, uint ns, uint extends, uint fieldList, uint methodList)
         {
             Attributes = attributes;

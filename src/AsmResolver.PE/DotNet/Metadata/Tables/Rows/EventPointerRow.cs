@@ -33,11 +33,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new EventPointerRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the event pointer metadata table.
+        /// </summary>
+        /// <param name="event">The index into the Event table that this pointer references.</param>
         public EventPointerRow(uint @event)
         {
             Event = @event;
         }
 
+        /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.EventPtr;
 
         /// <summary>

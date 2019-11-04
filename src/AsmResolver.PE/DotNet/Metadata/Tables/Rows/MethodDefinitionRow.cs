@@ -40,6 +40,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[5].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the method definition metadata table.
+        /// </summary>
+        /// <param name="body">The reference to the beginning of the method body. </param>
+        /// <param name="implAttributes">The characteristics of the implementation of the method body.</param>
+        /// <param name="attributes">The attributes associated to the method.</param>
+        /// <param name="name">The index into the #Strings heap containing the name of the type reference.</param>
+        /// <param name="signature">The index into the #Blob heap containing the signature of the method.</param>
+        /// <param name="parameterList">The index into the Param (or ParamPtr) table, representing the first parameter
+        /// that this method defines.</param>
         public MethodDefinitionRow(ISegmentReference body, MethodImplAttributes implAttributes, MethodAttributes attributes, 
             uint name, uint signature, uint parameterList)
         {
@@ -72,6 +82,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <summary>
         /// Gets the characteristics of the implementation of the method body.
         /// </summary>
+        /// <remarks>
+        /// These attributes dictate the format of <see cref="Body"/>.
+        /// </remarks>
         public MethodImplAttributes ImplAttributes
         {
             get;
@@ -166,6 +179,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"({Body.Rva:X8}, {(int)ImplAttributes:X4}, {(int) Attributes:X4}, {Name:X8}, {Signature:X8}, {ParameterList:X8})";

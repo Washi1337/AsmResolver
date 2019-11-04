@@ -2,6 +2,9 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be assigned to a method semantics row.
+    /// </summary>
     [Flags]
     public enum MethodSemanticsAttributes : ushort
     {

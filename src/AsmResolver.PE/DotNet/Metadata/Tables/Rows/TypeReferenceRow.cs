@@ -36,6 +36,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the type reference metadata table.
+        /// </summary>
+        /// <param name="resolutionScope">The  ResolutionScope coded index  containing the scope that can resolve this
+        /// type reference. </param>
+        /// <param name="name">The index into the #Strings heap containing the name of the type reference.</param>
+        /// <param name="ns">The index into the #Strings heap containing the namespace of the type reference.</param>
         public TypeReferenceRow(uint resolutionScope, uint name, uint ns)
         {
             ResolutionScope = resolutionScope;

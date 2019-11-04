@@ -1,5 +1,8 @@
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be assigned to a file reference.
+    /// </summary>
     public enum FileAttributes : uint
     {
         /// <summary>

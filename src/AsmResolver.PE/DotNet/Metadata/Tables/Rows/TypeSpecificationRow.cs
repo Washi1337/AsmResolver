@@ -33,6 +33,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new TypeSpecificationRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the type specification metadata table.
+        /// </summary>
+        /// <param name="signature">The index into the #Blob stream referencing the type signature that was exposed by
+        /// this row.</param>
         public TypeSpecificationRow(uint signature)
         {
             Signature = signature;

@@ -2,6 +2,9 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be assigned to a method definition.
+    /// </summary>
     [Flags]
     public enum MethodAttributes : ushort
     {
@@ -33,7 +36,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Specifies the method can be accesed by anyone who has visibility to this scope.
         /// </summary>
         Public = 0x0006,
+        /// <summary>
+        /// Provides a bitmask for all flags related to member access.
+        /// </summary>
         MemberAccessMask = 0x7,
+        /// <summary>
+        /// Indicates that the managed method is exported by thunk to unmanaged code.
+        /// </summary>
         UnmanagedExport = 0x8,
         /// <summary>
         /// Specifies the method can be accessed without requiring an instance.
@@ -59,8 +68,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Specifies the method always gets a new slot in the vtable.
         /// </summary>
         NewSlot = 0x100,
+        /// <summary>
+        /// Provides a bitmask for flags related to the vtable layout.
+        /// </summary>
         VtableLayoutMask = 0x100,
+        /// <summary>
+        /// Indicates that the method can only be overridden when it is also accessible.
+        /// </summary>
         CheckAccessOnOverride = 0x200,
+        /// <summary>
+        /// Indicates the method is abstract and needs to be overridden in a derived class.
+        /// </summary>
         Abstract = 0x400,
         /// <summary>
         /// Specifies that the method uses a special name.

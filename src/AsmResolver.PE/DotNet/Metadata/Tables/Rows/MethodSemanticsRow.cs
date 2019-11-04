@@ -33,6 +33,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the method semantics table.
+        /// </summary>
+        /// <param name="attributes">The semantic attributes that are assigned to the method.</param>
+        /// <param name="method">The index into the method definition table indicating the method that was assigned
+        /// special semantics.</param>
+        /// <param name="association">The index into the method definition table indicating the method that was assigned
+        /// special semantics.</param>
         public MethodSemanticsRow(MethodSemanticsAttributes attributes, uint method, uint association)
         {
             Attributes = attributes;

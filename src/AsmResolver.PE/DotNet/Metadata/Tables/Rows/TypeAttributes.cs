@@ -2,10 +2,12 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be assigned to a type definition.
+    /// </summary>
     [Flags]
     public enum TypeAttributes : uint
     {
-        VisibilityMask = 0x00000007,
         /// <summary>
         /// Class is not public scope.
         /// </summary>
@@ -38,9 +40,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Class is nested with family or assembly visibility.
         /// </summary>
         NestedFamilyOrAssembly = 0x00000007,
-
-
-        LayoutMask = 0x00000018,
+        /// <summary>
+        /// Provides a bitmask for obtaining flags related to visibility.
+        /// </summary>
+        VisibilityMask = 0x00000007,
+        
         /// <summary>
         /// Class fields are auto-laid out
         /// </summary>
@@ -53,8 +57,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// Layout is supplied explicitly
         /// </summary>
         ExplicitLayout = 0x00000010,
+        /// <summary>
+        /// Provides a bitmask for obtaining flags related to the layout of the type.
+        /// </summary>
+        LayoutMask = 0x00000018,
 
-        ClassSemanticsMask = 0x00000060,
         /// <summary>
         /// BaseType is a class.
         /// </summary>
@@ -63,7 +70,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// BaseType is an interface.
         /// </summary>
         Interface = 0x00000020, 
-
+        /// <summary>
+        /// Provides a bitmask for obtaining flags related to the semantics of the type.
+        /// </summary>
+        ClassSemanticsMask = 0x00000060,
         
         /// <summary>
         /// Class is abstract.
@@ -87,7 +97,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         Serializable = 0x00002000, 
 
 
-        StringFormatMask = 0x00030000,
         /// <summary>
         /// LPTSTR is interpreted as ANSI in this class.
         /// </summary>
@@ -104,8 +113,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// A non-standard encoding specified by CustomFormatMask.
         /// </summary>
         CustomFormatClass = 0x00030000,
-
-        CustomFormatMask = 0x00C00000, 
+        
+        /// <summary>
+        /// Provides a bitmask for obtaining flag related to string format.
+        /// </summary>
+        StringFormatMask = 0x00030000,
 
         /// <summary>
         /// Initialize the class any time before first static field access.
@@ -115,8 +127,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// This ExportedType is a type forwarder.
         /// </summary>
         Forwarder = 0x00200000,
-
-        ReservedMask = 0x00040800,
 
         /// <summary>
         /// Runtime should check name encoding.

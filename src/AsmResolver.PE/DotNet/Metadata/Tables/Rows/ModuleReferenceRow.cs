@@ -33,6 +33,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new ModuleReferenceRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the module reference metadata table.
+        /// </summary>
+        /// <param name="name">The index into the #Strings heap referencing the name of the external module that was
+        /// imported.</param>
         public ModuleReferenceRow(uint name)
         {
             Name = name;

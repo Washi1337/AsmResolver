@@ -33,6 +33,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the method implementation metadata table.
+        /// </summary>
+        /// <param name="class">The index into the TypeDef table indicating the class that inherited methods from an interface.</param>
+        /// <param name="methodBody">The MethodDefOrRef index indicating the method which provides the implementation
+        /// for the interface method.</param>
+        /// <param name="methodDeclaration">The MethodDefOrRef index indicating the interface method which is implemented.</param>
         public MethodImplementationRow(uint @class, uint methodBody, uint methodDeclaration)
         {
             Class = @class;

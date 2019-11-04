@@ -35,6 +35,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the method specification metadata table.
+        /// </summary>
+        /// <param name="method">The index into the method definition table indicating the method to be instantiated.</param>
+        /// <param name="instantiation">The index into the #Blob stream referencing the instantiation parameters of the method.</param>
         public MethodSpecificationRow(uint method, uint instantiation)
         {
             Method = method;

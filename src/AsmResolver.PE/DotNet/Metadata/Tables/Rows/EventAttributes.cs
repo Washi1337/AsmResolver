@@ -2,6 +2,9 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be associated to an event definition.
+    /// </summary>
     [Flags]
     public enum EventAttributes : ushort
     {

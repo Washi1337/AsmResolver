@@ -36,6 +36,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the member reference metadata table.
+        /// </summary>
+        /// <param name="parent">The MemberRefParent index indicating the parent member reference or definition that
+        /// defines or can resolve the member reference.</param>
+        /// <param name="name">The index into the #Strings heap containing the name of the member reference.</param>
+        /// <param name="signature">The index into the #Blob heap containing the signature of the member.</param>
         public MemberReferenceRow(uint parent, uint name, uint signature)
         {
             Parent = parent;

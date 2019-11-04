@@ -42,6 +42,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[8].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the assembly reference table.
+        /// </summary>
+        /// <param name="majorVersion">The major version number of the assembly.</param>
+        /// <param name="minorVersion">The minor version number of the assembly.</param>
+        /// <param name="buildNumber">The build version number of the assembly.</param>
+        /// <param name="revisionNumber">The revision version number of the assembly.</param>
+        /// <param name="attributes">The attributes associated to the assembly.</param>
+        /// <param name="publicKeyOrToken">The index into the #Blob stream referencing the public key or token of the
+        /// assembly to use for verification of a signature, or 0 if the assembly was not signed.</param>
+        /// <param name="name">The index into the #Strings stream referencing the name of the assembly.</param>
+        /// <param name="culture">The index into the #Strings stream referencing the locale string of the assembly.</param>
+        /// <param name="hashValue">The index into the #Blob stream referencing the hash value of the assembly reference.</param>
         public AssemblyReferenceRow(ushort majorVersion, ushort minorVersion, ushort buildNumber, ushort revisionNumber, 
             AssemblyAttributes attributes, uint publicKeyOrToken, uint name, uint culture, uint hashValue)
         {

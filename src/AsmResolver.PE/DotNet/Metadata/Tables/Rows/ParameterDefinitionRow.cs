@@ -36,6 +36,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the parameter definition metadata table. 
+        /// </summary>
+        /// <param name="attributes">The attributes associated to the parameter.</param>
+        /// <param name="sequence">The index of the parameter definition.</param>
+        /// <param name="name">The index into the #Strings heap containing the name of the type reference.</param>
         public ParameterDefinitionRow(ParameterAttributes attributes, ushort sequence, uint name)
         {
             Attributes = attributes;
@@ -91,11 +97,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return Attributes == other.Attributes && Sequence == other.Sequence && Name == other.Name;
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is ParameterDefinitionRow other && Equals(other);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             unchecked
@@ -107,6 +115,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"({(int) Attributes:X4}, {Sequence:X4}, {Name:X8})";

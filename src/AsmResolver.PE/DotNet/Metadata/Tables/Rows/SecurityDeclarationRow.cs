@@ -17,8 +17,17 @@
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Represents a single row in the security declaration metadata table.
+    /// </summary>
     public readonly struct SecurityDeclarationRow : IMetadataRow
     {
+        /// <summary>
+        /// Reads a single security declaration row from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="layout">The layout of the security declaration table.</param>
+        /// <returns>The row.</returns>
         public static SecurityDeclarationRow FromReader(IBinaryStreamReader reader, TableLayout layout)
         {
             return new SecurityDeclarationRow(
@@ -27,13 +36,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the security declaration metadata table.
+        /// </summary>
+        /// <param name="action">The action to be performed.</param>
+        /// <param name="parent">The HasDeclSecurity index that this security attribute is assigned to.</param>
+        /// <param name="permissionSet">The index into the #Blob stream referencing the permission set assigned to the member.</param>
         public SecurityDeclarationRow(SecurityAction action, uint parent, uint permissionSet)
         {
             Action = action;
             Parent = parent;
             PermissionSet = permissionSet;
         }
-        
+
+        /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.DeclSecurity;
 
         /// <summary>

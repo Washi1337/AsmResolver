@@ -33,6 +33,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new FieldPointerRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the field pointer metadata table.
+        /// </summary>
+        /// <param name="field">The index into the Field table that this pointer references.</param>
         public FieldPointerRow(uint field)
         {
             Field = field;

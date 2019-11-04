@@ -36,6 +36,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the class layout metadata table,
+        /// </summary>
+        /// <param name="packingSize">The alignment in bytes of each field in the type. </param>
+        /// <param name="classSize">The size in bytes of the type.</param>
+        /// <param name="parent">The index into the TypeDef table indicating the type that this layout is assigned to.</param>
         public ClassLayoutRow(ushort packingSize, uint classSize, uint parent)
         {
             PackingSize = packingSize;

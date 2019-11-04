@@ -35,6 +35,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the field layout metadata table.
+        /// </summary>
+        /// <param name="offset">The offset of the field relative to the start of the enclosing structure type.</param>
+        /// <param name="field">The index into the Field type referencing the field that this layout was assigned to.</param>
         public FieldLayoutRow(uint offset, uint field)
         {
             Offset = offset;

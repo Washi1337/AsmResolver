@@ -36,6 +36,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadUInt32());
         }
         
+        /// <summary>
+        /// Creates a new row for the assembly operating system metadata table.
+        /// </summary>
+        /// <param name="platformId">The identifier of the platform the assembly is targeting.</param>
+        /// <param name="majorVersion">The major version of the platform the assembly is targeting.</param>
+        /// <param name="minorVersion">The minor version of the platform the assembly is targeting.</param>
         public AssemblyOSRow(uint platformId, uint majorVersion, uint minorVersion)
         {
             PlatformId = platformId;

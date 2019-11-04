@@ -35,6 +35,12 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
 
+        /// <summary>
+        /// Creates anew row for the generic parameter constraint metadata table.
+        /// </summary>
+        /// <param name="owner">The index into the GenericParam table indicating the owner of the constraint.</param>
+        /// <param name="constraint">The TypeDefOrRef index (an index into either the TypeRef, TypeDef or TypeSpec table)
+        /// indicating the constraint that was put on the generic parameter.</param>
         public GenericParameterConstraintRow(uint owner, uint constraint)
         {
             Owner = owner;

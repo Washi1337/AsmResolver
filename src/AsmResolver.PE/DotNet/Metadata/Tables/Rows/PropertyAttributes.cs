@@ -2,6 +2,9 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be assigned to a property definition.
+    /// </summary>
     [Flags]
     public enum PropertyAttributes : ushort
     {
@@ -9,8 +12,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// The property uses a special name.
         /// </summary>
         SpecialName = 0x0200,
-        // Reserved flags for Runtime use only.
-        ReservedMask = 0xf400,
         /// <summary>
         /// The runtime should check the name encoding.
         /// </summary>

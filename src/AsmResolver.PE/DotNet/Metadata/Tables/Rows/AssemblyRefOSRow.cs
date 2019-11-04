@@ -20,6 +20,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the assembly reference operating system metadata table.
+        /// </summary>
+        /// <param name="platformId">The identifier of the platform the assembly is targeting.</param>
+        /// <param name="majorVersion">The major version of the platform the assembly is targeting.</param>
+        /// <param name="minorVersion">The minor version of the platform the assembly is targeting.</param>
+        /// <param name="assemblyReference">The index of the AssemblyRef that this operating system row
+        /// was assigned to.</param>
         public AssemblyRefOSRow(uint platformId, uint majorVersion, uint minorVersion, uint assemblyReference)
         {
             PlatformId = platformId;

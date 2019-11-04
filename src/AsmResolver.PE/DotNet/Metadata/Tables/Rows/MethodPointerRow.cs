@@ -33,11 +33,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new MethodPointerRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the method pointer metadata table.
+        /// </summary>
+        /// <param name="method">The index into the Method table that this pointer references.</param>
         public MethodPointerRow(uint method)
         {
             Method = method;
         }
 
+        /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.MethodPtr;
 
         /// <summary>

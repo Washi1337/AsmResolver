@@ -36,6 +36,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the event definition metadata table.
+        /// </summary>
+        /// <param name="attributes">The attributes associated to the event definition.</param>
+        /// <param name="name">The index into the #Strings stream referencing the name of the event.</param>
+        /// <param name="eventType">The TypeDefOrRef index (an index into either the TypeRef, TypeDef or TypeSpec table)
+        /// indicating the type of the event.</param>
         public EventDefinitionRow(EventAttributes attributes, uint name, uint eventType)
         {
             Attributes = attributes;

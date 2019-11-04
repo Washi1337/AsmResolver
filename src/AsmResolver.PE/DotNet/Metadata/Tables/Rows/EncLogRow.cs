@@ -35,6 +35,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 (DeltaFunctionCode) reader.ReadUInt32());
         }
         
+        /// <summary>
+        /// Creates a new row for the edit-and-continue log metadata table.
+        /// </summary>
+        /// <param name="token">The metadata token to apply the delta function to.</param>
+        /// <param name="funcCode">The delta function to apply.</param>
         public EncLogRow(MetadataToken token, DeltaFunctionCode funcCode)
         {
             Token = token;

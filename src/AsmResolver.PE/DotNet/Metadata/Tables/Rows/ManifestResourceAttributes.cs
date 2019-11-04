@@ -1,8 +1,10 @@
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
+    /// <summary>
+    /// Provides members defining all flags that can be assigned to a manifest resource.
+    /// </summary>
     public enum ManifestResourceAttributes : uint
     {
-        VisibilityMask = 0x0007,
         /// <summary>
         /// Specifies the resource is exported from the asembly.
         /// </summary>

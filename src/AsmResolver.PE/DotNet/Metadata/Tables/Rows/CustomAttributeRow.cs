@@ -36,6 +36,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[2].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the custom attribute metadata table.
+        /// </summary>
+        /// <param name="parent">The HasCustomAttribute index that this attribute is assigned to.</param>
+        /// <param name="type">The CustomAttributeType index (an index into either the Method or MemberRef table) defining the
+        /// constructor to call when initializing the custom attribute.</param>
+        /// <param name="value">The index into the #Blob stream containing the arguments of the constructor call.</param>
         public CustomAttributeRow(uint parent, uint type, uint value)
         {
             Parent = parent;
@@ -58,7 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <summary>
-        /// Gets and CustomAttributeType index (an index into either the Method or MemberRef table) defining the
+        /// Gets a CustomAttributeType index (an index into either the Method or MemberRef table) defining the
         /// constructor to call when initializing the custom attribute.
         /// </summary>
         public uint Type

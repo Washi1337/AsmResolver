@@ -42,6 +42,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 reader.ReadIndex((IndexSize) layout.Columns[8].Size));
         }
 
+        /// <summary>
+        /// Creates a new row for the assembly definition table.
+        /// </summary>
+        /// <param name="hashAlgorithm">The hashing algorithm used to sign the assembly.</param>
+        /// <param name="majorVersion">The major version number of the assembly.</param>
+        /// <param name="minorVersion">The minor version number of the assembly.</param>
+        /// <param name="buildNumber">The build version number of the assembly.</param>
+        /// <param name="revisionNumber">The revision version number of the assembly.</param>
+        /// <param name="attributes">The attributes associated to the assembly.</param>
+        /// <param name="publicKey">The index into the #Blob stream referencing the public key of the assembly to use
+        /// for verification of a signature, or 0 if the assembly was not signed.</param>
+        /// <param name="name">The index into the #Strings stream referencing the name of the assembly.</param>
+        /// <param name="culture">The index into the #Strings stream referencing the locale string of the assembly.</param>
         public AssemblyDefinitionRow(AssemblyHashAlgorithm hashAlgorithm, 
             ushort majorVersion, ushort minorVersion, ushort buildNumber, ushort revisionNumber,
             AssemblyAttributes attributes, uint publicKey, uint name, uint culture)

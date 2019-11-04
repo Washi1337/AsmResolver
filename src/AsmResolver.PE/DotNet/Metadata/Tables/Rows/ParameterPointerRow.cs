@@ -33,11 +33,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return new ParameterPointerRow(reader.ReadIndex((IndexSize) layout.Columns[0].Size));
         }
         
+        /// <summary>
+        /// Creates a new row for the parameter pointer metadata table.
+        /// </summary>
+        /// <param name="parameter">The index into the Parameter table that this pointer references.</param>
         public ParameterPointerRow(uint parameter)
         {
             Parameter = parameter;
         }
 
+        /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ParamPtr;
 
         /// <summary>
