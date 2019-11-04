@@ -21,7 +21,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
     /// Represents the metadata stream containing blob signatures referenced by entries in the tables stream. 
     /// </summary>
     /// <remarks>
-    /// Like most metadata streams, the blob stream does not necessarily contain just valid strings. It can contain
+    /// Like most metadata streams, the blob stream does not necessarily contain just valid blobs. It can contain
     /// (garbage) data that is never referenced by any of the tables in the tables stream. The only guarantee that the
     /// blob heap provides, is that any blob index in the tables stream is the start address (relative to the start of
     /// the blob stream) of a blob signature that is prefixed by a length.
@@ -30,11 +30,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
     {
         public const string DefaultName = "#Blob";
 
+        /// <summary>
+        /// Initializes the blob stream with its default name.
+        /// </summary>
         protected BlobStream()
             : base(DefaultName)
         {
         }
 
+        /// <summary>
+        /// Initializes the blob stream with a custom name.
+        /// </summary>
+        /// <param name="name"></param>
         protected BlobStream(string name)
             : base(name)
         {

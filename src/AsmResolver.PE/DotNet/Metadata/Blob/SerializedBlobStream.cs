@@ -19,15 +19,28 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Blob
 {
+    /// <summary>
+    /// Represents an implementation of a blob stream that obtains blobs from a readable segment in a file.  
+    /// </summary>
     public class SerializedBlobStream : BlobStream
     {
         private readonly IReadableSegment _contents;
 
+        /// <summary>
+        /// Creates a new blob stream based on a byte array.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedBlobStream(string name, byte[] rawData)
             : this(name, new DataSegment(rawData))
         {
         }
 
+        /// <summary>
+        /// Creates a new blob stream based on a segment.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="contents">The raw contents of the stream.</param>
         public SerializedBlobStream(string name, IReadableSegment contents)
             : base(name)
         {
