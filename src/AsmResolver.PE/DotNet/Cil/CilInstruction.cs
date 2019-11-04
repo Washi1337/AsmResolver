@@ -26,6 +26,11 @@ namespace AsmResolver.PE.DotNet.Cil
             : this(0, opCode, null)
         {
         }
+        
+        public CilInstruction(int offset, CilOpCode opCode)
+            : this(offset, opCode, null)
+        {
+        }
 
         public CilInstruction(CilOpCode opCode, object operand)
             : this(0, opCode, operand)
@@ -72,6 +77,32 @@ namespace AsmResolver.PE.DotNet.Cil
             return Operand is null
                 ? $"IL_{Offset:X4}: {OpCode.Mnemonic}"
                 : $"IL_{Offset:X4}: {OpCode.Mnemonic} {Operand}";
+        }
+
+        protected bool Equals(CilInstruction other)
+        {
+            return Offset == other.Offset && OpCode.Equals(other.OpCode) && Equals(Operand, other.Operand);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((CilInstruction) obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = Offset;
+                hashCode = (hashCode * 397) ^ OpCode.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Operand != null ? Operand.GetHashCode() : 0);
+                return hashCode;
+            }
         }
         
     }
