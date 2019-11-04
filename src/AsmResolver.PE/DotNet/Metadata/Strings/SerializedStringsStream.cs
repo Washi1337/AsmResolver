@@ -40,7 +40,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         }
 
         /// <summary>
-        /// Creates a new strings stream based on a segment.
+        /// Creates a new strings stream based on a segment in a file.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="contents">The raw contents of the stream.</param>

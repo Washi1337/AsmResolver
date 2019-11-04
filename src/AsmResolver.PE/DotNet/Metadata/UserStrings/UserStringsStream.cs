@@ -28,13 +28,22 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
     /// </remarks>
     public abstract class UserStringsStream : MetadataHeap
     {
+        /// <summary>
+        /// The default name of a user-strings stream, as described in the specification provided by ECMA-335.
+        /// </summary>
         public const string DefaultName = "#US";
 
+        /// <summary>
+        /// Initializes the user-strings stream with its default name.
+        /// </summary>
         protected UserStringsStream()
             : base(DefaultName)
         {
         }
 
+        /// <summary>
+        /// Initializes the user-strings stream with a custom name.
+        /// </summary>
         protected UserStringsStream(string name)
             : base(name)
         {

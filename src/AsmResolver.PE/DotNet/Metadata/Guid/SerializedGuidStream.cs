@@ -37,7 +37,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         }
 
         /// <summary>
-        /// Creates a new GUID stream based on a segment.
+        /// Creates a new GUID stream based on a segment in a file.
         /// </summary>
         /// <param name="name">The name of the stream.</param>
         /// <param name="contents">The raw contents of the stream.</param>

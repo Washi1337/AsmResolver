@@ -21,16 +21,29 @@ using System.Text;
 
 namespace AsmResolver.PE.DotNet.Metadata.UserStrings
 {
+    /// <summary>
+    /// Represents an implementation of a user-strings stream that obtains strings from a readable segment in a file.  
+    /// </summary>
     public class SerializedUserStringsStream : UserStringsStream
     {
         private readonly IDictionary<uint, string> _cachedStrings = new Dictionary<uint, string>();
         private readonly IReadableSegment _contents;
 
+        /// <summary>
+        /// Creates a new user-strings stream based on a byte array.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedUserStringsStream(string name, byte[] rawData)
             : this(name, new DataSegment(rawData))
         {
         }
 
+        /// <summary>
+        /// Creates a new user-strings stream based on a segment in a file.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="contents">The raw contents of the stream.</param>
         public SerializedUserStringsStream(string name, IReadableSegment contents)
             : base(name)
         {
