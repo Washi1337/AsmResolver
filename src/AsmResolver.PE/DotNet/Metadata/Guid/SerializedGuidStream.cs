@@ -19,15 +19,28 @@ using System;
 
 namespace AsmResolver.PE.DotNet.Metadata.Guid
 {
+    /// <summary>
+    /// Represents an implementation of a GUID stream that obtains GUIDs from a readable segment in a file.  
+    /// </summary>
     public class SerializedGuidStream : GuidStream
     {
         private readonly IReadableSegment _contents;
 
+        /// <summary>
+        /// Creates a new GUID stream based on a byte array.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedGuidStream(string name, byte[] rawData)
             : this(name, new DataSegment(rawData))
         {
         }
 
+        /// <summary>
+        /// Creates a new GUID stream based on a segment.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
+        /// <param name="contents">The raw contents of the stream.</param>
         public SerializedGuidStream(string name, IReadableSegment contents)
             : base(name)
         {

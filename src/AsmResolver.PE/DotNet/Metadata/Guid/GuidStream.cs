@@ -30,11 +30,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
     {
         public const string DefaultName = "#GUID";
 
+        /// <summary>
+        /// Initializes the GUID stream with its default name.
+        /// </summary>
         protected GuidStream()
             : base(DefaultName)
         {
         }
 
+        /// <summary>
+        /// Initializes the GUID stream with a custom name.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
         protected GuidStream(string name)
             : base(name)
         {

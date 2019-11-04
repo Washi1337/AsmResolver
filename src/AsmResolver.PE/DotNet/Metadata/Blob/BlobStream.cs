@@ -41,7 +41,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <summary>
         /// Initializes the blob stream with a custom name.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">The name of the stream.</param>
         protected BlobStream(string name)
             : base(name)
         {
