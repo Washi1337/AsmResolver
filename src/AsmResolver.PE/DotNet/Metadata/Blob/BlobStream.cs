@@ -28,6 +28,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
     /// </remarks>
     public abstract class BlobStream : MetadataHeap
     {
+        /// <summary>
+        /// The default name of a blob stream, as described in the specification provided by ECMA-335.
+        /// </summary>
         public const string DefaultName = "#Blob";
 
         /// <summary>

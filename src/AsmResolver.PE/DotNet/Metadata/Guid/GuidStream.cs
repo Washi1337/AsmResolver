@@ -28,6 +28,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
     /// </remarks>
     public abstract class GuidStream : MetadataHeap
     {
+        /// <summary>
+        /// The default name of a GUID stream, as described in the specification provided by ECMA-335.
+        /// </summary>
         public const string DefaultName = "#GUID";
 
         /// <summary>

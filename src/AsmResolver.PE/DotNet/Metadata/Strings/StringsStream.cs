@@ -28,13 +28,22 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
     /// </remarks>
     public abstract class StringsStream : MetadataHeap
     {
+        /// <summary>
+        /// The default name of a strings stream, as described in the specification provided by ECMA-335.
+        /// </summary>
         public const string DefaultName = "#Strings";
 
+        /// <summary>
+        /// Initializes the strings stream with its default name.
+        /// </summary>
         protected StringsStream()
             : base(DefaultName)
         {
         }
 
+        /// <summary>
+        /// Initializes the strings stream with a custom name.
+        /// </summary>
         protected StringsStream(string name)
             : base(name)
         {
