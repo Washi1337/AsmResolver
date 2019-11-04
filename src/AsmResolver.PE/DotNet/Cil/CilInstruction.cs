@@ -22,21 +22,53 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public class CilInstruction
     {
+        /// <summary>
+        /// Creates a new CIL instruction with no operand.
+        /// </summary>
+        /// <param name="opCode">The operation to perform.</param>
+        /// <remarks>
+        /// This constructor does not do any verification on the correctness of the instruction.
+        /// </remarks>
         public CilInstruction(CilOpCode opCode)
             : this(0, opCode, null)
         {
         }
-        
+
+        /// <summary>
+        /// Creates a new CIL instruction with no operand.
+        /// </summary>
+        /// <param name="offset">The offset of the instruction, relative to the start of the method body's code.</param>
+        /// <param name="opCode">The operation to perform.</param>
+        /// <remarks>
+        /// This constructor does not do any verification on the correctness of the instruction.
+        /// </remarks>
         public CilInstruction(int offset, CilOpCode opCode)
             : this(offset, opCode, null)
         {
         }
 
+        /// <summary>
+        /// Creates a new CIL instruction with an operand..
+        /// </summary>
+        /// <param name="opCode">The operation to perform.</param>
+        /// <param name="operand">The operand.</param>
+        /// <remarks>
+        /// This constructor does not do any verification on the correctness of the instruction.
+        /// </remarks>
         public CilInstruction(CilOpCode opCode, object operand)
             : this(0, opCode, operand)
         {
         }
 
+        /// <summary>
+        /// Creates a new CIL instruction with an operand..
+        /// </summary>
+        /// <param name="offset">The offset of the instruction, relative to the start of the method body's code.</param>
+        /// <param name="opCode">The operation to perform.</param>
+        /// <param name="operand">The operand.</param>
+        /// <remarks>
+        /// This constructor does not do any verification on the correctness of the instruction.
+        /// </remarks>
         public CilInstruction(int offset, CilOpCode opCode, object operand)
         {
             Offset = offset;
@@ -79,6 +111,11 @@ namespace AsmResolver.PE.DotNet.Cil
                 : $"IL_{Offset:X4}: {OpCode.Mnemonic} {Operand}";
         }
 
+        /// <summary>
+        /// Determines whether the provided instruction is considered equal to the current instruction.
+        /// </summary>
+        /// <param name="other">The instruction to compare against.</param>
+        /// <returns><c>true</c> if the instructions are equal, <c>false</c> otherwise.</returns>
         protected bool Equals(CilInstruction other)
         {
             return Offset == other.Offset && OpCode.Equals(other.OpCode) && Equals(Operand, other.Operand);
@@ -87,9 +124,12 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj)) 
+                return true;
+            if (obj.GetType() != GetType()) 
+                return false;
             return Equals((CilInstruction) obj);
         }
 

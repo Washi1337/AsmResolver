@@ -21,6 +21,9 @@ using static AsmResolver.PE.DotNet.Cil.CilOpCodeType;
 using static AsmResolver.PE.DotNet.Cil.CilOperandType;
 using static AsmResolver.PE.DotNet.Cil.CilFlowControl;
 
+// Disable missing XML doc warnings.
+#pragma warning disable 1591
+
 namespace AsmResolver.PE.DotNet.Cil
 {
     /// <summary>
@@ -28,7 +31,14 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public static class CilOpCodes
     {
+        /// <summary>
+        /// Gets a sorted list of all single-byte operation codes.
+        /// </summary>
         public static readonly CilOpCode[] SingleByteOpCodes = new CilOpCode[256];
+        
+        /// <summary>
+        /// Gets a sorted list of all multi-byte operation codes.
+        /// </summary>
         public static readonly CilOpCode[] MultiByteOpCodes = new CilOpCode[256];
        
         public static readonly CilOpCode Nop = new CilOpCode(
