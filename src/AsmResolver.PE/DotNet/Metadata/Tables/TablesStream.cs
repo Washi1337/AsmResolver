@@ -236,6 +236,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </remarks>
         protected IList<IMetadataTable> Tables => _tables.Value;
 
+        /// <summary>
+        /// Gets the layout of all tables in the stream.
+        /// </summary>
         protected IList<TableLayout> TableLayouts => _layouts.Value;
         
         /// <inheritdoc />
@@ -262,6 +265,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                            + sizeof(uint);
         }
 
+        /// <inheritdoc />
         public uint GetVirtualSize() => GetPhysicalSize();
 
         /// <inheritdoc />

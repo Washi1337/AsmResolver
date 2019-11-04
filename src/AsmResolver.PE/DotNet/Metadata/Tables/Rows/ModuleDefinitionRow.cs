@@ -56,6 +56,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             EncBaseId = encBaseId;
         }
 
+        /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Module;
 
         /// <summary>

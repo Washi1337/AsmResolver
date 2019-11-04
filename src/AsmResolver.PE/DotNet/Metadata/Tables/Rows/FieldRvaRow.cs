@@ -27,6 +27,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the field RVA table.</param>
+        /// <param name="referenceResolver"></param>
         /// <returns>The row.</returns>
         public static FieldRvaRow FromReader(IBinaryStreamReader reader, TableLayout layout, ISegmentReferenceResolver referenceResolver)
         {

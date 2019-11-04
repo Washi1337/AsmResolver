@@ -42,6 +42,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Field = field;
         }
 
+        /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.FieldPtr;
 
         /// <summary>

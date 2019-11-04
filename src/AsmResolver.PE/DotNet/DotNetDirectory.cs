@@ -33,6 +33,9 @@ namespace AsmResolver.PE.DotNet
         private readonly LazyVariable<IReadableSegment> _vtableFixups;
         private readonly LazyVariable<IReadableSegment> _managedNativeHeader;
 
+        /// <summary>
+        /// Creates a new .NET data directory.
+        /// </summary>
         public DotNetDirectory()
         {
             _metadata = new LazyVariable<IMetadata>(GetMetadata);

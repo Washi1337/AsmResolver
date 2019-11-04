@@ -22,6 +22,9 @@ using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet
 {
+    /// <summary>
+    /// Provides an implementation of a .NET directory that was stored in a PE file.
+    /// </summary>
     public class SerializedDotNetDirectory : DotNetDirectory
     {
         private readonly PEFile _peFile;
@@ -33,6 +36,12 @@ namespace AsmResolver.PE.DotNet
         private readonly DataDirectory _exportsDirectory;
         private readonly DataDirectory _nativeHeaderDirectory;
 
+        /// <summary>
+        /// Reads a .NET directory from an input stream.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the .NET directory.</param>
+        /// <param name="reader">The input stream.</param>
+        /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
         public SerializedDotNetDirectory(PEFile peFile, IBinaryStreamReader reader)
         {
             if (reader == null)

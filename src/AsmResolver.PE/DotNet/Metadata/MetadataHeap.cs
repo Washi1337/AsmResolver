@@ -24,6 +24,10 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public abstract class MetadataHeap : IMetadataStream
     {
+        /// <summary>
+        /// Initializes the metadata heap with a name.
+        /// </summary>
+        /// <param name="name">The name of the stream.</param>
         protected MetadataHeap(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));

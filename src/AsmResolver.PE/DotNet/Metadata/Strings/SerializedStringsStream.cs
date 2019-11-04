@@ -56,6 +56,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         /// <inheritdoc />
         public override IBinaryStreamReader CreateReader() => _contents.CreateReader();
 
+        /// <inheritdoc />
         public override uint GetPhysicalSize() => _contents.GetPhysicalSize();
 
         /// <inheritdoc />

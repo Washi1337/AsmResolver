@@ -25,6 +25,9 @@ using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
+    /// <summary>
+    /// Provides an implementation of a lazy-initialized list of metadata streams present in a metadata directory.
+    /// </summary>
     public class MetadataStreamList : LazyList<IMetadataStream>
     {
         private readonly IBinaryStreamReader _metadataReader;
@@ -32,10 +35,17 @@ namespace AsmResolver.PE.DotNet.Metadata
         private readonly int _numberOfStreams;
         private readonly ISegmentReferenceResolver _referenceResolver;
 
+        /// <summary>
+        /// Prepares a new lazy-initialized metadata stream list.
+        /// </summary>
+        /// <param name="metadataReader">The input stream containing the metadata directory.</param>
+        /// <param name="reader">The input stream containing the metadata stream entries.</param>
+        /// <param name="numberOfStreams">The number of streams.</param>
+        /// <param name="referenceResolver">The instance to use for resolving virtual addresses to other segments in the file.</param>
         public MetadataStreamList(IBinaryStreamReader metadataReader, IBinaryStreamReader reader, int numberOfStreams, 
             ISegmentReferenceResolver referenceResolver)
         {
-            _metadataReader = metadataReader;
+            _metadataReader = metadataReader ?? throw new ArgumentNullException(nameof(metadataReader));
             _entriesReader = reader ?? throw new ArgumentNullException(nameof(reader));
             _numberOfStreams = numberOfStreams;
             _referenceResolver = referenceResolver ?? throw new ArgumentNullException(nameof(referenceResolver));

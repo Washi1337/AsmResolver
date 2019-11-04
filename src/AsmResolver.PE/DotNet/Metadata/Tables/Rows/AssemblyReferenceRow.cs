@@ -183,11 +183,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                    && HashValue == other.HashValue;
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is AssemblyReferenceRow other && Equals(other);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             unchecked

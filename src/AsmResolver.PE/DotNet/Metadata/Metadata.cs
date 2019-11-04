@@ -29,18 +29,21 @@ namespace AsmResolver.PE.DotNet.Metadata
     {
         private IList<IMetadataStream> _streams;
 
+        /// <inheritdoc />
         public uint FileOffset
         {
             get;
             private set;
         }
 
+        /// <inheritdoc />
         public uint Rva
         {
             get;
             private set;
         }
 
+        /// <inheritdoc />
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
@@ -137,6 +140,11 @@ namespace AsmResolver.PE.DotNet.Metadata
             WriteStreams(writer);
         }
 
+        /// <summary>
+        /// Constructs new metadata stream headers for all streams in the metadata directory.
+        /// </summary>
+        /// <param name="offset">The offset of the first stream header.</param>
+        /// <returns>A list of stream headers.</returns>
         protected virtual IList<MetadataStreamHeader> GetStreamHeaders(uint offset)
         {
             uint sizeOfHeaders = (uint) (Streams.Count * 2 * sizeof(uint)
@@ -154,6 +162,11 @@ namespace AsmResolver.PE.DotNet.Metadata
             return result;
         }
 
+        /// <summary>
+        /// Writes a collection of stream headers to an output stream.
+        /// </summary>
+        /// <param name="writer">The output stream to write to.</param>
+        /// <param name="headers">The headers to write.</param>
         protected virtual void WriteStreamHeaders(IBinaryStreamWriter writer, IEnumerable<MetadataStreamHeader> headers)
         {
             foreach (var header in headers)
@@ -166,6 +179,10 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
         }
 
+        /// <summary>
+        /// Writes the contents of all streams to an output stream.
+        /// </summary>
+        /// <param name="writer">The output stream to write to.</param>
         protected virtual void WriteStreams(IBinaryStreamWriter writer)
         {
             foreach (var stream in Streams)

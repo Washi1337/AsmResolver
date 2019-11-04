@@ -21,6 +21,9 @@ using System.Text;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
+    /// <summary>
+    /// Provides an implementation of a metadata directory that is stored in a PE file.
+    /// </summary>
     public class SerializedMetadata : Metadata
     {
         private readonly ISegmentReferenceResolver _referenceResolver;
@@ -28,6 +31,14 @@ namespace AsmResolver.PE.DotNet.Metadata
         private readonly IBinaryStreamReader _streamContentsReader;
         private readonly int _numberOfStreams;
 
+        /// <summary>
+        /// Reads a metadata directory from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="referenceResolver">The instance to use for resolving references to other segments in the PE file.</param>
+        /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
+        /// <exception cref="NotSupportedException">Occurs when an unsupported metadata directory format was encountered.</exception>
+        /// <exception cref="BadImageFormatException">Occurs when the metadata directory header is invalid.</exception>
         public SerializedMetadata(IBinaryStreamReader reader, ISegmentReferenceResolver referenceResolver)
         {
             if (reader == null) 
@@ -65,6 +76,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             _streamEntriesReader = reader.Fork();
         }
 
+        /// <inheritdoc />
         protected override IList<IMetadataStream> GetStreams()
         {
             if (_numberOfStreams == 0)

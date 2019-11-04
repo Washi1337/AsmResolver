@@ -121,6 +121,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             }
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"({Parent:X8}, {Name:X8}, {Signature:X8})";
