@@ -28,6 +28,9 @@ namespace AsmResolver.PE.Relocations
     {
         private IList<RelocationEntry> _entries;
 
+        /// <summary>
+        /// Initializes an empty relocation block.
+        /// </summary>
         protected RelocationBlock()
         {
         }

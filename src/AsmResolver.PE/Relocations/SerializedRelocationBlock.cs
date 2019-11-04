@@ -20,12 +20,20 @@ using AsmResolver.PE.File;
 
 namespace AsmResolver.PE.Relocations
 {
+    /// <summary>
+    /// Provides an implementation of a relocation block that is stored in a PE file.
+    /// </summary>
     public class SerializedRelocationBlock : RelocationBlock
     {
         private readonly PEFile _peFile;
         private readonly uint _offset;
         private readonly uint _size;
 
+        /// <summary>
+        /// Reads a relocation block from an input stream.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the relocation block.</param>
+        /// <param name="reader">The input stream.</param>
         public SerializedRelocationBlock(PEFile peFile, IBinaryStreamReader reader)
         {
             _peFile = peFile;
@@ -36,7 +44,8 @@ namespace AsmResolver.PE.Relocations
             
             reader.FileOffset += _size;
         }
-        
+
+        /// <inheritdoc />
         protected override IList<RelocationEntry> GetEntries()
         {
             var result = new List<RelocationEntry>();

@@ -23,18 +23,27 @@ using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Relocations
 {
+    /// <summary>
+    /// Provides an implementation for a lazy-initialized list of relocation blocks stored in a PE file.
+    /// </summary>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedRelocationBlockList : LazyList<IRelocationBlock>
     {
         private readonly PEFile _peFile;
         private readonly DataDirectory _dataDirectory;
 
+        /// <summary>
+        /// Prepares a new lazy-initialized list of relocation blocks.
+        /// </summary>
+        /// <param name="peFile">The PE file containing the relocation blocks.</param>
+        /// <param name="dataDirectory">The relocations data directory.</param>
         public SerializedRelocationBlockList(PEFile peFile, DataDirectory dataDirectory)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
             _dataDirectory = dataDirectory ?? throw new ArgumentNullException(nameof(dataDirectory));
         }
-        
+
+        /// <inheritdoc />
         protected override void Initialize()
         {
             if (!_peFile.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
