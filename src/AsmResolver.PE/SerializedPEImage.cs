@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
@@ -43,6 +44,7 @@ namespace AsmResolver.PE
 
             MachineType = _peFile.FileHeader.Machine;
             Characteristics = _peFile.FileHeader.Characteristics;
+            TimeDateStamp = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(peFile.FileHeader.TimeDateStamp);
             PEKind = _peFile.OptionalHeader.Magic;
             SubSystem = _peFile.OptionalHeader.SubSystem;
             DllCharacteristics = _peFile.OptionalHeader.DllCharacteristics;

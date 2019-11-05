@@ -58,6 +58,9 @@ namespace AsmResolver.PE.File.Headers
         /// <summary>
         /// Gets or sets the time stamp of the portable executable file.
         /// </summary>
+        /// <remarks>
+        /// This timestamp is encoded as the number of seconds since 00:00 January 1, 1970.
+        /// </remarks>
         public uint TimeDateStamp
         {
             get;

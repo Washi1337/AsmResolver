@@ -104,6 +104,13 @@ namespace AsmResolver.PE
             get;
             set;
         }
+        
+        /// <inheritdoc />
+        public DateTime TimeDateStamp
+        {
+            get;
+            set;
+        }
 
         /// <inheritdoc />
         public OptionalHeaderMagic PEKind
