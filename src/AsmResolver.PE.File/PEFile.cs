@@ -68,13 +68,11 @@ namespace AsmResolver.PE.File
             if (signature != ValidPESignature)
                 throw new BadImageFormatException();
 
-            // NT headers.
-            var peFile = new PEFile
-            {
-                DosHeader = dosHeader,
-                FileHeader = FileHeader.FromReader(reader),
-                OptionalHeader = OptionalHeader.FromReader(reader)
-            };
+            // Read NT headers.
+            var peFile = new PEFile(
+                dosHeader, 
+                FileHeader.FromReader(reader), 
+                OptionalHeader.FromReader(reader));
 
             // Section headers.
             reader.FileOffset = peFile.OptionalHeader.FileOffset + peFile.FileHeader.SizeOfOptionalHeader;
@@ -97,8 +95,16 @@ namespace AsmResolver.PE.File
             return peFile;
         }
 
-        private PEFile()
+        public PEFile()
+            : this(new DosHeader(), new FileHeader(), new OptionalHeader())
         {
+        }
+
+        public PEFile(DosHeader dosHeader, FileHeader fileHeader, OptionalHeader optionalHeader)
+        {
+            DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
+            FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
+            OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
         }
 
         /// <summary>

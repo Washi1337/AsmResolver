@@ -21,6 +21,7 @@ using System.Threading;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
 using AsmResolver.PE.Win32Resources;
@@ -90,9 +91,42 @@ namespace AsmResolver.PE
             _dotNetDirectory = new LazyVariable<IDotNetDirectory>(GetDotNetDirectory);
         }
 
-        /// <summary>
-        /// Gets a collection of modules that were imported into the PE, according to the import data directory.
-        /// </summary>
+        /// <inheritdoc />
+        public MachineType MachineType
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public Characteristics Characteristics
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public OptionalHeaderMagic PEKind
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public SubSystem SubSystem
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
+        public DllCharacteristics DllCharacteristics
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
         public IList<IModuleImportEntry> Imports
         {
             get
@@ -103,18 +137,14 @@ namespace AsmResolver.PE
             }
         }
 
-        /// <summary>
-        /// Gets or sets the root resource directory in the PE, if available.
-        /// </summary>
+        /// <inheritdoc />
         public IResourceDirectory Resources
         {
             get => _resources.Value;
             set => _resources.Value = value;
         }
 
-        /// <summary>
-        /// Gets a collection of base relocations that are to be applied when loading the PE into memory for execution. 
-        /// </summary>
+        /// <inheritdoc />
         public IList<IRelocationBlock> Relocations
         {
             get

@@ -84,7 +84,7 @@ namespace AsmResolver.PE.File.Headers
             header.SizeOfImage = reader.ReadUInt32();
             header.SizeOfHeaders = reader.ReadUInt32();
             header.CheckSum = reader.ReadUInt32();
-            header.Subsystem = (SubSystem)reader.ReadUInt16();
+            header.SubSystem = (SubSystem)reader.ReadUInt16();
             header.DllCharacteristics = (DllCharacteristics)reader.ReadUInt16();
 
             if (header.Magic == OptionalHeaderMagic.Pe32)
@@ -329,7 +329,7 @@ namespace AsmResolver.PE.File.Headers
         /// <summary>
         /// Gets or sets the subsystem to use when running the portable executable (PE) file.
         /// </summary>
-        public SubSystem Subsystem
+        public SubSystem SubSystem
         {
             get;
             set;
@@ -463,7 +463,7 @@ namespace AsmResolver.PE.File.Headers
             writer.WriteUInt32(SizeOfImage);
             writer.WriteUInt32(SizeOfHeaders);
             writer.WriteUInt32(CheckSum);
-            writer.WriteUInt16((ushort)Subsystem);
+            writer.WriteUInt16((ushort)SubSystem);
             writer.WriteUInt16((ushort)DllCharacteristics);
 
             if (Magic == OptionalHeaderMagic.Pe32)

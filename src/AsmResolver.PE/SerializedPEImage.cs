@@ -40,6 +40,12 @@ namespace AsmResolver.PE
         public SerializedPEImage(PEFile peFile)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+
+            MachineType = _peFile.FileHeader.Machine;
+            Characteristics = _peFile.FileHeader.Characteristics;
+            PEKind = _peFile.OptionalHeader.Magic;
+            SubSystem = _peFile.OptionalHeader.SubSystem;
+            DllCharacteristics = _peFile.OptionalHeader.DllCharacteristics;
         }
 
         /// <inheritdoc />

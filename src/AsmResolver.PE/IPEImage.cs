@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
 using AsmResolver.PE.Win32Resources;
@@ -28,6 +29,72 @@ namespace AsmResolver.PE
     /// </summary>
     public interface IPEImage
     {
+        /// <summary>
+        /// Gets or sets the machine type that the PE image is targeting.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the machine type field in the file header of a portable
+        /// executable file.
+        /// </remarks>
+        MachineType MachineType
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        /// Gets or sets the attributes assigned to the executable file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the characteristics field in the file header of a portable
+        /// executable file.
+        /// </remarks>
+        Characteristics Characteristics
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the magic optional header signature, determining whether the image is a PE32 (32-bit) or a
+        /// PE32+ (64-bit) image.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the magic field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        OptionalHeaderMagic PEKind
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        /// Gets or sets the subsystem to use when running the portable executable (PE) file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the subsystem field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        SubSystem SubSystem
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the dynamic linked library characteristics of the portable executable (PE) file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the DLL characteristics field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        DllCharacteristics DllCharacteristics
+        {
+            get;
+            set;
+        }
+        
         /// <summary>
         /// Gets a collection of modules that were imported into the PE, according to the import data directory.
         /// </summary>
