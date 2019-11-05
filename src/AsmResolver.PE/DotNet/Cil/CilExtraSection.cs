@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Cil
     /// <remarks>
     /// This class does not do any verification on the actual contents of the section.
     /// </remarks>
-    public class CilExtraSection : ISegment
+    public class CilExtraSection : SegmentBase
     {
         /// <summary>
         /// Reads a single extra section from the provided input stream.
@@ -75,23 +75,6 @@ namespace AsmResolver.PE.DotNet.Cil
             Attributes = attributes;
             Data = data ?? throw new ArgumentNullException(nameof(data));
         }
-
-        /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public uint Rva
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
         
         /// <summary>
         /// Gets or sets the attributes associated to this section.
@@ -158,22 +141,15 @@ namespace AsmResolver.PE.DotNet.Cil
             get => _data;
             set => _data = value ?? throw new ArgumentNullException(nameof(value));
         }
-
-        /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-            Rva = newRva;
-        }
  
         /// <inheritdoc />
-        public uint GetPhysicalSize() => (uint) Data.Length + 4;
+        public override uint GetPhysicalSize() => (uint) Data.Length + 4;
 
         /// <inheritdoc />
-        public uint GetVirtualSize() => GetPhysicalSize();
+        public override uint GetVirtualSize() => GetPhysicalSize();
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public override void Write(IBinaryStreamWriter writer)
         {
             writer.WriteByte((byte) Attributes);
         

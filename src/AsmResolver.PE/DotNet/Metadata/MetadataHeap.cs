@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// <summary>
     /// Provides a base implementation of a metadata heap. 
     /// </summary>
-    public abstract class MetadataHeap : IMetadataStream
+    public abstract class MetadataHeap : SegmentBase, IMetadataStream
     {
         /// <summary>
         /// Initializes the metadata heap with a name.
@@ -34,23 +34,6 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
         
         /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public uint Rva
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
-
-        /// <inheritdoc />
         public string Name
         {
             get;
@@ -61,20 +44,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         public virtual bool CanRead => false;
 
         /// <inheritdoc />
-        public virtual void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-            Rva = newRva;
-        }
-
-        /// <inheritdoc />
-        public abstract uint GetPhysicalSize();
-
-        /// <inheritdoc />
-        public uint GetVirtualSize() => GetPhysicalSize();
-
-        /// <inheritdoc />
-        public abstract void Write(IBinaryStreamWriter writer);
+        public override uint GetVirtualSize() => GetPhysicalSize();
         
         /// <inheritdoc />
         public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();

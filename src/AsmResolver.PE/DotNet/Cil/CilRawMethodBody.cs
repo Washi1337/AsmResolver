@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Cil
     /// <summary>
     /// When overridden from this class, represents a chunk of CIL code that implements a method body.
     /// </summary>
-    public abstract class CilRawMethodBody : ISegment
+    public abstract class CilRawMethodBody : SegmentBase
     {
         /// <summary>
         /// Reads a raw method body from the given binary input stream.
@@ -45,24 +45,7 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         private byte[] _code;
-
-        /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public uint Rva
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
-
+        
         /// <summary>
         /// Gets a value indicating whether the method body is using the fat format.
         /// </summary>
@@ -81,20 +64,7 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public virtual void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-            Rva = newRva;
-        }
-
-        /// <inheritdoc />
-        public abstract uint GetPhysicalSize();
-
-        /// <inheritdoc />
-        public uint GetVirtualSize() => GetPhysicalSize();
-
-        /// <inheritdoc />
-        public abstract void Write(IBinaryStreamWriter writer);
+        public override uint GetVirtualSize() => GetPhysicalSize();
         
     }
 }

@@ -23,7 +23,7 @@ namespace AsmResolver
     /// <summary>
     /// Provides an implementation of a segment using a byte array to represent its contents. 
     /// </summary>
-    public class DataSegment : IReadableSegment
+    public class DataSegment : SegmentBase, IReadableSegment
     {
         /// <summary>
         /// Puts the remaining data of the provided input stream into a new data segment. 
@@ -64,24 +64,7 @@ namespace AsmResolver
         {
             Data = data;
         }
-
-        /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public uint Rva
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
-
+        
         /// <summary>
         /// Gets the data that is stored in the segment.
         /// </summary>
@@ -91,26 +74,13 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-            Rva = newRva;
-        }
+        public override uint GetPhysicalSize() => (uint) Data.Length;
 
         /// <inheritdoc />
-        public uint GetPhysicalSize()
-        {
-            return (uint) Data.Length;
-        }
+        public override uint GetVirtualSize() => (uint) Data.Length;
 
         /// <inheritdoc />
-        public uint GetVirtualSize()
-        {
-            return (uint) Data.Length;
-        }
-
-        /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public override void Write(IBinaryStreamWriter writer)
         {
             writer.WriteBytes(Data, 0, Data.Length);
         }

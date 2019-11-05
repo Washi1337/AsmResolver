@@ -131,10 +131,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        public uint GetVirtualSize()
-        {
-            return GetPhysicalSize();
-        }
+        public uint GetVirtualSize() => GetPhysicalSize();
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
