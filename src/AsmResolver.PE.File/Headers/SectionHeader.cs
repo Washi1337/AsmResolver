@@ -25,7 +25,7 @@ namespace AsmResolver.PE.File.Headers
     /// </summary>
     public class SectionHeader : ISegment, IOffsetConverter
     {
-        public const int SectionHeaderSize = 8 * sizeof(byte) +
+        public const uint SectionHeaderSize = 8 * sizeof(byte) +
                                              6 * sizeof (uint) +
                                              2 * sizeof (ushort) +
                                              1 * sizeof (uint);

@@ -25,7 +25,7 @@ namespace AsmResolver.PE.File.Headers
     /// </summary>
     public class OptionalHeader : ISegment
     {
-        private const int DefaultNumberOfRvasAndSizes = 15;
+        public const int DefaultNumberOfRvasAndSizes = 16;
         
         public const int ExportDirectoryIndex = 0;
         public const int ImportDirectoryIndex = 1;
@@ -219,7 +219,8 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the alignment of the sections when loaded into memory. Must be greater or equal to <see cref="FileAlignment"/>. Default is the page size for the architecture.
+        /// Gets or sets the alignment of the sections when loaded into memory. Must be greater or equal to
+        /// <see cref="FileAlignment"/>. Default is the page size for the architecture.
         /// </summary>
         public uint SectionAlignment
         {
