@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.PE.File;
@@ -40,6 +41,22 @@ namespace AsmResolver.PE.Imports
         }
         
         private IList<MemberImportEntry> _members;
+
+        /// <summary>
+        /// Creates a new empty module import.
+        /// </summary>
+        protected ModuleImportEntry()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new module import. 
+        /// </summary>
+        /// <param name="name">The name of the module to import.</param>
+        public ModuleImportEntry(string name)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+        }
 
         /// <inheritdoc />
         public string Name

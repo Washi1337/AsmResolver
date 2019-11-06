@@ -42,9 +42,6 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         /// <inheritdoc />
         public virtual bool CanRead => false;
-
-        /// <inheritdoc />
-        public override uint GetVirtualSize() => GetPhysicalSize();
         
         /// <inheritdoc />
         public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();

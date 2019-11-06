@@ -62,9 +62,6 @@ namespace AsmResolver.PE.DotNet.Cil
             get => _code;
             set => _code = value ?? throw new ArgumentNullException(nameof(value));
         }
-
-        /// <inheritdoc />
-        public override uint GetVirtualSize() => GetPhysicalSize();
         
     }
 }

@@ -77,9 +77,6 @@ namespace AsmResolver
         public override uint GetPhysicalSize() => (uint) Data.Length;
 
         /// <inheritdoc />
-        public override uint GetVirtualSize() => (uint) Data.Length;
-
-        /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
             writer.WriteBytes(Data, 0, Data.Length);

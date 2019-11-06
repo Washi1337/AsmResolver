@@ -25,6 +25,11 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public class SerializedModuleImportEntry : ModuleImportEntry
     {
+        /// <summary>
+        /// The amount of bytes a single entry uses in the import directory table.
+        /// </summary>
+        public const uint ModuleImportSize = 5 * sizeof(uint);
+        
         private readonly PEFile _peFile;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
