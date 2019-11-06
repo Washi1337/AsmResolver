@@ -24,7 +24,7 @@ The following example is a program that dumps the resources tree from a single P
         PrintResourceDirectory(peImage.Resources);
     }
 
-    private static void PrintResourceEntry(IResourceDirectoryEntry entry, int indentationLevel = 0)
+    private static void PrintResourceEntry(IResourceEntry entry, int indentationLevel = 0)
     {
         // Decide if we are dealing with a sub directory or a data entry.
         if (entry.IsDirectory)
