@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Relocations
     /// <summary>
     /// Provides a basic implementation of a base relocation block, which can be instantiated and added to a PE.
     /// </summary>
-    public class RelocationBlock : IRelocationBlock
+    public class RelocationBlock : SegmentBase, IRelocationBlock
     {
         private IList<RelocationEntry> _entries;
 
@@ -71,6 +71,18 @@ namespace AsmResolver.PE.Relocations
         protected virtual IList<RelocationEntry> GetEntries()
         {
             return new List<RelocationEntry>();
+        }
+
+        /// <inheritdoc />
+        public override uint GetPhysicalSize() => (uint) Entries.Count * sizeof(ushort) + 2 * sizeof(uint);
+
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            writer.WriteUInt32(PageRva);
+            writer.WriteUInt32(GetPhysicalSize());
+            foreach (var entry in _entries)
+                entry.Write(writer);
         }
         
     }

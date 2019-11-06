@@ -61,5 +61,11 @@ namespace AsmResolver.PE.Relocations
         /// Gets the offset (relative to the current relocation block) to the pointer to relocate.
         /// </summary>
         public int Offset => _value & 0xFFF;
+
+        /// <summary>
+        /// Writes the entry to an output stream.
+        /// </summary>
+        /// <param name="writer">The output stream</param>
+        public void Write(IBinaryStreamWriter writer) => writer.WriteUInt16(_value);
     }
 }

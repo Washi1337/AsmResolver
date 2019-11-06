@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Relocations
     /// <summary>
     /// Represents one block of relocations to be applied when the PE is loaded into memory.
     /// </summary>
-    public interface IRelocationBlock
+    public interface IRelocationBlock : ISegment
     {
         /// <summary>
         /// Gets or sets the RVA of the page to relocate.
