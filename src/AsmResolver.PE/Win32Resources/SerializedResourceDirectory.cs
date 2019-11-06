@@ -26,6 +26,11 @@ namespace AsmResolver.PE.Win32Resources
     public class SerializedResourceDirectory : ResourceDirectory
     {
         /// <summary>
+        /// Indicates the size of a single sub-directory entry in a resource directory.
+        /// </summary>
+        public const uint ResourceDirectorySize = 2 * sizeof(uint) + 4 * sizeof(ushort); 
+            
+        /// <summary>
         /// Indicates the maximum depth of sub directories a resource directory can have before AsmResolver aborts
         /// reading the resource tree branch. 
         /// </summary>

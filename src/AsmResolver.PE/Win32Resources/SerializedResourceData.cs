@@ -26,6 +26,11 @@ namespace AsmResolver.PE.Win32Resources
     /// </summary>
     public class SerializedResourceData : ResourceData
     {
+        /// <summary>
+        /// Indicates the size of a single data entry in a resource directory.
+        /// </summary>
+        public const uint ResourceDataEntrySize = 4 * sizeof(uint);
+        
         private readonly PEFile _peFile;
         private readonly uint _contentsRva;
         private readonly uint _contentsSize;
