@@ -25,6 +25,9 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <summary>
         /// Gets the offset to this segment relative to the start of the resource directory.
         /// </summary>
+        /// <remarks>
+        /// This property should only be used after the table has been relocated to the right location in the PE file.
+        /// </remarks>
         public uint Offset => Rva - _parentBuffer.Rva;
         
         /// <summary>
@@ -61,6 +64,9 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// </summary>
         /// <param name="entry">The item to get the offset for.</param>
         /// <returns>The offset.</returns>
+        /// <remarks>
+        /// This method should only be used after the table has been relocated to the right location in the PE file.
+        /// </remarks>
         public uint GetEntryOffset(TEntry entry) => Offset + _entryOffsets[entry];
 
         /// <inheritdoc />
