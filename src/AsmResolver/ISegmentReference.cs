@@ -26,6 +26,14 @@ namespace AsmResolver
     public interface ISegmentReference : IOffsetProvider
     {
         /// <summary>
+        /// Gets a value indicating whether the referenced segment can be read using a binary reader.
+        /// </summary>
+        bool CanRead
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Gets a value indicating whether the referenced segment is bounded to a fixed size.
         /// </summary>
         bool IsBounded
@@ -37,6 +45,9 @@ namespace AsmResolver
         /// Creates a binary reader starting at the beginning of the segment.
         /// </summary>
         /// <returns>The binary reader.</returns>
+        /// <remarks>
+        /// When <see cref="CanRead"/> is <c>false</c>, it is not guaranteed this method will succeed.
+        /// </remarks>
         IBinaryStreamReader CreateReader();
 
         /// <summary>

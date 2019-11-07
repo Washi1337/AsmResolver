@@ -111,6 +111,7 @@ namespace AsmResolver.PE.DotNet.Metadata
                            + ((uint) VersionString.Length).Align(4)  // Version
                            + sizeof(ushort)                          // Flags
                            + sizeof(ushort)                          // Stream count
+                           + GetSizeOfStreamHeaders()                // Stream headers
                            + Streams.Sum(s => s.GetPhysicalSize())); // Streams 
         }
 
@@ -147,8 +148,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <returns>A list of stream headers.</returns>
         protected virtual IList<MetadataStreamHeader> GetStreamHeaders(uint offset)
         {
-            uint sizeOfHeaders = (uint) (Streams.Count * 2 * sizeof(uint)
-                                         + Streams.Sum(s => ((uint) s.Name.Length + 1).Align(4)));
+            uint sizeOfHeaders = GetSizeOfStreamHeaders();
             offset += sizeOfHeaders;
             
             var result = new MetadataStreamHeader[Streams.Count];
@@ -160,6 +160,13 @@ namespace AsmResolver.PE.DotNet.Metadata
             }
 
             return result;
+        }
+
+        private uint GetSizeOfStreamHeaders()
+        {
+            uint sizeOfHeaders = (uint) (Streams.Count * 2 * sizeof(uint)
+                                         + Streams.Sum(s => ((uint) s.Name.Length + 1).Align(4)));
+            return sizeOfHeaders;
         }
 
         /// <summary>

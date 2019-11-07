@@ -177,7 +177,7 @@ namespace AsmResolver.PE.Builder
                     : new DataDirectory(0, 0));
             }
 
-            header.NumberOfRvaAndSizes = (uint) dataDirectories.Count;
+            header.NumberOfRvaAndSizes = OptionalHeader.DefaultNumberOfRvasAndSizes;
         }
 
         /// <summary>

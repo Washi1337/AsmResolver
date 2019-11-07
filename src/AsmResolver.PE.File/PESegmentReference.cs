@@ -25,6 +25,9 @@ namespace AsmResolver.PE.File
         bool IOffsetProvider.CanUpdateOffsets => false;
 
         /// <inheritdoc />
+        public bool CanRead => true;
+
+        /// <inheritdoc />
         public bool IsBounded => false;
 
         /// <inheritdoc />

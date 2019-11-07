@@ -24,7 +24,7 @@ namespace AsmResolver
     /// </summary>
     public readonly struct SegmentReference : ISegmentReference
     {
-        public SegmentReference(IReadableSegment segment)
+        public SegmentReference(ISegment segment)
         {
             Segment = segment ?? throw new ArgumentNullException(nameof(segment));
         }
@@ -40,11 +40,14 @@ namespace AsmResolver
         
         /// <inheritdoc />
         public bool IsBounded => true;
+        
+        /// <inheritdoc />
+        public bool CanRead => Segment is IReadableSegment;
 
         /// <summary>
         /// Gets the referenced segment.
         /// </summary>
-        public IReadableSegment Segment
+        public ISegment Segment
         {
             get;
         }
@@ -53,7 +56,12 @@ namespace AsmResolver
         public void UpdateOffsets(uint newFileOffset, uint newRva) => Segment.UpdateOffsets(newFileOffset, newRva);
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader() => Segment.CreateReader();
+        public IBinaryStreamReader CreateReader()
+        {
+            return CanRead
+                ? ((IReadableSegment) Segment).CreateReader()
+                : throw new InvalidOperationException("Cannot read the segment using a binary reader.");
+        }
 
         ISegment ISegmentReference.GetSegment() => Segment;
     }

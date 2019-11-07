@@ -37,6 +37,8 @@ namespace AsmResolver.PE.Tests
 
         void IOffsetProvider.UpdateOffsets(uint newFileOffset, uint newRva) => throw new InvalidOperationException();
 
+        public bool CanRead => false;
+
         bool ISegmentReference.IsBounded => false;
 
         IBinaryStreamReader ISegmentReference.CreateReader() => throw new InvalidOperationException();
