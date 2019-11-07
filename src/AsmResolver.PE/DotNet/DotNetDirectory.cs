@@ -17,13 +17,14 @@
 
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet
 {
     /// <summary>
     /// Provides a basic implementation of a CLR 2.0 data directory present in a PE image containing .NET metadata.
     /// </summary>
-    public class DotNetDirectory : IDotNetDirectory
+    public class DotNetDirectory : SegmentBase, IDotNetDirectory
     {
         private readonly LazyVariable<IMetadata> _metadata;
         private readonly LazyVariable<IReadableSegment> _resources;
@@ -46,7 +47,7 @@ namespace AsmResolver.PE.DotNet
             _vtableFixups = new LazyVariable<IReadableSegment>(GetVTableFixups);
             _managedNativeHeader = new LazyVariable<IReadableSegment>(GetManagedNativeHeader);
         }
-
+        
         /// <inheritdoc />
         public ushort MajorRuntimeVersion
         {
@@ -124,6 +125,37 @@ namespace AsmResolver.PE.DotNet
             set => _managedNativeHeader.Value = value;
         }
 
+        /// <inheritdoc />
+        public override uint GetPhysicalSize() =>
+            sizeof(uint)                            // cb
+            + 2 * sizeof(ushort)                    // version
+            + DataDirectory.DataDirectorySize       // metadata
+            + sizeof(uint)                          // flags
+            + sizeof(uint)                          // entrypoint
+            + 6 * DataDirectory.DataDirectorySize;  // data directories.
+
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            writer.WriteUInt32(GetPhysicalSize());
+            writer.WriteUInt16(MajorRuntimeVersion);
+            writer.WriteUInt16(MinorRuntimeVersion);
+            CreateDataDirectoryHeader(Metadata).Write(writer);
+            writer.WriteUInt32((uint) Flags);
+            writer.WriteUInt32(Entrypoint);
+            CreateDataDirectoryHeader(Resources).Write(writer);
+            CreateDataDirectoryHeader(StrongName).Write(writer);
+            CreateDataDirectoryHeader(CodeManagerTable).Write(writer);
+            CreateDataDirectoryHeader(VTableFixups).Write(writer);
+            CreateDataDirectoryHeader(ExportAddressTable).Write(writer);
+            CreateDataDirectoryHeader(ManagedNativeHeader).Write(writer);
+        }
+
+        private static DataDirectory CreateDataDirectoryHeader(ISegment directoryContents) =>
+            directoryContents != null 
+                ? new DataDirectory(directoryContents.Rva, directoryContents.GetPhysicalSize())
+                : new DataDirectory(0, 0);
+
         /// <summary>
         /// Obtains the data directory containing the metadata of the .NET binary. 
         /// </summary>
@@ -131,10 +163,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Metadata"/> property
         /// </remarks>
-        protected virtual IMetadata GetMetadata()
-        {
-            return null;
-        }
+        protected virtual IMetadata GetMetadata() => null;
 
         /// <summary>
         /// Obtains the data directory containing the embedded resources data of the .NET binary. 
@@ -143,10 +172,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Resources"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetResources()
-        {
-            return null;
-        }
+        protected virtual IReadableSegment GetResources() => null;
 
         /// <summary>
         /// Obtains the data directory containing the strong name signature of the .NET binary. 
@@ -155,10 +181,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="StrongName"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetStrongName()
-        {
-            return null;
-        }
+        protected virtual IReadableSegment GetStrongName() => null;
 
         /// <summary>
         /// Obtains the data directory containing the code manager table of the .NET binary. 
@@ -167,10 +190,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="CodeManagerTable"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetCodeManagerTable()
-        {
-            return null;
-        }
+        protected virtual IReadableSegment GetCodeManagerTable() => null;
 
         /// <summary>
         /// Obtains the data directory containing the export address table of the .NET binary. 
@@ -179,10 +199,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ExportAddressTable"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetExportAddressTable()
-        {
-            return null;
-        }
+        protected virtual IReadableSegment GetExportAddressTable() => null;
 
         /// <summary>
         /// Obtains the data directory containing the VTable fixups of the .NET binary. 
@@ -191,10 +208,7 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="VTableFixups"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetVTableFixups()
-        {
-            return null;
-        }
+        protected virtual IReadableSegment GetVTableFixups() => null;
 
         /// <summary>
         /// Obtains the data directory containing the managed native header of the .NET binary. 
@@ -203,10 +217,6 @@ namespace AsmResolver.PE.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ManagedNativeHeader"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetManagedNativeHeader()
-        {
-            return null;
-        }
-
+        protected virtual IReadableSegment GetManagedNativeHeader() => null;
     }
 }

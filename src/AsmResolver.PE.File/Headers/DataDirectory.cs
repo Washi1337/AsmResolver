@@ -26,6 +26,11 @@ namespace AsmResolver.PE.File.Headers
     public readonly struct DataDirectory : IWritable
     {
         /// <summary>
+        /// Indicates the size of a single data directory header.
+        /// </summary>
+        public const uint DataDirectorySize = 2 * sizeof(uint);
+        
+        /// <summary>
         /// Reads a single data directory at the current position of the provided input stream. 
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
@@ -66,9 +71,9 @@ namespace AsmResolver.PE.File.Headers
         /// Gets a value indicating the data directory is present in the portable executable file. 
         /// </summary>
         public bool IsPresentInPE => VirtualAddress != 0 || Size != 0;
-        
+
         /// <inheritdoc />
-        public uint GetPhysicalSize() => 2 * sizeof (uint);
+        public uint GetPhysicalSize() => DataDirectorySize;
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)

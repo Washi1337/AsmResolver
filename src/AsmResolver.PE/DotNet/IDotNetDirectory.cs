@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet
     /// <summary>
     /// Represents a data directory containing the CLR 2.0 header and data directories of a .NET binary.
     /// </summary>
-    public interface IDotNetDirectory
+    public interface IDotNetDirectory : ISegment
     {
         /// <summary>
         /// Gets or sets the major runtime version of the directory format.
