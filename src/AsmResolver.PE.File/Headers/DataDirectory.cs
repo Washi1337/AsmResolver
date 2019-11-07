@@ -21,13 +21,10 @@ namespace AsmResolver.PE.File.Headers
     /// Represents a data directory header, consisting of the starting address, and the size.
     /// </summary>
     /// <remarks>
-    /// This class does not contain the actual contents of the data directory.
+    /// This structure does not contain the actual contents of the data directory.
     /// </remarks>
-    public class DataDirectory : ISegment
+    public readonly struct DataDirectory : IWritable
     {
-        private uint _fileOffset;
-        private uint _rva;
-
         /// <summary>
         /// Reads a single data directory at the current position of the provided input stream. 
         /// </summary>
@@ -35,13 +32,7 @@ namespace AsmResolver.PE.File.Headers
         /// <returns>The data directory that was read.</returns>
         public static DataDirectory FromReader(IBinaryStreamReader reader)
         {
-            uint offset = reader.FileOffset;
-            uint rva = reader.Rva;
-            return new DataDirectory(reader.ReadUInt32(), reader.ReadUInt32())
-            {
-                _fileOffset = offset,
-                _rva = rva,
-            };
+            return new DataDirectory(reader.ReadUInt32(), reader.ReadUInt32());
         }
 
         /// <summary>
@@ -55,22 +46,12 @@ namespace AsmResolver.PE.File.Headers
             Size = size;
         }
 
-        /// <inheritdoc />
-        uint IOffsetProvider.FileOffset => _fileOffset;
-
-        /// <inheritdoc />
-        uint IOffsetProvider.Rva => _rva;
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
-
         /// <summary>
         /// Gets or sets the relative virtual address (RVA) of the directory.
         /// </summary>
         public uint VirtualAddress
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -79,7 +60,6 @@ namespace AsmResolver.PE.File.Headers
         public uint Size
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -88,23 +68,7 @@ namespace AsmResolver.PE.File.Headers
         public bool IsPresentInPE => VirtualAddress != 0 || Size != 0;
         
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            _fileOffset = newFileOffset; 
-            _rva = newRva;
-        }
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize()
-        {
-            return 2 * sizeof (uint);
-        }
-        /// <inheritdoc />
-
-        public uint GetVirtualSize()
-        {
-            return GetPhysicalSize();
-        }
+        public uint GetPhysicalSize() => 2 * sizeof (uint);
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)

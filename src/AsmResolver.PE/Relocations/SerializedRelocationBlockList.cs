@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Relocations
         public SerializedRelocationBlockList(PEFile peFile, DataDirectory dataDirectory)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _dataDirectory = dataDirectory ?? throw new ArgumentNullException(nameof(dataDirectory));
+            _dataDirectory = dataDirectory;
         }
 
         /// <inheritdoc />
