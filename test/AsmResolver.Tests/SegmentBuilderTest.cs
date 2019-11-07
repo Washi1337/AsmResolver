@@ -3,7 +3,7 @@ using Xunit;
 
 namespace AsmResolver.Tests
 {
-    public class SegmentCollectionTest
+    public class SegmentBuilderTest
     {
         private static byte[] ToBytes(ISegment segment)
         {
@@ -18,7 +18,7 @@ namespace AsmResolver.Tests
         [Fact]
         public void EmptyNoAlignment()
         {
-            var collection = new SegmentCollection();
+            var collection = new SegmentBuilder();
             
             collection.UpdateOffsets(0x400, 0x1000);
             
@@ -35,7 +35,7 @@ namespace AsmResolver.Tests
         {
             var segment = new DataSegment(new byte[] {1, 2, 3, 4});
 
-            var collection = new SegmentCollection {segment};
+            var collection = new SegmentBuilder {segment};
             
             collection.UpdateOffsets(0x400, 0x1000);
             
@@ -57,7 +57,7 @@ namespace AsmResolver.Tests
             var segment2 = new DataSegment(new byte[] {1, 2, 3 });
             var segment3 = new DataSegment(new byte[] {1, 2, 3, 4, 5});
 
-            var collection = new SegmentCollection {segment1, segment2, segment3};
+            var collection = new SegmentBuilder {segment1, segment2, segment3};
             
             collection.UpdateOffsets(0x400, 0x1000);
             
@@ -84,19 +84,19 @@ namespace AsmResolver.Tests
         {
             var segment = new DataSegment(new byte[] {1, 2, 3, 4});
 
-            var collection = new SegmentCollection(4) {segment};
+            var builder = new SegmentBuilder {segment};
             
-            collection.UpdateOffsets(0x400, 0x1000);
+            builder.UpdateOffsets(0x400, 0x1000);
 
             Assert.Equal(0x400u, segment.FileOffset);
             
-            Assert.Equal(4u, collection.GetPhysicalSize());
-            Assert.Equal(4u, collection.GetVirtualSize());
+            Assert.Equal(4u, builder.GetPhysicalSize());
+            Assert.Equal(4u, builder.GetVirtualSize());
 
             Assert.Equal(new byte[]
             {
                 1, 2, 3, 4
-            }, ToBytes(collection));
+            }, ToBytes(builder));
         }
 
         [Fact]
@@ -106,9 +106,14 @@ namespace AsmResolver.Tests
             var segment2 = new DataSegment(new byte[] {1, 2, 3 });
             var segment3 = new DataSegment(new byte[] {1, 2, 3, 4, 5});
 
-            var collection = new SegmentCollection(8) {segment1, segment2, segment3};
-            
-            collection.UpdateOffsets(0x400, 0x1000);
+            var builder = new SegmentBuilder
+            {
+                {segment1, 8},
+                {segment2, 8}, 
+                {segment3, 8}
+            };
+
+            builder.UpdateOffsets(0x400, 0x1000);
             
             Assert.Equal(0x400u, segment1.FileOffset);
             Assert.Equal(0x1000u, segment1.Rva);
@@ -117,15 +122,15 @@ namespace AsmResolver.Tests
             Assert.Equal(0x410u, segment3.FileOffset);
             Assert.Equal(0x1010u, segment3.Rva);
             
-            Assert.Equal(0x15u, collection.GetPhysicalSize());
-            Assert.Equal(0x15u, collection.GetVirtualSize());
+            Assert.Equal(0x15u, builder.GetPhysicalSize());
+            Assert.Equal(0x15u, builder.GetVirtualSize());
 
             Assert.Equal(new byte[]
             {
                 1, 2, 3, 4, 0, 0, 0, 0,
                 1, 2, 3, 0, 0, 0, 0, 0,
                 1, 2, 3, 4, 5
-            }, ToBytes(collection));
+            }, ToBytes(builder));
         }
         
     }

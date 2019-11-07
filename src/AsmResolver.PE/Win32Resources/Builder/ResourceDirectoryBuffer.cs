@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
     /// </summary>
     public class ResourceDirectoryBuffer : ISegment
     {
-        private readonly SegmentCollection _segments;
+        private readonly SegmentBuilder _segments;
 
         /// <summary>
         /// Creates a new resource directory buffer.
@@ -17,13 +17,13 @@ namespace AsmResolver.PE.Win32Resources.Builder
             NameTable = new ResourceNameTableBuffer(this);
             DataEntryTable = new ResourceDataTableBuffer(this);
             DirectoryTable = new ResourceDirectoryTableBuffer(this, NameTable, DataEntryTable);
-            DataTable = new SegmentCollection();
-            
-            _segments = new SegmentCollection
-            {    
-                DirectoryTable,
+            DataTable = new SegmentBuilder();
+
+            _segments = new SegmentBuilder
+            {
+                DirectoryTable, 
                 NameTable,
-                DataEntryTable,
+                DataEntryTable, 
                 DataTable
             };
         }
@@ -64,7 +64,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         /// <summary>
         /// Gets the segment containing all raw data segments for each data entry.
         /// </summary>
-        public SegmentCollection DataTable
+        public SegmentBuilder DataTable
         {
             get;
         }

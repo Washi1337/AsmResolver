@@ -15,38 +15,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver
 {
     /// <summary>
     /// Represents a collection of segments concatenated (and aligned) after each other.
     /// </summary>
-    public class SegmentCollection : ISegment, ICollection<ISegment>
+    public class SegmentBuilder : ISegment, IEnumerable<ISegment>
     {
-        private readonly IList<ISegment> _items = new List<ISegment>();
+        private readonly IList<AlignedSegment> _items = new List<AlignedSegment>();
         private uint _physicalSize;
         private uint _virtualSize;
         
-        public SegmentCollection()
-            : this(1)
-        {
-        }
-
-        public SegmentCollection(uint alignment)
-        {
-            if (alignment <= 0)
-                throw new ArgumentOutOfRangeException(nameof(alignment));
-            Alignment = alignment;
-        }
-
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the number of sub segments that are stored into the segment.
+        /// </summary>
         public int Count => _items.Count;
-
-        /// <inheritdoc />
-        public bool IsReadOnly => false;
 
         /// <inheritdoc />
         public uint FileOffset
@@ -62,14 +49,16 @@ namespace AsmResolver
             private set;
         }
 
-        public uint Alignment
-        {
-            get;
-        }
-
         /// <inheritdoc />
         public bool CanUpdateOffsets => true;
 
+        public void Add(ISegment segment) => Add(segment, 1);
+
+        public void Add(ISegment segment, uint alignment)
+        {
+            _items.Add(new AlignedSegment(segment, alignment));
+        }
+        
         /// <inheritdoc />
         public void UpdateOffsets(uint newFileOffset, uint newRva)
         {
@@ -80,16 +69,16 @@ namespace AsmResolver
             
             foreach (var item in _items)
             {
-                uint physicalPadding = newFileOffset.Align(Alignment) - newFileOffset;
-                uint virtualPadding = newRva.Align(Alignment) - newRva;
-
+                uint physicalPadding = newFileOffset.Align(item.Alignment) - newFileOffset;
+                uint virtualPadding = newRva.Align(item.Alignment) - newRva;
+                
                 newFileOffset += physicalPadding;
                 newRva += virtualPadding;
                 
-                item.UpdateOffsets(newFileOffset, newRva);
+                item.Segment.UpdateOffsets(newFileOffset, newRva);
 
-                uint physicalSize = item.GetPhysicalSize();
-                uint virtualSize = item.GetVirtualSize();
+                uint physicalSize = item.Segment.GetPhysicalSize();
+                uint virtualSize = item.Segment.GetVirtualSize();
                 
                 newFileOffset += physicalSize;
                 newRva += virtualSize;
@@ -117,44 +106,32 @@ namespace AsmResolver
             for (int i = 0; i < _items.Count; i++)
             {
                 var current = _items[i];
-                writer.FileOffset = current.FileOffset - FileOffset + start;
-                current.Write(writer);
+                writer.FileOffset = current.Segment.FileOffset - FileOffset + start;
+                current.Segment.Write(writer);
             }
         }
 
-        public void Add(ISegment item)
-        {
-            _items.Add(item);
-        }
+        public IEnumerator<ISegment> GetEnumerator() => _items.Select(s => s.Segment).GetEnumerator();
 
-        public void Clear()
-        {
-            _items.Clear();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public bool Contains(ISegment item)
+        private readonly struct AlignedSegment
         {
-            return _items.Contains(item);
-        }
+            public AlignedSegment(ISegment segment, uint alignment)
+            {
+                Segment = segment;
+                Alignment = alignment;
+            }
 
-        public void CopyTo(ISegment[] array, int arrayIndex)
-        {
-            _items.CopyTo(array, arrayIndex);
-        }
+            public ISegment Segment
+            {
+                get;
+            }
 
-        public bool Remove(ISegment item)
-        {
-            return _items.Remove(item);
-        }
-
-        public IEnumerator<ISegment> GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            public uint Alignment
+            {
+                get;
+            }
         }
         
     }
