@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Relocations
     /// <summary>
     /// Represents one single relocation that is applied upon loading the PE into memory.
     /// </summary>
-    public readonly struct RelocationEntry
+    public readonly struct RelocationEntry : IWritable
     {
         private readonly ushort _value;
 
@@ -62,10 +62,10 @@ namespace AsmResolver.PE.Relocations
         /// </summary>
         public int Offset => _value & 0xFFF;
 
-        /// <summary>
-        /// Writes the entry to an output stream.
-        /// </summary>
-        /// <param name="writer">The output stream</param>
+        /// <inheritdoc />
+        public uint GetPhysicalSize() => sizeof(ushort);
+
+        /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer) => writer.WriteUInt16(_value);
     }
 }

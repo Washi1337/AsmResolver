@@ -24,5 +24,6 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
                 0x2A                          // ret
             }, methodBody.Code);
         }
+        
     }
 }

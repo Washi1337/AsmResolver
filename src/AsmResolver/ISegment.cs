@@ -20,25 +20,13 @@ namespace AsmResolver
     /// <summary>
     /// Represents a single chunk of data residing in a file or memory space.
     /// </summary>
-    public interface ISegment : IOffsetProvider
+    public interface ISegment : IOffsetProvider, IWritable
     {
-        /// <summary>
-        /// Computes the number of bytes that the segment contains.
-        /// </summary>
-        /// <returns>The number of bytes.</returns>
-        uint GetPhysicalSize();
-
         /// <summary>
         /// Computes the number of bytes the segment will contain when it is mapped into memory.
         /// </summary>
         /// <returns>The number of bytes.</returns>
         uint GetVirtualSize();
-
-        /// <summary>
-        /// Serializes the segment to an output stream.
-        /// </summary>
-        /// <param name="writer">The output stream to write the data to.</param>
-        void Write(IBinaryStreamWriter writer);
         
     }
 
