@@ -15,6 +15,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+
 namespace AsmResolver
 {
     /// <summary>
@@ -36,5 +38,15 @@ namespace AsmResolver
         /// </summary>
         /// <returns>The binary reader.</returns>
         IBinaryStreamReader CreateReader();
+
+        /// <summary>
+        /// Obtains the segment referenced by this reference. 
+        /// </summary>
+        /// <returns>The segment.</returns>
+        /// <exception cref="InvalidOperationException">Occurs when the segment could not be obtained.</exception>
+        /// <remarks>
+        /// When <see cref="IsBounded"/> is <c>false</c>, it is not guaranteed this method will succeed.
+        /// </remarks>
+        ISegment GetSegment();
     }
 }

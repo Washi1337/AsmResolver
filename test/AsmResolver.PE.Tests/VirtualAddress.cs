@@ -40,5 +40,7 @@ namespace AsmResolver.PE.Tests
         bool ISegmentReference.IsBounded => false;
 
         IBinaryStreamReader ISegmentReference.CreateReader() => throw new InvalidOperationException();
+        
+        public ISegment GetSegment() => throw new InvalidOperationException();
     }
 }

@@ -55,5 +55,6 @@ namespace AsmResolver
         /// <inheritdoc />
         public IBinaryStreamReader CreateReader() => Segment.CreateReader();
 
+        ISegment ISegmentReference.GetSegment() => Segment;
     }
 }

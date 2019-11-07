@@ -32,6 +32,8 @@ namespace AsmResolver.PE.File
 
         /// <inheritdoc />
         public IBinaryStreamReader CreateReader() => _peFile.CreateReaderAtRva(Rva);
-        
+
+        /// <inheritdoc />
+        public ISegment GetSegment() => throw new InvalidOperationException();
     }
 }
