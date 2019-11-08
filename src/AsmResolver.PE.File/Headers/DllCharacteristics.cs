@@ -22,7 +22,7 @@ namespace AsmResolver.PE.File.Headers
     [Flags]
     public enum DllCharacteristics
     {
-        Reserved = 0x0020,
+        HighEntropyVA  = 0x0020,
         DynamicBase = 0x0040,
         ForceIntegrity = 0x0080,
         NxCompat = 0x0100,

@@ -96,42 +96,42 @@ namespace AsmResolver.PE
         {
             get;
             set;
-        }
+        } = MachineType.I386;
 
         /// <inheritdoc />
         public Characteristics Characteristics
         {
             get;
             set;
-        }
-        
+        } = Characteristics.Image | Characteristics.LargeAddressAware;
+
         /// <inheritdoc />
         public DateTime TimeDateStamp
         {
             get;
             set;
-        }
+        } = new DateTime(1970, 1, 1);
 
         /// <inheritdoc />
         public OptionalHeaderMagic PEKind
         {
             get;
             set;
-        }
+        } = OptionalHeaderMagic.Pe32;
 
         /// <inheritdoc />
         public SubSystem SubSystem
         {
             get;
             set;
-        }
+        } = SubSystem.WindowsCui;
 
         /// <inheritdoc />
         public DllCharacteristics DllCharacteristics
         {
             get;
             set;
-        }
+        } = DllCharacteristics.DynamicBase | DllCharacteristics.NoSeh | DllCharacteristics.NxCompat | DllCharacteristics.TerminalServerAware;
 
         /// <inheritdoc />
         public ulong ImageBase
