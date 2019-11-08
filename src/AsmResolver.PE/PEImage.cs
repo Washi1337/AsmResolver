@@ -79,7 +79,7 @@ namespace AsmResolver.PE
 
         private IList<IModuleImportEntry> _imports;
         private readonly LazyVariable<IResourceDirectory> _resources;
-        private IList<IRelocationBlock> _relocations;
+        private IList<BaseRelocation> _relocations;
         private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        public IList<IRelocationBlock> Relocations
+        public IList<BaseRelocation> Relocations
         {
             get
             {
@@ -207,9 +207,9 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Relocations"/> property.
         /// </remarks>
-        protected virtual IList<IRelocationBlock> GetRelocations()
+        protected virtual IList<BaseRelocation> GetRelocations()
         {
-            return new List<IRelocationBlock>();
+            return new List<BaseRelocation>();
         }
 
         /// <summary>

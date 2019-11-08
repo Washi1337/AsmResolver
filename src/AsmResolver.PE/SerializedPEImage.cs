@@ -71,12 +71,12 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IList<IRelocationBlock> GetRelocations()
+        protected override IList<BaseRelocation> GetRelocations()
         {
             var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
             return dataDirectory.IsPresentInPE
-                ? new SerializedRelocationBlockList(_peFile, dataDirectory)
-                : (IList<IRelocationBlock>) new List<IRelocationBlock>();
+                ? new SerializedRelocationList(_peFile, dataDirectory)
+                : (IList<BaseRelocation>) new List<BaseRelocation>();
         }
 
         /// <inheritdoc />

@@ -22,9 +22,9 @@ using System.Threading;
 namespace AsmResolver.PE.Relocations
 {
     /// <summary>
-    /// Provides a basic implementation of a base relocation block, which can be instantiated and added to a PE.
+    /// Represents one block of relocations to be applied when the PE is loaded into memory.
     /// </summary>
-    public class RelocationBlock : SegmentBase, IRelocationBlock
+    public class RelocationBlock : SegmentBase
     {
         private IList<RelocationEntry> _entries;
 

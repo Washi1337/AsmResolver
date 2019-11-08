@@ -104,7 +104,7 @@ namespace AsmResolver.PE
             get;
             set;
         }
-
+        
         /// <summary>
         /// Gets or sets the preferred address of the first byte of the image when loaded into memory. Must be a
         /// multiple of 64,000.
@@ -139,7 +139,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets a collection of base relocations that are to be applied when loading the PE into memory for execution. 
         /// </summary>
-        IList<IRelocationBlock> Relocations
+        IList<BaseRelocation> Relocations
         {
             get;
         }

@@ -438,11 +438,11 @@ namespace AsmResolver.PE.File
                     : OptionalHeader.SizeOfHeaders.Align(OptionalHeader.SectionAlignment);
 
                 header.PointerToRawData = fileOffset.Align(OptionalHeader.FileAlignment);
-                header.SizeOfRawData = section.Contents.GetPhysicalSize().Align(OptionalHeader.FileAlignment);
                 header.VirtualAddress = rva.Align(OptionalHeader.SectionAlignment);
-                header.VirtualSize = section.Contents.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
-
                 section.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
+               
+                header.SizeOfRawData = section.Contents.GetPhysicalSize().Align(OptionalHeader.FileAlignment);
+                header.VirtualSize = section.Contents.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
             }
         }
         

@@ -20,7 +20,8 @@ using System;
 namespace AsmResolver.PE.Relocations
 {
     /// <summary>
-    /// Represents one single relocation that is applied upon loading the PE into memory.
+    /// Represents one entry in a base relocation block, containing the offset within the page, as well as the type of relocation
+    /// to apply after the PE image was loaded by the OS.
     /// </summary>
     public readonly struct RelocationEntry : IWritable
     {
