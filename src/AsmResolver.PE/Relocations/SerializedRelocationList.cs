@@ -1,20 +1,31 @@
+using System.Diagnostics;
 using AsmResolver.Lazy;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Relocations
 {
+    /// <summary>
+    /// Provides an implementation of a lazy-initialized list of base relocation entries, read from an existing PE file.
+    /// </summary>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedRelocationList : LazyList<BaseRelocation>
     {
         private readonly PEFile _peFile;
         private readonly DataDirectory _relocDirectory;
 
+        /// <summary>
+        /// Prepares a new lazy-initialized list of base relocations.
+        /// </summary>
+        /// <param name="peFile">The PE file to read the base relocations from.</param>
+        /// <param name="relocDirectory">The directory that contains the base relocations.</param>
         public SerializedRelocationList(PEFile peFile, DataDirectory relocDirectory)
         {
             _peFile = peFile;
             _relocDirectory = relocDirectory;
         }
-        
+
+        /// <inheritdoc />
         protected override void Initialize()
         {
             if (!_peFile.TryCreateDataDirectoryReader(_relocDirectory, out var reader))

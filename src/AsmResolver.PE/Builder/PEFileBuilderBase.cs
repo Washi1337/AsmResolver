@@ -26,6 +26,7 @@ namespace AsmResolver.PE.Builder
     /// <summary>
     /// Provides a base for a PE file builder.
     /// </summary>
+    /// <typeparam name="TContext">The type that this builder uses to store intermediate values in.</typeparam>
     public abstract class PEFileBuilderBase<TContext> : IPEFileBuilder
     {
         /// <inheritdoc />
@@ -42,22 +43,27 @@ namespace AsmResolver.PE.Builder
             return peFile;
         }
 
+        /// <summary>
+        /// Creates a new context for temporary storage of intermediate values during the construction of a PE image.
+        /// </summary>
+        /// <param name="image">The image to build.</param>
+        /// <returns>The context.</returns>
         protected abstract TContext CreateContext(IPEImage image);
 
         /// <summary>
         /// Creates the sections of the PE image. 
         /// </summary>
         /// <param name="image">The image to create sections for.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         /// <returns>The sections.</returns>
         protected abstract IEnumerable<PESection> CreateSections(IPEImage image, TContext context);
 
-        protected abstract void ComputeOffsets(PEFile peFile, IPEImage image, TContext context);
-        
         /// <summary>
         /// Creates the data directory headers stored in the optional header of the PE file. 
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file that contains the sections.</param>
         /// <param name="image">The image to create the data directories for.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         /// <returns>The data directories.</returns>
         protected abstract IEnumerable<DataDirectory> CreateDataDirectories(PEFile peFile, IPEImage image, TContext context);
 
@@ -66,6 +72,7 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file containing the entrypoint.</param>
         /// <param name="image">The image that the PE file was based on.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         /// <returns>The relative virtual address to the entrypoin.</returns>
         protected abstract uint GetEntrypointAddress(PEFile peFile, IPEImage image, TContext context);
 
@@ -74,6 +81,7 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file to be aligned.</param>
         /// <param name="image">The image that the PE file was based on.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         /// <returns>The file alignment. This should be a power of 2 between 512 and 64,000.</returns>
         protected abstract uint GetFileAlignment(PEFile peFile, IPEImage image, TContext context);
         
@@ -82,6 +90,7 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file to be aligned.</param>
         /// <param name="image">The image that the PE file was based on.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         /// <returns>
         /// The section alignment. Must be greater or equal to the file alignment. Default is the page size for
         /// the architecture.
@@ -93,6 +102,7 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file to determine the image base for.</param>
         /// <param name="image">The image that the PE file was based on.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         /// <returns>The image base.</returns>
         protected abstract uint GetImageBase(PEFile peFile, IPEImage image, TContext context);
         
@@ -101,6 +111,7 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file to update.</param>
         /// <param name="image">The image that the PE file was based on.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         protected virtual void ComputeHeaderFields(PEFile peFile, IPEImage image, TContext context)
         {
             ComputeOptionalHeaderFields(peFile, image, context);
@@ -113,6 +124,7 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file to update.</param>
         /// <param name="image">The image that the PE file was based on.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         protected virtual void ComputeOptionalHeaderFields(PEFile peFile, IPEImage image, TContext context)
         {
             var header = peFile.OptionalHeader;
@@ -192,6 +204,7 @@ namespace AsmResolver.PE.Builder
         /// </summary>
         /// <param name="peFile">The (incomplete) PE file to update.</param>
         /// <param name="image">The image that the PE file was based on.</param>
+        /// <param name="context">The object containing the intermediate values used during the PE file construction.</param>
         protected virtual void ComputeFileHeaderFields(PEFile peFile, IPEImage image, TContext context)
         {
             var header = peFile.FileHeader;

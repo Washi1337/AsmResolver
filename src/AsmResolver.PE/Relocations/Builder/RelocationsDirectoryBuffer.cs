@@ -3,28 +3,22 @@ using System.Linq;
 
 namespace AsmResolver.PE.Relocations
 {
+    /// <summary>
+    /// Provides a mechanism for building a base relocations directory.
+    /// </summary>
     public class RelocationsDirectoryBuffer : SegmentBase
     {
         private readonly IList<BaseRelocation> _relocations = new List<BaseRelocation>();
         private IList<RelocationBlock> _blocks = new List<RelocationBlock>();
         
+        /// <summary>
+        /// Adds a single base relocation to the buffer.
+        /// </summary>
+        /// <param name="relocation">The base relocation to add.</param>
         public void Add(BaseRelocation relocation)
         {
             _relocations.Add(relocation);
             _blocks = null;
-        }
-
-        public override uint GetPhysicalSize()
-        {
-            EnsureBlocksCreated();
-            return (uint) _blocks.Sum(b => b.GetPhysicalSize());
-        }
-
-        public override void Write(IBinaryStreamWriter writer)
-        {
-            EnsureBlocksCreated();
-            foreach (var block in CreateBlocks())
-                block.Write(writer);
         }
 
         private void EnsureBlocksCreated()
@@ -63,6 +57,21 @@ namespace AsmResolver.PE.Relocations
             }
 
             return block;
+        }
+        
+        /// <inheritdoc />
+        public override uint GetPhysicalSize()
+        {
+            EnsureBlocksCreated();
+            return (uint) _blocks.Sum(b => b.GetPhysicalSize());
+        }
+
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            EnsureBlocksCreated();
+            foreach (var block in CreateBlocks())
+                block.Write(writer);
         }
         
     }
