@@ -45,7 +45,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// <param name="entry">The member to add.</param>
         public void AddMember(MemberImportEntry entry)
         {
-            _memberOffsets.Add(entry, _length);
+            _memberOffsets.Add(entry, _length - ThunkSize);
             _members.Add(entry);
             _length += ThunkSize;
         }

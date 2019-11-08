@@ -134,6 +134,13 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
+        public ulong ImageBase
+        {
+            get;
+            set;
+        } = 0x00400000;
+
+        /// <inheritdoc />
         public IList<IModuleImportEntry> Imports
         {
             get

@@ -48,6 +48,7 @@ namespace AsmResolver.PE
             PEKind = _peFile.OptionalHeader.Magic;
             SubSystem = _peFile.OptionalHeader.SubSystem;
             DllCharacteristics = _peFile.OptionalHeader.DllCharacteristics;
+            ImageBase = _peFile.OptionalHeader.ImageBase;
         }
 
         /// <inheritdoc />

@@ -104,6 +104,20 @@ namespace AsmResolver.PE
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets the preferred address of the first byte of the image when loaded into memory. Must be a
+        /// multiple of 64,000.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the image base field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        ulong ImageBase
+        {
+            get;
+            set;
+        }
         
         /// <summary>
         /// Gets a collection of modules that were imported into the PE, according to the import data directory.

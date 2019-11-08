@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.PE.Imports.Builder
 {
     /// <summary>
     /// Provides a base for the import lookup and address directory buffers.
     /// </summary>
-    public abstract class ImportDirectoryBufferBase : SegmentBase
+    public abstract class ImportDirectoryBufferBase : SegmentBase, IImportAddressProvider
     {
         private readonly IDictionary<IModuleImportEntry, ThunkTableBuffer> _lookupTables = new Dictionary<IModuleImportEntry, ThunkTableBuffer>();
         private uint _lookupTablesLength;
@@ -63,6 +64,20 @@ namespace AsmResolver.PE.Imports.Builder
         /// <returns>The thunk table.</returns>
         public ThunkTableBuffer GetModuleThunkTable(IModuleImportEntry module) => _lookupTables[module];
 
+        /// <inheritdoc />
+        public uint GetThunkRva(string moduleName, string memberName)
+        {
+            var module = Modules.FirstOrDefault(x => x.Name == moduleName);
+            if (module == null)
+                throw new ArgumentException($"Module {moduleName} is not imported.", nameof(moduleName));
+
+            var member = module.Members.FirstOrDefault(x => x.Name == memberName);
+            if (member == null)
+                throw new ArgumentException($"Member {moduleName}!{memberName} is not imported.", nameof(memberName));
+
+            return GetModuleThunkTable(module).GetMemberThunkRva(member);
+        }
+
         private void AddLookupTable(IModuleImportEntry module)
         {
             var lookupTable = new ThunkTableBuffer(HintNameTable, Is32Bit);
@@ -81,6 +96,5 @@ namespace AsmResolver.PE.Imports.Builder
             foreach (var module in Modules) 
                 _lookupTables[module].Write(writer);
         }
-        
     }
 }
