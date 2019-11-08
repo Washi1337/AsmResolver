@@ -78,7 +78,7 @@ namespace AsmResolver.PE.File.Tests
             var newSection = newPEFile.Sections.First(s => s.Header.Name == sectionName);
             var newData = new byte[sectionData.Length];
             
-            Assert.Equal(sectionData.Length, newSection.Contents
+            Assert.Equal(sectionData.Length, newSection
                 .CreateReader()
                 .ReadBytes(newData, 0, newData.Length));
             Assert.Equal(sectionData, newData);

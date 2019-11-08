@@ -228,7 +228,7 @@ namespace AsmResolver.PE.File
         {
             var section = GetSectionContainingRva(dataDirectory.VirtualAddress);
             uint fileOffset = section.Header.RvaToFileOffset(dataDirectory.VirtualAddress);
-            return section.Contents.CreateReader(fileOffset, dataDirectory.Size);
+            return section.CreateReader(fileOffset, dataDirectory.Size);
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace AsmResolver.PE.File
             if (TryGetSectionContainingRva(dataDirectory.VirtualAddress, out var section))
             {
                 uint fileOffset = section.Header.RvaToFileOffset(dataDirectory.VirtualAddress);
-                reader = section.Contents.CreateReader(fileOffset, dataDirectory.Size);
+                reader = section.CreateReader(fileOffset, dataDirectory.Size);
                 return true;
             }
 
@@ -258,7 +258,7 @@ namespace AsmResolver.PE.File
         public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset)
         {
             var section = GetSectionContainingOffset(fileOffset);
-            return section.Contents.CreateReader(fileOffset);
+            return section.CreateReader(fileOffset);
         }
         
         /// <summary>
@@ -271,7 +271,7 @@ namespace AsmResolver.PE.File
         {
             if (TryGetSectionContainingOffset(fileOffset, out var section))
             {
-                reader = section.Contents.CreateReader(fileOffset);
+                reader = section.CreateReader(fileOffset);
                 return true;
             }
 
@@ -288,7 +288,7 @@ namespace AsmResolver.PE.File
         public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size)
         {
             var section = GetSectionContainingOffset(fileOffset);
-            return section.Contents.CreateReader(fileOffset, size);
+            return section.CreateReader(fileOffset, size);
         } 
         
         /// <summary>
@@ -302,7 +302,7 @@ namespace AsmResolver.PE.File
         {
             if (TryGetSectionContainingOffset(fileOffset, out var section))
             {
-                reader = section.Contents.CreateReader(fileOffset, size);
+                reader = section.CreateReader(fileOffset, size);
                 return true;
             }
 
@@ -318,7 +318,7 @@ namespace AsmResolver.PE.File
         public IBinaryStreamReader CreateReaderAtRva(uint rva)
         {
             var section = GetSectionContainingRva(rva);
-            return section.Contents.CreateReader(section.Header.RvaToFileOffset(rva));
+            return section.CreateReader(section.Header.RvaToFileOffset(rva));
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace AsmResolver.PE.File
         {
             if (TryGetSectionContainingRva(rva, out var section))
             {
-                reader = section.Contents.CreateReader(section.Header.RvaToFileOffset(rva));
+                reader = section.CreateReader(section.Header.RvaToFileOffset(rva));
                 return true;
             }
 
@@ -348,7 +348,7 @@ namespace AsmResolver.PE.File
         public IBinaryStreamReader CreateReaderAtRva(uint rva, uint size)
         {
             var section = GetSectionContainingRva(rva);
-            return section.Contents.CreateReader(section.Header.RvaToFileOffset(rva), size);
+            return section.CreateReader(section.Header.RvaToFileOffset(rva), size);
         }
 
         /// <summary>
@@ -362,7 +362,7 @@ namespace AsmResolver.PE.File
         {
             if (TryGetSectionContainingRva(rva, out var section))
             {
-                reader = section.Contents.CreateReader(section.Header.RvaToFileOffset(rva), size);
+                reader = section.CreateReader(section.Header.RvaToFileOffset(rva), size);
                 return true;
             }
 

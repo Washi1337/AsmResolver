@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -22,7 +23,7 @@ namespace AsmResolver.PE.File
     /// <summary>
     /// Represents a single section in a portable executable (PE) file.
     /// </summary>
-    public class PESection : ISegment
+    public class PESection : IReadableSegment
     {
         /// <summary>
         /// Creates a new empty section.
@@ -56,11 +57,16 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the contents of the section.
         /// </summary>
-        public IReadableSegment Contents
+        public ISegment Contents
         {
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the section is readable using a binary stream reader.
+        /// </summary>
+        public bool IsReadable => Contents is IReadableSegment;
 
         /// <inheritdoc />
         public uint FileOffset => Contents?.FileOffset ?? Header.PointerToRawData;
@@ -87,6 +93,14 @@ namespace AsmResolver.PE.File
         public uint GetVirtualSize()
         {
             return Contents.GetVirtualSize();
+        }
+
+        /// <inheritdoc />
+        public IBinaryStreamReader CreateReader(uint fileOffset, uint size)
+        {
+            if (!IsReadable)
+                throw new InvalidOperationException("Section contents is not readable.");
+            return ((IReadableSegment) Contents).CreateReader(fileOffset, size);
         }
 
         /// <inheritdoc />
