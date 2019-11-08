@@ -52,19 +52,11 @@ namespace AsmResolver.PE.DotNet.Builder
         public override uint GetPhysicalSize() => 6;
 
         /// <inheritdoc />
-        public override IEnumerable<RelocationBlock> GetRelocations()
+        public override IEnumerable<BaseRelocation> GetRelocations()
         {
-            uint pageRva = Rva & unchecked((uint) ~0xFFF);
             return new[]
             {
-                new RelocationBlock(pageRva)
-                {
-                    Entries =
-                    {
-                        new RelocationEntry(RelocationType.HighLow, (int) (Rva - pageRva + 2)),
-                        new RelocationEntry(0)
-                    }
-                }
+                new BaseRelocation(RelocationType.HighLow, new RelativeReference(this, 2)), 
             };
         }
         

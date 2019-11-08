@@ -18,7 +18,7 @@ namespace AsmResolver.PE.DotNet.Builder
         /// Gets a collection of relocations that should be applied before executing the native code.
         /// </summary>
         /// <returns>The relocations.</returns>
-        public abstract IEnumerable<RelocationBlock> GetRelocations();
+        public abstract IEnumerable<BaseRelocation> GetRelocations();
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
