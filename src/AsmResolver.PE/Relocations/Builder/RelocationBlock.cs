@@ -15,11 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace AsmResolver.PE.Relocations
+namespace AsmResolver.PE.Relocations.Builder
 {
     /// <summary>
     /// Represents one block of relocations to be applied when the PE is loaded into memory.

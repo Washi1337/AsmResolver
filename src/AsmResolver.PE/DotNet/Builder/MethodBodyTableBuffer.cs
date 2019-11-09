@@ -55,7 +55,11 @@ namespace AsmResolver.PE.DotNet.Builder
         public void UpdateOffsets(uint newFileOffset, uint newRva) => _segments.UpdateOffsets(newFileOffset, newRva);
 
         /// <inheritdoc />
-        public uint GetPhysicalSize() => _segments.GetPhysicalSize();
+        public uint GetPhysicalSize()
+        {
+            uint physicalSize = _segments.GetPhysicalSize();
+            return physicalSize;
+        }
 
         /// <inheritdoc />
         public uint GetVirtualSize() => _segments.GetVirtualSize();

@@ -17,7 +17,7 @@
 
 using System;
 
-namespace AsmResolver.PE.Relocations
+namespace AsmResolver.PE.Relocations.Builder
 {
     /// <summary>
     /// Represents one entry in a base relocation block, containing the offset within the page, as well as the type of relocation

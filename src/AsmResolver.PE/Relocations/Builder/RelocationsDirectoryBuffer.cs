@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AsmResolver.PE.Relocations
+namespace AsmResolver.PE.Relocations.Builder
 {
     /// <summary>
     /// Provides a mechanism for building a base relocations directory.

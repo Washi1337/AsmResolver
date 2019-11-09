@@ -1,3 +1,8 @@
+using System;
+using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+
 namespace AsmResolver.PE.DotNet.Builder
 {
     /// <summary>
@@ -69,7 +74,7 @@ namespace AsmResolver.PE.DotNet.Builder
 
         /// <inheritdoc />
         public void UpdateOffsets(uint newFileOffset, uint newRva) => _segments.UpdateOffsets(newFileOffset, newRva);
-
+        
         /// <inheritdoc />
         public uint GetPhysicalSize() => _segments.GetPhysicalSize();
 
