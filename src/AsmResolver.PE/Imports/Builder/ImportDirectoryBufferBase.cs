@@ -32,6 +32,11 @@ namespace AsmResolver.PE.Imports.Builder
         }
 
         /// <summary>
+        /// Gets the number of modules that were added to the import directory.
+        /// </summary>
+        public int Count => Modules.Count;
+
+        /// <summary>
         /// Gets an ordered list of modules that were added to the buffer.
         /// </summary>
         protected IList<IModuleImportEntry> Modules

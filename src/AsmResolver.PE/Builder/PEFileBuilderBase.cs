@@ -158,9 +158,11 @@ namespace AsmResolver.PE.Builder
             }
 
             header.AddressOfEntrypoint = GetEntrypointAddress(peFile, image, context);
-            header.BaseOfCode = peFile.GetSectionContainingRva(header.AddressOfEntrypoint).Header.VirtualAddress;
-            header.BaseOfData = peFile.Sections.FirstOrDefault(s => s.Header.IsContentInitializedData)?.Header
-                                    .VirtualAddress ?? 0;
+            
+            header.BaseOfCode = peFile.Sections.FirstOrDefault(s => s.Header.IsContentCode)?
+                                    .Header.VirtualAddress ?? 0;
+            header.BaseOfData = peFile.Sections.FirstOrDefault(s => s.Header.IsContentInitializedData)?
+                                    .Header.VirtualAddress ?? 0;
 
             header.MajorOperatingSystemVersion = 4;
             header.MinorOperatingSystemVersion = 0;

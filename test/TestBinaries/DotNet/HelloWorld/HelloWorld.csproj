@@ -5,4 +5,8 @@
         <TargetFrameworks>net40;netcoreapp2.2</TargetFrameworks>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <PlatformTarget>AnyCPU</PlatformTarget>
+    </PropertyGroup>
+
 </Project>

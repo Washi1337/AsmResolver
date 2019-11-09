@@ -136,10 +136,13 @@ namespace AsmResolver.PE.DotNet.Builder
             if (image.Resources.Entries.Count > 0)
                 sections.Add(CreateRsrcSection(image, context));
 
-            var relocations = context.Bootstrapper.GetRelocations().ToArray();
-            if (relocations.Length > 0)
-                sections.Add(CreateRelocSection(context, relocations));
-            
+            if (context.Bootstrapper != null)
+            {
+                var relocations = context.Bootstrapper.GetRelocations().ToArray();
+                if (relocations.Length > 0)
+                    sections.Add(CreateRelocSection(context, relocations));
+            }
+
             return sections;
         }
 
@@ -151,16 +154,18 @@ namespace AsmResolver.PE.DotNet.Builder
         /// <returns>The .text section.</returns>
         protected virtual PESection CreateTextSection(IPEImage image, ManagedPEBuilderContext context)
         {
-            var contents = new SegmentBuilder
-            {
-                context.ImportDirectory.ImportAddressDirectory,
-                context.DotNetSegment,
-                context.ImportDirectory
-            };
-
             CreateImportDirectory(image, context);
             ProcessRvasInMetadataTables(context);
 
+            var contents = new SegmentBuilder();
+            if (context.ImportDirectory.Count > 0)
+                contents.Add(context.ImportDirectory.ImportAddressDirectory);
+            
+            contents.Add(context.DotNetSegment);
+            
+            if (context.ImportDirectory.Count > 0)
+                contents.Add(context.ImportDirectory);
+            
             if (context.Bootstrapper != null)
                 contents.Add(context.Bootstrapper);
 

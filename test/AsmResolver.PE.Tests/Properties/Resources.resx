@@ -21,6 +21,9 @@
     <data name="HelloWorld" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="HelloWorld_X64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.x64.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
     <data name="HelloWorld_MaliciousWin32ResLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.MaliciousWin32ResLoop.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>

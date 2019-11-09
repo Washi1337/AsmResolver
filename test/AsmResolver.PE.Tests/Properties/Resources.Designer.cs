@@ -123,6 +123,16 @@ namespace AsmResolver.PE.Tests.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        public static byte[] HelloWorld_X64 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_X64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         public static byte[] SimpleDll {
             get {
                 object obj = ResourceManager.GetObject("SimpleDll", resourceCulture);

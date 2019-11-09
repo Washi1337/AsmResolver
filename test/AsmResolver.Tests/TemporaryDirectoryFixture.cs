@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using AsmResolver.PE.File;
 using Xunit;
@@ -33,12 +34,13 @@ namespace AsmResolver.Tests
             return Path.Combine(GetTestDirectory(testClass, testMethod), fileName + ".exe");
         }
 
-        public void RebuildAndRunExe(string testClass, string testMethod, 
-            PEFile peFile, 
-            string fileName, 
-            string expectedOutput,
-            int timeout = 5000)
+        public void RebuildAndRunExe(PEFile peFile, string fileName, string expectedOutput, int timeout = 5000,
+            [CallerFilePath]
+            string testClass = "File", 
+            [CallerMemberName]
+            string testMethod = "Test")
         {
+            testClass = Path.GetFileNameWithoutExtension(testClass);
             string fullName = GetTestExecutable(testClass, testMethod, fileName);
 
             using (var fs = File.Create(fullName))

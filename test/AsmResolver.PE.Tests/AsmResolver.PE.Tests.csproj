@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\AsmResolver.PE\AsmResolver.PE.csproj" />
+      <ProjectReference Include="..\AsmResolver.Tests\AsmResolver.Tests.csproj" />
     </ItemGroup>
 
 </Project>

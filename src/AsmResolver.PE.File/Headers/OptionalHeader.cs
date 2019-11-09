@@ -416,7 +416,8 @@ namespace AsmResolver.PE.File.Headers
         /// <inheritdoc />
         public uint GetPhysicalSize()
         {
-            return 0xE0; // TODO: make dynamic.
+            // TODO: make configurable?
+            return Magic == OptionalHeaderMagic.Pe32 ? 0xE0u : 0xF0u;
         }
 
         /// <inheritdoc />

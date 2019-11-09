@@ -47,8 +47,7 @@ namespace AsmResolver.PE.File.Tests
         public void RebuildNetPENoChange()
         {
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
-            _fixture.RebuildAndRunExe(nameof(PEFileTest), nameof(RebuildNetPENoChange), 
-                peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+            _fixture.RebuildAndRunExe(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
         }
 
         [Fact]
@@ -67,8 +66,7 @@ namespace AsmResolver.PE.File.Tests
             });
 
             // Rebuild and check if file is still runnable.
-            _fixture.RebuildAndRunExe(nameof(PEFileTest), nameof(RebuildNetPEAddSection), 
-                peFile, fileName, "Hello World!" + Environment.NewLine);
+            _fixture.RebuildAndRunExe(peFile, fileName, "Hello World!" + Environment.NewLine);
 
             // Read the new file.
             var newPEFile = PEFile.FromFile(_fixture.GetTestExecutable(
