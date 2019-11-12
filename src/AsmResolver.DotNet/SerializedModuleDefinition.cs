@@ -8,7 +8,8 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Represents a lazily initialized module definition that is read from a .NET metadata image. 
+    /// Represents a lazily initialized implementation of <see cref="ModuleDefinition"/>  that is read from a
+    /// .NET metadata image. 
     /// </summary>
     public class SerializedModuleDefinition : ModuleDefinition
     {
