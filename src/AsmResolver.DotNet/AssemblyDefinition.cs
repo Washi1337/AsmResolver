@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
@@ -59,23 +62,19 @@ namespace AsmResolver.DotNet
                 throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
             return FromMetadata(peImage.DotNetDirectory.Metadata);
         }
-        
+
         /// <summary>
         /// Initializes a .NET module from a .NET metadata directory.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <returns>The module.</returns>
-        public static AssemblyDefinition FromMetadata(IMetadata metadata)
-        {
-            var stream = metadata.GetStream<TablesStream>();
-            var table = stream.GetTable<AssemblyDefinitionRow>();
-            return new SerializedAssemblyDefinition(metadata, new MetadataToken(TableIndex.Assembly, 1), table[0],
-                ModuleDefinition.FromMetadata(metadata));
-        }
+        public static AssemblyDefinition FromMetadata(IMetadata metadata) =>
+            ModuleDefinition.FromMetadata(metadata).Assembly;
         
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _culture;
         private readonly LazyVariable<byte[]> _publicKey;
+        private IList<ModuleDefinition> _modules;
 
         /// <summary>
         /// Initializes a new assembly definition.
@@ -170,6 +169,24 @@ namespace AsmResolver.DotNet
             set => _publicKey.Value = value;
         }
 
+        /// <summary>
+        /// Gets the main module of the .NET assembly containing the assembly's manifest. 
+        /// </summary>
+        public ModuleDefinition ManifestModule => Modules.Count > 0 ? Modules[0] : null;
+
+        /// <summary>
+        /// Gets a collection of modules that this .NET assembly defines.
+        /// </summary>
+        public IList<ModuleDefinition> Modules
+        {
+            get
+            {
+                if (_modules == null)
+                    Interlocked.CompareExchange(ref _modules, GetModules(), null);
+                return _modules;
+            }
+        }
+
         /// <inheritdoc />
         public byte[] GetPublicKeyToken()
         {
@@ -202,5 +219,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initializing the <see cref="PublicKey"/> property.
         /// </remarks>
         protected virtual byte[] GetPublicKey() => null;
+
+        /// <summary>
+        /// Obtains the list of defined modules in the .NET assembly. 
+        /// </summary>
+        /// <returns>The modules.</returns>
+        /// <remarks>
+        /// This method is called upon initializing the <see cref="Modules"/> and/or <see cref="ManifestModule"/> property.
+        /// </remarks>
+        protected virtual IList<ModuleDefinition> GetModules()
+            => new OwnedCollection<AssemblyDefinition, ModuleDefinition>(this);
     }
 }

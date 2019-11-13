@@ -39,7 +39,7 @@ namespace AsmResolver.Lazy
             set
             {
                 EnsureIsInitialized();
-                Items[index] = value;
+                OnSetItem(index, value);
             }
         }
 
@@ -94,16 +94,12 @@ namespace AsmResolver.Lazy
         }
 
         /// <inheritdoc />
-        public void Add(TItem item)
-        {
-            EnsureIsInitialized();
-            Items.Add(item);
-        }
+        public void Add(TItem item) => Insert(Count, item);
 
         /// <inheritdoc />
         public void Clear()
         {
-            Items.Clear();
+            OnClearItems();
             IsInitialized = true;
         }
 
@@ -125,7 +121,11 @@ namespace AsmResolver.Lazy
         public bool Remove(TItem item)
         {
             EnsureIsInitialized();
-            return Items.Remove(item);
+            int index = Items.IndexOf(item);
+            if (index == -1)
+                return false;
+            OnRemoveItem(index);
+            return true;
         }
 
         /// <inheritdoc />
@@ -139,15 +139,23 @@ namespace AsmResolver.Lazy
         public void Insert(int index, TItem item)
         {
             EnsureIsInitialized();
-            Items.Insert(index, item);
+            OnInsertItem(index, item);
         }
 
         /// <inheritdoc />
         public void RemoveAt(int index)
         {
             EnsureIsInitialized();
-            Items.RemoveAt(index);
+            OnRemoveItem(index);
         }
+
+        protected virtual void OnSetItem(int index, TItem item) => Items[index] = item;
+        
+        protected virtual void OnInsertItem(int index, TItem item) => Items.Insert(index, item);
+        
+        protected virtual void OnRemoveItem(int index) => Items.RemoveAt(index);
+
+        protected virtual void OnClearItems() => Items.Clear();
 
         /// <inheritdoc />
         public IEnumerator<TItem> GetEnumerator()

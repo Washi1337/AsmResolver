@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
@@ -12,7 +13,7 @@ namespace AsmResolver.DotNet
     /// Represents a single module in a .NET assembly. A module definition is the root object of any .NET module and
     /// defines types, as well as any resources and referenced assemblies. 
     /// </summary>
-    public class ModuleDefinition : IMetadataMember
+    public class ModuleDefinition : IMetadataMember, IOwnedCollectionElement<AssemblyDefinition>
     {
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -69,8 +70,18 @@ namespace AsmResolver.DotNet
         public static ModuleDefinition FromMetadata(IMetadata metadata)
         {
             var stream = metadata.GetStream<TablesStream>();
-            var table = stream.GetTable<ModuleDefinitionRow>();
-            return new SerializedModuleDefinition(metadata, new MetadataToken(TableIndex.Module, 1), table[0]);
+            var moduleTable = stream.GetTable<ModuleDefinitionRow>();
+            var module = new SerializedModuleDefinition(metadata, new MetadataToken(TableIndex.Module, 1), moduleTable[0]);
+            
+            var assemblyTable = stream.GetTable<AssemblyDefinitionRow>();
+            if (assemblyTable.Count > 0)
+            {
+                var assembly = new SerializedAssemblyDefinition(metadata,
+                    new MetadataToken(TableIndex.Assembly, 1), 
+                    assemblyTable[0], module);
+                module.Assembly = assembly;
+            }
+            return module;
         }
         
         private readonly LazyVariable<string> _name;
@@ -106,6 +117,22 @@ namespace AsmResolver.DotNet
         {
             get;
             protected set;
+        }
+
+        /// <summary>
+        /// Gets the parent assembly that defines this module.
+        /// </summary>
+        public AssemblyDefinition Assembly
+        {
+            get;
+            internal set;
+        }
+
+        /// <inheritdoc />
+        AssemblyDefinition IOwnedCollectionElement<AssemblyDefinition>.Owner
+        {
+            get => Assembly;
+            set => Assembly = value;
         }
 
         /// <summary>

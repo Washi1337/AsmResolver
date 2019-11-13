@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -43,5 +45,19 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         protected override byte[] GetPublicKey() => _metadata.GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKey);
+
+        /// <inheritdoc />
+        protected override IList<ModuleDefinition> GetModules()
+        {
+            _manifestModule.Assembly = null;
+            var result = new OwnedCollection<AssemblyDefinition, ModuleDefinition>(this)
+            {
+                _manifestModule
+            };
+
+            // TODO: add secondary modules from file defs.
+            
+            return result;
+        }
     }
 }
