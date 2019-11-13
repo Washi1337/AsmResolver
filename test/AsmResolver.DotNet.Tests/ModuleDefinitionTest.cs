@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.NestedClasses;
-using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests

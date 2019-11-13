@@ -19,7 +19,8 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<ITypeDefOrRef> _baseType;
         private IList<TypeDefinition> _nestedTypes;
         private string _fullName;
-        
+        private ModuleDefinition _module;
+
         /// <summary>
         /// Initializes a new type definition.
         /// </summary>
@@ -118,16 +119,12 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the module that defines the type.
         /// </summary>
-        public ModuleDefinition Module
-        {
-            get;
-            private set;
-        }
+        public ModuleDefinition Module => DeclaringType != null ? DeclaringType.Module : _module;
 
         ModuleDefinition IOwnedCollectionElement<ModuleDefinition>.Owner
         {
             get => Module;
-            set => Module = value;
+            set => _module = value;
         }
 
         /// <summary>

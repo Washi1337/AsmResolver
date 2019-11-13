@@ -86,6 +86,15 @@ namespace AsmResolver.DotNet.Tests
                 nameof(TopLevelClass2.Nested4.Nested4Nested1),
                 nameof(TopLevelClass2.Nested4.Nested4Nested2)
             }, nested4.NestedTypes.Select(t => t.Name));
+            
+            Assert.Same(class1, nested1.DeclaringType);
+            Assert.Same(class1, nested2.DeclaringType);
+            Assert.Same(class2, nested3.DeclaringType);
+            Assert.Same(class2, nested4.DeclaringType);
+            Assert.Same(module, nested1.Module);
+            Assert.Same(module, nested2.Module);
+            Assert.Same(module, nested3.Module);
+            Assert.Same(module, nested4.Module);
         }
         
     }
