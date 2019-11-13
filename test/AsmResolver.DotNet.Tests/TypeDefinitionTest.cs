@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.DotNet.TestCases.NestedClasses;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -37,5 +40,54 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal("System", module.TopLevelTypes[1].BaseType.Namespace);
             Assert.Equal("Object", module.TopLevelTypes[1].BaseType.Name);
         }
+
+        [Fact]
+        public void ReadNestedTypes()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+
+            var class1 = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass1));
+            Assert.Equal(new HashSet<string>
+            {
+                nameof(TopLevelClass1.Nested1),
+                nameof(TopLevelClass1.Nested2)
+            }, class1.NestedTypes.Select(t => t.Name));
+
+            var nested1 = class1.NestedTypes.First(t => t.Name == nameof(TopLevelClass1.Nested1));
+            Assert.Equal(new HashSet<string>
+            {
+                nameof(TopLevelClass1.Nested1.Nested1Nested1),
+                nameof(TopLevelClass1.Nested1.Nested1Nested2)
+            }, nested1.NestedTypes.Select(t => t.Name));
+
+            var nested2 = class1.NestedTypes.First(t => t.Name == nameof(TopLevelClass1.Nested2));
+            Assert.Equal(new HashSet<string>
+            {
+                nameof(TopLevelClass1.Nested2.Nested2Nested1),
+                nameof(TopLevelClass1.Nested2.Nested2Nested2)
+            }, nested2.NestedTypes.Select(t => t.Name));
+
+            var class2 = module.TopLevelTypes.First(t => t.Name == nameof(TopLevelClass2));
+            Assert.Equal(new HashSet<string>
+            {
+                nameof(TopLevelClass2.Nested3),
+                nameof(TopLevelClass2.Nested4)
+            }, class2.NestedTypes.Select(t => t.Name));
+
+            var nested3 = class2.NestedTypes.First(t => t.Name == nameof(TopLevelClass2.Nested3));
+            Assert.Equal(new HashSet<string>
+            {
+                nameof(TopLevelClass2.Nested3.Nested3Nested1),
+                nameof(TopLevelClass2.Nested3.Nested3Nested2)
+            }, nested3.NestedTypes.Select(t => t.Name));
+
+            var nested4 = class2.NestedTypes.First(t => t.Name == nameof(TopLevelClass2.Nested4));
+            Assert.Equal(new HashSet<string>
+            {
+                nameof(TopLevelClass2.Nested4.Nested4Nested1),
+                nameof(TopLevelClass2.Nested4.Nested4Nested2)
+            }, nested4.NestedTypes.Select(t => t.Name));
+        }
+        
     }
 }

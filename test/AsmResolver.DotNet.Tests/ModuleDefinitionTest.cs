@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -29,6 +31,18 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
+        }
+
+        [Fact]
+        public void ReadTypesNested()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            Assert.Equal(new HashSet<string>
+            {
+                "<Module>",
+                nameof(TopLevelClass1),
+                nameof(TopLevelClass2)
+            }, module.TopLevelTypes.Select(t => t.Name));
         }
 
         [Fact]

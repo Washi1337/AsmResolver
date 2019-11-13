@@ -19,6 +19,8 @@ namespace AsmResolver.DotNet.Serialized
         private readonly IMetadata _metadata;
         private readonly ModuleDefinitionRow _row;
 
+        private IDictionary<uint, IList<uint>> _typeDefTree;
+        private IDictionary<uint, uint> _parentTypeRids;
         private TypeReference[] _typeReferences;
 
         /// <summary>
@@ -103,18 +105,50 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<TypeDefinition> GetTopLevelTypes()
         {
+            InitalizeTypeDefinitionTree();
+            
             var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
 
-            // TODO: exclude nested types.
-            
             var typeDefTable = _metadata.GetStream<TablesStream>().GetTable<TypeDefinitionRow>();
             for (int i = 0; i < typeDefTable.Count; i++)
             {
-                var token = new MetadataToken(TableIndex.TypeDef, (uint) i + 1);
-                types.Add(new SerializedTypeDefinition(_metadata, this, token, typeDefTable[i]));
+                uint rid = (uint) i + 1;
+                if (!_parentTypeRids.ContainsKey(rid))
+                {
+                    var token = new MetadataToken(TableIndex.TypeDef, rid);
+                    types.Add(new SerializedTypeDefinition(_metadata, this, token, typeDefTable[i]));
+                }
             }
 
             return types;
         }
+
+        private void InitalizeTypeDefinitionTree()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var nestedClassTable = tablesStream.GetTable<NestedClassRow>();
+            
+            _typeDefTree = new Dictionary<uint, IList<uint>>();
+            _parentTypeRids = new Dictionary<uint, uint>();
+            
+            foreach (var nestedClass in nestedClassTable)
+            {
+                _parentTypeRids.Add(nestedClass.NestedClass, nestedClass.EnclosingClass);
+                var nestedTypeRids = GetNestedTypeRids(nestedClass.EnclosingClass);
+                nestedTypeRids.Add(nestedClass.NestedClass);
+            }
+        }
+
+        internal IList<uint> GetNestedTypeRids(uint enclosingTypeRid)
+        {
+            if (!_typeDefTree.TryGetValue(enclosingTypeRid, out var nestedRids))
+            {
+                nestedRids = new List<uint>();
+                _typeDefTree.Add(enclosingTypeRid, nestedRids);
+            }
+
+            return nestedRids;
+        }
+        
     }
 }

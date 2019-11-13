@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -13,7 +15,7 @@ namespace AsmResolver.DotNet.Serialized
     public class SerializedTypeDefinition : TypeDefinition
     {
         private readonly IMetadata _metadata;
-        private readonly ModuleDefinition _parentModule;
+        private readonly SerializedModuleDefinition _parentModule;
         private readonly TypeDefinitionRow _row;
 
         /// <summary>
@@ -23,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="parentModule"></param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type definition on.</param>
-        public SerializedTypeDefinition(IMetadata metadata, ModuleDefinition parentModule, MetadataToken token, TypeDefinitionRow row)
+        public SerializedTypeDefinition(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, TypeDefinitionRow row)
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
@@ -52,6 +54,27 @@ namespace AsmResolver.DotNet.Serialized
             var token = decoder.DecodeIndex(_row.Extends);
             return (ITypeDefOrRef) _parentModule.LookupMember(token);
         }
-        
+
+        /// <inheritdoc />
+        protected override IList<TypeDefinition> GetNestedTypes()
+        {
+            var typeDefTable = _metadata.GetStream<TablesStream>().GetTable<TypeDefinitionRow>();
+            var result = new OwnedCollection<TypeDefinition, TypeDefinition>(this);
+            
+            var rids = _parentModule.GetNestedTypeRids(MetadataToken.Rid);
+            foreach (uint rid in rids)
+            {
+                var nestedTypeRow = typeDefTable[(int) (rid - 1)];
+                var nestedType = new SerializedTypeDefinition(
+                    _metadata, 
+                    _parentModule,
+                    new MetadataToken(TableIndex.TypeDef, rid),
+                    nestedTypeRow);
+                
+                result.Add(nestedType);
+            }
+
+            return result;
+        }
     }
 }

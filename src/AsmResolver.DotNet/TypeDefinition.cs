@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -8,11 +10,15 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
-    public class TypeDefinition : ITypeDefOrRef, IOwnedCollectionElement<ModuleDefinition>
+    public class TypeDefinition : ITypeDefOrRef, 
+        IOwnedCollectionElement<ModuleDefinition>,
+        IOwnedCollectionElement<TypeDefinition>
     {
         private readonly LazyVariable<string> _namespace;
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<ITypeDefOrRef> _baseType;
+        private IList<TypeDefinition> _nestedTypes;
+        private string _fullName;
         
         /// <summary>
         /// Initializes a new type definition.
@@ -79,6 +85,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets the full name (including namespace or declaring type full name) of the type.
+        /// </summary>
+        public string FullName => _fullName ?? (_fullName = GetFullName());
+
+        /// <summary>
         /// Gets or sets the attributes associated to the type.
         /// </summary>
         public TypeAttributes Attributes
@@ -111,6 +122,31 @@ namespace AsmResolver.DotNet
             set => Module = value;
         }
 
+        /// <summary>
+        /// When this type is nested, gets the enclosing type.
+        /// </summary>
+        public TypeDefinition DeclaringType
+        {
+            get;
+            private set;
+        }
+
+        TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
+        {
+            get => DeclaringType;
+            set => DeclaringType = value;
+        }
+
+        public IList<TypeDefinition> NestedTypes
+        {
+            get
+            {
+                if (_nestedTypes is null)
+                    Interlocked.CompareExchange(ref _nestedTypes, GetNestedTypes(), null);
+                return _nestedTypes;
+            }
+        }
+
         IResolutionScope ITypeDefOrRef.Scope => Module;
         
         /// <summary>
@@ -139,5 +175,28 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="BaseType"/> property.
         /// </remarks>
         protected virtual ITypeDefOrRef GetBaseType() => null;
+
+        /// <summary>
+        /// Obtains the list of nested types that this type defines.
+        /// </summary>
+        /// <returns>The nested types.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="NestedTypes"/> property.
+        /// </remarks>
+        protected virtual IList<TypeDefinition> GetNestedTypes() =>
+            new OwnedCollection<TypeDefinition, TypeDefinition>(this);
+
+        private string GetFullName()
+        {
+            string prefix;
+            if (DeclaringType != null)
+                prefix = DeclaringType.FullName + "+";
+            else if (Namespace != null)
+                prefix = Namespace + ".";
+            else
+                prefix = null;
+
+            return prefix + Name;
+        }
     }
 }
