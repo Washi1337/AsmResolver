@@ -30,5 +30,17 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
         }
+
+        [Fact]
+        public void ResolveTypeReference()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var member = module.LookupMember(new MetadataToken(TableIndex.TypeRef, 12));
+            Assert.IsAssignableFrom<TypeReference>(member);
+
+            var typeRef = (TypeReference) member;
+            Assert.Equal("System", typeRef.Namespace);
+            Assert.Equal("Object", typeRef.Name);
+        }
     }
 }

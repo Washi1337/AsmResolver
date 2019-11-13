@@ -219,6 +219,20 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Looks up a member by its metadata token.
+        /// </summary>
+        /// <param name="token">The token of the member to lookup.</param>
+        /// <returns>The member.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Occurs when the module does not support looking up members by its token.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// Occurs when a metadata token indexes a table that cannot be converted to a metadata member.
+        /// </exception>
+        public virtual IMetadataMember LookupMember(MetadataToken token) =>
+            throw new InvalidOperationException("Cannot lookup members by tokens from a non-serialized module.");
+
+        /// <summary>
         /// Obtains the name of the module definition.
         /// </summary>
         /// <returns>The name.</returns>

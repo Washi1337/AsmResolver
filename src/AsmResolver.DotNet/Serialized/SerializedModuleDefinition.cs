@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Guid;
@@ -18,6 +19,8 @@ namespace AsmResolver.DotNet.Serialized
         private readonly IMetadata _metadata;
         private readonly ModuleDefinitionRow _row;
 
+        private TypeReference[] _typeReferences;
+
         /// <summary>
         /// Creates a module definition from a module metadata row.
         /// </summary>
@@ -31,6 +34,54 @@ namespace AsmResolver.DotNet.Serialized
             _row = row;
             Generation = row.Generation;
             MetadataToken = token;
+        }
+
+        /// <inheritdoc />
+        public override IMetadataMember LookupMember(MetadataToken token)
+        {
+            switch (token.Table)
+            {
+                case TableIndex.TypeRef:
+                    return LookupTypeReference(token);
+                
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        private TypeReference LookupTypeReference(MetadataToken token) =>
+            LookupOrCreateMemberFromCache<TypeReference, TypeReferenceRow>(
+                ref _typeReferences, token, (m, t, r) => new SerializedTypeReference(m, t, r));
+
+        private TMember LookupOrCreateMemberFromCache<TMember, TRow>(ref TMember[] cache, MetadataToken token,
+            Func<IMetadata, MetadataToken, TRow, TMember> createMember)
+            where TRow : struct, IMetadataRow
+            where TMember : class, IMetadataMember
+        {
+            // Obtain table.
+            var table = (MetadataTable<TRow>) _metadata
+                .GetStream<TablesStream>()
+                .GetTable(token.Table);
+            
+            // Check if within bounds.
+            if (token.Rid >= table.Count) 
+                return null;
+            
+            // Allocate cache if necessary.
+            if (cache is null)
+                Interlocked.CompareExchange(ref cache, new TMember[table.Count], null);
+
+            // Get or create cached member.
+            int index = (int) token.Rid - 1;
+            var member = cache[index];
+            if (member is null)
+            {
+                member = createMember(_metadata, token, table[index]);
+                member = Interlocked.CompareExchange(ref cache[index], member, null)
+                         ?? member;
+            }
+
+            return member;
         }
 
         /// <inheritdoc />
