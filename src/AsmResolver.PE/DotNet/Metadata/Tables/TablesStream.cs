@@ -51,6 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         
         private const int MaxTableCount = (int) TableIndex.GenericParamConstraint;
 
+        private readonly IDictionary<CodedIndex, IndexEncoder> _indexEncoders;
         private readonly LazyVariable<IList<IMetadataTable>> _tables;
         private readonly LazyVariable<IList<TableLayout>> _layouts;
 
@@ -61,6 +62,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             _layouts = new LazyVariable<IList<TableLayout>>(GetTableLayouts);
             _tables = new LazyVariable<IList<IMetadataTable>>(GetTables);
+            _indexEncoders = CreateIndexEncoders();
         }
 
         /// <inheritdoc />
@@ -468,6 +470,45 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             };
         }
 
+        private Dictionary<CodedIndex, IndexEncoder> CreateIndexEncoders()
+        {
+            return new Dictionary<CodedIndex, IndexEncoder>
+            {
+                [CodedIndex.TypeDefOrRef] = new IndexEncoder(this,
+                    TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.TypeSpec),
+                [CodedIndex.HasConstant] = new IndexEncoder(this,
+                    TableIndex.Field, TableIndex.Param, TableIndex.Property),
+                [CodedIndex.HasCustomAttribute] = new IndexEncoder(this,
+                    TableIndex.Method, TableIndex.Field, TableIndex.TypeRef, TableIndex.TypeDef,
+                    TableIndex.Param, TableIndex.InterfaceImpl, TableIndex.MemberRef, TableIndex.Module,
+                    TableIndex.DeclSecurity, TableIndex.Property, TableIndex.Event, TableIndex.StandAloneSig,
+                    TableIndex.ModuleRef, TableIndex.TypeSpec, TableIndex.Assembly, TableIndex.AssemblyRef,
+                    TableIndex.File, TableIndex.ExportedType, TableIndex.ManifestResource, TableIndex.GenericParam,
+                    TableIndex.GenericParamConstraint, TableIndex.MethodSpec),
+                [CodedIndex.HasFieldMarshal] = new IndexEncoder(this,
+                    TableIndex.Field, TableIndex.Param),
+                [CodedIndex.HasDeclSecurity] = new IndexEncoder(this,
+                    TableIndex.TypeDef, TableIndex.Method, TableIndex.Assembly),
+                [CodedIndex.MemberRefParent] = new IndexEncoder(this,
+                    TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.ModuleRef,
+                    TableIndex.Method, TableIndex.TypeSpec),
+                [CodedIndex.HasSemantics] = new IndexEncoder(this,
+                    TableIndex.Event, TableIndex.Property),
+                [CodedIndex.MethodDefOrRef] = new IndexEncoder(this,
+                    TableIndex.Method, TableIndex.MemberRef),
+                [CodedIndex.MemberForwarded] = new IndexEncoder(this,
+                    TableIndex.File, TableIndex.AssemblyRef, TableIndex.ExportedType),
+                [CodedIndex.Implementation] = new IndexEncoder(this,
+                    TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.TypeSpec),
+                [CodedIndex.CustomAttributeType] = new IndexEncoder(this,
+                    0, 0, TableIndex.Method, TableIndex.MemberRef, 0),
+                [CodedIndex.ResolutionScope] = new IndexEncoder(this,
+                    TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
+                [CodedIndex.TypeOrMethodDef] = new IndexEncoder(this,
+                    TableIndex.TypeDef, TableIndex.Method)
+            };
+        }
+        
         /// <summary>
         /// Gets a table by its table index. 
         /// </summary>
@@ -499,10 +540,41 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         /// <param name="columnType">The column type to verify.</param>
         /// <returns>The column size.</returns>
-        protected virtual IndexSize GetColumnSize(ColumnType columnType)
+        protected virtual uint GetColumnSize(ColumnType columnType)
         {
-            return IndexSize.Long;
+            if (_layouts.IsInitialized)
+            {
+                if (columnType <= ColumnType.GenericParamConstraint)
+                    return (uint) Tables[(int) columnType].IndexSize;
+                if (columnType <= ColumnType.TypeOrMethodDef)
+                    return (uint) GetIndexEncoder((CodedIndex) columnType).IndexSize;
+            }
+
+            switch (columnType)
+            {
+                case ColumnType.Blob:
+                    return (uint) BlobIndexSize;
+                case ColumnType.String:
+                    return (uint) StringIndexSize;
+                case ColumnType.Guid:
+                    return (uint) GuidIndexSize;
+                case ColumnType.Byte:
+                    return sizeof(byte);
+                case ColumnType.UInt16:
+                    return sizeof(ushort);
+                case ColumnType.UInt32:
+                    return sizeof(uint);
+                default:
+                    return sizeof(uint);
+            }
         }
+
+        /// <summary>
+        /// Gets an encoder/decoder for a particular coded index.
+        /// </summary>
+        /// <param name="index">The type of coded index to encode/decode.</param>
+        /// <returns>The encoder.</returns>
+        public IndexEncoder GetIndexEncoder(CodedIndex index) => _indexEncoders[index];
 
         /// <summary>
         /// Gets an ordered collection of the current table layouts.

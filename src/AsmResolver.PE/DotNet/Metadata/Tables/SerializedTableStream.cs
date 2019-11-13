@@ -34,6 +34,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly uint[] _rowCounts;
         private readonly IndexSize[] _indexSizes;
         private readonly uint _headerSize;
+        private bool _tablesInitialized;
 
         /// <summary>
         /// Creates a new tables stream based on a byte array.
@@ -98,9 +99,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        protected override IndexSize GetColumnSize(ColumnType columnType)
+        protected override uint GetColumnSize(ColumnType columnType)
         {
-            return _indexSizes[(int) columnType];
+            if (_tablesInitialized || (int) columnType >= _indexSizes.Length)
+                return base.GetColumnSize(columnType);
+            return (uint) _indexSizes[(int) columnType];
         }
 
         private IndexSize[] InitializeIndexSizes()
@@ -181,7 +184,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         protected override IList<IMetadataTable> GetTables()
         {
             uint offset = _contents.FileOffset + _headerSize;
-            return new IMetadataTable[]
+            var tables = new IMetadataTable[]
             {
                 CreateNextTable(TableIndex.Module, ref offset, ModuleDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.TypeRef, ref offset, TypeReferenceRow.FromReader),
@@ -229,6 +232,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.MethodSpec, ref offset, MethodSpecificationRow.FromReader),
                 CreateNextTable(TableIndex.GenericParamConstraint, ref offset, GenericParameterConstraintRow.FromReader),
             };
+            _tablesInitialized = true;
+            return tables;
         }
 
         private IBinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref uint currentOffset)

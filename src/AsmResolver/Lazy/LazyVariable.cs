@@ -10,7 +10,6 @@ namespace AsmResolver.Lazy
     public class LazyVariable<T>
     {
         private T _value;
-        private bool _initialized;
         private readonly Func<T> _getValue;
         private readonly object _lockObject = new object();
 
@@ -21,7 +20,7 @@ namespace AsmResolver.Lazy
         public LazyVariable(T value)
         {
             _value = value;
-            _initialized = true;
+            IsInitialized = true;
         }
 
         /// <summary>
@@ -34,13 +33,22 @@ namespace AsmResolver.Lazy
         }
 
         /// <summary>
+        /// Gets a value indicating the value has been initialized.
+        /// </summary>
+        public bool IsInitialized
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Gets or sets the value of the variable.
         /// </summary>
         public T Value
         {
             get
             {
-                if (!_initialized)
+                if (!IsInitialized)
                     InitializeValue();
                 return _value;
             }
@@ -49,7 +57,7 @@ namespace AsmResolver.Lazy
                 lock (_lockObject)
                 {
                     _value = value;
-                    _initialized = true;
+                    IsInitialized = true;
                 }
             }
         }
@@ -58,10 +66,10 @@ namespace AsmResolver.Lazy
         {
             lock (_lockObject)
             {
-                if (!_initialized)
+                if (!IsInitialized)
                 {
                     _value = _getValue();
-                    _initialized = true;
+                    IsInitialized = true;
                 }
             }
         }

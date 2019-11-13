@@ -25,7 +25,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <summary>
         /// Indicates the index is an index to a member in either the TypeRef, TypeDef or TypeSpec table.
         /// </summary>
-        TypeDefOrRef,
+        TypeDefOrRef = 45,
         
         /// <summary>
         /// Indicates the index is an index to a member in either the Field, Parameter or Property table.
