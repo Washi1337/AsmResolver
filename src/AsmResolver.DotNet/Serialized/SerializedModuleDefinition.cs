@@ -22,6 +22,7 @@ namespace AsmResolver.DotNet.Serialized
         private IDictionary<uint, IList<uint>> _typeDefTree;
         private IDictionary<uint, uint> _parentTypeRids;
         private TypeReference[] _typeReferences;
+        private TypeDefinition[] _typeDefinitions;
 
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -46,6 +47,9 @@ namespace AsmResolver.DotNet.Serialized
                 case TableIndex.TypeRef:
                     return LookupTypeReference(token);
                 
+                case TableIndex.TypeDef:
+                    return LookupTypeDefinition(token);
+                
                 default:
                     throw new NotSupportedException();
             }
@@ -54,6 +58,10 @@ namespace AsmResolver.DotNet.Serialized
         private TypeReference LookupTypeReference(MetadataToken token) =>
             LookupOrCreateMemberFromCache<TypeReference, TypeReferenceRow>(
                 ref _typeReferences, token, (m, t, r) => new SerializedTypeReference(m, t, r));
+
+        private TypeDefinition LookupTypeDefinition(MetadataToken token) => 
+            LookupOrCreateMemberFromCache<TypeDefinition, TypeDefinitionRow>(
+                ref _typeDefinitions, token, (m, t, r) => new SerializedTypeDefinition(m, this, t, r));
 
         private TMember LookupOrCreateMemberFromCache<TMember, TRow>(ref TMember[] cache, MetadataToken token,
             Func<IMetadata, MetadataToken, TRow, TMember> createMember)
@@ -66,7 +74,7 @@ namespace AsmResolver.DotNet.Serialized
                 .GetTable(token.Table);
             
             // Check if within bounds.
-            if (token.Rid >= table.Count) 
+            if (token.Rid > table.Count) 
                 return null;
             
             // Allocate cache if necessary.
@@ -105,7 +113,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<TypeDefinition> GetTopLevelTypes()
         {
-            InitalizeTypeDefinitionTree();
+            EnsureTypeDefinitionTreeInitialized();
             
             var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
 
@@ -116,14 +124,20 @@ namespace AsmResolver.DotNet.Serialized
                 if (!_parentTypeRids.ContainsKey(rid))
                 {
                     var token = new MetadataToken(TableIndex.TypeDef, rid);
-                    types.Add(new SerializedTypeDefinition(_metadata, this, token, typeDefTable[i]));
+                    types.Add(LookupTypeDefinition(token));
                 }
             }
 
             return types;
         }
 
-        private void InitalizeTypeDefinitionTree()
+        private void EnsureTypeDefinitionTreeInitialized()
+        {
+            if (_typeDefTree is null)
+                InitializeTypeDefinitionTree();
+        }
+
+        private void InitializeTypeDefinitionTree()
         {
             var tablesStream = _metadata.GetStream<TablesStream>();
             var nestedClassTable = tablesStream.GetTable<NestedClassRow>();
@@ -148,6 +162,13 @@ namespace AsmResolver.DotNet.Serialized
             }
 
             return nestedRids;
+        }
+
+        internal uint GetParentTypeRid(uint nestedTypeRid)
+        {
+            EnsureTypeDefinitionTreeInitialized();
+            _parentTypeRids.TryGetValue(nestedTypeRid, out uint parentRid);
+            return parentRid;
         }
         
     }

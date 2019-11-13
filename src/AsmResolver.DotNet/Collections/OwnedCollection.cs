@@ -32,11 +32,11 @@ namespace AsmResolver.DotNet.Collections
             get;
         }
         
-        private static void AssertNotNullAndHasNoOwner(TItem item)
+        private void AssertNotNullAndHasNoOwner(TItem item)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
-            if (item.Owner != null)
+            if (item.Owner != null && item.Owner != Owner)
                 throw new ArgumentException("Item is already added to another collection.");
         }
 

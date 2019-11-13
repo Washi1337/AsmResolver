@@ -53,5 +53,18 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal("System", typeRef.Namespace);
             Assert.Equal("Object", typeRef.Name);
         }
+
+        [Fact]
+        public void ResolveTypeDefinition()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var member = module.LookupMember(new MetadataToken(TableIndex.TypeDef, 2));
+            Assert.IsAssignableFrom<TypeDefinition>(member);
+            
+            var typeDef = (TypeDefinition) member;
+            Assert.Equal("HelloWorld", typeDef.Namespace);
+            Assert.Equal("Program", typeDef.Name);
+        }
+        
     }
 }

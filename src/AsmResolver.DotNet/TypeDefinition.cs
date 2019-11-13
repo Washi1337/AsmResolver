@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _namespace;
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<ITypeDefOrRef> _baseType;
+        private readonly LazyVariable<TypeDefinition> _declaringType;
         private IList<TypeDefinition> _nestedTypes;
         private string _fullName;
         private ModuleDefinition _module;
@@ -31,6 +32,7 @@ namespace AsmResolver.DotNet
             _namespace = new LazyVariable<string>(GetNamespace);
             _name = new LazyVariable<string>(GetName);
             _baseType = new LazyVariable<ITypeDefOrRef>(GetBaseType);
+            _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
         }
 
         /// <summary>
@@ -416,8 +418,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public TypeDefinition DeclaringType
         {
-            get;
-            private set;
+            get => _declaringType.Value;
+            private set => _declaringType.Value = value;
         }
         
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => DeclaringType;
@@ -479,6 +481,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<TypeDefinition> GetNestedTypes() =>
             new OwnedCollection<TypeDefinition, TypeDefinition>(this);
+
+        protected virtual TypeDefinition GetDeclaringType() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

@@ -6,16 +6,8 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides members for describing a .NET assembly.
     /// </summary>
-    public interface IAssemblyName
+    public interface IAssemblyName : INameProvider
     {
-        /// <summary>
-        /// Gets the name of the referenced assembly.
-        /// </summary>
-        string Name
-        {
-            get;
-        }
-
         /// <summary>
         /// Gets the version of the referenced assembly.
         /// </summary>

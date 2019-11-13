@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.NestedClasses;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -95,6 +96,15 @@ namespace AsmResolver.DotNet.Tests
             Assert.Same(module, nested2.Module);
             Assert.Same(module, nested3.Module);
             Assert.Same(module, nested4.Module);
+        }
+
+        [Fact]
+        public void ResolveNestedType()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var member = (TypeDefinition) module.LookupMember(new MetadataToken(TableIndex.TypeDef, 4));
+            Assert.NotNull(member.DeclaringType);
+            Assert.Equal(nameof(TopLevelClass1), member.DeclaringType.Name);
         }
         
     }

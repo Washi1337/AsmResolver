@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet
                 throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
             return FromMetadata(peImage.DotNetDirectory.Metadata);
         }
-        
+
         /// <summary>
         /// Initializes a .NET module from a .NET metadata directory.
         /// </summary>
@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet
             var stream = metadata.GetStream<TablesStream>();
             var moduleTable = stream.GetTable<ModuleDefinitionRow>();
             var module = new SerializedModuleDefinition(metadata, new MetadataToken(TableIndex.Module, 1), moduleTable[0]);
-            
+
             var assemblyTable = stream.GetTable<AssemblyDefinitionRow>();
             if (assemblyTable.Count > 0)
             {
@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet
             }
             return module;
         }
-        
+
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<Guid> _mvid;
         private readonly LazyVariable<Guid> _encId;

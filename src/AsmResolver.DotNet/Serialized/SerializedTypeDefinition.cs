@@ -59,23 +59,26 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<TypeDefinition> GetNestedTypes()
         {
-            var typeDefTable = _metadata.GetStream<TablesStream>().GetTable<TypeDefinitionRow>();
             var result = new OwnedCollection<TypeDefinition, TypeDefinition>(this);
             
             var rids = _parentModule.GetNestedTypeRids(MetadataToken.Rid);
             foreach (uint rid in rids)
             {
-                var nestedTypeRow = typeDefTable[(int) (rid - 1)];
-                var nestedType = new SerializedTypeDefinition(
-                    _metadata, 
-                    _parentModule,
-                    new MetadataToken(TableIndex.TypeDef, rid),
-                    nestedTypeRow);
-                
+                var nestedType = (TypeDefinition) _parentModule.LookupMember(new MetadataToken(TableIndex.TypeDef, rid));
                 result.Add(nestedType);
             }
 
             return result;
         }
+
+        /// <inheritdoc />
+        protected override TypeDefinition GetDeclaringType()
+        {
+            uint parentTypeRid = _parentModule.GetParentTypeRid(MetadataToken.Rid);
+            return parentTypeRid != 0
+                ? (TypeDefinition) _parentModule.LookupMember(new MetadataToken(TableIndex.TypeDef, parentTypeRid))
+                : null;
+        }
+        
     }
 }
