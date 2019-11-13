@@ -13,18 +13,21 @@ namespace AsmResolver.DotNet.Serialized
     public class SerializedTypeDefinition : TypeDefinition
     {
         private readonly IMetadata _metadata;
+        private readonly ModuleDefinition _parentModule;
         private readonly TypeDefinitionRow _row;
 
         /// <summary>
         /// Creates a type definition from a type metadata row.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="parentModule"></param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type definition on.</param>
-        public SerializedTypeDefinition(IMetadata metadata, MetadataToken token, TypeDefinitionRow row)
+        public SerializedTypeDefinition(IMetadata metadata, ModuleDefinition parentModule, MetadataToken token, TypeDefinitionRow row)
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            _parentModule = parentModule;
             _row = row;
         }
 
@@ -39,8 +42,16 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override ITypeDefOrRef GetBaseType()
         {
-            // TODO
-            return base.GetBaseType();
+            if (_row.Extends == 0)
+                return null;
+            
+            var decoder = _metadata
+                .GetStream<TablesStream>()
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef);
+            
+            var token = decoder.DecodeIndex(_row.Extends);
+            return (ITypeDefOrRef) _parentModule.LookupMember(token);
         }
+        
     }
 }

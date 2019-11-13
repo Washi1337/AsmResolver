@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet.Serialized
             for (int i = 0; i < typeDefTable.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.TypeDef, (uint) i + 1);
-                types.Add(new SerializedTypeDefinition(_metadata, token, typeDefTable[i]));
+                types.Add(new SerializedTypeDefinition(_metadata, this, token, typeDefTable[i]));
             }
 
             return types;
