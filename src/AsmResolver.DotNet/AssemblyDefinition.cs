@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
@@ -144,6 +145,67 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the assembly holds the full (unhashed) public key.
+        /// </summary>
+        /// <remarks>
+        /// This property does not automatically update after <see cref="PublicKey"/> was updated.
+        /// </remarks>
+        public bool HasPublicKey
+        {
+            get => (Attributes & AssemblyAttributes.PublicKey) != 0;
+            set => Attributes = (Attributes & ~AssemblyAttributes.PublicKey)
+                                | (value ? AssemblyAttributes.PublicKey : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating just-in-time (JIT) compiler tracking is enabled for the assembly.
+        /// </summary>
+        /// <remarks>
+        /// This attribute originates from the <see cref="DebuggableAttribute"/> attribute.
+        /// </remarks>
+        public bool EnableJitCompileTracking 
+        {
+            get => (Attributes & AssemblyAttributes.EnableJitCompileTracking) != 0;
+            set => Attributes = (Attributes & ~AssemblyAttributes.EnableJitCompileTracking)
+                                | (value ? AssemblyAttributes.EnableJitCompileTracking : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating any just-in-time (JIT) compiler optimization is disabled for the assembly.
+        /// This is the exact opposite of the meaning that is suggested by the member name.
+        /// </summary>
+        /// <remarks>
+        /// This attribute originates from the <see cref="DebuggableAttribute"/> attribute.
+        /// </remarks>
+        public bool DisableJitCompileOptimizer
+        {
+            get => (Attributes & AssemblyAttributes.DisableJitCompileOptimizer) != 0;
+            set => Attributes = (Attributes & ~AssemblyAttributes.DisableJitCompileOptimizer)
+                                | (value ? AssemblyAttributes.DisableJitCompileOptimizer : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the assembly contains Windows Runtime (WinRT) code or not.
+        /// </summary>
+        public bool IsWindowsRuntime
+        {
+            get => (Attributes & AssemblyAttributes.ContentMask) == AssemblyAttributes.ContentWindowsRuntime;
+            set => Attributes = (Attributes & ~AssemblyAttributes.ContentMask)
+                                | (value ? AssemblyAttributes.ContentWindowsRuntime : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the assembly can be retargeted (at runtime) to an assembly from
+        /// a different publisher.
+        /// </summary>
+        public bool IsRetargetable
+        {
+            get => (Attributes & AssemblyAttributes.Retargetable) != 0;
+            set => Attributes = (Attributes & ~AssemblyAttributes.Retargetable)
+                                | (value ? AssemblyAttributes.Retargetable : 0);
+        }
+        
+        /// <summary>
         /// Gets or sets the locale string of the assembly (if available).
         /// </summary>
         /// <remarks>
@@ -161,6 +223,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// <para>If this value is set to <c>null</c>, no public key will be assigned.</para>
+        /// <para>This property does not automatically update the <see cref="HasPublicKey"/> property.</para>
         /// <para>This property corresponds to the Culture column in the assembly definition table.</para> 
         /// </remarks>
         public byte[] PublicKey
