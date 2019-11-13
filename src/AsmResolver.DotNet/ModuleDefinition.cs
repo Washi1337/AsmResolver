@@ -277,5 +277,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<TypeDefinition> GetTopLevelTypes() =>
             new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
+
+        /// <inheritdoc />
+        public override string ToString() => Name;
     }
 }

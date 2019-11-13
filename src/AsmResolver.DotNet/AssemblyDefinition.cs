@@ -292,5 +292,8 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ModuleDefinition> GetModules()
             => new OwnedCollection<AssemblyDefinition, ModuleDefinition>(this);
+
+        /// <inheritdoc />
+        public override string ToString() => $"{Name}, Version={Version}";
     }
 }

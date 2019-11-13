@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using AsmResolver.Lazy;
 
 namespace AsmResolver.DotNet.Collections
@@ -9,6 +10,7 @@ namespace AsmResolver.DotNet.Collections
     /// </summary>
     /// <typeparam name="TOwner">The type of the owner object.</typeparam>
     /// <typeparam name="TItem">The type of elements to store.</typeparam>
+    [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class OwnedCollection<TOwner, TItem> : LazyList<TItem>
         where TItem : IMetadataMember, IOwnedCollectionElement<TOwner>
         where TOwner : class

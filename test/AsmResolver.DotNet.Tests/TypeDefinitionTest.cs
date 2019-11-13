@@ -37,8 +37,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Null(module.TopLevelTypes[0].BaseType);
             Assert.NotNull(module.TopLevelTypes[1].BaseType);
-            Assert.Equal("System", module.TopLevelTypes[1].BaseType.Namespace);
-            Assert.Equal("Object", module.TopLevelTypes[1].BaseType.Name);
+            Assert.Equal("System.Object", module.TopLevelTypes[1].BaseType.FullName);
         }
 
         [Fact]

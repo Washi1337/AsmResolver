@@ -6,11 +6,12 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a type defined in a .NET assembly.
     /// </summary>
-    public class TypeReference : ITypeDefOrRef
+    public class TypeReference : ITypeDefOrRef, IResolutionScope
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _namespace;
         private readonly LazyVariable<IResolutionScope> _scope;
+        private string _fullName;
 
         /// <summary>
         /// Initializes a new empty type reference.
@@ -51,7 +52,11 @@ namespace AsmResolver.DotNet
         public string Name
         {
             get => _name.Value;
-            set => _name.Value = value;
+            set
+            {
+                _name.Value = value;
+                _fullName = null;
+            }
         }
 
         /// <summary>
@@ -60,11 +65,21 @@ namespace AsmResolver.DotNet
         public string Namespace
         {
             get => _namespace.Value;
-            set => _namespace.Value = value;
+            set
+            {
+                _namespace.Value = value;
+                _fullName = null;
+            }
         }
 
         /// <inheritdoc />
+        public string FullName => _fullName ?? (_fullName = this.GetFullName());
+
+        /// <inheritdoc />
         public IResolutionScope Scope => _scope.Value;
+
+        /// <inheritdoc />
+        public ITypeDefOrRef DeclaringType => Scope as ITypeDefOrRef;
 
         /// <summary>
         /// Obtains the name of the type reference.

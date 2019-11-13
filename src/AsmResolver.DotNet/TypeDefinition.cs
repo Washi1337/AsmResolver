@@ -72,7 +72,11 @@ namespace AsmResolver.DotNet
         public string Namespace
         {
             get => _namespace.Value;
-            set => _namespace.Value = value;
+            set
+            {
+                _namespace.Value = value;
+                _fullName = null;
+            }
         }
 
         /// <summary>
@@ -81,13 +85,17 @@ namespace AsmResolver.DotNet
         public string Name
         {
             get => _name.Value;
-            set => _name.Value = value;
+            set
+            {
+                _name.Value = value;
+                _fullName = null;
+            }
         }
 
         /// <summary>
         /// Gets the full name (including namespace or declaring type full name) of the type.
         /// </summary>
-        public string FullName => _fullName ?? (_fullName = GetFullName());
+        public string FullName => _fullName ?? (_fullName = this.GetFullName());
 
         /// <summary>
         /// Gets or sets the attributes associated to the type.
@@ -130,6 +138,8 @@ namespace AsmResolver.DotNet
             get;
             private set;
         }
+        
+        ITypeDefOrRef ITypeDefOrRef.DeclaringType => DeclaringType;
 
         TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
         {
@@ -137,6 +147,9 @@ namespace AsmResolver.DotNet
             set => DeclaringType = value;
         }
 
+        /// <summary>
+        /// Gets a collection of nested types that this type defines.
+        /// </summary>
         public IList<TypeDefinition> NestedTypes
         {
             get
@@ -186,17 +199,7 @@ namespace AsmResolver.DotNet
         protected virtual IList<TypeDefinition> GetNestedTypes() =>
             new OwnedCollection<TypeDefinition, TypeDefinition>(this);
 
-        private string GetFullName()
-        {
-            string prefix;
-            if (DeclaringType != null)
-                prefix = DeclaringType.FullName + "+";
-            else if (Namespace != null)
-                prefix = Namespace + ".";
-            else
-                prefix = null;
-
-            return prefix + Name;
-        }
+        /// <inheritdoc />
+        public override string ToString() => FullName;
     }
 }
