@@ -108,6 +108,290 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the type is in a public scope or not.
+        /// </summary>
+        public bool IsNotPublic
+        {
+            get => (Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NotPublic;
+            set => Attributes = value ? Attributes & ~TypeAttributes.VisibilityMask : Attributes;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is in a public scope or not.
+        /// </summary>
+        public bool IsPublic
+        {
+            get => (Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.Public;
+            set => Attributes = (Attributes & ~TypeAttributes.VisibilityMask)
+                                | (value ? TypeAttributes.Public : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is nested with public visibility.
+        /// </summary>
+        /// <remarks>
+        /// Updating the value of this property does not automatically make the type nested in another type.
+        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// </remarks>
+        public bool IsNestedPublic
+        {
+            get => (Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedPublic;
+            set => Attributes = (Attributes & ~TypeAttributes.VisibilityMask)
+                                | (value ? TypeAttributes.NestedPublic : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is nested with private visibility.
+        /// </summary>
+        /// <remarks>
+        /// Updating the value of this property does not automatically make the type nested in another type.
+        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// </remarks>
+        public bool IsNestedPrivate
+        {
+            get => (Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedPrivate;
+            set => Attributes = (Attributes & ~TypeAttributes.VisibilityMask)
+                                | (value ? TypeAttributes.NestedPrivate : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is nested with family visibility.
+        /// </summary>
+        /// <remarks>
+        /// Updating the value of this property does not automatically make the type nested in another type.
+        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// </remarks>
+        public bool IsNestedFamily
+        {
+            get => (Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedFamily;
+            set => Attributes = (Attributes & ~TypeAttributes.VisibilityMask)
+                                | (value ? TypeAttributes.NestedFamily : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is nested with assembly visibility.
+        /// </summary>
+        /// <remarks>
+        /// Updating the value of this property does not automatically make the type nested in another type.
+        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// </remarks>
+        public bool IsNestedAssembly
+        {
+            get => (Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedAssembly;
+            set => Attributes = (Attributes & ~TypeAttributes.VisibilityMask)
+                                | (value ? TypeAttributes.NestedAssembly : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is nested with family and assembly visibility.
+        /// </summary>
+        /// <remarks>
+        /// Updating the value of this property does not automatically make the type nested in another type.
+        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// </remarks>
+        public bool IsNestedFamilyAndAssembly
+        {
+            get => (Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedFamilyAndAssembly;
+            set => Attributes = (Attributes & ~TypeAttributes.VisibilityMask)
+                                | (value ? TypeAttributes.NestedFamilyAndAssembly : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is nested with family or assembly visibility.
+        /// </summary>
+        /// <remarks>
+        /// Updating the value of this property does not automatically make the type nested in another type.
+        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// </remarks>
+        public bool IsNestedFamilyOrAssembly
+        {
+            get => (Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.NestedFamilyOrAssembly;
+            set => Attributes = (Attributes & ~TypeAttributes.VisibilityMask)
+                                | (value ? TypeAttributes.NestedFamilyOrAssembly : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the fields of the type are auto-laid out by the
+        /// common language runtime (CLR).
+        /// </summary>
+        public bool IsAutoLayout
+        {
+            get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.AutoLayout;
+            set => Attributes = value ? (Attributes & ~TypeAttributes.LayoutMask) : Attributes;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the fields of the type are laid out sequentially.
+        /// </summary>
+        public bool IsSequentialLayout
+        {
+            get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.SequentialLayout;
+            set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
+                                | (value ? TypeAttributes.SequentialLayout : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the fields of the type are laid out explicitly.
+        /// </summary>
+        public bool IsExplicitLayout
+        {
+            get => (Attributes & TypeAttributes.LayoutMask) == TypeAttributes.ExplicitLayout;
+            set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
+                                | (value ? TypeAttributes.ExplicitLayout : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is a class.
+        /// </summary>
+        public bool IsClass
+        {
+            get => (Attributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Class;
+            set => Attributes = value ? Attributes & ~TypeAttributes.ClassSemanticsMask : Attributes;
+        }
+        
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is an interface.
+        /// </summary>
+        public bool IsInterface
+        {
+            get => (Attributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Interface;
+            set => Attributes = (Attributes & ~TypeAttributes.ClassSemanticsMask)
+                                | (value ? TypeAttributes.Interface : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is defined abstract and should be extended before
+        /// an object can be instantiated.
+        /// </summary>
+        public bool IsAbstract
+        {
+            get => (Attributes & TypeAttributes.Abstract) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.Abstract)
+                                | (value ? TypeAttributes.Abstract : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is defined sealed and cannot be extended by a sub class.
+        /// </summary>
+        public bool IsSealed
+        {
+            get => (Attributes & TypeAttributes.Sealed) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.Sealed)
+                                | (value ? TypeAttributes.Sealed : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the type has a special name.
+        /// </summary>
+        public bool IsSpecialName
+        {
+            get => (Attributes & TypeAttributes.SpecialName) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.SpecialName)
+                                | (value ? TypeAttributes.SpecialName : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the runtime should check the encoding of the name.
+        /// </summary>
+        public bool IsRuntimeSpecialName
+        {
+            get => (Attributes & TypeAttributes.Forwarder) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.Forwarder)
+                                | (value ? TypeAttributes.Forwarder : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is imported.
+        /// </summary>
+        public bool IsImport
+        {
+            get => (Attributes & TypeAttributes.Import) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.Import)
+                                | (value ? TypeAttributes.Import : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the type is serializable.
+        /// </summary>
+        public bool IsSerializable
+        {
+            get => (Attributes & TypeAttributes.Serializable) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.Serializable)
+                                | (value ? TypeAttributes.Serializable : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether LPTSTR string instances are interpreted as ANSI strings.
+        /// </summary>
+        public bool IsAnsiClass
+        {
+            get => (Attributes & TypeAttributes.StringFormatMask) == TypeAttributes.AnsiClass;
+            set => Attributes = value ? Attributes & ~TypeAttributes.StringFormatMask : Attributes;
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether LPTSTR string instances are interpreted as Unicode strings.
+        /// </summary>
+        public bool IsUnicodeClass
+        {
+            get => (Attributes & TypeAttributes.StringFormatMask) == TypeAttributes.UnicodeClass;
+            set => Attributes = (Attributes & ~TypeAttributes.StringFormatMask)
+                                | (value ? TypeAttributes.UnicodeClass : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether LPTSTR string instances are interpreted automatically by the runtime.
+        /// </summary>
+        public bool IsAutoClass
+        {
+            get => (Attributes & TypeAttributes.StringFormatMask) == TypeAttributes.AutoClass;
+            set => Attributes = (Attributes & ~TypeAttributes.StringFormatMask)
+                                | (value ? TypeAttributes.AutoClass : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether LPTSTR string instances are interpreted using a non-standard encoding.
+        /// </summary>
+        public bool IsCustomFormatClass
+        {
+            get => (Attributes & TypeAttributes.StringFormatMask) == TypeAttributes.CustomFormatClass;
+            set => Attributes = (Attributes & ~TypeAttributes.StringFormatMask)
+                                | (value ? TypeAttributes.CustomFormatClass : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating the runtime should initialize the class before any time before the first
+        /// static field access.
+        /// </summary>
+        public bool IsBeforeFieldInit
+        {
+            get => (Attributes & TypeAttributes.BeforeFieldInit) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.BeforeFieldInit)
+                                | (value ? TypeAttributes.BeforeFieldInit : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating the type is an exported type and forwards the definition to another module.
+        /// </summary>
+        public bool IsForwarder
+        {
+            get => (Attributes & TypeAttributes.Forwarder) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.Forwarder)
+                                | (value ? TypeAttributes.Forwarder : 0);
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating the type has additional security attributes associated to it.
+        /// </summary>
+        public bool HasSecurity
+        {
+            get => (Attributes & TypeAttributes.HasSecurity) != 0;
+            set => Attributes = (Attributes & ~TypeAttributes.HasSecurity)
+                                | (value ? TypeAttributes.HasSecurity : 0);
+        }
+        
+        /// <summary>
         /// Gets or sets the super class that this type extends. 
         /// </summary>
         public ITypeDefOrRef BaseType

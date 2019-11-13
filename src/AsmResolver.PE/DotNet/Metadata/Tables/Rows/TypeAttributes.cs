@@ -88,6 +88,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// </summary>
         SpecialName = 0x00000400,
         /// <summary>
+        /// Runtime should check name encoding.
+        /// </summary>
+        RuntimeSpecialName = 0x00000800,
+        /// <summary>
         /// Class / interface is imported.
         /// </summary>
         Import = 0x00001000,
@@ -127,11 +131,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// This ExportedType is a type forwarder.
         /// </summary>
         Forwarder = 0x00200000,
-
-        /// <summary>
-        /// Runtime should check name encoding.
-        /// </summary>
-        RuntimeSpecialName = 0x00000800, 
 
         /// <summary>
         /// Class has security associate with it.
