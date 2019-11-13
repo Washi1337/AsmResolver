@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -46,5 +48,22 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         protected override Guid GetEncBaseId()
             => _metadata.GetStream<GuidStream>()?.GetGuidByIndex(_row.EncBaseId) ?? Guid.Empty;
+
+        /// <inheritdoc />
+        protected override IList<TypeDefinition> GetTopLevelTypes()
+        {
+            var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
+
+            // TODO: exclude nested types.
+            
+            var typeDefTable = _metadata.GetStream<TablesStream>().GetTable<TypeDefinitionRow>();
+            for (int i = 0; i < typeDefTable.Count; i++)
+            {
+                var token = new MetadataToken(TableIndex.TypeDef, (uint) i + 1);
+                types.Add(new SerializedTypeDefinition(_metadata, token, typeDefTable[i]));
+            }
+
+            return types;
+        }
     }
 }

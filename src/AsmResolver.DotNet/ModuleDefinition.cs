@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE;
@@ -13,7 +15,7 @@ namespace AsmResolver.DotNet
     /// Represents a single module in a .NET assembly. A module definition is the root object of any .NET module and
     /// defines types, as well as any resources and referenced assemblies. 
     /// </summary>
-    public class ModuleDefinition : IMetadataMember, IOwnedCollectionElement<AssemblyDefinition>
+    public class ModuleDefinition : IResolutionScope, IOwnedCollectionElement<AssemblyDefinition>
     {
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -88,6 +90,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<Guid> _mvid;
         private readonly LazyVariable<Guid> _encId;
         private readonly LazyVariable<Guid> _encBaseId;
+        private IList<TypeDefinition> _topLevelTypes;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -202,6 +205,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a collection of top-level (not nested) types defined in the module. 
+        /// </summary>
+        public IList<TypeDefinition> TopLevelTypes
+        {
+            get
+            {
+                if (_topLevelTypes is null)
+                    Interlocked.CompareExchange(ref _topLevelTypes, GetTopLevelTypes(), null);
+                return _topLevelTypes;
+            }
+        }
+
+        /// <summary>
         /// Obtains the name of the module definition.
         /// </summary>
         /// <returns>The name.</returns>
@@ -236,5 +252,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="EncBaseId"/> property.
         /// </remarks>
         protected virtual Guid GetEncBaseId() => Guid.Empty;
+
+        /// <summary>
+        /// Obtains the list of top-level types the module defines.
+        /// </summary>
+        /// <returns>The types.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="TopLevelTypes"/> property.
+        /// </remarks>
+        protected virtual IList<TypeDefinition> GetTopLevelTypes() =>
+            new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
     }
 }

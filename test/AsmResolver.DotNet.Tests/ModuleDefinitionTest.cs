@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -21,6 +22,13 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.NotNull(module.Assembly);
             Assert.Same(module, module.Assembly.ManifestModule);
+        }
+
+        [Fact]
+        public void ReadTypesNoNested()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
         }
     }
 }
