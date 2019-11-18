@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private TypeReference LookupTypeReference(MetadataToken token) =>
             LookupOrCreateMemberFromCache<TypeReference, TypeReferenceRow>(
-                ref _typeReferences, token, (m, t, r) => new SerializedTypeReference(m, t, r));
+                ref _typeReferences, token, (m, t, r) => new SerializedTypeReference(m, this, t, r));
 
         private TypeDefinition LookupTypeDefinition(MetadataToken token) => 
             LookupOrCreateMemberFromCache<TypeDefinition, TypeDefinitionRow>(

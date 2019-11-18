@@ -39,6 +39,22 @@ namespace AsmResolver.DotNet
             Name = name;
         }
 
+        /// <summary>
+        /// Creates a new reference to a type.
+        /// </summary>
+        /// <param name="module">The module that references the type.</param>
+        /// <param name="scope">The scope that defines the type.</param>
+        /// <param name="ns">The namespace the type resides in.</param>
+        /// <param name="name">The name of the type.</param>
+        public TypeReference(ModuleDefinition module, IResolutionScope scope, string ns, string name)
+            : this(new MetadataToken(TableIndex.TypeRef, 0))
+        {
+            _scope.Value = scope;
+            Module = module;
+            Namespace = ns;
+            Name = name;
+        }
+
         /// <inheritdoc />
         public MetadataToken MetadataToken
         {
@@ -79,9 +95,16 @@ namespace AsmResolver.DotNet
         public IResolutionScope Scope => _scope.Value;
 
         /// <inheritdoc />
+        public ModuleDefinition Module
+        {
+            get;
+            protected set;
+        }
+
+        /// <inheritdoc />
         public ITypeDefOrRef DeclaringType => Scope as ITypeDefOrRef;
 
-        ITypeDescriptor ITypeDescriptor.DeclaringType => DeclaringType;
+        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <summary>
         /// Obtains the name of the type reference.

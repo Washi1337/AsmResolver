@@ -19,12 +19,14 @@ namespace AsmResolver.DotNet.Serialized
         /// Creates a type reference from a type metadata row.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="parentModule">The module that references the type.</param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type definition on.</param>
-        public SerializedTypeReference(IMetadata metadata, MetadataToken token, TypeReferenceRow row)
+        public SerializedTypeReference(IMetadata metadata, ModuleDefinition parentModule, MetadataToken token, TypeReferenceRow row)
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            Module = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
         }
 
@@ -39,8 +41,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IResolutionScope GetScope()
         {
-            // TODO
-            return base.GetScope();
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var decoder = tablesStream.GetIndexEncoder(CodedIndex.ResolutionScope);
+            var token = decoder.DecodeIndex(_row.ResolutionScope);
+
+            return Module.LookupMember(token) as IResolutionScope;
         }
         
     }

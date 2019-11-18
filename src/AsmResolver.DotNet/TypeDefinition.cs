@@ -424,7 +424,7 @@ namespace AsmResolver.DotNet
         
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => DeclaringType;
         
-        ITypeDescriptor ITypeDescriptor.DeclaringType => DeclaringType;
+        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
         
         TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
         {

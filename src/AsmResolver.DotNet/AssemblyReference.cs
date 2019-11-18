@@ -6,7 +6,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to an external .NET assembly, hosted by a common language runtime (CLR). 
     /// </summary>
-    public class AssemblyReference : AssemblyDescriptor
+    public class AssemblyReference : AssemblyDescriptor, IResolutionScope
     {
         /// <summary>
         /// Initializes a new assembly reference.

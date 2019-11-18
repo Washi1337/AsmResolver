@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -24,8 +25,11 @@ namespace AsmResolver.DotNet.Serialized
         public SerializedAssemblyReference(IMetadata metadata, MetadataToken token, AssemblyReferenceRow row)
             : base(token)
         {
-            _metadata = metadata;
+            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _row = row;
+                
+            Attributes = row.Attributes;
+            Version = new Version(row.MajorVersion, row.MinorVersion, row.BuildNumber, row.RevisionNumber);
         }
 
         /// <inheritdoc />
