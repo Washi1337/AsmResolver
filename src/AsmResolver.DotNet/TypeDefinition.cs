@@ -423,7 +423,9 @@ namespace AsmResolver.DotNet
         }
         
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => DeclaringType;
-
+        
+        ITypeDescriptor ITypeDescriptor.DeclaringType => DeclaringType;
+        
         TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
         {
             get => DeclaringType;
@@ -443,7 +445,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        IResolutionScope ITypeDefOrRef.Scope => Module;
+        IResolutionScope ITypeDescriptor.Scope => Module;
         
         /// <summary>
         /// Obtains the namespace of the type definition.
@@ -482,6 +484,13 @@ namespace AsmResolver.DotNet
         protected virtual IList<TypeDefinition> GetNestedTypes() =>
             new OwnedCollection<TypeDefinition, TypeDefinition>(this);
 
+        /// <summary>
+        /// Obtains the enclosing class of the type definition if available.
+        /// </summary>
+        /// <returns>The enclosing type.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
+        /// </remarks>
         protected virtual TypeDefinition GetDeclaringType() => null;
 
         /// <inheritdoc />

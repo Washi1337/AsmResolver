@@ -2,7 +2,7 @@ namespace AsmResolver.DotNet
 {
     internal static class Utilities
     {
-        public static string GetFullName(this ITypeDefOrRef type)
+        public static string GetFullName(this ITypeDescriptor type)
         {
             string prefix;
             if (type.DeclaringType != null)

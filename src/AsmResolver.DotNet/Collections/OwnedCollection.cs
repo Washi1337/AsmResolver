@@ -50,6 +50,7 @@ namespace AsmResolver.DotNet.Collections
         {
             AssertNotNullAndHasNoOwner(item);
             item.Owner = Owner;
+            Items[index].Owner = null;
             base.OnSetItem(index, item);
         }
 

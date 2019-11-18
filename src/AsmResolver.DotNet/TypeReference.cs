@@ -81,6 +81,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public ITypeDefOrRef DeclaringType => Scope as ITypeDefOrRef;
 
+        ITypeDescriptor ITypeDescriptor.DeclaringType => DeclaringType;
+
         /// <summary>
         /// Obtains the name of the type reference.
         /// </summary>
