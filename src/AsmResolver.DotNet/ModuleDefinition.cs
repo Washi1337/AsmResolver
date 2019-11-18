@@ -139,6 +139,9 @@ namespace AsmResolver.DotNet
             get => Assembly;
             set => Assembly = value;
         }
+        
+        /// <inheritdoc />
+        ModuleDefinition IModuleProvider.Module => this;
 
         /// <summary>
         /// Gets or sets the name of the module.
@@ -299,9 +302,11 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="AssemblyReferences"/> property.
         /// </remarks>
-        protected virtual IList<AssemblyReference> GetAssemblyReferences() => new List<AssemblyReference>();
+        protected virtual IList<AssemblyReference> GetAssemblyReferences() =>
+            new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
 
         /// <inheritdoc />
         public override string ToString() => Name;
+
     }
 }

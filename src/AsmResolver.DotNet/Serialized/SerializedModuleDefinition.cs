@@ -184,7 +184,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {
-            var result = new List<AssemblyReference>();
+            var result = new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
 
             var table = _metadata.GetStream<TablesStream>().GetTable<AssemblyReferenceRow>();
             for (int i = 0; i < table.Count; i++)

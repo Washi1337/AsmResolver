@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -6,7 +7,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to an external .NET assembly, hosted by a common language runtime (CLR). 
     /// </summary>
-    public class AssemblyReference : AssemblyDescriptor, IResolutionScope
+    public class AssemblyReference : AssemblyDescriptor, IResolutionScope, IOwnedCollectionElement<ModuleDefinition>
     {
         /// <summary>
         /// Initializes a new assembly reference.
@@ -27,6 +28,20 @@ namespace AsmResolver.DotNet
         {
             Name = name;
             Version = version;
+        }
+
+        /// <inheritdoc />
+        public ModuleDefinition Module
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc />
+        ModuleDefinition IOwnedCollectionElement<ModuleDefinition>.Owner
+        {
+            get => Module;
+            set => Module = value;
         }
     }
 }
