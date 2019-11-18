@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         /// Creates an assembly definition from an assembly metadata row.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
-        /// <param name="token">The token to initialize the module for.</param>
+        /// <param name="token">The token to initialize the assembly for.</param>
         /// <param name="row">The metadata table row to base the assembly definition on.</param>
         /// <param name="manifestModule">The instance containing the manifest module definition.</param>
         public SerializedAssemblyDefinition(IMetadata metadata, MetadataToken token, AssemblyDefinitionRow row, ModuleDefinition manifestModule) 
@@ -34,7 +34,8 @@ namespace AsmResolver.DotNet.Serialized
             _manifestModule = manifestModule ?? throw new ArgumentNullException(nameof(manifestModule));
             
             Attributes = row.Attributes;
-            Version = new Version(row.MajorVersion, row.MinorVersion, row.BuildNumber, row.RevisionNumber);;
+            Version = new Version(row.MajorVersion, row.MinorVersion, row.BuildNumber, row.RevisionNumber);
+            HashAlgorithm = row.HashAlgorithm;
         }
 
         /// <inheritdoc />

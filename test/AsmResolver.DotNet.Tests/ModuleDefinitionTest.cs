@@ -41,9 +41,17 @@ namespace AsmResolver.DotNet.Tests
                 nameof(TopLevelClass2)
             }, module.TopLevelTypes.Select(t => t.Name));
         }
+        
+        [Fact]
+        public void HelloWorldReadAssemblyReferences()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            Assert.Single(module.AssemblyReferences);
+            Assert.Equal("mscorlib", module.AssemblyReferences[0].Name);
+        }
 
         [Fact]
-        public void ResolveTypeReference()
+        public void LookupTypeReference()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeRef, 12));
@@ -55,7 +63,7 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
-        public void ResolveTypeDefinition()
+        public void LookupTypeDefinition()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeDef, 2));
@@ -65,6 +73,18 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal("HelloWorld", typeDef.Namespace);
             Assert.Equal("Program", typeDef.Name);
         }
-        
+
+        [Fact]
+        public void LookupAssemblyReference()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var member = module.LookupMember(new MetadataToken(TableIndex.AssemblyRef, 1));
+            Assert.IsAssignableFrom<AssemblyReference>(member);
+            
+            var assemblyRef = (AssemblyReference) member;
+            Assert.Equal("mscorlib", assemblyRef.Name);
+            Assert.Same(module.AssemblyReferences[0], assemblyRef);
+        }
+
     }
 }

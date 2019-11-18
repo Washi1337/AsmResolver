@@ -92,6 +92,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<Guid> _encId;
         private readonly LazyVariable<Guid> _encBaseId;
         private IList<TypeDefinition> _topLevelTypes;
+        private IList<AssemblyReference> _assemblyReferences;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -219,6 +220,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a collection of references to .NET assemblies that the module uses. 
+        /// </summary>
+        public IList<AssemblyReference> AssemblyReferences
+        {
+            get
+            {
+                if (_assemblyReferences is null)
+                    Interlocked.CompareExchange(ref _assemblyReferences, GetAssemblyReferences(), null);
+                return _assemblyReferences;
+            }
+        }
+
+        /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>
         /// <param name="token">The token of the member to lookup.</param>
@@ -277,6 +291,15 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<TypeDefinition> GetTopLevelTypes() =>
             new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
+
+        /// <summary>
+        /// Obtains the list of references to .NET assemblies that the module uses. 
+        /// </summary>
+        /// <returns>The references to the assemblies..</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="AssemblyReferences"/> property.
+        /// </remarks>
+        protected virtual IList<AssemblyReference> GetAssemblyReferences() => new List<AssemblyReference>();
 
         /// <inheritdoc />
         public override string ToString() => Name;

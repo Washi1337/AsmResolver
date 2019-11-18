@@ -50,6 +50,9 @@ namespace AsmResolver.DotNet.Serialized
                 case TableIndex.TypeDef:
                     return LookupTypeDefinition(token);
                 
+                case TableIndex.AssemblyRef:
+                    return LookupAssemblyReference(token);
+                
                 default:
                     throw new NotSupportedException();
             }
@@ -62,7 +65,14 @@ namespace AsmResolver.DotNet.Serialized
         private TypeDefinition LookupTypeDefinition(MetadataToken token) => 
             LookupOrCreateMemberFromCache<TypeDefinition, TypeDefinitionRow>(
                 ref _typeDefinitions, token, (m, t, r) => new SerializedTypeDefinition(m, this, t, r));
-
+        
+        private IMetadataMember LookupAssemblyReference(MetadataToken token)
+        {
+            if (token.Rid == 0 || token.Rid > AssemblyReferences.Count )
+                return null;
+            return AssemblyReferences[(int) (token.Rid - 1)];
+        }
+        
         private TMember LookupOrCreateMemberFromCache<TMember, TRow>(ref TMember[] cache, MetadataToken token,
             Func<IMetadata, MetadataToken, TRow, TMember> createMember)
             where TRow : struct, IMetadataRow
@@ -169,6 +179,21 @@ namespace AsmResolver.DotNet.Serialized
             EnsureTypeDefinitionTreeInitialized();
             _parentTypeRids.TryGetValue(nestedTypeRid, out uint parentRid);
             return parentRid;
+        }
+
+        /// <inheritdoc />
+        protected override IList<AssemblyReference> GetAssemblyReferences()
+        {
+            var result = new List<AssemblyReference>();
+
+            var table = _metadata.GetStream<TablesStream>().GetTable<AssemblyReferenceRow>();
+            for (int i = 0; i < table.Count; i++)
+            {
+                var token = new MetadataToken(TableIndex.AssemblyRef, (uint) i + 1);
+                result.Add(new SerializedAssemblyReference(_metadata, token, table[i]));
+            }
+
+            return result;
         }
         
     }
