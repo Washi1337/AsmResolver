@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Serialized
         protected override string GetCulture() => _metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Culture);
 
         /// <inheritdoc />
-        protected override byte[] GetPublicKey() => _metadata.GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKeyOrToken);
+        protected override byte[] GetPublicKeyOrToken() => _metadata.GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKeyOrToken);
         
     }
 }

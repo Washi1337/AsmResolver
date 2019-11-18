@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.Lazy;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -71,6 +72,7 @@ namespace AsmResolver.DotNet
             ModuleDefinition.FromMetadata(metadata).Assembly;
         
         private IList<ModuleDefinition> _modules;
+        private readonly LazyVariable<byte[]> _publicKey;
 
         /// <summary>
         /// Initializes a new assembly definition.
@@ -79,6 +81,7 @@ namespace AsmResolver.DotNet
         protected AssemblyDefinition(MetadataToken token)
             : base(token)
         {
+            _publicKey = new LazyVariable<byte[]>(GetPublicKey);
         }
 
         /// <summary>
@@ -118,6 +121,20 @@ namespace AsmResolver.DotNet
                     Interlocked.CompareExchange(ref _modules, GetModules(), null);
                 return _modules;
             }
+        } 
+        
+        /// <summary>
+        /// Gets or sets the public key of the assembly to use for verification of a signature.
+        /// </summary>
+        /// <remarks>
+        /// <para>If this value is set to <c>null</c>, no public key will be assigned.</para>
+        /// <para>This property does not automatically update the <see cref="AssemblyDescriptor.HasPublicKey"/> property.</para>
+        /// <para>This property corresponds to the Culture column in the assembly definition table.</para> 
+        /// </remarks>
+        public byte[] PublicKey
+        {
+            get => _publicKey.Value;
+            set => _publicKey.Value = value;
         }
         
         /// <summary>
@@ -129,5 +146,20 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ModuleDefinition> GetModules()
             => new OwnedCollection<AssemblyDefinition, ModuleDefinition>(this);
+        
+        /// <summary>
+        /// Obtains the public key of the assembly definition.
+        /// </summary>
+        /// <returns>The public key.</returns>
+        /// <remarks>
+        /// This method is called upon initializing the <see cref="PublicKey"/> property.
+        /// </remarks>
+        protected virtual byte[] GetPublicKey() => null;
+
+        /// <inheritdoc />
+        public override byte[] GetPublicKeyToken()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

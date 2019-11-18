@@ -13,7 +13,6 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _culture;
-        private readonly LazyVariable<byte[]> _publicKey;
 
         /// <summary>
         /// Initializes a new empty assembly descriptor.
@@ -24,7 +23,6 @@ namespace AsmResolver.DotNet
             MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _culture = new LazyVariable<string>(GetCulture);
-            _publicKey = new LazyVariable<byte[]>(GetPublicKey);
         }
 
         /// <inheritdoc />
@@ -74,9 +72,6 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets a value indicating whether the assembly holds the full (unhashed) public key.
         /// </summary>
-        /// <remarks>
-        /// This property does not automatically update after <see cref="PublicKey"/> was updated.
-        /// </remarks>
         public bool HasPublicKey
         {
             get => (Attributes & AssemblyAttributes.PublicKey) != 0;
@@ -132,20 +127,6 @@ namespace AsmResolver.DotNet
         }
         
         /// <summary>
-        /// Gets or sets the public key of the assembly to use for verification of a signature.
-        /// </summary>
-        /// <remarks>
-        /// <para>If this value is set to <c>null</c>, no public key will be assigned.</para>
-        /// <para>This property does not automatically update the <see cref="HasPublicKey"/> property.</para>
-        /// <para>This property corresponds to the Culture column in the assembly definition table.</para> 
-        /// </remarks>
-        public byte[] PublicKey
-        {
-            get => _publicKey.Value;
-            set => _publicKey.Value = value;
-        }
-
-        /// <summary>
         /// Gets or sets the locale string of the assembly (if available).
         /// </summary>
         /// <remarks>
@@ -162,10 +143,7 @@ namespace AsmResolver.DotNet
         /// When the application is signed with a strong name, obtains the public key token of the assembly 
         /// </summary>
         /// <returns>The token.</returns>
-        public byte[] GetPublicKeyToken()
-        {
-            throw new NotImplementedException();
-        }
+        public abstract byte[] GetPublicKeyToken();
 
         /// <summary>
         /// Obtains the name of the assembly definition.
@@ -184,15 +162,6 @@ namespace AsmResolver.DotNet
         /// This method is called upon initializing the <see cref="Culture"/> property.
         /// </remarks>
         protected virtual string GetCulture() => null;
-
-        /// <summary>
-        /// Obtains the public key of the assembly definition.
-        /// </summary>
-        /// <returns>The public key.</returns>
-        /// <remarks>
-        /// This method is called upon initializing the <see cref="PublicKey"/> property.
-        /// </remarks>
-        protected virtual byte[] GetPublicKey() => null;
 
         /// <inheritdoc />
         public override string ToString() => $"{Name}, Version={Version}";
