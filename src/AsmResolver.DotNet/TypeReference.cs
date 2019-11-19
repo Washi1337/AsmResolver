@@ -95,6 +95,9 @@ namespace AsmResolver.DotNet
         public IResolutionScope Scope => _scope.Value;
 
         /// <inheritdoc />
+        public bool IsValueType => false; // TODO: resolve. 
+
+        /// <inheritdoc />
         public ModuleDefinition Module
         {
             get;

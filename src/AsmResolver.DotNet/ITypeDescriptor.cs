@@ -20,6 +20,14 @@ namespace AsmResolver.DotNet
         {
             get;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether instances of this type are passed on by value or by reference.
+        /// </summary>
+        bool IsValueType
+        {
+            get;
+        }
         
     }
 }

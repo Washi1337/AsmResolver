@@ -15,5 +15,8 @@ namespace AsmResolver.DotNet
             return prefix + type.Name;
         }
 
+        public static bool IsTypeOf(this ITypeDescriptor type, string ns, string name) =>
+            type.Name == name && type.Namespace == ns;
+
     }
 }

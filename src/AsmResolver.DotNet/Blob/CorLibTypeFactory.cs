@@ -148,6 +148,39 @@ namespace AsmResolver.DotNet.Blob
         /// </summary>
         public CorLibTypeSignature Object => GetOrCreateCorLibTypeSignature(ref _object, ElementType.Object, nameof(Object));
 
+        /// <summary>
+        /// Obtains the common object runtime type signature from its element type.
+        /// </summary>
+        /// <param name="elementType">The element type.</param>
+        /// <returns>The type signature.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="elementType"/> does not specify a
+        /// CorLib type signature.</exception>
+        public CorLibTypeSignature FromElementType(ElementType elementType)
+        {
+            return elementType switch
+            {
+                ElementType.Void => Void,
+                ElementType.Boolean => Boolean,
+                ElementType.Char => Char,
+                ElementType.I1 => SByte,
+                ElementType.U1 => Byte,
+                ElementType.I2 => Int16,
+                ElementType.U2 => UInt16,
+                ElementType.I4 => Int32,
+                ElementType.U4 => UInt32,
+                ElementType.I8 => Int64,
+                ElementType.U8 => UInt64,
+                ElementType.R4 => Single,
+                ElementType.R8 => Double,
+                ElementType.String => String,
+                ElementType.I => IntPtr,
+                ElementType.U => UIntPtr,
+                ElementType.TypedByRef => TypedReference,
+                ElementType.Object => Object,
+                _ => throw new ArgumentOutOfRangeException(nameof(elementType))
+            };
+        }
+        
         private CorLibTypeSignature GetOrCreateCorLibTypeSignature(ref CorLibTypeSignature cache, ElementType elementType, string name)
         {
             if (cache is null)

@@ -251,6 +251,10 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <summary>
+        /// Gets the common object runtime library type factory for this module, containing element type signatures used
+        /// in blob signatures. 
+        /// </summary>
         public CorLibTypeFactory CorLibTypeFactory
         {
             get;

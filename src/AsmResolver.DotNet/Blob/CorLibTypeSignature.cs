@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Blob
@@ -23,6 +24,31 @@ namespace AsmResolver.DotNet.Blob
 
         /// <inheritdoc />
         public override string Namespace => "System";
+
+        /// <inheritdoc />
+        public override bool IsValueType =>
+            ElementType switch
+            {
+                ElementType.String => false,
+                ElementType.Object => false,
+                ElementType.Void => true,
+                ElementType.Boolean => true,
+                ElementType.Char => true,
+                ElementType.I1 => true,
+                ElementType.U1 => true,
+                ElementType.I2 => true,
+                ElementType.U2 => true,
+                ElementType.I4 => true,
+                ElementType.U4 => true,
+                ElementType.I8 => true,
+                ElementType.U8 => true,
+                ElementType.R4 => true,
+                ElementType.R8 => true,
+                ElementType.TypedByRef => true,
+                ElementType.I => true,
+                ElementType.U => true,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         /// <inheritdoc />
         public override ElementType ElementType
