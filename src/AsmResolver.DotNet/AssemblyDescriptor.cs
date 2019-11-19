@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -164,6 +165,14 @@ namespace AsmResolver.DotNet
         protected virtual string GetCulture() => null;
 
         /// <inheritdoc />
-        public override string ToString() => $"{Name}, Version={Version}";
+        public override string ToString()
+        {
+            var publicKeyToken = GetPublicKeyToken();
+            string publicKeyTokenString = publicKeyToken != null
+                ? string.Join(string.Empty, publicKeyToken.Select(x => x.ToString("x2")))
+                : "null";
+            
+            return $"{Name}, Version={Version}, PublicKeyToken={publicKeyTokenString}";
+        }
     }
 }

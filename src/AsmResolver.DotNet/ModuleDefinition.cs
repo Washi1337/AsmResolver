@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.Lazy;
@@ -108,13 +109,28 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Defines a new .NET module.
+        /// Defines a new .NET module that references mscorlib version 4.0.0.0.
         /// </summary>
         /// <param name="name">The name of the module.</param>
         public ModuleDefinition(string name)
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
+            CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory();
+            AssemblyReferences.Add((AssemblyReference) CorLibTypeFactory.CorLibScope);
+        }
+
+        /// <summary>
+        /// Defines a new .NET module.
+        /// </summary>
+        /// <param name="name">The name of the module.</param>
+        /// <param name="corLib">The reference to the common object runtime (COR) library that this module will use.</param>
+        public ModuleDefinition(string name, AssemblyReference corLib)
+            : this(new MetadataToken(TableIndex.Module, 0))
+        {
+            Name = name;
+            CorLibTypeFactory = new CorLibTypeFactory(corLib);
+            AssemblyReferences.Add(corLib);
         }
 
         /// <inheritdoc />
@@ -235,6 +251,12 @@ namespace AsmResolver.DotNet
             }
         }
 
+        public CorLibTypeFactory CorLibTypeFactory
+        {
+            get;
+            protected set;
+        }
+        
         /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>

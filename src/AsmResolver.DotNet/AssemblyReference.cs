@@ -28,10 +28,43 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the assembly.</param>
         /// <param name="version">The version of the assembly.</param>
         public AssemblyReference(string name, Version version)
-            : base(new MetadataToken(TableIndex.AssemblyRef, 0))
+            : this(new MetadataToken(TableIndex.AssemblyRef, 0))
         {
             Name = name;
             Version = version;
+        }
+
+        /// <summary>
+        /// Creates a new assembly reference.
+        /// </summary>
+        /// <param name="name">The name of the assembly.</param>
+        /// <param name="version">The version of the assembly.</param>
+        /// <param name="publicKey">Indicates the key provided by <paramref name="publicKeyOrToken"/> is the full,
+        /// unhashed public key used to verify the authenticity of the assembly.</param>
+        /// <param name="publicKeyOrToken">Indicates the public key or token (depending on <paramref name="publicKey"/>),
+        /// used to verify the authenticity of the assembly.</param>
+        public AssemblyReference(string name, Version version, bool publicKey, byte[] publicKeyOrToken)
+            : this(new MetadataToken(TableIndex.AssemblyRef, 0))
+        {
+            Name = name;
+            Version = version;
+            HasPublicKey = publicKey;
+            PublicKeyOrToken = publicKeyOrToken;
+        }
+
+        /// <summary>
+        /// Creates a new assembly reference, and copies over all properties of another assembly descriptor.
+        /// </summary>
+        /// <param name="descriptor">The assembly to base the reference on.</param>
+        public AssemblyReference(AssemblyDescriptor descriptor)
+            : base(new MetadataToken(TableIndex.AssemblyRef, 0))
+        {
+            Name = descriptor.Name;
+            Version = descriptor.Version;
+            Attributes = descriptor.Attributes;
+            HasPublicKey = false;
+            PublicKeyOrToken = descriptor.GetPublicKeyToken();
+            Culture = descriptor.Culture;
         }
 
         /// <inheritdoc />

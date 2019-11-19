@@ -86,5 +86,14 @@ namespace AsmResolver.DotNet.Tests
             Assert.Same(module.AssemblyReferences[0], assemblyRef);
         }
 
+        [Fact]
+        public void CreateNewCorLibFactory()
+        {
+            var module = new ModuleDefinition("MySampleModule");
+            Assert.NotNull(module.CorLibTypeFactory);
+            Assert.NotNull(module.CorLibTypeFactory.CorLibScope);
+            Assert.NotNull(module.CorLibTypeFactory.Void);
+        }
+        
     }
 }
