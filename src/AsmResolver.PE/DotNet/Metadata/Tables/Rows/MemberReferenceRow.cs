@@ -146,7 +146,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public IEnumerator<uint> GetEnumerator()
         {
-            return new MetadataRowColumnEnumerator<MemberReferenceRow>(this);
+            return new MetadataRowColumnEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

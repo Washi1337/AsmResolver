@@ -118,9 +118,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return $"({Offset:X8}, {Field:X8})";
         }
 
+        /// <inheritdoc />
         public IEnumerator<uint> GetEnumerator()
         {
-            return new MetadataRowColumnEnumerator<FieldLayoutRow>(this);
+            return new MetadataRowColumnEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

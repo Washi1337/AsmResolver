@@ -179,9 +179,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return $"({(uint) Attributes:X8}, {TypeDefinitionId:X8}, {Name:X8}, {Namespace:X8}, {Implementation:X8})";
         }
 
+        /// <inheritdoc />
         public IEnumerator<uint> GetEnumerator()
         {
-            return new MetadataRowColumnEnumerator<ExportedTypeRow>(this);
+            return new MetadataRowColumnEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

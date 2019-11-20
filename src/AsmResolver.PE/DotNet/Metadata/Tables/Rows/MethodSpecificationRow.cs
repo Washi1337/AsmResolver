@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -59,7 +60,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public uint this[int index] => index switch
         {
             0 => Method,
-            1 => Instantiation
+            1 => Instantiation,
+            _ => throw new IndexOutOfRangeException()
         };
 
         /// <summary>
@@ -116,9 +118,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return $"({Method:X8}, {Instantiation:X8})";
         }
 
+        /// <inheritdoc />
         public IEnumerator<uint> GetEnumerator()
         {
-            return new MetadataRowColumnEnumerator<MethodSpecificationRow>(this);
+            return new MetadataRowColumnEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

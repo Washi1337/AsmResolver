@@ -101,9 +101,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return $"({Event:X8})";
         }
 
+        /// <inheritdoc />
         public IEnumerator<uint> GetEnumerator()
         {
-            return new MetadataRowColumnEnumerator<EventPointerRow>(this);
+            return new MetadataRowColumnEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

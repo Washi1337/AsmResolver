@@ -3,13 +3,19 @@ using System.Collections.Generic;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
-    public struct MetadataRowColumnEnumerator<TRow> : IEnumerator<uint>
-        where TRow : IMetadataRow
+    /// <summary>
+    /// Provides a mechanism for enumerating all column cells in a row of a metadata table.
+    /// </summary>
+    public struct MetadataRowColumnEnumerator : IEnumerator<uint>
     {
-        private TRow _row;
+        private readonly IMetadataRow _row;
         private int _index;
 
-        public MetadataRowColumnEnumerator(TRow row)
+        /// <summary>
+        /// Creates a new metadata row column enumerator.
+        /// </summary>
+        /// <param name="row"></param>
+        public MetadataRowColumnEnumerator(IMetadataRow row)
         {
             _row = row;
             _index = -1;
