@@ -1,3 +1,4 @@
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -47,5 +48,19 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 MethodDefinitionRow.FromReader);
         }
         
+        [Fact]
+        public void RowEnumerationTest()
+        {
+            var rawRow = new uint[] {0x00002050, 0x0000, 0x0091, 0x017E, 0x0023, 0x0001};
+            var row = new MethodDefinitionRow(
+                new VirtualAddress(rawRow[0]),
+                (MethodImplAttributes) rawRow[1],
+                (MethodAttributes) rawRow[2],
+                rawRow[3],
+                rawRow[4],
+                rawRow[5]);
+
+            RowTestUtils.VerifyRowColumnEnumeration(rawRow, row);
+        }
     }
 }

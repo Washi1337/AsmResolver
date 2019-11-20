@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -59,7 +63,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Module;
 
-        /// <summary>
+        /// <inheritdoc />
+        public int Count => 5;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => Generation,
+            1 => Name,
+            2 => Mvid,
+            3 => EncId,
+            4 => EncBaseId,
+            _ => throw new IndexOutOfRangeException()
+        };
+
+    /// <summary>
         /// Gets the generation number of the module.  
         /// </summary>
         /// <remarks>
@@ -152,6 +170,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
                 hashCode = (hashCode * 397) ^ (int) EncBaseId;
                 return hashCode;
             }
+        }
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<ModuleDefinitionRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

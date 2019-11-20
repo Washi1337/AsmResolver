@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -34,6 +35,19 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
             var newRow = readRow(new ByteArrayReader(tempStream.ToArray()), table.Layout, VirtualAddressResolver.Instance);
             
             Assert.Equal(expected, newRow);
+        }
+
+        public static void VerifyRowColumnEnumeration(uint[] expected, IMetadataRow row)
+        {
+            // Test count property
+            Assert.Equal(expected.Length, row.Count);
+
+            // Test indexer property
+            for (int i = 0; i < expected.Length; i++)
+                Assert.Equal(expected[i], row[i]);
+
+            // Test enumerator
+            Assert.Equal(expected, row.ToArray());
         }
     }
 }

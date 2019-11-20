@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -55,6 +59,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ManifestResource;
+
+        /// <inheritdoc />
+        public int Count => 4;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => Offset,
+            1 => (uint) Attributes,
+            2 => Name,
+            3 => Implementation,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets the byte offset within the referenced file at which the resource record begins. 
@@ -138,6 +155,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({Offset:X8}, {(int) Attributes:X8}, {Name:X8}, {Implementation:X8})";
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<ManifestResourceRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

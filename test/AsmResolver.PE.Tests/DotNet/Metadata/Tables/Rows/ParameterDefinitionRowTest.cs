@@ -27,5 +27,13 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 ParameterDefinitionRow.FromReader);
         }
         
+        [Fact]
+        public void RowEnumerationTest()
+        {
+            var rawRow = new uint[] { 0x0000, 0x001, 0x01DD };
+            var row = new ParameterDefinitionRow((ParameterAttributes) rawRow[0], (ushort) rawRow[1], rawRow[2]);
+
+            RowTestUtils.VerifyRowColumnEnumeration(rawRow, row);
+        }
     }
 }

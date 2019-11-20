@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -53,6 +57,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.CustomAttribute;
 
+        /// <inheritdoc />
+        public int Count => 3;
+        
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => Parent,
+            1 => Type,
+            2 => Value,
+            _ => throw new IndexOutOfRangeException()
+        };
+        
         /// <summary>
         /// Gets a HasCustomAttribute index (an index into either the Method, Field, TypeRef, TypeDef,
         /// Param, InterfaceImpl, MemberRef, Module, DeclSecurity, Property, Event, StandAloneSig, ModuleRef,
@@ -88,7 +104,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(CustomAttributeRow other)
         {
-            return Parent == other.Parent && Type == other.Type && Value == other.Value;
+            return Parent == other.Parent
+                   && Type == other.Type
+                   && Value == other.Value;
         }
 
         /// <inheritdoc />
@@ -100,10 +118,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            return obj is CustomAttributeRow other && Equals(other);
-        }
+        public override bool Equals(object obj) => obj is CustomAttributeRow other && Equals(other);
 
         /// <inheritdoc />
         public override int GetHashCode()
@@ -118,10 +133,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         }
 
         /// <inheritdoc />
-        public override string ToString()
+        public override string ToString() => $"({Parent:X8}, {Type:X8}, {Value:X8})";
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
         {
-            return $"({Parent:X8}, {Type:X8}, {Value:X8})";
+            return new MetadataRowColumnEnumerator<CustomAttributeRow>(this);
         }
-        
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

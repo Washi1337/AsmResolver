@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -52,6 +56,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.MemberRef;
+
+        /// <inheritdoc />
+        public int Count => 3;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => Parent,
+            1 => Name,
+            2 => Signature,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets a MemberRefParent index (an index into either the TypeDef, TypeRef, ModuleRef, Method or TypeSpec table)
@@ -125,6 +141,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public override string ToString()
         {
             return $"({Parent:X8}, {Name:X8}, {Signature:X8})";
+        }
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<MemberReferenceRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

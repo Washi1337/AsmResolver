@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -71,6 +75,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Constant;
 
+        /// <inheritdoc />
+        public int Count => 4;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => (uint) Type,
+            1 => Padding,
+            2 => Parent,
+            3 => Value,
+            _ => throw new IndexOutOfRangeException()
+        };
+        
         /// <summary>
         /// Gets the type of constant that is stored in the blob stream. 
         /// </summary>
@@ -113,7 +130,10 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <returns><c>true</c> if the rows are equal, <c>false</c> otherwise.</returns>
         public bool Equals(ConstantRow other)
         {
-            return Type == other.Type && Padding == other.Padding && Parent == other.Parent && Value == other.Value;
+            return Type == other.Type
+                   && Padding == other.Padding
+                   && Parent == other.Parent
+                   && Value == other.Value;
         }
 
         /// <inheritdoc />
@@ -149,6 +169,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({(int) Type:X2}, {Padding:X2}, {Value:X8})";
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<ConstantRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

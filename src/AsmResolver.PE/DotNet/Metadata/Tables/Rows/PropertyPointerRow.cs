@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -44,6 +48,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.PropertyPtr;
+
+        /// <inheritdoc />
+        public int Count => 1;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => Property,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets an index into the Property table that this pointer references.
@@ -87,5 +101,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             return $"({Property:X8})";
         }
 
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<PropertyPointerRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

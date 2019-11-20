@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -48,6 +52,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.FieldLayout;
+
+        /// <inheritdoc />
+        public int Count => 2;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => Offset,
+            1 => Field,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets the offset of the field relative to the start of the enclosing structure type.
@@ -102,6 +117,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({Offset:X8}, {Field:X8})";
         }
-        
+
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<FieldLayoutRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

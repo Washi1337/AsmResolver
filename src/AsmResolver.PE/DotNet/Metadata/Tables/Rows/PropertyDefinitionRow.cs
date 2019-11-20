@@ -12,6 +12,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -48,6 +52,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Property;
+
+        /// <inheritdoc />
+        public int Count => 3;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => (uint) Attributes,
+            1 => Name,
+            2 => Type,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets the attributes associated to the property definition.
@@ -118,6 +134,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({(int) Attributes:X4}, {Name:X8}, {Type:X8})";
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<PropertyDefinitionRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

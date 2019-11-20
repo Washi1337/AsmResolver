@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -55,6 +59,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ImplMap;
+
+        /// <inheritdoc />
+        public int Count => 4;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => (uint) Attributes,
+            1 => MemberForwarded,
+            2 => ImportName,
+            3 => ImportScope,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets the attributes associated to the implementation mapping.
@@ -134,6 +151,17 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public override string ToString()
         {
             return $"({(int) Attributes:X4}, {MemberForwarded:X8}, {ImportName:X8}, {ImportScope:X8})";
+        }
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<ImplementationMapRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

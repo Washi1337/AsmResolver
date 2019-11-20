@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -51,6 +55,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.DeclSecurity;
+
+        /// <inheritdoc />
+        public int Count => 3;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => (uint) Action,
+            1 => Parent,
+            2 => PermissionSet,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets the action to be performed.
@@ -118,6 +134,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({(int) Action:X4}, {Parent:X8}, {PermissionSet:X8})";
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<SecurityDeclarationRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

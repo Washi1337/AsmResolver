@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -63,6 +67,21 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Method;
+
+        /// <inheritdoc />
+        public int Count => 6;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => Body?.Rva ?? 0,
+            1 => (uint) ImplAttributes,
+            2 => (uint) Attributes,
+            3 => Name,
+            4 => Signature,
+            5 => ParameterList,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets a reference to the beginning of the method body. 
@@ -184,6 +203,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({Body.Rva:X8}, {(int)ImplAttributes:X4}, {(int) Attributes:X4}, {Name:X8}, {Signature:X8}, {ParameterList:X8})";
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<MethodDefinitionRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

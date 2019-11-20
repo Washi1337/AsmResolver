@@ -1,3 +1,7 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -39,6 +43,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.AssemblyRefOS;
 
+        /// <inheritdoc />
+        public int Count => 4;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => PlatformId,
+            1 => MajorVersion,
+            2 => MinorVersion,
+            3 => AssemblyReference,
+            _ => throw new IndexOutOfRangeException()
+        };
+        
         /// <summary>
         /// Gets the identifier of the platform the assembly is targeting.
         /// </summary>
@@ -118,6 +135,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({PlatformId:X8}, {MajorVersion:X8}, {MinorVersion:X8})";
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<AssemblyRefOSRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

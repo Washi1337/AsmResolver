@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -58,6 +62,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ExportedType;
+
+        /// <inheritdoc />
+        public int Count => 5;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => (uint) Attributes,
+            1 => TypeDefinitionId,
+            2 => Name,
+            3 => Namespace,
+            4 => Implementation,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets the attributes associated to the exported type.
@@ -160,6 +178,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({(uint) Attributes:X8}, {TypeDefinitionId:X8}, {Name:X8}, {Namespace:X8}, {Implementation:X8})";
         }
-        
+
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<ExportedTypeRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

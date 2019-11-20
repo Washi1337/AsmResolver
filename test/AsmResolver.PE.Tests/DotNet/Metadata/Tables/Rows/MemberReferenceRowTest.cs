@@ -38,6 +38,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                     0x0001),
                 MemberReferenceRow.FromReader);
         }
-        
+
+        [Fact]
+        public void RowEnumerationTest()
+        {
+            var rawRow = new uint[] {0x0009, 0x0195, 0x0001};
+            var row = new MemberReferenceRow(rawRow[0], rawRow[1], rawRow[2]);
+            
+            RowTestUtils.VerifyRowColumnEnumeration(rawRow, row);
+        }
     }
 }

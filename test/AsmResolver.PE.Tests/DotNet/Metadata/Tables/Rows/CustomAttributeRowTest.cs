@@ -39,5 +39,13 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 CustomAttributeRow.FromReader);
         }
         
+        [Fact]
+        public void RowEnumerationTest()
+        {
+            var rawRow = new uint[] { 0x002E, 0x000B, 0x0029 };
+            var row = new CustomAttributeRow(rawRow[0], rawRow[1], rawRow[2]);
+            
+            RowTestUtils.VerifyRowColumnEnumeration(rawRow, row);
+        }
     }
 }

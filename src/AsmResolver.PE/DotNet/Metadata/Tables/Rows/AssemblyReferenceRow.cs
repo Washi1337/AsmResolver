@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -72,6 +76,24 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.Assembly;
 
+        /// <inheritdoc />
+        public int Count => 9;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => MajorVersion,
+            1 => MinorVersion,
+            2 => BuildNumber,
+            3 => RevisionNumber,
+            4 => (uint) Attributes,
+            5 => PublicKeyOrToken,
+            6 => Name,
+            7 => Culture,
+            8 => HashValue,
+            _ => throw new IndexOutOfRangeException()
+        };
+        
         /// <summary>
         /// Gets the major version number of the assembly.
         /// </summary>
@@ -212,6 +234,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({MajorVersion:X4}, {MinorVersion:X4}, {BuildNumber:X4}, {RevisionNumber:X4}, {(int) Attributes:X8}, {PublicKeyOrToken:X8}, {Name:X8}, {Culture:X8})";
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<AssemblyReferenceRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

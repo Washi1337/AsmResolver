@@ -15,6 +15,10 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
@@ -54,6 +58,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.GenericParam;
+
+        /// <inheritdoc />
+        public int Count => 4;
+
+        /// <inheritdoc />
+        public uint this[int index] => index switch
+        {
+            0 => Number,
+            1 => (uint) Attributes,
+            2 => Owner,
+            3 => Name,
+            _ => throw new IndexOutOfRangeException()
+        };
 
         /// <summary>
         /// Gets the index of the generic parameter.
@@ -134,6 +151,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             return $"({Number:X4}, {(int) Attributes:X4}, {Owner:X8}, {Name:X8})";
         }
-        
+
+        /// <inheritdoc />
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return new MetadataRowColumnEnumerator<GenericParameterRow>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

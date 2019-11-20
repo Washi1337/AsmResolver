@@ -31,5 +31,14 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
                 TypeReferenceRow.FromReader);
         }
         
+        [Fact]
+        public void RowEnumerationTest()
+        {
+            var rawRow = new uint[] { 0x0006, 0x00D6, 0x01AE };
+            var row = new TypeReferenceRow(rawRow[0], rawRow[1], rawRow[2]);
+
+            RowTestUtils.VerifyRowColumnEnumeration(rawRow, row);
+        }
+        
     }
 }
