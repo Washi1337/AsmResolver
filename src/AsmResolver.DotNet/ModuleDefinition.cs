@@ -276,6 +276,29 @@ namespace AsmResolver.DotNet
             throw new InvalidOperationException("Cannot lookup members by tokens from a non-serialized module.");
 
         /// <summary>
+        /// Attempts to look up a member by its metadata token.
+        /// </summary>
+        /// <param name="token">The token of the member to lookup.</param>
+        /// <param name="member">The member, or <c>null</c> if the lookup failed.</param>
+        /// <returns><c>true</c> if the member was successfully looked up, false otherwise.</returns>
+        public virtual bool TryLookupMember(MetadataToken token, out IMetadataMember member)
+        {
+            member = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Obtains an object that can be used to decode coded indices to metadata tokens.
+        /// </summary>
+        /// <param name="codedIndex">The type of indices to get the encoder for.</param>
+        /// <returns>The index encoder.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Occurs when the module does not support index encoders.
+        /// </exception>
+        public virtual IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>
+            throw new InvalidOperationException("Cannot get an index encoder from a non-serialized module.");
+        
+        /// <summary>
         /// Obtains the name of the module definition.
         /// </summary>
         /// <returns>The name.</returns>

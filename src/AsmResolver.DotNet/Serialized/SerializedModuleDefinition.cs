@@ -40,39 +40,38 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        public override IMetadataMember LookupMember(MetadataToken token)
+        public override IMetadataMember LookupMember(MetadataToken token) =>
+            !TryLookupMember(token, out var member)
+                ? throw new ArgumentException($"Cannot resolve metadata token {token}.")
+                : member;
+
+        /// <inheritdoc />
+        public override bool TryLookupMember(MetadataToken token, out IMetadataMember member)
         {
-            switch (token.Table)
+            member = token.Table switch
             {
-                case TableIndex.TypeRef:
-                    return LookupTypeReference(token);
-                
-                case TableIndex.TypeDef:
-                    return LookupTypeDefinition(token);
-                
-                case TableIndex.AssemblyRef:
-                    return LookupAssemblyReference(token);
-                
-                default:
-                    throw new NotSupportedException();
-            }
+                TableIndex.TypeRef => LookupTypeReference(token),
+                TableIndex.TypeDef => LookupTypeDefinition(token),
+                TableIndex.AssemblyRef => LookupAssemblyReference(token),
+                _ => null
+            };
+
+            return member != null;
         }
 
         private TypeReference LookupTypeReference(MetadataToken token) =>
-            LookupOrCreateMemberFromCache<TypeReference, TypeReferenceRow>(
-                ref _typeReferences, token, (m, t, r) => new SerializedTypeReference(m, this, t, r));
+            LookupOrCreateMemberFromCache<TypeReference, TypeReferenceRow>(ref _typeReferences, token,
+                (m, t, r) => new SerializedTypeReference(m, this, t, r));
 
         private TypeDefinition LookupTypeDefinition(MetadataToken token) => 
-            LookupOrCreateMemberFromCache<TypeDefinition, TypeDefinitionRow>(
-                ref _typeDefinitions, token, (m, t, r) => new SerializedTypeDefinition(m, this, t, r));
+            LookupOrCreateMemberFromCache<TypeDefinition, TypeDefinitionRow>(ref _typeDefinitions, token, 
+                (m, t, r) => new SerializedTypeDefinition(m, this, t, r));
         
-        private IMetadataMember LookupAssemblyReference(MetadataToken token)
-        {
-            if (token.Rid == 0 || token.Rid > AssemblyReferences.Count )
-                return null;
-            return AssemblyReferences[(int) (token.Rid - 1)];
-        }
-        
+        private IMetadataMember LookupAssemblyReference(MetadataToken token) =>
+            token.Rid != 0 && token.Rid <= AssemblyReferences.Count
+                ? AssemblyReferences[(int) (token.Rid - 1)]
+                : null;
+
         private TMember LookupOrCreateMemberFromCache<TMember, TRow>(ref TMember[] cache, MetadataToken token,
             Func<IMetadata, MetadataToken, TRow, TMember> createMember)
             where TRow : struct, IMetadataRow
@@ -103,6 +102,10 @@ namespace AsmResolver.DotNet.Serialized
 
             return member;
         }
+
+        /// <inheritdoc />
+        public override IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>
+            _metadata.GetStream<TablesStream>().GetIndexEncoder(codedIndex);
 
         /// <inheritdoc />
         protected override string GetName() 

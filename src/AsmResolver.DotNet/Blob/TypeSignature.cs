@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Blob
@@ -54,13 +55,15 @@ namespace AsmResolver.DotNet.Blob
                 case ElementType.Object:
                     return module.CorLibTypeFactory.FromElementType(elementType);
                 
+                case ElementType.ValueType:
+                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection), true);
+                
+                case ElementType.Class:
+                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection), false);
+                
                 case ElementType.Ptr:
                     break;
                 case ElementType.ByRef:
-                    break;
-                case ElementType.ValueType:
-                    break;
-                case ElementType.Class:
                     break;
                 case ElementType.Var:
                     break;
@@ -98,6 +101,31 @@ namespace AsmResolver.DotNet.Blob
 
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Reads a TypeDefOrRef coded index from the provided blob reader.
+        /// </summary>
+        /// <param name="module">The module containing the blob signature.</param>
+        /// <param name="reader">The blob reader.</param>
+        /// <param name="protection">The object responsible for detecting infinite recursion.</param>
+        /// <returns>The decoded and resolved type definition or reference.</returns>
+        protected static ITypeDefOrRef ReadTypeDefOrRef(ModuleDefinition module, IBinaryStreamReader reader,
+            RecursionProtection protection)
+        {
+            if (!reader.TryReadCompressedUInt32(out uint codedIndex))
+                return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.BlobTooShort);
+
+            var decoder = module.GetIndexEncoder(CodedIndex.TypeDefOrRef);
+            var token = decoder.DecodeIndex(codedIndex);
+            
+            if (token.Table == TableIndex.Module)
+                return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
+            
+            if (module.TryLookupMember(token, out var member) && member is ITypeDefOrRef typeDefOrRef)
+                return typeDefOrRef;
+            
+            return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
+        } 
         
         /// <inheritdoc />
         public abstract string Name
