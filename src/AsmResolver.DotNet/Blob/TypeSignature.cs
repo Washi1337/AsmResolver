@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Blob
     /// <summary>
     /// Provides a base for blob signatures that reference a type. 
     /// </summary>
-    public abstract class TypeSignature : BlobSignature, ITypeDescriptor
+    public abstract class TypeSignature : ExtendableBlobSignature, ITypeDescriptor
     {
         /// <summary>
         /// Reads a type signature from a blob reader.
