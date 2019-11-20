@@ -5,6 +5,8 @@
         <PackageVersion>4.0.0</PackageVersion>
         <Title>Executable file format inspection library</Title>
         <LangVersion>8</LangVersion>
+        <AssemblyVersion>4.0</AssemblyVersion>
+        <FileVersion>4.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
