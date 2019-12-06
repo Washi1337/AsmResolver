@@ -59,18 +59,24 @@ namespace AsmResolver.DotNet.Serialized
             return member != null;
         }
 
-        private TypeReference LookupTypeReference(MetadataToken token) =>
-            LookupOrCreateMemberFromCache<TypeReference, TypeReferenceRow>(ref _typeReferences, token,
+        private TypeReference LookupTypeReference(MetadataToken token)
+        {
+            return LookupOrCreateMemberFromCache<TypeReference, TypeReferenceRow>(ref _typeReferences, token,
                 (m, t, r) => new SerializedTypeReference(m, this, t, r));
+        }
 
-        private TypeDefinition LookupTypeDefinition(MetadataToken token) => 
-            LookupOrCreateMemberFromCache<TypeDefinition, TypeDefinitionRow>(ref _typeDefinitions, token, 
+        private TypeDefinition LookupTypeDefinition(MetadataToken token)
+        {
+            return LookupOrCreateMemberFromCache<TypeDefinition, TypeDefinitionRow>(ref _typeDefinitions, token,
                 (m, t, r) => new SerializedTypeDefinition(m, this, t, r));
-        
-        private IMetadataMember LookupAssemblyReference(MetadataToken token) =>
-            token.Rid != 0 && token.Rid <= AssemblyReferences.Count
+        }
+
+        private IMetadataMember LookupAssemblyReference(MetadataToken token)
+        {
+            return token.Rid != 0 && token.Rid <= AssemblyReferences.Count
                 ? AssemblyReferences[(int) (token.Rid - 1)]
                 : null;
+        }
 
         private TMember LookupOrCreateMemberFromCache<TMember, TRow>(ref TMember[] cache, MetadataToken token,
             Func<IMetadata, MetadataToken, TRow, TMember> createMember)

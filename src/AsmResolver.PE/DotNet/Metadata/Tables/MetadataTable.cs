@@ -84,10 +84,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public bool IsSynchronized => false;
 
         /// <inheritdoc />
-        public void Add(TRow item)
-        {
-            throw new NotImplementedException();
-        }
+        public void Add(TRow item) => Rows.Add(item);
 
         /// <inheritdoc />
         public void Clear() => Rows.Clear();
@@ -117,10 +114,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Rows"/> property.
         /// </remarks>
-        protected virtual IList<TRow> GetRows()
-        {
-            return new List<TRow>();
-        }
+        protected virtual IList<TRow> GetRows() => new List<TRow>();
 
         /// <inheritdoc />
         public virtual void UpdateTableLayout(TableLayout layout)
