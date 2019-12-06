@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
@@ -105,6 +106,30 @@ namespace AsmResolver.DotNet.Tests
             var member = (TypeDefinition) module.LookupMember(new MetadataToken(TableIndex.TypeDef, 4));
             Assert.NotNull(member.DeclaringType);
             Assert.Equal(nameof(TopLevelClass1), member.DeclaringType.Name);
+        }
+
+        [Fact]
+        public void ReadEmptyFields()
+        {
+            var module = ModuleDefinition.FromFile(typeof(NoFields).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NoFields));
+            Assert.Empty(type.Fields);
+        }
+
+        [Fact]
+        public void ReadSingleField()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
+            Assert.Single(type.Fields);
+        }
+
+        [Fact]
+        public void ReadMultipleFields()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleFields));
+            Assert.Equal(3, type.Fields.Count);
         }
         
     }

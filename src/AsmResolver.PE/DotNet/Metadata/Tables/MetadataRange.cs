@@ -9,6 +9,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     public abstract class MetadataRange : IEnumerable<MetadataToken>
     {
         /// <summary>
+        /// Represents the empty metadata range.
+        /// </summary>
+        public static readonly MetadataRange Empty = new ContinuousMetadataRange(TableIndex.Module, 1, 1);
+        
+        /// <summary>
         /// Initializes the range.
         /// </summary>
         /// <param name="table">The table.</param>

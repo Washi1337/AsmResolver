@@ -63,7 +63,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <summary>
         /// Specifies the field is an implementation that is being forwarded through PInvoke.
         /// </summary>
-        PinvokeImpl = 0x2000,
+        PInvokeImpl = 0x2000,
         /// <summary>
         /// Reserved flags for runtime use only.
         /// </summary>

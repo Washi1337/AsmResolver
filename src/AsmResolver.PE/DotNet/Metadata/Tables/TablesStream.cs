@@ -766,6 +766,49 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             
             return result;
         }
+
+        /// <summary>
+        /// Gets the range of metadata tokens referencing fields that a type defines. 
+        /// </summary>
+        /// <param name="typeDefRid">The row identifier of the type definition to obtain the fields from.</param>
+        /// <returns>The range of metadata tokens.</returns>
+        public MetadataRange GetFieldRange(uint typeDefRid) =>
+            GetMemberRange(TableIndex.TypeDef, typeDefRid, 4,
+                TableIndex.Field, TableIndex.FieldPtr);
+
+        /// <summary>
+        /// Gets the range of metadata tokens referencing methods that a type defines. 
+        /// </summary>
+        /// <param name="typeDefRid">The row identifier of the type definition to obtain the methods from.</param>
+        /// <returns>The range of metadata tokens.</returns>
+        public MetadataRange GetMethodRange(uint typeDefRid) =>
+            GetMemberRange(TableIndex.TypeDef, typeDefRid, 5,
+                TableIndex.Method, TableIndex.MethodPtr);
+
+        private MetadataRange GetMemberRange(TableIndex ownerTableIndex, uint ownerRid, int ownerColumnIndex,
+            TableIndex memberTableIndex, TableIndex redirectTableIndex)
+        {
+            int index = (int) (ownerRid - 1);
+            
+            // Check if valid owner RID.
+            var ownerTable = GetTable(ownerTableIndex);
+            if (index < 0 || index >= ownerTable.Count)
+                return MetadataRange.Empty;
+
+            // Obtain boundaries.
+            uint startRid = ownerTable[index][ownerColumnIndex];
+            uint endRid = index < ownerTable.Count - 1
+                ? ownerTable[index + 1][ownerColumnIndex]
+                : (uint) GetTable(memberTableIndex).Count + 1;
+
+            // Check if redirect table is present.
+            var redirectTable = GetTable(redirectTableIndex);
+            if (redirectTable.Count > 0)
+                return new RedirectedMetadataRange(redirectTable, memberTableIndex, startRid, endRid);
+            
+            // If not, its a simple range.
+            return new ContinuousMetadataRange(memberTableIndex, startRid, endRid);
+        }
         
     }
 }

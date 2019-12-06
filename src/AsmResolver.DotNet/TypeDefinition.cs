@@ -21,6 +21,7 @@ namespace AsmResolver.DotNet
         private IList<TypeDefinition> _nestedTypes;
         private string _fullName;
         private ModuleDefinition _module;
+        private IList<FieldDefinition> _fields;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -454,7 +455,17 @@ namespace AsmResolver.DotNet
         /// Gets a value indicating whether the type defines an enumeration of discrete values.
         /// </summary>
         public bool IsEnum => BaseType.IsTypeOf("System", "Enum");
-        
+
+        public IList<FieldDefinition> Fields
+        {
+            get
+            {
+                if (_fields is null)
+                    Interlocked.CompareExchange(ref _fields, GetFields(), null);
+                return _fields;
+            }
+        }
+
         /// <summary>
         /// Obtains the namespace of the type definition.
         /// </summary>
@@ -467,7 +478,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Obtains the name of the type definition.
         /// </summary>
-        /// <returns>The namespace.</returns>
+        /// <returns>The name.</returns>
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
@@ -500,6 +511,16 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
         /// </remarks>
         protected virtual TypeDefinition GetDeclaringType() => null;
+
+        /// <summary>
+        /// Obtains the collection of fields that this type defines.
+        /// </summary>
+        /// <returns>The fields.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Fields"/> property.
+        /// </remarks>
+        protected virtual IList<FieldDefinition> GetFields() =>
+            new OwnedCollection<TypeDefinition, FieldDefinition>(this);
 
         /// <inheritdoc />
         public override string ToString() => FullName;

@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.NestedClasses", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.NestedClasses\AsmResolver.DotNet.TestCases.NestedClasses.csproj", "{7FB01382-5454-4AC4-A2C2-CAF62A2B21E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Fields", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Fields\AsmResolver.DotNet.TestCases.Fields.csproj", "{A95F1D67-462E-4F6A-96C5-20739405932B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -161,6 +163,18 @@ Global
 		{7FB01382-5454-4AC4-A2C2-CAF62A2B21E7}.Release|x64.Build.0 = Release|Any CPU
 		{7FB01382-5454-4AC4-A2C2-CAF62A2B21E7}.Release|x86.ActiveCfg = Release|Any CPU
 		{7FB01382-5454-4AC4-A2C2-CAF62A2B21E7}.Release|x86.Build.0 = Release|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Debug|x64.Build.0 = Debug|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Debug|x86.Build.0 = Debug|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Release|x64.ActiveCfg = Release|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Release|x64.Build.0 = Release|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Release|x86.ActiveCfg = Release|Any CPU
+		{A95F1D67-462E-4F6A-96C5-20739405932B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -180,6 +194,7 @@ Global
 		{A09E7AE7-34E0-476A-8A3D-188FCAD1BD90} = {34A95168-A162-4F6A-803B-B6F221FE9EA6}
 		{D35B7FB9-F1B2-4963-9D56-B7A7B2EF3198} = {786C1732-8C96-45DD-97BB-639C9AA7F45B}
 		{7FB01382-5454-4AC4-A2C2-CAF62A2B21E7} = {B3AF102B-ABE1-41B2-AE48-C40702F45AB0}
+		{A95F1D67-462E-4F6A-96C5-20739405932B} = {B3AF102B-ABE1-41B2-AE48-C40702F45AB0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3302AC79-6D23-4E7D-8C5F-C0C7261044D0}

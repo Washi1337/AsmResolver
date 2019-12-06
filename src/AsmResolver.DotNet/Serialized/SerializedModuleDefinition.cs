@@ -18,11 +18,10 @@ namespace AsmResolver.DotNet.Serialized
     {
         private readonly IMetadata _metadata;
         private readonly ModuleDefinitionRow _row;
+        private readonly CachedSerializedMemberFactory _memberFactory;
 
         private IDictionary<uint, IList<uint>> _typeDefTree;
         private IDictionary<uint, uint> _parentTypeRids;
-        private TypeReference[] _typeReferences;
-        private TypeDefinition[] _typeDefinitions;
 
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -37,6 +36,8 @@ namespace AsmResolver.DotNet.Serialized
             _row = row;
             Generation = row.Generation;
             MetadataToken = token;
+
+            _memberFactory = new CachedSerializedMemberFactory(metadata, this);
         }
 
         /// <inheritdoc />
@@ -46,68 +47,8 @@ namespace AsmResolver.DotNet.Serialized
                 : member;
 
         /// <inheritdoc />
-        public override bool TryLookupMember(MetadataToken token, out IMetadataMember member)
-        {
-            member = token.Table switch
-            {
-                TableIndex.TypeRef => LookupTypeReference(token),
-                TableIndex.TypeDef => LookupTypeDefinition(token),
-                TableIndex.AssemblyRef => LookupAssemblyReference(token),
-                _ => null
-            };
-
-            return member != null;
-        }
-
-        private TypeReference LookupTypeReference(MetadataToken token)
-        {
-            return LookupOrCreateMemberFromCache<TypeReference, TypeReferenceRow>(ref _typeReferences, token,
-                (m, t, r) => new SerializedTypeReference(m, this, t, r));
-        }
-
-        private TypeDefinition LookupTypeDefinition(MetadataToken token)
-        {
-            return LookupOrCreateMemberFromCache<TypeDefinition, TypeDefinitionRow>(ref _typeDefinitions, token,
-                (m, t, r) => new SerializedTypeDefinition(m, this, t, r));
-        }
-
-        private IMetadataMember LookupAssemblyReference(MetadataToken token)
-        {
-            return token.Rid != 0 && token.Rid <= AssemblyReferences.Count
-                ? AssemblyReferences[(int) (token.Rid - 1)]
-                : null;
-        }
-
-        private TMember LookupOrCreateMemberFromCache<TMember, TRow>(ref TMember[] cache, MetadataToken token,
-            Func<IMetadata, MetadataToken, TRow, TMember> createMember)
-            where TRow : struct, IMetadataRow
-            where TMember : class, IMetadataMember
-        {
-            // Obtain table.
-            var table = (MetadataTable<TRow>) _metadata
-                .GetStream<TablesStream>()
-                .GetTable(token.Table);
-            
-            // Check if within bounds.
-            if (token.Rid > table.Count) 
-                return null;
-            
-            // Allocate cache if necessary.
-            if (cache is null)
-                Interlocked.CompareExchange(ref cache, new TMember[table.Count], null);
-
-            // Get or create cached member.
-            int index = (int) token.Rid - 1;
-            var member = cache[index];
-            if (member is null)
-            {
-                member = createMember(_metadata, token, table[index]);
-                member = Interlocked.CompareExchange(ref cache[index], member, null)
-                         ?? member;
-            }
-
-            return member;
-        }
+        public override bool TryLookupMember(MetadataToken token, out IMetadataMember member) =>
+            _memberFactory.TryLookupMember(token, out member);
 
         /// <inheritdoc />
         public override IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>
@@ -143,7 +84,7 @@ namespace AsmResolver.DotNet.Serialized
                 if (!_parentTypeRids.ContainsKey(rid))
                 {
                     var token = new MetadataToken(TableIndex.TypeDef, rid);
-                    types.Add(LookupTypeDefinition(token));
+                    types.Add(_memberFactory.LookupTypeDefinition(token));
                 }
             }
 

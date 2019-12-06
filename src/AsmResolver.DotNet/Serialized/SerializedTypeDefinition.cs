@@ -79,6 +79,20 @@ namespace AsmResolver.DotNet.Serialized
                 ? (TypeDefinition) _parentModule.LookupMember(new MetadataToken(TableIndex.TypeDef, parentTypeRid))
                 : null;
         }
-        
+
+        /// <inheritdoc />
+        protected override IList<FieldDefinition> GetFields()
+        {
+            var result = new OwnedCollection<TypeDefinition, FieldDefinition>(this);
+            
+            var range = _metadata.GetStream<TablesStream>().GetFieldRange(MetadataToken.Rid);
+            foreach (var token in range)
+            {
+                var field = (FieldDefinition) _parentModule.LookupMember(token);
+                result.Add(field);
+            }
+
+            return result;
+        }
     }
 }
