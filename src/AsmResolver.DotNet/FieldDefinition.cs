@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet
         /// <param name="attributes">The attributes.</param>
         /// <param name="signature">The signature of the field.</param>
         /// <remarks>
-        /// For a valid .NET image, if <see cref="FieldSignature.HasThis"/> of the signature referenced by
+        /// For a valid .NET image, if <see cref="CallingConventionSignature.HasThis"/> of the signature referenced by
         /// <paramref name="signature"/> is set, the <see cref="FieldAttributes.Static"/> bit should be unset in
         /// <paramref name="attributes"/> and vice versa.
         /// </remarks>
@@ -163,9 +163,9 @@ namespace AsmResolver.DotNet
         /// Gets or sets a value indicating whether the field requires an object instance to access it.
         /// </summary>
         /// <remarks>
-        /// This property does not reflect the value of <see cref="FieldSignature.HasThis"/>, nor will it change
-        /// the value of <see cref="FieldSignature.HasThis"/> if this property is changed. For a valid .NET image, these
-        /// values should match, however.
+        /// This property does not reflect the value of <see cref="CallingConventionSignature.HasThis"/>, nor will it
+        /// change the value of <see cref="CallingConventionSignature.HasThis"/> if this property is changed. For a
+        /// valid .NET image, these values should match, however.
         /// </remarks>
         public bool IsStatic
         {

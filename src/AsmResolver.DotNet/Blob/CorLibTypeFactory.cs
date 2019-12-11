@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -12,15 +13,23 @@ namespace AsmResolver.DotNet.Blob
     public class CorLibTypeFactory
     {
         /// <summary>
+        /// A collection of names of known implementations of the common runtime library.
+        /// </summary>
+        public static readonly ICollection<string> KnownCorLibNames = new HashSet<string>(new []
+        {
+            "mscorlib",
+            "netstandard",
+            "System.Runtime",
+            "System.Private.CorLib"
+        });
+        
+        /// <summary>
         /// Creates a new type factory that references mscorlib 4.0.0.0.
         /// </summary>
         /// <returns>The factory.</returns>
         public static CorLibTypeFactory CreateMscorlib40TypeFactory() =>
-            new CorLibTypeFactory(new AssemblyReference(
-                "mscorlib",
-                new Version(4, 0, 0, 0),
-                false,
-                new byte[] {0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89}));
+            new CorLibTypeFactory(new AssemblyReference("mscorlib", new Version(4, 0, 0, 0),
+                false,new byte[] {0xb7, 0x7a, 0x5c, 0x56, 0x19, 0x34, 0xe0, 0x89}));
 
         private CorLibTypeSignature _void;
         private CorLibTypeSignature _boolean;

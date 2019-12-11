@@ -23,5 +23,15 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(field.DeclaringType);
             Assert.Equal(nameof(SingleField), field.DeclaringType.Name);
         }
+
+        [Fact]
+        public void ReadFieldSignature()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var field = (FieldDefinition) module.LookupMember(
+                typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
+            Assert.NotNull(field.Signature);
+            Assert.True(field.Signature.FieldType.IsTypeOf("System", "Int32"), "Field type should be System.Int32");
+        }
     }
 }

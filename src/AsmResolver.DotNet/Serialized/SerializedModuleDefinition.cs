@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Guid;
@@ -43,6 +44,7 @@ namespace AsmResolver.DotNet.Serialized
             MetadataToken = token;
 
             _memberFactory = new CachedSerializedMemberFactory(metadata, this);
+            CorLibTypeFactory = new CorLibTypeFactory(FindMostRecentCorLib());
         }
 
         /// <inheritdoc />
@@ -219,6 +221,30 @@ namespace AsmResolver.DotNet.Serialized
             }
 
             return result;
+        }
+
+        private IResolutionScope FindMostRecentCorLib()
+        {
+            // TODO: perhaps check public key tokens.
+            
+            IResolutionScope mostRecentCorLib = null;
+            var mostRecentVersion = new Version();
+            foreach (var reference in AssemblyReferences)
+            {
+                if (CorLibTypeFactory.KnownCorLibNames.Contains(reference.Name))
+                {
+                    if (mostRecentVersion < reference.Version)
+                        mostRecentCorLib = reference;
+                }
+            }
+
+            if (mostRecentCorLib is null)
+            {
+                if (CorLibTypeFactory.KnownCorLibNames.Contains(Assembly.Name))
+                    mostRecentCorLib = this;
+            }
+
+            return mostRecentCorLib;
         }
         
     }

@@ -456,6 +456,9 @@ namespace AsmResolver.DotNet
         /// </summary>
         public bool IsEnum => BaseType.IsTypeOf("System", "Enum");
 
+        /// <summary>
+        /// Gets a collection of fields defined in the type.
+        /// </summary>
         public IList<FieldDefinition> Fields
         {
             get
