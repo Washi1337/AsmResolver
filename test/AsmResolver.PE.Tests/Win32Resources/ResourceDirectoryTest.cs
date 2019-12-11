@@ -134,7 +134,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         [Fact]
         public void MaliciousDirectoryOffset()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWIn32ResDirOffset);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDirOffset);
             
             var entry = peImage.Resources.Entries[0];
             Assert.Equal(16u, entry.Id);
@@ -147,7 +147,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         [Fact]
         public void MaliciousDataOffset()
         {
-            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWIn32ResDataOffset);
+            var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDataOffset);
 
             var directory = (IResourceDirectory) peImage.Resources.Entries[0];
             directory = (IResourceDirectory) directory.Entries[0];

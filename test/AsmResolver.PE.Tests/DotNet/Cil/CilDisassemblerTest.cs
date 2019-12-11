@@ -94,7 +94,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         {
             var rawCode = new DataSegment(new byte[]
             {
-                0x38, 0x02, 0x00, 0x00, 0x00, // br +0x02
+                0x38, 0x02, 0x00, 0x00, 0x00, // br IL_0007
                 0x00,                         // nop
                 0x00,                         // nop
                 0x2A                          // ret
@@ -102,7 +102,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             
             var expected = new[]
             {
-                new CilInstruction(0, CilOpCodes.Br, 0x02), 
+                new CilInstruction(0, CilOpCodes.Br, 0x0007u), 
                 new CilInstruction(5, CilOpCodes.Nop), 
                 new CilInstruction(6, CilOpCodes.Nop), 
                 new CilInstruction(7, CilOpCodes.Ret), 
@@ -117,7 +117,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         {
             var rawCode = new DataSegment(new byte[]
             {
-                0x2B, 0x02, // br +0x02
+                0x2B, 0x02, // br IL_0004
                 0x00,       // nop
                 0x00,       // nop
                 0x2A        // ret
@@ -125,7 +125,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             
             var expected = new[]
             {
-                new CilInstruction(0, CilOpCodes.Br_S, (sbyte) 0x02), 
+                new CilInstruction(0, CilOpCodes.Br_S, 0x0004u), 
                 new CilInstruction(2, CilOpCodes.Nop), 
                 new CilInstruction(3, CilOpCodes.Nop), 
                 new CilInstruction(4, CilOpCodes.Ret), 
@@ -316,9 +316,9 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             var rawCode = new DataSegment(new byte[]
             {
                 0x45, 0x03, 0x00, 0x00, 0x00,  // switch 
-                      0x02, 0x00, 0x00, 0x00,  // + 0x0000000002
-                      0x04, 0x00, 0x00, 0x00,  // + 0x0000000004
-                      0x06, 0x00, 0x00, 0x00,  // + 0x0000000006
+                      0x02, 0x00, 0x00, 0x00,  // IL_0013
+                      0x04, 0x00, 0x00, 0x00,  // IL_0015
+                      0x06, 0x00, 0x00, 0x00,  // IL_0017
                 0x00,                          // nop
                 0x00,                          // nop
                 0x00,                          // nop
@@ -330,7 +330,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
 
             var expected = new[]
             {
-                new CilInstruction(0, CilOpCodes.Switch, new[] {2, 4, 6}.ToList()),
+                new CilInstruction(0, CilOpCodes.Switch, new[] {0x0013u, 0x0015u, 0x0017u}.ToList()),
                 new CilInstruction(17, CilOpCodes.Nop),
                 new CilInstruction(18, CilOpCodes.Nop),
                 new CilInstruction(19, CilOpCodes.Nop),

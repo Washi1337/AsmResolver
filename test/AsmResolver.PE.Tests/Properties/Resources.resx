@@ -30,11 +30,11 @@
     <data name="HelloWorld_MaliciousWin32ResDirName" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.MaliciousWin32ResLoop.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="HelloWorld_MaliciousWIn32ResDirOffset" type="System.Resources.ResXFileRef, System.Windows.Forms">
-        <value>..\Resources\HelloWorld.MaliciousWIn32ResDirOffset.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <data name="HelloWorld_MaliciousWin32ResDirOffset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.MaliciousWin32ResDirOffset.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="HelloWorld_MaliciousWIn32ResDataOffset" type="System.Resources.ResXFileRef, System.Windows.Forms">
-        <value>..\Resources\HelloWorld.MaliciousWIn32ResDataOffset.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <data name="HelloWorld_MaliciousWin32ResDataOffset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.MaliciousWin32ResDataOffset.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
     <data name="HelloWorld_TablesStream_ExtraData" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.TablesStream.ExtraData.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

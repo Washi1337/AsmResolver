@@ -88,13 +88,13 @@ namespace AsmResolver.PE.DotNet.Cil
             {
                 CilOperandType.InlineNone => (object) null,
                 CilOperandType.ShortInlineI => Reader.ReadSByte(),
-                CilOperandType.ShortInlineBrTarget => Reader.ReadSByte(),
+                CilOperandType.ShortInlineBrTarget => (uint) (Reader.ReadSByte() + (Reader.FileOffset - Reader.StartPosition)),
                 CilOperandType.ShortInlineVar => Reader.ReadByte(),
                 CilOperandType.ShortInlineArgument => Reader.ReadByte(),
                 CilOperandType.InlineVar => Reader.ReadUInt16(),
                 CilOperandType.InlineArgument => Reader.ReadUInt16(),
                 CilOperandType.InlineI => Reader.ReadInt32(),
-                CilOperandType.InlineBrTarget => Reader.ReadInt32(),
+                CilOperandType.InlineBrTarget => (uint) (Reader.ReadInt32() + (Reader.FileOffset - Reader.StartPosition)),
                 CilOperandType.ShortInlineR => Reader.ReadSingle(),
                 CilOperandType.InlineI8 => Reader.ReadInt64(),
                 CilOperandType.InlineR => Reader.ReadDouble(),
@@ -110,13 +110,14 @@ namespace AsmResolver.PE.DotNet.Cil
             };
         }
 
-        private IList<int> ReadSwitchTable()
+        private IList<uint> ReadSwitchTable()
         {
             int count = Reader.ReadInt32();
+            uint nextOffset = (uint) (Reader.FileOffset + count * sizeof(int));
             
-            var offsets = new List<int>(count);
+            var offsets = new List<uint>(count);
             for (int i = 0; i < count; i++)
-                offsets.Add(Reader.ReadInt32());
+                offsets.Add((uint) (nextOffset + Reader.ReadInt32()));
             
             return offsets;
         }
