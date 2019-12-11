@@ -527,6 +527,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return Tables.OfType<MetadataTable<TRow>>().First();
         }
 
+        /// <summary>
+        /// Gets a table by its row type.
+        /// </summary>
+        /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
+        /// <param name="index">The table index.</param>
+        /// <returns>The table.</returns>
+        public virtual MetadataTable<TRow> GetTable<TRow>(TableIndex index) 
+            where TRow : struct, IMetadataRow
+        {
+            return (MetadataTable<TRow>) Tables[(int) index];
+        }
+
         private IndexSize GetStreamIndexSize(int bitIndex) => (IndexSize) (((((int) Flags >> bitIndex) & 1) + 1) * 2);
 
         private void SetStreamIndexSize(int bitIndex, IndexSize newSize)

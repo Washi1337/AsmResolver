@@ -22,7 +22,12 @@ namespace AsmResolver.DotNet.Serialized
 
         private IDictionary<uint, IList<uint>> _typeDefTree;
         private IDictionary<uint, uint> _parentTypeRids;
-
+        
+        private MetadataRange[] _fieldLists;
+        private MetadataRange[] _methodLists;
+        private uint[] _fieldDeclaringTypes;
+        private uint[] _methodDeclaringTypes;
+            
         /// <summary>
         /// Creates a module definition from a module metadata row.
         /// </summary>
@@ -77,7 +82,7 @@ namespace AsmResolver.DotNet.Serialized
             
             var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
 
-            var typeDefTable = _metadata.GetStream<TablesStream>().GetTable<TypeDefinitionRow>();
+            var typeDefTable = _metadata.GetStream<TablesStream>().GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             for (int i = 0; i < typeDefTable.Count; i++)
             {
                 uint rid = (uint) i + 1;
@@ -100,7 +105,7 @@ namespace AsmResolver.DotNet.Serialized
         private void InitializeTypeDefinitionTree()
         {
             var tablesStream = _metadata.GetStream<TablesStream>();
-            var nestedClassTable = tablesStream.GetTable<NestedClassRow>();
+            var nestedClassTable = tablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
             
             _typeDefTree = new Dictionary<uint, IList<uint>>();
             _parentTypeRids = new Dictionary<uint, uint>();
@@ -131,6 +136,76 @@ namespace AsmResolver.DotNet.Serialized
             return parentRid;
         }
 
+        private void EnsureTypeMemberListsInitialized()
+        {
+            if (_fieldLists is null || _methodLists is null)
+                InitializeTypeMemberLists();
+        }
+        
+        private void InitializeTypeMemberLists()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var typeDefTable = tablesStream.GetTable(TableIndex.TypeDef);
+            var fieldDefTable = tablesStream.GetTable(TableIndex.Field);
+            var methodDefTable = tablesStream.GetTable(TableIndex.Method);
+
+            var fieldLists = new MetadataRange[typeDefTable.Count];
+            var methodLists = new MetadataRange[typeDefTable.Count];
+            var fieldDeclaringTypes = new uint[fieldDefTable.Count];
+            var methodDeclaringTypes = new uint[methodDefTable.Count];
+            
+            for (uint typeDefRid = 1; typeDefRid <= typeDefTable.Count; typeDefRid++)
+            {
+                InitializeMemberList(typeDefRid, tablesStream.GetFieldRange(typeDefRid), fieldLists, fieldDeclaringTypes);
+                InitializeMemberList(typeDefRid, tablesStream.GetMethodRange(typeDefRid), methodLists, methodDeclaringTypes);
+            }
+
+            Interlocked.CompareExchange(ref _fieldLists, fieldLists, null);
+            Interlocked.CompareExchange(ref _methodLists, methodLists, null);
+            Interlocked.CompareExchange(ref _fieldDeclaringTypes, fieldDeclaringTypes, null);
+            Interlocked.CompareExchange(ref _methodDeclaringTypes, methodDeclaringTypes, null);
+        }
+
+        private static void InitializeMemberList(uint typeDefRid, MetadataRange memberRange,
+            MetadataRange[] memberLists, uint[] memberDeclaringTypes)
+        {
+            memberLists[typeDefRid - 1] = memberRange;
+            foreach (var token in memberRange)
+                memberDeclaringTypes[token.Rid - 1] = typeDefRid;
+        }
+
+        internal MetadataRange GetFieldRange(uint typeRid)
+        {
+            EnsureTypeMemberListsInitialized();
+            return typeRid - 1 < _fieldLists.Length
+                ? _fieldLists[typeRid - 1]
+                : MetadataRange.Empty;
+        } 
+
+        internal MetadataRange GetMethodRange(uint typeRid)
+        {
+            EnsureTypeMemberListsInitialized();
+            return typeRid - 1 < _methodLists.Length
+                ? _methodLists[typeRid - 1]
+                : MetadataRange.Empty;
+        }
+
+        internal uint GetFieldDeclaringType(uint fieldRid)
+        {
+            EnsureTypeMemberListsInitialized();
+            return fieldRid - 1 < _fieldDeclaringTypes.Length
+                ? _fieldDeclaringTypes[fieldRid - 1]
+                : 0;
+        }
+
+        internal uint GetMethodDeclaringType(uint fieldRid)
+        {
+            EnsureTypeMemberListsInitialized();
+            return fieldRid - 1 < _methodDeclaringTypes.Length
+                ? _methodDeclaringTypes[fieldRid - 1]
+                : 0;
+        }
+        
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {

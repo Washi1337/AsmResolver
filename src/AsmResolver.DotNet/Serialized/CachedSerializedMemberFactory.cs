@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Serialized
                 .GetTable(token.Table);
             
             // Check if within bounds.
-            if (token.Rid > table.Count) 
+            if (token.Rid == 0 || token.Rid > table.Count) 
                 return null;
             
             // Allocate cache if necessary.

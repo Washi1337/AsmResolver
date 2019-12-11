@@ -31,7 +31,6 @@ namespace AsmResolver.DotNet.Serialized
             _metadata = metadata;
             _parentModule = parentModule;
             _row = row;
-            
         }
 
         /// <inheritdoc />
@@ -46,8 +45,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()
         {
-            // TODO
-            return null;
+            var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _parentModule.GetFieldDeclaringType(MetadataToken.Rid));
+            return _parentModule.TryLookupMember(declaringTypeToken, out var member)
+                ? member as TypeDefinition
+                : null;
         }
     }
 }

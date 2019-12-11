@@ -75,8 +75,8 @@ namespace AsmResolver.DotNet.Serialized
         protected override TypeDefinition GetDeclaringType()
         {
             uint parentTypeRid = _parentModule.GetParentTypeRid(MetadataToken.Rid);
-            return parentTypeRid != 0
-                ? (TypeDefinition) _parentModule.LookupMember(new MetadataToken(TableIndex.TypeDef, parentTypeRid))
+            return _parentModule.TryLookupMember(new MetadataToken(TableIndex.TypeDef, parentTypeRid), out var member)
+                ? member as TypeDefinition
                 : null;
         }
 
@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new OwnedCollection<TypeDefinition, FieldDefinition>(this);
             
-            var range = _metadata.GetStream<TablesStream>().GetFieldRange(MetadataToken.Rid);
+            var range = _parentModule.GetFieldRange(MetadataToken.Rid);
             foreach (var token in range)
             {
                 var field = (FieldDefinition) _parentModule.LookupMember(token);
