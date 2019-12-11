@@ -22,6 +22,7 @@ namespace AsmResolver.DotNet
         private string _fullName;
         private ModuleDefinition _module;
         private IList<FieldDefinition> _fields;
+        private IList<MethodDefinition> _methods;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -468,6 +469,19 @@ namespace AsmResolver.DotNet
                 return _fields;
             }
         }
+        
+        /// <summary>
+        /// Gets a collection of methods defined in the type.
+        /// </summary>
+        public IList<MethodDefinition> Methods
+        {
+            get
+            {
+                if (_methods is null)
+                    Interlocked.CompareExchange(ref _methods, GetMethods(), null);
+                return _methods;
+            }
+        }
 
         /// <summary>
         /// Obtains the namespace of the type definition.
@@ -525,6 +539,16 @@ namespace AsmResolver.DotNet
         protected virtual IList<FieldDefinition> GetFields() =>
             new OwnedCollection<TypeDefinition, FieldDefinition>(this);
 
+        /// <summary>
+        /// Obtains the collection of methods that this type defines.
+        /// </summary>
+        /// <returns>The methods.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Methods"/> property.
+        /// </remarks>
+        protected virtual IList<MethodDefinition> GetMethods() =>
+            new OwnedCollection<TypeDefinition, MethodDefinition>(this);
+        
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

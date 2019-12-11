@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
@@ -125,12 +126,28 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
-        public void ReadMultipleFields()
+        public void ReadEmptyMethods()
         {
-            var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location);
-            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleFields));
-            Assert.Equal(3, type.Fields.Count);
+            var module = ModuleDefinition.FromFile(typeof(NoMethods).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NoMethods));
+            Assert.Empty(type.Methods);
         }
         
+        [Fact]
+        public void ReadSingleMethod()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleMethod));
+            Assert.Single(type.Methods);
+        }
+
+        [Fact]
+        public void ReadMultipleMethods()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
+            Assert.Equal(6, type.Methods.Count);
+        }
+
     }
 }

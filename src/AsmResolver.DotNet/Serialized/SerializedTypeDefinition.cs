@@ -86,11 +86,20 @@ namespace AsmResolver.DotNet.Serialized
             var result = new OwnedCollection<TypeDefinition, FieldDefinition>(this);
             
             var range = _parentModule.GetFieldRange(MetadataToken.Rid);
-            foreach (var token in range)
-            {
-                var field = (FieldDefinition) _parentModule.LookupMember(token);
-                result.Add(field);
-            }
+            foreach (var token in range) 
+                result.Add((FieldDefinition) _parentModule.LookupMember(token));
+
+            return result;
+        }
+
+        /// <inheritdoc />
+        protected override IList<MethodDefinition> GetMethods()
+        {
+            var result = new OwnedCollection<TypeDefinition, MethodDefinition>(this);
+            
+            var range = _parentModule.GetMethodRange(MetadataToken.Rid);
+            foreach (var token in range) 
+                result.Add((MethodDefinition) _parentModule.LookupMember(token));
 
             return result;
         }

@@ -24,9 +24,10 @@ namespace AsmResolver.DotNet.Blob
         protected TypeSignature MemberReturnType
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
-        public override string ToString() => (HasThis ? "instance " : string.Empty) + MemberReturnType.FullName;
+        public override string ToString() => (HasThis ? "instance " : string.Empty) + MemberReturnType?.FullName;
     }
 }

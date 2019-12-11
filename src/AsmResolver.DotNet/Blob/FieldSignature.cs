@@ -54,7 +54,10 @@ namespace AsmResolver.DotNet.Blob
         /// <summary>
         /// Gets the type of the object that the field stores.
         /// </summary>
-        public TypeSignature FieldType => MemberReturnType;
-
+        public TypeSignature FieldType
+        {
+            get => MemberReturnType;
+            set => MemberReturnType = value;
+        }
     }
 }
