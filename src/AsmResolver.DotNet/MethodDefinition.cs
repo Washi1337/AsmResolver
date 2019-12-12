@@ -332,7 +332,9 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public ModuleDefinition Module => DeclaringType.Module;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the type that defines the method.
+        /// </summary>
         public TypeDefinition DeclaringType
         {
             get => _declaringType.Value;

@@ -12,8 +12,9 @@ namespace AsmResolver.DotNet.TestCases.Methods
         {
         }
         
-        public static void IntParameterlessMethod()
+        public static int IntParameterlessMethod()
         {
+            return default;
         }
         
         public static MultipleMethods TypeDefOrRefParameterlessMethod()

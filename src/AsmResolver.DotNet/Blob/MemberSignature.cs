@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Blob
         protected MemberSignature(CallingConventionAttributes attributes, TypeSignature memberReturnType) 
             : base(attributes)
         {
-            MemberReturnType = memberReturnType ?? throw new ArgumentNullException(nameof(memberReturnType));
+            MemberReturnType = memberReturnType;
         }
 
         /// <summary>
