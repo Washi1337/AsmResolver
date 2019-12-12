@@ -120,7 +120,10 @@ namespace AsmResolver.DotNet.Collections
 
         internal void PushParameterUpdateToSignature(Parameter parameter)
         {
-            _owner.Signature.ParameterTypes[parameter.MethodSignatureIndex] = parameter.ParameterType;
+            if (parameter.MethodSignatureIndex == -1)
+                _owner.Signature.ReturnType = parameter.ParameterType;
+            else
+                _owner.Signature.ParameterTypes[parameter.MethodSignatureIndex] = parameter.ParameterType;
         }
 
         /// <inheritdoc />
