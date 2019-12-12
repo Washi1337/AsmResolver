@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
@@ -14,6 +16,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<MethodSignature> _signature;
+        private IList<ParameterDefinition> _parameterDefinitions;
 
         /// <summary>
         /// Initializes a new method definition.
@@ -350,6 +353,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a collection of parameter definitions that this method defines.
+        /// </summary>
+        public IList<ParameterDefinition> ParameterDefinitions
+        {
+            get
+            {
+                if (_parameterDefinitions is null)
+                    Interlocked.CompareExchange(ref _parameterDefinitions, GetParameterDefinitions(), null);
+                return _parameterDefinitions;
+            }
+        }
+
+        /// <summary>
         /// Obtains the name of the method definition.
         /// </summary>
         /// <returns>The name.</returns>
@@ -366,7 +382,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
         /// </remarks>
         protected virtual TypeDefinition GetDeclaringType() => null;
-        
+
         /// <summary>
         /// Obtains the signature of the method definition.
         /// </summary>
@@ -375,6 +391,16 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
         protected virtual MethodSignature GetSignature() => null;
+
+        /// <summary>
+        /// Obtains the parameter definitions of the method definition.
+        /// </summary>
+        /// <returns>The signature.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ParameterDefinitions"/> property.
+        /// </remarks>
+        protected virtual IList<ParameterDefinition> GetParameterDefinitions() => 
+            new OwnedCollection<MethodDefinition, ParameterDefinition>(this);
 
         /// <inheritdoc />
         public override string ToString() => FullName;

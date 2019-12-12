@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet.Serialized
         private TypeDefinition[] _typeDefinitions;
         private FieldDefinition[] _fieldDefinitions;
         private MethodDefinition[] _methodDefinitions;
+        private ParameterDefinition[] _parameterDefinitions;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -31,6 +32,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.AssemblyRef => LookupAssemblyReference(token),
                 TableIndex.Field => LookupFieldDefinition(token),
                 TableIndex.Method => LookupMethodDefinition(token),
+                TableIndex.Param => LookupParameterDefinition(token),
                 _ => null
             };
 
@@ -66,6 +68,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<MethodDefinition, MethodDefinitionRow>(ref _methodDefinitions, token,
                 (m, t, r) => new SerializedMethodDefinition(m, _parentModule, t, r));
+        }
+
+        private ParameterDefinition LookupParameterDefinition(MetadataToken token)
+        {   
+            return LookupOrCreateMember<ParameterDefinition, ParameterDefinitionRow>(ref _parameterDefinitions, token,
+                (m, t, r) => new SerializedParameterDefinition(m, _parentModule, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

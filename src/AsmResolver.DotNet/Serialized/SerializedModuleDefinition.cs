@@ -25,9 +25,13 @@ namespace AsmResolver.DotNet.Serialized
         private IDictionary<uint, uint> _parentTypeRids;
         
         private MetadataRange[] _fieldLists;
-        private MetadataRange[] _methodLists;
         private uint[] _fieldDeclaringTypes;
+        
+        private MetadataRange[] _methodLists;
         private uint[] _methodDeclaringTypes;
+        
+        private MetadataRange[] _paramLists;
+        private uint[] _parameterMethods;
             
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -168,12 +172,12 @@ namespace AsmResolver.DotNet.Serialized
             Interlocked.CompareExchange(ref _methodDeclaringTypes, methodDeclaringTypes, null);
         }
 
-        private static void InitializeMemberList(uint typeDefRid, MetadataRange memberRange,
+        private static void InitializeMemberList(uint ownerRid, MetadataRange memberRange,
             MetadataRange[] memberLists, uint[] memberDeclaringTypes)
         {
-            memberLists[typeDefRid - 1] = memberRange;
+            memberLists[ownerRid - 1] = memberRange;
             foreach (var token in memberRange)
-                memberDeclaringTypes[token.Rid - 1] = typeDefRid;
+                memberDeclaringTypes[token.Rid - 1] = ownerRid;
         }
 
         internal MetadataRange GetFieldRange(uint typeRid)
@@ -207,7 +211,46 @@ namespace AsmResolver.DotNet.Serialized
                 ? _methodDeclaringTypes[fieldRid - 1]
                 : 0;
         }
-        
+
+        private void EnsureParameterListsInitialized()
+        {
+            if (_paramLists is null)
+                InitializeParameterLists();
+        }
+
+        private void InitializeParameterLists()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var parameterTable = tablesStream.GetTable(TableIndex.Param);
+            var methodTable = tablesStream.GetTable(TableIndex.Method);
+
+            var paramLists = new MetadataRange[methodTable.Count];
+            var parameterMethods = new uint[parameterTable.Count];
+            for (uint methodRid = 1; methodRid <= methodTable.Count; methodRid++)
+            {
+                InitializeMemberList(methodRid, tablesStream.GetParameterRange(methodRid), paramLists, parameterMethods);
+            }
+
+            Interlocked.CompareExchange(ref _paramLists, paramLists, null);
+            Interlocked.CompareExchange(ref _parameterMethods, parameterMethods, null);
+        }
+
+        internal MetadataRange GetParameterRange(uint methodRid)
+        {
+            EnsureParameterListsInitialized();
+            return methodRid - 1 < _paramLists.Length
+                ? _paramLists[methodRid - 1]
+                : MetadataRange.Empty;
+        }
+
+        internal uint GetParameterOwner(uint paramRid)
+        {
+            EnsureParameterListsInitialized();
+            return paramRid - 1 < _parameterMethods.Length
+                ? _parameterMethods[paramRid - 1]
+                : 0;
+        }
+
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {

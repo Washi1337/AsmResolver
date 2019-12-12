@@ -796,6 +796,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public MetadataRange GetMethodRange(uint typeDefRid) =>
             GetMemberRange(TableIndex.TypeDef, typeDefRid, 5,
                 TableIndex.Method, TableIndex.MethodPtr);
+        
+        /// <summary>
+        /// Gets the range of metadata tokens referencing parameters that a method defines. 
+        /// </summary>
+        /// <param name="methodDefRid">The row identifier of the method definition to obtain the parameters from.</param>
+        /// <returns>The range of metadata tokens.</returns>
+        public MetadataRange GetParameterRange(uint methodDefRid) =>
+            GetMemberRange(TableIndex.Method, methodDefRid, 5,
+                TableIndex.Param, TableIndex.ParamPtr);
 
         private MetadataRange GetMemberRange(TableIndex ownerTableIndex, uint ownerRid, int ownerColumnIndex,
             TableIndex memberTableIndex, TableIndex redirectTableIndex)

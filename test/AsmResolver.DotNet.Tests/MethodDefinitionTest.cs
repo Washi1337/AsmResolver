@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Methods;
 using Xunit;
@@ -36,6 +37,33 @@ namespace AsmResolver.DotNet.Tests
                 typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod)).MetadataToken);
             Assert.NotNull(method.DeclaringType);
             Assert.Equal(nameof(SingleMethod), method.DeclaringType.Name);
+        }
+
+        [Fact]
+        public void ReadEmptyParameterDefinitions()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.VoidParameterlessMethod)).MetadataToken);
+            Assert.Empty(method.ParameterDefinitions);
+        }
+
+        [Fact]
+        public void ReadSingleParameterDefinition()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.SingleParameterMethod)).MetadataToken);
+            Assert.Single(method.ParameterDefinitions);
+        }
+
+        [Fact]
+        public void ReadMultipleParameterDefinitions()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(MultipleMethods).GetMethod(nameof(MultipleMethods.MultipleParameterMethod)).MetadataToken);
+            Assert.Equal(3, method.ParameterDefinitions.Count);
         }
     }
 }
