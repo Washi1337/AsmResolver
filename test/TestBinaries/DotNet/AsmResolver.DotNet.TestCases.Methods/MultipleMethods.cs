@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.TestCases.Methods
         {
         }
 
-        public static void MultipleParameterMethod(int intParameter, string stringParameter, MulticastDelegate typeDefOrRefParameter)
+        public static void MultipleParameterMethod(int intParameter, string stringParameter, MultipleMethods typeDefOrRefParameter)
         {
         }
     }

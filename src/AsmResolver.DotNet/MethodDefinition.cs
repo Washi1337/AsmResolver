@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<MethodSignature> _signature;
         private IList<ParameterDefinition> _parameterDefinitions;
+        private ParameterCollection _parameters;
 
         /// <summary>
         /// Initializes a new method definition.
@@ -355,6 +356,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets a collection of parameter definitions that this method defines.
         /// </summary>
+        /// <remarks>
+        /// This property might not reflect the list of actual parameters that the method defines and uses according
+        /// to the method signature. This property only reflects the list that is inferred from the ParamList column
+        /// in the metadata row. For the actual list of parameters, use the <see cref="Parameters"/> property instead.
+        /// </remarks>
         public IList<ParameterDefinition> ParameterDefinitions
         {
             get
@@ -362,6 +368,19 @@ namespace AsmResolver.DotNet
                 if (_parameterDefinitions is null)
                     Interlocked.CompareExchange(ref _parameterDefinitions, GetParameterDefinitions(), null);
                 return _parameterDefinitions;
+            }
+        }
+
+        /// <summary>
+        /// Gets a collection of parameters that the method signature defines.
+        /// </summary>
+        public ParameterCollection Parameters
+        {
+            get
+            {
+                if (_parameters is null)
+                    Interlocked.CompareExchange(ref _parameters, new ParameterCollection(this), null);
+                return _parameters;
             }
         }
 
