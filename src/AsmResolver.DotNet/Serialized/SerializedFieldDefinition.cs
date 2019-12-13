@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Serialized
         /// Creates a field definition from a field metadata row.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
-        /// <param name="parentModule"></param>
+        /// <param name="parentModule">The module that contains the field.</param>
         /// <param name="token">The token to initialize the field for.</param>
         /// <param name="row">The metadata table row to base the field definition on.</param>
         public SerializedFieldDefinition(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, FieldDefinitionRow row)

@@ -11,7 +11,6 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _namespace;
         private readonly LazyVariable<IResolutionScope> _scope;
-        private string _fullName;
 
         /// <summary>
         /// Initializes a new empty type reference.
@@ -68,11 +67,7 @@ namespace AsmResolver.DotNet
         public string Name
         {
             get => _name.Value;
-            set
-            {
-                _name.Value = value;
-                _fullName = null;
-            }
+            set => _name.Value = value;
         }
 
         /// <summary>
@@ -81,15 +76,11 @@ namespace AsmResolver.DotNet
         public string Namespace
         {
             get => _namespace.Value;
-            set
-            {
-                _namespace.Value = value;
-                _fullName = null;
-            }
+            set => _namespace.Value = value;
         }
 
         /// <inheritdoc />
-        public string FullName => _fullName ?? (_fullName = this.GetFullName());
+        public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
         public IResolutionScope Scope => _scope.Value;

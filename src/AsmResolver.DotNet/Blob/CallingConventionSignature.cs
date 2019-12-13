@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Blob
                 case CallingConventionAttributes.StdCall:
                 case CallingConventionAttributes.ThisCall:
                 case CallingConventionAttributes.VarArg:
-                    throw new NotImplementedException();
+                    return MethodSignature.FromReader(module, reader, false, protection);
                 
                 case CallingConventionAttributes.Property:
                     throw new NotImplementedException();

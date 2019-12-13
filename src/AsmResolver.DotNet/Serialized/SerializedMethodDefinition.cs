@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         /// Creates a method definition from a method metadata row.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
-        /// <param name="parentModule"></param>
+        /// <param name="parentModule">The module that contains the method.</param>
         /// <param name="token">The token to initialize the method for.</param>
         /// <param name="row">The metadata table row to base the method definition on.</param>
         public SerializedMethodDefinition(IMetadata metadata, SerializedModuleDefinition parentModule,

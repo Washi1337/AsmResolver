@@ -19,7 +19,6 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<ITypeDefOrRef> _baseType;
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private IList<TypeDefinition> _nestedTypes;
-        private string _fullName;
         private ModuleDefinition _module;
         private IList<FieldDefinition> _fields;
         private IList<MethodDefinition> _methods;
@@ -77,11 +76,7 @@ namespace AsmResolver.DotNet
         public string Namespace
         {
             get => _namespace.Value;
-            set
-            {
-                _namespace.Value = value;
-                _fullName = null;
-            }
+            set => _namespace.Value = value;
         }
 
         /// <summary>
@@ -90,17 +85,13 @@ namespace AsmResolver.DotNet
         public string Name
         {
             get => _name.Value;
-            set
-            {
-                _name.Value = value;
-                _fullName = null;
-            }
+            set => _name.Value = value;
         }
 
         /// <summary>
         /// Gets the full name (including namespace or declaring type full name) of the type.
         /// </summary>
-        public string FullName => _fullName ?? (_fullName = this.GetFullName());
+        public string FullName => this.GetTypeFullName();
 
         /// <summary>
         /// Gets or sets the attributes associated to the type.

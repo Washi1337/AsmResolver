@@ -140,7 +140,7 @@ namespace AsmResolver.DotNet.Blob
         }
 
         /// <inheritdoc />
-        public string FullName => this.GetFullName();
+        public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
         public abstract IResolutionScope Scope

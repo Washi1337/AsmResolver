@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single method in a type definition of a .NET module.
     /// </summary>
-    public class MethodDefinition : IMetadataMember, IMemberDescriptor, IOwnedCollectionElement<TypeDefinition>
+    public class MethodDefinition : IMemberDescriptor, IOwnedCollectionElement<TypeDefinition>, IMemberRefParent
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;
@@ -75,17 +75,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName
-        {
-            get
-            {
-                string parameterTypesString = string.Join(", ", Signature.ParameterTypes)
-                                              + (Signature.IsSentinel ? ", ..." : string.Empty);
-                return DeclaringType is null
-                    ? $"{Signature.ReturnType} {Name}({parameterTypesString})"
-                    : $"{Signature.ReturnType} {DeclaringType}::{Name}({parameterTypesString})";
-            }
-        }
+        public string FullName => FullNameGenerator.GetMethodFullName(Name, DeclaringType, Signature);
 
         /// <summary>
         /// Gets or sets the attributes associated to the method.

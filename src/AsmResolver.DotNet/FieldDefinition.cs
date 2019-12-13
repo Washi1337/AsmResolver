@@ -70,10 +70,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string FullName =>
-            DeclaringType == null
-                ? $"{Signature.FieldType} {Name}"
-                : $"{Signature.FieldType} {DeclaringType}::{Name}";
+        public string FullName => FullNameGenerator.GetFieldFullName(Name, DeclaringType, Signature);
 
         /// <summary>
         /// Gets or sets the attributes associated to the field.
