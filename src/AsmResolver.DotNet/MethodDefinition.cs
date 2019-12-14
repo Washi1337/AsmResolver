@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Code;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -16,6 +18,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<MethodSignature> _signature;
+        private readonly LazyVariable<MethodBody> _methodBody;
         private IList<ParameterDefinition> _parameterDefinitions;
         private ParameterCollection _parameters;
 
@@ -29,6 +32,7 @@ namespace AsmResolver.DotNet
             _name  =new LazyVariable<string>(GetName);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
             _signature = new LazyVariable<MethodSignature>(GetSignature);
+            _methodBody= new LazyVariable<MethodBody>(GetBody);
         }
 
         /// <summary>
@@ -85,7 +89,7 @@ namespace AsmResolver.DotNet
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the method is compiler controlled and cannot be referenced directly.
         /// </summary>
@@ -105,7 +109,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~MethodAttributes.MemberAccessMask)
                                 | (value ? MethodAttributes.Private : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the method is marked family and assembly, and can only be accessed by
         /// members within the same enclosing type and any derived type, within the same assembly.
@@ -206,7 +210,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~MethodAttributes.Virtual)
                                 | (value ? MethodAttributes.Virtual : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the method is distinguished by both its name and signature.
         /// </summary>
@@ -323,6 +327,133 @@ namespace AsmResolver.DotNet
                                 | (value ? MethodAttributes.RequireSecObject : 0);
         }
 
+        /// <summary>
+        /// Gets or sets the attributes that describe the implementation of the method body.
+        /// </summary>
+        public MethodImplAttributes ImplAttributes
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the method body is implemented using the Common Intermediate Language (CIL).
+        /// </summary>
+        public bool IsIL
+        {
+            get => (ImplAttributes & MethodImplAttributes.CodeTypeMask) == MethodImplAttributes.IL;
+            set => ImplAttributes = value ? ImplAttributes & ~MethodImplAttributes.CodeTypeMask : ImplAttributes;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the method body is implemented using the Common Intermediate Language (CIL).
+        /// </summary>
+        public bool IsNative
+        {
+            get => (ImplAttributes & MethodImplAttributes.CodeTypeMask) == MethodImplAttributes.Native;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.CodeTypeMask)
+                                    | (value ? MethodImplAttributes.Native : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the method body is implemented using OPTIL.
+        /// </summary>
+        public bool IsOPTIL
+        {
+            get => (ImplAttributes & MethodImplAttributes.CodeTypeMask) == MethodImplAttributes.OPTIL;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.CodeTypeMask)
+                                    | (value ? MethodImplAttributes.OPTIL : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the method body is implemented by the runtime.
+        /// </summary>
+        public bool IsRuntime
+        {
+            get => (ImplAttributes & MethodImplAttributes.CodeTypeMask) == MethodImplAttributes.Runtime;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.CodeTypeMask)
+                                    | (value ? MethodImplAttributes.Runtime : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the method body is managed by the runtime.
+        /// </summary>
+        public bool Managed
+        {
+            get => (ImplAttributes & MethodImplAttributes.ManagedMask) == MethodImplAttributes.Managed;
+            set => ImplAttributes = value ? ImplAttributes & ~MethodImplAttributes.ManagedMask : ImplAttributes;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the method body is not managed by the runtime.
+        /// </summary>
+        public bool Unmanaged
+        {
+            get => (ImplAttributes & MethodImplAttributes.ManagedMask) == MethodImplAttributes.Unmanaged;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.ManagedMask)
+                                    | (value ? MethodImplAttributes.Unmanaged : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the method body is forwarded.
+        /// </summary>
+        public bool IsForwardReference
+        {
+            get => (ImplAttributes & MethodImplAttributes.ForwardRef) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.ForwardRef)
+                                    | (value ? MethodImplAttributes.ForwardRef : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the runtime should not optimize the code upon generating native code.
+        /// </summary>
+        public bool IsNoOptimization
+        {
+            get => (ImplAttributes & MethodImplAttributes.NoOptimization) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.NoOptimization)
+                                    | (value ? MethodImplAttributes.NoOptimization : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the method's signature is not to be mangled to do HRESULT conversion.
+        /// </summary>
+        public bool PreserveSignature
+        {
+            get => (ImplAttributes & MethodImplAttributes.PreserveSig) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.PreserveSig)
+                                    | (value ? MethodImplAttributes.PreserveSig : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the method is an internal call into the runtime.
+        /// </summary>
+        public bool IsInternalCall
+        {
+            get => (ImplAttributes & MethodImplAttributes.InternalCall) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.InternalCall)
+                                    | (value ? MethodImplAttributes.InternalCall : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating only one thread can run the method at once. 
+        /// </summary>
+        public bool IsSynchronized
+        {
+            get => (ImplAttributes & MethodImplAttributes.Synchronized) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.Synchronized)
+                                    | (value ? MethodImplAttributes.Synchronized : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the method can be inlined by the runtime or not.
+        /// </summary>
+        public bool NoInlining
+        {
+            get => (ImplAttributes & MethodImplAttributes.NoInlining) != 0;
+            set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.NoInlining)
+                                    | (value ? MethodImplAttributes.NoInlining : 0);
+        }
+
         /// <inheritdoc />
         public ModuleDefinition Module => DeclaringType.Module;
 
@@ -334,6 +465,7 @@ namespace AsmResolver.DotNet
             get => _declaringType.Value;
             set => _declaringType.Value = value;
         }
+
 
         ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
 
@@ -375,6 +507,40 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets or sets the body of the method. 
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Updating this property does not automatically set the appropriate implementation attributes in the
+        /// <see cref="ImplAttributes"/>.
+        /// </para>
+        /// </remarks>
+        public MethodBody MethodBody
+        {
+            get => _methodBody.Value;
+            set => _methodBody.Value = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the managed CIL body of the method if available. 
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If this property is set to <c>null</c>, it does not necessarily mean the method does not have a method body.
+        /// There could be an unmanaged method body assigned instead. See the <see cref="MethodBody"/> property instead.
+        /// </para>
+        /// <para>
+        /// Updating this property does not automatically set the appropriate implementation attributes in the
+        /// <see cref="ImplAttributes"/>.
+        /// </para>
+        /// </remarks>
+        public CilMethodBody CilMethodBody
+        {
+            get => MethodBody as CilMethodBody;
+            set => MethodBody = value;
+        }
+
+        /// <summary>
         /// Obtains the name of the method definition.
         /// </summary>
         /// <returns>The name.</returns>
@@ -410,6 +576,15 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ParameterDefinition> GetParameterDefinitions() => 
             new OwnedCollection<MethodDefinition, ParameterDefinition>(this);
+        
+        /// <summary>
+        /// Obtains the body of the method definition.
+        /// </summary>
+        /// <returns>The signature.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="MethodBody"/> property.
+        /// </remarks>
+        protected virtual MethodBody GetBody() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

@@ -8,6 +8,7 @@ using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -60,6 +61,19 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         public override bool TryLookupMember(MetadataToken token, out IMetadataMember member) =>
             _memberFactory.TryLookupMember(token, out member);
+
+        /// <inheritdoc />
+        public override string LookupString(MetadataToken token) => 
+            !TryLookupString(token, out var member)
+                ? throw new ArgumentException($"Cannot resolve string token {token}.")
+                : member;
+
+        /// <inheritdoc />
+        public override bool TryLookupString(MetadataToken token, out string value)
+        {
+            value = _metadata.GetStream<UserStringsStream>().GetStringByIndex(token.Rid);
+            return value == null;
+        }
 
         /// <inheritdoc />
         public override IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>

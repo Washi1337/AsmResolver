@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Blob
         /// <param name="reader">The blob input stream.</param>
         /// <param name="protection">The object responsible for detecting infinite recursion.</param>
         /// <returns>The method signature.</returns>
-        private static MethodSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader, 
+        public static MethodSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader, 
             RecursionProtection protection)
         {
             var result = new MethodSignature((CallingConventionAttributes) reader.ReadByte());

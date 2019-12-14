@@ -288,6 +288,32 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Looks up a user string by its string token.
+        /// </summary>
+        /// <param name="token">The token of the string to lookup.</param>
+        /// <returns>The member.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Occurs when the module does not support looking up string by its token.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when a metadata token indexes an invalid string.
+        /// </exception>
+        public virtual string LookupString(MetadataToken token) =>
+            throw new InvalidOperationException("Cannot lookup strings by tokens from a non-serialized module.");
+        
+        /// <summary>
+        /// Attempts to look up a user string by its metadata token.
+        /// </summary>
+        /// <param name="token">The token of the member to lookup.</param>
+        /// <param name="value">The string, or <c>null</c> if the lookup failed.</param>
+        /// <returns><c>true</c> if the string was successfully looked up, false otherwise.</returns>
+        public virtual bool TryLookupString(MetadataToken token, out string value)
+        {
+            value = null;
+            return false;
+        }
+        
+        /// <summary>
         /// Obtains an object that can be used to decode coded indices to metadata tokens.
         /// </summary>
         /// <param name="codedIndex">The type of indices to get the encoder for.</param>

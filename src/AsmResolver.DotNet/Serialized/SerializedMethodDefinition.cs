@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Code;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -66,6 +69,24 @@ namespace AsmResolver.DotNet.Serialized
 
             return result;
         }
-        
+
+        /// <inheritdoc />
+        protected override MethodBody GetBody()
+        {
+            // TODO: make configurable
+
+            if (_row.Body.CanRead)
+            {
+                if (IsIL)
+                {
+                    var rawBody = CilRawMethodBody.FromReader(_row.Body.CreateReader());
+                    return CilMethodBody.FromRawMethodBody(this, rawBody);
+                }
+                
+                // TODO: handle native method bodies.
+            }
+
+            return null;
+        }
     }
 }

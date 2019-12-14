@@ -126,5 +126,8 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Scope"/> property.
         /// </remarks>
         protected virtual IResolutionScope GetScope() => null;
+
+        /// <inheritdoc />
+        public override string ToString() => FullName;
     }
 }
