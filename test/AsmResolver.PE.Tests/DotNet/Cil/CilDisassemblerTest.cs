@@ -102,7 +102,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             
             var expected = new[]
             {
-                new CilInstruction(0, CilOpCodes.Br, 0x0007u), 
+                new CilInstruction(0, CilOpCodes.Br, new CilOffsetLabel(0x0007)), 
                 new CilInstruction(5, CilOpCodes.Nop), 
                 new CilInstruction(6, CilOpCodes.Nop), 
                 new CilInstruction(7, CilOpCodes.Ret), 
@@ -125,7 +125,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             
             var expected = new[]
             {
-                new CilInstruction(0, CilOpCodes.Br_S, 0x0004u), 
+                new CilInstruction(0, CilOpCodes.Br_S, new CilOffsetLabel(0x0004)), 
                 new CilInstruction(2, CilOpCodes.Nop), 
                 new CilInstruction(3, CilOpCodes.Nop), 
                 new CilInstruction(4, CilOpCodes.Ret), 

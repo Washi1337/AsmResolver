@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using System.Collections;
 using System.Linq;
 
@@ -105,6 +106,34 @@ namespace AsmResolver.PE.DotNet.Cil
             get;
             set;
         }
+
+        public int Size => OpCode.Size + GetOperandSize();
+
+        private int GetOperandSize() =>
+            OpCode.OperandType switch
+            {
+                CilOperandType.InlineNone => 0,
+                CilOperandType.ShortInlineI => sizeof(sbyte),
+                CilOperandType.ShortInlineArgument => sizeof(sbyte),
+                CilOperandType.ShortInlineBrTarget => sizeof(sbyte),
+                CilOperandType.ShortInlineVar => sizeof(sbyte),
+                CilOperandType.InlineVar => sizeof(ushort),
+                CilOperandType.InlineArgument => sizeof(ushort),
+                CilOperandType.InlineBrTarget => sizeof(uint),
+                CilOperandType.InlineI => sizeof(uint),
+                CilOperandType.InlineField => sizeof(uint),
+                CilOperandType.InlineMethod => sizeof(uint),
+                CilOperandType.InlineSig => sizeof(uint),
+                CilOperandType.InlineString => sizeof(uint),
+                CilOperandType.InlineTok => sizeof(uint),
+                CilOperandType.InlineType => sizeof(uint),
+                CilOperandType.InlineI8 => sizeof(ulong),
+                CilOperandType.ShortInlineR => sizeof(float),
+                CilOperandType.InlineR => sizeof(double),
+                CilOperandType.InlineSwitch => ((((ICollection) Operand).Count + 1) * sizeof(int)),
+                CilOperandType.InlinePhi => throw new NotSupportedException(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         /// <inheritdoc />
         public override string ToString()
