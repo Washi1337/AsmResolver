@@ -107,6 +107,9 @@ namespace AsmResolver.PE.DotNet.Cil
             set;
         }
 
+        /// <summary>
+        /// Gets the size in bytes of the CIL instruction.
+        /// </summary>
         public int Size => OpCode.Size + GetOperandSize();
 
         private int GetOperandSize() =>
@@ -186,6 +189,11 @@ namespace AsmResolver.PE.DotNet.Cil
                 return hashCode;
             }
         }
-        
+
+        /// <summary>
+        /// Creates a new label to the current instruction.
+        /// </summary>
+        /// <returns>The label.</returns>
+        public ICilLabel CreateLabel() => new CilInstructionLabel(this);
     }
 }

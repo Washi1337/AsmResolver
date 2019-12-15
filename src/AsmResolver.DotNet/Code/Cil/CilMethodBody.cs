@@ -34,9 +34,8 @@ namespace AsmResolver.DotNet.Code.Cil
                 result.MaxStack = fatBody.MaxStack;
                 result.InitializeLocals = fatBody.InitLocals;
 
-                ReadLocalVariables(method, result, fatBody);
-                
-                // TODO: Add exception handlers.
+                ReadLocalVariables(method.Module, result, fatBody);
+                ReadExceptionHandlers(fatBody, result);
             }
             else
             {
@@ -113,15 +112,32 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
-        private static void ReadLocalVariables(MethodDefinition method, CilMethodBody result, CilRawFatMethodBody fatBody)
+        private static void ReadLocalVariables(ModuleDefinition module, CilMethodBody result, CilRawFatMethodBody fatBody)
         {
             if (fatBody.LocalVarSigToken != MetadataToken.Zero
-                && method.Module.TryLookupMember(fatBody.LocalVarSigToken, out var member)
+                && module.TryLookupMember(fatBody.LocalVarSigToken, out var member)
                 && member is StandAloneSignature signature
                 && signature.Signature is LocalVariablesSignature localVariablesSignature)
             {
                 foreach (var type in localVariablesSignature.VariableTypes)
                     result.LocalVariables.Add(new CilLocalVariable(type));
+            }
+        }
+
+        private static void ReadExceptionHandlers(CilRawFatMethodBody fatBody, CilMethodBody result)
+        {
+            foreach (var section in fatBody.ExtraSections)
+            {
+                if (section.IsEHTable)
+                {
+                    var reader = new ByteArrayReader(section.Data);
+                    int size = section.IsFat
+                        ? CilExceptionHandler.FatExceptionHandlerSize
+                        : CilExceptionHandler.TinyExceptionHandlerSize;
+
+                    while (reader.CanRead(size))
+                        result.ExceptionHandlers.Add(CilExceptionHandler.FromReader(result, reader, section.IsFat));
+                }
             }
         }
 
@@ -187,7 +203,15 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get;
         } = new CilLocalVariableCollection();
-        
+
+        /// <summary>
+        /// Gets a collection of regions protected by exception handlers, finally or faulting clauses defined in the method body.
+        /// </summary>
+        public IList<CilExceptionHandler> ExceptionHandlers
+        {
+            get;
+        } = new List<CilExceptionHandler>();
+            
         /// <inheritdoc />
         IMetadataMember ICilOperandResolver.ResolveMember(MetadataToken token)
         {
