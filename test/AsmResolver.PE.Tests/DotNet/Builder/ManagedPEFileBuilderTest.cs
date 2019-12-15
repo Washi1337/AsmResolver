@@ -2,6 +2,7 @@ using System;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.Tests;
+using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Builder
@@ -26,7 +27,9 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var peFile = builder.ConstructPEFile(image);
             
             // Verify
-            _fixture.RebuildAndRunExe(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
         }
         
         [Fact]
@@ -40,7 +43,9 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var peFile = builder.ConstructPEFile(image);
             
             // Verify
-            _fixture.RebuildAndRunExe(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
         }
 
         [Fact]
@@ -58,7 +63,9 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var peFile = builder.ConstructPEFile(image);
             
             // Verify
-            _fixture.RebuildAndRunExe(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
         }
 
         [Fact]
@@ -76,7 +83,9 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var peFile = builder.ConstructPEFile(image);
             
             // Verify
-            _fixture.RebuildAndRunExe(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
         }
         
     }

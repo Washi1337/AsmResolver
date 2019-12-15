@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.Tests;
+using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.PE.File.Tests
@@ -47,7 +48,9 @@ namespace AsmResolver.PE.File.Tests
         public void RebuildNetPENoChange()
         {
             var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
-            _fixture.RebuildAndRunExe(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(peFile, "HelloWorld", "Hello World!" + Environment.NewLine);
         }
 
         [Fact]
@@ -66,11 +69,14 @@ namespace AsmResolver.PE.File.Tests
             });
 
             // Rebuild and check if file is still runnable.
-            _fixture.RebuildAndRunExe(peFile, fileName, "Hello World!" + Environment.NewLine);
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(peFile, fileName, "Hello World!" + Environment.NewLine);
 
             // Read the new file.
-            var newPEFile = PEFile.FromFile(_fixture.GetTestExecutable(
-                nameof(PEFileTest), nameof(RebuildNetPEAddSection), fileName));
+            var newPEFile = PEFile.FromFile(_fixture
+                .GetRunner<FrameworkPERunner>()
+                .GetTestExecutablePath(nameof(PEFileTest), nameof(RebuildNetPEAddSection), fileName));
 
             // Verify the section and its data is present:
             var newSection = newPEFile.Sections.First(s => s.Header.Name == sectionName);
