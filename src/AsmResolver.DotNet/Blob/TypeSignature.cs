@@ -63,8 +63,10 @@ namespace AsmResolver.DotNet.Blob
                 
                 case ElementType.Ptr:
                     break;
+                
                 case ElementType.ByRef:
-                    break;
+                    return ByReferenceTypeSignature.FromReader(module, reader, protection);
+                
                 case ElementType.Var:
                     break;
                 case ElementType.Array:
@@ -74,7 +76,8 @@ namespace AsmResolver.DotNet.Blob
                 case ElementType.FnPtr:
                     break;
                 case ElementType.SzArray:
-                    break;
+                    return SzArrayTypeSignature.FromReader(module, reader, protection);
+                
                 case ElementType.MVar:
                     break;
                 case ElementType.CModReqD:
@@ -96,7 +99,7 @@ namespace AsmResolver.DotNet.Blob
                 case ElementType.Enum:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
             }
 
             throw new NotImplementedException();
