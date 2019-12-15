@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             VariableType = variableType;
         }
-        
+
         /// <summary>
         /// Gets the index of the variable.
         /// </summary>
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get;
             internal set;
-        }
+        } = -1;
 
         /// <summary>
         /// Gets or sets the type of values this variable stores.

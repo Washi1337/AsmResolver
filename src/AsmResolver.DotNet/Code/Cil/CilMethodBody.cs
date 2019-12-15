@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -26,21 +27,15 @@ namespace AsmResolver.DotNet.Code.Cil
             if (operandResolver is null)
                 operandResolver = result;
             
-            // Read code.
-            var reader = new ByteArrayReader(rawBody.Code);
-            var disassembler = new CilDisassembler(reader);
-            result.Instructions.AddRange(disassembler.ReadAllInstructions());
-
-            // Resolve operands.
-            foreach (var instruction in result.Instructions)
-                instruction.Operand = ResolveOperand(result, instruction, operandResolver) ?? instruction.Operand;
+            ReadInstructions(result, rawBody, operandResolver);
 
             if (rawBody is CilRawFatMethodBody fatBody)
             {
                 result.MaxStack = fatBody.MaxStack;
                 result.InitializeLocals = fatBody.InitLocals;
+
+                ReadLocalVariables(method, result, fatBody);
                 
-                // TODO: Add variables
                 // TODO: Add exception handlers.
             }
             else
@@ -50,6 +45,18 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             
             return result;
+        }
+
+        private static void ReadInstructions(CilMethodBody result, CilRawMethodBody rawBody,
+            ICilOperandResolver operandResolver)
+        {
+            var reader = new ByteArrayReader(rawBody.Code);
+            var disassembler = new CilDisassembler(reader);
+            result.Instructions.AddRange(disassembler.ReadAllInstructions());
+
+            // Resolve operands.
+            foreach (var instruction in result.Instructions)
+                instruction.Operand = ResolveOperand(result, instruction, operandResolver) ?? instruction.Operand;
         }
 
         private static object ResolveOperand(CilMethodBody methodBody, CilInstruction instruction, ICilOperandResolver resolver)
@@ -103,6 +110,18 @@ namespace AsmResolver.DotNet.Code.Cil
                 
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void ReadLocalVariables(MethodDefinition method, CilMethodBody result, CilRawFatMethodBody fatBody)
+        {
+            if (fatBody.LocalVarSigToken != MetadataToken.Zero
+                && method.Module.TryLookupMember(fatBody.LocalVarSigToken, out var member)
+                && member is StandAloneSignature signature
+                && signature.Signature is LocalVariablesSignature localVariablesSignature)
+            {
+                foreach (var type in localVariablesSignature.VariableTypes)
+                    result.LocalVariables.Add(new CilLocalVariable(type));
             }
         }
 
@@ -161,6 +180,14 @@ namespace AsmResolver.DotNet.Code.Cil
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of local variables defined in the method body.
+        /// </summary>
+        public CilLocalVariableCollection LocalVariables
+        {
+            get;
+        } = new CilLocalVariableCollection();
+        
         /// <inheritdoc />
         IMetadataMember ICilOperandResolver.ResolveMember(MetadataToken token)
         {
@@ -178,13 +205,14 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <inheritdoc />
         CilLocalVariable ICilOperandResolver.ResolveLocalVariable(int index)
         {
-            throw new NotImplementedException();
+            return index >= 0 && index < LocalVariables.Count ? LocalVariables[index] : null;
         }
 
         /// <inheritdoc />
         Parameter ICilOperandResolver.ResolveParameter(int index)
         {
-            throw new NotImplementedException();
+            var parameters = Owner.Parameters;
+            return index >= 0 && index < parameters.Count ? parameters[index] : null;
         }
-    }
+    } 
 }

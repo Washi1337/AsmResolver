@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet.Serialized
         private MethodDefinition[] _methodDefinitions;
         private ParameterDefinition[] _parameterDefinitions;
         private MemberReference[] _memberReferences;
+        private StandAloneSignature[] _standAloneSignatures;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -35,6 +36,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.Method => LookupMethodDefinition(token),
                 TableIndex.Param => LookupParameterDefinition(token),
                 TableIndex.MemberRef => LookupMemberReference(token),
+                TableIndex.StandAloneSig => LookupStandAloneSignature(token),
                 _ => null
             };
 
@@ -82,6 +84,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<MemberReference, MemberReferenceRow>(ref _memberReferences, token,
                 (m, t, r) => new SerializedMemberReference(m, _parentModule, t, r));
+        }
+
+        private StandAloneSignature LookupStandAloneSignature(in MetadataToken token)
+        {
+            return LookupOrCreateMember<StandAloneSignature, StandAloneSignatureRow>(ref _standAloneSignatures, token,
+                (m, t, r) => new SerializedStandAloneSignature(m, _parentModule, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

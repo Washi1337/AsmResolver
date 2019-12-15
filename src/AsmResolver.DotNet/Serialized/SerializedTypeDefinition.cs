@@ -32,6 +32,8 @@ namespace AsmResolver.DotNet.Serialized
             _parentModule = parentModule;
             _row = row;
             Attributes = row.Attributes;
+
+            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = parentModule;
         }
 
         /// <inheritdoc />

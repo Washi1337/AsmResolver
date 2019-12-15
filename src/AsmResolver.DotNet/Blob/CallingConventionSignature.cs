@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Blob
                     throw new NotImplementedException();
                 
                 case CallingConventionAttributes.Local:
-                    throw new NotImplementedException();
+                    return LocalVariablesSignature.FromReader(module, reader, protection);
                     
                 case CallingConventionAttributes.GenericInstance:
                     throw new NotImplementedException();

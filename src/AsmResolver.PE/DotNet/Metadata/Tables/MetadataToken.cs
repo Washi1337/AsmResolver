@@ -8,6 +8,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     public readonly struct MetadataToken : IComparable<MetadataToken>
     {
         /// <summary>
+        /// Represents the zero metadata token, or the absence of a metadata token.
+        /// </summary>
+        public static readonly MetadataToken Zero = new MetadataToken(0);
+        
+        /// <summary>
         /// Converts a 32-bit integer to a metadata token.
         /// </summary>
         /// <param name="token">The token to convert.</param>
@@ -25,6 +30,30 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public static implicit operator MetadataToken(uint token)
         {
             return new MetadataToken(token);
+        }
+
+        /// <summary>
+        /// Determines whether two metadata tokens are considered equal. That is, both the table index and the row
+        /// identifier match.
+        /// </summary>
+        /// <param name="a">The first metadata token.</param>
+        /// <param name="b">The second metadata token.</param>
+        /// <returns><c>true</c> if the tokens are considered equal, <c>false</c> otherwise.</returns>
+        public static bool operator ==(MetadataToken a, MetadataToken b)
+        {
+            return a.Equals(b);
+        }
+        
+        /// <summary>
+        /// Determines whether two metadata tokens are not considered equal. That is, either the table index or the row
+        /// identifier (or both) does not match the other.
+        /// </summary>
+        /// <param name="a">The first metadata token.</param>
+        /// <param name="b">The second metadata token.</param>
+        /// <returns><c>true</c> if the tokens are not considered equal, <c>false</c> otherwise.</returns>
+        public static bool operator !=(MetadataToken a, MetadataToken b)
+        {
+            return !(a == b);
         }
 
         private readonly uint _value;
