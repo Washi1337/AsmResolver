@@ -1,5 +1,4 @@
 using System.Linq;
-using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.Properties;
 using Xunit;
 
