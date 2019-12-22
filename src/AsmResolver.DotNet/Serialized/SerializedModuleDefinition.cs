@@ -33,6 +33,9 @@ namespace AsmResolver.DotNet.Serialized
         
         private MetadataRange[] _paramLists;
         private uint[] _parameterMethods;
+        
+        private IDictionary<uint, MetadataRange> _propertyLists;
+        private uint[] _propertyDeclaringTypes;
             
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -186,14 +189,6 @@ namespace AsmResolver.DotNet.Serialized
             Interlocked.CompareExchange(ref _methodDeclaringTypes, methodDeclaringTypes, null);
         }
 
-        private static void InitializeMemberList(uint ownerRid, MetadataRange memberRange,
-            MetadataRange[] memberLists, uint[] memberDeclaringTypes)
-        {
-            memberLists[ownerRid - 1] = memberRange;
-            foreach (var token in memberRange)
-                memberDeclaringTypes[token.Rid - 1] = ownerRid;
-        }
-
         internal MetadataRange GetFieldRange(uint typeRid)
         {
             EnsureTypeMemberListsInitialized();
@@ -263,6 +258,63 @@ namespace AsmResolver.DotNet.Serialized
             return paramRid - 1 < _parameterMethods.Length
                 ? _parameterMethods[paramRid - 1]
                 : 0;
+        }
+
+        private void EnsurePropertyListsInitialized()
+        {
+            if (_propertyLists is null)
+                InitializePropertyLists();
+        }
+
+        private void InitializePropertyLists()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var propertyMapTable = tablesStream.GetTable<PropertyMapRow>(TableIndex.PropertyMap);
+            var propertyTable = tablesStream.GetTable(TableIndex.Property);
+
+            var propertyLists = new Dictionary<uint, MetadataRange>();
+            var propertyDeclaringTypes  = new uint[propertyTable.Count];
+            
+            for (uint mapRid = 1; mapRid <= propertyMapTable.Count; mapRid++)
+            {
+                uint ownerRid = propertyMapTable[(int) (mapRid - 1)].Parent;
+                InitializeMemberList(ownerRid, tablesStream.GetPropertyRange(mapRid), propertyLists, propertyDeclaringTypes);
+            }
+            
+            Interlocked.CompareExchange(ref _propertyLists, propertyLists, null);
+            Interlocked.CompareExchange(ref _propertyDeclaringTypes, propertyDeclaringTypes, null);
+        }
+
+        internal MetadataRange GetPropertyRange(uint typeRid)
+        {
+            EnsurePropertyListsInitialized();
+            return _propertyLists.TryGetValue(typeRid, out var range)
+                ? range
+                : MetadataRange.Empty;
+        }
+
+        internal uint GetPropertyOwner(uint propertyRid)
+        {
+            EnsurePropertyListsInitialized();
+            return propertyRid - 1 < _propertyDeclaringTypes.Length
+                ? _propertyDeclaringTypes[propertyRid - 1]
+                : 0;
+        }
+
+        private static void InitializeMemberList(uint ownerRid, MetadataRange memberRange,
+            MetadataRange[] memberLists, uint[] memberDeclaringTypes)
+        {
+            memberLists[ownerRid - 1] = memberRange;
+            foreach (var token in memberRange)
+                memberDeclaringTypes[token.Rid - 1] = ownerRid;
+        }
+
+        private static void InitializeMemberList(uint ownerRid, MetadataRange memberRange,
+            IDictionary<uint, MetadataRange> memberLists, uint[] memberDeclaringTypes)
+        {
+            memberLists[ownerRid] = memberRange;
+            foreach (var token in memberRange)
+                memberDeclaringTypes[token.Rid - 1] = ownerRid;
         }
 
         /// <inheritdoc />

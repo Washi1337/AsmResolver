@@ -32,14 +32,39 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetMethodFullName(string name, ITypeDescriptor declaringType, MethodSignature signature)
         {
-            string parameterTypesString = string.Join(", ", signature.ParameterTypes)
-                                          + (signature.IsSentinel ? ", ..." : string.Empty);
+            string parameterTypesString = GetParameterTypesString(signature);
             return declaringType is null
                 ? $"{signature.ReturnType} {name}({parameterTypesString})"
                 : $"{signature.ReturnType} {declaringType}::{name}({parameterTypesString})";
+        }
+
+        /// <summary>
+        /// Computes the full name of a property definition, including its declaring type's full name, as well as its
+        /// return type and parameters.
+        /// </summary>
+        /// <param name="name">The name of the property.</param>
+        /// <param name="declaringType">The declaring type of the property if available.</param>
+        /// <param name="signature">The signature of the property.</param>
+        /// <returns>The full name</returns>
+        public static string GetPropertyFullName(string name, ITypeDescriptor declaringType, PropertySignature signature)
+        {
+            string parameterTypesString = signature.ParameterTypes.Count > 0
+                ? $"[{GetParameterTypesString(signature)}]"
+                : string.Empty;
+            
+            return declaringType is null
+                ? $"{signature.ReturnType} {name}{parameterTypesString}"
+                : $"{signature.ReturnType} {declaringType}::{name}{parameterTypesString}";
             
         }
-        
+
+        private static string GetParameterTypesString(MethodSignatureBase signature)
+        {
+            string parameterTypesString = string.Join(", ", signature.ParameterTypes)
+                                          + (signature.IsSentinel ? ", ..." : string.Empty);
+            return parameterTypesString;
+        }
+
         /// <summary>
         /// Computes the full name of a type descriptor, including its namespace and/or declaring types.
         /// </summary>

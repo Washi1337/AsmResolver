@@ -3,6 +3,7 @@ using System.Linq;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.NestedClasses;
+using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -147,6 +148,31 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
             Assert.Equal(6, type.Methods.Count);
+        }
+
+
+        [Fact]
+        public void ReadEmptyProperties()
+        {
+            var module = ModuleDefinition.FromFile(typeof(NoProperties).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NoProperties));
+            Assert.Empty(type.Properties);
+        }
+        
+        [Fact]
+        public void ReadSingleProperty()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
+            Assert.Single(type.Properties);
+        }
+
+        [Fact]
+        public void ReadMultipleProperties()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
+            Assert.Equal(4, type.Properties.Count);
         }
 
     }

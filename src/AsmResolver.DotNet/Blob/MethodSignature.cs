@@ -6,7 +6,7 @@ namespace AsmResolver.DotNet.Blob
     /// <summary>
     /// Represents the signature of a method defined or referenced by a .NET executable file.
     /// </summary>
-    public class MethodSignature : MemberSignature
+    public class MethodSignature : MethodSignatureBase
     {
         /// <summary>
         /// Reads a single method signature from an input stream.
@@ -36,23 +36,8 @@ namespace AsmResolver.DotNet.Blob
                     return result;
                 result.GenericParameterCount = (int) genericParameterCount;
             }
-
-            // Parameter count.
-            if (!reader.TryReadCompressedUInt32(out uint parameterCount))
-                return result;
-
-            // Return type.
-            result.ReturnType = TypeSignature.FromReader(module, reader, protection);
-            
-            // Parameter types.
-            for (int i = 0; i < parameterCount; i++)
-            {
-                var parameterType = TypeSignature.FromReader(module, reader, protection);
-                
-                // TODO: handle sentinel parameters.
-                result.ParameterTypes.Add(parameterType);
-            }
-
+        
+            result.ReadParametersAndReturnType(module, reader, protection);
             return result;
         }
 
@@ -108,10 +93,13 @@ namespace AsmResolver.DotNet.Blob
         public static MethodSignature CreateInstance(TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
             => new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
 
-        private MethodSignature(CallingConventionAttributes attributes)
-            : base(attributes, null)
+        /// <summary>
+        /// Initializes an empty method signature with no parameters.
+        /// </summary>
+        /// <param name="attributes">The attributes</param>
+        protected MethodSignature(CallingConventionAttributes attributes)
+            : base(attributes, null, Enumerable.Empty<TypeSignature>())
         {
-            ParameterTypes = new List<TypeSignature>();
             SentinelParameterTypes = new List<TypeSignature>();
         }
 
@@ -122,9 +110,8 @@ namespace AsmResolver.DotNet.Blob
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The types of the parameter the method defines.</param>
         public MethodSignature(CallingConventionAttributes attributes, TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes) 
-            : base(attributes, returnType)
+            : base(attributes, returnType, parameterTypes)
         {
-            ParameterTypes = new List<TypeSignature>(parameterTypes);
             SentinelParameterTypes = new List<TypeSignature>();
         }
 
@@ -135,23 +122,6 @@ namespace AsmResolver.DotNet.Blob
         {
             get;
             set;
-        }
-
-        /// <summary>
-        /// Gets an ordered list of types indicating the types of the parameters that this method defines. 
-        /// </summary>
-        public IList<TypeSignature> ParameterTypes
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets or sets the type of the value that this method returns.
-        /// </summary>
-        public TypeSignature ReturnType
-        {
-            get => MemberReturnType;
-            set => MemberReturnType = value;
         }
 
         /// <summary>

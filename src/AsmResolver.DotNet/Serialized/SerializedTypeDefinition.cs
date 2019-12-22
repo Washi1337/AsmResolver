@@ -105,5 +105,17 @@ namespace AsmResolver.DotNet.Serialized
 
             return result;
         }
+
+        /// <inheritdoc />
+        protected override IList<PropertyDefinition> GetProperties()
+        {
+            var result = new OwnedCollection<TypeDefinition, PropertyDefinition>(this);
+            
+            var range = _parentModule.GetPropertyRange(MetadataToken.Rid);
+            foreach (var token in range) 
+                result.Add((PropertyDefinition) _parentModule.LookupMember(token));
+
+            return result;
+        }
     }
 }

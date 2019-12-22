@@ -18,6 +18,7 @@
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Fields\AsmResolver.DotNet.TestCases.Fields.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.NestedClasses\AsmResolver.DotNet.TestCases.NestedClasses.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Properties\AsmResolver.DotNet.TestCases.Properties.csproj" />
     </ItemGroup>
 
 </Project>
