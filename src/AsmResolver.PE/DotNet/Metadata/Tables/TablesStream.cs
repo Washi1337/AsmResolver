@@ -806,6 +806,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             GetMemberRange(TableIndex.Method, methodDefRid, 5,
                 TableIndex.Param, TableIndex.ParamPtr);
 
+        /// <summary>
+        /// Gets the range of metadata tokens referencing properties that a property map row defines. 
+        /// </summary>
+        /// <param name="propertyMapRid">The row identifier of the property map to obtain the properties from.</param>
+        /// <returns>The range of metadata tokens.</returns>
+        public MetadataRange GetPropertyRange(uint propertyMapRid) =>
+            GetMemberRange(TableIndex.PropertyMap, propertyMapRid, 1,
+                TableIndex.Property, TableIndex.PropertyPtr);
+        
         private MetadataRange GetMemberRange(TableIndex ownerTableIndex, uint ownerRid, int ownerColumnIndex,
             TableIndex memberTableIndex, TableIndex redirectTableIndex)
         {
