@@ -137,9 +137,12 @@ namespace AsmResolver.DotNet.Blob
         public override string ToString()
         {
             string prefix = HasThis ? "instance " : string.Empty;
+            string genericsString = GenericParameterCount > 0
+                ? $"<{string.Join(", ", new string('?', GenericParameterCount))}>"
+                : string.Empty;
             string parameterTypesString = string.Join(", ", ParameterTypes) + (IsSentinel ? ", ..." : string.Empty);
             
-            return $"{prefix}{ReturnType} *({parameterTypesString})";
+            return $"{prefix}{ReturnType} *{genericsString}({parameterTypesString})";
         }
     }
 }

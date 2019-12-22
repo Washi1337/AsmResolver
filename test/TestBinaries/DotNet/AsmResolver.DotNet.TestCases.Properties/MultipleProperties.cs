@@ -7,12 +7,12 @@ namespace AsmResolver.DotNet.TestCases.Properties
             get;
         }
 
-        public int WriteOnlyProperty
+        public string WriteOnlyProperty
         {
             set {}
         }
 
-        public int ReadWriteProperty
+        public MultipleProperties ReadWriteProperty
         {
             get;
             set;

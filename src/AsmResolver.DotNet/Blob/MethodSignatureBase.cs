@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Blob
         }
 
         /// <summary>
-        /// Gets an ordered list of types indicating the types of the parameters that this method defines. 
+        /// Gets an ordered list of types indicating the types of the parameters that this member defines. 
         /// </summary>
         public IList<TypeSignature> ParameterTypes
         {
@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Blob
         }
 
         /// <summary>
-        /// Gets or sets the type of the value that this method returns.
+        /// Gets or sets the type of the value that this member returns.
         /// </summary>
         public TypeSignature ReturnType
         {
@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Blob
         }
 
         /// <summary>
-        /// Initializes the <see cref="ParameterTypes"/> and <see cref="ReturnType"/> proeprties by reading
+        /// Initializes the <see cref="ParameterTypes"/> and <see cref="ReturnType"/> properties by reading
         /// the parameter count, return type and parameter fields of the signature from the provided input stream.
         /// </summary>
         /// <param name="module">The module that contains the signature.</param>

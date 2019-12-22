@@ -109,5 +109,16 @@ namespace AsmResolver.DotNet.Blob
             : base(attributes | CallingConventionAttributes.Property, propertyType, parameterTypes)
         {
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            string prefix = HasThis ? "instance " : string.Empty;
+            string parameterTypesString = ParameterTypes.Count > 0
+                ? $"[{string.Join(", ", ParameterTypes)}]"
+                : string.Empty;
+            
+            return $"{prefix}{ReturnType} *{parameterTypesString}";
+        }
     }
 }
