@@ -814,7 +814,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public MetadataRange GetPropertyRange(uint propertyMapRid) =>
             GetMemberRange(TableIndex.PropertyMap, propertyMapRid, 1,
                 TableIndex.Property, TableIndex.PropertyPtr);
-        
+
+        /// <summary>
+        /// Gets the range of metadata tokens referencing events that a event map row defines. 
+        /// </summary>
+        /// <param name="eventMapRid">The row identifier of the event map to obtain the events from.</param>
+        /// <returns>The range of metadata tokens.</returns>
+        public MetadataRange GetEventRange(uint eventMapRid) =>
+            GetMemberRange(TableIndex.EventMap, eventMapRid, 1,
+                TableIndex.Event, TableIndex.EventPtr);
+
         private MetadataRange GetMemberRange(TableIndex ownerTableIndex, uint ownerRid, int ownerColumnIndex,
             TableIndex memberTableIndex, TableIndex redirectTableIndex)
         {
@@ -839,6 +848,5 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             // If not, its a simple range.
             return new ContinuousMetadataRange(memberTableIndex, startRid, endRid);
         }
-        
     }
 }
