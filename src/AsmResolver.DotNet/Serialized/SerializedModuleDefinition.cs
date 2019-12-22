@@ -36,7 +36,10 @@ namespace AsmResolver.DotNet.Serialized
         
         private IDictionary<uint, MetadataRange> _propertyLists;
         private uint[] _propertyDeclaringTypes;
-            
+        
+        private IDictionary<uint, MetadataRange> _eventLists;
+        private uint[] _eventDeclaringTypes;
+
         /// <summary>
         /// Creates a module definition from a module metadata row.
         /// </summary>
@@ -301,6 +304,47 @@ namespace AsmResolver.DotNet.Serialized
                 : 0;
         }
 
+        private void EnsureEventListsInitialized()
+        {
+            if (_eventLists is null)
+                InitializeEventLists();
+        }
+
+        private void InitializeEventLists()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var eventMapTable = tablesStream.GetTable<EventMapRow>(TableIndex.EventMap);
+            var eventTable = tablesStream.GetTable(TableIndex.Event);
+
+            var eventLists = new Dictionary<uint, MetadataRange>();
+            var eventDeclaringTypes  = new uint[eventTable.Count];
+            
+            for (uint mapRid = 1; mapRid <= eventMapTable.Count; mapRid++)
+            {
+                uint ownerRid = eventMapTable[(int) (mapRid - 1)].Parent;
+                InitializeMemberList(ownerRid, tablesStream.GetEventRange(mapRid), eventLists, eventDeclaringTypes);
+            }
+            
+            Interlocked.CompareExchange(ref _eventLists, eventLists, null);
+            Interlocked.CompareExchange(ref _eventDeclaringTypes, eventDeclaringTypes, null);
+        }
+
+        internal MetadataRange GetEventRange(uint typeRid)
+        {
+            EnsureEventListsInitialized();
+            return _eventLists.TryGetValue(typeRid, out var range)
+                ? range
+                : MetadataRange.Empty;
+        }
+
+        internal uint GetEventOwner(uint eventRid)
+        {
+            EnsureEventListsInitialized();
+            return eventRid - 1 < _eventDeclaringTypes.Length
+                ? _eventDeclaringTypes[eventRid - 1]
+                : 0;
+        }
+
         private static void InitializeMemberList(uint ownerRid, MetadataRange memberRange,
             MetadataRange[] memberLists, uint[] memberDeclaringTypes)
         {
@@ -355,6 +399,5 @@ namespace AsmResolver.DotNet.Serialized
 
             return mostRecentCorLib;
         }
-        
     }
 }

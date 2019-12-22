@@ -23,6 +23,7 @@ namespace AsmResolver.DotNet
         private IList<FieldDefinition> _fields;
         private IList<MethodDefinition> _methods;
         private IList<PropertyDefinition> _properties;
+        private IList<EventDefinition> _events;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -476,7 +477,7 @@ namespace AsmResolver.DotNet
         }
         
         /// <summary>
-        /// Gets a collection of methods defined in the type.
+        /// Gets a collection of properties defined in the type.
         /// </summary>
         public IList<PropertyDefinition> Properties
         {
@@ -485,6 +486,19 @@ namespace AsmResolver.DotNet
                 if (_properties is null)
                     Interlocked.CompareExchange(ref _properties, GetProperties(), null);
                 return _properties;
+            }
+        }
+        
+        /// <summary>
+        /// Gets a collection of events defined in the type.
+        /// </summary>
+        public IList<EventDefinition> Events
+        {
+            get
+            {
+                if (_events is null)
+                    Interlocked.CompareExchange(ref _events, GetEvents(), null);
+                return _events;
             }
         }
 
@@ -565,6 +579,16 @@ namespace AsmResolver.DotNet
         protected virtual IList<PropertyDefinition> GetProperties() =>
             new OwnedCollection<TypeDefinition, PropertyDefinition>(this);
 
+        /// <summary>
+        /// Obtains the collection of events that this type defines.
+        /// </summary>
+        /// <returns>The events.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Events"/> property.
+        /// </remarks>
+        protected virtual IList<EventDefinition> GetEvents() =>
+            new OwnedCollection<TypeDefinition, EventDefinition>(this);
+        
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

@@ -55,9 +55,23 @@ namespace AsmResolver.DotNet
             return declaringType is null
                 ? $"{signature.ReturnType} {name}{parameterTypesString}"
                 : $"{signature.ReturnType} {declaringType}::{name}{parameterTypesString}";
-            
         }
 
+        /// <summary>
+        /// Computes the full name of a event definition, including its declaring type's full name, as well as its
+        /// event type.
+        /// </summary>
+        /// <param name="name">The name of the field.</param>
+        /// <param name="declaringType">The declaring type of the field, if available.</param>
+        /// <param name="eventType">The type of the event.</param>
+        /// <returns>The full name</returns>
+        public static string GetEventFullName(string name, ITypeDescriptor declaringType, ITypeDefOrRef eventType)
+        {
+            return declaringType == null
+                ? $"{eventType} {name}"
+                : $"{eventType} {declaringType}::{name}";
+        }
+        
         private static string GetParameterTypesString(MethodSignatureBase signature)
         {
             string parameterTypesString = string.Join(", ", signature.ParameterTypes)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.NestedClasses;
@@ -150,7 +151,6 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(6, type.Methods.Count);
         }
 
-
         [Fact]
         public void ReadEmptyProperties()
         {
@@ -173,6 +173,30 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             Assert.Equal(4, type.Properties.Count);
+        }
+
+        [Fact]
+        public void ReadEmptyEvents()
+        {
+            var module = ModuleDefinition.FromFile(typeof(NoEvents).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NoEvents));
+            Assert.Empty(type.Events);
+        }
+        
+        [Fact]
+        public void ReadSingleEvent()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
+            Assert.Single(type.Events);
+        }
+
+        [Fact]
+        public void ReadMultipleEvents()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
+            Assert.Equal(3, type.Events.Count);
         }
 
     }

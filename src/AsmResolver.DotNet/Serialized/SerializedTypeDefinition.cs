@@ -83,39 +83,31 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IList<FieldDefinition> GetFields()
-        {
-            var result = new OwnedCollection<TypeDefinition, FieldDefinition>(this);
-            
-            var range = _parentModule.GetFieldRange(MetadataToken.Rid);
-            foreach (var token in range) 
-                result.Add((FieldDefinition) _parentModule.LookupMember(token));
-
-            return result;
-        }
+        protected override IList<FieldDefinition> GetFields() => 
+            CreateMemberCollection<FieldDefinition>(_parentModule.GetFieldRange(MetadataToken.Rid));
 
         /// <inheritdoc />
-        protected override IList<MethodDefinition> GetMethods()
-        {
-            var result = new OwnedCollection<TypeDefinition, MethodDefinition>(this);
-            
-            var range = _parentModule.GetMethodRange(MetadataToken.Rid);
-            foreach (var token in range) 
-                result.Add((MethodDefinition) _parentModule.LookupMember(token));
-
-            return result;
-        }
+        protected override IList<MethodDefinition> GetMethods() => 
+            CreateMemberCollection<MethodDefinition>(_parentModule.GetMethodRange(MetadataToken.Rid));
 
         /// <inheritdoc />
-        protected override IList<PropertyDefinition> GetProperties()
+        protected override IList<PropertyDefinition> GetProperties() =>
+            CreateMemberCollection<PropertyDefinition>(_parentModule.GetPropertyRange(MetadataToken.Rid));
+
+        /// <inheritdoc />
+        protected override IList<EventDefinition> GetEvents() =>
+            CreateMemberCollection<EventDefinition>(_parentModule.GetEventRange(MetadataToken.Rid));
+        
+        private IList<TMember> CreateMemberCollection<TMember>(MetadataRange range)
+            where TMember : IMetadataMember, IOwnedCollectionElement<TypeDefinition>
         {
-            var result = new OwnedCollection<TypeDefinition, PropertyDefinition>(this);
-            
-            var range = _parentModule.GetPropertyRange(MetadataToken.Rid);
-            foreach (var token in range) 
-                result.Add((PropertyDefinition) _parentModule.LookupMember(token));
+            var result = new OwnedCollection<TypeDefinition, TMember>(this);
+
+            foreach (var token in range)
+                result.Add((TMember) _parentModule.LookupMember(token));
 
             return result;
         }
+        
     }
 }
