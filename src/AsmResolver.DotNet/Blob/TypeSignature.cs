@@ -62,10 +62,10 @@ namespace AsmResolver.DotNet.Blob
                     return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection), false);
                 
                 case ElementType.Ptr:
-                    break;
+                    return new PointerTypeSignature(FromReader(module, reader, protection));
                 
                 case ElementType.ByRef:
-                    return ByReferenceTypeSignature.FromReader(module, reader, protection);
+                    return new ByReferenceTypeSignature(FromReader(module, reader, protection));
                 
                 case ElementType.Var:
                     break;
@@ -76,7 +76,7 @@ namespace AsmResolver.DotNet.Blob
                 case ElementType.FnPtr:
                     break;
                 case ElementType.SzArray:
-                    return SzArrayTypeSignature.FromReader(module, reader, protection);
+                    return new SzArrayTypeSignature(FromReader(module, reader, protection));
                 
                 case ElementType.MVar:
                     break;
