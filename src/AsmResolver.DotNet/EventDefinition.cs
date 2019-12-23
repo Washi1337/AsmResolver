@@ -56,6 +56,26 @@ namespace AsmResolver.DotNet
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating the event uses a special name. 
+        /// </summary>
+        public bool IsSpecialName
+        {
+            get => (Attributes & EventAttributes.SpecialName) != 0;
+            set => Attributes = (Attributes & ~EventAttributes.SpecialName)
+                                | (value ? EventAttributes.SpecialName : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the event uses a special name used by the runtime.
+        /// </summary>
+        public bool IsRuntimeSpecialName
+        {
+            get => (Attributes & EventAttributes.RtSpecialName) != 0;
+            set => Attributes = (Attributes & ~EventAttributes.RtSpecialName)
+                                | (value ? EventAttributes.RtSpecialName : 0);
+        }
+
         /// <inheritdoc />
         public string Name
         {

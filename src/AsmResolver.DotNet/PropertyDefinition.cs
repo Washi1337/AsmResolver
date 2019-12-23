@@ -57,6 +57,37 @@ namespace AsmResolver.DotNet
             set;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating the property uses a special name. 
+        /// </summary>
+        public bool IsSpecialName
+        {
+            get => (Attributes & PropertyAttributes.SpecialName) != 0;
+            set => Attributes = (Attributes & ~PropertyAttributes.SpecialName)
+                                | (value ? PropertyAttributes.SpecialName : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the property uses a special name used by the runtime.
+        /// </summary>
+        public bool IsRuntimeSpecialName
+        {
+            get => (Attributes & PropertyAttributes.RtSpecialName) != 0;
+            set => Attributes = (Attributes & ~PropertyAttributes.RtSpecialName)
+                                | (value ? PropertyAttributes.RtSpecialName : 0);
+        }
+
+
+        /// <summary>
+        /// Gets or sets a value indicating the property has a default value.
+        /// </summary>
+        public bool HasDefault
+        {
+            get => (Attributes & PropertyAttributes.HasDefault) != 0;
+            set => Attributes = (Attributes & ~PropertyAttributes.HasDefault)
+                                | (value ? PropertyAttributes.HasDefault : 0);
+        }
+
         /// <inheritdoc />
         public string Name
         {
