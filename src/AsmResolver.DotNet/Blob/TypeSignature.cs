@@ -121,12 +121,19 @@ namespace AsmResolver.DotNet.Blob
             var decoder = module.GetIndexEncoder(CodedIndex.TypeDefOrRef);
             var token = decoder.DecodeIndex(codedIndex);
             
-            if (token.Table == TableIndex.Module)
-                return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
-            
-            if (module.TryLookupMember(token, out var member) && member is ITypeDefOrRef typeDefOrRef)
-                return typeDefOrRef;
-            
+            switch (token.Table)
+            {
+                case TableIndex.TypeSpec when !protection.TraversedTokens.Add(token):
+                    return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
+                
+                case TableIndex.TypeDef:
+                case TableIndex.TypeRef:
+                case TableIndex.TypeSpec:
+                    if (module.TryLookupMember(token, out var member) && member is ITypeDefOrRef typeDefOrRef)
+                        return typeDefOrRef;
+                    break;
+            }
+
             return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
         } 
         
