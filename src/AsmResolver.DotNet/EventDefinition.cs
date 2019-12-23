@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
@@ -129,6 +130,24 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <summary>
+        /// Gets the method definition representing the add accessor of this event definition. 
+        /// </summary>
+        public MethodDefinition AddMethod => 
+            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.AddOn)?.Method;
+        
+        /// <summary>
+        /// Gets the method definition representing the remove accessor of this event definition. 
+        /// </summary>
+        public MethodDefinition RemoveMethod => 
+            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.RemoveOn)?.Method;
+        
+        /// <summary>
+        /// Gets the method definition representing the fire accessor of this event definition. 
+        /// </summary>
+        public MethodDefinition FireMethod => 
+            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Fire)?.Method;
+        
         /// <summary>
         /// Obtains the name of the property definition.
         /// </summary>

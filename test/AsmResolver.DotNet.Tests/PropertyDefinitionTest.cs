@@ -49,6 +49,8 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(MethodSemanticsAttributes.Getter, property.Semantics[0].Attributes);
             Assert.Same(property, property.Semantics[0].Association);
             Assert.Equal("get_ReadOnlyProperty", property.Semantics[0].Method.Name);
+            Assert.NotNull(property.GetMethod);
+            Assert.Null(property.SetMethod);
         }
 
         [Fact]
@@ -61,6 +63,8 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(MethodSemanticsAttributes.Setter, property.Semantics[0].Attributes);
             Assert.Same(property, property.Semantics[0].Association);
             Assert.Equal("set_WriteOnlyProperty", property.Semantics[0].Method.Name);
+            Assert.NotNull(property.SetMethod);
+            Assert.Null(property.GetMethod);
         }
 
         [Fact]

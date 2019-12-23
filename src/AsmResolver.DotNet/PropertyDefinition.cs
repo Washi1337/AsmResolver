@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
@@ -141,6 +142,18 @@ namespace AsmResolver.DotNet
                 return _semantics;
             }
         }
+
+        /// <summary>
+        /// Gets the method definition representing the get accessor of this property definition. 
+        /// </summary>
+        public MethodDefinition GetMethod => 
+            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Getter)?.Method;
+        
+        /// <summary>
+        /// Gets the method definition representing the set accessor of this property definition. 
+        /// </summary>
+        public MethodDefinition SetMethod => 
+            Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Setter)?.Method;
 
         /// <summary>
         /// Obtains the name of the property definition.
