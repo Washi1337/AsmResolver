@@ -32,3 +32,12 @@ Table of Contents:
    peimage/imports
    peimage/win32resources
    peimage/dotnet
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Abstraction Layer 3: .NET assemblies
+   :name: sec-peimage
+
+   dotnet/index
+   dotnet/basics
