@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
@@ -53,5 +54,6 @@ namespace AsmResolver.DotNet.Serialized
                 ? member as TypeDefinition
                 : null;
         }
+
     }
 }

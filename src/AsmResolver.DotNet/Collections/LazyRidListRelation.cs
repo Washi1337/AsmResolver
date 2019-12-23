@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Serialized
+namespace AsmResolver.DotNet.Collections
 {
-    internal class LazyOneToManyTokenRelation<TAssociationRow>
+    internal class LazyRidListRelation<TAssociationRow>
         where TAssociationRow : struct, IMetadataRow
     {
         public delegate uint GetOwnerRidDelegate(uint rid, TAssociationRow row);
@@ -22,7 +21,7 @@ namespace AsmResolver.DotNet.Serialized
         private IDictionary<uint, MetadataRange> _memberLists;
         private IDictionary<uint, uint> _memberOwners;
         
-        public LazyOneToManyTokenRelation(
+        public LazyRidListRelation(
             IMetadata metadata, 
             TableIndex associationTable,
             GetOwnerRidDelegate getOwnerRid, 
@@ -39,19 +38,19 @@ namespace AsmResolver.DotNet.Serialized
             if (_memberLists is null)
                 Initialize();
         }
-        
+
         private void Initialize()
         {
             lock (_lock)
             {
-                if (_memberLists != null) 
+                if (_memberLists != null)
                     return;
-                
+
                 var tablesStream = _metadata.GetStream<TablesStream>();
                 var associationTable = tablesStream.GetTable<TAssociationRow>(_associationTable);
 
-                _memberLists= new Dictionary<uint, MetadataRange>();
-                _memberOwners= new Dictionary<uint, uint>();
+                _memberLists = new Dictionary<uint, MetadataRange>();
+                _memberOwners = new Dictionary<uint, uint>();
 
                 for (int i = 0; i < associationTable.Count; i++)
                 {

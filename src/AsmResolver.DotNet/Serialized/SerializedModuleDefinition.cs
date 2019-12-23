@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
@@ -22,14 +21,13 @@ namespace AsmResolver.DotNet.Serialized
         private readonly ModuleDefinitionRow _row;
         private readonly CachedSerializedMemberFactory _memberFactory;
 
-        private IDictionary<uint, IList<uint>> _typeDefTree;
-        private IDictionary<uint, uint> _parentTypeRids;
+        private readonly LazyRidListRelation<TypeDefinitionRow> _fieldLists;
+        private readonly LazyRidListRelation<TypeDefinitionRow> _methodLists;
+        private readonly LazyRidListRelation<MethodDefinitionRow> _paramLists;
+        private readonly LazyRidListRelation<PropertyMapRow> _propertyLists;
+        private readonly LazyRidListRelation<EventMapRow> _eventLists;
 
-        private readonly LazyOneToManyTokenRelation<TypeDefinitionRow> _fieldLists;
-        private readonly LazyOneToManyTokenRelation<TypeDefinitionRow> _methodLists;
-        private readonly LazyOneToManyTokenRelation<MethodDefinitionRow> _paramLists;
-        private readonly LazyOneToManyTokenRelation<PropertyMapRow> _propertyLists;
-        private readonly LazyOneToManyTokenRelation<EventMapRow> _eventLists;
+        private OneToManyRelation<uint, uint> _typeDefTree;
         
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -50,15 +48,15 @@ namespace AsmResolver.DotNet.Serialized
 
             var tablesStream = metadata.GetStream<TablesStream>();
 
-            _fieldLists = new LazyOneToManyTokenRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
+            _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetFieldRange);
-            _methodLists = new LazyOneToManyTokenRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef, 
+            _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef, 
                 (rid, _) => rid, tablesStream.GetMethodRange);
-            _paramLists = new LazyOneToManyTokenRelation<MethodDefinitionRow>(metadata, TableIndex.Method, 
+            _paramLists = new LazyRidListRelation<MethodDefinitionRow>(metadata, TableIndex.Method, 
                 (rid, _) => rid, tablesStream.GetParameterRange);
-            _propertyLists = new LazyOneToManyTokenRelation<PropertyMapRow>(metadata, TableIndex.PropertyMap, 
+            _propertyLists = new LazyRidListRelation<PropertyMapRow>(metadata, TableIndex.PropertyMap, 
                 (_, map) => map.Parent, tablesStream.GetPropertyRange);
-            _eventLists = new LazyOneToManyTokenRelation<EventMapRow>(metadata, TableIndex.EventMap,
+            _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
         }
 
@@ -112,11 +110,14 @@ namespace AsmResolver.DotNet.Serialized
             
             var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
 
-            var typeDefTable = _metadata.GetStream<TablesStream>().GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            var typeDefTable = _metadata
+                .GetStream<TablesStream>()
+                .GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            
             for (int i = 0; i < typeDefTable.Count; i++)
             {
                 uint rid = (uint) i + 1;
-                if (!_parentTypeRids.ContainsKey(rid))
+                if (_typeDefTree.GetMemberOwner(rid) == 0)
                 {
                     var token = new MetadataToken(TableIndex.TypeDef, rid);
                     types.Add(_memberFactory.LookupTypeDefinition(token));
@@ -137,33 +138,21 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = _metadata.GetStream<TablesStream>();
             var nestedClassTable = tablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
             
-            _typeDefTree = new Dictionary<uint, IList<uint>>();
-            _parentTypeRids = new Dictionary<uint, uint>();
-            
+            _typeDefTree = new OneToManyRelation<uint, uint>();
             foreach (var nestedClass in nestedClassTable)
-            {
-                _parentTypeRids.Add(nestedClass.NestedClass, nestedClass.EnclosingClass);
-                var nestedTypeRids = GetNestedTypeRids(nestedClass.EnclosingClass);
-                nestedTypeRids.Add(nestedClass.NestedClass);
-            }
+                _typeDefTree.Add(nestedClass.EnclosingClass, nestedClass.NestedClass);
         }
 
-        internal IList<uint> GetNestedTypeRids(uint enclosingTypeRid)
+        internal IEnumerable<uint> GetNestedTypeRids(uint enclosingTypeRid)
         {
-            if (!_typeDefTree.TryGetValue(enclosingTypeRid, out var nestedRids))
-            {
-                nestedRids = new List<uint>();
-                _typeDefTree.Add(enclosingTypeRid, nestedRids);
-            }
-
-            return nestedRids;
+            EnsureTypeDefinitionTreeInitialized();
+            return _typeDefTree.GetMemberList(enclosingTypeRid);
         }
 
         internal uint GetParentTypeRid(uint nestedTypeRid)
         {
             EnsureTypeDefinitionTreeInitialized();
-            _parentTypeRids.TryGetValue(nestedTypeRid, out uint parentRid);
-            return parentRid;
+            return _typeDefTree.GetMemberOwner(nestedTypeRid);
         }
 
         internal MetadataRange GetFieldRange(uint typeRid) => _fieldLists.GetMemberRange(typeRid);
@@ -176,7 +165,7 @@ namespace AsmResolver.DotNet.Serialized
         internal uint GetPropertyDeclaringType(uint propertyRid) => _propertyLists.GetMemberOwner(propertyRid);
         internal MetadataRange GetEventRange(uint typeRid) => _eventLists.GetMemberRange(typeRid);
         internal uint GetEventDeclaringType(uint eventRid) => _eventLists.GetMemberOwner(eventRid);
-
+        
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {
