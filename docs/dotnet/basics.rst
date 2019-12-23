@@ -49,7 +49,7 @@ Opening a .NET module can be done through one of the `FromXXX` methods from the 
 .. code-block:: csharp
 
     IMetadata metadata = ...
-    ModuleDefinition module = ModuleDefinition.FromMetadata(peImage);
+    ModuleDefinition module = ModuleDefinition.FromMetadata(metadata);
 
 
 Creating a new .NET assembly
@@ -69,30 +69,30 @@ Opening (multi-module) .NET assemblies can be done in a very similar fashion as 
 
 .. code-block:: csharp
 
-    AssemblyDefinition module = AssemblyDefinition.FromFile(@"C:\myfile.exe");
+    AssemblyDefinition assembly = AssemblyDefinition.FromFile(@"C:\myfile.exe");
 
 .. code-block:: csharp
 
     PEFile peFile = ...
-    AssemblyDefinition module = AssemblyDefinition.FromFile(peFile);
+    AssemblyDefinition assembly = AssemblyDefinition.FromFile(peFile);
 
 .. code-block:: csharp
 
     byte[] raw = ...
-    AssemblyDefinition module = AssemblyDefinition.FromBytes(raw);
+    AssemblyDefinition assembly = AssemblyDefinition.FromBytes(raw);
 
 .. code-block:: csharp
 
     IBinaryStreamReader reader = ...
-    AssemblyDefinition module = AssemblyDefinition.FromReader(reader);
+    AssemblyDefinition assembly = AssemblyDefinition.FromReader(reader);
 
 .. code-block:: csharp
 
     IPEImage peImage = ...
-    AssemblyDefinition module = AssemblyDefinition.FromImage(peImage);
+    AssemblyDefinition assembly = AssemblyDefinition.FromImage(peImage);
 
 .. code-block:: csharp
 
     IMetadata metadata = ...
-    AssemblyDefinition module = AssemblyDefinition.FromMetadata(peImage);
+    AssemblyDefinition assembly = AssemblyDefinition.FromMetadata(metadata);
 
