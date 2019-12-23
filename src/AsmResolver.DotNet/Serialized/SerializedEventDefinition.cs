@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -53,6 +55,21 @@ namespace AsmResolver.DotNet.Serialized
             return _parentModule.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
                 : null;
+        }
+        
+
+        /// <inheritdoc />
+        protected override IList<MethodSemantics> GetSemantics()
+        {
+            var result = new OwnedCollection<IHasSemantics, MethodSemantics>(this);
+
+            foreach (uint rid in _parentModule.GetMethodSemantics(MetadataToken))
+            {
+                var semanticsToken = new MetadataToken(TableIndex.MethodSemantics, rid);
+                result.Add((MethodSemantics) _parentModule.LookupMember(semanticsToken));
+            }
+
+            return result;
         }
     }
 }

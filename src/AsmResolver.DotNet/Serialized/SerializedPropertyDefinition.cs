@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new OwnedCollection<IHasSemantics, MethodSemantics>(this);
 
-            foreach (var rid in _parentModule.GetMethodSemantics(MetadataToken))
+            foreach (uint rid in _parentModule.GetMethodSemantics(MetadataToken))
             {
                 var semanticsToken = new MetadataToken(TableIndex.MethodSemantics, rid);
                 result.Add((MethodSemantics) _parentModule.LookupMember(semanticsToken));

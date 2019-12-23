@@ -37,5 +37,14 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(nameof(SingleEvent), @event.DeclaringType.Name);
         }
 
+        [Fact]
+        public void ReadEventSemantics()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var @event = (EventDefinition) module.LookupMember(
+                typeof(SingleEvent).GetEvent(nameof(SingleEvent.SimpleEvent)).MetadataToken);
+            Assert.Equal(2, @event.Semantics.Count);
+        }
+
     }
 }

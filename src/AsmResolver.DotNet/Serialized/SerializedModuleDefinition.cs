@@ -180,10 +180,11 @@ namespace AsmResolver.DotNet.Serialized
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
             
             _semantics = new OneToManyRelation<MetadataToken, uint>();
-            foreach (var semanticsRow in semanticsTable)
+            for (int i = 0; i < semanticsTable.Count; i++)
             {
-                var ownerToken = encoder.DecodeIndex(semanticsRow.Association);
-                _semantics.Add(ownerToken, semanticsRow.Method);
+                var ownerToken = encoder.DecodeIndex(semanticsTable[i].Association);
+                uint semanticsRid = (uint) (i + 1);
+                _semantics.Add(ownerToken, semanticsRid);
             }
         }
 
