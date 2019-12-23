@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()
         {
-            var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _parentModule.GetEventOwner(MetadataToken.Rid));
+            var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _parentModule.GetEventDeclaringType(MetadataToken.Rid));
             return _parentModule.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
                 : null;
