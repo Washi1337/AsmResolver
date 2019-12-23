@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
@@ -9,11 +11,12 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single property in a type definition of a .NET module.
     /// </summary>
-    public class PropertyDefinition : IMetadataMember, IMemberDescriptor, IOwnedCollectionElement<TypeDefinition>
+    public class PropertyDefinition : IMemberDescriptor, IOwnedCollectionElement<TypeDefinition>, IHasSemantics
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<PropertySignature> _signature;
+        private IList<MethodSemantics> _semantics;
 
         /// <summary>
         /// Initializes a new property definition.
@@ -127,7 +130,18 @@ namespace AsmResolver.DotNet
             get => DeclaringType;
             set => DeclaringType = value;
         }
-        
+
+        /// <inheritdoc />
+        public IList<MethodSemantics> Semantics
+        {
+            get
+            {
+                if (_semantics is null)
+                    Interlocked.CompareExchange(ref _semantics, GetSemantics(), null);
+                return _semantics;
+            }
+        }
+
         /// <summary>
         /// Obtains the name of the property definition.
         /// </summary>
@@ -155,6 +169,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual TypeDefinition GetDeclaringType() => null;
 
+        /// <summary>
+        /// Obtains the methods associated to this property definition.
+        /// </summary>
+        /// <returns>The method semantic objects.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Semantics"/> property.
+        /// </remarks>
+        protected virtual IList<MethodSemantics> GetSemantics() =>
+            new OwnedCollection<IHasSemantics, MethodSemantics>(this);
+        
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

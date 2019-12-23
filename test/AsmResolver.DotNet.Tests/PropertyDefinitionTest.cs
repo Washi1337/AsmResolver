@@ -1,5 +1,6 @@
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Properties;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -38,5 +39,37 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(nameof(SingleProperty), property.DeclaringType.Name);
         }
 
+        [Fact]
+        public void ReadReadOnlyPropertySemantics()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
+            var property = type.Properties.First(m => m.Name == nameof(MultipleProperties.ReadOnlyProperty));
+            Assert.Single(property.Semantics);
+            Assert.Equal(MethodSemanticsAttributes.Getter, property.Semantics[0].Attributes);
+            Assert.Same(property, property.Semantics[0].Association);
+            Assert.Equal("get_ReadOnlyProperty", property.Semantics[0].Method.Name);
+        }
+
+        [Fact]
+        public void ReadWriteOnlyPropertySemantics()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
+            var property = type.Properties.First(m => m.Name == nameof(MultipleProperties.WriteOnlyProperty));
+            Assert.Single(property.Semantics);
+            Assert.Equal(MethodSemanticsAttributes.Setter, property.Semantics[0].Attributes);
+            Assert.Same(property, property.Semantics[0].Association);
+            Assert.Equal("set_WriteOnlyProperty", property.Semantics[0].Method.Name);
+        }
+
+        [Fact]
+        public void ReadReadWritePropertySemantics()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
+            var property = type.Properties.First(m => m.Name == nameof(MultipleProperties.ReadWriteProperty));
+            Assert.Equal(2, property.Semantics.Count);
+        }
     }
 }

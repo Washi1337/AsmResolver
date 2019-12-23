@@ -20,6 +20,7 @@ namespace AsmResolver.DotNet.Serialized
         private StandAloneSignature[] _standAloneSignatures;
         private PropertyDefinition[] _propertyDefinitions;
         private EventDefinition[] _eventDefinition;
+        private MethodSemantics[] _methodSemantics;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -41,6 +42,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.StandAloneSig => LookupStandAloneSignature(token),
                 TableIndex.Property => LookupPropertyDefinition(token),
                 TableIndex.Event => LookupEventDefinition(token),
+                TableIndex.MethodSemantics => LookupMethodSemantics(token),
                 _ => null
             };
 
@@ -106,6 +108,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<EventDefinition, EventDefinitionRow>(ref _eventDefinition, token,
                 (m, t, r) => new SerializedEventDefinition(m, _parentModule, t, r));
+        }
+
+        private MethodSemantics LookupMethodSemantics(in MetadataToken token)
+        {
+            return LookupOrCreateMember<MethodSemantics, MethodSemanticsRow>(ref _methodSemantics, token,
+                (m, t, r) => new SerializedMethodSemantics(m, _parentModule, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

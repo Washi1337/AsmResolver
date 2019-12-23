@@ -28,6 +28,7 @@ namespace AsmResolver.DotNet.Serialized
         private readonly LazyRidListRelation<EventMapRow> _eventLists;
 
         private OneToManyRelation<uint, uint> _typeDefTree;
+        private OneToManyRelation<MetadataToken, uint> _semantics;
         
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -165,7 +166,39 @@ namespace AsmResolver.DotNet.Serialized
         internal uint GetPropertyDeclaringType(uint propertyRid) => _propertyLists.GetMemberOwner(propertyRid);
         internal MetadataRange GetEventRange(uint typeRid) => _eventLists.GetMemberRange(typeRid);
         internal uint GetEventDeclaringType(uint eventRid) => _eventLists.GetMemberOwner(eventRid);
-        
+
+        private void EnsureMethodSemanticsInitialized()
+        {
+            if (_semantics is null)
+                InitializeMethodSemantics();
+        }
+
+        private void InitializeMethodSemantics()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var semanticsTable = tablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
+            
+            _semantics = new OneToManyRelation<MetadataToken, uint>();
+            foreach (var semanticsRow in semanticsTable)
+            {
+                var ownerToken = encoder.DecodeIndex(semanticsRow.Association);
+                _semantics.Add(ownerToken, semanticsRow.Method);
+            }
+        }
+
+        internal IEnumerable<uint> GetMethodSemantics(MetadataToken owner)
+        {
+            EnsureMethodSemanticsInitialized();
+            return _semantics.GetMemberList(owner);
+        }
+
+        internal MetadataToken GetMethodSemanticsOwner(uint methodRid)
+        {
+            EnsureMethodSemanticsInitialized();
+            return _semantics.GetMemberOwner(methodRid);
+        }
+
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {
