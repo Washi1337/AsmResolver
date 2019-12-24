@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Blob
         }
 
         /// <inheritdoc />
-        public override string Namespace => BaseType.Name;
+        public override string Namespace => BaseType.Namespace;
 
         /// <inheritdoc />
         public override IResolutionScope Scope => BaseType.Scope;

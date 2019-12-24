@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet
         /// <returns>The invalid type reference instance.</returns>
         public static InvalidTypeDefOrRef Get(InvalidTypeSignatureError error)
         {
-            if (Instances.TryGetValue(error, out var instance))
+            if (!Instances.TryGetValue(error, out var instance))
             {
                 instance = new InvalidTypeDefOrRef(error);
                 Instances.Add(error, instance);
@@ -58,5 +58,8 @@ namespace AsmResolver.DotNet
         ITypeDescriptor IMemberDescriptor.DeclaringType => null;
 
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => null;
+
+        /// <inheritdoc />
+        public override string ToString() =>  ((IFullNameProvider) this).Name;
     }
 }

@@ -39,13 +39,13 @@ namespace AsmResolver.DotNet.Blob
         public override ElementType ElementType => IsValueType ? ElementType.ValueType : ElementType.Class;
 
         /// <inheritdoc />
-        public override string Name => Type.Name;
+        public override string Name => Type?.Name;
 
         /// <inheritdoc />
-        public override string Namespace => Type.Namespace;
+        public override string Namespace => Type?.Namespace;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => Type.Scope;
+        public override IResolutionScope Scope => Type?.Scope;
 
         /// <inheritdoc />
         public override bool IsValueType
