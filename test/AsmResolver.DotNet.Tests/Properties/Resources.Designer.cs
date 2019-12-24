@@ -83,6 +83,16 @@ namespace AsmResolver.DotNet.Tests.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        public static byte[] HelloWorl_MaliciousTypeSpecLoop {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorl_MaliciousTypeSpecLoop", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         public static byte[] HelloWorld {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld", resourceCulture);
