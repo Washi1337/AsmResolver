@@ -7,10 +7,16 @@ namespace AsmResolver.DotNet.Collections
         private readonly IDictionary<TKey, ICollection<TValue>> _memberLists = new Dictionary<TKey, ICollection<TValue>>();
         private readonly IDictionary<TValue, TKey> _memberOwners = new Dictionary<TValue, TKey>();
 
-        public void Add(TKey key, TValue value)
+        public bool Add(TKey key, TValue value)
         {
-            GetMemberList(key).Add(value);
-            _memberOwners.Add(value, key);
+            if (!_memberOwners.ContainsKey(value))
+            {
+                GetMemberList(key).Add(value);
+                _memberOwners.Add(value, key);
+                return true;
+            }
+
+            return false;
         }
         
         public ICollection<TValue> GetMemberList(TKey key)

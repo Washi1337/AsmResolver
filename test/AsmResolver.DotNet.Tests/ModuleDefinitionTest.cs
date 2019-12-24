@@ -41,6 +41,27 @@ namespace AsmResolver.DotNet.Tests
                 nameof(TopLevelClass2)
             }, module.TopLevelTypes.Select(t => t.Name));
         }
+
+        [Fact]
+        public void ReadMaliciousNestedClassLoop()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorl_MaliciousNestedClassLoop);
+            Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
+        }
+
+        [Fact]
+        public void ReadMaliciousNestedClassLoop2()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorl_MaliciousNestedClassLoop2);
+            Assert.Equal(
+                new HashSet<string> {"<Module>", "Program", "MaliciousEnclosingClass"},
+                new HashSet<string>(module.TopLevelTypes.Select(t => t.Name)));
+
+            var enclosingClass = module.TopLevelTypes.First(x => x.Name == "MaliciousEnclosingClass");
+            Assert.Single(enclosingClass.NestedTypes);
+            Assert.Single(enclosingClass.NestedTypes[0].NestedTypes);
+            Assert.Empty(enclosingClass.NestedTypes[0].NestedTypes[0].NestedTypes);
+        }
         
         [Fact]
         public void HelloWorldReadAssemblyReferences()
