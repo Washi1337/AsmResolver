@@ -84,6 +84,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public void Write(IBinaryStreamWriter writer, TableLayout layout)
         {
             writer.WriteIndex(NestedClass, (IndexSize) layout.Columns[0].Size);
+            writer.WriteIndex(EnclosingClass, (IndexSize) layout.Columns[1].Size);
         }
 
         /// <summary>

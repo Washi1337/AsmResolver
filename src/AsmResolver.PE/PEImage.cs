@@ -85,7 +85,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Initializes a new PE image.
         /// </summary>
-        protected PEImage()
+        public PEImage()
         {
             _resources = new LazyVariable<IResourceDirectory>(GetResources);
             _dotNetDirectory = new LazyVariable<IDotNetDirectory>(GetDotNetDirectory);
