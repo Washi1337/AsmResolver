@@ -56,10 +56,10 @@ namespace AsmResolver.DotNet.Blob
                     return module.CorLibTypeFactory.FromElementType(elementType);
                 
                 case ElementType.ValueType:
-                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection), true);
+                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection, false), true);
                 
                 case ElementType.Class:
-                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection), false);
+                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection, false), false);
                 
                 case ElementType.Ptr:
                     return new PointerTypeSignature(FromReader(module, reader, protection));
@@ -81,9 +81,17 @@ namespace AsmResolver.DotNet.Blob
                 case ElementType.MVar:
                     break;
                 case ElementType.CModReqD:
-                    break;
+                    return new CustomModifierTypeSignature(
+                        ReadTypeDefOrRef(module, reader, protection, true), 
+                        true,
+                        FromReader(module, reader, protection));
+                    
                 case ElementType.CModOpt:
-                    break;
+                    return new CustomModifierTypeSignature(
+                        ReadTypeDefOrRef(module, reader, protection, true), 
+                        false,
+                        FromReader(module, reader, protection));
+                
                 case ElementType.Internal:
                     break;
                 case ElementType.Modifier:
@@ -111,24 +119,32 @@ namespace AsmResolver.DotNet.Blob
         /// <param name="module">The module containing the blob signature.</param>
         /// <param name="reader">The blob reader.</param>
         /// <param name="protection">The object responsible for detecting infinite recursion.</param>
+        /// <param name="allowTypeSpec">Indicates the coded index to the type is allowed to be decoded to a member in
+        /// the type specification table.</param>
         /// <returns>The decoded and resolved type definition or reference.</returns>
         protected static ITypeDefOrRef ReadTypeDefOrRef(ModuleDefinition module, IBinaryStreamReader reader,
-            RecursionProtection protection)
+            RecursionProtection protection, bool allowTypeSpec)
         {
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.BlobTooShort);
 
             var decoder = module.GetIndexEncoder(CodedIndex.TypeDefOrRef);
             var token = decoder.DecodeIndex(codedIndex);
+
+            // Check if type specs can be encoded.
+            if (token.Table == TableIndex.TypeSpec && !allowTypeSpec)
+                return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
             
             switch (token.Table)
             {
+                // Check for infinite recursion.
                 case TableIndex.TypeSpec when !protection.TraversedTokens.Add(token):
                     return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
                 
+                // Any other type is legal.
+                case TableIndex.TypeSpec:
                 case TableIndex.TypeDef:
                 case TableIndex.TypeRef:
-                case TableIndex.TypeSpec:
                     if (module.TryLookupMember(token, out var member) && member is ITypeDefOrRef typeDefOrRef)
                         return typeDefOrRef;
                     break;

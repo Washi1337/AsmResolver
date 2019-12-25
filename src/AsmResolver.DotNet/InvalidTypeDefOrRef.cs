@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet
 
         MetadataToken IMetadataMember.MetadataToken => new MetadataToken(TableIndex.TypeSpec, 0);
 
-        string INameProvider.Name => $"<<<{Error}>>>";
+        string INameProvider.Name => $"<<<{Error}>>>".ToUpperInvariant();
         
         string ITypeDescriptor.Namespace => null;
 

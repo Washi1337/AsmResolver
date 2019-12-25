@@ -19,5 +19,10 @@ namespace AsmResolver.DotNet
         /// Indicates there exists a reference loop between the metadata tables and the blob stream. 
         /// </summary>
         MetadataLoop,
+        
+        /// <summary>
+        /// Indicates a TypeDefOrRef coded index decoded to a TypeSpec, but is not allowed by the runtime to be one. 
+        /// </summary>
+        IllegalTypeSpec
     }
 }
