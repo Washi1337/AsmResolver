@@ -45,14 +45,14 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMaliciousNestedClassLoop()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorl_MaliciousNestedClassLoop);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop);
             Assert.Equal(new[] {"<Module>", "Program"}, module.TopLevelTypes.Select(t => t.Name));
         }
 
         [Fact]
         public void ReadMaliciousNestedClassLoop2()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorl_MaliciousNestedClassLoop2);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousNestedClassLoop2);
             Assert.Equal(
                 new HashSet<string> {"<Module>", "Program", "MaliciousEnclosingClass"},
                 new HashSet<string>(module.TopLevelTypes.Select(t => t.Name)));

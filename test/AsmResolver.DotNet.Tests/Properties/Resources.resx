@@ -21,13 +21,16 @@
     <data name="HelloWorld" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="HelloWorl_MaliciousNestedClassLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <data name="HelloWorld_MaliciousNestedClassLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.MaliciousNestedClassLoop.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="HelloWorl_MaliciousNestedClassLoop2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <data name="HelloWorld_MaliciousNestedClassLoop2" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.MaliciousNestedClassLoop2.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
-    <data name="HelloWorl_MaliciousTypeSpecLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <data name="HelloWorld_IllegalTypeSpecInTypeDefOrRefSig" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld.IllegalTypeSpecInTypeDefOrRefSig.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_MaliciousTypeSpecLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.MaliciousTypeSpecLoop.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
 </root>

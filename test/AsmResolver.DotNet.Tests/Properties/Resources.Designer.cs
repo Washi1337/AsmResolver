@@ -63,39 +63,49 @@ namespace AsmResolver.DotNet.Tests.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        public static byte[] HelloWorl_MaliciousNestedClassLoop {
-            get {
-                object obj = ResourceManager.GetObject("HelloWorl_MaliciousNestedClassLoop", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        public static byte[] HelloWorl_MaliciousNestedClassLoop2 {
-            get {
-                object obj = ResourceManager.GetObject("HelloWorl_MaliciousNestedClassLoop2", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        public static byte[] HelloWorl_MaliciousTypeSpecLoop {
-            get {
-                object obj = ResourceManager.GetObject("HelloWorl_MaliciousTypeSpecLoop", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         public static byte[] HelloWorld {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_IllegalTypeSpecInTypeDefOrRefSig {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_IllegalTypeSpecInTypeDefOrRefSig", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_MaliciousNestedClassLoop {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_MaliciousNestedClassLoop", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_MaliciousNestedClassLoop2 {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_MaliciousNestedClassLoop2", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_MaliciousTypeSpecLoop {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_MaliciousTypeSpecLoop", resourceCulture);
                 return ((byte[])(obj));
             }
         }
