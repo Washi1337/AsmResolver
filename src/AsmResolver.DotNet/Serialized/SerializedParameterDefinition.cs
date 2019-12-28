@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -26,8 +28,8 @@ namespace AsmResolver.DotNet.Serialized
             MetadataToken token, ParameterDefinitionRow row)
             : base(token)
         {
-            _metadata = metadata;
-            _parentModule = parentModule;
+            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
 
             Sequence = row.Sequence;
@@ -45,5 +47,9 @@ namespace AsmResolver.DotNet.Serialized
                 ? member as MethodDefinition
                 : null;
         }
+        
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
     }
 }

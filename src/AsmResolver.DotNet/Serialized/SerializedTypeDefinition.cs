@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Serialized
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
-            _parentModule = parentModule;
+            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
             Attributes = row.Attributes;
 
@@ -109,5 +109,9 @@ namespace AsmResolver.DotNet.Serialized
             return result;
         }
         
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
+     
     }
 }

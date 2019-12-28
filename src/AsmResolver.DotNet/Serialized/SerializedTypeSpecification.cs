@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
@@ -14,7 +15,7 @@ namespace AsmResolver.DotNet.Serialized
     public class SerializedTypeSpecification : TypeSpecification
     {
         private readonly IMetadata _metadata;
-        private readonly ModuleDefinition _parentModule;
+        private readonly SerializedModuleDefinition _parentModule;
         private readonly TypeSpecificationRow _row;
 
         /// <summary>
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="parentModule">The module that references the type.</param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type specification on.</param>
-        public SerializedTypeSpecification(IMetadata metadata, ModuleDefinition parentModule, MetadataToken token, TypeSpecificationRow row)
+        public SerializedTypeSpecification(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, TypeSpecificationRow row)
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
@@ -40,5 +41,9 @@ namespace AsmResolver.DotNet.Serialized
             protection.TraversedTokens.Add(MetadataToken);
             return TypeSignature.FromReader(_parentModule, reader, protection);
         }
+        
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
     }
 }

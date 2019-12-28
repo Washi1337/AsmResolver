@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
@@ -27,8 +29,8 @@ namespace AsmResolver.DotNet.Serialized
             MetadataToken token, StandAloneSignatureRow row)
             : base(token)
         {
-            _metadata = metadata;
-            _parentModule = parentModule;
+            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
         }
 
@@ -38,5 +40,9 @@ namespace AsmResolver.DotNet.Serialized
             var reader = _metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Signature);
             return CallingConventionSignature.FromReader(_parentModule, reader);
         }
+        
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
     }
 }

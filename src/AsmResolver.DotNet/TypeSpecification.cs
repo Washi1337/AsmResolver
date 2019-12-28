@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -7,10 +10,11 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type that allows for assigning metadata tokens to type signatures stored in the blob stream. 
     /// </summary>
-    public class TypeSpecification : IMetadataMember, ITypeDescriptor
+    public class TypeSpecification : IMetadataMember, ITypeDescriptor, IHasCustomAttribute
     {
         private readonly LazyVariable<TypeSignature> _signature;
-        
+        private IList<CustomAttribute> _customAttributes;
+
         /// <summary>
         /// Initializes an empty type specification.
         /// </summary>
@@ -68,6 +72,17 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsValueType => Signature.IsValueType;
 
+        /// <inheritdoc />
+        public IList<CustomAttribute> CustomAttributes
+        {
+            get
+            {
+                if (_customAttributes is null)
+                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
+                return _customAttributes;
+            }
+        }
+        
         /// <summary>
         /// Obtains the signature the type specification is referencing.
         /// </summary>
@@ -79,5 +94,15 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override string ToString() => FullName;
+
+        /// <summary>
+        /// Obtains the list of custom attributes assigned to the member.
+        /// </summary>
+        /// <returns>The attributes</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
+        /// </remarks>
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
+            new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
     }
 }

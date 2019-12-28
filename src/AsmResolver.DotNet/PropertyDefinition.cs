@@ -19,6 +19,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<PropertySignature> _signature;
         private IList<MethodSemantics> _semantics;
+        private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
         /// Initializes a new property definition.
@@ -143,13 +144,24 @@ namespace AsmResolver.DotNet
                 return _semantics;
             }
         }
+        
+        /// <inheritdoc />
+        public IList<CustomAttribute> CustomAttributes
+        {
+            get
+            {
+                if (_customAttributes is null)
+                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
+                return _customAttributes;
+            }
+        }
 
         /// <summary>
         /// Gets the method definition representing the get accessor of this property definition. 
         /// </summary>
         public MethodDefinition GetMethod => 
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Getter)?.Method;
-        
+
         /// <summary>
         /// Gets the method definition representing the set accessor of this property definition. 
         /// </summary>
@@ -164,7 +176,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
         protected virtual string GetName() => null;
-        
+
         /// <summary>
         /// Obtains the signature of the property definition.
         /// </summary>
@@ -173,7 +185,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Signature"/> property.
         /// </remarks>
         protected virtual PropertySignature GetSignature() => null;
-        
+
         /// <summary>
         /// Obtains the declaring type of the property definition.
         /// </summary>
@@ -192,7 +204,17 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<MethodSemantics> GetSemantics() =>
             new OwnedCollection<IHasSemantics, MethodSemantics>(this);
-        
+
+        /// <summary>
+        /// Obtains the list of custom attributes assigned to the member.
+        /// </summary>
+        /// <returns>The attributes</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
+        /// </remarks>
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
+            new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

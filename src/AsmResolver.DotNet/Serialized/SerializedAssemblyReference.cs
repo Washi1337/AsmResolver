@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -15,19 +16,22 @@ namespace AsmResolver.DotNet.Serialized
     {
         private readonly IMetadata _metadata;
         private readonly AssemblyReferenceRow _row;
+        private readonly SerializedModuleDefinition _parentModule;
 
         /// <summary>
         /// Creates an assembly reference from an assembly reference metadata row.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="parentModule">The module that contained the reference.</param>
         /// <param name="token">The token to initialize the reference for.</param>
         /// <param name="row">The metadata table row to base the assembly reference on.</param>
-        public SerializedAssemblyReference(IMetadata metadata, MetadataToken token, AssemblyReferenceRow row)
+        public SerializedAssemblyReference(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, AssemblyReferenceRow row)
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
-                
+
             Attributes = row.Attributes;
             Version = new Version(row.MajorVersion, row.MinorVersion, row.BuildNumber, row.RevisionNumber);
         }
@@ -40,6 +44,9 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override byte[] GetPublicKeyOrToken() => _metadata.GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKeyOrToken);
-        
+      
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
+            _parentModule.GetCustomAttributeCollection(this);  
     }
 }

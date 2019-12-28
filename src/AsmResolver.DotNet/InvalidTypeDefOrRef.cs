@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -11,6 +13,7 @@ namespace AsmResolver.DotNet
     {
         private static readonly IDictionary<InvalidTypeSignatureError, InvalidTypeDefOrRef> Instances =
             new Dictionary<InvalidTypeSignatureError, InvalidTypeDefOrRef>();
+        private IList<CustomAttribute> _customAttributes = new List<CustomAttribute>();
 
         /// <summary>
         /// Gets the instance for the provided error.
@@ -61,5 +64,17 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override string ToString() =>  ((IFullNameProvider) this).Name;
+    
+
+        /// <inheritdoc />
+        public IList<CustomAttribute> CustomAttributes
+        {
+            get
+            {
+                if (_customAttributes is null)
+                    Interlocked.CompareExchange(ref _customAttributes, new List<CustomAttribute>().AsReadOnly(), null);
+                return _customAttributes;
+            }
+        }
     }
 }

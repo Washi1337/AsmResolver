@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -14,6 +15,7 @@ namespace AsmResolver.DotNet.Serialized
     {
         private readonly IMetadata _metadata;
         private readonly TypeReferenceRow _row;
+        private readonly SerializedModuleDefinition _parentModule;
 
         /// <summary>
         /// Creates a type reference from a type metadata row.
@@ -22,11 +24,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="parentModule">The module that references the type.</param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type definition on.</param>
-        public SerializedTypeReference(IMetadata metadata, ModuleDefinition parentModule, MetadataToken token, TypeReferenceRow row)
+        public SerializedTypeReference(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, TypeReferenceRow row)
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
-            Module = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            Module = _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
         }
 
@@ -48,5 +50,9 @@ namespace AsmResolver.DotNet.Serialized
             return Module.LookupMember(token) as IResolutionScope;
         }
         
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
+   
     }
 }

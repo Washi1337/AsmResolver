@@ -94,6 +94,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<Guid> _encBaseId;
         private IList<TypeDefinition> _topLevelTypes;
         private IList<AssemblyReference> _assemblyReferences;
+        private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -261,6 +262,17 @@ namespace AsmResolver.DotNet
             protected set;
         }
         
+        /// <inheritdoc />
+        public IList<CustomAttribute> CustomAttributes
+        {
+            get
+            {
+                if (_customAttributes is null)
+                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
+                return _customAttributes;
+            }
+        }
+
         /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>
@@ -300,7 +312,7 @@ namespace AsmResolver.DotNet
         /// </exception>
         public virtual string LookupString(MetadataToken token) =>
             throw new InvalidOperationException("Cannot lookup strings by tokens from a non-serialized module.");
-        
+
         /// <summary>
         /// Attempts to look up a user string by its metadata token.
         /// </summary>
@@ -312,7 +324,7 @@ namespace AsmResolver.DotNet
             value = null;
             return false;
         }
-        
+
         /// <summary>
         /// Obtains an object that can be used to decode coded indices to metadata tokens.
         /// </summary>
@@ -323,7 +335,7 @@ namespace AsmResolver.DotNet
         /// </exception>
         public virtual IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>
             throw new InvalidOperationException("Cannot get an index encoder from a non-serialized module.");
-        
+
         /// <summary>
         /// Obtains the name of the module definition.
         /// </summary>
@@ -380,8 +392,17 @@ namespace AsmResolver.DotNet
         protected virtual IList<AssemblyReference> GetAssemblyReferences() =>
             new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
 
+        /// <summary>
+        /// Obtains the list of custom attributes assigned to the member.
+        /// </summary>
+        /// <returns>The attributes</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
+        /// </remarks>
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
+            new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+
         /// <inheritdoc />
         public override string ToString() => Name;
-
     }
 }

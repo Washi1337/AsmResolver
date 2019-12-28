@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
@@ -28,8 +29,8 @@ namespace AsmResolver.DotNet.Serialized
         public SerializedFieldDefinition(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, FieldDefinitionRow row)
             : base(token)
         {
-            _metadata = metadata;
-            _parentModule = parentModule;
+            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
         }
 
@@ -50,5 +51,9 @@ namespace AsmResolver.DotNet.Serialized
                 ? member as TypeDefinition
                 : null;
         }
+        
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
     }
 }

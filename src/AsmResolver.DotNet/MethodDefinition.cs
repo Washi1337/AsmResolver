@@ -21,6 +21,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MethodBody> _methodBody;
         private IList<ParameterDefinition> _parameterDefinitions;
         private ParameterCollection _parameters;
+        private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
         /// Initializes a new method definition.
@@ -540,6 +541,27 @@ namespace AsmResolver.DotNet
             set => MethodBody = value;
         }
 
+        /// <inheritdoc />
+        public IList<CustomAttribute> CustomAttributes
+        {
+            get
+            {
+                if (_customAttributes is null)
+                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
+                return _customAttributes;
+            }
+        }
+
+        /// <summary>
+        /// Obtains the list of custom attributes assigned to the member.
+        /// </summary>
+        /// <returns>The attributes</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
+        /// </remarks>
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
+            new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+        
         /// <summary>
         /// Obtains the name of the method definition.
         /// </summary>

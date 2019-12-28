@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet.Serialized
         private readonly IMetadata _metadata;
         private readonly AssemblyDefinitionRow _row;
         private readonly ModuleDefinition _manifestModule;
+        private readonly SerializedModuleDefinition _parentModule;
 
         /// <summary>
         /// Creates an assembly definition from an assembly metadata row.
@@ -26,12 +27,13 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the assembly for.</param>
         /// <param name="row">The metadata table row to base the assembly definition on.</param>
         /// <param name="manifestModule">The instance containing the manifest module definition.</param>
-        public SerializedAssemblyDefinition(IMetadata metadata, MetadataToken token, AssemblyDefinitionRow row, ModuleDefinition manifestModule) 
+        public SerializedAssemblyDefinition(IMetadata metadata, MetadataToken token, AssemblyDefinitionRow row, SerializedModuleDefinition manifestModule) 
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _row = row;
             _manifestModule = manifestModule ?? throw new ArgumentNullException(nameof(manifestModule));
+            _parentModule = manifestModule;
             
             Attributes = row.Attributes;
             Version = new Version(row.MajorVersion, row.MinorVersion, row.BuildNumber, row.RevisionNumber);
@@ -60,5 +62,9 @@ namespace AsmResolver.DotNet.Serialized
             
             return result;
         }
+
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
+            _parentModule.GetCustomAttributeCollection(this);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
@@ -227,6 +228,9 @@ namespace AsmResolver.DotNet.Serialized
             EnsureCustomAttributesInitialized();
             return _customAttributes.GetMemberList(owner);
         }
+        
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => GetCustomAttributeCollection(this);
 
         internal MetadataToken GetCustomAttributeOwner(uint attributeRid)
         {
@@ -234,6 +238,19 @@ namespace AsmResolver.DotNet.Serialized
             return _customAttributes.GetMemberOwner(attributeRid);
         }
 
+        internal IList<CustomAttribute> GetCustomAttributeCollection(IHasCustomAttribute owner)
+        {
+            var result = new OwnedCollection<IHasCustomAttribute, CustomAttribute>(owner);
+
+            foreach (uint rid in GetCustomAttributes(owner.MetadataToken))
+            {
+                var attribute = (CustomAttribute) LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
+                result.Add(attribute);
+            }
+            
+            return result;
+        }
+        
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {
@@ -243,9 +260,9 @@ namespace AsmResolver.DotNet.Serialized
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.AssemblyRef, (uint) i + 1);
-                result.Add(new SerializedAssemblyReference(_metadata, token, table[i]));
+                result.Add(new SerializedAssemblyReference(_metadata, this, token, table[i]));
             }
-
+            
             return result;
         }
 

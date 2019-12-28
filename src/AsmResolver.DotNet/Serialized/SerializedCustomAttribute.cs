@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;

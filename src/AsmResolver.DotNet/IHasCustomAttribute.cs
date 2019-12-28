@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace AsmResolver.DotNet
 {
     /// <summary>
@@ -5,5 +7,12 @@ namespace AsmResolver.DotNet
     /// </summary>
     public interface IHasCustomAttribute : IMetadataMember
     {
+        /// <summary>
+        /// Gets a collection of custom attributes assigned to this member.
+        /// </summary>
+        IList<CustomAttribute> CustomAttributes
+        {
+            get;
+        }
     }
 }
