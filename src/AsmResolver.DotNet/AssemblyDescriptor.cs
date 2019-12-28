@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides a base implementation for describing a self-describing .NET assembly hosted by a common language runtime (CLR).
     /// </summary>
-    public abstract class AssemblyDescriptor : IMetadataMember
+    public abstract class AssemblyDescriptor : IHasCustomAttribute
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _culture;

@@ -17,7 +17,7 @@ namespace AsmResolver.DotNet
     /// Represents a single module in a .NET assembly. A module definition is the root object of any .NET module and
     /// defines types, as well as any resources and referenced assemblies. 
     /// </summary>
-    public class ModuleDefinition : IResolutionScope, IOwnedCollectionElement<AssemblyDefinition>
+    public class ModuleDefinition : IResolutionScope, IHasCustomAttribute, IOwnedCollectionElement<AssemblyDefinition>
     {
         /// <summary>
         /// Reads a .NET module from the provided input buffer.

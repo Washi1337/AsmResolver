@@ -29,6 +29,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<uint, uint> _typeDefTree;
         private OneToManyRelation<MetadataToken, uint> _semantics;
+        private OneToManyRelation<MetadataToken, uint> _customAttributes;
         
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -198,6 +199,39 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureMethodSemanticsInitialized();
             return _semantics.GetMemberOwner(methodRid);
+        }
+
+        private void EnsureCustomAttributesInitialized()
+        {
+            if (_customAttributes is null)
+                InitializeCustomAttributes();
+        }
+
+        private void InitializeCustomAttributes()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var attributeTable = tablesStream.GetTable<CustomAttributeRow>(TableIndex.CustomAttribute);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
+            
+            _customAttributes = new OneToManyRelation<MetadataToken, uint>();
+            for (int i = 0; i < attributeTable.Count; i++)
+            {
+                var ownerToken = encoder.DecodeIndex(attributeTable[i].Parent);
+                uint attributeRid = (uint) (i + 1);
+                _customAttributes.Add(ownerToken, attributeRid);
+            }
+        }
+
+        internal IEnumerable<uint> GetCustomAttributes(MetadataToken owner)
+        {
+            EnsureCustomAttributesInitialized();
+            return _customAttributes.GetMemberList(owner);
+        }
+
+        internal MetadataToken GetCustomAttributeOwner(uint attributeRid)
+        {
+            EnsureCustomAttributesInitialized();
+            return _customAttributes.GetMemberOwner(attributeRid);
         }
 
         /// <inheritdoc />

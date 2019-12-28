@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
     /// Stand-alone signatures are often used by the runtime for referencing local variable signatures, or serve
     /// as an operand for calli instructions.
     /// </remarks>
-    public class StandAloneSignature : IMetadataMember
+    public class StandAloneSignature : IHasCustomAttribute
     {
         private readonly LazyVariable<CallingConventionSignature> _signature;
         

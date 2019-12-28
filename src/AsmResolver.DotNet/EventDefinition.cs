@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single event in a type definition of a .NET module.
     /// </summary>
-    public class EventDefinition : IHasSemantics, IMemberDescriptor, IOwnedCollectionElement<TypeDefinition>
+    public class EventDefinition : IHasSemantics, IMemberDescriptor, IHasCustomAttribute, IOwnedCollectionElement<TypeDefinition>
     { 
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;

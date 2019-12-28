@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet
     /// signature. Parameter definitions only provide additional information, such as a name, attributes or a default
     /// value.
     /// </remarks>
-    public class ParameterDefinition : IMetadataMember, INameProvider, IOwnedCollectionElement<MethodDefinition>
+    public class ParameterDefinition : IOwnedCollectionElement<MethodDefinition>, IHasCustomAttribute
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<MethodDefinition> _method;

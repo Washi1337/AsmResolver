@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single field in a type definition of a .NET module.
     /// </summary>
-    public class FieldDefinition : IMetadataMember, IMemberDescriptor, IOwnedCollectionElement<TypeDefinition>
+    public class FieldDefinition : IMemberDescriptor, IHasCustomAttribute, IOwnedCollectionElement<TypeDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<FieldSignature> _signature;

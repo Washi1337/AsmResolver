@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
-    public class TypeDefinition : ITypeDefOrRef, 
+    public class TypeDefinition : ITypeDefOrRef,
         IOwnedCollectionElement<ModuleDefinition>,
         IOwnedCollectionElement<TypeDefinition>
     {

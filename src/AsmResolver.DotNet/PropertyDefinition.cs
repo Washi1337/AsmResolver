@@ -12,7 +12,8 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single property in a type definition of a .NET module.
     /// </summary>
-    public class PropertyDefinition : IMemberDescriptor, IOwnedCollectionElement<TypeDefinition>, IHasSemantics
+    public class PropertyDefinition : IMemberDescriptor, IHasCustomAttribute, IHasSemantics,
+        IOwnedCollectionElement<TypeDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;

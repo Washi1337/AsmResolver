@@ -22,6 +22,7 @@ namespace AsmResolver.DotNet.Serialized
         private EventDefinition[] _eventDefinition;
         private MethodSemantics[] _methodSemantics;
         private TypeSpecification[] _typeSpecifications;
+        private CustomAttribute[] _customAttributes;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -36,6 +37,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.TypeRef => LookupTypeReference(token),
                 TableIndex.TypeDef => LookupTypeDefinition(token),
                 TableIndex.TypeSpec => LookupTypeSpecification(token),
+                TableIndex.Assembly => LookupAssemblyDefinition(token),
                 TableIndex.AssemblyRef => LookupAssemblyReference(token),
                 TableIndex.Field => LookupFieldDefinition(token),
                 TableIndex.Method => LookupMethodDefinition(token),
@@ -45,6 +47,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.Property => LookupPropertyDefinition(token),
                 TableIndex.Event => LookupEventDefinition(token),
                 TableIndex.MethodSemantics => LookupMethodSemantics(token),
+                TableIndex.CustomAttribute => LookupCustomAttribute(token),
                 _ => null
             };
 
@@ -67,6 +70,13 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<TypeSpecification, TypeSpecificationRow>(ref _typeSpecifications, token,
                 (m, t, r) => new SerializedTypeSpecification(m, _parentModule, t, r));
+        }
+
+        private AssemblyDefinition LookupAssemblyDefinition(in MetadataToken token)
+        {
+            return token.Rid == 1
+                ? _parentModule.Assembly
+                : null; // TODO: handle spurious assembly definition rows.
         }
 
         internal IMetadataMember LookupAssemblyReference(MetadataToken token)
@@ -122,6 +132,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<MethodSemantics, MethodSemanticsRow>(ref _methodSemantics, token,
                 (m, t, r) => new SerializedMethodSemantics(m, _parentModule, t, r));
+        }
+
+        private CustomAttribute LookupCustomAttribute(in MetadataToken token)
+        {
+            return LookupOrCreateMember<CustomAttribute, CustomAttributeRow>(ref _customAttributes, token,
+                (m, t, r) => new SerializedCustomAttribute(m, _parentModule, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

@@ -159,7 +159,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {
-            throw new NotImplementedException();
+            // TODO
+            return null;
         }
     }
 }

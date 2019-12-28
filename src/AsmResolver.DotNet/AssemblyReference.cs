@@ -8,7 +8,8 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to an external .NET assembly, hosted by a common language runtime (CLR). 
     /// </summary>
-    public class AssemblyReference : AssemblyDescriptor, IResolutionScope, IOwnedCollectionElement<ModuleDefinition>
+    public class AssemblyReference : AssemblyDescriptor, IResolutionScope, IOwnedCollectionElement<ModuleDefinition>,
+        IHasCustomAttribute
     {
         private readonly LazyVariable<byte[]> _publicKeyOrToken;
 
