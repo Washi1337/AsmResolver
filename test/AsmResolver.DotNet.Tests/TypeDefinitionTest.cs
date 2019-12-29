@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Methods;
@@ -199,5 +200,12 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(3, type.Events.Count);
         }
 
+        [Fact]
+        public void ReadCustomAttributes()
+        {
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
+            Assert.Equal(6, type.CustomAttributes.Count);
+        }
     }
 }
