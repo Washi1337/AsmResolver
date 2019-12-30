@@ -47,6 +47,19 @@ namespace AsmResolver.DotNet.Serialized
             MetadataToken = token;
 
             _memberFactory = new CachedSerializedMemberFactory(metadata, this);
+            
+            var assemblyTable = _metadata
+                .GetStream<TablesStream>()
+                .GetTable<AssemblyDefinitionRow>();
+            
+            if (assemblyTable.Count > 0)
+            {
+                var assembly = new SerializedAssemblyDefinition(metadata,
+                    new MetadataToken(TableIndex.Assembly, 1), 
+                    assemblyTable[0], this);
+                Assembly = assembly;
+            }
+            
             CorLibTypeFactory = new CorLibTypeFactory(FindMostRecentCorLib());
 
             var tablesStream = metadata.GetStream<TablesStream>();

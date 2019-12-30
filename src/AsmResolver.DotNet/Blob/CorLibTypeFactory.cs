@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Blob
             "mscorlib",
             "netstandard",
             "System.Runtime",
-            "System.Private.CorLib"
+            "System.Private.CoreLib"
         });
         
         /// <summary>

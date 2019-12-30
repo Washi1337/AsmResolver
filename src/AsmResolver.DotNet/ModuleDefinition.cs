@@ -77,14 +77,6 @@ namespace AsmResolver.DotNet
             var moduleTable = stream.GetTable<ModuleDefinitionRow>();
             var module = new SerializedModuleDefinition(metadata, new MetadataToken(TableIndex.Module, 1), moduleTable[0]);
 
-            var assemblyTable = stream.GetTable<AssemblyDefinitionRow>();
-            if (assemblyTable.Count > 0)
-            {
-                var assembly = new SerializedAssemblyDefinition(metadata,
-                    new MetadataToken(TableIndex.Assembly, 1), 
-                    assemblyTable[0], module);
-                module.Assembly = assembly;
-            }
             return module;
         }
 
@@ -272,6 +264,15 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the object responsible for resolving references to external .NET assemblies.
+        /// </summary>
+        public IAssemblyResolver AssemblyResolver
+        {
+            get;
+            set;
+        } = new DefaultAssemblyResolver();
 
         /// <summary>
         /// Looks up a member by its metadata token.
