@@ -36,9 +36,8 @@ namespace AsmResolver.DotNet.Tests
             var corlibName = corlibAssembly.GetName();
             var corlibAssemblyDef = AssemblyDefinition.FromFile(corlibAssembly.Location);
 
-            var computedToken = corlibAssemblyDef.GetPublicKeyToken();
             Assert.Equal(corlibName.GetPublicKey(), corlibAssemblyDef.PublicKey);
-            Assert.Equal(corlibName.GetPublicKeyToken(), computedToken);
+            Assert.Equal(corlibName.GetPublicKeyToken(), corlibAssemblyDef.GetPublicKeyToken());
         }
     }
 }

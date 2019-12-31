@@ -31,5 +31,16 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(expectedToken, assemblyRef.PublicKeyOrToken);
             Assert.Equal(expectedToken, assemblyRef.GetPublicKeyToken());
         }
+
+        [Fact]
+        public void CorLibResolution()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var assemblyRef = module.AssemblyReferences[0];
+            var assemblyDef = assemblyRef.Resolve();
+            Assert.NotNull(assemblyDef);
+            Assert.Equal(assemblyDef.Name, assemblyDef.Name);
+            Assert.Equal(assemblyDef.Version, assemblyDef.Version);
+        }
     }
 }

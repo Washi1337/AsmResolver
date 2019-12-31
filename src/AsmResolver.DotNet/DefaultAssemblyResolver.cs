@@ -50,7 +50,10 @@ namespace AsmResolver.DotNet
             if (_cache.TryGetValue(assembly, out var assemblyDef))
                 return assemblyDef;
             
-            string path = ProbeGlobalAssemblyCache(assembly);
+            string path = null;
+            
+            if (assembly.GetPublicKeyToken()!= null)
+                path = ProbeGlobalAssemblyCache(assembly);
             if (string.IsNullOrEmpty(path))
                 path = ProbeSearchDirectories(assembly);
 

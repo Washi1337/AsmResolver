@@ -74,6 +74,7 @@ namespace AsmResolver.DotNet
         
         private IList<ModuleDefinition> _modules;
         private readonly LazyVariable<byte[]> _publicKey;
+        private byte[] _publicKeyToken;
 
         /// <summary>
         /// Initializes a new assembly definition.
@@ -135,9 +136,13 @@ namespace AsmResolver.DotNet
         public byte[] PublicKey
         {
             get => _publicKey.Value;
-            set => _publicKey.Value = value;
+            set
+            {
+                _publicKey.Value = value;
+                _publicKeyToken = null;
+            }
         }
-        
+
         /// <summary>
         /// Obtains the list of defined modules in the .NET assembly. 
         /// </summary>
@@ -160,10 +165,17 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {
-            return PublicKey != null 
-                ? ComputePublicKeyToken(PublicKey, HashAlgorithm) 
-                : null;
+            if (_publicKeyToken is null)
+            {
+                _publicKeyToken = PublicKey != null
+                    ? ComputePublicKeyToken(PublicKey, HashAlgorithm)
+                    : null;
+            }
+
+            return _publicKeyToken;
         }
 
+        /// <inheritdoc />
+        public override AssemblyDefinition Resolve() => this;
     }
 }

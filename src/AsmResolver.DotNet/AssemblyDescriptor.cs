@@ -231,5 +231,10 @@ namespace AsmResolver.DotNet
             return token;
         }
 
+        /// <summary>
+        /// Resolves the reference to the assembly to an assembly definition.
+        /// </summary>
+        /// <returns>The assembly definition, or <c>null</c> if the resolution failed.</returns>
+        public abstract AssemblyDefinition Resolve();
     }
 }

@@ -114,5 +114,8 @@ namespace AsmResolver.DotNet
         /// This method is called upon initializing the <see cref="PublicKeyOrToken"/> property.
         /// </remarks>
         protected virtual byte[] GetPublicKeyOrToken() => null;
+
+        /// <inheritdoc />
+        public override AssemblyDefinition Resolve() => Module?.AssemblyResolver?.Resolve(this);
     }
 }
