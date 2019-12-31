@@ -28,5 +28,17 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new[] {assemblyDef.ManifestModule}, assemblyDef.Modules);
             Assert.Same(assemblyDef, assemblyDef.ManifestModule.Assembly);
         }
+
+        [Fact]
+        public void ReadPublicKeyToken()
+        {
+            var corlibAssembly = typeof(object).Assembly;
+            var corlibName = corlibAssembly.GetName();
+            var corlibAssemblyDef = AssemblyDefinition.FromFile(corlibAssembly.Location);
+
+            var computedToken = corlibAssemblyDef.GetPublicKeyToken();
+            Assert.Equal(corlibName.GetPublicKey(), corlibAssemblyDef.PublicKey);
+            Assert.Equal(corlibName.GetPublicKeyToken(), computedToken);
+        }
     }
 }

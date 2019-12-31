@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
@@ -159,8 +160,10 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {
-            // TODO
-            return null;
+            return PublicKey != null 
+                ? ComputePublicKeyToken(PublicKey, HashAlgorithm) 
+                : null;
         }
+
     }
 }

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
@@ -15,6 +17,8 @@ namespace AsmResolver.DotNet
     /// </summary>
     public abstract class AssemblyDescriptor : IHasCustomAttribute
     {
+        private const int PublicKeyTokenLength = 8;
+        
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _culture;
         private IList<CustomAttribute> _customAttributes;
@@ -199,5 +203,33 @@ namespace AsmResolver.DotNet
             
             return $"{Name}, Version={Version}, PublicKeyToken={publicKeyTokenString}";
         }
+
+        /// <summary>
+        /// Computes the token of a public key using the provided hashing algorithm.
+        /// </summary>
+        /// <param name="publicKey">The public key to obtain the token from.</param>
+        /// <param name="algorithm">The algorithm to use.</param>
+        /// <returns>The public key token.</returns>
+        protected static byte[] ComputePublicKeyToken(byte[] publicKey, AssemblyHashAlgorithm algorithm)
+        {
+            using HashAlgorithm implementation = algorithm switch
+            {
+                AssemblyHashAlgorithm.None => throw new ArgumentException("Attempted to compute a hashing algorithm without providing a hashing algorithm."),
+                AssemblyHashAlgorithm.Md5 => MD5.Create(),
+                AssemblyHashAlgorithm.Sha1 => SHA1.Create(),
+                AssemblyHashAlgorithm.Hmac => HMAC.Create(),
+                AssemblyHashAlgorithm.Sha256 => SHA256.Create(),
+                AssemblyHashAlgorithm.Sha384 => SHA384.Create(),
+                AssemblyHashAlgorithm.Sha512 => SHA512.Create(),
+                _ => throw new NotSupportedException($"Unsupported hashing algorithm {algorithm}.")
+            };
+
+            var hash = implementation.ComputeHash(publicKey);
+            var token = new byte[PublicKeyTokenLength];
+            for (int i = 0; i < PublicKeyTokenLength; i++) 
+                token[i] = hash[hash.Length - 1 - i];
+            return token;
+        }
+
     }
 }
