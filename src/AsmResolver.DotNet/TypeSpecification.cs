@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type that allows for assigning metadata tokens to type signatures stored in the blob stream. 
     /// </summary>
-    public class TypeSpecification : IMetadataMember, ITypeDescriptor, IHasCustomAttribute
+    public class TypeSpecification : ITypeDefOrRef, IHasCustomAttribute
     {
         private readonly LazyVariable<TypeSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
@@ -67,7 +67,10 @@ namespace AsmResolver.DotNet
         public IResolutionScope Scope => Signature.Scope;
 
         /// <inheritdoc />
-        public ITypeDescriptor DeclaringType => Signature.DeclaringType;
+        public ITypeDefOrRef DeclaringType => Signature.DeclaringType as ITypeDefOrRef;
+
+        /// <inheritdoc />
+        ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
         public bool IsValueType => Signature.IsValueType;
