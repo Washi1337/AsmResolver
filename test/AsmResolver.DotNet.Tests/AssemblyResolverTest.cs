@@ -1,9 +1,14 @@
+using System.IO;
+using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.TestCases.NestedClasses;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
 {
     public class AssemblyResolverTest
     {
+        private readonly SignatureComparer _comparer = new SignatureComparer();
+
         [Fact]
         public void ResolveCorLib()
         {
@@ -19,6 +24,18 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotNull(assemblyDef);
             Assert.Equal(assemblyName.Name, assemblyDef.Name);
+        }
+
+        [Fact]
+        public void ResolveLocalLibrary()
+        {
+            var resolver = new DefaultAssemblyResolver();
+            resolver.SearchDirectories.Add(Path.GetDirectoryName(typeof(AssemblyResolverTest).Assembly.Location));
+         
+            var assemblyDef = AssemblyDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
+            var assemblyRef = new AssemblyReference(assemblyDef);
+
+            Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef), _comparer);
         }
     }
 }

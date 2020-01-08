@@ -268,11 +268,11 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets or sets the object responsible for resolving references to external .NET assemblies.
         /// </summary>
-        public IAssemblyResolver AssemblyResolver
+        public IMetadataResolver MetadataResolver
         {
             get;
             set;
-        } = new DefaultAssemblyResolver();
+        } = new DefaultMetadataResolver(new DefaultAssemblyResolver());
 
         /// <summary>
         /// Looks up a member by its metadata token.

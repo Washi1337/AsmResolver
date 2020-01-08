@@ -115,6 +115,9 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
+
         /// <summary>
         /// Obtains the name of the type reference.
         /// </summary>

@@ -417,11 +417,12 @@ namespace AsmResolver.DotNet
             get => _declaringType.Value;
             private set => _declaringType.Value = value;
         }
-        
+
+
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => DeclaringType;
-        
+
         ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
-        
+
         TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
         {
             get => DeclaringType;
@@ -440,6 +441,7 @@ namespace AsmResolver.DotNet
                 return _nestedTypes;
             }
         }
+
 
         IResolutionScope ITypeDescriptor.Scope => GetDeclaringScope();
 
@@ -463,7 +465,7 @@ namespace AsmResolver.DotNet
                 return _fields;
             }
         }
-        
+
         /// <summary>
         /// Gets a collection of methods defined in the type.
         /// </summary>
@@ -476,7 +478,7 @@ namespace AsmResolver.DotNet
                 return _methods;
             }
         }
-        
+
         /// <summary>
         /// Gets a collection of properties defined in the type.
         /// </summary>
@@ -489,7 +491,7 @@ namespace AsmResolver.DotNet
                 return _properties;
             }
         }
-        
+
         /// <summary>
         /// Gets a collection of events defined in the type.
         /// </summary>
@@ -534,6 +536,8 @@ namespace AsmResolver.DotNet
 
             return DeclaringType.ToTypeReference();
         }
+
+        TypeDefinition ITypeDefOrRef.Resolve() => this;
 
         /// <summary>
         /// Obtains the namespace of the type definition.

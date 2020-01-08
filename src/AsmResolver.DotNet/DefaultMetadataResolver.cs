@@ -18,10 +18,8 @@ namespace AsmResolver.DotNet
         {
             AssemblyResolver = assemblyResolver ?? throw new ArgumentNullException(nameof(assemblyResolver));
         }
-        
-        /// <summary>
-        /// Gets the object responsible for the resolution of external assemblies.
-        /// </summary>
+
+        /// <inheritdoc />
         public IAssemblyResolver AssemblyResolver
         {
             get;

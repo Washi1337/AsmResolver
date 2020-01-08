@@ -6,6 +6,14 @@ namespace AsmResolver.DotNet
     public interface IMetadataResolver
     {
         /// <summary>
+        /// Gets the object responsible for the resolution of external assemblies.
+        /// </summary>
+        IAssemblyResolver AssemblyResolver
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Resolves a reference to a type.
         /// </summary>
         /// <param name="type">The type to resolve.</param>

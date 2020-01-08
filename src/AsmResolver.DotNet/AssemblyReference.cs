@@ -116,6 +116,6 @@ namespace AsmResolver.DotNet
         protected virtual byte[] GetPublicKeyOrToken() => null;
 
         /// <inheritdoc />
-        public override AssemblyDefinition Resolve() => Module?.AssemblyResolver?.Resolve(this);
+        public override AssemblyDefinition Resolve() => Module?.MetadataResolver?.AssemblyResolver.Resolve(this);
     }
 }

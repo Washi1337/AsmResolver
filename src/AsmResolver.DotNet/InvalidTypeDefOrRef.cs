@@ -63,10 +63,6 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => null;
 
         /// <inheritdoc />
-        public override string ToString() =>  ((IFullNameProvider) this).Name;
-    
-
-        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
@@ -76,5 +72,10 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
+
+        TypeDefinition ITypeDefOrRef.Resolve() => null;
+
+        /// <inheritdoc />
+        public override string ToString() =>  ((IFullNameProvider) this).Name;
     }
 }

@@ -85,6 +85,9 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
+
+        /// <inheritdoc />
+        public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
         
         /// <summary>
         /// Obtains the signature the type specification is referencing.
