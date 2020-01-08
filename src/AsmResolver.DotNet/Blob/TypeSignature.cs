@@ -153,6 +153,22 @@ namespace AsmResolver.DotNet.Blob
             return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
         } 
         
+        internal static TypeSignature ReadFieldOrPropType(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        {
+            var elementType = (ElementType) reader.ReadByte();
+            switch (elementType)
+            {
+                case ElementType.Boxed:
+                    return parentModule.CorLibTypeFactory.Object;
+                case ElementType.SzArray:
+                    return new SzArrayTypeSignature(ReadFieldOrPropType(parentModule, reader));
+                case ElementType.Enum:
+                    throw new NotImplementedException();
+                default:
+                    return parentModule.CorLibTypeFactory.FromElementType(elementType);
+            }
+        }
+        
         /// <inheritdoc />
         public abstract string Name
         {

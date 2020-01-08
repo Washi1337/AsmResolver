@@ -24,6 +24,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
             EnumValue = enumValue;
         }
 
+        public TestCaseAttribute(Type typeValue)
+        {
+            TypeValue = typeValue;
+        }
+
         public TestCaseAttribute(int intValue, string stringValue, TestEnum enumValue)
         {
             IntValue = intValue;
@@ -44,6 +49,12 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         }
 
         public TestEnum EnumValue
+        {
+            get;
+            set;
+        }
+
+        public Type TypeValue
         {
             get;
             set;

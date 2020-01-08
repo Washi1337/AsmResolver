@@ -205,7 +205,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
-            Assert.Equal(6, type.CustomAttributes.Count);
+            Assert.Single(type.CustomAttributes);
         }
     }
 }

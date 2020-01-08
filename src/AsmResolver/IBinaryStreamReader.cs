@@ -329,5 +329,22 @@ namespace AsmResolver
                     throw new ArgumentOutOfRangeException(nameof(size));
             }
         }
+        
+        /// <summary>
+        /// Reads a serialized UTF8 string from the stream.
+        /// </summary>
+        /// <param name="reader">The reader to use for reading the data.</param>
+        /// <returns>The string that was read from the stream.</returns>
+        public static string ReadSerString(this IBinaryStreamReader reader)
+        {
+            if (reader.ReadByte() == 0xFF)
+                return null;
+            reader.FileOffset--;
+            if (!reader.TryReadCompressedUInt32(out uint length))
+                return null;
+            var data = new byte[length];
+            length = (uint) reader.ReadBytes(data, 0, (int) length);
+            return Encoding.UTF8.GetString(data, 0, (int) length);
+        }
     }
 }

@@ -50,6 +50,10 @@ namespace AsmResolver.DotNet.Serialized
                 _metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Signature));
 
         /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
+        
+        /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()
         {
             var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _parentModule.GetMethodDeclaringType(MetadataToken.Rid));

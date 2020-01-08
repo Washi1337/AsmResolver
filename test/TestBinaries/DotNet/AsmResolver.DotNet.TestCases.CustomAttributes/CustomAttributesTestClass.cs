@@ -3,11 +3,6 @@ using System;
 namespace AsmResolver.DotNet.TestCases.CustomAttributes
 {
     [TestCase]
-    [TestCase(1)]
-    [TestCase("String fixed arg")]
-    [TestCase(TestEnum.Value2)]
-    [TestCase(2, "Fixed arg", TestEnum.Value3)]
-    [TestCase(IntValue = 3, StringValue = "Named arg", EnumValue = TestEnum.Value2)]
     public class CustomAttributesTestClass
     {
         [TestCase]
@@ -28,6 +23,51 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
             get;
             [TestCase]
             set;
+        }
+
+        [TestCase(1)]
+        public void FixedInt32Argument()
+        {
+        }
+        
+        [TestCase("String fixed arg")]
+        public void FixedStringArgument()
+        {
+        }
+        
+        [TestCase(TestEnum.Value3)]
+        public void FixedEnumArgument()
+        {
+        }
+        
+        [TestCase(typeof(string))]
+        public void FixedTypeArgument()
+        {
+        }
+        
+        [TestCase(2, "Fixed arg", TestEnum.Value3)]
+        public void FixedMultipleArguments()
+        {
+        }
+        
+        [TestCase(IntValue = 2)]
+        public void NamedInt32Argument()
+        {
+        }
+        
+        [TestCase(StringValue = "String named arg")]
+        public void NamedStringArgument()
+        {
+        }
+        
+        [TestCase(EnumValue = TestEnum.Value2)]
+        public void NamedEnumArgument()
+        {
+        }
+        
+        [TestCase(TypeValue = typeof(int))]
+        public void NamedTypeArgument()
+        {
         }
     }
 }

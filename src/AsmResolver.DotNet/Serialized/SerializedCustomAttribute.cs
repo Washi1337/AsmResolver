@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -55,8 +56,8 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override CustomAttributeSignature GetSignature()
         {
-            // TODO:
-            return base.GetSignature();
+            return CustomAttributeSignature.FromReader(_parentModule, Constructor,
+                _metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Value));
         }
     }
 }

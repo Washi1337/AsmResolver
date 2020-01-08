@@ -51,5 +51,83 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(parentToken, attribute.Parent.MetadataToken);
         }
 
+        private static CustomAttribute GetCustomAttributeTestCase(string methodName)
+        {
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
+            var method = type.Methods.First(m => m.Name == methodName);
+            var attribute = method.CustomAttributes.First(c => c.Constructor.DeclaringType.Name == nameof(TestCaseAttribute));
+            return attribute;
+        }
+
+        [Fact]
+        public void ReadFixedInt32Argument()
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32Argument));
+            Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Empty(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.FixedArguments[0];
+            Assert.Equal(1, argument.Element.Value);
+        }
+
+        [Fact]
+        public void ReadFixedStringArgument()
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedStringArgument));
+            Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Empty(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.FixedArguments[0];
+            Assert.Equal("String fixed arg", argument.Element.Value);
+        }
+
+        [Fact]
+        public void ReadFixedEnumArgument()
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedEnumArgument));
+            Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Empty(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.FixedArguments[0];
+            Assert.Equal(3, argument.Element.Value);
+        }
+
+        [Fact]
+        public void ReadNamedInt32Argument()
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedInt32Argument));
+            Assert.Empty(attribute.Signature.FixedArguments);
+            Assert.Single(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.NamedArguments[0];
+            Assert.Equal(nameof(TestCaseAttribute.IntValue), argument.MemberName);
+            Assert.Equal(2, argument.Argument.Element.Value);
+        }
+
+        [Fact]
+        public void ReadNamedStringArgument()
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedStringArgument));
+            Assert.Empty(attribute.Signature.FixedArguments);
+            Assert.Single(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.NamedArguments[0];
+            Assert.Equal(nameof(TestCaseAttribute.StringValue), argument.MemberName);
+            Assert.Equal("String named arg", argument.Argument.Element.Value);
+        }
+
+        [Fact]
+        public void ReadNamedEnumArgument()
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedEnumArgument));
+            Assert.Empty(attribute.Signature.FixedArguments);
+            Assert.Single(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.NamedArguments[0];
+            Assert.Equal(nameof(TestCaseAttribute.EnumValue), argument.MemberName);
+            Assert.Equal(2, argument.Argument.Element.Value);
+        }
+
     }
 }
