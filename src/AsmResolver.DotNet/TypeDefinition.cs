@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -538,6 +540,28 @@ namespace AsmResolver.DotNet
         }
 
         TypeDefinition ITypeDescriptor.Resolve() => this;
+
+        /// <summary>
+        /// When this type is an enum, extracts the underlying enum type.
+        /// </summary>
+        /// <returns>The type, or <c>null</c> if none was found.</returns>
+        /// <exception cref="InvalidOperationException">Occurs when the type is not an enum.</exception>
+        /// <remarks>
+        /// To verify whether a type is an enum or not, use the <see cref="IsEnum"/> property.
+        /// </remarks>
+        public TypeSignature GetEnumUnderlyingType()
+        {
+            if (!IsEnum)
+                throw new InvalidOperationException("Type is not an enum.");
+
+            foreach (var field in Fields)
+            {
+                if (!field.IsLiteral && !field.IsStatic && field.Signature != null)
+                    return field.Signature.FieldType;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Obtains the namespace of the type definition.

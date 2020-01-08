@@ -163,7 +163,7 @@ namespace AsmResolver.DotNet.Blob
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(ReadFieldOrPropType(parentModule, reader));
                 case ElementType.Enum:
-                    throw new NotImplementedException();
+                    return TypeNameParser.ParseType(parentModule, reader.ReadSerString());
                 default:
                     return parentModule.CorLibTypeFactory.FromElementType(elementType);
             }

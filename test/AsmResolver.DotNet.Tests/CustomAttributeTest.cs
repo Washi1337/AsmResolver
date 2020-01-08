@@ -93,7 +93,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature.NamedArguments);
 
             var argument = attribute.Signature.FixedArguments[0];
-            Assert.Equal(3, argument.Element.Value);
+            Assert.Equal((int) TestEnum.Value3, argument.Element.Value);
         }
 
         [Fact]
@@ -144,7 +144,7 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.EnumValue), argument.MemberName);
-            Assert.Equal(2, argument.Argument.Element.Value);
+            Assert.Equal((int) TestEnum.Value2, argument.Argument.Element.Value);
         }
 
     }

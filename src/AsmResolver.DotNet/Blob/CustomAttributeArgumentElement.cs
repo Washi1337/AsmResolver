@@ -20,12 +20,9 @@ namespace AsmResolver.DotNet.Blob
             return new CustomAttributeArgumentElement(ReadValue(parentModule, typeSignature, reader));
         }
 
-        private static object ReadValue(ModuleDefinition parentModule, TypeSignature typeSignature, IBinaryStreamReader reader)
+        private static object ReadValue(ModuleDefinition parentModule, TypeSignature valueType, IBinaryStreamReader reader)
         {
-            if (typeSignature.IsTypeOf("System", "Type"))
-                return TypeNameParser.ParseType(parentModule, reader.ReadSerString());
-            
-            switch (typeSignature.ElementType)
+            switch (valueType.ElementType)
             {
                 case ElementType.Boolean:
                     return reader.ReadByte() == 1;
@@ -58,16 +55,16 @@ namespace AsmResolver.DotNet.Blob
                 case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
-                    var enumTypeDef = parentModule.MetadataResolver.ResolveType(typeSignature);
-                    if (enumTypeDef == null)
-                        return null;
-
-                    if (enumTypeDef.IsEnum)
-                        throw new NotImplementedException();
+                    var enumTypeDef = parentModule.MetadataResolver.ResolveType(valueType);
+                    if (enumTypeDef != null && enumTypeDef.IsEnum)
+                        return ReadValue(parentModule, enumTypeDef.GetEnumUnderlyingType(), reader);
                     break;
             }
+            
+            if (valueType.IsTypeOf("System", "Type"))
+                return TypeNameParser.ParseType(parentModule, reader.ReadSerString());
 
-            throw new NotSupportedException($"Unsupported element type {typeSignature.ElementType}.");
+            throw new NotSupportedException($"Unsupported element type {valueType.ElementType}.");
         }
 
         /// <summary>
