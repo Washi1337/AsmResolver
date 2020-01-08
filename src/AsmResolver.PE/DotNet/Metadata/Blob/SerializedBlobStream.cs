@@ -65,7 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         /// <inheritdoc />
         public override IBinaryStreamReader GetBlobReaderByIndex(uint index)
         {
-            if (index >= _contents.GetPhysicalSize()) 
+            if (index == 0 || index >= _contents.GetPhysicalSize()) 
                 return null;
             
             var blobReader = _contents.CreateReader((uint) (_contents.FileOffset + index));

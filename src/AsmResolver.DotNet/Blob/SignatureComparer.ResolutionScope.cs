@@ -47,8 +47,7 @@ namespace AsmResolver.DotNet.Blob
             if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
                 return false;
 
-            return x.Attributes == y.Attributes
-                   && x.Version == y.Version
+            return x.Version == y.Version
                    && x.Name == y.Name
                    && x.Culture == y.Culture
                    && Equals(x.GetPublicKeyToken(), y.GetPublicKeyToken());

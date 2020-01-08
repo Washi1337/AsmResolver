@@ -58,7 +58,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="descriptor">The assembly to base the reference on.</param>
         public AssemblyReference(AssemblyDescriptor descriptor)
-            : base(new MetadataToken(TableIndex.AssemblyRef, 0))
+            : this(new MetadataToken(TableIndex.AssemblyRef, 0))
         {
             Name = descriptor.Name;
             Version = descriptor.Version;

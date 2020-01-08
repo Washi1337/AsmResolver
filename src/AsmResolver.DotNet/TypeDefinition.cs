@@ -441,7 +441,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        IResolutionScope ITypeDescriptor.Scope => Module;
+        IResolutionScope ITypeDescriptor.Scope => GetDeclaringScope();
 
         /// <inheritdoc />
         public bool IsValueType => BaseType.IsTypeOf("System", "ValueType") || IsEnum;
@@ -512,6 +512,27 @@ namespace AsmResolver.DotNet
                     Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
                 return _customAttributes;
             }
+        }
+
+        /// <summary>
+        /// Creates a new type reference to this type definition. 
+        /// </summary>
+        /// <returns>The type reference.</returns>
+        public TypeReference ToTypeReference()
+        {
+            var scope = DeclaringType is null
+                ? (IResolutionScope) new AssemblyReference(Module.Assembly)
+                : DeclaringType.ToTypeReference();
+            
+            return new TypeReference(scope, Namespace, Name);
+        }
+
+        private IResolutionScope GetDeclaringScope()
+        {
+            if (DeclaringType is null)
+                return Module;
+
+            return DeclaringType.ToTypeReference();
         }
 
         /// <summary>
