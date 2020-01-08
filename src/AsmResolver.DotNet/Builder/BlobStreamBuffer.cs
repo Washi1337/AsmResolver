@@ -65,6 +65,9 @@ namespace AsmResolver.DotNet.Builder
         /// <returns>The index of the blob.</returns>
         public uint GetBlobIndex(byte[] blob)
         {
+            if (blob is null || blob.Length == 0)
+                return 0;
+            
             if (!_blobs.TryGetValue(blob, out uint offset))
             {
                 offset = (uint) _rawStream.Length;
