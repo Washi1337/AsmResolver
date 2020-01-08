@@ -56,6 +56,40 @@ namespace AsmResolver.DotNet.Tests
             var definition = _resolver.ResolveType(topLevelClass1);
             Assert.Equal((ITypeDefOrRef) topLevelClass1, definition, _comparer);
         }
+
+        [Fact]
+        public void ResolveTypeReferenceTwice()
+        {
+            var module = new ModuleDefinition("SomeModule.dll");
+
+            var consoleType = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Console");
+            Assert.Same(_resolver.ResolveType(consoleType), _resolver.ResolveType(consoleType));
+        }
+
+        [Fact]
+        public void ResolveTypeReferenceThenChangeRefAndResolveAgain()
+        {
+            var module = new ModuleDefinition("SomeModule.dll");
+
+            ITypeDefOrRef expected = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
+            var reference = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
+            Assert.Equal(expected, _resolver.ResolveType(reference), _comparer);
+            reference.Name = "String";
+            Assert.NotEqual(expected, _resolver.ResolveType(reference), _comparer);
+        }
+
+        [Fact]
+        public void ResolveTypeReferenceThenChangeDefAndResolveAgain()
+        {
+            var module = new ModuleDefinition("SomeModule.dll");
+
+            ITypeDefOrRef expected = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
+            var reference = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
+            var definition = _resolver.ResolveType(reference);
+            Assert.Equal(expected, definition, _comparer);
+            definition.Name = "String";
+            Assert.NotEqual(expected, _resolver.ResolveType(reference), _comparer);
+        }
         
         [Fact]
         public void ResolveNestedType()
@@ -90,13 +124,13 @@ namespace AsmResolver.DotNet.Tests
         public void ResolveConsoleWriteLineMethod()
         {
             var module = new ModuleDefinition("SomeModule.dll");
-            
+
             var consoleType = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Console");
             var writeLineMethod = new MemberReference(consoleType, "WriteLine",
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.String));
 
             var definition = _resolver.ResolveMethod(writeLineMethod);
-            
+
             Assert.Equal(writeLineMethod.Name, definition.Name);
             Assert.Equal(writeLineMethod.Signature, definition.Signature, _comparer);
         }
@@ -105,16 +139,15 @@ namespace AsmResolver.DotNet.Tests
         public void ResolveStringEmptyField()
         {
             var module = new ModuleDefinition("SomeModule.dll");
-            
+
             var stringType = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "String");
             var emptyField = new MemberReference(stringType, "Empty",
                 FieldSignature.CreateStatic(module.CorLibTypeFactory.String));
 
             var definition = _resolver.ResolveField(emptyField);
-            
+
             Assert.Equal(emptyField.Name, definition.Name);
             Assert.Equal(emptyField.Signature, definition.Signature, _comparer);
         }
-        
     }
 }

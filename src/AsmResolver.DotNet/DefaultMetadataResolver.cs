@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Blob;
 
 namespace AsmResolver.DotNet
@@ -9,6 +10,7 @@ namespace AsmResolver.DotNet
     public class DefaultMetadataResolver : IMetadataResolver
     {
         private readonly SignatureComparer _comparer = new SignatureComparer();
+        private readonly IDictionary<TypeReference, TypeDefinition> _typeCache;
 
         /// <summary>
         /// Creates a new metadata resolver. 
@@ -17,6 +19,8 @@ namespace AsmResolver.DotNet
         public DefaultMetadataResolver(IAssemblyResolver assemblyResolver)
         {
             AssemblyResolver = assemblyResolver ?? throw new ArgumentNullException(nameof(assemblyResolver));
+            
+            _typeCache = new Dictionary<TypeReference, TypeDefinition>(_comparer);
         }
 
         /// <inheritdoc />
@@ -47,6 +51,23 @@ namespace AsmResolver.DotNet
         }
 
         private TypeDefinition ResolveTypeReference(TypeReference reference)
+        {
+            if (_typeCache.TryGetValue(reference, out var typeDef))
+            {
+                // Check if type definition has changed since last lookup.
+                if (_comparer.Equals(reference, typeDef))
+                    return typeDef;
+                _typeCache.Remove(reference);
+            }
+
+            var resolvedType = ResolveTypeReferenceImpl(reference);
+            if (resolvedType != null)
+                _typeCache[reference] = resolvedType;
+            
+            return resolvedType;
+        }
+
+        private TypeDefinition ResolveTypeReferenceImpl(TypeReference reference)
         {
             switch (reference.Scope)
             {
