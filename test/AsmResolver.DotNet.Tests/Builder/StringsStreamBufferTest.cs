@@ -21,9 +21,9 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.NotEqual(index1, index2);
             
-            var blobStream = (StringsStream) buffer.CreateStream();
-            Assert.Equal(string1, blobStream.GetStringByIndex(index1));
-            Assert.Equal(string2, blobStream.GetStringByIndex(index2));
+            var stringsStream = (StringsStream) buffer.CreateStream();
+            Assert.Equal(string1, stringsStream.GetStringByIndex(index1));
+            Assert.Equal(string2, stringsStream.GetStringByIndex(index2));
         }
 
         [Fact]
@@ -39,8 +39,8 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.Equal(index1, index2);
             
-            var blobStream = (StringsStream) buffer.CreateStream();
-            Assert.Equal(string1, blobStream.GetStringByIndex(index1));
+            var stringsStream = (StringsStream) buffer.CreateStream();
+            Assert.Equal(string1, stringsStream.GetStringByIndex(index1));
         }
 
         [Fact]
@@ -56,8 +56,8 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.NotEqual(index1, index2);
 
-            var blobStream = (StringsStream) buffer.CreateStream();
-            Assert.Equal(string1, blobStream.GetStringByIndex(index2));
+            var stringsStream = (StringsStream) buffer.CreateStream();
+            Assert.Equal(string1, stringsStream.GetStringByIndex(index2));
         }
 
         [Fact]
