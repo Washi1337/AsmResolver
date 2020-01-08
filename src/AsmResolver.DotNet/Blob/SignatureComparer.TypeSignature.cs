@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.DotNet.Blob
 {
@@ -10,7 +11,8 @@ namespace AsmResolver.DotNet.Blob
         IEqualityComparer<PointerTypeSignature>,
         IEqualityComparer<SzArrayTypeSignature>,
         IEqualityComparer<TypeDefOrRefSignature>,
-        IEqualityComparer<CustomModifierTypeSignature>
+        IEqualityComparer<CustomModifierTypeSignature>,
+        IEqualityComparer<IEnumerable<TypeSignature>>
     {
         /// <inheritdoc />
         public bool Equals(TypeSignature x, TypeSignature y)
@@ -161,6 +163,26 @@ namespace AsmResolver.DotNet.Blob
         private int GetHashCode(TypeSpecificationSignature obj)
         {
             return (int) obj.ElementType << ElementTypeOffset ^ GetHashCode(obj.BaseType);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(IEnumerable<TypeSignature> x, IEnumerable<TypeSignature> y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+
+            return x.SequenceEqual(y, this);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(IEnumerable<TypeSignature> obj)
+        {
+            int checksum = 0;
+            foreach (var type in obj)
+                checksum ^= type.GetHashCode();
+            return checksum;
         }
     }
 }
