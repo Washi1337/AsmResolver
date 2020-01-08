@@ -37,12 +37,10 @@ namespace AsmResolver.DotNet
                     return ResolveTypeReference(reference);
 
                 case TypeSpecification specification:
-                    // TODO:
-                    break;
+                    return ResolveType(specification.Signature);
                 
                 case TypeSignature signature:
-                    // TODO:
-                    break;
+                    return ResolveTypeSignature(signature);
             }
 
             return null;
@@ -94,6 +92,21 @@ namespace AsmResolver.DotNet
             }
 
             return null;
+        }
+
+        private TypeDefinition ResolveTypeSignature(TypeSignature signature)
+        {
+            switch (signature.GetLeafType())
+            {
+                case CorLibTypeSignature corLibType:
+                    return ResolveType(corLibType.Type);
+                
+                case TypeDefOrRefSignature typeDefOrRef:
+                    return ResolveType(typeDefOrRef.Type);
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         /// <inheritdoc />

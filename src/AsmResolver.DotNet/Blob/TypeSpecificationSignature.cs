@@ -30,6 +30,18 @@ namespace AsmResolver.DotNet.Blob
         public override IResolutionScope Scope => BaseType.Scope;
 
         /// <inheritdoc />
+        public override TypeDefinition Resolve()
+        {
+            return BaseType.Resolve();
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature GetLeafType()
+        {
+            return BaseType.GetLeafType();
+        }
+
+        /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
             return (uint) (sizeof(byte) + BaseType.GetPhysicalSize() + ExtraData.Length);

@@ -537,7 +537,7 @@ namespace AsmResolver.DotNet
             return DeclaringType.ToTypeReference();
         }
 
-        TypeDefinition ITypeDefOrRef.Resolve() => this;
+        TypeDefinition ITypeDescriptor.Resolve() => this;
 
         /// <summary>
         /// Obtains the namespace of the type definition.

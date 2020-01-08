@@ -195,6 +195,15 @@ namespace AsmResolver.DotNet.Blob
         public ITypeDescriptor DeclaringType => Scope as ITypeDescriptor;
 
         /// <inheritdoc />
+        public abstract TypeDefinition Resolve();
+
+        /// <summary>
+        /// Gets the underlying base type signature, without any extra adornments.
+        /// </summary>
+        /// <returns>The base signature.</returns>
+        public abstract TypeSignature GetLeafType();
+        
+        /// <inheritdoc />
         public override string ToString() => FullName;
         
     }

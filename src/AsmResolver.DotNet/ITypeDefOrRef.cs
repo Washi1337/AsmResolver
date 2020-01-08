@@ -12,14 +12,5 @@ namespace AsmResolver.DotNet
         {
             get;
         }
-
-        /// <summary>
-        /// Resolves the reference to a type definition. 
-        /// </summary>
-        /// <returns>The resolved type definition, or <c>null</c> if the type could not be resolved.</returns>
-        /// <remarks>
-        /// This method can only be invoked if the reference was added to a module to 
-        /// </remarks>
-        TypeDefinition Resolve();
     }
 }

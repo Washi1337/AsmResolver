@@ -35,6 +35,15 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal((ITypeDefOrRef) reference, definition, _comparer);
         }
+
+        [Fact]
+        public void ResolveCorLibTypeSignature()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var definition = _resolver.ResolveType(module.CorLibTypeFactory.Object);
+            
+            Assert.Equal(module.CorLibTypeFactory.Object.Type, definition, _comparer);
+        }
         
         [Fact]
         public void ResolveType()

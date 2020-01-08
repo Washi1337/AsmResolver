@@ -52,7 +52,19 @@ namespace AsmResolver.DotNet.Blob
         {
             get;
         }
-        
+
+        /// <inheritdoc />
+        public override TypeDefinition Resolve()
+        {
+            return Type.Resolve();
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature GetLeafType()
+        {
+            return this;
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {

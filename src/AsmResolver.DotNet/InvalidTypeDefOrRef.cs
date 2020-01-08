@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        TypeDefinition ITypeDefOrRef.Resolve() => null;
+        TypeDefinition ITypeDescriptor.Resolve() => null;
 
         /// <inheritdoc />
         public override string ToString() =>  ((IFullNameProvider) this).Name;

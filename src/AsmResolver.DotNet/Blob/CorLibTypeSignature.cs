@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Blob
@@ -14,6 +15,19 @@ namespace AsmResolver.DotNet.Blob
             Scope = corlibScope;
             ElementType = elementType;
             Name = name;
+
+            if (corlibScope is ModuleDefinition module)
+                Type = module.TopLevelTypes.First(t => t.IsTypeOf(Namespace, Name));
+            else
+                Type = new TypeReference(corlibScope.Module, corlibScope, Namespace, Name);
+        }
+
+        /// <summary>
+        /// Gets the reference to the type as it is defined in the common object runtime library.
+        /// </summary>
+        public ITypeDefOrRef Type
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -49,6 +63,18 @@ namespace AsmResolver.DotNet.Blob
                 ElementType.U => true,
                 _ => throw new ArgumentOutOfRangeException()
             };
+
+        /// <inheritdoc />
+        public override TypeDefinition Resolve()
+        {
+            return Type.Resolve();
+        }
+
+        /// <inheritdoc />
+        public override TypeSignature GetLeafType()
+        {
+            return this;
+        }
 
         /// <inheritdoc />
         public override ElementType ElementType
