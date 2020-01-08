@@ -177,5 +177,27 @@ namespace AsmResolver
             }
         }
         
+        /// <summary>
+        /// Compresses and writes an unsigned integer to the stream.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="value"></param>
+        public static void WriteCompressedUInt32(this IBinaryStreamWriter writer, uint value)
+        {
+            if (value < 0x80)
+                writer.WriteByte((byte)value);
+            else if (value < 0x4000)
+            {
+                writer.WriteByte((byte)(0x80 | value >> 8));
+                writer.WriteByte((byte)(value & 0xFF));
+            }
+            else
+            {
+                writer.WriteByte((byte)(0x80 | 0x40 | value >> 0x18));
+                writer.WriteByte((byte)(value >> 0x10 & 0xFF));
+                writer.WriteByte((byte)(value >> 0x08 & 0xFF));
+                writer.WriteByte((byte)(value & 0xFF));
+            }
+        }
     }
 }
