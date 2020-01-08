@@ -22,6 +22,9 @@ namespace AsmResolver.DotNet.Blob
 
         private static object ReadValue(ModuleDefinition parentModule, TypeSignature typeSignature, IBinaryStreamReader reader)
         {
+            if (typeSignature.IsTypeOf("System", "Type"))
+                return TypeNameParser.ParseType(parentModule, reader.ReadSerString());
+            
             switch (typeSignature.ElementType)
             {
                 case ElementType.Boolean:
@@ -63,9 +66,6 @@ namespace AsmResolver.DotNet.Blob
                         throw new NotImplementedException();
                     break;
             }
-
-            if (typeSignature.IsTypeOf("System", "Type"))
-                throw new NotImplementedException();
 
             throw new NotSupportedException($"Unsupported element type {typeSignature.ElementType}.");
         }

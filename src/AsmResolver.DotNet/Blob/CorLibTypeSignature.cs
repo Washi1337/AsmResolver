@@ -71,9 +71,9 @@ namespace AsmResolver.DotNet.Blob
         }
 
         /// <inheritdoc />
-        public override TypeSignature GetLeafType()
+        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef()
         {
-            return this;
+            return Type;
         }
 
         /// <inheritdoc />

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -12,6 +13,8 @@ namespace AsmResolver.DotNet.Tests
 {
     public class CustomAttributeTest
     {
+        private readonly SignatureComparer _comparer = new SignatureComparer();
+
         [Fact]
         public void ReadConstructor()
         {
@@ -91,6 +94,21 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.FixedArguments[0];
             Assert.Equal(3, argument.Element.Value);
+        }
+
+        [Fact]
+        public void ReadFixedTypeArgument()
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedTypeArgument));
+            Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Empty(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.FixedArguments[0];
+            var expected = new TypeReference(
+                attribute.Constructor.Module.CorLibTypeFactory.CorLibScope,
+                "System", "String");
+            
+            Assert.Equal(new TypeDefOrRefSignature(expected), argument.Element.Value as TypeSignature, _comparer);
         }
 
         [Fact]

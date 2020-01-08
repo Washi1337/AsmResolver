@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Blob
                 return true;
             if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
                 return false;
-
+                
             return x.Version == y.Version
                    && x.Name == y.Name
                    && x.Culture == y.Culture

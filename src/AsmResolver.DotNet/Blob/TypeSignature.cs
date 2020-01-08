@@ -217,7 +217,7 @@ namespace AsmResolver.DotNet.Blob
         /// Gets the underlying base type signature, without any extra adornments.
         /// </summary>
         /// <returns>The base signature.</returns>
-        public abstract TypeSignature GetLeafType();
+        public abstract ITypeDefOrRef GetUnderlyingTypeDefOrRef();
         
         /// <inheritdoc />
         public override string ToString() => FullName;

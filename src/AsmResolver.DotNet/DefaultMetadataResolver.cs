@@ -117,17 +117,7 @@ namespace AsmResolver.DotNet
 
         private TypeDefinition ResolveTypeSignature(TypeSignature signature)
         {
-            switch (signature.GetLeafType())
-            {
-                case CorLibTypeSignature corLibType:
-                    return ResolveType(corLibType.Type);
-                
-                case TypeDefOrRefSignature typeDefOrRef:
-                    return ResolveType(typeDefOrRef.Type);
-                
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            return ResolveType(signature.GetUnderlyingTypeDefOrRef());
         }
 
         /// <inheritdoc />

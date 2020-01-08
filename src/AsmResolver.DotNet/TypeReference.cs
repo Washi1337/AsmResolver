@@ -87,7 +87,11 @@ namespace AsmResolver.DotNet
         public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
-        public IResolutionScope Scope => _scope.Value;
+        public IResolutionScope Scope
+        {
+            get => _scope.Value;
+            set => _scope.Value = value;
+        }
 
         /// <inheritdoc />
         public bool IsValueType => false; // TODO: resolve. 
