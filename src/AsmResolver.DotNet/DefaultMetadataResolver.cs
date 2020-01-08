@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public TypeDefinition ResolveType(ITypeDefOrRef type)
+        public TypeDefinition ResolveType(ITypeDescriptor type)
         {
             switch (type)
             {
@@ -37,6 +37,10 @@ namespace AsmResolver.DotNet
                     return ResolveTypeReference(reference);
 
                 case TypeSpecification specification:
+                    // TODO:
+                    break;
+                
+                case TypeSignature signature:
                     // TODO:
                     break;
             }
@@ -91,6 +95,37 @@ namespace AsmResolver.DotNet
 
             return null;
         }
-        
+
+        /// <inheritdoc />
+        public MethodDefinition ResolveMethod(IMethodDescriptor method)
+        {
+            var declaringType = ResolveType(method.DeclaringType);
+            if (declaringType is null)
+                return null;
+
+            foreach (var m in declaringType.Methods)
+            {
+                if (m.Name == method.Name && (!m.IsHideBySig || _comparer.Equals(m.Signature, method.Signature)))
+                    return m;
+            }
+
+            return null;
+        }
+
+        /// <inheritdoc />
+        public FieldDefinition ResolveField(IFieldDescriptor field)
+        {
+            var declaringType = ResolveType(field.DeclaringType);
+            if (declaringType is null)
+                return null;
+
+            foreach (var f in declaringType.Fields)
+            {
+                if (f.Name == field.Name && _comparer.Equals(f.Signature, field.Signature))
+                    return f;
+            }
+
+            return null;
+        }
     }
 }

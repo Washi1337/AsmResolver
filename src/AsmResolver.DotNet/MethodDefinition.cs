@@ -13,7 +13,11 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single method in a type definition of a .NET module.
     /// </summary>
-    public class MethodDefinition : IOwnedCollectionElement<TypeDefinition>, IMemberRefParent, ICustomAttributeType
+    public class MethodDefinition : 
+        IMethodDescriptor,
+        IOwnedCollectionElement<TypeDefinition>,
+        IMemberRefParent, 
+        ICustomAttributeType
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;

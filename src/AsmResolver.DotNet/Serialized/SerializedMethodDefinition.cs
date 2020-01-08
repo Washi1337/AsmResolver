@@ -36,6 +36,8 @@ namespace AsmResolver.DotNet.Serialized
             _metadata = metadata;
             _parentModule = parentModule;
             _row = row;
+
+            Attributes = row.Attributes;
         }
 
         /// <inheritdoc />

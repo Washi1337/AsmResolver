@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Linq;
 using AsmResolver.DotNet.Blob;
 using AsmResolver.DotNet.TestCases.NestedClasses;
+using AsmResolver.PE.DotNet.Cil;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -56,7 +58,7 @@ namespace AsmResolver.DotNet.Tests
             var nested1 = new TypeReference(topLevelClass1,null, typeof(TopLevelClass1.Nested1).Name);
             
             var definition = _resolver.ResolveType(nested1);
-
+            
             Assert.Equal((ITypeDefOrRef) nested1, definition, _comparer);
         }
         
@@ -71,8 +73,38 @@ namespace AsmResolver.DotNet.Tests
             var nested1nested1 = new TypeReference(nested1,null, typeof(TopLevelClass1.Nested1.Nested1Nested1).Name);
             
             var definition = _resolver.ResolveType(nested1nested1);
-
+            
             Assert.Equal((ITypeDefOrRef) nested1nested1, definition, _comparer);
+        }
+
+        [Fact]
+        public void ResolveConsoleWriteLineMethod()
+        {
+            var module = new ModuleDefinition("SomeModule.dll");
+            
+            var consoleType = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Console");
+            var writeLineMethod = new MemberReference(consoleType, "WriteLine",
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void, module.CorLibTypeFactory.String));
+
+            var definition = _resolver.ResolveMethod(writeLineMethod);
+            
+            Assert.Equal(writeLineMethod.Name, definition.Name);
+            Assert.Equal(writeLineMethod.Signature, definition.Signature, _comparer);
+        }
+
+        [Fact]
+        public void ResolveStringEmptyField()
+        {
+            var module = new ModuleDefinition("SomeModule.dll");
+            
+            var stringType = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "String");
+            var emptyField = new MemberReference(stringType, "Empty",
+                FieldSignature.CreateStatic(module.CorLibTypeFactory.String));
+
+            var definition = _resolver.ResolveField(emptyField);
+            
+            Assert.Equal(emptyField.Name, definition.Name);
+            Assert.Equal(emptyField.Signature, definition.Signature, _comparer);
         }
         
     }

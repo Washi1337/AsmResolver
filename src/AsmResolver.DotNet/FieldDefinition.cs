@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single field in a type definition of a .NET module.
     /// </summary>
-    public class FieldDefinition : IMemberDescriptor, IHasCustomAttribute, IOwnedCollectionElement<TypeDefinition>
+    public class FieldDefinition : IFieldDescriptor, IHasCustomAttribute, IOwnedCollectionElement<TypeDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<FieldSignature> _signature;
@@ -335,5 +335,8 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="DeclaringType"/> property.
         /// </remarks>
         protected virtual TypeDefinition GetDeclaringType() => null;
+
+        /// <inheritdoc />
+        public override string ToString() => FullName;
     }
 }

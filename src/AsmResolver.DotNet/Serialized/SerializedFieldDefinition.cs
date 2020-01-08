@@ -32,6 +32,8 @@ namespace AsmResolver.DotNet.Serialized
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
+
+            Attributes = row.Attributes;
         }
 
         /// <inheritdoc />

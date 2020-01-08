@@ -6,6 +6,22 @@ namespace AsmResolver.DotNet.Blob
     public class FieldSignature : MemberSignature
     {
         /// <summary>
+        /// Creates a new field signature for a static field.
+        /// </summary>
+        /// <param name="fieldType">The value type of the field.</param>
+        /// <returns>The signature.</returns>
+        public static FieldSignature CreateStatic(TypeSignature fieldType)
+            => new FieldSignature(CallingConventionAttributes.Field, fieldType);
+        
+        /// <summary>
+        /// Creates a new field signature for a static field.
+        /// </summary>
+        /// <param name="fieldType">The value type of the field.</param>
+        /// <returns>The signature.</returns>
+        public static FieldSignature CreateInstance(TypeSignature fieldType)
+            => new FieldSignature(CallingConventionAttributes.Field | CallingConventionAttributes.HasThis, fieldType);
+
+        /// <summary>
         /// Reads a single field signature from an input stream.
         /// </summary>
         /// <param name="module">The module containing the signature.</param>
