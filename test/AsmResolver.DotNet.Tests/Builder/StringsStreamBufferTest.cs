@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Builder.Strings;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using Xunit;
 

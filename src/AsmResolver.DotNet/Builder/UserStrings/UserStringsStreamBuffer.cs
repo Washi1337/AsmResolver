@@ -6,7 +6,7 @@ using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Builder.UserStrings
 {
     /// <summary>
     /// Provides a mutable buffer for building up a user-strings stream in a .NET portable executable. 

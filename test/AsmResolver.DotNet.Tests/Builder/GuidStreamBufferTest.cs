@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Builder.Guid;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using Xunit;
 

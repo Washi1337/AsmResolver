@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Builder.Guid
 {
     /// <summary>
     /// Provides a mutable buffer for building up a GUID stream in a .NET portable executable. 
@@ -14,7 +13,7 @@ namespace AsmResolver.DotNet.Builder
     {
         private readonly MemoryStream _rawStream = new MemoryStream();
         private readonly BinaryStreamWriter _writer;
-        private readonly IDictionary<Guid, uint> _guids = new Dictionary<Guid, uint>();
+        private readonly IDictionary<System.Guid, uint> _guids = new Dictionary<System.Guid, uint>();
 
         /// <summary>
         /// Creates a new GUID stream buffer with the default GUID stream name.
@@ -53,9 +52,9 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="guid">The GUID. to lookup or add.</param>
         /// <returns>The index of the GUID.</returns>
-        public uint GetGuidIndex(Guid guid)
+        public uint GetGuidIndex(System.Guid guid)
         {
-            if (guid == Guid.Empty)
+            if (guid == System.Guid.Empty)
                 return 0;
             
             if (!_guids.TryGetValue(guid, out uint index))

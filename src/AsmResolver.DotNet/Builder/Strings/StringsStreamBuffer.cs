@@ -5,7 +5,7 @@ using System.Text;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Builder.Strings
 {
     /// <summary>
     /// Provides a mutable buffer for building up a strings stream in a .NET portable executable. 
