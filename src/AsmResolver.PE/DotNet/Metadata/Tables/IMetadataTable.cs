@@ -37,6 +37,20 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
+        /// Gets the contents of a row by its row identifier.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <returns>The row.</returns>
+        IMetadataRow GetByRid(uint rid);
+
+        /// <summary>
+        /// Sets the contents of a row by its row identifier.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <param name="row">The new contents of the row.</param>
+        void SetByRid(uint rid, IMetadataRow row);
+
+        /// <summary>
         /// Updates the table layout.
         /// </summary>
         /// <param name="layout">The new table layout.</param>

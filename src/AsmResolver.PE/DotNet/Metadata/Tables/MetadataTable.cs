@@ -116,6 +116,24 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </remarks>
         protected virtual IList<TRow> GetRows() => new List<TRow>();
 
+        /// <summary>
+        /// Gets the contents of a row by its row identifier.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <returns>The row.</returns>
+        public TRow GetByRid(uint rid) => this[(int) (rid - 1)];
+
+        IMetadataRow IMetadataTable.GetByRid(uint rid) => GetByRid(rid);
+
+        /// <summary>
+        /// Sets the contents of a row by its row identifier.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <param name="row">The new contents of the row.</param>
+        public void SetByRid(uint rid, TRow row) => this[(int) (rid - 1)] = row;
+
+        void IMetadataTable.SetByRid(uint rid, IMetadataRow row) => SetByRid(rid, (TRow) row);
+
         /// <inheritdoc />
         public virtual void UpdateTableLayout(TableLayout layout)
         {
