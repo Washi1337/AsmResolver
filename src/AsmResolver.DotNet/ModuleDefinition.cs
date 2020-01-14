@@ -336,6 +336,26 @@ namespace AsmResolver.DotNet
         /// </exception>
         public virtual IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>
             throw new InvalidOperationException("Cannot get an index encoder from a non-serialized module.");
+       
+        /// <summary>
+        /// Enumerates all types (including nested types) defined in the module.
+        /// </summary>
+        /// <returns>The types.</returns>
+        public IEnumerable<TypeDefinition> GetAllTypes()
+        {
+            var agenda = new Queue<TypeDefinition>();
+            foreach (var type in TopLevelTypes)
+                agenda.Enqueue(type);
+
+            while (agenda.Count > 0)
+            {
+                var currentType = agenda.Dequeue();
+                yield return currentType;
+
+                foreach (var nestedType in currentType.NestedTypes)
+                    agenda.Enqueue(nestedType);
+            }
+        }
 
         /// <summary>
         /// Obtains the name of the module definition.
@@ -405,5 +425,6 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override string ToString() => Name;
+
     }
 }
