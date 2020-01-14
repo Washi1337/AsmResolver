@@ -1,5 +1,5 @@
 using System.IO;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using Xunit;
 

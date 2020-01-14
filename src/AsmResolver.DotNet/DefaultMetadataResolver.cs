@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet
 {

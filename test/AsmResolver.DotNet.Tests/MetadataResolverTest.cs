@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Cil;
 using Xunit;

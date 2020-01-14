@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;

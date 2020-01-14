@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Collections
 {

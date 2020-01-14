@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;

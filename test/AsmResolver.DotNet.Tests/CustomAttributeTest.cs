@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata.Tables;

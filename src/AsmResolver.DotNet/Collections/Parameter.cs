@@ -1,5 +1,5 @@
 using System;
-using AsmResolver.DotNet.Blob;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Collections
 {
