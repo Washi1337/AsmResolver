@@ -6,7 +6,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 namespace AsmResolver.DotNet.Builder.Tables
 {
     /// <summary>
-    /// Provides an implementation of a metadata table buffer, that does not apply any special ordering on the added rows.\  
+    /// Provides an implementation of a metadata table buffer, that does not apply any special ordering on the added rows.
     /// </summary>
     /// <typeparam name="TRow">The type of rows that this buffer contains.</typeparam>
     public class UnsortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow>
@@ -42,22 +42,7 @@ namespace AsmResolver.DotNet.Builder.Tables
             foreach (var row in _rows)
                 table.Add(row);
 
-            return new SimpleConstructedTableInfo(table);
-        }
-
-        private struct SimpleConstructedTableInfo : IConstructedTableInfo<TRow>
-        {
-            public SimpleConstructedTableInfo(MetadataTable<TRow> serializedTable)
-            {
-                ConstructedTable = serializedTable;
-            }
-        
-            public MetadataTable<TRow> ConstructedTable
-            {
-                get;
-            }
-
-            public uint GetRid(MetadataRowHandle handle) => (uint) handle.Id;
+            return new SimpleConstructedTableInfo<TRow>(table);
         }
     }
 }
