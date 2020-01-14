@@ -62,10 +62,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         /// <inheritdoc />
         public override System.Guid GetGuidByIndex(uint index)
         {
-            index--;
-            if (index < _contents.GetPhysicalSize())
+            if (index == 0)
+                return System.Guid.Empty;
+
+            uint offset = (index - 1) * 16;
+            if (offset < _contents.GetPhysicalSize())
             {
-                var guidReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
+                var guidReader = _contents.CreateReader((uint) (_contents.FileOffset + offset));
                 var data = new byte[16];
                 guidReader.ReadBytes(data, 0, data.Length);
                 return new System.Guid(data);
