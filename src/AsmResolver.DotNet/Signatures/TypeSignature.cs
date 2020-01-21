@@ -66,25 +66,25 @@ namespace AsmResolver.DotNet.Signatures
                 
                 case ElementType.ByRef:
                     return new ByReferenceTypeSignature(FromReader(module, reader, protection));
-                
+
                 case ElementType.Var:
-                    break;
-                
-                case ElementType.Array:
-                    break;
-                
-                case ElementType.GenericInst:
-                    return GenericInstanceTypeSignature.FromReader(module, reader, protection);
-                
-                case ElementType.FnPtr:
-                    break;
-                
-                case ElementType.SzArray:
-                    return new SzArrayTypeSignature(FromReader(module, reader, protection));
+                    return new GenericParameterSignature(GenericParameterType.Type, (int) reader.ReadCompressedUInt32());
                 
                 case ElementType.MVar:
+                    return new GenericParameterSignature(GenericParameterType.Method, (int) reader.ReadCompressedUInt32());
+
+                case ElementType.Array:
                     break;
-                
+
+                case ElementType.GenericInst:
+                    return GenericInstanceTypeSignature.FromReader(module, reader, protection);
+
+                case ElementType.FnPtr:
+                    break;
+
+                case ElementType.SzArray:
+                    return new SzArrayTypeSignature(FromReader(module, reader, protection));
+
                 case ElementType.CModReqD:
                     return new CustomModifierTypeSignature(
                         ReadTypeDefOrRef(module, reader, protection, true), 
