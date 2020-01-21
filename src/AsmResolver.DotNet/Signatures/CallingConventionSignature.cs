@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Signatures
         public static CallingConventionSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader,
             bool readToEnd = false)
         {
-            return FromReader(module, reader, readToEnd, new RecursionProtection());
+            return FromReader(module, reader, readToEnd, RecursionProtection.CreateNew());
         }
 
         /// <summary>

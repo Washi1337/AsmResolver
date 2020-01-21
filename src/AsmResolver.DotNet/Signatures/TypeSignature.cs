@@ -69,17 +69,22 @@ namespace AsmResolver.DotNet.Signatures
                 
                 case ElementType.Var:
                     break;
+                
                 case ElementType.Array:
                     break;
+                
                 case ElementType.GenericInst:
-                    break;
+                    return GenericInstanceTypeSignature.FromReader(module, reader, protection);
+                
                 case ElementType.FnPtr:
                     break;
+                
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(FromReader(module, reader, protection));
                 
                 case ElementType.MVar:
                     break;
+                
                 case ElementType.CModReqD:
                     return new CustomModifierTypeSignature(
                         ReadTypeDefOrRef(module, reader, protection, true), 
