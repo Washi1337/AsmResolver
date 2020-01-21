@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet.Code.Cil
             if (signature == null)
             {
                 if (opCode.Code == CilCode.Ret)
-                    return parent.Owner.Signature.ReturnType.IsTypeOf("System", "Void") ? 0 : 1;
+                    return parent == null || parent.Owner.Signature.ReturnType.IsTypeOf("System", "Void") ? 0 : 1;
             }
             else
             {
