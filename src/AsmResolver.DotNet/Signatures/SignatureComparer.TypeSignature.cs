@@ -12,6 +12,8 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<SzArrayTypeSignature>,
         IEqualityComparer<TypeDefOrRefSignature>,
         IEqualityComparer<CustomModifierTypeSignature>,
+        IEqualityComparer<GenericInstanceTypeSignature>,
+        IEqualityComparer<GenericParameterSignature>,
         IEqualityComparer<IEnumerable<TypeSignature>>
     {
         /// <inheritdoc />
@@ -150,6 +152,49 @@ namespace AsmResolver.DotNet.Signatures
                 return hashCode;
             }
         }
+
+        /// <inheritdoc />
+        public bool Equals(GenericInstanceTypeSignature x, GenericInstanceTypeSignature y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+
+            return x.IsValueType == y.IsValueType
+                   && Equals(x.GenericType, y.GenericType)
+                   && Equals(x.TypeArguments, y.TypeArguments);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(GenericInstanceTypeSignature obj)
+        {
+            unchecked
+            {
+                int hashCode = (int) obj.ElementType << ElementTypeOffset;
+                hashCode = (hashCode * 397) ^ (obj.GenericType != null ? obj.GenericType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ GetHashCode(obj.TypeArguments);
+                return hashCode;
+            }
+        }
+        
+        /// <inheritdoc />
+        public bool Equals(GenericParameterSignature x, GenericParameterSignature y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+
+            return x.Index == y.Index
+                   && x.ParameterType == y.ParameterType;
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(GenericParameterSignature obj)
+        {
+            return (int) obj.ElementType << ElementTypeOffset | obj.Index;
+        }
         
         private bool Equals(TypeSpecificationSignature x, TypeSpecificationSignature y)
         {
@@ -181,7 +226,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             int checksum = 0;
             foreach (var type in obj)
-                checksum ^= type.GetHashCode();
+                checksum ^= GetHashCode(type);
             return checksum;
         }
     }
