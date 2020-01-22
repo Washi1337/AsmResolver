@@ -556,6 +556,8 @@ namespace AsmResolver.DotNet
             }
         }
 
+        MethodDefinition IMethodDescriptor.Resolve() => this;
+        
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
         /// </summary>

@@ -83,7 +83,6 @@ namespace AsmResolver.DotNet
         
         ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
 
-
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
@@ -94,6 +93,9 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
+
+        /// <inheritdoc />
+        public MethodDefinition Resolve() => Method.Resolve();
 
         /// <summary>
         /// Obtains the instantiated method.
