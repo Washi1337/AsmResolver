@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet
@@ -36,6 +37,26 @@ namespace AsmResolver.DotNet
             return declaringType is null
                 ? $"{signature.ReturnType} {name}({parameterTypesString})"
                 : $"{signature.ReturnType} {declaringType}::{name}({parameterTypesString})";
+        }
+
+        /// <summary>
+        /// Computes the full name of a method specification, including its declaring type's full name, as well as its
+        /// return type, parameters and any type arguments.
+        /// </summary>
+        /// <param name="name">The name of the method.</param>
+        /// <param name="declaringType">The declaring type of the method if available.</param>
+        /// <param name="signature">The signature of the method.</param>
+        /// <param name="typeArguments">The type arguments.</param>
+        /// <returns>The full name</returns>
+        public static string GetMethodFullName(string name, ITypeDescriptor declaringType, MethodSignature signature,
+            IEnumerable<TypeSignature> typeArguments)
+        {
+            string parameterTypesString = GetParameterTypesString(signature);
+            string typeArgumentsString = string.Join(", ", typeArguments);
+            
+            return declaringType is null
+                ? $"{signature.ReturnType} {name}<{typeArgumentsString}>({parameterTypesString})"
+                : $"{signature.ReturnType} {declaringType}::{name}<{typeArgumentsString}>({parameterTypesString})";
         }
 
         /// <summary>

@@ -6,5 +6,12 @@ namespace AsmResolver.DotNet
     /// </summary>
     public interface IMethodDefOrRef : IMethodDescriptor, IHasCustomAttribute
     {
+        /// <summary>
+        /// When this member is defined in a type, gets the enclosing type.
+        /// </summary>
+        new ITypeDefOrRef DeclaringType
+        {
+            get;
+        }
     }
 }

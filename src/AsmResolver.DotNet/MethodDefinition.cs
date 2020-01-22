@@ -13,8 +13,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single method in a type definition of a .NET module.
     /// </summary>
-    public class MethodDefinition : 
-        IMethodDescriptor,
+    public class MethodDefinition :
         IOwnedCollectionElement<TypeDefinition>,
         IMemberRefParent, 
         ICustomAttributeType
@@ -470,9 +469,10 @@ namespace AsmResolver.DotNet
             get => _declaringType.Value;
             set => _declaringType.Value = value;
         }
-
-
+        
         ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
+        
+        ITypeDefOrRef IMethodDefOrRef.DeclaringType => DeclaringType;
 
         TypeDefinition IOwnedCollectionElement<TypeDefinition>.Owner
         {

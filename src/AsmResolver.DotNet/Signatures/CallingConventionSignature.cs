@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Signatures
                     return LocalVariablesSignature.FromReader(module, reader, protection);
                     
                 case CallingConventionAttributes.GenericInstance:
-                    throw new NotImplementedException();
+                    return GenericInstanceMethodSignature.FromReader(module, reader, protection);
                 
                 case CallingConventionAttributes.Field:
                     return FieldSignature.FromReader(module, reader, protection);
