@@ -23,6 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         private MethodSemantics[] _methodSemantics;
         private TypeSpecification[] _typeSpecifications;
         private CustomAttribute[] _customAttributes;
+        private MethodSpecification[] _methodSpecifications;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -48,6 +49,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.Event => LookupEventDefinition(token),
                 TableIndex.MethodSemantics => LookupMethodSemantics(token),
                 TableIndex.CustomAttribute => LookupCustomAttribute(token),
+                TableIndex.MethodSpec => LookupMethodSpecification(token),
                 _ => null
             };
 
@@ -138,6 +140,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<CustomAttribute, CustomAttributeRow>(ref _customAttributes, token,
                 (m, t, r) => new SerializedCustomAttribute(m, _parentModule, t, r));
+        }
+
+        private IMetadataMember LookupMethodSpecification(in MetadataToken token)
+        {
+            return LookupOrCreateMember<MethodSpecification, MethodSpecificationRow>(ref _methodSpecifications, token,
+                (m, t, r) => new SerializedMethodSpecification(m, _parentModule, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

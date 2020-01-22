@@ -7,7 +7,8 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<CallingConventionSignature>,
         IEqualityComparer<FieldSignature>,
         IEqualityComparer<MethodSignature>,
-        IEqualityComparer<LocalVariablesSignature>
+        IEqualityComparer<LocalVariablesSignature>,
+        IEqualityComparer<GenericInstanceMethodSignature>
     {
         /// <inheritdoc />
         public bool Equals(CallingConventionSignature x, CallingConventionSignature y)
@@ -111,6 +112,29 @@ namespace AsmResolver.DotNet.Signatures
             {
                 int hashCode = (int) obj.Attributes;
                 hashCode = (hashCode * 397) ^ GetHashCode(obj.VariableTypes);
+                return hashCode;
+            }
+        }
+
+        /// <inheritdoc />
+        public bool Equals(GenericInstanceMethodSignature x, GenericInstanceMethodSignature y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+
+            return x.Attributes == y.Attributes
+                   && Equals(x.TypeArguments, y.TypeArguments);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(GenericInstanceMethodSignature obj)
+        {
+            unchecked
+            {
+                int hashCode = (int) obj.Attributes;
+                hashCode = (hashCode * 397) ^ GetHashCode(obj.TypeArguments);
                 return hashCode;
             }
         }

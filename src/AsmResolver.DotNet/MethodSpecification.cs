@@ -110,6 +110,9 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+
+        /// <inheritdoc />
+        public override string ToString() => FullName;
     }
 
 }
