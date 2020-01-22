@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Signatures;
@@ -136,7 +137,36 @@ namespace AsmResolver.DotNet
             }
         }
 
-        MethodDefinition IMethodDescriptor.Resolve() => Module?.MetadataResolver.ResolveMethod(this);
+        /// <summary>
+        /// Resolves the reference to a member definition.
+        /// </summary>
+        /// <returns>The resolved member definition, or <c>null</c> if the member could not be resolved.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the member reference has an invalid signature.</exception>
+        /// <remarks>
+        /// This method can only be invoked if the reference was added to a module. 
+        /// </remarks>
+        public IMetadataMember Resolve()
+        {
+            if (IsMethod)
+                return ((IMethodDescriptor) this).Resolve();
+            if (IsField)
+                return ((IFieldDescriptor) this).Resolve();
+            throw new ArgumentOutOfRangeException();
+        }
+
+        FieldDefinition IFieldDescriptor.Resolve()
+        {
+            if (!IsField)
+                throw new InvalidOperationException("Member reference must reference a field.");
+            return Module?.MetadataResolver.ResolveField(this);
+        }
+
+        MethodDefinition IMethodDescriptor.Resolve()
+        {
+            if (!IsMethod)
+                throw new InvalidOperationException("Member reference must reference a method.");
+            return Module?.MetadataResolver.ResolveMethod(this);
+        }
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

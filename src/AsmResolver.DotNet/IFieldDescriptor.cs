@@ -14,5 +14,14 @@ namespace AsmResolver.DotNet
         {
             get;
         }
+
+        /// <summary>
+        /// Resolves the reference to a field definition. 
+        /// </summary>
+        /// <returns>The resolved field definition, or <c>null</c> if the field could not be resolved.</returns>
+        /// <remarks>
+        /// This method can only be invoked if the reference was added to a module. 
+        /// </remarks>
+        FieldDefinition Resolve();
     }
 }
