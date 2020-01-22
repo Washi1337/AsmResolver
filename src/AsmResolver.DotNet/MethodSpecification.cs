@@ -7,12 +7,19 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
 {
+    /// <summary>
+    /// Represents a reference to a generic method that is instantiated with type arguments.
+    /// </summary>
     public class MethodSpecification : IMethodDescriptor, IHasCustomAttribute
     {
         private readonly LazyVariable<IMethodDefOrRef> _method;
         private readonly LazyVariable<GenericInstanceMethodSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
 
+        /// <summary>
+        /// Creates a new empty method specification.
+        /// </summary>
+        /// <param name="token">The token of the specification.</param>
         protected MethodSpecification(MetadataToken token)
         {
             MetadataToken = token;
@@ -20,6 +27,11 @@ namespace AsmResolver.DotNet
             _signature = new LazyVariable<GenericInstanceMethodSignature>(GetSignature);
         }
 
+        /// <summary>
+        /// Creates a new reference to a generic instantiation of a method.
+        /// </summary>
+        /// <param name="method">The method to instantiate.</param>
+        /// <param name="signature">The instantiation signature.</param>
         public MethodSpecification(IMethodDefOrRef method, GenericInstanceMethodSignature signature)
             : this(new MetadataToken(TableIndex.MethodSpec,0))
         {
