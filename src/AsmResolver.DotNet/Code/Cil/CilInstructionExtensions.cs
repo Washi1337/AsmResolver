@@ -94,6 +94,9 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             switch (instruction.OpCode.StackBehaviourPush)
             {
+                case CilStackBehaviour.Push0:
+                    return 0;
+                
                 case CilStackBehaviour.Push1:
                 case CilStackBehaviour.PushI:
                 case CilStackBehaviour.PushI8:
