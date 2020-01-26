@@ -94,5 +94,23 @@ namespace AsmResolver.DotNet.Serialized
 
             return null;
         }
+
+        /// <inheritdoc />
+        protected override IList<GenericParameter> GetGenericParameters()
+        {
+            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
+            
+            foreach (uint rid in _parentModule.GetGenericParameters(MetadataToken))
+            {
+                if (_parentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
+                    && member is GenericParameter genericParameter)
+                {
+                    result.Add(genericParameter);
+                }
+            }
+
+            return result;
+        }
+
     }
 }

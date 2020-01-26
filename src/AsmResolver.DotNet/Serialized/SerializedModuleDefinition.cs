@@ -31,6 +31,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToManyRelation<uint, uint> _typeDefTree;
         private OneToManyRelation<MetadataToken, uint> _semantics;
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
+        private OneToManyRelation<MetadataToken, uint> _genericParameters;
         
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -263,7 +264,40 @@ namespace AsmResolver.DotNet.Serialized
             
             return result;
         }
+
+        private void EnsureGenericParametersInitialized()
+        {
+            if (_genericParameters is null)
+                InitializeGenericParameters();
+        }
+
+        private void InitializeGenericParameters()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var parameterTable = tablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
+            
+            _genericParameters = new OneToManyRelation<MetadataToken, uint>();
+            for (int i = 0; i < parameterTable.Count; i++)
+            {
+                var ownerToken = encoder.DecodeIndex(parameterTable[i].Owner);
+                uint parameterRid = (uint) (i + 1);
+                _genericParameters.Add(ownerToken, parameterRid);
+            }
+        }
+
+        internal MetadataToken GetGenericParameterOwner(uint parameterRid)
+        {
+            EnsureGenericParametersInitialized();
+            return _genericParameters.GetMemberOwner(parameterRid);
+        }
         
+        internal ICollection<uint> GetGenericParameters(MetadataToken ownerToken)
+        {
+            EnsureGenericParametersInitialized();
+            return _genericParameters.GetMemberList(ownerToken);
+        }
+
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {

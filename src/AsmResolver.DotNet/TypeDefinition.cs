@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
     public class TypeDefinition : ITypeDefOrRef,
+        IHasGenericParameters,
         IOwnedCollectionElement<ModuleDefinition>,
         IOwnedCollectionElement<TypeDefinition>
     {
@@ -27,6 +28,7 @@ namespace AsmResolver.DotNet
         private IList<PropertyDefinition> _properties;
         private IList<EventDefinition> _events;
         private IList<CustomAttribute> _customAttributes;
+        private IList<GenericParameter> _genericParameters;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -518,6 +520,17 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public IList<GenericParameter> GenericParameters
+        {
+            get
+            {
+                if (_genericParameters is null)
+                    Interlocked.CompareExchange(ref _genericParameters, GetGenericParameters(), null);
+                return _genericParameters;
+            }
+        }
+
         /// <summary>
         /// Creates a new type reference to this type definition. 
         /// </summary>
@@ -659,6 +672,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+
+        /// <summary>
+        /// Obtains the list of generic parameters this member declares.
+        /// </summary>
+        /// <returns>The generic parameters</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="GenericParameters"/> property.
+        /// </remarks>
+        protected virtual IList<GenericParameter> GetGenericParameters() =>
+            new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
 
         /// <inheritdoc />
         public override string ToString() => FullName;

@@ -112,6 +112,22 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
             _parentModule.GetCustomAttributeCollection(this);
-     
+
+        /// <inheritdoc />
+        protected override IList<GenericParameter> GetGenericParameters()
+        {
+            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
+            
+            foreach (uint rid in _parentModule.GetGenericParameters(MetadataToken))
+            {
+                if (_parentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
+                    && member is GenericParameter genericParameter)
+                {
+                    result.Add(genericParameter);
+                }
+            }
+
+            return result;
+        }
     }
 }

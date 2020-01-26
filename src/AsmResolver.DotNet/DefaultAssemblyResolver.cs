@@ -83,7 +83,8 @@ namespace AsmResolver.DotNet
         {
             if (Type.GetType("Mono.Runtime") == null)
             {
-                DetectWindowsGacDirectories();
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                    DetectWindowsGacDirectories();
             }
             else
             {
@@ -104,6 +105,9 @@ namespace AsmResolver.DotNet
 
         private void AddGacDirectories(string windowsGac, string prefix)
         {
+            if (!Directory.Exists(windowsGac))
+                return;
+            
             foreach (string directory in Directory.GetDirectories(windowsGac))
             {
                 string name = Path.GetFileName(directory);

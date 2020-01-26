@@ -3,6 +3,7 @@ using System.Linq;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
@@ -206,6 +207,14 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             Assert.Single(type.CustomAttributes);
+        }
+        
+        [Fact]
+        public void ReadGenericParameters()
+        {
+            var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == typeof(GenericType<,,>).Name);
+            Assert.Equal(3, type.GenericParameters.Count);
         }
     }
 }
