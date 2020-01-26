@@ -92,7 +92,8 @@ namespace AsmResolver.DotNet
         /// <param name="readParameters">The parameters to use while reading the assembly.</param>
         /// <returns>The module.</returns>
         public static AssemblyDefinition FromMetadata(IMetadata metadata, ModuleReadParameters readParameters) =>
-            ModuleDefinition.FromMetadata(metadata, readParameters).Assembly;
+            ModuleDefinition.FromMetadata(metadata, readParameters).Assembly
+            ?? throw new BadImageFormatException("The metadata directory does not contain an assembly definition.");
         
         private IList<ModuleDefinition> _modules;
         private readonly LazyVariable<byte[]> _publicKey;

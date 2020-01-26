@@ -29,5 +29,14 @@ namespace AsmResolver.DotNet.Serialized
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets the method body parser.
+        /// </summary>
+        public IMethodBodyReader MethodBodyReader
+        {
+            get;
+            set;
+        } = new DefaultMethodBodyReader();
     }
 }

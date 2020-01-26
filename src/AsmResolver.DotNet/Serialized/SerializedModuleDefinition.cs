@@ -19,9 +19,8 @@ namespace AsmResolver.DotNet.Serialized
     {
         private readonly IMetadata _metadata;
         private readonly ModuleDefinitionRow _row;
-        private readonly ModuleReadParameters _readParameters;
-        private readonly CachedSerializedMemberFactory _memberFactory;
 
+        private readonly CachedSerializedMemberFactory _memberFactory;
         private readonly LazyRidListRelation<TypeDefinitionRow> _fieldLists;
         private readonly LazyRidListRelation<TypeDefinitionRow> _methodLists;
         private readonly LazyRidListRelation<MethodDefinitionRow> _paramLists;
@@ -46,7 +45,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             _metadata = metadata;
             _row = row;
-            _readParameters = readParameters;
+            ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
             Generation = row.Generation;
             MetadataToken = token;
 
@@ -80,6 +79,14 @@ namespace AsmResolver.DotNet.Serialized
                 (_, map) => map.Parent, tablesStream.GetPropertyRange);
             _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
+        }
+
+        /// <summary>
+        /// Gets the reading parameters that are used for reading the contents of the module.
+        /// </summary>
+        public ModuleReadParameters ReadParameters
+        {
+            get;
         }
 
         /// <inheritdoc />

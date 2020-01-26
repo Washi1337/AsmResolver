@@ -40,6 +40,13 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void ReadSecondaryModuleAsAssemblyShouldThrow()
+        {
+            Assert.Throws<BadImageFormatException>(() =>
+                AssemblyDefinition.FromFile(Path.Combine("Resources", "MyModel.netmodule")));
+        }
+        
+        [Fact]
         public void ReadPublicKeyToken()
         {
             var corlibAssembly = typeof(object).Assembly;

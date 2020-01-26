@@ -77,23 +77,8 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override MethodBody GetBody()
-        {
-            // TODO: make configurable
-
-            if (_row.Body.CanRead)
-            {
-                if (IsIL)
-                {
-                    var rawBody = CilRawMethodBody.FromReader(_row.Body.CreateReader());
-                    return CilMethodBody.FromRawMethodBody(this, rawBody);
-                }
-                
-                // TODO: handle native method bodies.
-            }
-
-            return null;
-        }
+        protected override MethodBody GetBody() => 
+            _parentModule.ReadParameters.MethodBodyReader.ReadMethodBody(this, _row);
 
         /// <inheritdoc />
         protected override IList<GenericParameter> GetGenericParameters()
