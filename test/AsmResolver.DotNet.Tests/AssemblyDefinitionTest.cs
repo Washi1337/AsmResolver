@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -20,13 +21,22 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
-        public void ReadSingleModule()
+        public void ReadSingleModuleAssembly()
         {
             var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Single(assemblyDef.Modules);
             Assert.NotNull(assemblyDef.ManifestModule);
             Assert.Equal(new[] {assemblyDef.ManifestModule}, assemblyDef.Modules);
             Assert.Same(assemblyDef, assemblyDef.ManifestModule.Assembly);
+        }
+
+        [Fact]
+        public void ReadMultiModuleAssembly()
+        {
+            var assemblyDef = AssemblyDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"));
+            Assert.Equal(2, assemblyDef.Modules.Count);
+            Assert.Equal("Manifest.exe", assemblyDef.ManifestModule.Name);
+            Assert.Equal("MyModel.netmodule", assemblyDef.Modules[1].Name);
         }
 
         [Fact]

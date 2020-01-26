@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.Lazy;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
@@ -24,14 +26,16 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static AssemblyDefinition FromBytes(byte[] buffer) => FromImage(PEImage.FromBytes(buffer));
-        
+
         /// <summary>
         /// Reads a .NET assembly from the provided input file.
         /// </summary>
         /// <param name="filePath">The file path to the input executable to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromFile(string filePath) => FromImage(PEImage.FromFile(filePath));
+        public static AssemblyDefinition FromFile(string filePath) => FromImage(
+            PEImage.FromFile(filePath),
+            new ModuleReadParameters(Path.GetDirectoryName(filePath)));
 
         /// <summary>
         /// Reads a .NET assembly from the provided input file.
@@ -48,20 +52,29 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static AssemblyDefinition FromReader(IBinaryStreamReader reader) => FromImage(PEImage.FromReader(reader));
-        
+
         /// <summary>
         /// Initializes a .NET assembly from a PE image.
         /// </summary>
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromImage(IPEImage peImage)
+        public static AssemblyDefinition FromImage(IPEImage peImage) => FromImage(peImage, new ModuleReadParameters());
+        
+        /// <summary>
+        /// Initializes a .NET assembly from a PE image.
+        /// </summary>
+        /// <param name="peImage">The image containing the .NET metadata.</param>
+        /// <param name="readParameters">The parameters to use while reading the assembly.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static AssemblyDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters)
         {
             if (peImage.DotNetDirectory == null)
                 throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
             if (peImage.DotNetDirectory.Metadata == null)
                 throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
-            return FromMetadata(peImage.DotNetDirectory.Metadata);
+            return FromMetadata(peImage.DotNetDirectory.Metadata, readParameters);
         }
 
         /// <summary>
@@ -71,6 +84,15 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         public static AssemblyDefinition FromMetadata(IMetadata metadata) =>
             ModuleDefinition.FromMetadata(metadata).Assembly;
+
+        /// <summary>
+        /// Initializes a .NET module from a .NET metadata directory.
+        /// </summary>
+        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="readParameters">The parameters to use while reading the assembly.</param>
+        /// <returns>The module.</returns>
+        public static AssemblyDefinition FromMetadata(IMetadata metadata, ModuleReadParameters readParameters) =>
+            ModuleDefinition.FromMetadata(metadata, readParameters).Assembly;
         
         private IList<ModuleDefinition> _modules;
         private readonly LazyVariable<byte[]> _publicKey;

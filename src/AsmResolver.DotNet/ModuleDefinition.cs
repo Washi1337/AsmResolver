@@ -26,14 +26,28 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromBytes(byte[] buffer) => FromImage(PEImage.FromBytes(buffer));
-        
+
         /// <summary>
         /// Reads a .NET module from the provided input file.
         /// </summary>
         /// <param name="filePath">The file path to the input executable to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(string filePath) => FromImage(PEImage.FromFile(filePath));
+        public static ModuleDefinition FromFile(string filePath) => FromFile(filePath, new ModuleReadParameters());
+
+        /// <summary>
+        /// Reads a .NET module from the provided input file.
+        /// </summary>
+        /// <param name="filePath">The file path to the input executable to load.</param>
+        /// <param name="readParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromFile(string filePath, ModuleReadParameters readParameters)
+        {
+            var module = FromImage(PEImage.FromFile(filePath), readParameters);
+            module.FilePath = filePath;
+            return module;
+        }
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -50,14 +64,23 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromReader(IBinaryStreamReader reader) => FromImage(PEImage.FromReader(reader));
-        
+
         /// <summary>
         /// Initializes a .NET module from a PE image.
         /// </summary>
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage)
+        public static ModuleDefinition FromImage(IPEImage peImage) => FromImage(peImage, new ModuleReadParameters());
+
+        /// <summary>
+        /// Initializes a .NET module from a PE image.
+        /// </summary>
+        /// <param name="peImage">The image containing the .NET metadata.</param>
+        /// <param name="readParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters)
         {
             if (peImage.DotNetDirectory == null)
                 throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
@@ -71,21 +94,35 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <returns>The module.</returns>
-        public static ModuleDefinition FromMetadata(IMetadata metadata)
+        public static ModuleDefinition FromMetadata(IMetadata metadata) => FromMetadata(metadata, new ModuleReadParameters());
+
+        /// <summary>
+        /// Initializes a .NET module from a .NET metadata directory.
+        /// </summary>
+        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="readParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        public static ModuleDefinition FromMetadata(IMetadata metadata, ModuleReadParameters readParameters)
         {
             var stream = metadata.GetStream<TablesStream>();
             var moduleTable = stream.GetTable<ModuleDefinitionRow>();
-            var module = new SerializedModuleDefinition(metadata, new MetadataToken(TableIndex.Module, 1), moduleTable[0]);
+            var module = new SerializedModuleDefinition(metadata, new MetadataToken(TableIndex.Module, 1), moduleTable[0], readParameters);
 
             return module;
         }
 
         private readonly LazyVariable<string> _name;
+
         private readonly LazyVariable<Guid> _mvid;
+
         private readonly LazyVariable<Guid> _encId;
+
         private readonly LazyVariable<Guid> _encBaseId;
+
         private IList<TypeDefinition> _topLevelTypes;
+
         private IList<AssemblyReference> _assemblyReferences;
+
         private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
@@ -126,6 +163,15 @@ namespace AsmResolver.DotNet
             AssemblyReferences.Add(corLib);
         }
 
+        /// <summary>
+        /// When this module was read from the disk, gets the file path to the module.
+        /// </summary>
+        public string FilePath
+        {
+            get;
+            internal set;
+        }
+
         /// <inheritdoc />
         public MetadataToken MetadataToken
         {
@@ -148,7 +194,7 @@ namespace AsmResolver.DotNet
             get => Assembly;
             set => Assembly = value;
         }
-        
+
         /// <inheritdoc />
         ModuleDefinition IModuleProvider.Module => this;
 
@@ -253,7 +299,7 @@ namespace AsmResolver.DotNet
             get;
             protected set;
         }
-        
+
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
@@ -336,7 +382,7 @@ namespace AsmResolver.DotNet
         /// </exception>
         public virtual IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>
             throw new InvalidOperationException("Cannot get an index encoder from a non-serialized module.");
-       
+
         /// <summary>
         /// Enumerates all types (including nested types) defined in the module.
         /// </summary>
@@ -425,6 +471,5 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override string ToString() => Name;
-
     }
 }

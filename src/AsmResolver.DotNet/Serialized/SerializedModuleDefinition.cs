@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
@@ -20,6 +19,7 @@ namespace AsmResolver.DotNet.Serialized
     {
         private readonly IMetadata _metadata;
         private readonly ModuleDefinitionRow _row;
+        private readonly ModuleReadParameters _readParameters;
         private readonly CachedSerializedMemberFactory _memberFactory;
 
         private readonly LazyRidListRelation<TypeDefinitionRow> _fieldLists;
@@ -32,18 +32,21 @@ namespace AsmResolver.DotNet.Serialized
         private OneToManyRelation<MetadataToken, uint> _semantics;
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
-        
+
         /// <summary>
         /// Creates a module definition from a module metadata row.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <param name="token">The token to initialize the module for.</param>
         /// <param name="row">The metadata table row to base the module definition on.</param>
-        public SerializedModuleDefinition(IMetadata metadata, MetadataToken token, ModuleDefinitionRow row)
+        /// <param name="readParameters">The parameters to use while reading the module.</param>
+        public SerializedModuleDefinition(IMetadata metadata, MetadataToken token, ModuleDefinitionRow row,
+            ModuleReadParameters readParameters)
             : base(token)
         {
             _metadata = metadata;
             _row = row;
+            _readParameters = readParameters;
             Generation = row.Generation;
             MetadataToken = token;
 
@@ -56,8 +59,10 @@ namespace AsmResolver.DotNet.Serialized
             if (assemblyTable.Count > 0)
             {
                 var assembly = new SerializedAssemblyDefinition(metadata,
-                    new MetadataToken(TableIndex.Assembly, 1), 
-                    assemblyTable[0], this);
+                    new MetadataToken(TableIndex.Assembly, 1),
+                    assemblyTable[0],
+                    this,
+                    readParameters);
                 Assembly = assembly;
             }
             
