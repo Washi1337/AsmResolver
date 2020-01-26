@@ -131,6 +131,7 @@ namespace AsmResolver.DotNet.Tests
 
             var definition = _resolver.ResolveMethod(writeLineMethod);
 
+            Assert.NotNull(definition);
             Assert.Equal(writeLineMethod.Name, definition.Name);
             Assert.Equal(writeLineMethod.Signature, definition.Signature, _comparer);
         }
@@ -146,6 +147,7 @@ namespace AsmResolver.DotNet.Tests
 
             var definition = _resolver.ResolveField(emptyField);
 
+            Assert.NotNull(definition);
             Assert.Equal(emptyField.Name, definition.Name);
             Assert.Equal(emptyField.Signature, definition.Signature, _comparer);
         }
