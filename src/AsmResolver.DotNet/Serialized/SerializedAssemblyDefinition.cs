@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.FileAttributes;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -18,6 +20,7 @@ namespace AsmResolver.DotNet.Serialized
         private readonly IMetadata _metadata;
         private readonly AssemblyDefinitionRow _row;
         private readonly ModuleDefinition _manifestModule;
+        private readonly ModuleReadParameters _readParameters;
         private readonly SerializedModuleDefinition _parentModule;
 
         /// <summary>
@@ -27,12 +30,15 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the assembly for.</param>
         /// <param name="row">The metadata table row to base the assembly definition on.</param>
         /// <param name="manifestModule">The instance containing the manifest module definition.</param>
-        public SerializedAssemblyDefinition(IMetadata metadata, MetadataToken token, AssemblyDefinitionRow row, SerializedModuleDefinition manifestModule) 
+        /// <param name="readParameters">The parameters to use for reading modules.</param>
+        public SerializedAssemblyDefinition(IMetadata metadata, MetadataToken token, AssemblyDefinitionRow row,
+            SerializedModuleDefinition manifestModule, ModuleReadParameters readParameters)
             : base(token)
         {
             _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _row = row;
             _manifestModule = manifestModule ?? throw new ArgumentNullException(nameof(manifestModule));
+            _readParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
             _parentModule = manifestModule;
             
             Attributes = row.Attributes;
@@ -58,7 +64,24 @@ namespace AsmResolver.DotNet.Serialized
                 _manifestModule
             };
 
-            // TODO: add secondary modules from file defs.
+            var moduleResolver = _readParameters.ModuleResolver;
+            if (moduleResolver != null)
+            {
+                var tablesStream = _metadata.GetStream<TablesStream>();
+                var stringsStream = _metadata.GetStream<StringsStream>();
+                
+                var filesTable = tablesStream.GetTable<FileReferenceRow>(TableIndex.File);
+                foreach (var fileRow in filesTable)
+                {
+                    if (fileRow.Attributes == FileAttributes.ContainsMetadata)
+                    {
+                        string name = stringsStream.GetStringByIndex(fileRow.Name);
+                        var module = moduleResolver.Resolve(name);
+                        if (module != null)
+                            result.Add(module);
+                    }
+                }
+            }
             
             return result;
         }

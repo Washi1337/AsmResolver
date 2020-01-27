@@ -13,7 +13,9 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public uint FileOffset => _peFile.RvaToFileOffset(Rva);
+        public uint FileOffset => _peFile.TryGetSectionContainingRva(Rva, out _) 
+            ? _peFile.RvaToFileOffset(Rva) 
+            : 0u;
 
         /// <inheritdoc />
         public uint Rva
@@ -25,7 +27,7 @@ namespace AsmResolver.PE.File
         bool IOffsetProvider.CanUpdateOffsets => false;
 
         /// <inheritdoc />
-        public bool CanRead => true;
+        public bool CanRead => _peFile.TryGetSectionContainingRva(Rva, out _);
 
         /// <inheritdoc />
         public bool IsBounded => false;

@@ -16,7 +16,8 @@ namespace AsmResolver.DotNet
     public class MethodDefinition :
         IOwnedCollectionElement<TypeDefinition>,
         IMemberRefParent, 
-        ICustomAttributeType
+        ICustomAttributeType,
+        IHasGenericParameters
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;
@@ -25,6 +26,7 @@ namespace AsmResolver.DotNet
         private IList<ParameterDefinition> _parameterDefinitions;
         private ParameterCollection _parameters;
         private IList<CustomAttribute> _customAttributes;
+        private IList<GenericParameter> _genericParameters;
 
         /// <summary>
         /// Initializes a new method definition.
@@ -556,18 +558,19 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public IList<GenericParameter> GenericParameters
+        {
+            get
+            {
+                if (_genericParameters is null)
+                    Interlocked.CompareExchange(ref _genericParameters, GetGenericParameters(), null);
+                return _genericParameters;
+            }
+        }
+
         MethodDefinition IMethodDescriptor.Resolve() => this;
-        
-        /// <summary>
-        /// Obtains the list of custom attributes assigned to the member.
-        /// </summary>
-        /// <returns>The attributes</returns>
-        /// <remarks>
-        /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
-        /// </remarks>
-        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
-            new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
-        
+
         /// <summary>
         /// Obtains the name of the method definition.
         /// </summary>
@@ -604,7 +607,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ParameterDefinition> GetParameterDefinitions() => 
             new OwnedCollection<MethodDefinition, ParameterDefinition>(this);
-        
+
         /// <summary>
         /// Obtains the body of the method definition.
         /// </summary>
@@ -613,6 +616,26 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="MethodBody"/> property.
         /// </remarks>
         protected virtual MethodBody GetBody() => null;
+
+        /// <summary>
+        /// Obtains the list of custom attributes assigned to the member.
+        /// </summary>
+        /// <returns>The attributes</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
+        /// </remarks>
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
+            new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+
+        /// <summary>
+        /// Obtains the list of generic parameters this member declares.
+        /// </summary>
+        /// <returns>The generic parameters</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="GenericParameters"/> property.
+        /// </remarks>
+        protected virtual IList<GenericParameter> GetGenericParameters() =>
+            new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
 
         /// <inheritdoc />
         public override string ToString() => FullName;

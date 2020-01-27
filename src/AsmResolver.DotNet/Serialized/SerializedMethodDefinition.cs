@@ -77,22 +77,25 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override MethodBody GetBody()
-        {
-            // TODO: make configurable
+        protected override MethodBody GetBody() => 
+            _parentModule.ReadParameters.MethodBodyReader.ReadMethodBody(this, _row);
 
-            if (_row.Body.CanRead)
+        /// <inheritdoc />
+        protected override IList<GenericParameter> GetGenericParameters()
+        {
+            var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
+            
+            foreach (uint rid in _parentModule.GetGenericParameters(MetadataToken))
             {
-                if (IsIL)
+                if (_parentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
+                    && member is GenericParameter genericParameter)
                 {
-                    var rawBody = CilRawMethodBody.FromReader(_row.Body.CreateReader());
-                    return CilMethodBody.FromRawMethodBody(this, rawBody);
+                    result.Add(genericParameter);
                 }
-                
-                // TODO: handle native method bodies.
             }
 
-            return null;
+            return result;
         }
+
     }
 }

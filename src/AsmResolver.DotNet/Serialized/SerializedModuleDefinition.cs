@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
@@ -20,8 +19,8 @@ namespace AsmResolver.DotNet.Serialized
     {
         private readonly IMetadata _metadata;
         private readonly ModuleDefinitionRow _row;
-        private readonly CachedSerializedMemberFactory _memberFactory;
 
+        private readonly CachedSerializedMemberFactory _memberFactory;
         private readonly LazyRidListRelation<TypeDefinitionRow> _fieldLists;
         private readonly LazyRidListRelation<TypeDefinitionRow> _methodLists;
         private readonly LazyRidListRelation<MethodDefinitionRow> _paramLists;
@@ -31,18 +30,22 @@ namespace AsmResolver.DotNet.Serialized
         private OneToManyRelation<uint, uint> _typeDefTree;
         private OneToManyRelation<MetadataToken, uint> _semantics;
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
-        
+        private OneToManyRelation<MetadataToken, uint> _genericParameters;
+
         /// <summary>
         /// Creates a module definition from a module metadata row.
         /// </summary>
         /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <param name="token">The token to initialize the module for.</param>
         /// <param name="row">The metadata table row to base the module definition on.</param>
-        public SerializedModuleDefinition(IMetadata metadata, MetadataToken token, ModuleDefinitionRow row)
+        /// <param name="readParameters">The parameters to use while reading the module.</param>
+        public SerializedModuleDefinition(IMetadata metadata, MetadataToken token, ModuleDefinitionRow row,
+            ModuleReadParameters readParameters)
             : base(token)
         {
             _metadata = metadata;
             _row = row;
+            ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
             Generation = row.Generation;
             MetadataToken = token;
 
@@ -55,8 +58,10 @@ namespace AsmResolver.DotNet.Serialized
             if (assemblyTable.Count > 0)
             {
                 var assembly = new SerializedAssemblyDefinition(metadata,
-                    new MetadataToken(TableIndex.Assembly, 1), 
-                    assemblyTable[0], this);
+                    new MetadataToken(TableIndex.Assembly, 1),
+                    assemblyTable[0],
+                    this,
+                    readParameters);
                 Assembly = assembly;
             }
             
@@ -74,6 +79,14 @@ namespace AsmResolver.DotNet.Serialized
                 (_, map) => map.Parent, tablesStream.GetPropertyRange);
             _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
+        }
+
+        /// <summary>
+        /// Gets the reading parameters that are used for reading the contents of the module.
+        /// </summary>
+        public ModuleReadParameters ReadParameters
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -263,7 +276,40 @@ namespace AsmResolver.DotNet.Serialized
             
             return result;
         }
+
+        private void EnsureGenericParametersInitialized()
+        {
+            if (_genericParameters is null)
+                InitializeGenericParameters();
+        }
+
+        private void InitializeGenericParameters()
+        {
+            var tablesStream = _metadata.GetStream<TablesStream>();
+            var parameterTable = tablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
+            
+            _genericParameters = new OneToManyRelation<MetadataToken, uint>();
+            for (int i = 0; i < parameterTable.Count; i++)
+            {
+                var ownerToken = encoder.DecodeIndex(parameterTable[i].Owner);
+                uint parameterRid = (uint) (i + 1);
+                _genericParameters.Add(ownerToken, parameterRid);
+            }
+        }
+
+        internal MetadataToken GetGenericParameterOwner(uint parameterRid)
+        {
+            EnsureGenericParametersInitialized();
+            return _genericParameters.GetMemberOwner(parameterRid);
+        }
         
+        internal ICollection<uint> GetGenericParameters(MetadataToken ownerToken)
+        {
+            EnsureGenericParametersInitialized();
+            return _genericParameters.GetMemberList(ownerToken);
+        }
+
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
 
         <IsPackable>false</IsPackable>
 
@@ -24,6 +24,15 @@
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.NestedClasses\AsmResolver.DotNet.TestCases.NestedClasses.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Properties\AsmResolver.DotNet.TestCases.Properties.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Resources\Manifest.exe">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Resources\MyModel.netmodule">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
