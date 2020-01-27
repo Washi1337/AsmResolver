@@ -57,7 +57,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
                 }
             }
         }
-        
+
         [Fact]
         public void DotNetHelloWorld()
         {

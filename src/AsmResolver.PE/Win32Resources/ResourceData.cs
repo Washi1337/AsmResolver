@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using AsmResolver.Lazy;
 
 namespace AsmResolver.PE.Win32Resources
@@ -40,10 +41,10 @@ namespace AsmResolver.PE.Win32Resources
         /// <param name="name">The name of the entry.</param>
         /// <param name="contents">The data to store in the entry.</param>
         public ResourceData(string name, IReadableSegment contents)
+            : this()
         {
-            Name = name;
-            Contents = contents;
-            _contents = new LazyVariable<IReadableSegment>(contents);
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
         /// <summary>
@@ -52,10 +53,10 @@ namespace AsmResolver.PE.Win32Resources
         /// <param name="id">The identifier.</param>
         /// <param name="contents">The data to store in the entry.</param>
         public ResourceData(uint id, IReadableSegment contents)
+            : this()
         {
-            Contents = contents;
             Id = id;
-            _contents = new LazyVariable<IReadableSegment>(contents);
+            Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
         /// <inheritdoc />
