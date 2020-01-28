@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -17,7 +18,6 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedModuleDefinition : ModuleDefinition
     {
-        private readonly IMetadata _metadata;
         private readonly ModuleDefinitionRow _row;
 
         private readonly CachedSerializedMemberFactory _memberFactory;
@@ -35,29 +35,31 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Creates a module definition from a module metadata row.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="dotNetDirectory">The object providing access to the underlying .NET data directory.</param>
         /// <param name="token">The token to initialize the module for.</param>
         /// <param name="row">The metadata table row to base the module definition on.</param>
         /// <param name="readParameters">The parameters to use while reading the module.</param>
-        public SerializedModuleDefinition(IMetadata metadata, MetadataToken token, ModuleDefinitionRow row,
+        public SerializedModuleDefinition(IDotNetDirectory dotNetDirectory, MetadataToken token, ModuleDefinitionRow row,
             ModuleReadParameters readParameters)
             : base(token)
         {
-            _metadata = metadata;
+            DotNetDirectory = dotNetDirectory;
             _row = row;
             ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
             Generation = row.Generation;
             MetadataToken = token;
 
+            var metadata = dotNetDirectory.Metadata;
+            
             _memberFactory = new CachedSerializedMemberFactory(metadata, this);
             
-            var assemblyTable = _metadata
+            var assemblyTable = metadata
                 .GetStream<TablesStream>()
                 .GetTable<AssemblyDefinitionRow>();
             
             if (assemblyTable.Count > 0)
             {
-                var assembly = new SerializedAssemblyDefinition(metadata,
+                var assembly = new SerializedAssemblyDefinition(dotNetDirectory,
                     new MetadataToken(TableIndex.Assembly, 1),
                     assemblyTable[0],
                     this,
@@ -79,6 +81,14 @@ namespace AsmResolver.DotNet.Serialized
                 (_, map) => map.Parent, tablesStream.GetPropertyRange);
             _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
+        }
+        
+        /// <summary>
+        /// Gets the underlying object providing access to the data directory containing .NET metadata.  
+        /// </summary>
+        public IDotNetDirectory DotNetDirectory
+        {
+            get;
         }
 
         /// <summary>
@@ -108,29 +118,29 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         public override bool TryLookupString(MetadataToken token, out string value)
         {
-            value = _metadata.GetStream<UserStringsStream>().GetStringByIndex(token.Rid);
+            value = DotNetDirectory.Metadata.GetStream<UserStringsStream>().GetStringByIndex(token.Rid);
             return value == null;
         }
 
         /// <inheritdoc />
         public override IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>
-            _metadata.GetStream<TablesStream>().GetIndexEncoder(codedIndex);
+            DotNetDirectory.Metadata.GetStream<TablesStream>().GetIndexEncoder(codedIndex);
 
         /// <inheritdoc />
         protected override string GetName() 
-            => _metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
+            => DotNetDirectory.Metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override Guid GetMvid() 
-            => _metadata.GetStream<GuidStream>()?.GetGuidByIndex(_row.Mvid) ?? Guid.Empty;
+            => DotNetDirectory.Metadata.GetStream<GuidStream>()?.GetGuidByIndex(_row.Mvid) ?? Guid.Empty;
 
         /// <inheritdoc />
         protected override Guid GetEncId()
-            => _metadata.GetStream<GuidStream>()?.GetGuidByIndex(_row.EncId) ?? Guid.Empty;
+            => DotNetDirectory.Metadata.GetStream<GuidStream>()?.GetGuidByIndex(_row.EncId) ?? Guid.Empty;
 
         /// <inheritdoc />
         protected override Guid GetEncBaseId()
-            => _metadata.GetStream<GuidStream>()?.GetGuidByIndex(_row.EncBaseId) ?? Guid.Empty;
+            => DotNetDirectory.Metadata.GetStream<GuidStream>()?.GetGuidByIndex(_row.EncBaseId) ?? Guid.Empty;
 
         /// <inheritdoc />
         protected override IList<TypeDefinition> GetTopLevelTypes()
@@ -139,7 +149,8 @@ namespace AsmResolver.DotNet.Serialized
             
             var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
 
-            var typeDefTable = _metadata
+            var typeDefTable = DotNetDirectory
+                .Metadata
                 .GetStream<TablesStream>()
                 .GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             
@@ -164,7 +175,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private void InitializeTypeDefinitionTree()
         {
-            var tablesStream = _metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var nestedClassTable = tablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
             
             _typeDefTree = new OneToManyRelation<uint, uint>();
@@ -203,7 +214,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private void InitializeMethodSemantics()
         {
-            var tablesStream = _metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var semanticsTable = tablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
             
@@ -236,7 +247,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private void InitializeCustomAttributes()
         {
-            var tablesStream = _metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var attributeTable = tablesStream.GetTable<CustomAttributeRow>(TableIndex.CustomAttribute);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
             
@@ -285,7 +296,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private void InitializeGenericParameters()
         {
-            var tablesStream = _metadata.GetStream<TablesStream>();
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var parameterTable = tablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
             
@@ -315,11 +326,11 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
 
-            var table = _metadata.GetStream<TablesStream>().GetTable<AssemblyReferenceRow>();
+            var table = DotNetDirectory.Metadata.GetStream<TablesStream>().GetTable<AssemblyReferenceRow>();
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.AssemblyRef, (uint) i + 1);
-                result.Add(new SerializedAssemblyReference(_metadata, this, token, table[i]));
+                result.Add(new SerializedAssemblyReference(this, token, table[i]));
             }
             
             return result;

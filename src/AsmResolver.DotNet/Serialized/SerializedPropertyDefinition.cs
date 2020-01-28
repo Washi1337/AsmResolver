@@ -16,21 +16,18 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedPropertyDefinition : PropertyDefinition
     {
-        private readonly IMetadata _metadata;
         private readonly SerializedModuleDefinition _parentModule;
         private readonly PropertyDefinitionRow _row;
 
         /// <summary>
         /// Creates a property definition from a property metadata row.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <param name="parentModule">The module that contains the property.</param>
         /// <param name="token">The token to initialize the property for.</param>
         /// <param name="row">The metadata table row to base the property definition on.</param>
-        public SerializedPropertyDefinition(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, PropertyDefinitionRow row)
+        public SerializedPropertyDefinition(SerializedModuleDefinition parentModule, MetadataToken token, PropertyDefinitionRow row)
             : base(token)
         {
-            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
 
@@ -38,13 +35,17 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() =>
-            _metadata.GetStream<StringsStream>().GetStringByIndex(_row.Name);
+        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+            .GetStream<StringsStream>()
+            .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override PropertySignature GetSignature()
         {
-            var reader = _metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Type);
+            var reader = _parentModule.DotNetDirectory.Metadata
+                .GetStream<BlobStream>()
+                .GetBlobReaderByIndex(_row.Type);
+            
             return PropertySignature.FromReader(_parentModule, reader);
         }
 

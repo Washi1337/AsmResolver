@@ -13,22 +13,18 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedParameterDefinition : ParameterDefinition
     {
-        private readonly IMetadata _metadata;
         private readonly SerializedModuleDefinition _parentModule;
         private readonly ParameterDefinitionRow _row;
 
         /// <summary>
         /// Creates a parameter definition from a parameter metadata row.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <param name="parentModule"></param>
         /// <param name="token">The token to initialize the parameter for.</param>
         /// <param name="row">The metadata table row to base the parameter definition on.</param>
-        public SerializedParameterDefinition(IMetadata metadata, SerializedModuleDefinition parentModule,
-            MetadataToken token, ParameterDefinitionRow row)
+        public SerializedParameterDefinition(SerializedModuleDefinition parentModule, MetadataToken token, ParameterDefinitionRow row)
             : base(token)
         {
-            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
 
@@ -37,7 +33,9 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _metadata.GetStream<StringsStream>().GetStringByIndex(_row.Name);
+        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+            .GetStream<StringsStream>()
+            .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override MethodDefinition GetMethod()

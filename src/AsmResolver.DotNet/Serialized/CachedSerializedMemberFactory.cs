@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
     {
         private readonly IMetadata _metadata;
         private readonly SerializedModuleDefinition _parentModule;
-        
+
         private TypeReference[] _typeReferences;
         private TypeDefinition[] _typeDefinitions;
         private FieldDefinition[] _fieldDefinitions;
@@ -61,19 +61,19 @@ namespace AsmResolver.DotNet.Serialized
         internal TypeReference LookupTypeReference(MetadataToken token)
         {
             return LookupOrCreateMember<TypeReference, TypeReferenceRow>(ref _typeReferences, token,
-                (m, t, r) => new SerializedTypeReference(m, _parentModule, t, r));
+                (m, t, r) => new SerializedTypeReference(m, t, r));
         }
 
         internal TypeDefinition LookupTypeDefinition(MetadataToken token)
         {
             return LookupOrCreateMember<TypeDefinition, TypeDefinitionRow>(ref _typeDefinitions, token,
-                (m, t, r) => new SerializedTypeDefinition(m, _parentModule, t, r));
+                (m, t, r) => new SerializedTypeDefinition(m, t, r));
         }
 
         internal TypeSpecification LookupTypeSpecification(MetadataToken token)
         {
             return LookupOrCreateMember<TypeSpecification, TypeSpecificationRow>(ref _typeSpecifications, token,
-                (m, t, r) => new SerializedTypeSpecification(m, _parentModule, t, r));
+                (m, t, r) => new SerializedTypeSpecification(m, t, r));
         }
 
         private AssemblyDefinition LookupAssemblyDefinition(in MetadataToken token)
@@ -93,71 +93,71 @@ namespace AsmResolver.DotNet.Serialized
         private FieldDefinition LookupFieldDefinition(MetadataToken token)
         {
             return LookupOrCreateMember<FieldDefinition, FieldDefinitionRow>(ref _fieldDefinitions, token,
-                (m, t, r) => new SerializedFieldDefinition(m, _parentModule, t, r));
+                (m, t, r) => new SerializedFieldDefinition(m, t, r));
         }
 
         private MethodDefinition LookupMethodDefinition(MetadataToken token)
         {
             return LookupOrCreateMember<MethodDefinition, MethodDefinitionRow>(ref _methodDefinitions, token,
-                (m, t, r) => new SerializedMethodDefinition(m, _parentModule, t, r));
+                (m, t, r) => new SerializedMethodDefinition(m, t, r));
         }
 
         private ParameterDefinition LookupParameterDefinition(MetadataToken token)
-        {   
+        {
             return LookupOrCreateMember<ParameterDefinition, ParameterDefinitionRow>(ref _parameterDefinitions, token,
-                (m, t, r) => new SerializedParameterDefinition(m, _parentModule, t, r));
+                (m, t, r) => new SerializedParameterDefinition(m, t, r));
         }
 
         private MemberReference LookupMemberReference(MetadataToken token)
         {
             return LookupOrCreateMember<MemberReference, MemberReferenceRow>(ref _memberReferences, token,
-                (m, t, r) => new SerializedMemberReference(m, _parentModule, t, r));
+                (m, t, r) => new SerializedMemberReference(m, t, r));
         }
 
         private StandAloneSignature LookupStandAloneSignature(in MetadataToken token)
         {
             return LookupOrCreateMember<StandAloneSignature, StandAloneSignatureRow>(ref _standAloneSignatures, token,
-                (m, t, r) => new SerializedStandAloneSignature(m, _parentModule, t, r));
+                (m, t, r) => new SerializedStandAloneSignature(m, t, r));
         }
 
         private PropertyDefinition LookupPropertyDefinition(in MetadataToken token)
         {
             return LookupOrCreateMember<PropertyDefinition, PropertyDefinitionRow>(ref _propertyDefinitions, token,
-                (m, t, r) => new SerializedPropertyDefinition(m, _parentModule, t, r));
+                (m, t, r) => new SerializedPropertyDefinition(m, t, r));
         }
 
         private EventDefinition LookupEventDefinition(in MetadataToken token)
         {
             return LookupOrCreateMember<EventDefinition, EventDefinitionRow>(ref _eventDefinition, token,
-                (m, t, r) => new SerializedEventDefinition(m, _parentModule, t, r));
+                (m, t, r) => new SerializedEventDefinition(m, t, r));
         }
 
         private MethodSemantics LookupMethodSemantics(in MetadataToken token)
         {
             return LookupOrCreateMember<MethodSemantics, MethodSemanticsRow>(ref _methodSemantics, token,
-                (m, t, r) => new SerializedMethodSemantics(m, _parentModule, t, r));
+                (m, t, r) => new SerializedMethodSemantics(m, t, r));
         }
 
         private CustomAttribute LookupCustomAttribute(in MetadataToken token)
         {
             return LookupOrCreateMember<CustomAttribute, CustomAttributeRow>(ref _customAttributes, token,
-                (m, t, r) => new SerializedCustomAttribute(m, _parentModule, t, r));
+                (m, t, r) => new SerializedCustomAttribute(m, t, r));
         }
 
         private IMetadataMember LookupMethodSpecification(in MetadataToken token)
         {
             return LookupOrCreateMember<MethodSpecification, MethodSpecificationRow>(ref _methodSpecifications, token,
-                (m, t, r) => new SerializedMethodSpecification(m, _parentModule, t, r));
+                (m, t, r) => new SerializedMethodSpecification(m, t, r));
         }
 
         private GenericParameter LookupGenericParameter(MetadataToken token)
         {
             return LookupOrCreateMember<GenericParameter, GenericParameterRow>(ref _genericParameters, token,
-                (m, t, r) => new SerializedGenericParameter(m, _parentModule, t, r));
+                (m, t, r) => new SerializedGenericParameter(m, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,
-            Func<IMetadata, MetadataToken, TRow, TMember> createMember)
+            Func<SerializedModuleDefinition, MetadataToken, TRow, TMember> createMember)
             where TRow : struct, IMetadataRow
             where TMember : class, IMetadataMember
         {
@@ -165,11 +165,11 @@ namespace AsmResolver.DotNet.Serialized
             var table = (MetadataTable<TRow>) _metadata
                 .GetStream<TablesStream>()
                 .GetTable(token.Table);
-            
+
             // Check if within bounds.
-            if (token.Rid == 0 || token.Rid > table.Count) 
+            if (token.Rid == 0 || token.Rid > table.Count)
                 return null;
-            
+
             // Allocate cache if necessary.
             if (cache is null)
                 Interlocked.CompareExchange(ref cache, new TMember[table.Count], null);
@@ -179,7 +179,7 @@ namespace AsmResolver.DotNet.Serialized
             var member = cache[index];
             if (member is null)
             {
-                member = createMember(_metadata, token, table[index]);
+                member = createMember(_parentModule, token, table[index]);
                 member = Interlocked.CompareExchange(ref cache[index], member, null)
                          ?? member;
             }

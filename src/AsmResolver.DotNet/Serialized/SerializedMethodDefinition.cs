@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
@@ -18,36 +19,33 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedMethodDefinition : MethodDefinition
     {
-        private readonly IMetadata _metadata;
         private readonly SerializedModuleDefinition _parentModule;
         private readonly MethodDefinitionRow _row;
 
         /// <summary>
         /// Creates a method definition from a method metadata row.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <param name="parentModule">The module that contains the method.</param>
         /// <param name="token">The token to initialize the method for.</param>
         /// <param name="row">The metadata table row to base the method definition on.</param>
-        public SerializedMethodDefinition(IMetadata metadata, SerializedModuleDefinition parentModule,
-            MetadataToken token, MethodDefinitionRow row)
+        public SerializedMethodDefinition(SerializedModuleDefinition parentModule, MetadataToken token, MethodDefinitionRow row)
             : base(token)
         {
-            _metadata = metadata;
-            _parentModule = parentModule;
+            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
 
             Attributes = row.Attributes;
         }
 
         /// <inheritdoc />
-        protected override string GetName() =>
-            _metadata.GetStream<StringsStream>().GetStringByIndex(_row.Name);
+        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+            .GetStream<StringsStream>().GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override MethodSignature GetSignature() =>
-            MethodSignature.FromReader(_parentModule,
-                _metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Signature));
+        protected override MethodSignature GetSignature() => MethodSignature.FromReader(_parentModule,
+            _parentModule.DotNetDirectory.Metadata
+                .GetStream<BlobStream>()
+                .GetBlobReaderByIndex(_row.Signature));
 
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 

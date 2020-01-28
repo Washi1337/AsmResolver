@@ -14,21 +14,18 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedEventDefinition : EventDefinition
     {
-        private readonly IMetadata _metadata;
         private readonly SerializedModuleDefinition _parentModule;
         private readonly EventDefinitionRow _row;
 
         /// <summary>
         /// Creates a event definition from a event metadata row.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <param name="parentModule">The module that contains the event.</param>
         /// <param name="token">The token to initialize the event for.</param>
         /// <param name="row">The metadata table row to base the event definition on.</param>
-        public SerializedEventDefinition(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, EventDefinitionRow row)
+        public SerializedEventDefinition(SerializedModuleDefinition parentModule, MetadataToken token, EventDefinitionRow row)
             : base(token)
         {
-            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
 
@@ -36,13 +33,17 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() =>
-            _metadata.GetStream<StringsStream>().GetStringByIndex(_row.Name);
+        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+            .GetStream<StringsStream>()
+            .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override ITypeDefOrRef GetEventType()
         {
-            var encoder = _metadata.GetStream<TablesStream>().GetIndexEncoder(CodedIndex.TypeDefOrRef);
+            var encoder =  _parentModule.DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetIndexEncoder(CodedIndex.TypeDefOrRef);
+            
             var eventTypeToken = encoder.DecodeIndex(_row.EventType);
             return _parentModule.TryLookupMember(eventTypeToken, out var member)
                 ? member as ITypeDefOrRef

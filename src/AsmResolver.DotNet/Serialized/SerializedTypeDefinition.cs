@@ -14,21 +14,18 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedTypeDefinition : TypeDefinition
     {
-        private readonly IMetadata _metadata;
         private readonly SerializedModuleDefinition _parentModule;
         private readonly TypeDefinitionRow _row;
 
         /// <summary>
         /// Creates a type definition from a type metadata row.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <param name="parentModule"></param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type definition on.</param>
-        public SerializedTypeDefinition(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, TypeDefinitionRow row)
+        public SerializedTypeDefinition(SerializedModuleDefinition parentModule, MetadataToken token, TypeDefinitionRow row)
             : base(token)
         {
-            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
             Attributes = row.Attributes;
@@ -37,12 +34,14 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetNamespace() =>
-            _metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Namespace);
+        protected override string GetNamespace() => _parentModule.DotNetDirectory.Metadata
+            .GetStream<StringsStream>()?
+            .GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />
-        protected override string GetName() =>
-            _metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
+        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+            .GetStream<StringsStream>()?
+            .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override ITypeDefOrRef GetBaseType()
@@ -50,7 +49,7 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Extends == 0)
                 return null;
             
-            var decoder = _metadata
+            var decoder = _parentModule.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             

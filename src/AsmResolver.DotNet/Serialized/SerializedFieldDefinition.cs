@@ -15,21 +15,18 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedFieldDefinition : FieldDefinition
     {
-        private readonly IMetadata _metadata;
         private readonly SerializedModuleDefinition _parentModule;
         private readonly FieldDefinitionRow _row;
 
         /// <summary>
         /// Creates a field definition from a field metadata row.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
         /// <param name="parentModule">The module that contains the field.</param>
         /// <param name="token">The token to initialize the field for.</param>
         /// <param name="row">The metadata table row to base the field definition on.</param>
-        public SerializedFieldDefinition(IMetadata metadata, SerializedModuleDefinition parentModule, MetadataToken token, FieldDefinitionRow row)
+        public SerializedFieldDefinition(SerializedModuleDefinition parentModule, MetadataToken token, FieldDefinitionRow row)
             : base(token)
         {
-            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
 
@@ -37,13 +34,15 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => 
-            _metadata.GetStream<StringsStream>().GetStringByIndex(_row.Name);
+        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+            .GetStream<StringsStream>()
+            .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override FieldSignature GetSignature() => 
-            FieldSignature.FromReader(_parentModule,
-                _metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Signature));
+        protected override FieldSignature GetSignature() => FieldSignature.FromReader(_parentModule,
+            _parentModule.DotNetDirectory.Metadata
+                .GetStream<BlobStream>()
+                .GetBlobReaderByIndex(_row.Signature));
 
         /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()

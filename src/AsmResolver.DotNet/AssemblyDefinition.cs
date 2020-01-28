@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.Lazy;
 using AsmResolver.PE;
-using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
@@ -74,25 +73,25 @@ namespace AsmResolver.DotNet
                 throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
             if (peImage.DotNetDirectory.Metadata == null)
                 throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
-            return FromMetadata(peImage.DotNetDirectory.Metadata, readParameters);
+            return FromDirectory(peImage.DotNetDirectory, readParameters);
         }
 
         /// <summary>
         /// Initializes a .NET module from a .NET metadata directory.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="directory">The object providing access to the underlying .NET data directory.</param>
         /// <returns>The module.</returns>
-        public static AssemblyDefinition FromMetadata(IMetadata metadata) =>
-            ModuleDefinition.FromMetadata(metadata).Assembly;
+        public static AssemblyDefinition FromDirectory(IDotNetDirectory directory) =>
+            ModuleDefinition.FromDirectory(directory).Assembly;
 
         /// <summary>
         /// Initializes a .NET module from a .NET metadata directory.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="directory">The object providing access to the underlying .NET data directory.</param>
         /// <param name="readParameters">The parameters to use while reading the assembly.</param>
         /// <returns>The module.</returns>
-        public static AssemblyDefinition FromMetadata(IMetadata metadata, ModuleReadParameters readParameters) =>
-            ModuleDefinition.FromMetadata(metadata, readParameters).Assembly
+        public static AssemblyDefinition FromDirectory(IDotNetDirectory directory, ModuleReadParameters readParameters) =>
+            ModuleDefinition.FromDirectory(directory, readParameters).Assembly
             ?? throw new BadImageFormatException("The metadata directory does not contain an assembly definition.");
         
         private IList<ModuleDefinition> _modules;

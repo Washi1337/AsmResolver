@@ -26,6 +26,7 @@ namespace AsmResolver.DotNet.Tests
             var token = typeof(GenericType<,,>).GetGenericArguments()[0].MetadataToken;
 
             var genericParameter = (GenericParameter) module.LookupMember(token);
+            Assert.NotNull(genericParameter.Owner);
             Assert.Equal(typeof(GenericType<,,>).MetadataToken, genericParameter.Owner.MetadataToken);
         }
 
@@ -37,6 +38,7 @@ namespace AsmResolver.DotNet.Tests
             var token = method.GetGenericArguments()[0].MetadataToken;
 
             var genericParameter = (GenericParameter) module.LookupMember(token);
+            Assert.NotNull(genericParameter.Owner);
             Assert.Equal(method.MetadataToken, genericParameter.Owner.MetadataToken);
         }
     }

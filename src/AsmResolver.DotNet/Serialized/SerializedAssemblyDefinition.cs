@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -17,7 +18,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedAssemblyDefinition : AssemblyDefinition
     {
-        private readonly IMetadata _metadata;
+        private readonly IDotNetDirectory _dotNetDirectory;
         private readonly AssemblyDefinitionRow _row;
         private readonly ModuleDefinition _manifestModule;
         private readonly ModuleReadParameters _readParameters;
@@ -26,16 +27,16 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Creates an assembly definition from an assembly metadata row.
         /// </summary>
-        /// <param name="metadata">The object providing access to the underlying metadata streams.</param>
+        /// <param name="dotNetDirectory">The object providing access to the underlying metadata streams.</param>
         /// <param name="token">The token to initialize the assembly for.</param>
         /// <param name="row">The metadata table row to base the assembly definition on.</param>
         /// <param name="manifestModule">The instance containing the manifest module definition.</param>
         /// <param name="readParameters">The parameters to use for reading modules.</param>
-        public SerializedAssemblyDefinition(IMetadata metadata, MetadataToken token, AssemblyDefinitionRow row,
+        public SerializedAssemblyDefinition(IDotNetDirectory dotNetDirectory, MetadataToken token, AssemblyDefinitionRow row,
             SerializedModuleDefinition manifestModule, ModuleReadParameters readParameters)
             : base(token)
         {
-            _metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            _dotNetDirectory = dotNetDirectory ?? throw new ArgumentNullException(nameof(dotNetDirectory));
             _row = row;
             _manifestModule = manifestModule ?? throw new ArgumentNullException(nameof(manifestModule));
             _readParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
@@ -47,13 +48,13 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
+        protected override string GetName() => _dotNetDirectory.Metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override string GetCulture() => _metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Culture);
+        protected override string GetCulture() => _dotNetDirectory.Metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Culture);
 
         /// <inheritdoc />
-        protected override byte[] GetPublicKey() => _metadata.GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKey);
+        protected override byte[] GetPublicKey() => _dotNetDirectory.Metadata.GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKey);
 
         /// <inheritdoc />
         protected override IList<ModuleDefinition> GetModules()
@@ -67,8 +68,8 @@ namespace AsmResolver.DotNet.Serialized
             var moduleResolver = _readParameters.ModuleResolver;
             if (moduleResolver != null)
             {
-                var tablesStream = _metadata.GetStream<TablesStream>();
-                var stringsStream = _metadata.GetStream<StringsStream>();
+                var tablesStream = _dotNetDirectory.Metadata.GetStream<TablesStream>();
+                var stringsStream = _dotNetDirectory.Metadata.GetStream<StringsStream>();
                 
                 var filesTable = tablesStream.GetTable<FileReferenceRow>(TableIndex.File);
                 foreach (var fileRow in filesTable)
