@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -6,43 +6,47 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 namespace AsmResolver.DotNet.Builder.Tables
 {
     /// <summary>
-    /// Provides an implementation of a metadata table buffer, that does not apply any special ordering on the added rows.
+    /// Represents a metadata stream buffer that adds every new row at the end of the table, without any further
+    /// processing or reordering of the rows.
     /// </summary>
-    /// <typeparam name="TRow">The type of rows that this buffer contains.</typeparam>
-    public class UnsortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow>
+    /// <typeparam name="TRow">The type of rows to store.</typeparam>
+    public class UnsortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow> 
         where TRow : struct, IMetadataRow
     {
-        private readonly TableLayout _layout;
-        private readonly List<TRow> _rows = new List<TRow>();
-        
+        private readonly IList<TRow> _entries = new List<TRow>();
+        private readonly MetadataTable<TRow> _table;
+
         /// <summary>
-        /// Creates a new instance of an unsorted metadata table buffer.
+        /// Creates a new unsorted metadata table buffer.
         /// </summary>
-        /// <param name="layout">The layout of the final table.</param>
-        public UnsortedMetadataTableBuffer(TableLayout layout)
+        /// <param name="table">The underlying table to flush to.</param>
+        public UnsortedMetadataTableBuffer(MetadataTable<TRow> table)
         {
-            _layout = layout ?? throw new ArgumentNullException(nameof(layout));
+            _table = table ?? throw new ArgumentNullException(nameof(table));
         }
 
         /// <inheritdoc />
-        public int Count => _rows.Count;
+        public int Count => _entries.Count;
 
         /// <inheritdoc />
-        public MetadataRowHandle Add(TRow row)
+        public virtual TRow this[uint rid]
         {
-            _rows.Add(row);
-            return new MetadataRowHandle(_rows.Count);
+            get => _entries[(int) (rid - 1)];
+            set => _entries[(int) (rid - 1)] = value;
         }
 
         /// <inheritdoc />
-        public IConstructedTableInfo<TRow> CreateTable()
+        public virtual uint Add(in TRow row)
         {
-            var table = new MetadataTable<TRow>(_layout);
+            _entries.Add(row);
+            return (uint) _entries.Count;
+        }
 
-            foreach (var row in _rows)
-                table.Add(row);
-
-            return new SimpleConstructedTableInfo<TRow>(table);
+        /// <inheritdoc />
+        public void FlushToTable()
+        {
+            foreach (var row in _entries)
+                _table.Add(row);
         }
     }
 }

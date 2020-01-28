@@ -1,100 +1,86 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder.Tables
 {
     /// <summary>
-    /// Provides an implementation of a metadata table buffer, that sorts all rows in ascending order by a primary column.
+    /// Represents a metadata stream buffer that sorts all added rows by one or two primary columns.
     /// </summary>
-    /// <typeparam name="TRow">The type of rows that this buffer contains.</typeparam>
+    /// <typeparam name="TRow">The type of rows to store.</typeparam>
     public class SortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow> 
         where TRow : struct, IMetadataRow
     {
-        private readonly TableLayout _layout;
-        private readonly int _primaryKeyColumn;
-        private readonly List<Entry> _entries = new List<Entry>();
+        private readonly List<TRow> _entries = new List<TRow>();
+        private readonly MetadataTable<TRow> _table;
+        private readonly IComparer<TRow> _comparer;
+        
+        /// <summary>
+        /// Creates a new metadata stream buffer that is sorted by a single primary column.
+        /// </summary>
+        /// <param name="table">The underlying table to flush to.</param>
+        /// <param name="primaryColumn">The index of the primary column to use as a sorting key.</param>
+        public SortedMetadataTableBuffer(MetadataTable<TRow> table, int primaryColumn)
+            : this(table, primaryColumn, primaryColumn)
+        {
+        }
 
         /// <summary>
-        /// Creates a new instance of a sorted metadata table buffer.
+        /// Creates a new metadata stream buffer that is sorted by a primary and a secondary column.
         /// </summary>
-        /// <param name="layout">The layout of the final table.</param>
-        /// <param name="primaryKeyColumn">The index of the column to use for sorting.</param>
-        public SortedMetadataTableBuffer(TableLayout layout, int primaryKeyColumn)
+        /// <param name="table">The underlying table to flush to.</param>
+        /// <param name="primaryColumn">The index of the primary column to use as a sorting key.</param>
+        /// <param name="secondaryColumn">The index of the secondary column to use as a sorting key.</param>
+        public SortedMetadataTableBuffer(MetadataTable<TRow> table, int primaryColumn, int secondaryColumn)
         {
-            _layout = layout ?? throw new ArgumentNullException(nameof(layout));
-            _primaryKeyColumn = primaryKeyColumn;
+            _table = table ?? throw new ArgumentNullException(nameof(table));
+            _comparer = new RowComparer(primaryColumn, secondaryColumn);
         }
 
         /// <inheritdoc />
         public int Count => _entries.Count;
 
         /// <inheritdoc />
-        public MetadataRowHandle Add(TRow row)
+        public TRow this[uint rid]
         {
-            var handle = new MetadataRowHandle(_entries.Count + 1);
-            _entries.Add(new Entry(row, handle));
-            return handle;
+            get => _entries[(int) (rid - 1)];
+            set => _entries[(int) (rid - 1)] = value;
         }
 
         /// <inheritdoc />
-        public IConstructedTableInfo<TRow> CreateTable()
+        public uint Add(in TRow row)
         {
-            var comparer = new EntryComparer(_primaryKeyColumn);
-            _entries.Sort(comparer);
-            
-            var table = new MetadataTable<TRow>(_layout);
-            var mapping = new Dictionary<MetadataRowHandle, uint>();
-
-            for (uint rid = 1; rid <= _entries.Count; rid++)
-            {
-                var entry = _entries[(int) (rid - 1)];
-                table.Add(entry.Row);
-                mapping[entry.Handle] = rid;
-            }
-
-            return new MappedConstructedTableInfo<TRow>(table, mapping);
+            _entries.Add(row);
+            return (uint) _entries.Count;
         }
 
-        private struct Entry
+        /// <inheritdoc />
+        public void FlushToTable()
         {
-            public Entry(TRow row, MetadataRowHandle handle)
-            {
-                Row = row;
-                Handle = handle;
-            }
-            
-            public TRow Row
-            {
-                get;
-            }
-
-            public MetadataRowHandle Handle
-            {
-                get;
-            }
-            
-            #if DEBUG
-            public override string ToString()
-            {
-                return $"{nameof(Row)}: {Row}, {nameof(Handle)}: {Handle}";
-            }
-            #endif
+            _entries.Sort(_comparer);
+            foreach (var row in _entries)
+                _table.Add(row);
         }
-        
-        private struct EntryComparer : IComparer<Entry>
-        {
-            private readonly int _primaryColumnIndex;
 
-            public EntryComparer(int primaryColumnIndex)
+        private sealed class RowComparer : IComparer<TRow>
+        {
+            private readonly int _primaryColumn;
+            private readonly int _secondaryColumn;
+
+            public RowComparer(int primaryColumn, int secondaryColumn)
             {
-                _primaryColumnIndex = primaryColumnIndex;
+                _primaryColumn = primaryColumn;
+                _secondaryColumn = secondaryColumn;
             }
             
-            public int Compare(Entry x, Entry y)
+            public int Compare(TRow x, TRow y)
             {
-                return x.Row[_primaryColumnIndex].CompareTo(y.Row[_primaryColumnIndex]);
+                int result = x[_primaryColumn].CompareTo(y[_primaryColumn]);
+                if (result == 0)
+                    result = x[_secondaryColumn].CompareTo(y[_secondaryColumn]);
+                return result;
             }
         }
     }

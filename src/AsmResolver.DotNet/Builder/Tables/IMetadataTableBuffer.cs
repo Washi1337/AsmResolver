@@ -1,37 +1,48 @@
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+﻿using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder.Tables
 {
     /// <summary>
-    /// Represents a mutable buffer for a metadata table stored in the tables stream of a .NET module.
+    /// Provides members for constructing a new metadata table.
     /// </summary>
-    /// <typeparam name="TRow"></typeparam>
-    public interface IMetadataTableBuffer<TRow>
-        where TRow : struct, IMetadataRow
+    public interface IMetadataTableBuffer
     {
         /// <summary>
-        /// Gets the number of rows this buffer contains.
+        /// Gets the number of rows that were added to the buffer.
         /// </summary>
-        /// <remarks>
-        /// This number of rows might include additional padding rows.
-        /// </remarks>
         int Count
         {
             get;
         }
-    
-        /// <summary>
-        /// Adds a metadata table row to the buffer.
-        /// </summary>
-        /// <param name="row">The row to add.</param>
-        /// <returns>A handle to the metadata row that can be used later to resolve to a definitive row identifier (RID).</returns>
-        MetadataRowHandle Add(TRow row);
 
         /// <summary>
-        /// Constructs a new metadata table from the buffer.
+        /// Submits all rows to the underlying table stream.
         /// </summary>
-        /// <returns>An object containing the constructed metadata table, as well as a mechanism for resolving row handles
-        /// to their definitive row identifiers (RIDs)</returns>
-        IConstructedTableInfo<TRow> CreateTable();
+        void FlushToTable();
+    }
+
+    /// <summary>
+    /// Provides members for constructing a new metadata table.
+    /// </summary>
+    /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
+    public interface IMetadataTableBuffer<TRow> : IMetadataTableBuffer
+        where TRow : struct, IMetadataRow
+    {
+        TRow this[uint rid]
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        /// Adds a row to the metadata table.
+        /// </summary>
+        /// <param name="row">The row to add.</param>
+        /// <returns>The RID that this row was assigned to.</returns>
+        /// <remarks>
+        /// For some metadata table buffers, the RID that the row was assigned to might not be definitive. Sorted
+        /// metadata table buffers will reorder the table once all rows have been added to the buffer.
+        /// </remarks>
+        uint Add(in TRow row);
     }
 }
