@@ -43,34 +43,25 @@ namespace AsmResolver.DotNet.Serialized
             ModuleReadParameters readParameters)
             : base(token)
         {
+            // Store parameters in fields.
             DotNetDirectory = dotNetDirectory;
             _row = row;
             ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
+            
+            // Copy over "simple" columns.
             Generation = row.Generation;
             MetadataToken = token;
 
+            // Initialize member factory.
             var metadata = dotNetDirectory.Metadata;
-            
             _memberFactory = new CachedSerializedMemberFactory(metadata, this);
             
-            var assemblyTable = metadata
-                .GetStream<TablesStream>()
-                .GetTable<AssemblyDefinitionRow>();
-            
-            if (assemblyTable.Count > 0)
-            {
-                var assembly = new SerializedAssemblyDefinition(dotNetDirectory,
-                    new MetadataToken(TableIndex.Assembly, 1),
-                    assemblyTable[0],
-                    this,
-                    readParameters);
-                Assembly = assembly;
-            }
-            
+            // Find assembly + referenced corlib.
+            Assembly = FindParentAssembly();
             CorLibTypeFactory = new CorLibTypeFactory(FindMostRecentCorLib());
 
+            // Prepare lazy RID lists.
             var tablesStream = metadata.GetStream<TablesStream>();
-
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetFieldRange);
             _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef, 
@@ -82,7 +73,7 @@ namespace AsmResolver.DotNet.Serialized
             _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
         }
-        
+
         /// <summary>
         /// Gets the underlying object providing access to the data directory containing .NET metadata.  
         /// </summary>
@@ -334,6 +325,25 @@ namespace AsmResolver.DotNet.Serialized
             }
             
             return result;
+        }
+
+        private AssemblyDefinition FindParentAssembly()
+        {
+            var assemblyTable = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable<AssemblyDefinitionRow>();
+
+            if (assemblyTable.Count > 0)
+            {
+                var assembly = new SerializedAssemblyDefinition(DotNetDirectory,
+                    new MetadataToken(TableIndex.Assembly, 1),
+                    assemblyTable[0],
+                    this,
+                    ReadParameters);
+                return assembly;
+            }
+
+            return null;
         }
 
         private IResolutionScope FindMostRecentCorLib()
