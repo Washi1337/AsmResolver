@@ -137,5 +137,7 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override AssemblyDefinition Resolve() => Module?.MetadataResolver?.AssemblyResolver.Resolve(this);
+
+        AssemblyDescriptor IResolutionScope.GetAssembly() => this;
     }
 }

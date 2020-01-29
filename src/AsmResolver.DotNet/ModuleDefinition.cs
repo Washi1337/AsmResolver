@@ -470,6 +470,8 @@ namespace AsmResolver.DotNet
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
+        AssemblyDescriptor IResolutionScope.GetAssembly() => Assembly;
+
         /// <inheritdoc />
         public override string ToString() => Name;
     }

@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides a base implementation for describing a self-describing .NET assembly hosted by a common language runtime (CLR).
     /// </summary>
-    public abstract class AssemblyDescriptor : IHasCustomAttribute
+    public abstract class AssemblyDescriptor : IHasCustomAttribute, IFullNameProvider
     {
         private const int PublicKeyTokenLength = 8;
         
@@ -52,7 +52,21 @@ namespace AsmResolver.DotNet
             get => _name.Value;
             set => _name.Value = value;
         }
-        
+
+        /// <inheritdoc />
+        public string FullName
+        {
+            get
+            {
+                var publicKeyToken = GetPublicKeyToken();
+                string publicKeyTokenString = publicKeyToken != null
+                    ? string.Join(string.Empty, publicKeyToken.Select(x => x.ToString("x2")))
+                    : "null";
+
+                return $"{Name}, Version={Version}, PublicKeyToken={publicKeyTokenString}";
+            }
+        }
+
         /// <summary>
         /// Gets or sets the version of the assembly.
         /// </summary>
@@ -194,15 +208,7 @@ namespace AsmResolver.DotNet
         protected virtual string GetCulture() => null;
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            var publicKeyToken = GetPublicKeyToken();
-            string publicKeyTokenString = publicKeyToken != null
-                ? string.Join(string.Empty, publicKeyToken.Select(x => x.ToString("x2")))
-                : "null";
-            
-            return $"{Name}, Version={Version}, PublicKeyToken={publicKeyTokenString}";
-        }
+        public override string ToString() => FullName;
 
         /// <summary>
         /// Computes the token of a public key using the provided hashing algorithm.

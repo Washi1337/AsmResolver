@@ -176,7 +176,42 @@ namespace AsmResolver.DotNet.Signatures
 
         internal static void WriteFieldOrPropType(IBinaryStreamWriter writer, TypeSignature type)
         {
-            throw new NotImplementedException();
+            switch (type.ElementType)
+            {
+                case ElementType.Boolean:
+                case ElementType.Char:
+                case ElementType.I1:
+                case ElementType.U1:
+                case ElementType.I2:
+                case ElementType.U2:
+                case ElementType.I4:
+                case ElementType.U4:
+                case ElementType.I8:
+                case ElementType.U8:
+                case ElementType.R4:
+                case ElementType.R8:
+                case ElementType.I:
+                case ElementType.U:
+                case ElementType.String: 
+                    writer.WriteByte((byte) type.ElementType);
+                    break;
+                
+                case ElementType.Object:
+                    writer.WriteByte((byte) ElementType.Boxed);
+                    break;
+                
+                case ElementType.SzArray:
+                    var arrayType = (SzArrayTypeSignature) type;
+                    WriteFieldOrPropType(writer, arrayType.BaseType);
+                    break;
+                
+                case ElementType.Enum:
+                    writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(type));
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
         
         /// <inheritdoc />

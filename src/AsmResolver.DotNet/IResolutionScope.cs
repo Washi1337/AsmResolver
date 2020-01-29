@@ -5,5 +5,9 @@ namespace AsmResolver.DotNet
     /// </summary>
     public interface IResolutionScope : IMetadataMember, INameProvider, IModuleProvider
     {
+        /// <summary>
+        /// Gets the underlying assembly that this scope defines.
+        /// </summary>
+        AssemblyDescriptor GetAssembly();
     }
 }
