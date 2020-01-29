@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
@@ -20,13 +21,14 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="operandResolver">The object instance to use for resolving operands of an instruction in the
         /// method body.</param>
         /// <returns>The method body.</returns>
-        public static CilMethodBody FromRawMethodBody(MethodDefinition method, CilRawMethodBody rawBody, ICilOperandResolver operandResolver = null)
+        public static CilMethodBody FromRawMethodBody(MethodDefinition method, CilRawMethodBody rawBody,
+            ICilOperandResolver operandResolver = null)
         {
             var result = new CilMethodBody(method);
 
             if (operandResolver is null)
                 operandResolver = result;
-            
+
             ReadInstructions(result, rawBody, operandResolver);
 
             if (rawBody is CilRawFatMethodBody fatBody)
@@ -42,7 +44,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 result.MaxStack = 8;
                 result.InitializeLocals = false;
             }
-            
+
             return result;
         }
 
@@ -58,7 +60,8 @@ namespace AsmResolver.DotNet.Code.Cil
                 instruction.Operand = ResolveOperand(result, instruction, operandResolver) ?? instruction.Operand;
         }
 
-        private static object ResolveOperand(CilMethodBody methodBody, CilInstruction instruction, ICilOperandResolver resolver)
+        private static object ResolveOperand(CilMethodBody methodBody, CilInstruction instruction,
+            ICilOperandResolver resolver)
         {
             switch (instruction.OpCode.OperandType)
             {
@@ -66,17 +69,17 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilOperandType.ShortInlineBrTarget:
                     return new CilInstructionLabel(
                         methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset));
-                
+
                 case CilOperandType.InlineField:
                 case CilOperandType.InlineMethod:
                 case CilOperandType.InlineSig:
                 case CilOperandType.InlineTok:
                 case CilOperandType.InlineType:
                     return resolver.ResolveMember((MetadataToken) instruction.Operand);
-                
+
                 case CilOperandType.InlineString:
                     return resolver.ResolveString((MetadataToken) instruction.Operand);
-                
+
                 case CilOperandType.InlineSwitch:
                     var result = new List<ICilLabel>();
                     var labels = (IEnumerable<ICilLabel>) instruction.Operand;
@@ -87,11 +90,11 @@ namespace AsmResolver.DotNet.Code.Cil
                     }
 
                     return result;
-                
+
                 case CilOperandType.InlineVar:
                 case CilOperandType.ShortInlineVar:
                     return resolver.ResolveLocalVariable(Convert.ToInt32(instruction.Operand));
-                
+
                 case CilOperandType.InlineArgument:
                 case CilOperandType.ShortInlineArgument:
                     return resolver.ResolveParameter(Convert.ToInt32(instruction.Operand));
@@ -103,16 +106,17 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilOperandType.ShortInlineI:
                 case CilOperandType.ShortInlineR:
                     return instruction.Operand;
-                
+
                 case CilOperandType.InlinePhi:
                     throw new NotSupportedException();
-                
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private static void ReadLocalVariables(ModuleDefinition module, CilMethodBody result, CilRawFatMethodBody fatBody)
+        private static void ReadLocalVariables(ModuleDefinition module, CilMethodBody result,
+            CilRawFatMethodBody fatBody)
         {
             if (fatBody.LocalVarSigToken != MetadataToken.Zero
                 && module.TryLookupMember(fatBody.LocalVarSigToken, out var member)
@@ -197,6 +201,35 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
+        /// Gets a value indicating whether the method body is considered fat. That is, it has at least one of the
+        /// following properties
+        /// <list type="bullet">
+        ///    <item><description>The method is larger than 64 bytes.</description></item>
+        ///    <item><description>The method defines exception handlers.</description></item>
+        ///    <item><description>The method defines local variables.</description></item>
+        ///    <item><description>The method needs more than 8 values on the stack.</description></item>
+        /// </list>
+        /// </summary>
+        public bool IsFat
+        {
+            get
+            {
+                if (ExceptionHandlers.Count > 0
+                    || LocalVariables.Count > 0
+                    || MaxStack > 8)
+                {
+                    return true;
+                }
+
+                if (Instructions.Count == 0)
+                    return false;
+
+                var last = Instructions[Instructions.Count - 1];
+                return last.Offset + last.Size > 64;
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of local variables defined in the method body.
         /// </summary>
         public CilLocalVariableCollection LocalVariables
@@ -211,7 +244,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get;
         } = new List<CilExceptionHandler>();
-            
+
         /// <inheritdoc />
         IMetadataMember ICilOperandResolver.ResolveMember(MetadataToken token)
         {
@@ -238,5 +271,142 @@ namespace AsmResolver.DotNet.Code.Cil
             var parameters = Owner.Parameters;
             return index >= 0 && index < parameters.Count ? parameters[index] : null;
         }
-    } 
+
+        /// <summary>
+        /// Computes the maximum values pushed onto the stack by this method body.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="StackImbalanceException">Occurs when the method body will result in an unbalanced stack.</exception>
+        /// <remarks>This method will force the offsets of each instruction to be calculated.</remarks>
+        public int ComputeMaxStack()
+        {
+            if (Instructions.Count == 0)
+                return 0;
+
+            Instructions.CalculateOffsets();
+
+            var visitedInstructions = new Dictionary<int, StackState>();
+            var agenda = new Stack<StackState>();
+
+            // Add entrypoints to agenda.
+            agenda.Push(new StackState(0, 0));
+            foreach (var handler in ExceptionHandlers)
+            {
+                agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.TryStart.Offset), 0));
+                agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.HandlerStart.Offset),
+                    handler.HandlerType == CilExceptionHandlerType.Finally ? 0 : 1));
+                if (handler.FilterStart != null)
+                    agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.FilterStart.Offset), 1));
+            }
+
+            while (agenda.Count > 0)
+            {
+                var currentState = agenda.Pop();
+                if (currentState.InstructionIndex >= Instructions.Count)
+                {
+                    var last = Instructions[Instructions.Count - 1];
+                    throw new StackImbalanceException(this, last.Offset + last.Size);
+                }
+
+                var instruction = Instructions[currentState.InstructionIndex];
+
+                if (visitedInstructions.TryGetValue(currentState.InstructionIndex, out var visitedState))
+                {
+                    // Check if previously visited state is consistent with current observation.
+                    if (visitedState.StackSize != currentState.StackSize)
+                        throw new StackImbalanceException(this, instruction.Offset);
+                }
+                else
+                {
+                    // Mark instruction as visited and store current state.
+                    visitedInstructions[currentState.InstructionIndex] = currentState;
+
+                    // Compute next stack size.
+                    int nextStackSize = currentState.StackSize - instruction.GetStackPopCount(this);
+                    if (nextStackSize < 0)
+                        throw new StackImbalanceException(this, instruction.Offset);
+                    nextStackSize += instruction.GetStackPushCount();
+
+                    // Add outgoing edges to agenda.
+                    switch (instruction.OpCode.FlowControl)
+                    {
+                        case CilFlowControl.Branch:
+                            agenda.Push(new StackState(
+                                Instructions.GetIndexByOffset(((CilInstruction) instruction.Operand).Offset),
+                                nextStackSize));
+                            break;
+                        case CilFlowControl.ConditionalBranch:
+                            switch (instruction.OpCode.OperandType)
+                            {
+                                case CilOperandType.InlineBrTarget:
+                                case CilOperandType.ShortInlineBrTarget:
+                                    agenda.Push(new StackState(
+                                        Instructions.GetIndexByOffset(((CilInstruction) instruction.Operand).Offset),
+                                        nextStackSize));
+                                    break;
+                                case CilOperandType.InlineSwitch:
+                                    foreach (var target in ((IEnumerable<CilInstruction>) instruction.Operand))
+                                    {
+                                        agenda.Push(new StackState(
+                                            Instructions.GetIndexByOffset(target.Offset),
+                                            nextStackSize));
+                                    }
+
+                                    break;
+                            }
+
+                            agenda.Push(new StackState(
+                                currentState.InstructionIndex + 1,
+                                nextStackSize));
+                            break;
+                        case CilFlowControl.Call:
+                        case CilFlowControl.Break:
+                        case CilFlowControl.Meta:
+                        case CilFlowControl.Phi:
+                        case CilFlowControl.Next:
+                            agenda.Push(new StackState(
+                                currentState.InstructionIndex + 1,
+                                nextStackSize));
+                            break;
+                        case CilFlowControl.Return:
+                            if (nextStackSize != 0)
+                                throw new StackImbalanceException(this, instruction.Offset);
+                            break;
+                    }
+                }
+            }
+
+            return visitedInstructions.Max(x => x.Value.StackSize);
+        }
+
+        /// <summary>
+        /// Provides information about the state of the stack at a particular point of execution in a method.  
+        /// </summary>
+        private struct StackState
+        {
+            /// <summary>
+            /// The index of the instruction the state is associated to.
+            /// </summary>
+            public readonly int InstructionIndex;
+
+            /// <summary>
+            /// The number of values currently on the stack.
+            /// </summary>
+            public readonly int StackSize;
+
+            public StackState(int instructionIndex, int stackSize)
+            {
+                InstructionIndex = instructionIndex;
+                StackSize = stackSize;
+            }
+
+#if DEBUG
+            public override string ToString()
+            {
+                return $"InstructionIndex: {InstructionIndex}, StackSize: {StackSize}";
+            }
+#endif
+        }
+    }
 }
+

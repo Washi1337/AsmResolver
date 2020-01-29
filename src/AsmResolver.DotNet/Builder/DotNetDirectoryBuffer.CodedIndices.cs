@@ -48,14 +48,16 @@ namespace AsmResolver.DotNet.Builder
 
             var token = parent switch
             {
-                ITypeDefOrRef typeDefOrRef => AddTypeDefOrRef(typeDefOrRef),
+                TypeDefinition definition => GetTypeDefinitionToken(definition),
+                TypeReference reference => AddTypeReference(reference),
+                TypeSpecification specification => AddTypeSpecification(specification),
                 MethodDefinition methodDefinition => GetMethodDefinitionToken(methodDefinition),
                 // TODO: moduleref
                 _ => throw new ArgumentOutOfRangeException(nameof(parent))
             };
             
             return Metadata.TablesStream
-                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .GetIndexEncoder(CodedIndex.MemberRefParent)
                 .EncodeToken(token);
         }
 

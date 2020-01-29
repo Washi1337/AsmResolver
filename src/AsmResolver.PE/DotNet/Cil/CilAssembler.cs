@@ -53,6 +53,9 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             switch (instruction.OpCode.OperandType)
             {
+                case CilOperandType.InlineNone:
+                    break;
+                
                 case CilOperandType.ShortInlineI:
                     _writer.WriteSByte((sbyte) instruction.Operand);
                     break;

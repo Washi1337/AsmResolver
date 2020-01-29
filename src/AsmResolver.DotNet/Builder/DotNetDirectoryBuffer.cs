@@ -4,7 +4,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder
 {
-    public partial class DotNetDirectoryBuffer : ITokenProvider
+    public partial class DotNetDirectoryBuffer
     {
         public DotNetDirectoryBuffer(ModuleDefinition module, IMethodBodySerializer methodBodySerializer, IMetadataBuffer metadata)
         {

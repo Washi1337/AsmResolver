@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -164,6 +165,14 @@ namespace AsmResolver.DotNet.Code.Cil
             set;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the exception handler requires the fat format to be used to encode the
+        /// boundaries of the protected region.
+        /// </summary>
+        public bool IsFat =>
+            TryEnd.Offset - TryStart.Offset >= byte.MaxValue
+            || HandlerStart.Offset - HandlerEnd.Offset >= byte.MaxValue;
+
         /// <inheritdoc />
         public override string ToString()
         {
@@ -176,6 +185,5 @@ namespace AsmResolver.DotNet.Code.Cil
                 nameof(FilterStart), FilterStart,
                 nameof(ExceptionType), ExceptionType);
         }
-        
     }
 }

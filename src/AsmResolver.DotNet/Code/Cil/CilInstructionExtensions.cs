@@ -18,7 +18,19 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <returns>The number of values popped from the stack.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the instruction's operation code provides an
         /// invalid stack behaviour.</exception>
-        public static int GetStackPopCount(this CilInstruction instruction, CilMethodBody parent)
+        public static int GetStackPopCount(this CilInstruction instruction, CilMethodBody parent) =>
+            GetStackPopCount(instruction,
+                parent == null || parent.Owner.Signature.ReturnType.IsTypeOf("System", "Void"));
+        
+        /// <summary>
+        /// Determines the number of values that are popped from the stack by this instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        /// <param name="isVoid">A value indicating whether the enclosing method is returning System.Void or not.</param>
+        /// <returns>The number of values popped from the stack.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when the instruction's operation code provides an
+        /// invalid stack behaviour.</exception>
+        public static int GetStackPopCount(this CilInstruction instruction, bool isVoid)
         {
             switch (instruction.OpCode.StackBehaviourPop)
             {
@@ -50,14 +62,14 @@ namespace AsmResolver.DotNet.Code.Cil
                     return 3;
                 
                 case CilStackBehaviour.VarPop:
-                    return DetermineVarPopCount(instruction, parent);
+                    return DetermineVarPopCount(instruction, isVoid);
                 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private static int DetermineVarPopCount(CilInstruction instruction, CilMethodBody parent)
+        private static int DetermineVarPopCount(CilInstruction instruction, bool isVoid)
         {
             var opCode = instruction.OpCode;
             var signature = instruction.Operand switch
@@ -70,7 +82,7 @@ namespace AsmResolver.DotNet.Code.Cil
             if (signature == null)
             {
                 if (opCode.Code == CilCode.Ret)
-                    return parent == null || parent.Owner.Signature.ReturnType.IsTypeOf("System", "Void") ? 0 : 1;
+                    return isVoid ? 0 : 1;
             }
             else
             {

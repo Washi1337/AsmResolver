@@ -2,6 +2,6 @@
 {
     public interface IMethodBodySerializer
     {
-        ISegmentReference SerializeMethodBody(ITokenProvider provider, MethodDefinition method);
+        ISegmentReference SerializeMethodBody(DotNetDirectoryBuffer buffer, MethodDefinition method);
     }
 }
