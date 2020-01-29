@@ -2,6 +2,7 @@
 using AsmResolver.DotNet.Builder.Guid;
 using AsmResolver.DotNet.Builder.Strings;
 using AsmResolver.DotNet.Builder.Tables;
+using AsmResolver.DotNet.Builder.UserStrings;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
@@ -19,7 +20,7 @@ namespace AsmResolver.DotNet.Builder
             get;
         }
 
-        UserStringsStream UserStringsStream
+        UserStringsStreamBuffer UserStringsStream
         {
             get;
         }

@@ -114,6 +114,8 @@ namespace AsmResolver.DotNet.Builder.Tables
         /// <inheritdoc />
         public IMetadataStream CreateStream()
         {
+            foreach (var tableBuffer in _tableBuffers)
+                tableBuffer.FlushToTable();
             return _tablesStream;
         }
 
