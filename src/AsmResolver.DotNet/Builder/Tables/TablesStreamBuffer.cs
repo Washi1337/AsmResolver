@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Builder.Tables
     /// <summary>
     /// Provides a mutable buffer for building up a tables stream in a .NET portable executable. 
     /// </summary>
-    public class TableStreamBuffer : IMetadataStreamBuffer
+    public class TablesStreamBuffer : IMetadataStreamBuffer
     {
         private static readonly TableIndex[] EncTables =
         {
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Builder.Tables
         /// <summary>
         /// Creates a new mutable tables stream buffer.
         /// </summary>
-        public TableStreamBuffer()
+        public TablesStreamBuffer()
         {
             _tableBuffers = new IMetadataTableBuffer[]
             {
@@ -106,6 +106,11 @@ namespace AsmResolver.DotNet.Builder.Tables
             return (IMetadataTableBuffer<TRow>) _tableBuffers[(int) table];
         }
 
+        public IndexEncoder GetIndexEncoder(CodedIndex codedIndex)
+        {
+            return _tablesStream.GetIndexEncoder(codedIndex);
+        }
+
         /// <inheritdoc />
         public IMetadataStream CreateStream()
         {
@@ -130,7 +135,7 @@ namespace AsmResolver.DotNet.Builder.Tables
             return new SortedMetadataTableBuffer<TRow>(
                 (MetadataTable<TRow>) _tablesStream.GetTable(table), 
                 primaryColumn);
-        } 
+        }
 
         private IMetadataTableBuffer<TRow> Sorted<TRow>(TableIndex table, int primaryColumn, int secondaryColumn)
             where TRow : struct, IMetadataRow
@@ -139,8 +144,6 @@ namespace AsmResolver.DotNet.Builder.Tables
                 (MetadataTable<TRow>) _tablesStream.GetTable(table), 
                 primaryColumn,
                 secondaryColumn);
-        } 
-        
-        
+        }
     }
 }

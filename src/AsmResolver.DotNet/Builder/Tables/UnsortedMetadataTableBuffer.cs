@@ -36,10 +36,10 @@ namespace AsmResolver.DotNet.Builder.Tables
         }
 
         /// <inheritdoc />
-        public virtual uint Add(in TRow row)
+        public virtual MetadataToken Add(in TRow row)
         {
             _entries.Add(row);
-            return (uint) _entries.Count;
+            return new MetadataToken(_table.TableIndex, (uint) _entries.Count);
         }
 
         /// <inheritdoc />

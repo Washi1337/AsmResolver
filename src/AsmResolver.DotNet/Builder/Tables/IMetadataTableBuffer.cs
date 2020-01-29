@@ -1,4 +1,5 @@
-﻿using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+﻿using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder.Tables
 {
@@ -38,11 +39,11 @@ namespace AsmResolver.DotNet.Builder.Tables
         /// Adds a row to the metadata table.
         /// </summary>
         /// <param name="row">The row to add.</param>
-        /// <returns>The RID that this row was assigned to.</returns>
+        /// <returns>The metadata token that this row was assigned to.</returns>
         /// <remarks>
-        /// For some metadata table buffers, the RID that the row was assigned to might not be definitive. Sorted
+        /// For some metadata table buffers, the metadata token that the row was assigned to might not be definitive. Sorted
         /// metadata table buffers will reorder the table once all rows have been added to the buffer.
         /// </remarks>
-        uint Add(in TRow row);
+        MetadataToken Add(in TRow row);
     }
 }

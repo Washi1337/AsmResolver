@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Builder.Tables
     public class DistinctMetadataTableBuffer<TRow> : UnsortedMetadataTableBuffer<TRow>
         where TRow : struct, IMetadataRow
     {
-        private readonly IDictionary<TRow, uint> _entryRids = new Dictionary<TRow, uint>();
+        private readonly IDictionary<TRow, MetadataToken> _entries = new Dictionary<TRow, MetadataToken>();
         
         /// <summary>
         /// Creates a new distinct metadata table buffer.
@@ -30,27 +30,27 @@ namespace AsmResolver.DotNet.Builder.Tables
             get => base[rid];
             set
             {
-                if (_entryRids.TryGetValue(value, out uint duplicateRid) && duplicateRid != rid)
+                if (_entries.TryGetValue(value, out var duplicateToken) && duplicateToken.Rid != rid)
                     throw new ArgumentException("Row is already present in the table.");
 
                 var old = base[rid];
                 base[rid] = value;
                 
-                _entryRids.Remove(old);
-                _entryRids.Add(value, rid);
+                _entries.Remove(old);
+                _entries.Add(value, rid);
             }
         }
 
         /// <inheritdoc />
-        public override uint Add(in TRow row)
+        public override MetadataToken Add(in TRow row)
         {
-            if (!_entryRids.TryGetValue(row, out uint rid))
+            if (!_entries.TryGetValue(row, out var token))
             {
-                rid = base.Add(in row);
-                _entryRids.Add(row, rid);
+                token = base.Add(in row);
+                _entries.Add(row, token);
             }
 
-            return rid;
+            return token;
         }
     }
 }

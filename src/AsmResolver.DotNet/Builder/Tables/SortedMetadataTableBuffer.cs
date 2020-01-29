@@ -50,10 +50,10 @@ namespace AsmResolver.DotNet.Builder.Tables
         }
 
         /// <inheritdoc />
-        public uint Add(in TRow row)
+        public MetadataToken Add(in TRow row)
         {
             _entries.Add(row);
-            return (uint) _entries.Count;
+            return new MetadataToken(_table.TableIndex, (uint) _entries.Count);
         }
 
         /// <inheritdoc />
