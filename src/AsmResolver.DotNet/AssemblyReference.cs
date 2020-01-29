@@ -12,6 +12,7 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute
     {
         private readonly LazyVariable<byte[]> _publicKeyOrToken;
+        private readonly LazyVariable<byte[]> _hashValue;
 
         /// <summary>
         /// Initializes a new assembly reference.
@@ -21,6 +22,7 @@ namespace AsmResolver.DotNet
             : base(token)
         {
             _publicKeyOrToken = new LazyVariable<byte[]>(GetPublicKeyOrToken);
+            _hashValue = new LazyVariable<byte[]>(GetHashValue);
         }
 
         /// <summary>
@@ -98,6 +100,15 @@ namespace AsmResolver.DotNet
             set => _publicKeyOrToken.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the hash value of the assembly reference.
+        /// </summary>
+        public byte[] HashValue
+        {
+            get => _hashValue.Value;
+            set => _hashValue.Value = value;
+        }
+        
         /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {
@@ -114,6 +125,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initializing the <see cref="PublicKeyOrToken"/> property.
         /// </remarks>
         protected virtual byte[] GetPublicKeyOrToken() => null;
+
+        /// <summary>
+        /// Obtains the hash value of the assembly reference.
+        /// </summary>
+        /// <returns>The hash value.</returns>
+        /// <remarks>
+        /// This method is called upon initializing the <see cref="HashValue"/> property.
+        /// </remarks>
+        protected virtual byte[] GetHashValue() => null;
 
         /// <inheritdoc />
         public override AssemblyDefinition Resolve() => Module?.MetadataResolver?.AssemblyResolver.Resolve(this);
