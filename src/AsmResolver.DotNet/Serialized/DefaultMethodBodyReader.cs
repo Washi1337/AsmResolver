@@ -27,6 +27,10 @@ namespace AsmResolver.DotNet.Serialized
                     // TODO: handle native method bodies.
                 }
             }
+            else if (row.Body.IsBounded && row.Body.GetSegment() is CilRawMethodBody rawMethodBody)
+            {
+                return CilMethodBody.FromRawMethodBody(owner, rawMethodBody);
+            }
 
             return null;
         }

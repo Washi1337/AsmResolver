@@ -58,7 +58,10 @@ namespace AsmResolver.DotNet.Serialized
             
             // Find assembly + referenced corlib.
             Assembly = FindParentAssembly();
-            CorLibTypeFactory = new CorLibTypeFactory(FindMostRecentCorLib());
+            var corlib = FindMostRecentCorLib();
+            CorLibTypeFactory = corlib == null
+                ? CorLibTypeFactory.CreateMscorlib40TypeFactory()
+                : new CorLibTypeFactory(corlib);
 
             // Prepare lazy RID lists.
             var tablesStream = metadata.GetStream<TablesStream>();
@@ -361,7 +364,7 @@ namespace AsmResolver.DotNet.Serialized
                 }
             }
 
-            if (mostRecentCorLib is null)
+            if (mostRecentCorLib is null && Assembly is {})
             {
                 if (CorLibTypeFactory.KnownCorLibNames.Contains(Assembly.Name))
                     mostRecentCorLib = this;
