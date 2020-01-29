@@ -14,7 +14,6 @@ namespace AsmResolver.PE.Imports.Builder
         public ImportDirectoryBuffer(bool is32Bit)
             : base(new HintNameTableBuffer(), is32Bit)
         {
-            _entriesLength = SerializedModuleImportEntry.ModuleImportSize;
             ImportAddressDirectory = new ImportAddressDirectoryBuffer(HintNameTable, is32Bit);
         }
 
@@ -29,6 +28,9 @@ namespace AsmResolver.PE.Imports.Builder
         /// <inheritdoc />
         public override void AddModule(IModuleImportEntry module)
         {
+            if (_entriesLength == 0)
+                _entriesLength = SerializedModuleImportEntry.ModuleImportSize;
+            
             _entriesLength += SerializedModuleImportEntry.ModuleImportSize;
             
             ImportAddressDirectory.AddModule(module);
