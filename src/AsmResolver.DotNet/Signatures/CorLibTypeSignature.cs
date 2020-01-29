@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -89,10 +90,8 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => sizeof(ElementType);
-
-        /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer) => writer.WriteByte((byte) ElementType);
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider tokenProvider) =>
+            writer.WriteByte((byte) ElementType);
         
     }
 }

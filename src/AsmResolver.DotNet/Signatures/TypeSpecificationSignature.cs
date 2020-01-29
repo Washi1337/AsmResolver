@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Builder;
+
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
@@ -30,29 +32,18 @@ namespace AsmResolver.DotNet.Signatures
         public override IResolutionScope Scope => BaseType.Scope;
 
         /// <inheritdoc />
-        public override TypeDefinition Resolve()
-        {
-            return BaseType.Resolve();
-        }
+        public override TypeDefinition Resolve() => 
+            BaseType.Resolve();
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef()
-        {
-            return BaseType.GetUnderlyingTypeDefOrRef();
-        }
+        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => 
+            BaseType.GetUnderlyingTypeDefOrRef();
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize()
-        {
-            return (uint) (sizeof(byte) + BaseType.GetPhysicalSize() + ExtraData.Length);
-        }
-
-        /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
             writer.WriteByte((byte) ElementType);
-            BaseType.Write(writer);
-            base.Write(writer);
+            BaseType.Write(writer, provider);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -76,15 +77,13 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize()
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
-            throw new System.NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
-        {
-            throw new System.NotImplementedException();
+            writer.WriteByte((byte) Attributes);
+            writer.WriteCompressedUInt32((uint) VariableTypes.Count);
+            
+            foreach (var type in VariableTypes)
+                type.Write(writer, provider);
         }
     }
 }

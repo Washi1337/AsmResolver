@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -10,6 +11,8 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class CustomAttributeSignature : ExtendableBlobSignature
     {
+        private const ushort CustomAttributeSignaturePrologue = 0x0001;
+
         /// <summary>
         /// Reads a single custom attribute signature from the input stream.
         /// </summary>
@@ -20,8 +23,8 @@ namespace AsmResolver.DotNet.Signatures
         /// <exception cref="FormatException">Occurs when the input stream does not point to a valid signature.</exception>
         public static CustomAttributeSignature FromReader(ModuleDefinition parentModule, ICustomAttributeType ctor, IBinaryStreamReader reader)
         {
-            ushort prolog = reader.ReadUInt16();
-            if (prolog != 0x0001)
+            ushort prologue = reader.ReadUInt16();
+            if (prologue != CustomAttributeSignaturePrologue)
                 throw new FormatException("Input stream does not point to a valid custom attribute signature.");
 
             var result = new CustomAttributeSignature();
@@ -90,6 +93,19 @@ namespace AsmResolver.DotNet.Signatures
         public override string ToString()
         {
             return $"(Fixed: {{{string.Join(", ", FixedArguments)}}}, Named: {{{string.Join(", ", NamedArguments)}}})";
+        }
+
+        /// <inheritdoc />
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteUInt16(CustomAttributeSignaturePrologue);
+            
+            for (int i = 0; i < FixedArguments.Count; i++)
+                FixedArguments[i].Write(writer, provider);
+
+            writer.WriteUInt16((ushort) NamedArguments.Count);
+            for (int i = 0; i < NamedArguments.Count; i++)
+                NamedArguments[i].Write(writer, provider);
         }
     }
 }

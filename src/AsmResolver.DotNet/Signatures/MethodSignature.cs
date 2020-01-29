@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -131,6 +132,17 @@ namespace AsmResolver.DotNet.Signatures
         public IList<TypeSignature> SentinelParameterTypes
         {
             get;
+        }
+
+        /// <inheritdoc />
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteByte((byte) Attributes);
+
+            if (IsGeneric)
+                writer.WriteCompressedUInt32((uint) GenericParameterCount);
+
+            WriteParametersAndReturnType(writer, provider);
         }
 
         /// <inheritdoc />

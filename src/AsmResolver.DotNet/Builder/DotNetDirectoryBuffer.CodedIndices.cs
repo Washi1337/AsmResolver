@@ -3,7 +3,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
 {
-    public partial class DotNetDirectoryBuffer
+    public partial class DotNetDirectoryBuffer : ITypeCodedIndexProvider
     {
         private uint AddResolutionScope(IResolutionScope scope)
         {
@@ -39,5 +39,7 @@ namespace AsmResolver.DotNet.Builder
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)
                 .EncodeToken(token);
         }
+
+        uint ITypeCodedIndexProvider.GetTypeDefOrRefIndex(ITypeDefOrRef type) => AddTypeDefOrRef(type);
     }
 }

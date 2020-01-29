@@ -173,6 +173,11 @@ namespace AsmResolver.DotNet.Signatures
                     return parentModule.CorLibTypeFactory.FromElementType(elementType);
             }
         }
+
+        internal static void WriteFieldOrPropType(IBinaryStreamWriter writer, TypeSignature type)
+        {
+            throw new NotImplementedException();
+        }
         
         /// <inheritdoc />
         public abstract string Name

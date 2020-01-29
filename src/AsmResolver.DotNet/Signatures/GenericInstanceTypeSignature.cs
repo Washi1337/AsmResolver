@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -103,5 +104,14 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => GenericType;
 
+        /// <inheritdoc />
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteByte((byte) ElementType);
+            writer.WriteByte((byte) (IsValueType ? ElementType.ValueType : ElementType.Class));
+            writer.WriteCompressedUInt32((uint) TypeArguments.Count);
+            for (int i = 0; i < TypeArguments.Count; i++)
+                TypeArguments[i].Write(writer, provider);
+        }
     }
 }

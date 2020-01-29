@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -68,5 +69,12 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => null;
+
+        /// <inheritdoc />
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteByte((byte) ElementType);
+            writer.WriteCompressedUInt32((uint) Index);
+        }
     }
 }

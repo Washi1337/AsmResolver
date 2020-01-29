@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Builder;
+
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
@@ -13,18 +15,20 @@ namespace AsmResolver.DotNet.Signatures
             get;
             set;
         }
-
+        
         /// <inheritdoc />
-        public override uint GetPhysicalSize()
+        public sealed override void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
-            return (uint) (ExtraData?.Length ?? 0);
-        }
-
-        /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
-        {
+            WriteContents(writer, provider);
             if (ExtraData != null)
                 writer.WriteBytes(ExtraData);
         }
+
+        /// <summary>
+        /// Serializes the blob (without extra data) to an output stream.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
+        protected abstract void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider);
     }
 }

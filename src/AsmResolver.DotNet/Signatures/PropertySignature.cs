@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -108,6 +109,13 @@ namespace AsmResolver.DotNet.Signatures
         public PropertySignature(CallingConventionAttributes attributes, TypeSignature propertyType, IEnumerable<TypeSignature> parameterTypes)
             : base(attributes | CallingConventionAttributes.Property, propertyType, parameterTypes)
         {
+        }
+
+        /// <inheritdoc />
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteByte((byte) Attributes);
+            WriteParametersAndReturnType(writer, provider);
         }
 
         /// <inheritdoc />

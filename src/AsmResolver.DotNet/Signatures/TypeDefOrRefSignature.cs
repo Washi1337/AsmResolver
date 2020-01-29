@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Builder;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -66,15 +68,10 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize()
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
-            throw new System.NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
-        {
-            throw new System.NotImplementedException();
+            writer.WriteByte((byte) ElementType);
+            writer.WriteCompressedUInt32(provider.GetTypeDefOrRefIndex(Type));
         }
     }
 }

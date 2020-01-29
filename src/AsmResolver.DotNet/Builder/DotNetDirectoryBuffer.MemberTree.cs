@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new FieldDefinitionRow(
                 field.Attributes,
                 Metadata.StringsStream.GetStringIndex(field.Name),
-                Metadata.BlobStream.GetBlobIndex(field.Signature));
+                Metadata.BlobStream.GetBlobIndex(this, field.Signature));
 
             return table.Add(row, field.MetadataToken.Rid);
         }
@@ -104,10 +104,12 @@ namespace AsmResolver.DotNet.Builder
                 method.ImplAttributes, 
                 method.Attributes, 
                 Metadata.StringsStream.GetStringIndex(method.Name),
-                Metadata.BlobStream.GetBlobIndex(method.Signature),
+                Metadata.BlobStream.GetBlobIndex(this, method.Signature),
                 0);
 
-            return table.Add(row, method.MetadataToken.Rid);
+            var token = table.Add(row, method.MetadataToken.Rid);
+            _methodTokens.Add(method, token);
+            return token;
         }
 
         private void AddParameterDefinitions()
@@ -123,7 +125,7 @@ namespace AsmResolver.DotNet.Builder
                     paramList);
                 table[rid] = row;
 
-                var method = _methodTokens.GetKey(new MetadataToken(TableIndex.TypeDef, rid));
+                var method = _methodTokens.GetKey(new MetadataToken(TableIndex.Method, rid));
                 
                 foreach (var parameter in method.ParameterDefinitions)
                     AddParameterDefinition(parameter);

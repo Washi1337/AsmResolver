@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -88,6 +89,78 @@ namespace AsmResolver.DotNet.Signatures
         public override string ToString()
         {
             return Value?.ToString() ?? "null";
+        }
+
+        /// <summary>
+        /// Writes the named argument to the provided output stream.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <param name="argumentType">The type of the argument.</param>
+        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
+        public void Write(IBinaryStreamWriter writer, TypeSignature argumentType, ITypeCodedIndexProvider provider)
+        {
+            WriteValue(writer, argumentType, provider, Value);
+        }
+
+        private void WriteValue(IBinaryStreamWriter writer, TypeSignature argumentType, ITypeCodedIndexProvider provider, object value)
+        {
+            switch (argumentType.ElementType)
+            {
+                case ElementType.Boolean:
+                    writer.WriteByte((byte) ((bool) value ? 1 : 0));
+                    break;
+                case ElementType.Char:
+                    writer.WriteUInt16((char) value);
+                    break;
+                case ElementType.I1:
+                    writer.WriteSByte((sbyte) value);
+                    break;
+                case ElementType.U1:
+                    writer.WriteByte((byte) value);
+                    break;
+                case ElementType.I2:
+                    writer.WriteInt16((short) value);
+                    break;
+                case ElementType.U2:
+                    writer.WriteUInt16((ushort) value);
+                    break;
+                case ElementType.I4:
+                    writer.WriteInt32((int) value);
+                    break;
+                case ElementType.U4:
+                    writer.WriteUInt32((uint) value);
+                    break;
+                case ElementType.I8:
+                    writer.WriteInt64((long) value);
+                    break;
+                case ElementType.U8:
+                    writer.WriteUInt64((ulong) value);
+                    break;
+                case ElementType.R4:
+                    writer.WriteSingle((float) value);
+                    break;
+                case ElementType.R8:
+                    writer.WriteDouble((double) value);
+                    break;
+                case ElementType.String:
+                    writer.WriteSerString(value as string);
+                    break;
+                case ElementType.Object:
+                    throw new NotImplementedException();
+                    
+                case ElementType.Class:
+                case ElementType.Enum:
+                case ElementType.ValueType:
+                    var enumTypeDef = argumentType.Resolve();
+                    if (enumTypeDef != null && enumTypeDef.IsEnum)
+                        WriteValue(writer, enumTypeDef.GetEnumUnderlyingType(), provider, Value);
+                    else
+                        throw new NotImplementedException();
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -76,6 +77,15 @@ namespace AsmResolver.DotNet.Signatures
         public IList<TypeSignature> TypeArguments
         {
             get;
+        }
+
+        /// <inheritdoc />
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteByte((byte) Attributes);
+            writer.WriteCompressedUInt32((uint) TypeArguments.Count);
+            for (int i = 0; i < TypeArguments.Count; i++)
+                TypeArguments[i].Write(writer, provider);
         }
 
         /// <inheritdoc />

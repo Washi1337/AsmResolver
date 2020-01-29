@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -67,6 +68,19 @@ namespace AsmResolver.DotNet.Signatures
         public override string ToString()
         {
             return $"{MemberName} = {Argument}";
+        }
+
+        /// <summary>
+        /// Writes the named argument to the provided output stream.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
+        public void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteByte((byte) MemberType);
+            TypeSignature.WriteFieldOrPropType(writer, ArgumentType);
+            writer.WriteSerString(MemberName);
+            Argument.Write(writer, provider);
         }
     }
 }

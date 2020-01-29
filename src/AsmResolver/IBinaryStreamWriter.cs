@@ -199,5 +199,23 @@ namespace AsmResolver
                 writer.WriteByte((byte)(value & 0xFF));
             }
         }
+
+        /// <summary>
+        /// Writes an UTF8 string to the stream.
+        /// </summary>
+        /// <param name="writer">The writer to use.</param>
+        /// <param name="value">The string to write.</param>
+        public static void WriteSerString(this IBinaryStreamWriter writer, string value)
+        {
+            if (value == null)
+            {
+                writer.WriteByte(0xFF);
+                return;
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(value);
+            writer.WriteCompressedUInt32((uint)bytes.Length);
+            writer.WriteBytes(bytes);
+        }
     }
 }

@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using AsmResolver.DotNet.Builder;
 
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
     /// Provides a base for method and property signatures. 
     /// </summary>
-    public class MethodSignatureBase : MemberSignature
+    public abstract class MethodSignatureBase : MemberSignature
     {
         /// <summary>
         /// Initializes the base of a method signature.
@@ -63,6 +64,21 @@ namespace AsmResolver.DotNet.Signatures
                 // TODO: handle sentinel parameters.
                 ParameterTypes.Add(parameterType);
             }
+        }
+
+        /// <summary>
+        /// Writes the parameter and return types in the signature to the provided output stream.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <param name="provider">The object to use for looking up type tokens.</param>
+        protected void WriteParametersAndReturnType(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
+            
+            ReturnType.Write(writer, provider);
+            
+            foreach (var type in ParameterTypes)
+                type.Write(writer, provider);
         }
     }
 }

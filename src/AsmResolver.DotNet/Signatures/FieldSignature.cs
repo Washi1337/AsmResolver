@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Builder;
+
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
@@ -74,6 +76,13 @@ namespace AsmResolver.DotNet.Signatures
         {
             get => MemberReturnType;
             set => MemberReturnType = value;
+        }
+
+        /// <inheritdoc />
+        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            writer.WriteByte((byte) Attributes);
+            FieldType.Write(writer, provider);
         }
     }
 }

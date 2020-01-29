@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -39,9 +40,9 @@ namespace AsmResolver.DotNet.Signatures
             
             var arrayElementType = ((SzArrayTypeSignature) argumentType).BaseType;
             uint elementCount = reader.CanRead(sizeof(uint)) ? reader.ReadUInt32() : uint.MaxValue;
-            result.IsNull = elementCount == uint.MaxValue;
+            result.IsNullArray = elementCount == uint.MaxValue;
             
-            if (!result.IsNull)
+            if (!result.IsNullArray)
             {
                 for (uint i = 0; i < elementCount; i++)
                 {
@@ -85,9 +86,9 @@ namespace AsmResolver.DotNet.Signatures
         } = new List<CustomAttributeArgumentElement>();
 
         /// <summary>
-        /// Gets or sets a value indicating whether the argument represents the null value.
+        /// Gets or sets a value indicating whether the argument represents the null array value.
         /// </summary>
-        public bool IsNull
+        public bool IsNullArray
         {
             get;
             set;
@@ -96,11 +97,35 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override string ToString()
         {
-            return !IsNull
+            return !IsNullArray
                 ? ArgumentType.ElementType == ElementType.SzArray
                     ? $"{{{string.Join(", ", Elements)}}}"
                     : Element.ToString()
                 : "null";
+        }
+
+        /// <summary>
+        /// Writes the fixed argument to the provided output stream.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
+        public void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            if (ArgumentType is SzArrayTypeSignature szArrayType)
+                WriteArray(szArrayType, writer, provider);
+            else
+                WriteSimple(writer, provider);
+        }
+
+        private void WriteSimple(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        {
+            Element.Write(writer, ArgumentType, provider);
+        }
+
+        private void WriteArray(SzArrayTypeSignature szArrayType, IBinaryStreamWriter writer,
+            ITypeCodedIndexProvider provider)
+        {
+            
         }
     }
 }

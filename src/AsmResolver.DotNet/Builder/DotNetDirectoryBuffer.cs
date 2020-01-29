@@ -82,7 +82,7 @@ namespace AsmResolver.DotNet.Builder
             AssertIsImported(type);
             
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
-            var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(type.Signature));
+            var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature));
             return table.Add(row, type.MetadataToken.Rid);
         }
     }
