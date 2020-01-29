@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Builder.Tables
         }
 
         /// <inheritdoc />
-        public MetadataToken Add(in TRow row)
+        public MetadataToken Add(in TRow row, uint originalRid)
         {
             _entries.Add(row);
             return new MetadataToken(_table.TableIndex, (uint) _entries.Count);

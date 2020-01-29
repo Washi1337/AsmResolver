@@ -52,18 +52,19 @@ namespace AsmResolver.DotNet.Builder
             return directory;
         }
 
-        private void AddModule(ModuleDefinition module)
+        private void AddManifestModule(ModuleDefinition module)
         {
             var stringsStream = Metadata.StringsStream;
             var guidStream = Metadata.GuidStream;
 
             var table = Metadata.TablesStream.GetTable<ModuleDefinitionRow>(TableIndex.Module);
-            table.Add(new ModuleDefinitionRow(
+            var row = new ModuleDefinitionRow(
                 module.Generation,
                 stringsStream.GetStringIndex(module.Name),
                 guidStream.GetGuidIndex(module.Mvid),
                 guidStream.GetGuidIndex(module.EncId),
-                guidStream.GetGuidIndex(module.EncBaseId)));
+                guidStream.GetGuidIndex(module.EncBaseId));
+            table.Add(row, module.MetadataToken.Rid);
 
             AddTypeDefinitionsInModule(module);
         }
@@ -92,7 +93,7 @@ namespace AsmResolver.DotNet.Builder
                 0,
                 0);
 
-            var token = table.Add(row);
+            var token = table.Add(row, type.MetadataToken.Rid);
             _typeDefTokens.Add(type, token);
             return token;
         }
@@ -129,26 +130,26 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.BlobStream.GetBlobIndex(method.Signature),
                 0);
 
-            return table.Add(row);
+            return table.Add(row, method.MetadataToken.Rid);
         }
         
-        private MetadataToken AddAssemblyReference(AssemblyReference reference)
+        private MetadataToken AddAssemblyReference(AssemblyReference assembly)
         {
-            AssertIsImported(reference);
+            AssertIsImported(assembly);
             
             var table = Metadata.TablesStream.GetTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
 
-            var row = new AssemblyReferenceRow((ushort) reference.Version.Major,
-                (ushort) reference.Version.Minor,
-                (ushort) reference.Version.Build,
-                (ushort) reference.Version.Revision,
-                reference.Attributes,
-                Metadata.BlobStream.GetBlobIndex(reference.PublicKeyOrToken),
-                Metadata.StringsStream.GetStringIndex(reference.Name),
-                Metadata.StringsStream.GetStringIndex(reference.Culture),
-                Metadata.BlobStream.GetBlobIndex(reference.HashValue));
+            var row = new AssemblyReferenceRow((ushort) assembly.Version.Major,
+                (ushort) assembly.Version.Minor,
+                (ushort) assembly.Version.Build,
+                (ushort) assembly.Version.Revision,
+                assembly.Attributes,
+                Metadata.BlobStream.GetBlobIndex(assembly.PublicKeyOrToken),
+                Metadata.StringsStream.GetStringIndex(assembly.Name),
+                Metadata.StringsStream.GetStringIndex(assembly.Culture),
+                Metadata.BlobStream.GetBlobIndex(assembly.HashValue));
 
-            return table.Add(row);
+            return table.Add(row, assembly.MetadataToken.Rid);
         }
 
         private MetadataToken AddTypeReference(TypeReference type)
@@ -165,7 +166,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(type.Name),
                 Metadata.StringsStream.GetStringIndex(type.Namespace));
 
-            return table.Add(row);
+            return table.Add(row, type.MetadataToken.Rid);
         }
 
         private MetadataToken AddTypeSpecification(TypeSpecification type)
@@ -174,7 +175,7 @@ namespace AsmResolver.DotNet.Builder
             
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
             var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(type.Signature));
-            return table.Add(row);
+            return table.Add(row, type.MetadataToken.Rid);
         }
     }
 }

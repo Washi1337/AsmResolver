@@ -42,11 +42,11 @@ namespace AsmResolver.DotNet.Builder.Tables
         }
 
         /// <inheritdoc />
-        public override MetadataToken Add(in TRow row)
+        public override MetadataToken Add(in TRow row, uint originalRid)
         {
             if (!_entries.TryGetValue(row, out var token))
             {
-                token = base.Add(in row);
+                token = base.Add(in row, originalRid);
                 _entries.Add(row, token);
             }
 
