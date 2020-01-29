@@ -253,9 +253,24 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             Rva = newRva;
         }
 
+        /// <summary>
+        /// Updates the layouts of each metadata table, according to the <see cref="Flags"/> property.
+        /// </summary>
+        /// <remarks>
+        /// This method should be called after updating any of the index sizes in any of the <see cref="Flags"/>,
+        /// <see cref="StringIndexSize"/>, <see cref="BlobIndexSize"/> or <see cref="GuidIndexSize"/> properties.
+        /// </remarks>
+        protected void SynchronizeTableLayoutsWithFlags()
+        {
+            var layouts = GetTableLayouts();
+            for (int i = 0; i < Tables.Count; i++)
+                Tables[i].UpdateTableLayout(layouts[i]);
+        }
+
         /// <inheritdoc />
         public uint GetPhysicalSize()
         {
+            SynchronizeTableLayoutsWithFlags();
             ulong validBitmask = ComputeValidBitmask();
             return (uint) (sizeof(uint)
                            + 4 * sizeof(byte)
@@ -273,6 +288,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public virtual void Write(IBinaryStreamWriter writer)
         {
+            SynchronizeTableLayoutsWithFlags();
+            
             writer.WriteUInt32(Reserved);
             writer.WriteByte(MajorVersion);
             writer.WriteByte(MinorVersion);
