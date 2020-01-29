@@ -110,6 +110,7 @@ namespace AsmResolver.DotNet.Builder.UserStrings
         /// <inheritdoc />
         public IMetadataStream CreateStream()
         {
+            _writer.Align(4);
             return new SerializedUserStringsStream(Name, _rawStream.ToArray());
         }
     }

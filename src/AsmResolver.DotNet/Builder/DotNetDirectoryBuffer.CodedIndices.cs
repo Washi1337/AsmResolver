@@ -7,6 +7,9 @@ namespace AsmResolver.DotNet.Builder
     {
         private uint AddResolutionScope(IResolutionScope scope)
         {
+            if (scope == null)
+                return 0;
+            
             AssertIsImported(scope);
 
             var token = scope switch
@@ -25,6 +28,9 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddTypeDefOrRef(ITypeDefOrRef type)
         {
+            if (type == null)
+                return 0;
+            
             AssertIsImported(type);
 
             var token = type switch
@@ -44,6 +50,9 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddMemberRefParent(IMemberRefParent parent)
         {
+            if (parent == null)
+                return 0;
+            
             AssertIsImported(parent);
 
             var token = parent switch
@@ -63,6 +72,9 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddMethodDefOrRef(IMethodDefOrRef method)
         {
+            if (method == null)
+                return 0;
+
             AssertIsImported(method);
 
             var token = method switch
@@ -73,7 +85,26 @@ namespace AsmResolver.DotNet.Builder
             };
             
             return Metadata.TablesStream
-                .GetIndexEncoder(CodedIndex.TypeDefOrRef)
+                .GetIndexEncoder(CodedIndex.MethodDefOrRef)
+                .EncodeToken(token);
+        }
+
+        private uint AddCustomAttributeType(ICustomAttributeType constructor)
+        {
+            if (constructor == null)
+                return 0;
+
+            AssertIsImported(constructor);
+
+            var token = constructor switch
+            {
+                MethodDefinition definition => GetMethodDefinitionToken(definition),
+                MemberReference reference => AddMemberReference(reference),
+                _ => throw new ArgumentOutOfRangeException(nameof(constructor))
+            };
+            
+            return Metadata.TablesStream
+                .GetIndexEncoder(CodedIndex.CustomAttributeType)
                 .EncodeToken(token);
         }
     }

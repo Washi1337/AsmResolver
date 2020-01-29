@@ -28,7 +28,27 @@ namespace AsmResolver.DotNet.Builder
             return _methodTokens.GetValue(method);
         }
 
-        public void AddManifestModule(ModuleDefinition module)
+        public void AddAssembly(AssemblyDefinition assembly)
+        {
+            var table = Metadata.TablesStream.GetTable<AssemblyDefinitionRow>(TableIndex.Assembly);
+
+            var row = new AssemblyDefinitionRow(
+                assembly.HashAlgorithm,
+                (ushort) assembly.Version.Major,
+                (ushort) assembly.Version.Minor,
+                (ushort) assembly.Version.Build,
+                (ushort) assembly.Version.Revision,
+                assembly.Attributes,
+                Metadata.BlobStream.GetBlobIndex(assembly.PublicKey),
+                Metadata.StringsStream.GetStringIndex(assembly.Name),
+                Metadata.StringsStream.GetStringIndex(assembly.Culture));
+
+            var token = table.Add(row, assembly.MetadataToken.Rid);
+            AddCustomAttributes(token, assembly);
+            AddModule(assembly.ManifestModule);
+        }
+
+        public void AddModule(ModuleDefinition module)
         {
             var stringsStream = Metadata.StringsStream;
             var guidStream = Metadata.GuidStream;
@@ -40,8 +60,9 @@ namespace AsmResolver.DotNet.Builder
                 guidStream.GetGuidIndex(module.Mvid),
                 guidStream.GetGuidIndex(module.EncId),
                 guidStream.GetGuidIndex(module.EncBaseId));
-            table.Add(row, module.MetadataToken.Rid);
-
+            
+            var token = table.Add(row, module.MetadataToken.Rid);
+            AddCustomAttributes(token, module);
             AddTypeDefinitionsInModule(module);
         }
 
@@ -71,6 +92,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, type.MetadataToken.Rid);
             _typeDefTokens.Add(type, token);
+            AddCustomAttributes(token, type);
             return token;
         }
 
@@ -83,12 +105,12 @@ namespace AsmResolver.DotNet.Builder
             
             for (uint rid = 1; rid <= table.Count; rid++)
             {
-                var row = table[rid];
-                row = new TypeDefinitionRow(row.Attributes, row.Name, row.Namespace, row.Extends,
-                    fieldList, methodList);
-                table[rid] = row;
-
                 var type = _typeDefTokens.GetKey(new MetadataToken(TableIndex.TypeDef, rid));
+                
+                var row = table[rid];
+                row = new TypeDefinitionRow(row.Attributes, row.Name, row.Namespace, 
+                    AddTypeDefOrRef(type.BaseType), fieldList, methodList);
+                table[rid] = row;
                 
                 foreach (var field in type.Fields)
                     AddFieldDefinition(field);
@@ -113,6 +135,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, field.MetadataToken.Rid);
             _fieldTokens.Add(field, token);
+            AddCustomAttributes(token, field);
             return token;
         }
 
@@ -130,6 +153,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, method.MetadataToken.Rid);
             _methodTokens.Add(method, token);
+            AddCustomAttributes(token, method);
             return token;
         }
 
@@ -164,7 +188,9 @@ namespace AsmResolver.DotNet.Builder
                 parameter.Sequence,
                 Metadata.StringsStream.GetStringIndex(parameter.Name));
 
-            return table.Add(row, parameter.MetadataToken.Rid);
+            var token = table.Add(row, parameter.MetadataToken.Rid);
+            AddCustomAttributes(token, parameter);
+            return token;
         }
     }
 }

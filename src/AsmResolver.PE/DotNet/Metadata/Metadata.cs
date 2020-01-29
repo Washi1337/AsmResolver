@@ -51,14 +51,14 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             get;
             set;
-        }
+        } = 1;
 
         /// <inheritdoc />
         public ushort MinorVersion
         {
             get;
             set;
-        }
+        } = 1;
 
         /// <inheritdoc />
         public uint Reserved
@@ -72,7 +72,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             get;
             set;
-        }
+        } = "v4.0.30319";
 
         /// <inheritdoc />
         public ushort Flags

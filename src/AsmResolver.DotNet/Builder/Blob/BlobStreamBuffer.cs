@@ -99,6 +99,7 @@ namespace AsmResolver.DotNet.Builder.Blob
         /// <inheritdoc />
         public IMetadataStream CreateStream()
         {
+            _writer.Align(4);
             return new SerializedBlobStream(Name, _rawStream.ToArray());
         }
     }

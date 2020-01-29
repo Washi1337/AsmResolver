@@ -85,6 +85,7 @@ namespace AsmResolver.DotNet.Builder.Strings
         /// <inheritdoc />
         public IMetadataStream CreateStream()
         {
+            _writer.Align(4);
             return new SerializedStringsStream(Name, _rawStream.ToArray());
         }
     }

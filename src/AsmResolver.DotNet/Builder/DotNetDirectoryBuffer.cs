@@ -57,7 +57,9 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Culture),
                 Metadata.BlobStream.GetBlobIndex(assembly.HashValue));
 
-            return table.Add(row, assembly.MetadataToken.Rid);
+            var token = table.Add(row, assembly.MetadataToken.Rid);
+            AddCustomAttributes(token, assembly);
+            return token;
         }
 
         public MetadataToken AddTypeReference(TypeReference type)
@@ -68,13 +70,14 @@ namespace AsmResolver.DotNet.Builder
             AssertIsImported(type);
             
             var table = Metadata.TablesStream.GetTable<TypeReferenceRow>(TableIndex.TypeRef);
-            
             var row = new TypeReferenceRow(
                 AddResolutionScope( type.Scope),
                 Metadata.StringsStream.GetStringIndex(type.Name),
                 Metadata.StringsStream.GetStringIndex(type.Namespace));
 
-            return table.Add(row, type.MetadataToken.Rid);
+            var token = table.Add(row, type.MetadataToken.Rid);
+            AddCustomAttributes(token, type);
+            return token;
         }
 
         public MetadataToken AddMemberReference(MemberReference member)
@@ -86,7 +89,10 @@ namespace AsmResolver.DotNet.Builder
                 AddMemberRefParent(member.Parent),
                 Metadata.StringsStream.GetStringIndex(member.Name),
                 Metadata.BlobStream.GetBlobIndex(this, member.Signature));
-            return table.Add(row, member.MetadataToken.Rid);
+            
+            var token = table.Add(row, member.MetadataToken.Rid);
+            AddCustomAttributes(token, member);
+            return token;
         }
 
         public MetadataToken AddTypeSpecification(TypeSpecification type)
@@ -95,7 +101,10 @@ namespace AsmResolver.DotNet.Builder
             
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
             var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature));
-            return table.Add(row, type.MetadataToken.Rid);
+            
+            var token = table.Add(row, type.MetadataToken.Rid);
+            AddCustomAttributes(token, type);
+            return token;
         }
 
         public MetadataToken AddStandAloneSignature(StandAloneSignature signature)
@@ -103,7 +112,10 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetTable<StandAloneSignatureRow>(TableIndex.StandAloneSig);
             var row = new StandAloneSignatureRow(
                 Metadata.BlobStream.GetBlobIndex(this, signature.Signature));
-            return table.Add(row, signature.MetadataToken.Rid);
+            
+            var token = table.Add(row, signature.MetadataToken.Rid);
+            AddCustomAttributes(token, signature);
+            return token;
         }
 
         public MetadataToken AddMethodSpecification(MethodSpecification method)
@@ -112,7 +124,29 @@ namespace AsmResolver.DotNet.Builder
             var row = new MethodSpecificationRow(
                 AddMethodDefOrRef(method.Method),
                 Metadata.BlobStream.GetBlobIndex(this, method.Signature));
-            return table.Add(row, method.MetadataToken.Rid);
+            
+            var token = table.Add(row, method.MetadataToken.Rid);
+            AddCustomAttributes(token, method);
+            return token;
+        }
+
+        private void AddCustomAttributes(MetadataToken ownerToken, IHasCustomAttribute provider)
+        {
+            foreach (var attribute in provider.CustomAttributes)
+                AddCustomAttribute(ownerToken, attribute);
+        }
+
+        private void AddCustomAttribute(MetadataToken ownerToken, CustomAttribute attribute)
+        {
+            var table = Metadata.TablesStream.GetTable<CustomAttributeRow>(TableIndex.CustomAttribute);
+
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
+            var row = new CustomAttributeRow(
+                encoder.EncodeToken(ownerToken),
+                AddCustomAttributeType(attribute.Constructor),
+                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature));
+
+            table.Add(row, attribute.MetadataToken.Rid);
         }
     }
 }

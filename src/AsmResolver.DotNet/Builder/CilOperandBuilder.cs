@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet.Builder
         {
             return operand switch
             {
-                string value => _buffer.Metadata.UserStringsStream.GetStringIndex(value),
+                string value => 0x70000000 | _buffer.Metadata.UserStringsStream.GetStringIndex(value),
                 uint raw => raw,
                 _ => throw new NotSupportedException("Unsupported string operand.")
             };
