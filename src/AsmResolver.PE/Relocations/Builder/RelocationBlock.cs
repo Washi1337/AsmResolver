@@ -73,7 +73,7 @@ namespace AsmResolver.PE.Relocations.Builder
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => (uint) Entries.Count * sizeof(ushort) + 2 * sizeof(uint);
+        public override uint GetPhysicalSize() => (uint) (Entries.Count + 1) * sizeof(ushort) + 2 * sizeof(uint);
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
@@ -82,6 +82,7 @@ namespace AsmResolver.PE.Relocations.Builder
             writer.WriteUInt32(GetPhysicalSize());
             foreach (var entry in _entries)
                 entry.Write(writer);
+            new RelocationEntry(0).Write(writer);
         }
         
     }
