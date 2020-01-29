@@ -126,7 +126,7 @@ namespace AsmResolver.DotNet.Builder.Tables
         private IMetadataTableBuffer<TRow> Distinct<TRow>(TableIndex table) 
             where TRow : struct, IMetadataRow
         {
-            return new DistinctMetadataTableBuffer<TRow>((MetadataTable<TRow>) _tablesStream.GetTable(table));
+            return new DistinctMetadataTableBuffer<TRow>(Unsorted<TRow>(table));
         }
 
         private IMetadataTableBuffer<TRow> Sorted<TRow>(TableIndex table, int primaryColumn)
