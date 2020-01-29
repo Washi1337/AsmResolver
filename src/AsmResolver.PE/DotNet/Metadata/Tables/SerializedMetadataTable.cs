@@ -37,10 +37,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Reads a metadata table from an input stream. 
         /// </summary>
         /// <param name="reader">The input stream.</param>
+        /// <param name="tableIndex">The index of the table.</param>
         /// <param name="originalLayout">The layout of the table.</param>
         /// <param name="readRow">The method to use for reading each row in the table.</param>
-        public SerializedMetadataTable(IBinaryStreamReader reader, TableLayout originalLayout, ReadRowDelegate readRow)
-            : base(originalLayout)
+        public SerializedMetadataTable(IBinaryStreamReader reader, TableIndex tableIndex, TableLayout originalLayout, ReadRowDelegate readRow)
+            : base(tableIndex, originalLayout)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
             _originalLayout = originalLayout;
@@ -52,12 +53,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Reads a metadata table from an input stream. 
         /// </summary>
         /// <param name="reader">The input stream.</param>
+        /// <param name="tableIndex">The index of the table.</param>
         /// <param name="originalLayout">The layout of the table.</param>
         /// <param name="readRow">The method to use for reading each row in the table.</param>
         /// <param name="referenceResolver">The instance used to resolve RVAs to segments.</param>
-        public SerializedMetadataTable(IBinaryStreamReader reader, TableLayout originalLayout,
+        public SerializedMetadataTable(IBinaryStreamReader reader, TableIndex tableIndex, TableLayout originalLayout,
             ReadRowExtendedDelegate readRow, ISegmentReferenceResolver referenceResolver)
-            : this(reader, originalLayout, (r, l) => readRow(r, l, referenceResolver))
+            : this(reader, tableIndex, originalLayout, (r, l) => readRow(r, l, referenceResolver))
         {
         }
 

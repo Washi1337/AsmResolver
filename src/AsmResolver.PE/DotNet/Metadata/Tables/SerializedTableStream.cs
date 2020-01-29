@@ -252,7 +252,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             where TRow : struct, IMetadataRow
         {
             return new SerializedMetadataTable<TRow>(
-                CreateNextRawTableReader(index, ref offset), TableLayouts[(int) index], readRow);
+                CreateNextRawTableReader(index, ref offset), index, TableLayouts[(int) index], readRow);
         }
 
         private SerializedMetadataTable<TRow> CreateNextTable<TRow>(
@@ -263,7 +263,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             where TRow : struct, IMetadataRow
         {
             return new SerializedMetadataTable<TRow>(
-                CreateNextRawTableReader(index, ref offset), TableLayouts[(int) index], readRow, referenceResolver);
+                CreateNextRawTableReader(index, ref offset), index, TableLayouts[(int) index], readRow, referenceResolver);
         }
         
     }

@@ -21,9 +21,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// Creates a new metadata table using the provided layout.
         /// </summary>
         /// <param name="layout">The layout of the table.</param>
-        public MetadataTable(TableLayout layout)
+        public MetadataTable(TableIndex tableIndex, TableLayout layout)
         {
+            TableIndex = tableIndex;
             Layout = layout ?? throw new ArgumentNullException(nameof(layout));
+        }
+
+        /// <summary>
+        /// Gets the index of the table in the tables stream. 
+        /// </summary>
+        public TableIndex TableIndex
+        {
+            get;
         }
         
         /// <inheritdoc />
