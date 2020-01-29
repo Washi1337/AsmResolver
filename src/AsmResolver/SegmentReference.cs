@@ -24,16 +24,24 @@ namespace AsmResolver
     /// </summary>
     public readonly struct SegmentReference : ISegmentReference
     {
+        /// <summary>
+        /// Represents the null reference. 
+        /// </summary>
+        public static SegmentReference Null
+        {
+            get;
+        } = new SegmentReference(null);
+        
         public SegmentReference(ISegment segment)
         {
-            Segment = segment ?? throw new ArgumentNullException(nameof(segment));
+            Segment = segment;
         }
         
         /// <inheritdoc />
-        public uint FileOffset => Segment.FileOffset;
+        public uint FileOffset => Segment?.FileOffset ?? 0;
 
         /// <inheritdoc />
-        public uint Rva => Segment.Rva;
+        public uint Rva => Segment?.Rva ?? 0;
         
         /// <inheritdoc />
         public bool CanUpdateOffsets => Segment.CanUpdateOffsets;
