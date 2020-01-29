@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Builder.UserStrings
         /// Creates a new user-strings stream buffer with the default user-strings stream name.
         /// </summary>
         public UserStringsStreamBuffer()
-            : this(StringsStream.DefaultName)
+            : this(UserStringsStream.DefaultName)
         {
         }
 
