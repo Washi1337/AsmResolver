@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Builder
             return table.Add(row, assembly.MetadataToken.Rid);
         }
 
-        private MetadataToken AddTypeReference(TypeReference type)
+        public MetadataToken AddTypeReference(TypeReference type)
         {
             if (type == null)
                 return 0;
@@ -77,13 +77,42 @@ namespace AsmResolver.DotNet.Builder
             return table.Add(row, type.MetadataToken.Rid);
         }
 
-        private MetadataToken AddTypeSpecification(TypeSpecification type)
+        public MetadataToken AddMemberReference(MemberReference member)
+        {
+            AssertIsImported(member);
+            
+            var table = Metadata.TablesStream.GetTable<MemberReferenceRow>(TableIndex.MemberRef);
+            var row = new MemberReferenceRow(
+                AddMemberRefParent(member.Parent),
+                Metadata.StringsStream.GetStringIndex(member.Name),
+                Metadata.BlobStream.GetBlobIndex(this, member.Signature));
+            return table.Add(row, member.MetadataToken.Rid);
+        }
+
+        public MetadataToken AddTypeSpecification(TypeSpecification type)
         {
             AssertIsImported(type);
             
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
             var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature));
             return table.Add(row, type.MetadataToken.Rid);
+        }
+
+        public MetadataToken AddStandAloneSignature(StandAloneSignature signature)
+        {
+            var table = Metadata.TablesStream.GetTable<StandAloneSignatureRow>(TableIndex.StandAloneSig);
+            var row = new StandAloneSignatureRow(
+                Metadata.BlobStream.GetBlobIndex(this, signature.Signature));
+            return table.Add(row, signature.MetadataToken.Rid);
+        }
+
+        public MetadataToken AddMethodSpecification(MethodSpecification method)
+        {
+            var table = Metadata.TablesStream.GetTable<MethodSpecificationRow>(TableIndex.MethodSpec);
+            var row = new MethodSpecificationRow(
+                AddMethodDefOrRef(method.Method),
+                Metadata.BlobStream.GetBlobIndex(this, method.Signature));
+            return table.Add(row, method.MetadataToken.Rid);
         }
     }
 }

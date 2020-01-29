@@ -8,6 +8,25 @@ namespace AsmResolver.DotNet.Builder
     {
         private readonly OneToOneRelation<TypeDefinition, MetadataToken> _typeDefTokens = new OneToOneRelation<TypeDefinition, MetadataToken>();
         private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
+        private readonly OneToOneRelation<FieldDefinition, MetadataToken> _fieldTokens = new OneToOneRelation<FieldDefinition, MetadataToken>();
+
+        public MetadataToken GetTypeDefinitionToken(TypeDefinition type)
+        {
+            AssertIsImported(type);
+            return _typeDefTokens.GetValue(type);
+        }
+
+        public MetadataToken GetFieldDefinitionToken(FieldDefinition field)
+        {
+            AssertIsImported(field);
+            return _fieldTokens.GetValue(field);
+        }
+
+        public MetadataToken GetMethodDefinitionToken(MethodDefinition method)
+        {
+            AssertIsImported(method);
+            return _methodTokens.GetValue(method);
+        }
 
         public void AddManifestModule(ModuleDefinition module)
         {
@@ -92,7 +111,9 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(field.Name),
                 Metadata.BlobStream.GetBlobIndex(this, field.Signature));
 
-            return table.Add(row, field.MetadataToken.Rid);
+            var token = table.Add(row, field.MetadataToken.Rid);
+            _fieldTokens.Add(field, token);
+            return token;
         }
 
         private MetadataToken AddMethodDefinitionStub(MethodDefinition method)
