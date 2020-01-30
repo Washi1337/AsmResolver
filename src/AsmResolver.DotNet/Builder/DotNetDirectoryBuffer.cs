@@ -4,25 +4,44 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder
 {
+    /// <summary>
+    /// Provides a mutable buffer for building up a .NET data directory, containing all metadata relevant for the
+    /// execution of a .NET assembly.
+    /// </summary>
     public partial class DotNetDirectoryBuffer
     {
+        /// <summary>
+        /// Creates a new .NET data directory buffer.
+        /// </summary>
+        /// <param name="module">The module for which this .NET directory is built.</param>
+        /// <param name="methodBodySerializer">The method body serializer to use for constructing method bodies.</param>
+        /// <param name="metadata">The metadata builder </param>
         public DotNetDirectoryBuffer(ModuleDefinition module, IMethodBodySerializer methodBodySerializer, IMetadataBuffer metadata)
         {
             Module = module;
             MethodBodySerializer = methodBodySerializer;
             Metadata = metadata;
-        }
+        }    
         
+        /// <summary>
+        /// Gets the module for which this .NET directory is built.
+        /// </summary>
         public ModuleDefinition Module
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the method body serializer to use for constructing method bodies.
+        /// </summary>
         public IMethodBodySerializer MethodBodySerializer
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the metadata directory buffer, containing the metadata stream buffers.
+        /// </summary>
         public IMetadataBuffer Metadata
         {
             get;
@@ -34,6 +53,10 @@ namespace AsmResolver.DotNet.Builder
                 throw new MemberNotImportedException((IMemberDescriptor) member);
         }
 
+        /// <summary>
+        /// Builds the .NET data directory from the buffer. 
+        /// </summary>
+        /// <returns></returns>
         public IDotNetDirectory CreateDirectory()
         {
             var directory = new DotNetDirectory();
@@ -62,6 +85,15 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
+        /// <summary>
+        /// Adds a type reference to the .NET data directory buffer. 
+        /// </summary>
+        /// <param name="type">The reference to the type to add.</param>
+        /// <returns>The metadata token of the added type reference.</returns>
+        /// <remarks>
+        /// Depending on the implementation of the underlying metadata buffers, this might reuse an old type reference
+        /// that was added before. 
+        /// </remarks>
         public MetadataToken AddTypeReference(TypeReference type)
         {
             if (type == null)
@@ -80,6 +112,15 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
+        /// <summary>
+        /// Adds a member reference to the .NET data directory buffer. 
+        /// </summary>
+        /// <param name="member">The reference to the member to add.</param>
+        /// <returns>The metadata token of the added member reference.</returns>
+        /// <remarks>
+        /// Depending on the implementation of the underlying metadata buffers, this might reuse an old member reference
+        /// that was added before. 
+        /// </remarks>
         public MetadataToken AddMemberReference(MemberReference member)
         {
             AssertIsImported(member);
@@ -95,6 +136,15 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
+        /// <summary>
+        /// Adds a type specification to the .NET data directory buffer. 
+        /// </summary>
+        /// <param name="type">The specification of the type to add.</param>
+        /// <returns>The metadata token of the added type specification.</returns>
+        /// <remarks>
+        /// Depending on the implementation of the underlying metadata buffers, this might reuse an old type specification
+        /// that was added before. 
+        /// </remarks>
         public MetadataToken AddTypeSpecification(TypeSpecification type)
         {
             AssertIsImported(type);
@@ -107,6 +157,15 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
+        /// <summary>
+        /// Adds a stand-alone signature to the .NET data directory buffer. 
+        /// </summary>
+        /// <param name="signature">The stand-alone signature to add.</param>
+        /// <returns>The metadata token of the added stand-alone signature.</returns>
+        /// <remarks>
+        /// Depending on the implementation of the underlying metadata buffers, this might reuse an old stand-alone
+        /// signature that was added before. 
+        /// </remarks>
         public MetadataToken AddStandAloneSignature(StandAloneSignature signature)
         {
             var table = Metadata.TablesStream.GetTable<StandAloneSignatureRow>(TableIndex.StandAloneSig);
@@ -118,6 +177,15 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
+        /// <summary>
+        /// Adds a method specification to the .NET data directory buffer. 
+        /// </summary>
+        /// <param name="method">The specification of the method to add.</param>
+        /// <returns>The metadata token of the added method specification.</returns>
+        /// <remarks>
+        /// Depending on the implementation of the underlying metadata buffers, this might reuse an old method
+        /// specification that was added before. 
+        /// </remarks>
         public MetadataToken AddMethodSpecification(MethodSpecification method)
         {
             var table = Metadata.TablesStream.GetTable<MethodSpecificationRow>(TableIndex.MethodSpec);

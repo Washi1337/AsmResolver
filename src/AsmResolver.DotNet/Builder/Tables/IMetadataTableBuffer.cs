@@ -29,6 +29,10 @@ namespace AsmResolver.DotNet.Builder.Tables
     public interface IMetadataTableBuffer<TRow> : IMetadataTableBuffer
         where TRow : struct, IMetadataRow
     {
+        /// <summary>
+        /// Gets or sets a row in the metadata table.
+        /// </summary>
+        /// <param name="rid">The identifier of the metadata row.</param>
         TRow this[uint rid]
         {
             get;

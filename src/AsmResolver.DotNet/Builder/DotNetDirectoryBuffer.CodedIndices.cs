@@ -17,7 +17,6 @@ namespace AsmResolver.DotNet.Builder
                 AssemblyReference assemblyReference => AddAssemblyReference(assemblyReference),
                 TypeReference typeReference => AddTypeReference(typeReference),
                 ModuleDefinition _ => 0u,
-                null => 0,
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
             };
 

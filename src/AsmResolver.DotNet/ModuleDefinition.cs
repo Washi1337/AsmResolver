@@ -113,17 +113,11 @@ namespace AsmResolver.DotNet
         }
 
         private readonly LazyVariable<string> _name;
-
         private readonly LazyVariable<Guid> _mvid;
-
         private readonly LazyVariable<Guid> _encId;
-
         private readonly LazyVariable<Guid> _encBaseId;
-
         private IList<TypeDefinition> _topLevelTypes;
-
         private IList<AssemblyReference> _assemblyReferences;
-
         private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
@@ -471,7 +465,7 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         AssemblyDescriptor IResolutionScope.GetAssembly() => Assembly;
-
+        
         /// <inheritdoc />
         public override string ToString() => Name;
     }

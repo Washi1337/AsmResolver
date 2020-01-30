@@ -19,7 +19,7 @@ namespace AsmResolver.Tests.Runners
             {
                 new NativePERunner(BasePath),
                 new FrameworkPERunner(BasePath),
-                new DotNetPERunner(BasePath), 
+                new CorePERunner(BasePath), 
             };
         }
 

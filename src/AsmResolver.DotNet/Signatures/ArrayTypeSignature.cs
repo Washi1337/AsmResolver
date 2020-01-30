@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -109,10 +110,71 @@ namespace AsmResolver.DotNet.Signatures
         {
             return $"{low}...{low + size - 1}";
         }
+        
+        /// <summary>
+        /// Verifies that the array signature only contains dimensions that are valid.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// An array signature is valid if all bounded dimensions are in the front of the dimensions list.
+        /// </remarks>
+        public bool Validate()
+        {
+            bool allowSizes = true;
+            bool allowLowBounds = true;
+            for (int i = 0; i < Dimensions.Count; i++)
+            {
+                var dimension = Dimensions[i];
+                if (dimension.Size.HasValue)
+                {
+                    if (!allowSizes)
+                        return false;
+                }
+                else
+                {
+                    allowSizes = false;
+                }
 
+                if (dimension.LowerBound.HasValue)
+                {
+                    if (!allowLowBounds)
+                        return false;
+                }
+                else
+                {
+                    allowLowBounds = false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
         protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
-            base.WriteContents(writer, provider);
+            if (!Validate())
+                throw new InvalidOperationException();
+
+            writer.WriteByte((byte) ElementType);
+            BaseType.Write(writer, provider);
+            writer.WriteCompressedUInt32((uint) Dimensions.Count);
+
+            // Sized dimensions.
+            var sizedDimensions = Dimensions
+                .Where(x => x.Size.HasValue)
+                .ToArray();
+            
+            writer.WriteCompressedUInt32((uint) sizedDimensions.Length);
+            foreach (var sizedDimension in sizedDimensions)
+                writer.WriteCompressedUInt32((uint) sizedDimension.Size.Value);
+
+            // Bounded dimensions.
+            var boundedDimensions = Dimensions
+                .Where(x => x.LowerBound.HasValue)
+                .ToArray();
+            writer.WriteCompressedUInt32((uint) boundedDimensions.Length);
+            foreach (var boundedDimension in boundedDimensions)
+                writer.WriteCompressedUInt32((uint) boundedDimension.LowerBound.Value);
         }
     }
 }

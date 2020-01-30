@@ -106,6 +106,11 @@ namespace AsmResolver.DotNet.Builder.Tables
             return (IMetadataTableBuffer<TRow>) _tableBuffers[(int) table];
         }
 
+        /// <summary>
+        /// Gets an encoder/decoder for a particular coded index.
+        /// </summary>
+        /// <param name="codedIndex">The coded index.</param>
+        /// <returns>The encoder/decoder object.</returns>
         public IndexEncoder GetIndexEncoder(CodedIndex codedIndex)
         {
             return _tablesStream.GetIndexEncoder(codedIndex);

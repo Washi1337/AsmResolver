@@ -5,42 +5,62 @@ using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
 {
+    /// <summary>
+    /// Provides a default implementation of the <see cref="IMethodBodySerializer"/> interface, that serializes all
+    /// managed CIL method bodies of type <see cref="CilMethodBody"/> to raw method bodies of type <see cref="CilRawMethodBody"/>.
+    /// </summary>
     public class CilMethodBodySerializer : IMethodBodySerializer
     {
+        /// <inheritdoc />
         public ISegmentReference SerializeMethodBody(DotNetDirectoryBuffer buffer, MethodDefinition method)
         {
             if (method.CilMethodBody == null)
-                return null;
+                return SegmentReference.Null;
 
             var body = method.CilMethodBody;
             
-            body.Instructions.CalculateOffsets();
+            // Compute max stack when specified, otherwise just calculate offsets only.
             if (body.ComputeMaxStackOnBuild)
                 body.MaxStack = body.ComputeMaxStack();
+            else
+                body.Instructions.CalculateOffsets();
             
+            // Serialize CIL stream.
             var code = BuildRawCodeStream(buffer, body);
-
-            var rawBody = body.IsFat ? BuildFatMethodBody(buffer, body, code) : BuildTinyMethodBody(code);
+            
+            // Build method body.
+            var rawBody = body.IsFat 
+                ? BuildFatMethodBody(buffer, body, code) 
+                : BuildTinyMethodBody(code);
 
             return new SegmentReference(rawBody);
         }
 
-        private static CilRawMethodBody BuildTinyMethodBody(byte[] code)
-        {
-            return new CilRawTinyMethodBody(code);
-        }
+        private static CilRawMethodBody BuildTinyMethodBody(byte[] code) => 
+            new CilRawTinyMethodBody(code);
 
         private CilRawMethodBody BuildFatMethodBody(DotNetDirectoryBuffer buffer, CilMethodBody body, byte[] code)
         {
-            var localVarSig = new LocalVariablesSignature(body.LocalVariables.Select(v => v.VariableType));
-            var standAloneSig = new StandAloneSignature(localVarSig);
-            var token = buffer.AddStandAloneSignature(standAloneSig);
+            // Serialize local variables.
+            MetadataToken token;
+            if (body.LocalVariables.Count == 0)
+            {
+                token = MetadataToken.Zero;
+            }
+            else
+            {
+                var localVarSig = new LocalVariablesSignature(body.LocalVariables.Select(v => v.VariableType));
+                var standAloneSig = new StandAloneSignature(localVarSig);
+                token = buffer.AddStandAloneSignature(standAloneSig);
+            }
 
             var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, code);
 
+            // Build up EH table section.
             if (body.ExceptionHandlers.Count > 0)
             {
                 fatBody.HasSections = true;
@@ -50,9 +70,9 @@ namespace AsmResolver.DotNet.Builder
                 if (needsFatFormat)
                     attributes |= CilExtraSectionAttributes.FatFormat;
 
-                var rawData = SerializeExceptionHandlers(buffer, body.ExceptionHandlers, needsFatFormat);
-
-                fatBody.ExtraSections.Add(new CilExtraSection(attributes, rawData));
+                var rawSectionData = SerializeExceptionHandlers(buffer, body.ExceptionHandlers, needsFatFormat);
+                var section = new CilExtraSection(attributes, rawSectionData);
+                fatBody.ExtraSections.Add(section);
             }
 
             return fatBody;
@@ -61,9 +81,11 @@ namespace AsmResolver.DotNet.Builder
         private static byte[] BuildRawCodeStream(DotNetDirectoryBuffer buffer, CilMethodBody body)
         {
             using var codeStream = new MemoryStream();
+            
             var writer = new BinaryStreamWriter(codeStream);
             var assembler = new CilAssembler(writer, new CilOperandBuilder(buffer));
             assembler.WriteInstructions(body.Instructions);
+            
             return codeStream.ToArray();
         }
 
@@ -86,6 +108,7 @@ namespace AsmResolver.DotNet.Builder
             if (handler.IsFat && !useFatFormat)
                 throw new InvalidOperationException("Can only serialize fat exception handlers in fat format.");
             
+            // Write handler type and boundaries.
             if (useFatFormat)
             {
                 writer.WriteUInt32((uint) handler.HandlerType);
@@ -103,6 +126,7 @@ namespace AsmResolver.DotNet.Builder
                 writer.WriteByte((byte) (handler.HandlerEnd.Offset - handler.HandlerStart.Offset));
             }
 
+            // Write handler type or filter start.
             switch (handler.HandlerType)
             {
                 case CilExceptionHandlerType.Exception:
