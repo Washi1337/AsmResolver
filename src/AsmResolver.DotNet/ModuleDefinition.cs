@@ -147,6 +147,7 @@ namespace AsmResolver.DotNet
             Name = name;
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory();
             AssemblyReferences.Add((AssemblyReference) CorLibTypeFactory.CorLibScope);
+            TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
 
         /// <summary>

@@ -61,7 +61,25 @@ namespace AsmResolver.DotNet.Builder
         {
             var directory = new DotNetDirectory();
             directory.Metadata = Metadata.CreateMetadata();
+            directory.Entrypoint = GetEntrypoint();
             return directory;
+        }
+
+        private uint GetEntrypoint()
+        {
+            var entrypointToken = MetadataToken.Zero;
+            
+            switch (Module.ManagedEntrypoint.MetadataToken.Table)
+            {
+                case TableIndex.Method:
+                    entrypointToken = GetMethodDefinitionToken(Module.ManagedEntrypointMethod);
+                    break;
+                case TableIndex.File:
+                    //todo:
+                    break;
+            }
+
+            return entrypointToken.ToUInt32();
         }
 
         private MetadataToken AddAssemblyReference(AssemblyReference assembly)
