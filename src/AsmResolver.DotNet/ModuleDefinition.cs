@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.Lazy;
 using AsmResolver.PE;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -501,5 +505,36 @@ namespace AsmResolver.DotNet
         
         /// <inheritdoc />
         public override string ToString() => Name;
+
+        public void Write(string filePath) => 
+            Write(filePath, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
+
+        public void Write(Stream outputStream) => 
+            Write(outputStream, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
+
+        public void Write(string filePath, IPEImageBuilder imageBuilder) => 
+            Write(filePath, imageBuilder, new ManagedPEFileBuilder());
+
+        public void Write(Stream outputStream, IPEImageBuilder imageBuilder) => 
+            Write(outputStream, imageBuilder, new ManagedPEFileBuilder());
+
+        public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
+        {
+            using var fs = File.Create(filePath);
+            Write(fs, imageBuilder, fileBuilder);
+        }
+
+        public void Write(Stream outputStream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
+        {
+            var writer = new BinaryStreamWriter(outputStream);
+            Write(writer, imageBuilder, fileBuilder);
+        }
+
+        public void Write(IBinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
+        {
+            var image = imageBuilder.CreateImage(this);
+            var file = fileBuilder.CreateFile(image);
+            file.Write(writer);
+        }
     }
 }

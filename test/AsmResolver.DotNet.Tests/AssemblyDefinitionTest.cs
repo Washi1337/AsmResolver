@@ -1,11 +1,20 @@
 using System;
 using System.IO;
+using AsmResolver.DotNet.Builder;
+using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
 {
     public class AssemblyDefinitionTest
     {
+        private static AssemblyDefinition Rebuild(AssemblyDefinition assembly)
+        {
+            using var stream = new MemoryStream();
+            assembly.ManifestModule.Write(stream);
+            return AssemblyDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
+        }
+
         [Fact]
         public void ReadNameTest()
         {
@@ -14,10 +23,34 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void NameIsPersistentAfterRebuild()
+        {
+            const string newName = "OtherAssembly";
+            
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            assemblyDef.Name = newName;
+
+            var rebuilt = Rebuild(assemblyDef);
+            Assert.Equal(newName, rebuilt.Name);
+        }
+
+        [Fact]
         public void ReadVersion()
         {
             var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Equal(new Version(1,0,0,0), assemblyDef.Version);
+        }
+
+        [Fact]
+        public void VersionIsPersistentAfterRebuild()
+        {
+            var newVersion = new Version(1,2,3,4);
+            
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            assemblyDef.Version = newVersion;
+            
+            var rebuilt = Rebuild(assemblyDef);
+            Assert.Equal(newVersion, rebuilt.Version);
         }
 
         [Fact]
@@ -55,6 +88,21 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(corlibName.GetPublicKey(), corlibAssemblyDef.PublicKey);
             Assert.Equal(corlibName.GetPublicKeyToken(), corlibAssemblyDef.GetPublicKeyToken());
+        }
+
+        [Fact]
+        public void PublicKeyIsPersistentAfterRebuild()
+        {
+            var newKey = new byte[]
+            {
+                1, 2, 3, 4
+            };
+            
+            var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
+            assemblyDef.PublicKey = newKey;
+            
+            var rebuilt = Rebuild(assemblyDef);
+            Assert.Equal(newKey, rebuilt.PublicKey);
         }
     }
 }

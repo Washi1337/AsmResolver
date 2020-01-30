@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -29,7 +28,7 @@ namespace AsmResolver.Tests.Runners
             [CallerFilePath] string testClass = "File",
             [CallerMemberName] string testMethod = "Test")
         {
-            string fullPath = WriteToTemporaryFile(peFile, fileName, testClass, testMethod);
+            string fullPath = Rebuild(peFile, fileName, testClass, testMethod);
             string actualOutput = RunAndCaptureOutput(fullPath, timeout);
             Assert.Equal(expectedOutput, actualOutput);
         }
@@ -47,15 +46,13 @@ namespace AsmResolver.Tests.Runners
             return Path.ChangeExtension(Path.Combine(GetTestDirectory(testClass, testMethod), fileName), ExecutableExtension);
         }
 
-        private string WriteToTemporaryFile(PEFile peFile, string fileName, string testClass, string testMethod)
+        public string Rebuild(PEFile peFile, string fileName, string testClass, string testMethod)
         {
             testClass = Path.GetFileNameWithoutExtension(testClass);
             string fullPath = GetTestExecutablePath(testClass, testMethod, fileName);
 
-            using (var fileStream = File.Create(fullPath))
-            {
-                peFile.Write(new BinaryStreamWriter(fileStream));
-            }
+            using var fileStream = File.Create(fullPath);
+            peFile.Write(new BinaryStreamWriter(fileStream));
 
             return fullPath;
         }

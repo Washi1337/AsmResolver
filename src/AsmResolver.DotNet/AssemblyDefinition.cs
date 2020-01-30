@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.Lazy;
 using AsmResolver.PE;
+using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
@@ -199,5 +202,31 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public override AssemblyDefinition Resolve() => this;
+
+        public void Write(string filePath)
+        {
+            Write(filePath, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
+        }
+
+        public void Write(string filePath, IPEImageBuilder imageBuilder)
+        {
+            Write(filePath, imageBuilder, new ManagedPEFileBuilder());
+        }
+
+        public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
+        {
+            string directory = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(directory))
+                throw new DirectoryNotFoundException();
+            
+            foreach (var module in Modules)
+            {
+                string modulePath = module == ManifestModule
+                    ? filePath
+                    : Path.Combine(directory, module.Name);
+
+                module.Write(modulePath, imageBuilder, fileBuilder);
+            }
+        }
     }
 }
