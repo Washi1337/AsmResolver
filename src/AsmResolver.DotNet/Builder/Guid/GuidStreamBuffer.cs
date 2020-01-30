@@ -67,10 +67,14 @@ namespace AsmResolver.DotNet.Builder.Guid
             return index;
         }
 
+        /// <summary>
+        /// Serializes the GUID stream buffer to a metadata stream.
+        /// </summary>
+        /// <returns>The metadata stream.</returns>
+        public GuidStream CreateStream() => 
+            new SerializedGuidStream(Name, _rawStream.ToArray());
+
         /// <inheritdoc />
-        public IMetadataStream CreateStream()
-        {
-            return new SerializedGuidStream(Name, _rawStream.ToArray());
-        }
+        IMetadataStream IMetadataStreamBuffer.CreateStream() => CreateStream();
     }
 }

@@ -96,11 +96,17 @@ namespace AsmResolver.DotNet.Builder.Blob
             return GetBlobIndex(stream.ToArray());
         }
 
-        /// <inheritdoc />
-        public IMetadataStream CreateStream()
+        /// <summary>
+        /// Serialises the blob stream buffer to a metadata stream.
+        /// </summary>
+        /// <returns>The metadata stream.</returns>
+        public BlobStream CreateStream()
         {
             _writer.Align(4);
             return new SerializedBlobStream(Name, _rawStream.ToArray());
         }
+
+        /// <inheritdoc />
+        IMetadataStream IMetadataStreamBuffer.CreateStream() => CreateStream();
     }
 }

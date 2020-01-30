@@ -116,13 +116,19 @@ namespace AsmResolver.DotNet.Builder.Tables
             return _tablesStream.GetIndexEncoder(codedIndex);
         }
 
-        /// <inheritdoc />
-        public IMetadataStream CreateStream()
+        /// <summary>
+        /// Serializes the tables stream buffer to a metadata stream.
+        /// </summary>
+        /// <returns>The stream.</returns>
+        public TablesStream CreateStream()
         {
             foreach (var tableBuffer in _tableBuffers)
                 tableBuffer.FlushToTable();
             return _tablesStream;
         }
+
+        /// <inheritdoc />
+        IMetadataStream IMetadataStreamBuffer.CreateStream() => CreateStream();
 
         private IMetadataTableBuffer<TRow> Unsorted<TRow>(TableIndex table) 
             where TRow : struct, IMetadataRow

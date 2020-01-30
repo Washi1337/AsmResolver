@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.NotEqual(index1, index2);
             
-            var blobStream = (BlobStream) buffer.CreateStream();
+            var blobStream = buffer.CreateStream();
             Assert.Equal(blob1, blobStream.GetBlobByIndex(index1));
             Assert.Equal(blob2, blobStream.GetBlobByIndex(index2));
         }
@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.Equal(index1, index2);
 
-            var blobStream = (BlobStream) buffer.CreateStream();
+            var blobStream = buffer.CreateStream();
             Assert.Equal(blob1, blobStream.GetBlobByIndex(index1));
         }
 
@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.NotEqual(index1, index2);
 
-            var blobStream = (BlobStream) buffer.CreateStream();
+            var blobStream = buffer.CreateStream();
             Assert.Equal(blob2, blobStream.GetBlobByIndex(index2));
         }
     }

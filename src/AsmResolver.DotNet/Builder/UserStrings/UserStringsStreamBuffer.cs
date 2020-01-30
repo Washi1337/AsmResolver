@@ -107,11 +107,17 @@ namespace AsmResolver.DotNet.Builder.UserStrings
             return 0;
         }
 
-        /// <inheritdoc />
-        public IMetadataStream CreateStream()
+        /// <summary>
+        /// Serializes 
+        /// </summary>
+        /// <returns></returns>
+        public UserStringsStream CreateStream()
         {
             _writer.Align(4);
             return new SerializedUserStringsStream(Name, _rawStream.ToArray());
         }
+
+        /// <inheritdoc />
+        IMetadataStream IMetadataStreamBuffer.CreateStream() => CreateStream();
     }
 }

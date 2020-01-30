@@ -27,7 +27,7 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.NotEqual(index1, index2);
             
-            var blobStream = (GuidStream) buffer.CreateStream();
+            var blobStream = buffer.CreateStream();
             Assert.Equal(guid1, blobStream.GetGuidByIndex(index1));
             Assert.Equal(guid2, blobStream.GetGuidByIndex(index2));
         }
@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             Assert.Equal(index1, index2);
 
-            var blobStream = (GuidStream) buffer.CreateStream();
+            var blobStream = buffer.CreateStream();
             Assert.Equal(guid1, blobStream.GetGuidByIndex(index1));
         }
 

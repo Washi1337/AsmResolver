@@ -82,11 +82,17 @@ namespace AsmResolver.DotNet.Builder.Strings
             return offset;
         }
 
-        /// <inheritdoc />
-        public IMetadataStream CreateStream()
+        /// <summary>
+        /// Serializes the strings stream buffer to a metadata stream. 
+        /// </summary> 
+        /// <returns>The metadata stream.</returns>
+        public StringsStream CreateStream()
         {
             _writer.Align(4);
             return new SerializedStringsStream(Name, _rawStream.ToArray());
         }
+
+        /// <inheritdoc />
+        IMetadataStream IMetadataStreamBuffer.CreateStream() => CreateStream();
     }
 }
