@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             
             // Rebuild
             var builder = new ManagedPEFileBuilder();
-            var peFile = builder.ConstructPEFile(image);
+            var peFile = builder.CreateFile(image);
             
             // Verify
             _fixture
@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             
             // Rebuild
             var builder = new ManagedPEFileBuilder();
-            var peFile = builder.ConstructPEFile(image);
+            var peFile = builder.CreateFile(image);
             
             // Verify
             _fixture
@@ -60,7 +60,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             
             // Rebuild
             var builder = new ManagedPEFileBuilder();
-            var peFile = builder.ConstructPEFile(image);
+            var peFile = builder.CreateFile(image);
             
             // Verify
             _fixture
@@ -80,7 +80,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             
             // Rebuild
             var builder = new ManagedPEFileBuilder();
-            var peFile = builder.ConstructPEFile(image);
+            var peFile = builder.CreateFile(image);
             
             // Verify
             _fixture

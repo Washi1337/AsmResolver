@@ -133,7 +133,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 CreateTextSection(image, context)
             };
 
-            if (image.Resources.Entries.Count > 0)
+            if (image.Resources != null && image.Resources.Entries.Count > 0)
                 sections.Add(CreateRsrcSection(image, context));
 
             if (context.Bootstrapper != null)

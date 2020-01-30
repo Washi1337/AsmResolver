@@ -30,7 +30,7 @@ namespace AsmResolver.PE.Builder
     public abstract class PEFileBuilderBase<TContext> : IPEFileBuilder
     {
         /// <inheritdoc />
-        public virtual PEFile ConstructPEFile(IPEImage image)
+        public virtual PEFile CreateFile(IPEImage image)
         {
             var peFile = new PEFile();
             var context = CreateContext(image);
