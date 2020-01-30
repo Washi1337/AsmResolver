@@ -116,9 +116,12 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<Guid> _mvid;
         private readonly LazyVariable<Guid> _encId;
         private readonly LazyVariable<Guid> _encBaseId;
+        
         private IList<TypeDefinition> _topLevelTypes;
         private IList<AssemblyReference> _assemblyReferences;
         private IList<CustomAttribute> _customAttributes;
+        
+        private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -131,6 +134,7 @@ namespace AsmResolver.DotNet
             _mvid = new LazyVariable<Guid>(GetMvid);
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
+            _managedEntrypoint = new LazyVariable<IManagedEntrypoint>(GetManagedEntrypoint);
         }
 
         /// <summary>
@@ -316,6 +320,25 @@ namespace AsmResolver.DotNet
         } = new DefaultMetadataResolver(new DefaultAssemblyResolver());
 
         /// <summary>
+        /// Gets or sets the managed method that is invoked when the .NET module is initialized. 
+        /// </summary>
+        public MethodDefinition ManagedEntrypointMethod
+        {
+            get => ManagedEntrypoint as MethodDefinition;
+            set => ManagedEntrypoint = value;
+        }
+        
+        /// <summary>
+        /// Gets or sets the managed entrypoint that is invoked when the .NET module is initialized. This is either a
+        /// method, or a reference to a secondary module containing the entrypoint method.
+        /// </summary>
+        public IManagedEntrypoint ManagedEntrypoint
+        {
+            get => _managedEntrypoint.Value;
+            set => _managedEntrypoint.Value = value;
+        }
+
+        /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>
         /// <param name="token">The token of the member to lookup.</param>
@@ -465,6 +488,15 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         AssemblyDescriptor IResolutionScope.GetAssembly() => Assembly;
+        
+        /// <summary>
+        /// Obtains the managed entrypoint of this module.
+        /// </summary>
+        /// <returns>The entrypoint.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ManagedEntrypoint"/> property.
+        /// </remarks>
+        protected virtual IManagedEntrypoint GetManagedEntrypoint() => null;
         
         /// <inheritdoc />
         public override string ToString() => Name;

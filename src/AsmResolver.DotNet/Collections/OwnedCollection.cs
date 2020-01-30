@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Collections
     /// <typeparam name="TItem">The type of elements to store.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class OwnedCollection<TOwner, TItem> : LazyList<TItem>
-        where TItem : IMetadataMember, IOwnedCollectionElement<TOwner>
+        where TItem : class, IMetadataMember, IOwnedCollectionElement<TOwner>
         where TOwner : class
     {
         /// <summary>

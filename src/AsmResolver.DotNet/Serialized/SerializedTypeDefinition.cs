@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Serialized
             CreateMemberCollection<EventDefinition>(_parentModule.GetEventRange(MetadataToken.Rid));
         
         private IList<TMember> CreateMemberCollection<TMember>(MetadataRange range)
-            where TMember : IMetadataMember, IOwnedCollectionElement<TypeDefinition>
+            where TMember : class, IMetadataMember, IOwnedCollectionElement<TypeDefinition>
         {
             var result = new OwnedCollection<TypeDefinition, TMember>(this);
 

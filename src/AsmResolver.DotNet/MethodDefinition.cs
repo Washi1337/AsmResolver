@@ -17,7 +17,8 @@ namespace AsmResolver.DotNet
         IOwnedCollectionElement<TypeDefinition>,
         IMemberRefParent, 
         ICustomAttributeType,
-        IHasGenericParameters
+        IHasGenericParameters,
+        IManagedEntrypoint
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;

@@ -1,5 +1,5 @@
 IF EXIST bin (
-    rm -r bin
+    rmdir /q /s bin
 ) 
 
 mkdir bin
