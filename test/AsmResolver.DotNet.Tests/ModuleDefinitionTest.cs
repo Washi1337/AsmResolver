@@ -1,13 +1,23 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
 {
     public class ModuleDefinitionTest
     {
+        private static ModuleDefinition Rebuild(ModuleDefinition module)
+        {
+            using var stream = new MemoryStream();
+            module.Write(stream);
+            return ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
+        }
+        
         [Fact]
         public void ReadNameTest()
         {
@@ -15,6 +25,18 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal("HelloWorld.exe", module.Name);
         }
 
+        [Fact]
+        public void NameIsPersistentAfterRebuild()
+        {
+            const string newName = "HelloMars.exe";
+            
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            module.Name = newName;
+
+            var newModule = Rebuild(module);
+            Assert.Equal(newName, newModule.Name);
+        }
+        
         [Fact]
         public void ReadManifestModule()
         {
@@ -116,5 +138,18 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(module.CorLibTypeFactory.Void);
         }
         
+        [Fact]
+        public void AddingTypeIsPersistentAfterRebuild()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            
+            var newType = new TypeDefinition("SomeNamespace", "SomeType", 
+                TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed);
+            module.TopLevelTypes.Add(newType);
+
+            var newModule = Rebuild(module);
+            var comparer = new SignatureComparer();
+            Assert.Contains(newModule.TopLevelTypes, t => comparer.Equals(newType, t));
+        }
     }
 }

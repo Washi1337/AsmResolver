@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
@@ -14,6 +15,15 @@ namespace AsmResolver.DotNet.Tests
 {
     public class TypeDefinitionTest
     {
+        public TypeDefinition RebuildAndLookup(TypeDefinition type)
+        {
+            var stream = new MemoryStream();
+            type.Module.Write(stream);
+            
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            return newModule.TopLevelTypes.FirstOrDefault(t => t.FullName == type.FullName);
+        }
+        
         [Fact]
         public void LinkedToModule()
         {
@@ -31,11 +41,48 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void NameIsPersistentAfterRebuild()
+        {
+            const string newName = "SomeType";
+            
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var type = module.TopLevelTypes.First(t => t.Name == "Program");
+            type.Name = newName;
+
+            var newType = RebuildAndLookup(type);
+            Assert.Equal(newName, newType.Name);
+        }
+
+        [Fact]
         public void ReadNamespace()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             Assert.Null(module.TopLevelTypes[0].Namespace);
             Assert.Equal("HelloWorld", module.TopLevelTypes[1].Namespace);
+        }
+
+        [Fact]
+        public void NonNullNamespaceIsPersistentAfterRebuild()
+        {
+            const string newNameSpace = "SomeNamespace";
+            
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var type = module.TopLevelTypes.First(t => t.Name == "Program");
+            type.Namespace = newNameSpace;
+
+            var newType = RebuildAndLookup(type);
+            Assert.Equal(newNameSpace, newType.Namespace);
+        }
+
+        [Fact]
+        public void NullNamespaceIsPersistentAfterRebuild()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            var type = module.TopLevelTypes.First(t => t.Name == "Program");
+            type.Namespace = null;
+
+            var newType = RebuildAndLookup(type);
+            Assert.Null(newType.Namespace);
         }
 
         [Fact]
