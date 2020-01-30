@@ -330,6 +330,23 @@ namespace AsmResolver.DotNet.Serialized
             return result;
         }
 
+        /// <inheritdoc />
+        protected override IManagedEntrypoint GetManagedEntrypoint()
+        {
+            if ((DotNetDirectory.Flags & DotNetDirectoryFlags.ILLibrary) == 0)
+            {
+                if ((DotNetDirectory.Flags & DotNetDirectoryFlags.NativeEntrypoint) != 0)
+                {
+                    // TODO: native entrypoints.
+                    return null;
+                }
+
+                return LookupMember(DotNetDirectory.Entrypoint) as IManagedEntrypoint;
+            }
+
+            return null;
+        }
+
         private AssemblyDefinition FindParentAssembly()
         {
             var assemblyTable = DotNetDirectory.Metadata
