@@ -126,6 +126,7 @@ namespace AsmResolver.DotNet
         private IList<CustomAttribute> _customAttributes;
         
         private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
+        private IList<ModuleReference> _moduleReferences;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -295,6 +296,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a collection of references to external modules that the module uses. 
+        /// </summary>
+        public IList<ModuleReference> ModuleReferences
+        {
+            get
+            {
+                if (_moduleReferences is null)
+                    Interlocked.CompareExchange(ref _moduleReferences, GetModuleReferences(), null);
+                return _moduleReferences;
+            }
+        }
+
+        /// <summary>
         /// Gets the common object runtime library type factory for this module, containing element type signatures used
         /// in blob signatures. 
         /// </summary>
@@ -332,7 +346,7 @@ namespace AsmResolver.DotNet
             get => ManagedEntrypoint as MethodDefinition;
             set => ManagedEntrypoint = value;
         }
-        
+
         /// <summary>
         /// Gets or sets the managed entrypoint that is invoked when the .NET module is initialized. This is either a
         /// method, or a reference to a secondary module containing the entrypoint method.
@@ -481,6 +495,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<AssemblyReference> GetAssemblyReferences() =>
             new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
+      
+        /// <summary>
+        /// Obtains the list of references to external modules that the module uses. 
+        /// </summary>
+        /// <returns>The references to the modules.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ModuleReferences"/> property.
+        /// </remarks>
+        protected virtual IList<ModuleReference> GetModuleReferences() => 
+            new OwnedCollection<ModuleDefinition, ModuleReference>(this);
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

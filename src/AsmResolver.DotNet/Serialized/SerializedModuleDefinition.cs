@@ -320,11 +320,34 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
 
-            var table = DotNetDirectory.Metadata.GetStream<TablesStream>().GetTable<AssemblyReferenceRow>();
+            var table = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
+            
+            // Don't use the member factory here, this method may be called before the member factory is initialized.
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.AssemblyRef, (uint) i + 1);
                 result.Add(new SerializedAssemblyReference(this, token, table[i]));
+            }
+            
+            return result;
+        }
+
+        /// <inheritdoc />
+        protected override IList<ModuleReference> GetModuleReferences()
+        {
+            var result = new OwnedCollection<ModuleDefinition, ModuleReference>(this);
+
+            var table = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable(TableIndex.ModuleRef);
+            
+            for (int i = 0; i < table.Count; i++)
+            {
+                var token = new MetadataToken(TableIndex.ModuleRef, (uint) i + 1);
+                if (_memberFactory.TryLookupMember(token, out var member) && member is ModuleReference module)
+                    result.Add(module);
             }
             
             return result;
