@@ -130,6 +130,18 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void LookupModuleReference()
+        {
+            var module = ModuleDefinition.FromFile(Path.Combine("Resources", "Manifest.exe"));
+            var member = module.LookupMember(new MetadataToken(TableIndex.ModuleRef, 1));
+            Assert.IsAssignableFrom<ModuleReference>(member);
+
+            var moduleRef = (ModuleReference) member;
+            Assert.Equal("MyModel.netmodule", moduleRef.Name);
+            Assert.Same(module.ModuleReferences[0], moduleRef);
+        }
+
+        [Fact]
         public void CreateNewCorLibFactory()
         {
             var module = new ModuleDefinition("MySampleModule");
