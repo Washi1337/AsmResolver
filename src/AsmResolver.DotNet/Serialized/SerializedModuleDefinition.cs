@@ -354,6 +354,25 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        protected override IList<FileReference> GetFileReferences()
+        {
+            var result = new OwnedCollection<ModuleDefinition, FileReference>(this);
+
+            var table = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable(TableIndex.File);
+            
+            for (int i = 0; i < table.Count; i++)
+            {
+                var token = new MetadataToken(TableIndex.File, (uint) i + 1);
+                if (_memberFactory.TryLookupMember(token, out var member) && member is FileReference file)
+                    result.Add(file);
+            }
+            
+            return result;
+        }
+
+        /// <inheritdoc />
         protected override IManagedEntrypoint GetManagedEntrypoint()
         {
             if ((DotNetDirectory.Flags & DotNetDirectoryFlags.ILLibrary) == 0)

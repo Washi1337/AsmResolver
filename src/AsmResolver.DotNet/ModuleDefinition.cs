@@ -127,6 +127,7 @@ namespace AsmResolver.DotNet
         
         private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
         private IList<ModuleReference> _moduleReferences;
+        private IList<FileReference> _fileReferences;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -305,6 +306,19 @@ namespace AsmResolver.DotNet
                 if (_moduleReferences is null)
                     Interlocked.CompareExchange(ref _moduleReferences, GetModuleReferences(), null);
                 return _moduleReferences;
+            }
+        }
+
+        /// <summary>
+        /// Gets a collection of references to external files that the module uses. 
+        /// </summary>
+        public IList<FileReference> FileReferences
+        {
+            get
+            {
+                if (_fileReferences is null)
+                    Interlocked.CompareExchange(ref _fileReferences, GetFileReferences(), null);
+                return _fileReferences;
             }
         }
 
@@ -495,7 +509,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<AssemblyReference> GetAssemblyReferences() =>
             new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
-      
+
         /// <summary>
         /// Obtains the list of references to external modules that the module uses. 
         /// </summary>
@@ -505,6 +519,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ModuleReference> GetModuleReferences() => 
             new OwnedCollection<ModuleDefinition, ModuleReference>(this);
+        
+        /// <summary>
+        /// Obtains the list of references to external files that the module uses. 
+        /// </summary>
+        /// <returns>The references to the files.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="FileReferences"/> property.
+        /// </remarks>
+        protected virtual IList<FileReference> GetFileReferences() =>
+            new OwnedCollection<ModuleDefinition, FileReference>(this);
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
@@ -517,7 +541,7 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         AssemblyDescriptor IResolutionScope.GetAssembly() => Assembly;
-        
+
         /// <summary>
         /// Obtains the managed entrypoint of this module.
         /// </summary>
@@ -526,7 +550,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="ManagedEntrypoint"/> property.
         /// </remarks>
         protected virtual IManagedEntrypoint GetManagedEntrypoint() => null;
-        
+
         /// <inheritdoc />
         public override string ToString() => Name;
 
