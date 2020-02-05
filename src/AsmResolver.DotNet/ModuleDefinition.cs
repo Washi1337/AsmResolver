@@ -323,6 +323,9 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <summary>
+        /// Gets a collection of types that are forwarded to another .NET module.
+        /// </summary>
         public IList<ExportedType> ExportedTypes
         {
             get
@@ -575,30 +578,66 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override string ToString() => Name;
 
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="filePath">The output path of the manifest module file.</param>
         public void Write(string filePath) => 
             Write(filePath, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="outputStream">The output stream of the manifest module file.</param>
         public void Write(Stream outputStream) => 
             Write(outputStream, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="filePath">The output path of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         public void Write(string filePath, IPEImageBuilder imageBuilder) => 
             Write(filePath, imageBuilder, new ManagedPEFileBuilder());
 
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="outputStream">The output stream of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         public void Write(Stream outputStream, IPEImageBuilder imageBuilder) => 
             Write(outputStream, imageBuilder, new ManagedPEFileBuilder());
 
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="filePath">The output path of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
             using var fs = File.Create(filePath);
             Write(fs, imageBuilder, fileBuilder);
         }
 
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="outputStream">The output stream of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(Stream outputStream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
             var writer = new BinaryStreamWriter(outputStream);
             Write(writer, imageBuilder, fileBuilder);
         }
 
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="writer">The output stream of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(IBinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
             var image = imageBuilder.CreateImage(this);

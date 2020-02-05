@@ -17,12 +17,30 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _namespace;
         private readonly LazyVariable<IImplementation> _implementation;
 
+        /// <summary>
+        /// Initializes an exported type with a metadata token.
+        /// </summary>
+        /// <param name="token">The metadata token.</param>
         protected ExportedType(MetadataToken token)
         {
             MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _namespace = new LazyVariable<string>(GetNamespace);
             _implementation = new LazyVariable<IImplementation>(GetImplementation);
+        }
+
+        /// <summary>
+        /// Creates a new exported type reference. 
+        /// </summary>
+        /// <param name="implementation">The file containing the type.</param>
+        /// <param name="ns">The namespace of the type.</param>
+        /// <param name="name">The name of the type.</param>
+        public ExportedType(IImplementation implementation, string ns, string name)
+            : this(new MetadataToken(TableIndex.ExportedType, 1))
+        {
+            Implementation = implementation;
+            Namespace = ns;
+            Name = name;
         }
 
         /// <inheritdoc />

@@ -203,16 +203,31 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override AssemblyDefinition Resolve() => this;
 
+        /// <summary>
+        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="filePath">The output path of the manifest module file.</param>
         public void Write(string filePath)
         {
             Write(filePath, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
         }
 
+        /// <summary>
+        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="filePath">The output path of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         public void Write(string filePath, IPEImageBuilder imageBuilder)
         {
             Write(filePath, imageBuilder, new ManagedPEFileBuilder());
         }
 
+        /// <summary>
+        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system. 
+        /// </summary>
+        /// <param name="filePath">The output path of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
             string directory = Path.GetDirectoryName(filePath);
