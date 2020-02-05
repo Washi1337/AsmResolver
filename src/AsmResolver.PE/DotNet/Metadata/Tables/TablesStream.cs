@@ -516,7 +516,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 [CodedIndex.MemberForwarded] = new IndexEncoder(this,
                     TableIndex.File, TableIndex.AssemblyRef, TableIndex.ExportedType),
                 [CodedIndex.Implementation] = new IndexEncoder(this,
-                    TableIndex.TypeDef, TableIndex.TypeRef, TableIndex.TypeSpec),
+                    TableIndex.File, TableIndex.AssemblyRef, TableIndex.ExportedType),
                 [CodedIndex.CustomAttributeType] = new IndexEncoder(this,
                     0, 0, TableIndex.Method, TableIndex.MemberRef, 0),
                 [CodedIndex.ResolutionScope] = new IndexEncoder(this,

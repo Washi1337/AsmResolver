@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet
@@ -32,22 +34,15 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public TypeDefinition ResolveType(ITypeDescriptor type)
         {
-            switch (type)
+            return type switch
             {
-                case TypeDefinition definition:
-                    return definition;
-                
-                case TypeReference reference:
-                    return ResolveTypeReference(reference);
-
-                case TypeSpecification specification:
-                    return ResolveType(specification.Signature);
-                
-                case TypeSignature signature:
-                    return ResolveTypeSignature(signature);
-            }
-
-            return null;
+                TypeDefinition definition => definition,
+                TypeReference reference => ResolveTypeReference(reference),
+                TypeSpecification specification => ResolveType(specification.Signature),
+                TypeSignature signature => ResolveTypeSignature(signature),
+                ExportedType exportedType => ResolveExportedType(exportedType),
+                _ => null
+            };
         }
 
         private TypeDefinition ResolveTypeReference(TypeReference reference)
@@ -74,7 +69,7 @@ namespace AsmResolver.DotNet
                 case AssemblyReference assemblyRefScope:
                     var assemblyDefScope = AssemblyResolver.Resolve(assemblyRefScope);
                     return assemblyDefScope != null
-                        ? FindTypeInModule(assemblyDefScope.ManifestModule, reference)
+                        ? FindTypeInAssembly(assemblyDefScope, reference)
                         : null;
 
                 case ModuleDefinition moduleScope:
@@ -83,7 +78,7 @@ namespace AsmResolver.DotNet
                 case TypeReference typeRefScope:
                     var typeDefScope = ResolveType(typeRefScope);
                     return typeDefScope != null
-                        ? FindNestedType(typeDefScope, reference)
+                        ? FindNestedType(typeDefScope, reference.Name)
                         : null;
 
                 default:
@@ -91,33 +86,77 @@ namespace AsmResolver.DotNet
             }
         }
 
-        private TypeDefinition FindTypeInModule(ModuleDefinition module, ITypeDefOrRef target)
+        private TypeDefinition FindTypeInAssembly(AssemblyDefinition assembly, ITypeDescriptor type) =>
+            FindTypeInAssembly(assembly, type.Namespace, type.Name);
+        
+        private TypeDefinition FindTypeInAssembly(AssemblyDefinition assembly, string ns, string name)
         {
-            foreach (var type in module.TopLevelTypes)
+            foreach (var module in assembly.Modules)
             {
-                if (_comparer.Equals(type, target))
+                var type = FindTypeInModule(module, ns, name);
+                if (type is {})
                     return type;
             }
 
-            // TODO: look at exported types.
+            return null;
+        }
+
+        private TypeDefinition FindTypeInModule(ModuleDefinition module, ITypeDescriptor type) =>
+            FindTypeInModule(module, type.Namespace, type.Name);
+
+        private TypeDefinition FindTypeInModule(ModuleDefinition module, string ns, string name)
+        {
+            foreach (var type in module.TopLevelTypes)
+            {
+                if (type.IsTypeOf(ns, name))
+                    return type;
+            }
+
+            foreach (var exportedType in module.ExportedTypes)
+            {
+                if (exportedType.IsTypeOf(ns, name))
+                    return ResolveExportedType(exportedType);
+            }
             
             return null;
         }
 
-        private TypeDefinition FindNestedType(TypeDefinition enclosingType, ITypeDefOrRef target)
+        private TypeDefinition FindNestedType(TypeDefinition enclosingType, string name)
         {
-            foreach (var type in enclosingType.NestedTypes)
-            {
-                if (_comparer.Equals(type, target))
-                    return type;
-            }
-
-            return null;
+            return enclosingType.NestedTypes.FirstOrDefault(t => t.Name == name);
         }
 
         private TypeDefinition ResolveTypeSignature(TypeSignature signature)
         {
             return ResolveType(signature.GetUnderlyingTypeDefOrRef());
+        }
+
+        private TypeDefinition ResolveExportedType(ExportedType exportedType)
+        {
+            switch (exportedType.Implementation)
+            {
+                case AssemblyReference assemblyRef:
+                    var assembly = assemblyRef.Resolve();
+                    return assembly is {}
+                        ? FindTypeInAssembly(assembly, exportedType)
+                        : null;
+
+                case FileReference fileRef:
+                    var module = exportedType.Module.Assembly.Modules
+                        .FirstOrDefault(m => m.Name == fileRef.Name);
+                    return module is {} 
+                        ? FindTypeInModule(module, exportedType) 
+                        : null;
+
+                case ExportedType parentType:
+                    var declaringType = ResolveExportedType(parentType);
+                    return declaringType is {}
+                        ? FindNestedType(declaringType, parentType.Name) 
+                        : null;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         /// <inheritdoc />

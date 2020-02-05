@@ -109,5 +109,15 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] HelloWorld_NetCore {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_NetCore", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

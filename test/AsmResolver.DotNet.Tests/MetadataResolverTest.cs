@@ -35,6 +35,17 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal((ITypeDefOrRef) reference, definition, _comparer);
         }
+        
+        [Fact]
+        public void ResolveSystemObjectNetCore()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+
+            var reference = new TypeReference(module.CorLibTypeFactory.CorLibScope, "System", "Object");
+            var definition = _resolver.ResolveType(reference);
+
+            Assert.True(definition.IsTypeOf(reference.Namespace, reference.Name));
+        }
 
         [Fact]
         public void ResolveCorLibTypeSignature()

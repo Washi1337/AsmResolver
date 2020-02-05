@@ -1,18 +1,18 @@
-using System;
 using System.Collections.Generic;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures
 {
     public partial class SignatureComparer : 
+        IEqualityComparer<ITypeDescriptor>,
         IEqualityComparer<ITypeDefOrRef>,
         IEqualityComparer<TypeDefinition>,
         IEqualityComparer<TypeReference>,
         IEqualityComparer<TypeSpecification>,
+        IEqualityComparer<ExportedType>,
         IEqualityComparer<InvalidTypeDefOrRef>
     {
         /// <inheritdoc />
-        public bool Equals(ITypeDefOrRef x, ITypeDefOrRef y)
+        public bool Equals(ITypeDescriptor x, ITypeDescriptor y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(ITypeDefOrRef obj)
+        public int GetHashCode(ITypeDescriptor obj)
         {
             unchecked
             {
@@ -45,27 +45,39 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
+        public bool Equals(ITypeDefOrRef x, ITypeDefOrRef y)
+        {
+            return Equals((ITypeDescriptor) x, y);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(ITypeDefOrRef obj)
+        {
+            return GetHashCode((ITypeDescriptor) obj);
+        }
+
+        /// <inheritdoc />
         public bool Equals(TypeDefinition x, TypeDefinition y)
         {
-            return Equals((ITypeDefOrRef) x, y);
+            return Equals((ITypeDescriptor) x, y);
         }
 
         /// <inheritdoc />
         public int GetHashCode(TypeDefinition obj)
         {
-            return GetHashCode((ITypeDefOrRef) obj);
+            return GetHashCode((ITypeDescriptor) obj);
         }
 
         /// <inheritdoc />
         public bool Equals(TypeReference x, TypeReference y)
         {
-            return Equals((ITypeDefOrRef) x, y);
+            return Equals((ITypeDescriptor) x, y);
         }
 
         /// <inheritdoc />
         public int GetHashCode(TypeReference obj)
         {
-            return GetHashCode((ITypeDefOrRef) obj);
+            return GetHashCode((ITypeDescriptor) obj);
         }
 
         /// <inheritdoc />
@@ -83,6 +95,23 @@ namespace AsmResolver.DotNet.Signatures
         public int GetHashCode(TypeSpecification obj)
         {
             return GetHashCode(obj.Signature);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(ExportedType x, ExportedType y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+
+            return Equals((ITypeDescriptor) x, y);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(ExportedType obj)
+        {
+            return GetHashCode((ITypeDescriptor) obj);
         }
 
         /// <inheritdoc />

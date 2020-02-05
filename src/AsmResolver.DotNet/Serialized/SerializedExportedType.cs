@@ -16,11 +16,11 @@ namespace AsmResolver.DotNet.Serialized
         private readonly ExportedTypeRow _row;
 
         /// <summary>
-        /// Creates a field definition from a field metadata row.
+        /// Creates a exported type from a exported type metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the field.</param>
-        /// <param name="token">The token to initialize the field for.</param>
-        /// <param name="row">The metadata table row to base the field definition on.</param>
+        /// <param name="parentModule">The module that contains the exported type.</param>
+        /// <param name="token">The token to initialize the exported type for.</param>
+        /// <param name="row">The metadata table row to base the exported type on.</param>
         public SerializedExportedType(SerializedModuleDefinition parentModule, MetadataToken token, ExportedTypeRow row)
             : base(token)
         {
