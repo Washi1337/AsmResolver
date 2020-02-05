@@ -27,6 +27,7 @@ namespace AsmResolver.DotNet.Serialized
         private GenericParameter[] _genericParameters;
         private ModuleReference[] _moduleReferences;
         private FileReference[] _fileReferences;
+        private ExportedType[] _exportedTypes;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -56,6 +57,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.GenericParam => LookupGenericParameter(token),
                 TableIndex.ModuleRef => LookupModuleReference(token),
                 TableIndex.File => LookupFileReference(token),
+                TableIndex.ExportedType => LookupExportedType(token),
                 _ => null
             };
 
@@ -170,6 +172,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<FileReference, FileReferenceRow>(ref _fileReferences, token,
                 (m, t, r) => new SerializedFileReference(m, t, r));
+        }
+        
+        private ExportedType LookupExportedType(MetadataToken token)
+        {
+            return LookupOrCreateMember<ExportedType, ExportedTypeRow>(ref _exportedTypes, token,
+                (m, t, r) => new SerializedExportedType(m, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

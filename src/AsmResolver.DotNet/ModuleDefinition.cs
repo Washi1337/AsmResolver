@@ -128,6 +128,7 @@ namespace AsmResolver.DotNet
         private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
         private IList<ModuleReference> _moduleReferences;
         private IList<FileReference> _fileReferences;
+        private IList<ExportedType> _exportedTypes;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -319,6 +320,16 @@ namespace AsmResolver.DotNet
                 if (_fileReferences is null)
                     Interlocked.CompareExchange(ref _fileReferences, GetFileReferences(), null);
                 return _fileReferences;
+            }
+        }
+
+        public IList<ExportedType> ExportedTypes
+        {
+            get
+            {
+                if (_exportedTypes is null)
+                    Interlocked.CompareExchange(ref _exportedTypes, GetExportedTypes(), null);
+                return _exportedTypes;
             }
         }
 
@@ -519,7 +530,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ModuleReference> GetModuleReferences() => 
             new OwnedCollection<ModuleDefinition, ModuleReference>(this);
-        
+
         /// <summary>
         /// Obtains the list of references to external files that the module uses. 
         /// </summary>
@@ -529,6 +540,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<FileReference> GetFileReferences() =>
             new OwnedCollection<ModuleDefinition, FileReference>(this);
+     
+        /// <summary>
+        /// Obtains the list of types that are redirected to another external module. 
+        /// </summary>
+        /// <returns>The exported types.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ExportedTypes"/> property.
+        /// </remarks>
+        protected virtual IList<ExportedType> GetExportedTypes() => 
+            new OwnedCollection<ModuleDefinition, ExportedType>(this);
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
