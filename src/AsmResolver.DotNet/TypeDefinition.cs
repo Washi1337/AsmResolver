@@ -450,12 +450,12 @@ namespace AsmResolver.DotNet
         IResolutionScope ITypeDescriptor.Scope => GetDeclaringScope();
 
         /// <inheritdoc />
-        public bool IsValueType => BaseType.IsTypeOf("System", "ValueType") || IsEnum;
+        public bool IsValueType => BaseType is {} && (BaseType.IsTypeOf("System", "ValueType") || IsEnum);
 
         /// <summary>
         /// Gets a value indicating whether the type defines an enumeration of discrete values.
         /// </summary>
-        public bool IsEnum => BaseType.IsTypeOf("System", "Enum");
+        public bool IsEnum => BaseType?.IsTypeOf("System", "Enum") ?? false;
 
         /// <summary>
         /// Gets a collection of fields defined in the type.
