@@ -94,7 +94,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public bool IsValueType => false; // TODO: resolve. 
+        public bool IsValueType => Resolve()?.IsValueType ?? false; 
 
         /// <inheritdoc />
         public ModuleDefinition Module
