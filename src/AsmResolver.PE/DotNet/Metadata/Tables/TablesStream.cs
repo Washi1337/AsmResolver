@@ -459,7 +459,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 new MetadataTable<StandAloneSignatureRow>(TableIndex.StandAloneSig, layouts[17]), 
                 new MetadataTable<EventMapRow>(TableIndex.EventMap, layouts[18]), 
                 new MetadataTable<EventPointerRow>(TableIndex.EventPtr, layouts[19]),
-                new MetadataTable<EventDefinitionRow>(TableIndex.EventMap, layouts[20]), 
+                new MetadataTable<EventDefinitionRow>(TableIndex.Event, layouts[20]), 
                 new MetadataTable<PropertyMapRow>(TableIndex.PropertyMap, layouts[21]), 
                 new MetadataTable<PropertyPointerRow>(TableIndex.PropertyPtr, layouts[22]), 
                 new MetadataTable<PropertyDefinitionRow>(TableIndex.Property, layouts[23]), 

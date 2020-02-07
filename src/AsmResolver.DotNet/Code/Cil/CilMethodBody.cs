@@ -333,7 +333,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     {
                         case CilFlowControl.Branch:
                             agenda.Push(new StackState(
-                                Instructions.GetIndexByOffset(((CilInstruction) instruction.Operand).Offset),
+                                Instructions.GetIndexByOffset(((ICilLabel) instruction.Operand).Offset),
                                 nextStackSize));
                             break;
                         case CilFlowControl.ConditionalBranch:
@@ -342,11 +342,11 @@ namespace AsmResolver.DotNet.Code.Cil
                                 case CilOperandType.InlineBrTarget:
                                 case CilOperandType.ShortInlineBrTarget:
                                     agenda.Push(new StackState(
-                                        Instructions.GetIndexByOffset(((CilInstruction) instruction.Operand).Offset),
+                                        Instructions.GetIndexByOffset(((ICilLabel) instruction.Operand).Offset),
                                         nextStackSize));
                                     break;
                                 case CilOperandType.InlineSwitch:
-                                    foreach (var target in ((IEnumerable<CilInstruction>) instruction.Operand))
+                                    foreach (var target in ((IEnumerable<ICilLabel>) instruction.Operand))
                                     {
                                         agenda.Push(new StackState(
                                             Instructions.GetIndexByOffset(target.Offset),

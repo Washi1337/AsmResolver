@@ -243,7 +243,7 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
-        public void PersistentMultpleProperties()
+        public void PersistentMultipleProperties()
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
@@ -258,6 +258,15 @@ namespace AsmResolver.DotNet.Tests
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoEvents));
             Assert.Empty(type.Events);
         }
+
+        [Fact]
+        public void PersistentEmptyEvent()
+        {
+            var module = ModuleDefinition.FromFile(typeof(NoEvents).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NoEvents));
+            var newType = RebuildAndLookup(type);
+            Assert.Empty(newType.Events);
+        }
         
         [Fact]
         public void ReadSingleEvent()
@@ -268,11 +277,29 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void PersistentSingleEvent()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
+            var newType = RebuildAndLookup(type);
+            Assert.Single(newType.Events);
+        }
+
+        [Fact]
         public void ReadMultipleEvents()
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
             Assert.Equal(3, type.Events.Count);
+        }
+
+        [Fact]
+        public void PersistentMultipleEvents()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
+            var newType = RebuildAndLookup(type);
+            Assert.Equal(3, newType.Events.Count);
         }
 
         [Fact]

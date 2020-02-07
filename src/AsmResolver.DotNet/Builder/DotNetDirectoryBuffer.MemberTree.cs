@@ -126,6 +126,7 @@ namespace AsmResolver.DotNet.Builder
             uint fieldList = 1;
             uint methodList = 1;
             uint propertyList = 1;
+            uint eventList = 1;
             
             for (uint rid = 1; rid <= table.Count; rid++)
             {
@@ -142,6 +143,7 @@ namespace AsmResolver.DotNet.Builder
                     AddMethodDefinitionStub(method);
 
                 AddPropertyDefinitionsInType(type, rid, ref propertyList);
+                AddEventDefinitionsInType(type, rid, ref eventList);
                 
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
@@ -246,6 +248,36 @@ namespace AsmResolver.DotNet.Builder
             var token = table.Add(row, property.MetadataToken.Rid);
             AddCustomAttributes(token, property);
             AddMethodSemantics(token, property);
+            return token;
+        }
+
+        private void AddEventDefinitionsInType(TypeDefinition type, uint typeRid, ref uint eventList)
+        {
+            if (type.Events.Count > 0)
+            {
+                var table = Metadata.TablesStream.GetTable<EventMapRow>(TableIndex.EventMap);
+                    
+                foreach (var @event in type.Events)
+                    AddEventDefinition(@event);
+                
+                var row = new EventMapRow(typeRid, eventList);
+                table.Add(row, 0);
+                eventList += (uint) type.Events.Count;
+            }
+        }
+
+        private MetadataToken AddEventDefinition(EventDefinition @event)
+        {
+            var table = Metadata.TablesStream.GetTable<EventDefinitionRow>(TableIndex.Event);
+            
+            var row = new EventDefinitionRow(
+                @event.Attributes, 
+                Metadata.StringsStream.GetStringIndex(@event.Name),
+                AddTypeDefOrRef(@event.EventType));
+
+            var token = table.Add(row, @event.MetadataToken.Rid);
+            AddCustomAttributes(token, @event);
+            AddMethodSemantics(token, @event);
             return token;
         }
 
