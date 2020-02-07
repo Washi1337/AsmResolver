@@ -107,6 +107,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public ModuleDefinition Module => Method?.Module;
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get

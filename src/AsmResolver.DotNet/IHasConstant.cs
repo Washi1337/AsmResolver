@@ -3,7 +3,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a member that can be assigned a constant value, and can be referenced by a HasConstant coded index.
     /// </summary>
-    public interface IHasConstant : IMetadataMember, INameProvider
+    public interface IHasConstant : IMetadataMember, INameProvider, IModuleProvider
     {
         /// <summary>
         /// Gets or sets a constant that is assigned to the member.

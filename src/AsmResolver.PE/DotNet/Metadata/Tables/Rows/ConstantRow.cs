@@ -167,7 +167,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"({(int) Type:X2}, {Padding:X2}, {Value:X8})";
+            return $"({(int) Type:X2}, {Padding:X2}, {Parent:X8}, {Value:X8})";
         }
 
         /// <inheritdoc />

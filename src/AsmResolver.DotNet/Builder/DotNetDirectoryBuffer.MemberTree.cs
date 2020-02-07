@@ -164,6 +164,7 @@ namespace AsmResolver.DotNet.Builder
             var token = table.Add(row, field.MetadataToken.Rid);
             _fieldTokens.Add(field, token);
             AddCustomAttributes(token, field);
+            AddConstant(token, field.Constant);
             return token;
         }
 
@@ -218,6 +219,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, parameter.MetadataToken.Rid);
             AddCustomAttributes(token, parameter);
+            AddConstant(token, parameter.Constant);
             return token;
         }
 
@@ -248,6 +250,7 @@ namespace AsmResolver.DotNet.Builder
             var token = table.Add(row, property.MetadataToken.Rid);
             AddCustomAttributes(token, property);
             AddMethodSemantics(token, property);
+            AddConstant(token, property.Constant);
             return token;
         }
 

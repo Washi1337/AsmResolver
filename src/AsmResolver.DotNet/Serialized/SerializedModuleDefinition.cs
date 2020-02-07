@@ -243,13 +243,13 @@ namespace AsmResolver.DotNet.Serialized
         private void InitializeConstants()
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
-            var attributeTable = tablesStream.GetTable<ConstantRow>(TableIndex.Constant);
+            var constantTable = tablesStream.GetTable<ConstantRow>(TableIndex.Constant);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasConstant);
             
             _constants = new OneToOneRelation<MetadataToken, uint>();
-            for (int i = 0; i < attributeTable.Count; i++)
+            for (int i = 0; i < constantTable.Count; i++)
             {
-                var ownerToken = encoder.DecodeIndex(attributeTable[i].Parent);
+                var ownerToken = encoder.DecodeIndex(constantTable[i].Parent);
                 uint constantRid = (uint) (i + 1);
                 _constants.Add(ownerToken, constantRid);
             }

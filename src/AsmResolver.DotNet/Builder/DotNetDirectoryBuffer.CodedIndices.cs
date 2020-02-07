@@ -1,5 +1,6 @@
 ﻿using System;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -106,5 +107,22 @@ namespace AsmResolver.DotNet.Builder
                 .GetIndexEncoder(CodedIndex.CustomAttributeType)
                 .EncodeToken(token);
         }
+
+        private MetadataToken AddConstant(MetadataToken ownerToken, Constant constant)
+        {
+            if (constant == null)
+                return 0;
+
+            var table = Metadata.TablesStream.GetTable<ConstantRow>(TableIndex.Constant);
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasConstant);
+
+            var row = new ConstantRow(
+                constant.Type,
+                encoder.EncodeToken(ownerToken),
+                Metadata.BlobStream.GetBlobIndex(this, constant.Value));
+
+            return table.Add(row, constant.MetadataToken.Rid);
+        }
+
     }
 }
