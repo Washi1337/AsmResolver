@@ -127,6 +127,17 @@ namespace AsmResolver.PE.DotNet.Cil
         PopRef_PopI_PopRef,
 
         /// <summary>
+        /// Indicates the operation pops a reference off the stack for the first operand, a value off the stack for the
+        /// second operand, and a 32-bit integer off the stack for the third operand.
+        ///</summary>
+        PopRef_PopI_Pop1,
+        
+        /// <summary>
+        /// Indicates the operation clears the evaluation stack.
+        /// </summary>
+        PopAll,
+        
+        /// <summary>
         /// Indicates the operation pushes no values onto the stack.
         ///</summary>
         Push0,
@@ -176,11 +187,5 @@ namespace AsmResolver.PE.DotNet.Cil
         /// Indicates the operation pushes a variable amount of values onto the stack.
         ///</summary>
         VarPush,
-
-        /// <summary>
-        /// Indicates the operation pops a reference off the stack for the first operand, a value off the stack for the
-        /// second operand, and a 32-bit integer off the stack for the third operand.
-        ///</summary>
-        PopRef_PopI_Pop1
     }
 }

@@ -322,7 +322,8 @@ namespace AsmResolver.DotNet.Code.Cil
                     visitedInstructions[currentState.InstructionIndex] = currentState;
 
                     // Compute next stack size.
-                    int nextStackSize = currentState.StackSize - instruction.GetStackPopCount(this);
+                    int popCount = instruction.GetStackPopCount(this);
+                    int nextStackSize = popCount == -1 ? 0 : currentState.StackSize - popCount;
                     if (nextStackSize < 0)
                         throw new StackImbalanceException(this, instruction.Offset);
                     nextStackSize += instruction.GetStackPushCount();

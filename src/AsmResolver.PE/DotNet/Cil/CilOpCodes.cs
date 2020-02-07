@@ -1728,7 +1728,7 @@ namespace AsmResolver.PE.DotNet.Cil
             (((ushort) CilCode.Leave & 0xFF) << ValueOffset)
             | (((ushort) CilCode.Leave >> 14) << TwoBytesOffset)
             | ((ushort) Push0 << StackBehaviourPushOffset)
-            | ((ushort) Pop0 << StackBehaviourPopOffset)
+            | ((ushort) PopAll << StackBehaviourPopOffset)
             | ((byte) Primitive << OpCodeTypeOffset)
             | ((byte) InlineBrTarget << OperandTypeOffset)
             | ((byte) Branch << FlowControlOffset));
@@ -1737,7 +1737,7 @@ namespace AsmResolver.PE.DotNet.Cil
             (((ushort) CilCode.Leave_S & 0xFF) << ValueOffset)
             | (((ushort) CilCode.Leave_S >> 14) << TwoBytesOffset)
             | ((ushort) Push0 << StackBehaviourPushOffset)
-            | ((ushort) Pop0 << StackBehaviourPopOffset)
+            | ((ushort) PopAll << StackBehaviourPopOffset)
             | ((byte) Primitive << OpCodeTypeOffset)
             | ((byte) ShortInlineBrTarget << OperandTypeOffset)
             | ((byte) Branch << FlowControlOffset));

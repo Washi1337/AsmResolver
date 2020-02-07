@@ -64,6 +64,9 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilStackBehaviour.VarPop:
                     return DetermineVarPopCount(instruction, isVoid);
                 
+                case CilStackBehaviour.PopAll:
+                    return -1;
+                
                 default:
                     throw new ArgumentOutOfRangeException();
             }
