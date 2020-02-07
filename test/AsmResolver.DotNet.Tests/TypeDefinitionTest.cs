@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Tests
 {
     public class TypeDefinitionTest
     {
-        public TypeDefinition RebuildAndLookup(TypeDefinition type)
+        private TypeDefinition RebuildAndLookup(TypeDefinition type)
         {
             var stream = new MemoryStream();
             type.Module.Write(stream);
@@ -23,7 +23,12 @@ namespace AsmResolver.DotNet.Tests
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             return newModule.TopLevelTypes.FirstOrDefault(t => t.FullName == type.FullName);
         }
-        
+
+        private void AssertNamesEqual(IEnumerable<INameProvider> expected, IEnumerable<INameProvider> actual)
+        {
+            Assert.Equal(expected.Select(n => n.Name), actual.Select(n => n.Name));
+        }
+
         [Fact]
         public void LinkedToModule()
         {
@@ -169,11 +174,54 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void PersistentEmptyFields()
+        {
+            var module = ModuleDefinition.FromFile(typeof(NoFields).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NoFields));
+            var newType = RebuildAndLookup(type);
+            AssertNamesEqual(type.Fields, newType.Fields);
+        }
+
+        [Fact]
         public void ReadSingleField()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
-            Assert.Single(type.Fields);
+            Assert.Equal(new[]
+            {
+                nameof(SingleField.IntField), 
+            }, type.Fields.Select(p => p.Name));
+        }
+
+        [Fact]
+        public void PersistentSingleField()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
+            var newType = RebuildAndLookup(type);
+            AssertNamesEqual(type.Fields, newType.Fields);
+        }
+
+        [Fact]
+        public void ReadMultipleFields()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleFields));
+            Assert.Equal(new[]
+            {
+                nameof(MultipleFields.IntField),
+                nameof(MultipleFields.StringField),
+                nameof(MultipleFields.TypeDefOrRefFieldType),
+            }, type.Fields.Select(p => p.Name));
+        }
+
+        [Fact]
+        public void PersistentMultipleFields()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleFields).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleFields));
+            var newType = RebuildAndLookup(type);
+            AssertNamesEqual(type.Fields, newType.Fields);
         }
 
         [Fact]
@@ -183,13 +231,34 @@ namespace AsmResolver.DotNet.Tests
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoMethods));
             Assert.Empty(type.Methods);
         }
+
+        [Fact]
+        public void PersistentEmptyMethods()
+        {
+            var module = ModuleDefinition.FromFile(typeof(NoMethods).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NoMethods));
+            var newType = RebuildAndLookup(type);
+            Assert.Empty(newType.Methods);
+        }
         
         [Fact]
         public void ReadSingleMethod()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleMethod));
-            Assert.Single(type.Methods);
+            Assert.Equal(new[]
+            {
+                nameof(SingleMethod.VoidParameterlessMethod),
+            }, type.Methods.Select(p => p.Name));
+        }
+
+        [Fact]
+        public void PersistentSingleMethod()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleMethod));
+            var newType = RebuildAndLookup(type);
+            AssertNamesEqual(type.Methods, newType.Methods);
         }
 
         [Fact]
@@ -197,7 +266,24 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
-            Assert.Equal(6, type.Methods.Count);
+            Assert.Equal(new[]
+            {
+                ".ctor",
+                nameof(MultipleMethods.VoidParameterlessMethod),
+                nameof(MultipleMethods.IntParameterlessMethod),
+                nameof(MultipleMethods.TypeDefOrRefParameterlessMethod),
+                nameof(MultipleMethods.SingleParameterMethod),
+                nameof(MultipleMethods.MultipleParameterMethod),
+            }, type.Methods.Select(p => p.Name));
+        }
+
+        [Fact]
+        public void PersistentMultipleMethods()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleMethods).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleMethods));
+            var newType = RebuildAndLookup(type);
+            AssertNamesEqual(type.Methods, newType.Methods);
         }
 
         [Fact]
@@ -222,7 +308,10 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
-            Assert.Single(type.Properties);
+            Assert.Equal(new[]
+            {
+                nameof(SingleProperty.IntProperty)
+            }, type.Properties.Select(p => p.Name));
         }
 
         [Fact]
@@ -231,7 +320,10 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
             var newType = RebuildAndLookup(type);
-            Assert.Single(newType.Properties);
+            Assert.Equal(new[]
+            {
+                nameof(SingleProperty.IntProperty)
+            }, newType.Properties.Select(p => p.Name));
         }
 
         [Fact]
@@ -239,7 +331,11 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
-            Assert.Equal(4, type.Properties.Count);
+            Assert.Equal(new[]
+            {
+                nameof(MultipleProperties.ReadOnlyProperty), nameof(MultipleProperties.WriteOnlyProperty),
+                nameof(MultipleProperties.ReadWriteProperty), "Item",
+            }, type.Properties.Select(p => p.Name));
         }
 
         [Fact]
@@ -248,7 +344,11 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             var newType = RebuildAndLookup(type);
-            Assert.Equal(4, newType.Properties.Count);
+            Assert.Equal(new[]
+            {
+                nameof(MultipleProperties.ReadOnlyProperty), nameof(MultipleProperties.WriteOnlyProperty),
+                nameof(MultipleProperties.ReadWriteProperty), "Item",
+            }, newType.Properties.Select(p => p.Name));
         }
 
         [Fact]
@@ -273,7 +373,10 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
-            Assert.Single(type.Events);
+            Assert.Equal(new[]
+            {
+                nameof(SingleEvent.SimpleEvent)
+            }, type.Events.Select(p => p.Name));
         }
 
         [Fact]
@@ -282,7 +385,10 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleEvent));
             var newType = RebuildAndLookup(type);
-            Assert.Single(newType.Events);
+            Assert.Equal(new[]
+            {
+                nameof(SingleEvent.SimpleEvent)
+            }, newType.Events.Select(p => p.Name));
         }
 
         [Fact]
@@ -290,7 +396,12 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
-            Assert.Equal(3, type.Events.Count);
+            Assert.Equal(new[]
+            {
+                nameof(MultipleEvents.Event1),
+                nameof(MultipleEvents.Event2),
+                nameof(MultipleEvents.Event3),
+            }, type.Events.Select(p => p.Name));
         }
 
         [Fact]
@@ -299,7 +410,12 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(MultipleEvents).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleEvents));
             var newType = RebuildAndLookup(type);
-            Assert.Equal(3, newType.Events.Count);
+            Assert.Equal(new[]
+            {
+                nameof(MultipleEvents.Event1),
+                nameof(MultipleEvents.Event2),
+                nameof(MultipleEvents.Event3),
+            }, newType.Events.Select(p => p.Name));
         }
 
         [Fact]
