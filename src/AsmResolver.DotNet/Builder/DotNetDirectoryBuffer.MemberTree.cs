@@ -125,6 +125,7 @@ namespace AsmResolver.DotNet.Builder
 
             uint fieldList = 1;
             uint methodList = 1;
+            uint propertyList = 1;
             
             for (uint rid = 1; rid <= table.Count; rid++)
             {
@@ -139,6 +140,8 @@ namespace AsmResolver.DotNet.Builder
                     AddFieldDefinition(field);
                 foreach (var method in type.Methods)
                     AddMethodDefinitionStub(method);
+
+                AddPropertyDefinitionsInType(type, rid, ref propertyList);
                 
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
@@ -215,5 +218,58 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, parameter);
             return token;
         }
+
+        private void AddPropertyDefinitionsInType(TypeDefinition type, uint typeRid, ref uint propertyList)
+        {
+            if (type.Properties.Count > 0)
+            {
+                var table = Metadata.TablesStream.GetTable<PropertyMapRow>(TableIndex.PropertyMap);
+                    
+                foreach (var property in type.Properties)
+                    AddPropertyDefinition(property);
+                
+                var row = new PropertyMapRow(typeRid, propertyList);
+                table.Add(row, 0);
+                propertyList += (uint) type.Properties.Count;
+            }
+        }
+
+        private MetadataToken AddPropertyDefinition(PropertyDefinition property)
+        {
+            var table = Metadata.TablesStream.GetTable<PropertyDefinitionRow>(TableIndex.Property);
+            
+            var row = new PropertyDefinitionRow(
+                property.Attributes, 
+                Metadata.StringsStream.GetStringIndex(property.Name),
+                Metadata.BlobStream.GetBlobIndex(this, property.Signature));
+
+            var token = table.Add(row, property.MetadataToken.Rid);
+            AddCustomAttributes(token, property);
+            AddMethodSemantics(token, property);
+            return token;
+        }
+
+        private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)
+        {
+            foreach (var semantics in provider.Semantics)
+                AddMethodSemantics(ownerToken, semantics);
+        }
+
+        private MetadataToken AddMethodSemantics(MetadataToken ownerToken, MethodSemantics semantics)
+        {
+            var table = Metadata.TablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
+
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
+
+            var row = new MethodSemanticsRow(
+                semantics.Attributes,
+                GetMethodDefinitionToken(semantics.Method).Rid,
+                encoder.EncodeToken(ownerToken)
+            );
+
+            var token = table.Add(row, semantics.MetadataToken.Rid);
+            return token;
+        }
+        
     }
 }

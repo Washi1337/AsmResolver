@@ -67,6 +67,9 @@ namespace AsmResolver.DotNet.Builder
 
         private uint GetEntrypoint()
         {
+            if (Module.ManagedEntrypoint is null)
+                return 0;
+            
             var entrypointToken = MetadataToken.Zero;
             
             switch (Module.ManagedEntrypoint.MetadataToken.Table)
@@ -74,6 +77,7 @@ namespace AsmResolver.DotNet.Builder
                 case TableIndex.Method:
                     entrypointToken = GetMethodDefinitionToken(Module.ManagedEntrypointMethod);
                     break;
+                
                 case TableIndex.File:
                     //todo:
                     break;

@@ -207,6 +207,15 @@ namespace AsmResolver.DotNet.Tests
             var type = module.TopLevelTypes.First(t => t.Name == nameof(NoProperties));
             Assert.Empty(type.Properties);
         }
+
+        [Fact]
+        public void PersistentEmptyProperties()
+        {
+            var module = ModuleDefinition.FromFile(typeof(NoProperties).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(NoProperties));
+            var newType = RebuildAndLookup(type);
+            Assert.Empty(newType.Properties);
+        }
         
         [Fact]
         public void ReadSingleProperty()
@@ -217,11 +226,29 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void PersistentSingleProperty()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
+            var newType = RebuildAndLookup(type);
+            Assert.Single(newType.Properties);
+        }
+
+        [Fact]
         public void ReadMultipleProperties()
         {
             var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
             Assert.Equal(4, type.Properties.Count);
+        }
+
+        [Fact]
+        public void PersistentMultpleProperties()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MultipleProperties).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(MultipleProperties));
+            var newType = RebuildAndLookup(type);
+            Assert.Equal(4, newType.Properties.Count);
         }
 
         [Fact]

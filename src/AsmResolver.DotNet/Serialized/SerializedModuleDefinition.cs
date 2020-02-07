@@ -402,7 +402,8 @@ namespace AsmResolver.DotNet.Serialized
                     return null;
                 }
 
-                return LookupMember(DotNetDirectory.Entrypoint) as IManagedEntrypoint;
+                if (DotNetDirectory.Entrypoint != 0)
+                    return LookupMember(DotNetDirectory.Entrypoint) as IManagedEntrypoint;
             }
 
             return null;
