@@ -15,10 +15,14 @@ namespace AsmResolver.DotNet
     /// signature. Parameter definitions only provide additional information, such as a name, attributes or a default
     /// value.
     /// </remarks>
-    public class ParameterDefinition : IOwnedCollectionElement<MethodDefinition>, IHasCustomAttribute
+    public class ParameterDefinition :
+        IHasCustomAttribute,
+        IHasConstant,
+        IOwnedCollectionElement<MethodDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<MethodDefinition> _method;
+        private readonly LazyVariable<Constant> _constant;
         private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
@@ -30,6 +34,7 @@ namespace AsmResolver.DotNet
             MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _method = new LazyVariable<MethodDefinition>(GetMethod);
+            _constant = new LazyVariable<Constant>(GetConstant);
         }
 
         /// <summary>
@@ -112,6 +117,13 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public Constant Constant
+        {
+            get => _constant.Value;
+            set => _constant.Value = value;
+        }
+
         /// <summary>
         /// Obtains the name of the parameter.
         /// </summary>
@@ -139,6 +151,15 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+        
+        /// <summary>
+        /// Obtains the constant value assigned to the parameter definition.
+        /// </summary>
+        /// <returns>The constant.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Constant"/> property.
+        /// </remarks>
+        protected virtual Constant GetConstant() => null;
 
         /// <inheritdoc />
         public override string ToString() => Name;

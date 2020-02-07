@@ -34,11 +34,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IHasConstant GetParent()
         {
-            var encoder = _parentModule.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
-                .GetIndexEncoder(CodedIndex.HasConstant);
-
-            var token = encoder.DecodeIndex(_row.Parent);
+            var token = _parentModule.GetConstantOwner(MetadataToken.Rid);
             return _parentModule.TryLookupMember(token, out var member)
                 ? member as IHasConstant
                 : null;

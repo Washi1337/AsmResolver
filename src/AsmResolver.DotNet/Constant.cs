@@ -13,13 +13,22 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<IHasConstant> _parent;
         private readonly LazyVariable<DataBlobSignature> _value;
 
+        /// <summary>
+        /// Initializes the constant with a metadata token.
+        /// </summary>
+        /// <param name="token">The metadata token.</param>
         protected Constant(MetadataToken token)
         {
             MetadataToken = token;
             _parent = new LazyVariable<IHasConstant>(GetParent);
             _value = new LazyVariable<DataBlobSignature>(GetValue);
         }
-
+        
+        /// <summary>
+        /// Creates a new constant for a member, with the provided constant type and raw literal value. 
+        /// </summary>
+        /// <param name="type">The type of the constant.</param>
+        /// <param name="value">The raw literal value of the constant.</param>
         public Constant(ElementType type, DataBlobSignature value)
         {
             Type = type;

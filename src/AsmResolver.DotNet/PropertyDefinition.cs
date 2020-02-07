@@ -12,12 +12,17 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single property in a type definition of a .NET module.
     /// </summary>
-    public class PropertyDefinition : IMemberDescriptor, IHasCustomAttribute, IHasSemantics,
+    public class PropertyDefinition :
+        IMemberDescriptor,
+        IHasCustomAttribute,
+        IHasSemantics,
+        IHasConstant,
         IOwnedCollectionElement<TypeDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<PropertySignature> _signature;
+        private readonly LazyVariable<Constant> _constant;
         private IList<MethodSemantics> _semantics;
         private IList<CustomAttribute> _customAttributes;
 
@@ -31,6 +36,7 @@ namespace AsmResolver.DotNet
             _name = new LazyVariable<string>(GetName);
             _signature = new LazyVariable<PropertySignature>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
+            _constant = new LazyVariable<Constant>(GetConstant);
         }
 
         /// <summary>
@@ -156,6 +162,13 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public Constant Constant
+        {
+            get => _constant.Value;
+            set => _constant.Value = value;
+        }
+
         /// <summary>
         /// Gets the method definition representing the get accessor of this property definition. 
         /// </summary>
@@ -214,6 +227,15 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+
+        /// <summary>
+        /// Obtains the constant value assigned to the property definition.
+        /// </summary>
+        /// <returns>The constant.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Constant"/> property.
+        /// </remarks>
+        protected virtual Constant GetConstant() => null;
 
         /// <inheritdoc />
         public override string ToString() => FullName;

@@ -255,10 +255,18 @@ namespace AsmResolver.DotNet.Serialized
             }
         }
 
-        internal uint GetConstant(MetadataToken token)
+        internal uint GetConstantRid(MetadataToken ownerToken)
         {
             EnsureConstantsInitialized();
-            return _constants.GetValue(token);
+            return _constants.GetValue(ownerToken);
+        }
+
+        internal Constant GetConstant(MetadataToken ownerToken)
+        {
+            uint constantRid = GetConstantRid(ownerToken);
+            return TryLookupMember(new MetadataToken(TableIndex.Constant, constantRid), out var member)
+                ? member as Constant
+                : null;
         }
 
         internal MetadataToken GetConstantOwner(uint constantRid)

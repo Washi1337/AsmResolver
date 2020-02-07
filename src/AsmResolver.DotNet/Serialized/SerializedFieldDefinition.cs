@@ -54,13 +54,8 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override Constant GetConstant()
-        {
-            uint constantRid = _parentModule.GetConstant(MetadataToken);
-            return _parentModule.TryLookupMember(new MetadataToken(TableIndex.Constant, constantRid), out var member)
-                ? member as Constant
-                : null;
-        }
+        protected override Constant GetConstant() => 
+            _parentModule.GetConstant(MetadataToken);
 
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 

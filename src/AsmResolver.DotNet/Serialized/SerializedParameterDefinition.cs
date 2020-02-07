@@ -49,5 +49,9 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
             _parentModule.GetCustomAttributeCollection(this);
+
+        /// <inheritdoc />
+        protected override Constant GetConstant() => 
+            _parentModule.GetConstant(MetadataToken);
     }
 }
