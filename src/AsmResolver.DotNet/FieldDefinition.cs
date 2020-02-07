@@ -11,11 +11,16 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single field in a type definition of a .NET module.
     /// </summary>
-    public class FieldDefinition : IFieldDescriptor, IHasCustomAttribute, IOwnedCollectionElement<TypeDefinition>
+    public class FieldDefinition : 
+        IFieldDescriptor, 
+        IHasCustomAttribute, 
+        IHasConstant,
+        IOwnedCollectionElement<TypeDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<FieldSignature> _signature;
         private readonly LazyVariable<TypeDefinition> _declaringType;
+        private readonly LazyVariable<Constant> _constant;
         private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
@@ -28,6 +33,7 @@ namespace AsmResolver.DotNet
             _name = new LazyVariable<string>(GetName);
             _signature = new LazyVariable<FieldSignature>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
+            _constant = new LazyVariable<Constant>(GetConstant);
         }
 
         /// <summary>
@@ -299,6 +305,13 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <inheritdoc />
+        public Constant Constant
+        {
+            get => _constant.Value;
+            set => _constant.Value = value;
+        }
+
         FieldDefinition IFieldDescriptor.Resolve() => this;
 
         /// <summary>
@@ -338,7 +351,17 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual TypeDefinition GetDeclaringType() => null;
 
+        /// <summary>
+        /// Obtains the constant value assigned to the field definition.
+        /// </summary>
+        /// <returns>The constant.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Constant"/> property.
+        /// </remarks>
+        protected virtual Constant GetConstant() => null;
+
         /// <inheritdoc />
         public override string ToString() => FullName;
+
     }
 }

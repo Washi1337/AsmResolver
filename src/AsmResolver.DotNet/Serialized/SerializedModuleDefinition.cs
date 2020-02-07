@@ -29,6 +29,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<uint, uint> _typeDefTree;
         private OneToManyRelation<MetadataToken, uint> _semantics;
+        private OneToOneRelation<MetadataToken, uint> _constants;
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
 
@@ -231,6 +232,39 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureMethodSemanticsInitialized();
             return _semantics.GetMemberOwner(methodRid);
+        }
+
+        private void EnsureConstantsInitialized()
+        {
+            if (_constants is null)
+                InitializeConstants();
+        }
+
+        private void InitializeConstants()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var attributeTable = tablesStream.GetTable<ConstantRow>(TableIndex.Constant);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasConstant);
+            
+            _constants = new OneToOneRelation<MetadataToken, uint>();
+            for (int i = 0; i < attributeTable.Count; i++)
+            {
+                var ownerToken = encoder.DecodeIndex(attributeTable[i].Parent);
+                uint constantRid = (uint) (i + 1);
+                _constants.Add(ownerToken, constantRid);
+            }
+        }
+
+        internal uint GetConstant(MetadataToken token)
+        {
+            EnsureConstantsInitialized();
+            return _constants.GetValue(token);
+        }
+
+        internal MetadataToken GetConstantOwner(uint constantRid)
+        {
+            EnsureConstantsInitialized();
+            return _constants.GetKey(constantRid);
         }
 
         private void EnsureCustomAttributesInitialized()

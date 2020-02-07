@@ -28,6 +28,7 @@ namespace AsmResolver.DotNet.Serialized
         private ModuleReference[] _moduleReferences;
         private FileReference[] _fileReferences;
         private ExportedType[] _exportedTypes;
+        private Constant[] _constants;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -58,6 +59,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.ModuleRef => LookupModuleReference(token),
                 TableIndex.File => LookupFileReference(token),
                 TableIndex.ExportedType => LookupExportedType(token),
+                TableIndex.Constant => LookupConstant(token),
                 _ => null
             };
 
@@ -82,7 +84,7 @@ namespace AsmResolver.DotNet.Serialized
                 (m, t, r) => new SerializedTypeSpecification(m, t, r));
         }
 
-        private AssemblyDefinition LookupAssemblyDefinition(in MetadataToken token)
+        private AssemblyDefinition LookupAssemblyDefinition(MetadataToken token)
         {
             return token.Rid == 1
                 ? _parentModule.Assembly
@@ -167,17 +169,23 @@ namespace AsmResolver.DotNet.Serialized
             return LookupOrCreateMember<ModuleReference, ModuleReferenceRow>(ref _moduleReferences, token,
                 (m, t, r) => new SerializedModuleReference(m, t, r));
         }
-        
+
         private FileReference LookupFileReference(MetadataToken token)
         {
             return LookupOrCreateMember<FileReference, FileReferenceRow>(ref _fileReferences, token,
                 (m, t, r) => new SerializedFileReference(m, t, r));
         }
-        
+
         private ExportedType LookupExportedType(MetadataToken token)
         {
             return LookupOrCreateMember<ExportedType, ExportedTypeRow>(ref _exportedTypes, token,
                 (m, t, r) => new SerializedExportedType(m, t, r));
+        }
+
+        private Constant LookupConstant(MetadataToken token)
+        {
+            return LookupOrCreateMember<Constant, ConstantRow>(ref _constants, token,
+                (m, t, r) => new SerializedConstant(m, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

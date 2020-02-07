@@ -52,7 +52,16 @@ namespace AsmResolver.DotNet.Serialized
                 ? member as TypeDefinition
                 : null;
         }
-        
+
+        /// <inheritdoc />
+        protected override Constant GetConstant()
+        {
+            uint constantRid = _parentModule.GetConstant(MetadataToken);
+            return _parentModule.TryLookupMember(new MetadataToken(TableIndex.Constant, constantRid), out var member)
+                ? member as Constant
+                : null;
+        }
+
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
             _parentModule.GetCustomAttributeCollection(this);

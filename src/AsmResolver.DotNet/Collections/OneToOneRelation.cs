@@ -19,9 +19,16 @@ namespace AsmResolver.DotNet.Collections
             return false;
         }
 
-        public TValue GetValue(TKey key) => _keyToValue[key];
-        
-        public TKey GetKey(TValue value) => _valueToKey[value];
+        public TValue GetValue(TKey key)
+        {
+            _keyToValue.TryGetValue(key, out var value);
+            return value;
+        }
 
+        public TKey GetKey(TValue value)
+        {
+            _valueToKey.TryGetValue(value, out var key);
+            return key;
+        }
     }
 }
