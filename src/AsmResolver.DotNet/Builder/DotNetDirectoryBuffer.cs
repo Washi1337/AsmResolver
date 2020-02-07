@@ -238,5 +238,27 @@ namespace AsmResolver.DotNet.Builder
 
             table.Add(row, attribute.MetadataToken.Rid);
         }
+        
+        private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)
+        {
+            foreach (var semantics in provider.Semantics)
+                AddMethodSemantics(ownerToken, semantics);
+        }
+
+        private MetadataToken AddMethodSemantics(MetadataToken ownerToken, MethodSemantics semantics)
+        {
+            var table = Metadata.TablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
+
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
+
+            var row = new MethodSemanticsRow(
+                semantics.Attributes,
+                GetMethodDefinitionToken(semantics.Method).Rid,
+                encoder.EncodeToken(ownerToken)
+            );
+
+            var token = table.Add(row, semantics.MetadataToken.Rid);
+            return token;
+        }
     }
 }
