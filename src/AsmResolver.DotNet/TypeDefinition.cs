@@ -29,6 +29,7 @@ namespace AsmResolver.DotNet
         private IList<EventDefinition> _events;
         private IList<CustomAttribute> _customAttributes;
         private IList<GenericParameter> _genericParameters;
+        private IList<ITypeDefOrRef> _interfaces;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -532,6 +533,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a collection of interfaces that are implemented by the type.
+        /// </summary>
+        public IList<ITypeDefOrRef> Interfaces
+        {
+            get
+            {
+                if (_interfaces is null)
+                    Interlocked.CompareExchange(ref _interfaces, GetInterfaces(), null);
+                return _interfaces;
+            }
+        }
+
+        /// <summary>
         /// Creates a new type reference to this type definition. 
         /// </summary>
         /// <returns>The type reference.</returns>
@@ -682,6 +696,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<GenericParameter> GetGenericParameters() =>
             new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
+
+        /// <summary>
+        /// Obtains the list of interfaces this type implements.
+        /// </summary>
+        /// <returns>The interfaces.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Interfaces"/> property.
+        /// </remarks>
+        protected virtual IList<ITypeDefOrRef> GetInterfaces() =>
+            new List<ITypeDefOrRef>();
 
         /// <inheritdoc />
         public override string ToString() => FullName;

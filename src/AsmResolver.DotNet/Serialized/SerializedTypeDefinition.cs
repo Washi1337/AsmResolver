@@ -128,5 +128,27 @@ namespace AsmResolver.DotNet.Serialized
 
             return result;
         }
+
+        /// <inheritdoc />
+        protected override IList<ITypeDefOrRef> GetInterfaces()
+        {
+            var result = new List<ITypeDefOrRef>();
+            
+            var tablesStream = _parentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var implementationTable = tablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeDefOrRef);
+            
+            var rids = _parentModule.GetInterfaceImplementationRids(MetadataToken);
+            foreach (uint rid in rids)
+            {
+                var row = implementationTable[(int) (rid - 1)];
+                var interfaceToken = encoder.DecodeIndex(row.Interface);
+
+                if (_parentModule.TryLookupMember(interfaceToken, out var member) && member is ITypeDefOrRef type)
+                    result.Add(type);
+            }
+
+            return result;
+        }
     }
 }

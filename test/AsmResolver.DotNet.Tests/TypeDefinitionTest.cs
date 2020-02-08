@@ -8,6 +8,7 @@ using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
+using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -432,6 +433,17 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(GenericType<,,>).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == typeof(GenericType<,,>).Name);
             Assert.Equal(3, type.GenericParameters.Count);
+        }
+
+        [Fact]
+        public void ReadInterfaces()
+        {
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementation).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementation));
+            Assert.Equal(new HashSet<string>(new[]
+            {
+                nameof(IInterface1), nameof(IInterface2),
+            }), new HashSet<string>(type.Interfaces.Select(i => i.Name)));
         }
     }
 }

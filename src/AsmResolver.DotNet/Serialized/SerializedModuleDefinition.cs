@@ -32,6 +32,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _constants;
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
+        private OneToManyRelation<MetadataToken, uint> _interfaces;
 
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -355,6 +356,32 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureGenericParametersInitialized();
             return _genericParameters.GetMemberList(ownerToken);
+        }
+
+        private void EnsureInterfacesInitialized()
+        {
+            if (_interfaces is null)
+                InitializeInterfaces();
+        }
+
+        private void InitializeInterfaces()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var interfaceImplTable = tablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
+            
+            _interfaces = new OneToManyRelation<MetadataToken, uint>();
+            for (int i = 0; i < interfaceImplTable.Count; i++)
+            {
+                var ownerToken = new MetadataToken(TableIndex.TypeDef, interfaceImplTable[i].Class);
+                uint interfaceImplRid = (uint) (i + 1);
+                _interfaces.Add(ownerToken, interfaceImplRid);
+            }
+        }
+
+        internal ICollection<uint> GetInterfaceImplementationRids(MetadataToken ownerToken)
+        {
+            EnsureInterfacesInitialized();
+            return _interfaces.GetMemberList(ownerToken);
         }
 
         /// <inheritdoc />
