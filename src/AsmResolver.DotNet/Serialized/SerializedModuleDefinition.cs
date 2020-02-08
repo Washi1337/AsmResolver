@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet;
@@ -166,17 +167,19 @@ namespace AsmResolver.DotNet.Serialized
         private void EnsureTypeDefinitionTreeInitialized()
         {
             if (_typeDefTree is null)
-                InitializeTypeDefinitionTree();
+                Interlocked.CompareExchange(ref _typeDefTree, InitializeTypeDefinitionTree(), null);
         }
 
-        private void InitializeTypeDefinitionTree()
+        private OneToManyRelation<uint, uint> InitializeTypeDefinitionTree()
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var nestedClassTable = tablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
             
-            _typeDefTree = new OneToManyRelation<uint, uint>();
+            var typeDefTree = new OneToManyRelation<uint, uint>();
             foreach (var nestedClass in nestedClassTable)
-                _typeDefTree.Add(nestedClass.EnclosingClass, nestedClass.NestedClass);
+                typeDefTree.Add(nestedClass.EnclosingClass, nestedClass.NestedClass);
+
+            return typeDefTree;
         }
 
         internal IEnumerable<uint> GetNestedTypeRids(uint enclosingTypeRid)
@@ -205,22 +208,24 @@ namespace AsmResolver.DotNet.Serialized
         private void EnsureMethodSemanticsInitialized()
         {
             if (_semantics is null)
-                InitializeMethodSemantics();
+                Interlocked.CompareExchange(ref _semantics, InitializeMethodSemantics(), null);
         }
 
-        private void InitializeMethodSemantics()
+        private OneToManyRelation<MetadataToken, uint> InitializeMethodSemantics()
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var semanticsTable = tablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
             
-            _semantics = new OneToManyRelation<MetadataToken, uint>();
+            var semantics = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < semanticsTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(semanticsTable[i].Association);
                 uint semanticsRid = (uint) (i + 1);
-                _semantics.Add(ownerToken, semanticsRid);
+                semantics.Add(ownerToken, semanticsRid);
             }
+
+            return semantics;
         }
 
         internal IEnumerable<uint> GetMethodSemantics(MetadataToken owner)
@@ -238,22 +243,24 @@ namespace AsmResolver.DotNet.Serialized
         private void EnsureConstantsInitialized()
         {
             if (_constants is null)
-                InitializeConstants();
+                Interlocked.CompareExchange(ref _constants, GetConstants(), null);
         }
 
-        private void InitializeConstants()
+        private OneToOneRelation<MetadataToken, uint> GetConstants()
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var constantTable = tablesStream.GetTable<ConstantRow>(TableIndex.Constant);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasConstant);
             
-            _constants = new OneToOneRelation<MetadataToken, uint>();
+            var constants = new OneToOneRelation<MetadataToken, uint>();
             for (int i = 0; i < constantTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(constantTable[i].Parent);
                 uint constantRid = (uint) (i + 1);
-                _constants.Add(ownerToken, constantRid);
+                constants.Add(ownerToken, constantRid);
             }
+
+            return constants;
         }
 
         internal uint GetConstantRid(MetadataToken ownerToken)
@@ -279,22 +286,24 @@ namespace AsmResolver.DotNet.Serialized
         private void EnsureCustomAttributesInitialized()
         {
             if (_customAttributes is null)
-                InitializeCustomAttributes();
+                Interlocked.CompareExchange(ref _customAttributes, InitializeCustomAttributes(), null);
         }
 
-        private void InitializeCustomAttributes()
+        private OneToManyRelation<MetadataToken, uint> InitializeCustomAttributes()
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var attributeTable = tablesStream.GetTable<CustomAttributeRow>(TableIndex.CustomAttribute);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
             
-            _customAttributes = new OneToManyRelation<MetadataToken, uint>();
+            var customAttributes = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < attributeTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(attributeTable[i].Parent);
                 uint attributeRid = (uint) (i + 1);
-                _customAttributes.Add(ownerToken, attributeRid);
+                customAttributes.Add(ownerToken, attributeRid);
             }
+
+            return customAttributes;
         }
 
         internal IEnumerable<uint> GetCustomAttributes(MetadataToken owner)
@@ -328,22 +337,24 @@ namespace AsmResolver.DotNet.Serialized
         private void EnsureGenericParametersInitialized()
         {
             if (_genericParameters is null)
-                InitializeGenericParameters();
+                Interlocked.CompareExchange(ref _genericParameters, InitializeGenericParameters(), null);
         }
 
-        private void InitializeGenericParameters()
+        private OneToManyRelation<MetadataToken, uint> InitializeGenericParameters()
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var parameterTable = tablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
             
-            _genericParameters = new OneToManyRelation<MetadataToken, uint>();
+            var genericParameters = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < parameterTable.Count; i++)
             {
                 var ownerToken = encoder.DecodeIndex(parameterTable[i].Owner);
                 uint parameterRid = (uint) (i + 1);
-                _genericParameters.Add(ownerToken, parameterRid);
+                genericParameters.Add(ownerToken, parameterRid);
             }
+
+            return genericParameters;
         }
 
         internal MetadataToken GetGenericParameterOwner(uint parameterRid)
@@ -361,21 +372,23 @@ namespace AsmResolver.DotNet.Serialized
         private void EnsureInterfacesInitialized()
         {
             if (_interfaces is null)
-                InitializeInterfaces();
+                Interlocked.CompareExchange(ref _interfaces, InitializeInterfaces(), null);
         }
 
-        private void InitializeInterfaces()
+        private OneToManyRelation<MetadataToken, uint> InitializeInterfaces()
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var interfaceImplTable = tablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
             
-            _interfaces = new OneToManyRelation<MetadataToken, uint>();
+            var interfaces = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < interfaceImplTable.Count; i++)
             {
                 var ownerToken = new MetadataToken(TableIndex.TypeDef, interfaceImplTable[i].Class);
                 uint interfaceImplRid = (uint) (i + 1);
-                _interfaces.Add(ownerToken, interfaceImplRid);
+                interfaces.Add(ownerToken, interfaceImplRid);
             }
+
+            return interfaces;
         }
 
         internal ICollection<uint> GetInterfaceImplementationRids(MetadataToken ownerToken)
