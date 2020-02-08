@@ -195,5 +195,43 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <returns>The label.</returns>
         public ICilLabel CreateLabel() => new CilInstructionLabel(this);
+
+        /// <summary>
+        /// Determines whether the instruction is a variant of the ldloc instructions.
+        /// </summary>
+        public bool IsLdloc()
+        {
+            switch (OpCode.Code)
+            {
+                case CilCode.Ldloc:
+                case CilCode.Ldloc_0:
+                case CilCode.Ldloc_1:
+                case CilCode.Ldloc_2:
+                case CilCode.Ldloc_3:
+                case CilCode.Ldloc_S:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the instruction is a variant of the stloc instructions.
+        /// </summary>
+        public bool IsStloc()
+        {
+            switch (OpCode.Code)
+            {
+                case CilCode.Stloc:
+                case CilCode.Stloc_0:
+                case CilCode.Stloc_1:
+                case CilCode.Stloc_2:
+                case CilCode.Stloc_3:
+                case CilCode.Stloc_S:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }

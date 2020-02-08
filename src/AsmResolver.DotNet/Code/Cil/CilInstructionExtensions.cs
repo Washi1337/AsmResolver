@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 
@@ -147,6 +148,45 @@ namespace AsmResolver.DotNet.Code.Cil
                 return 1;
 
             return 0;
+        }
+
+        /// <summary>
+        /// When this instruction is using a variant of the ldloc or stloc opcodes, gets the local variable that is
+        /// referenced by the instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        /// <param name="variables">The local variables defined in the enclosing method body.</param>
+        /// <returns>The variable.</returns>
+        /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldloc or stloc opcodes.</exception>
+        public static CilLocalVariable GetLocalVariable(this CilInstruction instruction, IList<CilLocalVariable> variables)
+        {
+            switch (instruction.OpCode.Code)
+            {
+                case CilCode.Ldloc:
+                case CilCode.Ldloc_S:
+                case CilCode.Stloc:
+                case CilCode.Stloc_S:
+                    return (CilLocalVariable) instruction.Operand;
+                
+                case CilCode.Ldloc_0:
+                case CilCode.Stloc_0:
+                    return variables[0];
+                    
+                case CilCode.Ldloc_1:
+                case CilCode.Stloc_1:
+                    return variables[1];
+                    
+                case CilCode.Ldloc_2:
+                case CilCode.Stloc_2:
+                    return variables[2];
+                    
+                case CilCode.Ldloc_3:
+                case CilCode.Stloc_3:
+                    return variables[3];
+                
+                default:
+                    throw new ArgumentException("Instruction is not a ldloc or stloc instruction.");
+            }
         }
         
     }
