@@ -10,10 +10,12 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<ByReferenceTypeSignature>,
         IEqualityComparer<PointerTypeSignature>,
         IEqualityComparer<SzArrayTypeSignature>,
+        IEqualityComparer<PinnedTypeSignature>,
         IEqualityComparer<TypeDefOrRefSignature>,
         IEqualityComparer<CustomModifierTypeSignature>,
         IEqualityComparer<GenericInstanceTypeSignature>,
         IEqualityComparer<GenericParameterSignature>,
+        IEqualityComparer<ArrayTypeSignature>,
         IEqualityComparer<IEnumerable<TypeSignature>>
     {
         /// <inheritdoc />
@@ -28,7 +30,9 @@ namespace AsmResolver.DotNet.Signatures
             {
                 CorLibTypeSignature corLibType => Equals(corLibType, y as CorLibTypeSignature),
                 ByReferenceTypeSignature byRefType => Equals(byRefType, y as ByReferenceTypeSignature),
+                ArrayTypeSignature arrayTypeSignature => throw new NotImplementedException(),
                 CustomModifierTypeSignature modifierType => Equals(modifierType, y as CustomModifierTypeSignature),
+                PinnedTypeSignature pinnedTypeSignature => throw new NotImplementedException(),
                 PointerTypeSignature pointerType => Equals(pointerType, y as PointerTypeSignature),
                 SzArrayTypeSignature szArrayType => Equals(szArrayType, y as SzArrayTypeSignature),
                 TypeDefOrRefSignature typeDefOrRef => Equals(typeDefOrRef, y as TypeDefOrRefSignature),
@@ -98,6 +102,18 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public int GetHashCode(SzArrayTypeSignature obj)
+        {
+            return GetHashCode(obj as TypeSpecificationSignature);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(PinnedTypeSignature x, PinnedTypeSignature y)
+        {
+            return Equals(x as TypeSpecificationSignature, y);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(PinnedTypeSignature obj)
         {
             return GetHashCode(obj as TypeSpecificationSignature);
         }
@@ -208,6 +224,39 @@ namespace AsmResolver.DotNet.Signatures
         private int GetHashCode(TypeSpecificationSignature obj)
         {
             return (int) obj.ElementType << ElementTypeOffset ^ GetHashCode(obj.BaseType);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(ArrayTypeSignature x, ArrayTypeSignature y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null) || x.Dimensions.Count != y.Dimensions.Count)
+                return false;
+
+            for (int i = 0; i < x.Dimensions.Count; i++)
+            {
+                if (x.Dimensions[i].Size != y.Dimensions[i].Size
+                    || x.Dimensions[i].LowerBound != y.Dimensions[i].LowerBound)
+                {
+                    return false;
+                }
+            }
+            
+            return Equals(x.BaseType, y.BaseType);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(ArrayTypeSignature obj)
+        {
+            unchecked
+            {
+                int hashCode = (int) obj.ElementType << ElementTypeOffset;
+                hashCode = (hashCode * 397) ^ GetHashCode(obj.BaseType);
+                foreach (var dimension in obj.Dimensions)
+                    hashCode = (hashCode * 397) ^ dimension.GetHashCode();
+                return hashCode;
+            }
         }
 
         /// <inheritdoc />

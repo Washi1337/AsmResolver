@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Signatures
                     return new GenericParameterSignature(GenericParameterType.Method, (int) reader.ReadCompressedUInt32());
 
                 case ElementType.Array:
-                    break;
+                    return ArrayTypeSignature.FromReader(module, reader, protection);
 
                 case ElementType.GenericInst:
                     return GenericInstanceTypeSignature.FromReader(module, reader, protection);
@@ -97,20 +97,18 @@ namespace AsmResolver.DotNet.Signatures
                         false,
                         FromReader(module, reader, protection));
                 
-                case ElementType.Internal:
-                    break;
-                case ElementType.Modifier:
-                    break;
                 case ElementType.Sentinel:
                     break;
+                
                 case ElementType.Pinned:
-                    break;
-                case ElementType.Type:
-                    break;
+                    return new PinnedTypeSignature(FromReader(module, reader, protection));
+                
                 case ElementType.Boxed:
                     break;
+                
                 case ElementType.Enum:
                     break;
+                
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
             }
