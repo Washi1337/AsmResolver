@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -41,13 +42,35 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether sentinel parameters should be included in the signature. 
+        /// </summary>
+        public bool IncludeSentinel
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets an ordered list of types indicating the types of the sentinel parameters that this member defines. 
+        /// </summary>
+        /// <remarks>
+        /// For any of the sentinel parameter types to be emitted to the output module, the <see cref="IncludeSentinel"/>
+        /// must be set to <c>true</c>.
+        /// </remarks>
+        public IList<TypeSignature> SentinelParameterTypes
+        {
+            get;
+        } = new List<TypeSignature>();
+
+        /// <summary>
         /// Initializes the <see cref="ParameterTypes"/> and <see cref="ReturnType"/> properties by reading
         /// the parameter count, return type and parameter fields of the signature from the provided input stream.
         /// </summary>
         /// <param name="module">The module that contains the signature.</param>
         /// <param name="reader">The input stream.</param>
         /// <param name="protection">The object instance responsible for detecting infinite recursion.</param>
-        protected void ReadParametersAndReturnType(ModuleDefinition module, IBinaryStreamReader reader, RecursionProtection protection)
+        protected void ReadParametersAndReturnType(ModuleDefinition module, IBinaryStreamReader reader,
+            RecursionProtection protection)
         {
             // Parameter count.
             if (!reader.TryReadCompressedUInt32(out uint parameterCount))
@@ -55,14 +78,26 @@ namespace AsmResolver.DotNet.Signatures
 
             // Return type.
             ReturnType = TypeSignature.FromReader(module, reader, protection);
-            
+
             // Parameter types.
+            bool sentinel = false;
             for (int i = 0; i < parameterCount; i++)
             {
                 var parameterType = TypeSignature.FromReader(module, reader, protection);
-                
-                // TODO: handle sentinel parameters.
-                ParameterTypes.Add(parameterType);
+
+                if (parameterType.ElementType == ElementType.Sentinel)
+                {
+                    sentinel = true;
+                    i--;
+                }
+                else if (sentinel)
+                {
+                    SentinelParameterTypes.Add(parameterType);
+                }
+                else
+                {
+                    ParameterTypes.Add(parameterType);
+                }
             }
         }
 
@@ -79,6 +114,13 @@ namespace AsmResolver.DotNet.Signatures
             
             foreach (var type in ParameterTypes)
                 type.Write(writer, provider);
+
+            if (IncludeSentinel)
+            {
+                writer.WriteByte((byte) ElementType.Sentinel);
+                foreach (var sentinelType in SentinelParameterTypes)
+                    sentinelType.Write(writer, provider);
+            }
         }
     }
 }

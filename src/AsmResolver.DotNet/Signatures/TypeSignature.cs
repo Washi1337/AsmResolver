@@ -98,7 +98,7 @@ namespace AsmResolver.DotNet.Signatures
                         FromReader(module, reader, protection));
                 
                 case ElementType.Sentinel:
-                    break;
+                    return new SentinelTypeSignature();
                 
                 case ElementType.Pinned:
                     return new PinnedTypeSignature(FromReader(module, reader, protection));
