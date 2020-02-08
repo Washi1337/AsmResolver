@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 
@@ -158,7 +159,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="variables">The local variables defined in the enclosing method body.</param>
         /// <returns>The variable.</returns>
         /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldloc or stloc opcodes.</exception>
-        public static CilLocalVariable GetLocalVariable(this CilInstruction instruction, IList<CilLocalVariable> variables)
+        public static CilLocalVariable GetLocalVariable(this CilInstruction instruction, IReadOnlyList<CilLocalVariable> variables)
         {
             switch (instruction.OpCode.Code)
             {
@@ -186,6 +187,41 @@ namespace AsmResolver.DotNet.Code.Cil
                 
                 default:
                     throw new ArgumentException("Instruction is not a ldloc or stloc instruction.");
+            }
+        }
+
+        /// <summary>
+        /// When this instruction is using a variant of the ldarg or starg opcodes, gets the parameter that is
+        /// referenced by the instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction.</param>
+        /// <param name="parameters">The parameters defined in the enclosing method body.</param>
+        /// <returns>The parameter.</returns>
+        /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldarg or starg opcodes.</exception>
+        public static Parameter GetParameter(this CilInstruction instruction, IReadOnlyList<Parameter> parameters)
+        {
+            switch (instruction.OpCode.Code)
+            {
+                case CilCode.Ldarg:
+                case CilCode.Ldarg_S:
+                case CilCode.Starg:
+                case CilCode.Starg_S:
+                    return (Parameter) instruction.Operand;
+                
+                case CilCode.Ldarg_0:
+                    return parameters[0];
+                    
+                case CilCode.Ldarg_1:
+                    return parameters[1];
+                    
+                case CilCode.Ldarg_2:
+                    return parameters[2];
+                    
+                case CilCode.Ldarg_3:
+                    return parameters[3];
+                
+                default:
+                    throw new ArgumentException("Instruction is not a ldarg or starg instruction.");
             }
         }
         

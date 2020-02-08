@@ -197,7 +197,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public ICilLabel CreateLabel() => new CilInstructionLabel(this);
 
         /// <summary>
-        /// Determines whether the instruction is a variant of the ldloc instructions.
+        /// Determines whether the instruction is using a variant of the ldloc opcodes.
         /// </summary>
         public bool IsLdloc()
         {
@@ -216,7 +216,7 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <summary>
-        /// Determines whether the instruction is a variant of the stloc instructions.
+        /// Determines whether the instruction is using a variant of the stloc opcodes.
         /// </summary>
         public bool IsStloc()
         {
@@ -228,6 +228,41 @@ namespace AsmResolver.PE.DotNet.Cil
                 case CilCode.Stloc_2:
                 case CilCode.Stloc_3:
                 case CilCode.Stloc_S:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+
+        /// <summary>
+        /// Determines whether the instruction is using a variant of the ldarg opcodes.
+        /// </summary>
+        public bool IsLdarg()
+        {
+            switch (OpCode.Code)
+            {
+                case CilCode.Ldarg:
+                case CilCode.Ldarg_0:
+                case CilCode.Ldarg_1:
+                case CilCode.Ldarg_2:
+                case CilCode.Ldarg_3:
+                case CilCode.Ldarg_S:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the instruction is using a variant of the starg opcodes.
+        /// </summary>
+        public bool IsStarg()
+        {
+            switch (OpCode.Code)
+            {
+                case CilCode.Starg:
+                case CilCode.Starg_S:
                     return true;
                 default:
                     return false;

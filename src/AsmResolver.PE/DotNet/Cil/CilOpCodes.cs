@@ -182,7 +182,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((ushort) PushI << StackBehaviourPushOffset)
             | ((ushort) Pop0 << StackBehaviourPopOffset)
             | ((byte) Macro << OpCodeTypeOffset)
-            | ((byte) ShortInlineVar << OperandTypeOffset)
+            | ((byte) ShortInlineArgument << OperandTypeOffset)
             | ((byte) Next << FlowControlOffset));
 
         public static readonly CilOpCode Starg_S = new CilOpCode(
@@ -191,7 +191,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((ushort) Push0 << StackBehaviourPushOffset)
             | ((ushort) Pop1 << StackBehaviourPopOffset)
             | ((byte) Macro << OpCodeTypeOffset)
-            | ((byte) ShortInlineVar << OperandTypeOffset)
+            | ((byte) ShortInlineArgument << OperandTypeOffset)
             | ((byte) Next << FlowControlOffset));
 
         public static readonly CilOpCode Ldloc_S = new CilOpCode(
@@ -1928,7 +1928,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((ushort) Push0 << StackBehaviourPushOffset)
             | ((ushort) Pop1 << StackBehaviourPopOffset)
             | ((byte) Primitive << OpCodeTypeOffset)
-            | ((byte) InlineVar << OperandTypeOffset)
+            | ((byte) InlineArgument << OperandTypeOffset)
             | ((byte) Next << FlowControlOffset));
 
         public static readonly CilOpCode Ldloc = new CilOpCode(
