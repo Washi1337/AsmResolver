@@ -104,10 +104,7 @@ namespace AsmResolver.DotNet.Signatures
                     return new PinnedTypeSignature(FromReader(module, reader, protection));
                 
                 case ElementType.Boxed:
-                    break;
-                
-                case ElementType.Enum:
-                    break;
+                    return new BoxedTypeSignature(FromReader(module, reader, protection));
                 
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");

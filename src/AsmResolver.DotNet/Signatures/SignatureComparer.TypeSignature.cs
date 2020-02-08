@@ -11,6 +11,7 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<PointerTypeSignature>,
         IEqualityComparer<SzArrayTypeSignature>,
         IEqualityComparer<PinnedTypeSignature>,
+        IEqualityComparer<BoxedTypeSignature>,
         IEqualityComparer<TypeDefOrRefSignature>,
         IEqualityComparer<CustomModifierTypeSignature>,
         IEqualityComparer<GenericInstanceTypeSignature>,
@@ -29,13 +30,16 @@ namespace AsmResolver.DotNet.Signatures
             return x switch
             {
                 CorLibTypeSignature corLibType => Equals(corLibType, y as CorLibTypeSignature),
-                ByReferenceTypeSignature byRefType => Equals(byRefType, y as ByReferenceTypeSignature),
-                ArrayTypeSignature arrayTypeSignature => throw new NotImplementedException(),
-                CustomModifierTypeSignature modifierType => Equals(modifierType, y as CustomModifierTypeSignature),
-                PinnedTypeSignature pinnedTypeSignature => throw new NotImplementedException(),
-                PointerTypeSignature pointerType => Equals(pointerType, y as PointerTypeSignature),
-                SzArrayTypeSignature szArrayType => Equals(szArrayType, y as SzArrayTypeSignature),
                 TypeDefOrRefSignature typeDefOrRef => Equals(typeDefOrRef, y as TypeDefOrRefSignature),
+                SzArrayTypeSignature szArrayType => Equals(szArrayType, y as SzArrayTypeSignature),
+                ArrayTypeSignature arrayType => Equals(arrayType, y as ArrayTypeSignature),
+                ByReferenceTypeSignature byRefType => Equals(byRefType, y as ByReferenceTypeSignature),
+                BoxedTypeSignature boxedType => Equals(boxedType, y as BoxedTypeSignature),
+                GenericInstanceTypeSignature genericInstanceType => Equals(genericInstanceType, y as GenericInstanceTypeSignature),
+                GenericParameterSignature genericParameter => Equals(genericParameter, y as GenericParameterSignature),
+                PointerTypeSignature pointerType => Equals(pointerType, y as PointerTypeSignature),
+                PinnedTypeSignature pinnedType => Equals(pinnedType, y as PinnedTypeSignature),
+                CustomModifierTypeSignature modifierType => Equals(modifierType, y as CustomModifierTypeSignature),
                 _ => throw new NotSupportedException()
             };
         }
@@ -46,10 +50,15 @@ namespace AsmResolver.DotNet.Signatures
             return obj switch
             {
                 CorLibTypeSignature corLibType => GetHashCode(corLibType),
-                ByReferenceTypeSignature byRefType => GetHashCode(byRefType),
-                PointerTypeSignature pointerType => GetHashCode(pointerType),
-                SzArrayTypeSignature szArrayType => GetHashCode(szArrayType),
                 TypeDefOrRefSignature typeDefOrRef => GetHashCode(typeDefOrRef),
+                SzArrayTypeSignature szArrayType => GetHashCode(szArrayType),
+                ArrayTypeSignature arrayType => GetHashCode(arrayType),
+                ByReferenceTypeSignature byRefType => GetHashCode(byRefType),
+                GenericInstanceTypeSignature genericInstanceType => GetHashCode(genericInstanceType),
+                GenericParameterSignature genericParameter => GetHashCode(genericParameter),
+                PointerTypeSignature pointerType => GetHashCode(pointerType),
+                PinnedTypeSignature pinnedType => GetHashCode(pinnedType),
+                CustomModifierTypeSignature modifierType => GetHashCode(modifierType),
                 _ => throw new NotSupportedException()
             };
         }
@@ -114,6 +123,18 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public int GetHashCode(PinnedTypeSignature obj)
+        {
+            return GetHashCode(obj as TypeSpecificationSignature);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(BoxedTypeSignature x, BoxedTypeSignature y)
+        {
+            return Equals(x as TypeSpecificationSignature, y);
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(BoxedTypeSignature obj)
         {
             return GetHashCode(obj as TypeSpecificationSignature);
         }
