@@ -116,6 +116,7 @@ namespace AsmResolver.DotNet.Builder
             var token = table.Add(row, type.MetadataToken.Rid);
             _typeDefTokens.Add(type, token);
             AddCustomAttributes(token, type);
+            AddInterfaces(token, type.Interfaces);
             return token;
         }
 

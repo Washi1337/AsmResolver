@@ -1,4 +1,5 @@
-﻿using AsmResolver.PE.DotNet;
+﻿using System.Collections.Generic;
+using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -259,6 +260,17 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, semantics.MetadataToken.Rid);
             return token;
+        }
+
+        private void AddInterfaces(MetadataToken ownerToken, IEnumerable<ITypeDefOrRef> interfaces)
+        {
+            var table = Metadata.TablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
+
+            foreach (var @interface in interfaces)
+            {
+                var row = new InterfaceImplementationRow(ownerToken.Rid, AddTypeDefOrRef(@interface));
+                table.Add(row, 0);
+            }
         }
     }
 }

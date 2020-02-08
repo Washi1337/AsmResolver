@@ -445,5 +445,17 @@ namespace AsmResolver.DotNet.Tests
                 nameof(IInterface1), nameof(IInterface2),
             }), new HashSet<string>(type.Interfaces.Select(i => i.Name)));
         }
+
+        [Fact]
+        public void PersistentInterfaces()
+        {
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementation).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementation));
+            var newType = RebuildAndLookup(type);
+            Assert.Equal(new HashSet<string>(new[]
+            {
+                nameof(IInterface1), nameof(IInterface2),
+            }), new HashSet<string>(newType.Interfaces.Select(i => i.Name)));   
+        }
     }
 }
