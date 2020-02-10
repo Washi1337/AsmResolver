@@ -21,6 +21,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<ITypeDefOrRef> _baseType;
         private readonly LazyVariable<TypeDefinition> _declaringType;
+        private readonly LazyVariable<ClassLayout> _classLayout;
         private IList<TypeDefinition> _nestedTypes;
         private ModuleDefinition _module;
         private IList<FieldDefinition> _fields;
@@ -42,6 +43,7 @@ namespace AsmResolver.DotNet
             _name = new LazyVariable<string>(GetName);
             _baseType = new LazyVariable<ITypeDefOrRef>(GetBaseType);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
+            _classLayout = new LazyVariable<ClassLayout>(GetClassLayout);
         }
 
         /// <summary>
@@ -546,6 +548,18 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets or sets an override to the layout of a class, indicating its total and packing size. 
+        /// </summary>
+        /// <remarks>
+        /// When this property is set to <c>null</c>, the runtime decides the layout of the class. 
+        /// </remarks>
+        public ClassLayout ClassLayout
+        {
+            get => _classLayout.Value;
+            set => _classLayout.Value = value;
+        }
+
+        /// <summary>
         /// Creates a new type reference to this type definition. 
         /// </summary>
         /// <returns>The type reference.</returns>
@@ -707,6 +721,15 @@ namespace AsmResolver.DotNet
         protected virtual IList<ITypeDefOrRef> GetInterfaces() =>
             new List<ITypeDefOrRef>();
 
+        /// <summary>
+        /// Obtains the class layout of this type.
+        /// </summary>
+        /// <returns>The class layout.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ClassLayout"/> property.
+        /// </remarks>
+        protected virtual ClassLayout GetClassLayout() => null;
+        
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

@@ -34,6 +34,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
         private OneToManyRelation<MetadataToken, uint> _interfaces;
+        private OneToOneRelation<MetadataToken, uint> _classLayouts;
 
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -395,6 +396,34 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureInterfacesInitialized();
             return _interfaces.GetMemberList(ownerToken);
+        }
+
+        private void EnsureClassLayoutsInitialized()
+        {
+            if (_classLayouts is null)
+                Interlocked.CompareExchange(ref _classLayouts, InitializeClassLayouts(), null);
+        }
+
+        private OneToOneRelation<MetadataToken, uint> InitializeClassLayouts()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var layoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
+            
+            var layouts = new OneToOneRelation<MetadataToken, uint>();
+            for (int i = 0; i < layoutTable.Count; i++)
+            {
+                var ownerToken = new MetadataToken(TableIndex.TypeDef, layoutTable[i].Parent);
+                uint layoutRid = (uint) (i + 1);
+                layouts.Add(ownerToken, layoutRid);
+            }
+
+            return layouts;
+        }
+
+        internal uint GetClassLayoutRid(MetadataToken ownerToken)
+        {
+            EnsureClassLayoutsInitialized();
+            return _classLayouts.GetValue(ownerToken);
         }
 
         /// <inheritdoc />

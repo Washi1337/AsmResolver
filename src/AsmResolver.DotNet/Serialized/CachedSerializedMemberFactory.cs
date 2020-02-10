@@ -29,6 +29,7 @@ namespace AsmResolver.DotNet.Serialized
         private FileReference[] _fileReferences;
         private ExportedType[] _exportedTypes;
         private Constant[] _constants;
+        private ClassLayout[] _classLayouts;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -60,6 +61,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.File => LookupFileReference(token),
                 TableIndex.ExportedType => LookupExportedType(token),
                 TableIndex.Constant => LookupConstant(token),
+                TableIndex.ClassLayout => LookupClassLayout(token),
                 _ => null
             };
 
@@ -186,6 +188,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<Constant, ConstantRow>(ref _constants, token,
                 (m, t, r) => new SerializedConstant(m, t, r));
+        }
+
+        private ClassLayout LookupClassLayout(MetadataToken token)
+        {
+            return LookupOrCreateMember<ClassLayout, ClassLayoutRow>(ref _classLayouts, token,
+                (m, t, r) => new SerializedClassLayout(m, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

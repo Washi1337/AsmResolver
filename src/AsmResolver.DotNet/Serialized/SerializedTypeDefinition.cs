@@ -150,5 +150,20 @@ namespace AsmResolver.DotNet.Serialized
 
             return result;
         }
+
+        /// <inheritdoc />
+        protected override ClassLayout GetClassLayout()
+        {
+            uint rid = _parentModule.GetClassLayoutRid(MetadataToken);
+            
+            if (_parentModule.TryLookupMember(new MetadataToken(TableIndex.ClassLayout, rid), out var member)
+                && member is ClassLayout layout)
+            {
+                layout.Parent = this;
+                return layout;
+            }
+
+            return null;
+        }
     }
 }
