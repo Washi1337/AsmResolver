@@ -16,10 +16,26 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
+using System.Collections.Generic;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {
+
+    public static class PESectionHelper
+    {
+        public static List<PESection> Copy(this IList<PESection> collection)
+        {
+            List<PESection> value = new List<PESection>();
+            foreach (var item in collection)
+            {
+                value.Add(new PESection(item));
+            }
+
+            return value;
+        }
+    }
+
     /// <summary>
     /// Represents a single section in a portable executable (PE) file.
     /// </summary>
@@ -34,7 +50,11 @@ namespace AsmResolver.PE.File
         {
             Header = new SectionHeader(name, characteristics);
         }
-        
+
+        public PESection(PESection section) : this (section.Header, section.Contents)
+        {
+        }
+
         /// <summary>
         /// Creates a new section with the provided contents.
         /// </summary>
@@ -45,7 +65,14 @@ namespace AsmResolver.PE.File
             Header = header;
             Contents = contents;
         }
-        
+
+        public PESection(SectionHeader header, ISegment contents)
+        {
+            Header = new SectionHeader(header);
+            Contents = contents;
+
+        }
+
         /// <summary>
         /// Gets or sets the header associated to the section.
         /// </summary>
