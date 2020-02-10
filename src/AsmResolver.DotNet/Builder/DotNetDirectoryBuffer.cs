@@ -272,5 +272,13 @@ namespace AsmResolver.DotNet.Builder
                 table.Add(row, 0);
             }
         }
+
+        private MetadataToken AddClassLayout(MetadataToken ownerToken, ClassLayout layout)
+        {
+            var table = Metadata.TablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
+
+            var row = new ClassLayoutRow(layout.PackingSize, layout.ClassSize, ownerToken.Rid);
+            return table.Add(row, layout.MetadataToken.Rid);
+        }
     }
 }
