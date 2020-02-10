@@ -23,7 +23,7 @@ namespace AsmResolver.PE.File.Headers
     /// <remarks>
     /// This structure does not contain the actual contents of the data directory.
     /// </remarks>
-    public readonly struct DataDirectory : IWritable
+    public class DataDirectory : IWritable
     {
         /// <summary>
         /// Indicates the size of a single data directory header.
@@ -57,6 +57,7 @@ namespace AsmResolver.PE.File.Headers
         public uint VirtualAddress
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -65,6 +66,7 @@ namespace AsmResolver.PE.File.Headers
         public uint Size
         {
             get;
+            set;
         }
 
         /// <summary>
