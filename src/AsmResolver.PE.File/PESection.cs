@@ -51,7 +51,12 @@ namespace AsmResolver.PE.File
             Header = new SectionHeader(name, characteristics);
         }
 
-        public PESection(PESection section) : this (section.Header, section.Contents)
+        /// <summary>
+        /// Copy a new section.
+        /// </summary>
+        /// <param name="section">The section to be copied.</param>
+        public PESection(PESection section) 
+            : this (section.Header, section.Contents)
         {
         }
 
@@ -66,6 +71,11 @@ namespace AsmResolver.PE.File
             Contents = contents;
         }
 
+        /// <summary>
+        /// Copy a section with the provided contents.
+        /// </summary>
+        /// <param name="header">The section's header to be copied.</param>
+        /// <param name="contents">The contents of the section.</param>
         public PESection(SectionHeader header, ISegment contents)
         {
             Header = new SectionHeader(header);

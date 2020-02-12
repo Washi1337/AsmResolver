@@ -398,7 +398,7 @@ namespace AsmResolver.PE.File
         /// </remarks>
         public void UpdateHeaders()
         {
-            List<SectionHeader> oldSections = (Sections.Copy()).Select(_ => _.Header).ToList();
+            var oldSections = Sections.Copy().Select(_ => _.Header).ToList();
 
             FileHeader.NumberOfSections = (ushort) Sections.Count;
             
@@ -448,23 +448,26 @@ namespace AsmResolver.PE.File
             }
         }
 
+        /// <summary>
+        /// Aligns all data directories' virtual address according to the section header's ones. 
+        /// </summary>
         public void AlignDataDirectoryEntries(IList<SectionHeader> oldHeaders) {
-            IList<DataDirectory> dataDirectoryEntries = OptionalHeader.DataDirectories;
+            var dataDirectoryEntries = OptionalHeader.DataDirectories;
             for (int j = 0; j < dataDirectoryEntries.Count; j++)
             {
-                var DataDirectory = dataDirectoryEntries[j];
-                if (DataDirectory.IsPresentInPE)
+                var dataDirectory = dataDirectoryEntries[j];
+                if (dataDirectory.IsPresentInPE)
                 {
-                    uint VAImageDir = DataDirectory.VirtualAddress;
+                    uint oldRvaDir = dataDirectory.VirtualAddress;
                     for(int i = 0; i < oldHeaders.Count; i++)
                     {
                         var header = oldHeaders[i];
                         /* Locate section containing image directory. */
-                        if (header.VirtualAddress <= VAImageDir && header.VirtualAddress + header.SizeOfRawData > VAImageDir)
+                        if (header.VirtualAddress <= oldRvaDir && header.VirtualAddress + header.SizeOfRawData > oldRvaDir)
                         {
                             /* Calculate the delta between the new section.rva and the old one */
                             uint sectionRvaDelta = Sections[i].Rva - header.VirtualAddress;
-                            DataDirectory.VirtualAddress += sectionRvaDelta;
+                            dataDirectory.VirtualAddress += sectionRvaDelta;
                             break;
                         }
                     }
