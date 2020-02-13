@@ -466,8 +466,16 @@ namespace AsmResolver.PE.File
                         if (header.VirtualAddress <= oldRvaDir && header.VirtualAddress + header.SizeOfRawData > oldRvaDir)
                         {
                             /* Calculate the delta between the new section.rva and the old one */
-                            uint sectionRvaDelta = Sections[i].Rva - header.VirtualAddress;
-                            dataDirectory.VirtualAddress += sectionRvaDelta;
+                            if (Sections[i].Rva >= header.VirtualAddress)
+                            {
+                                uint sectionRvaDelta = Sections[i].Rva - header.VirtualAddress;
+                                dataDirectory.VirtualAddress += sectionRvaDelta;
+                            }
+                            else
+                            {
+                                uint sectionRvaDelta = header.VirtualAddress - Sections[i].Rva;
+                                dataDirectory.VirtualAddress -= sectionRvaDelta;
+                            }
                             break;
                         }
                     }
