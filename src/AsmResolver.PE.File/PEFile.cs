@@ -398,6 +398,8 @@ namespace AsmResolver.PE.File
         /// </remarks>
         public void UpdateHeaders()
         {
+            var oldSections = Sections.Copy().Select(_ => _.Header).ToList();
+
             FileHeader.NumberOfSections = (ushort) Sections.Count;
             
             FileHeader.UpdateOffsets(
@@ -414,10 +416,10 @@ namespace AsmResolver.PE.File
                 .Align(OptionalHeader.FileAlignment);
             
             AlignSections();
+            AlignDataDirectoryEntries(oldSections);
 
             var lastSection = Sections[Sections.Count - 1];
             OptionalHeader.SizeOfImage = lastSection.Header.VirtualAddress + lastSection.Header.VirtualSize;
-
         }
 
         /// <summary>
@@ -443,6 +445,41 @@ namespace AsmResolver.PE.File
                
                 header.SizeOfRawData = section.Contents.GetPhysicalSize().Align(OptionalHeader.FileAlignment);
                 header.VirtualSize = section.Contents.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
+            }
+        }
+
+        /// <summary>
+        /// Aligns all data directories' virtual address according to the section header's ones. 
+        /// </summary>
+        public void AlignDataDirectoryEntries(IList<SectionHeader> oldHeaders) {
+            var dataDirectoryEntries = OptionalHeader.DataDirectories;
+            for (int j = 0; j < dataDirectoryEntries.Count; j++)
+            {
+                var dataDirectory = dataDirectoryEntries[j];
+                if (dataDirectory.IsPresentInPE)
+                {
+                    uint oldRvaDir = dataDirectory.VirtualAddress;
+                    for(int i = 0; i < oldHeaders.Count; i++)
+                    {
+                        var header = oldHeaders[i];
+                        /* Locate section containing image directory. */
+                        if (header.VirtualAddress <= oldRvaDir && header.VirtualAddress + header.SizeOfRawData > oldRvaDir)
+                        {
+                            /* Calculate the delta between the new section.rva and the old one */
+                            if (Sections[i].Rva >= header.VirtualAddress)
+                            {
+                                uint sectionRvaDelta = Sections[i].Rva - header.VirtualAddress;
+                                dataDirectory.VirtualAddress += sectionRvaDelta;
+                            }
+                            else
+                            {
+                                uint sectionRvaDelta = header.VirtualAddress - Sections[i].Rva;
+                                dataDirectory.VirtualAddress -= sectionRvaDelta;
+                            }
+                            break;
+                        }
+                    }
+                }
             }
         }
         
