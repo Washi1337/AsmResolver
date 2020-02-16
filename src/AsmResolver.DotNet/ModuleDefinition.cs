@@ -155,6 +155,7 @@ namespace AsmResolver.DotNet
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory();
             AssemblyReferences.Add((AssemblyReference) CorLibTypeFactory.CorLibScope);
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
+            MetadataResolver = new DefaultMetadataResolver(new NetFrameworkAssemblyResolver());
         }
 
         /// <summary>
@@ -168,6 +169,9 @@ namespace AsmResolver.DotNet
             Name = name;
             CorLibTypeFactory = new CorLibTypeFactory(corLib);
             AssemblyReferences.Add(corLib);
+
+            var resolver = CreateAssemblyResolver(corLib);
+            MetadataResolver = new DefaultMetadataResolver(resolver);
         }
 
         /// <summary>
@@ -364,7 +368,7 @@ namespace AsmResolver.DotNet
         {
             get;
             set;
-        } = new DefaultMetadataResolver(new DefaultAssemblyResolver());
+        }
 
         /// <summary>
         /// Gets or sets the managed method that is invoked when the .NET module is initialized. 
@@ -543,7 +547,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<FileReference> GetFileReferences() =>
             new OwnedCollection<ModuleDefinition, FileReference>(this);
-     
+
         /// <summary>
         /// Obtains the list of types that are redirected to another external module. 
         /// </summary>
@@ -574,6 +578,19 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="ManagedEntrypoint"/> property.
         /// </remarks>
         protected virtual IManagedEntrypoint GetManagedEntrypoint() => null;
+
+        /// <summary>
+        /// Creates an assembly resolver based on the corlib reference.
+        /// </summary>
+        /// <param name="corLib">The corlib reference.</param>
+        /// <returns>The resolver.</returns>
+        protected static IAssemblyResolver CreateAssemblyResolver(IResolutionScope corLib)
+        {
+            var resolver = corLib.Name == "mscorlib"
+                ? (IAssemblyResolver) new NetFrameworkAssemblyResolver()
+                : new NetCoreAssemblyResolver();
+            return resolver;
+        }
 
         /// <inheritdoc />
         public override string ToString() => Name;

@@ -62,10 +62,11 @@ namespace AsmResolver.DotNet.Serialized
             
             // Find assembly + referenced corlib.
             Assembly = FindParentAssembly();
-            var corlib = FindMostRecentCorLib();
-            CorLibTypeFactory = corlib == null
+            var corLib = FindMostRecentCorLib();
+            CorLibTypeFactory = corLib == null
                 ? CorLibTypeFactory.CreateMscorlib40TypeFactory()
-                : new CorLibTypeFactory(corlib);
+                : new CorLibTypeFactory(corLib);
+            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(corLib));
 
             // Prepare lazy RID lists.
             var tablesStream = metadata.GetStream<TablesStream>();

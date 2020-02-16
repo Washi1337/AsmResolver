@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet.Tests
                 false,
                 assemblyName.GetPublicKeyToken());
          
-            var resolver = new DefaultAssemblyResolver();
+            var resolver = new NetCoreAssemblyResolver();
             var assemblyDef = resolver.Resolve(assemblyRef);
 
             Assert.NotNull(assemblyDef);
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveLocalLibrary()
         {
-            var resolver = new DefaultAssemblyResolver();
+            var resolver = new NetCoreAssemblyResolver();
             resolver.SearchDirectories.Add(Path.GetDirectoryName(typeof(AssemblyResolverTest).Assembly.Location));
          
             var assemblyDef = AssemblyDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
