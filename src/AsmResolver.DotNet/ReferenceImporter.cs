@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet
@@ -284,6 +285,68 @@ namespace AsmResolver.DotNet
                 result.SentinelParameterTypes.Add(ImportTypeSignature(signature.SentinelParameterTypes[i]));
             
             return result;
+        }
+
+        /// <summary>
+        /// Imports a reference to a generic method instantiation into the module.
+        /// </summary>
+        /// <param name="method">The method to import.</param>
+        /// <returns>The imported method.</returns>
+        public virtual MethodSpecification ImportMethod(MethodSpecification method)
+        {
+            if (method.DeclaringType is null)
+                throw new ArgumentException("Cannot import a method that is not added to a type.");
+
+            if (method.Module == _module)
+                return method;
+
+            var memberRef = ImportMethod(method.Method);
+            
+            var instantiation = new GenericInstanceMethodSignature();
+            foreach (var argument in method.Signature.TypeArguments)
+                instantiation.TypeArguments.Add(ImportTypeSignature(argument));
+
+            return new MethodSpecification(memberRef, instantiation);
+        }
+
+        /// <summary>
+        /// Imports a reference to a method into the module.
+        /// </summary>
+        /// <param name="method">The method to import.</param>
+        /// <returns>The imported method.</returns>
+        public virtual IMethodDescriptor ImportMethod(MethodBase method)
+        {
+            if (method.IsGenericMethod && !method.IsGenericMethodDefinition)
+                return ImportGenericMethod((MethodInfo) method);
+
+            var returnType = method is MethodInfo info
+                ? ImportTypeSignature(info.ReturnType)
+                : _module.CorLibTypeFactory.Void;
+
+            var parameters = method.DeclaringType.IsConstructedGenericType
+                ? method.Module.ResolveMethod(method.MetadataToken).GetParameters()
+                : method.GetParameters();
+
+            var parameterTypes = new TypeSignature[parameters.Length];
+            for (int i = 0; i < parameterTypes.Length; i++)
+                parameterTypes[i] = ImportTypeSignature(parameters[i].ParameterType);
+
+            var result = new MethodSignature(
+                method.IsStatic ? 0 : CallingConventionAttributes.HasThis,
+                returnType, parameterTypes);
+
+            return new MemberReference(ImportType(method.DeclaringType), method.Name, result);
+        }
+
+        private IMethodDescriptor ImportGenericMethod(MethodInfo method)
+        {
+            var memberRef = (IMethodDefOrRef) ImportMethod(method.GetGenericMethodDefinition());
+            
+            var instantiation = new GenericInstanceMethodSignature();
+            foreach (var argument in method.GetGenericArguments())
+                instantiation.TypeArguments.Add(ImportTypeSignature(argument));
+
+            return new MethodSpecification(memberRef, instantiation);
         }
 
         /// <summary>

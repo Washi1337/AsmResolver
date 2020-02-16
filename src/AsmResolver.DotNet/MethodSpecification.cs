@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet
             FullNameGenerator.GetMethodFullName(Name, DeclaringType, Method.Signature, Signature.TypeArguments);
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Method.Module;
+        public ModuleDefinition Module => Method?.Module;
 
         /// <summary>
         /// Gets the declaring type of the method.

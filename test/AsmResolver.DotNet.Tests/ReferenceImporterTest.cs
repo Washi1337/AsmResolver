@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -185,6 +186,37 @@ namespace AsmResolver.DotNet.Tests
             var result = _importer.ImportMethod(method);
 
             Assert.Same(method, result);
+        }
+
+        [Fact]
+        public void ImportMethodFromGenericTypeThroughReflectionShouldIncludeGenericParamSig()
+        {
+            var method = typeof(List<string>).GetMethod("Add");
+
+            var result = _importer.ImportMethod(method);
+
+            Assert.IsAssignableFrom<GenericParameterSignature>(result.Signature.ParameterTypes[0]);
+            var genericParameter = (GenericParameterSignature) result.Signature.ParameterTypes[0];
+            Assert.Equal(0, genericParameter.Index);
+            Assert.Equal(GenericParameterType.Type, genericParameter.ParameterType);
+        }
+
+        [Fact]
+        public void ImportGenericMethodFromReflectionShouldResultInMethodSpec()
+        {
+            var method = typeof(Enumerable)
+                .GetMethod("Empty")
+                .MakeGenericMethod(typeof(string));
+
+            var result = _importer.ImportMethod(method);
+
+            Assert.IsAssignableFrom<MethodSpecification>(result);
+            var specification = (MethodSpecification) result;
+            Assert.Equal("Empty", result.Name);
+            Assert.Equal(new TypeSignature[]
+            {
+                _module.CorLibTypeFactory.String
+            }, specification.Signature.TypeArguments, _comparer);
         }
 
         [Fact]
