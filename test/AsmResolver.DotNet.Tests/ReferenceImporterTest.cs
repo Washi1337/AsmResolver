@@ -186,5 +186,33 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Same(method, result);
         }
+
+        [Fact]
+        public void ImportFieldFromExternalModuleShouldResultInMemberRef()
+        {
+            var type = new TypeReference(_dummyAssembly, null, "Type");
+            var field = new MemberReference(type, "Field",
+                FieldSignature.CreateStatic(_module.CorLibTypeFactory.String));
+
+            var result = _importer.ImportField(field);
+
+            Assert.Equal(field, result, _comparer);
+            Assert.Same(_module, result.Module);
+        }
+
+        [Fact]
+        public void ImportFieldFromSameModuleShouldResultInSameInstance()
+        {
+            var type = new TypeDefinition(null, "Type", TypeAttributes.Public);
+            _module.TopLevelTypes.Add(type);
+            
+            var field = new FieldDefinition("Method", FieldAttributes.Public | FieldAttributes.Static,
+                FieldSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+            type.Fields.Add(field);
+
+            var result = _importer.ImportField(field);
+
+            Assert.Same(field, result);
+        }
     }
 }

@@ -285,5 +285,30 @@ namespace AsmResolver.DotNet
             
             return result;
         }
+
+        /// <summary>
+        /// Imports a reference to a field into the module.
+        /// </summary>
+        /// <param name="field">The field to import.</param>
+        /// <returns>The imported field.</returns>
+        /// <exception cref="ArgumentException">Occurs when a field is not added to a type.</exception>
+        public IFieldDescriptor ImportField(IFieldDescriptor field)
+        {
+            if (field.DeclaringType is null)
+                throw new ArgumentException("Cannot import a field that is not added to a type.");
+
+            if (field.Module == _module)
+                return field;
+
+            return new MemberReference(
+                ImportType((ITypeDefOrRef) field.DeclaringType),
+                field.Name,
+                ImportFieldSignature(field.Signature));
+        }
+
+        private FieldSignature ImportFieldSignature(FieldSignature signature)
+        {
+            return new FieldSignature(signature.Attributes, ImportTypeSignature(signature.FieldType));
+        }
     }
 }
