@@ -87,6 +87,5 @@ namespace AsmResolver.PE.File.Tests
                 .ReadBytes(newData, 0, newData.Length));
             Assert.Equal(sectionData, newData);
         }
-        
     }
 }

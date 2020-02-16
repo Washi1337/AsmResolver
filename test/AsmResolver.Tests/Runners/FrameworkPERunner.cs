@@ -14,12 +14,7 @@ namespace AsmResolver.Tests.Runners
 
         protected override ProcessStartInfo GetStartInfo(string filePath)
         {
-            var info = new ProcessStartInfo
-            {
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            };
+            var info = new ProcessStartInfo();
             
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
@@ -34,4 +29,5 @@ namespace AsmResolver.Tests.Runners
             return info;
         }
     }
+    
 }

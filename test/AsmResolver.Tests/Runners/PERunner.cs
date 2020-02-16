@@ -57,15 +57,19 @@ namespace AsmResolver.Tests.Runners
             return fullPath;
         }
 
-        private string RunAndCaptureOutput(string filePath, int timeout=5000)
+        public string RunAndCaptureOutput(string filePath, int timeout=5000)
         {
-            var process = new Process()
-            {
-                StartInfo = GetStartInfo(filePath)
-            };
-
+            var info = GetStartInfo(filePath);
+            info.RedirectStandardError = true;
+            info.RedirectStandardOutput = true;
+            info.UseShellExecute = false;
+            info.WorkingDirectory = Path.GetDirectoryName(filePath);
+         
+            using var process = new Process();
+            
+            process.StartInfo = info;
             process.Start();
-
+            
             if (!process.WaitForExit(timeout))
             {
                 try
@@ -78,6 +82,15 @@ namespace AsmResolver.Tests.Runners
                 }
                 
                 throw new TimeoutException();
+            }
+
+            process.WaitForExit();
+
+
+            if (process.ExitCode != 0)
+            {
+                string errorString = process.StandardError.ReadToEnd();
+                throw new RunnerException(process.ExitCode, errorString);
             }
 
             return process.StandardOutput.ReadToEnd();
