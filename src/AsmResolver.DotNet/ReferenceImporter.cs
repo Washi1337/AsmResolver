@@ -251,5 +251,39 @@ namespace AsmResolver.DotNet
                 result.TypeArguments.Add(ImportTypeSignature(argument));
             return result;
         }
+
+        /// <summary>
+        /// Imports a reference to a method into the module.
+        /// </summary>
+        /// <param name="method">The method to import.</param>
+        /// <returns>The imported method.</returns>
+        /// <exception cref="ArgumentException">Occurs when a method is not added to a type.</exception>
+        public IMethodDefOrRef ImportMethod(IMethodDefOrRef method)
+        {
+            if (method.DeclaringType is null)
+                throw new ArgumentException("Cannot import a method that is not added to a type.");
+
+            if (method.Module == _module)
+                return method;
+           
+            return new MemberReference(
+                ImportType(method.DeclaringType),
+                method.Name,
+                ImportMethodSignature(method.Signature));
+        }
+
+        private MethodSignature ImportMethodSignature(MethodSignature signature)
+        {
+            var parameterTypes = new TypeSignature[signature.ParameterTypes.Count];
+            for (int i = 0; i < parameterTypes.Length; i++)
+                parameterTypes[i] = ImportTypeSignature(signature.ParameterTypes[i]);
+            
+            var result = new MethodSignature(signature.Attributes, ImportTypeSignature(signature.ReturnType), parameterTypes);
+
+            for (int i = 0; i < signature.SentinelParameterTypes.Count; i++)
+                result.SentinelParameterTypes.Add(ImportTypeSignature(signature.SentinelParameterTypes[i]));
+            
+            return result;
+        }
     }
 }

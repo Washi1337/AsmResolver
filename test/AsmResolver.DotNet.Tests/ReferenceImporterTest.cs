@@ -157,7 +157,34 @@ namespace AsmResolver.DotNet.Tests
             {
                 _module.CorLibTypeFactory.String
             }, genericInstance.TypeArguments);
+        }
 
+        [Fact]
+        public void ImportMethodFromExternalModuleShouldResultInMemberRef()
+        {
+            var type = new TypeReference(_dummyAssembly, null, "Type");
+            var method = new MemberReference(type, "Method",
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.String));
+
+            var result = _importer.ImportMethod(method);
+
+            Assert.Equal(method, result, _comparer);
+            Assert.Same(_module, result.Module);
+        }
+
+        [Fact]
+        public void ImportMethodFromSameModuleShouldResultInSameInstance()
+        {
+            var type = new TypeDefinition(null, "Type", TypeAttributes.Public);
+            _module.TopLevelTypes.Add(type);
+            
+            var method = new MethodDefinition("Method", MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+            type.Methods.Add(method);
+
+            var result = _importer.ImportMethod(method);
+
+            Assert.Same(method, result);
         }
     }
 }
