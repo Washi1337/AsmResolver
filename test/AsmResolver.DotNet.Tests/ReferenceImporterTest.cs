@@ -246,5 +246,17 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Same(field, result);
         }
+
+        [Fact]
+        public void ImportFieldFromReflectionShouldResultInMemberRef()
+        {
+            var field = typeof(string).GetField("Empty");
+
+            var result = _importer.ImportField(field);
+            
+            Assert.Equal(field.Name, result.Name);
+            Assert.Equal(field.DeclaringType.FullName, result.DeclaringType.FullName);
+            Assert.Equal(field.FieldType.FullName, ((FieldSignature) result.Signature).FieldType.FullName);
+        }
     }
 }

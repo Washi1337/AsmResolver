@@ -373,5 +373,23 @@ namespace AsmResolver.DotNet
         {
             return new FieldSignature(signature.Attributes, ImportTypeSignature(signature.FieldType));
         }
+
+        /// <summary>
+        /// Imports a reference to a field into the module.
+        /// </summary>
+        /// <param name="field">The field to import.</param>
+        /// <returns>The imported field.</returns>
+        /// <exception cref="ArgumentException">Occurs when a field is not added to a type.</exception>
+        public MemberReference ImportField(FieldInfo field)
+        {
+            if (field.DeclaringType.IsConstructedGenericType)
+                field = field.Module.ResolveField(field.MetadataToken);
+
+            var scope = ImportType(field.DeclaringType);
+            var signature = new FieldSignature(field.IsStatic ? 0 : CallingConventionAttributes.HasThis,
+                ImportTypeSignature(field.FieldType));
+            
+            return new MemberReference(scope, field.Name, signature);
+        }
     }
 }
