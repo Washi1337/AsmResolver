@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -86,6 +88,76 @@ namespace AsmResolver.DotNet.Tests
             var importedType = _importer.ImportType(definition);
 
             Assert.Same(definition, importedType);
+        }
+
+        [Fact]
+        public void ImportNestedTypeShouldImportParentType()
+        {
+            var declaringType = new TypeReference(_dummyAssembly, "SomeNamespace", "SomeName");
+            var nested = new TypeReference(declaringType, null, "Nested");
+
+            var result = _importer.ImportType(nested);
+
+            Assert.Equal(nested, result, _comparer);
+            Assert.Equal(_module, result.Module);
+            Assert.Equal(_module, result.DeclaringType.Module);
+        }
+
+        [Fact]
+        public void ImportSimpleTypeFromReflectionShouldResultInTypeRef()
+        {
+            var type = typeof(Console);
+
+            var result = _importer.ImportType(type);
+
+            Assert.IsAssignableFrom<TypeReference>(result);
+            Assert.Equal(type.FullName, result.FullName);
+            Assert.Equal(type.Assembly.GetName().Name, result.Scope.Name);
+        }
+
+        [Fact]
+        public void ImportArrayTypeShouldResultInTypeSpecWithSzArray()
+        {
+            var type = typeof(Stream[]);
+
+            var result = _importer.ImportType(type);
+
+            Assert.IsAssignableFrom<TypeSpecification>(result);
+            Assert.IsAssignableFrom<SzArrayTypeSignature>(((TypeSpecification) result).Signature);
+        }
+        
+        [Fact]
+        public void ImportCorLibTypeAsSignatureShouldResultInCorLibTypeSignature()
+        {
+            var type = typeof(string[]);
+
+            var result = _importer.ImportType(type);
+
+            Assert.IsAssignableFrom<TypeSpecification>(result);
+            var specification = (TypeSpecification) result;
+            Assert.IsAssignableFrom<SzArrayTypeSignature>(specification.Signature);
+            var arrayType = (SzArrayTypeSignature) specification.Signature;
+            Assert.IsAssignableFrom<CorLibTypeSignature>(arrayType.BaseType);
+            Assert.Equal(ElementType.String, arrayType.BaseType.ElementType);
+        }
+
+        [Fact]
+        public void ImportGenericTypeShouldResultInTypeSpecWithGenericInstance()
+        {
+            var type = typeof(List<string>);
+
+            var result = _importer.ImportType(type);
+
+            Assert.IsAssignableFrom<TypeSpecification>(result);
+            var specification = (TypeSpecification) result;
+            Assert.IsAssignableFrom<GenericInstanceTypeSignature>(specification.Signature);
+            var genericInstance = (GenericInstanceTypeSignature) specification.Signature;
+            Assert.Equal(typeof(List<>).FullName, genericInstance.GenericType.FullName);
+            Assert.Equal(new TypeSignature[]
+            {
+                _module.CorLibTypeFactory.String
+            }, genericInstance.TypeArguments);
+
         }
     }
 }

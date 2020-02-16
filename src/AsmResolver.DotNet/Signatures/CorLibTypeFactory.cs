@@ -189,7 +189,44 @@ namespace AsmResolver.DotNet.Signatures
                 _ => throw new ArgumentOutOfRangeException(nameof(elementType))
             };
         }
-        
+
+        /// <summary>
+        /// Obtains the common object runtime type signature by its full name.
+        /// </summary>
+        /// <param name="ns">The namespace.</param>
+        /// <param name="name">The name.</param>
+        /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
+        public CorLibTypeSignature FromName(string ns, string name)
+        {
+            if (ns == "System")
+            {
+                return name switch
+                {
+                    "Void" => Void,
+                    "Boolean" => Boolean,
+                    "Char" => Char,
+                    "SByte" => SByte,
+                    "Byte" => Byte,
+                    "Int16" => Int16,
+                    "UInt16" => UInt16,
+                    "Int32" => Int32,
+                    "UInt32" => UInt32,
+                    "Int64" => Int64,
+                    "UInt64" => UInt64,
+                    "Single" => Single,
+                    "Double" => Double,
+                    "String" => String,
+                    "IntPtr" => IntPtr,
+                    "UIntPtr" => UIntPtr,
+                    "TypedReference" => TypedReference,
+                    "Object" => Object,
+                    _ => null
+                };
+            }
+
+            return null;
+        }
+
         private CorLibTypeSignature GetOrCreateCorLibTypeSignature(ref CorLibTypeSignature cache, ElementType elementType, string name)
         {
             if (cache is null)

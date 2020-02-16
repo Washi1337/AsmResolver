@@ -194,5 +194,62 @@ namespace AsmResolver.DotNet
                 result.TypeArguments.Add(ImportTypeSignature(argument));
             return result;
         }
+
+        public virtual ITypeDefOrRef ImportType(Type type)
+        {
+            var importedTypeSig = ImportTypeSignature(type);
+            if (importedTypeSig is TypeDefOrRefSignature typeDefOrRef)
+                return typeDefOrRef.Type;
+            return new TypeSpecification(importedTypeSig);
+        }
+
+        private TypeSignature ImportTypeSignature(Type type)
+        {
+            if (type.IsArray)
+                return ImportArrayType(type);
+            if (type.IsConstructedGenericType)
+                return ImportGenericType(type);
+            if (type.IsPointer)
+                return new PointerTypeSignature(ImportTypeSignature(type.GetElementType()));
+            if (type.IsByRef)
+                return new ByReferenceTypeSignature(ImportTypeSignature(type.GetElementType()));
+            if (type.IsGenericParameter)
+                return new GenericParameterSignature(
+                    type.DeclaringMethod != null ? GenericParameterType.Method : GenericParameterType.Type,
+                    type.GenericParameterPosition);
+
+            var corlibType = _module.CorLibTypeFactory.FromName(type.Namespace, type.Name);
+            if (corlibType != null)
+                return corlibType;
+
+            var reference = new TypeReference(_module,
+                ImportAssembly(new ReflectionAssemblyDescriptor(_module, type.Assembly.GetName())),
+                type.Namespace,
+                type.Name);
+            
+            return new TypeDefOrRefSignature(reference, type.IsValueType);
+        }
+
+        private TypeSignature ImportArrayType(Type type)
+        {
+            var baseType = ImportTypeSignature(type.GetElementType());
+            
+            int rank = type.GetArrayRank();
+            if (rank == 1)
+                return new SzArrayTypeSignature(baseType);
+
+            var result = new ArrayTypeSignature(baseType);
+            for (int i = 0; i < rank; i++)
+                result.Dimensions.Add(new ArrayDimension());
+            return result;
+        }
+
+        private TypeSignature ImportGenericType(Type type)
+        {
+            var result = new GenericInstanceTypeSignature(ImportType(type.GetGenericTypeDefinition()), type.IsValueType);
+            foreach (var argument in type.GetGenericArguments())
+                result.TypeArguments.Add(ImportTypeSignature(argument));
+            return result;
+        }
     }
 }
