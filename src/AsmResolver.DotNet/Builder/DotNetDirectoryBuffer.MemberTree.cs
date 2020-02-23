@@ -93,6 +93,7 @@ namespace AsmResolver.DotNet.Builder
         {
             AddTypeDefinitionStubs(module);
             AddTypeDefinitionMembers();
+            FinalizeMethodDefinitions();
         }
 
         private void AddTypeDefinitionStubs(ModuleDefinition module)
@@ -179,7 +180,7 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             
             var row = new MethodDefinitionRow(
-                MethodBodySerializer.SerializeMethodBody(this, method), 
+                null, 
                 method.ImplAttributes, 
                 method.Attributes, 
                 Metadata.StringsStream.GetStringIndex(method.Name),
@@ -289,6 +290,26 @@ namespace AsmResolver.DotNet.Builder
             AddMethodSemantics(token, @event);
             return token;
         }
-        
+
+        private void FinalizeMethodDefinitions()
+        {
+            var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
+            for (uint rid = 1; rid <= table.Count; rid++)
+            {
+                var method = _methodTokens.GetKey(new MetadataToken(TableIndex.Method, rid));
+                if (method.MethodBody != null)
+                {
+                    var row = table[rid];
+                    row = new MethodDefinitionRow(
+                        MethodBodySerializer.SerializeMethodBody(this, method),
+                        row.ImplAttributes,
+                        row.Attributes,
+                        row.Name,
+                        row.Signature,
+                        row.ParameterList);
+                    table[rid] = row;
+                }
+            }
+        }
     }
 }

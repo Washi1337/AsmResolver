@@ -151,7 +151,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer, TableLayout layout)
         {
-            writer.WriteUInt32(Body.Rva);
+            writer.WriteUInt32(Body?.Rva ?? 0);
             writer.WriteUInt16((ushort) ImplAttributes);
             writer.WriteUInt16((ushort) Attributes);
             writer.WriteIndex(Name, (IndexSize) layout.Columns[3].Size);
