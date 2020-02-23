@@ -419,7 +419,8 @@ namespace AsmResolver.PE.File
             AlignDataDirectoryEntries(oldSections);
 
             var lastSection = Sections[Sections.Count - 1];
-            OptionalHeader.SizeOfImage = lastSection.Header.VirtualAddress + lastSection.Header.VirtualSize;
+            OptionalHeader.SizeOfImage = lastSection.Header.VirtualAddress
+                                         + lastSection.Header.VirtualSize.Align(OptionalHeader.SectionAlignment);
         }
 
         /// <summary>
@@ -444,7 +445,7 @@ namespace AsmResolver.PE.File
                 section.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
                
                 header.SizeOfRawData = section.Contents.GetPhysicalSize().Align(OptionalHeader.FileAlignment);
-                header.VirtualSize = section.Contents.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
+                header.VirtualSize = section.Contents.GetVirtualSize();
             }
         }
 
