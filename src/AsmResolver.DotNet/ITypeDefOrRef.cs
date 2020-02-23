@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Signatures;
+
 namespace AsmResolver.DotNet
 {
     /// <summary>
@@ -12,5 +14,11 @@ namespace AsmResolver.DotNet
         {
             get;
         }
+
+        /// <summary>
+        /// Creates a signature of this type that can be used in various blob signatures.
+        /// </summary>
+        /// <returns>The type signature.</returns>
+        TypeSignature ToTypeSignature();
     }
 }

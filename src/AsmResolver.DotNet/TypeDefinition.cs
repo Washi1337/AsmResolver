@@ -558,6 +558,10 @@ namespace AsmResolver.DotNet
             get => _classLayout.Value;
             set => _classLayout.Value = value;
         }
+        
+        /// <inheritdoc />
+        public TypeSignature ToTypeSignature() => 
+            new TypeDefOrRefSignature(this, IsValueType);
 
         /// <summary>
         /// Creates a new type reference to this type definition. 

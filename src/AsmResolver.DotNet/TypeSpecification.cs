@@ -87,6 +87,9 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public TypeSignature ToTypeSignature() => Signature;
+
+        /// <inheritdoc />
         public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
         
         /// <summary>

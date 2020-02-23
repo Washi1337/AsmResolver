@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -60,6 +62,7 @@ namespace AsmResolver.DotNet
 
         ITypeDescriptor IMemberDescriptor.DeclaringType => null;
 
+
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => null;
 
         /// <inheritdoc />
@@ -73,7 +76,11 @@ namespace AsmResolver.DotNet
             }
         }
 
+
         TypeDefinition ITypeDescriptor.Resolve() => null;
+
+        /// <inheritdoc />
+        TypeSignature ITypeDefOrRef.ToTypeSignature() => throw new InvalidOperationException();
 
         /// <inheritdoc />
         public override string ToString() =>  ((IFullNameProvider) this).Name;
