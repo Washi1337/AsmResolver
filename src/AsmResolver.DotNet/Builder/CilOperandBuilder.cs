@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Builder
                 TableIndex.Method => _buffer.GetMethodDefinitionToken((MethodDefinition) member),
                 TableIndex.MemberRef => _buffer.AddMemberReference((MemberReference) member),
                 TableIndex.StandAloneSig => _buffer.AddStandAloneSignature((StandAloneSignature) member),
-                TableIndex.TypeSpec => _buffer.AddTypeReference((TypeReference) member),
+                TableIndex.TypeSpec => _buffer.AddTypeSpecification((TypeSpecification) member),
                 TableIndex.MethodSpec => _buffer.AddMethodSpecification((MethodSpecification) member),
                 _ => throw new ArgumentOutOfRangeException(nameof(member))
             };

@@ -68,10 +68,10 @@ namespace AsmResolver.DotNet.Signatures
                     return new ByReferenceTypeSignature(FromReader(module, reader, protection));
 
                 case ElementType.Var:
-                    return new GenericParameterSignature(GenericParameterType.Type, (int) reader.ReadCompressedUInt32());
+                    return new GenericParameterSignature(module, GenericParameterType.Type, (int) reader.ReadCompressedUInt32());
                 
                 case ElementType.MVar:
-                    return new GenericParameterSignature(GenericParameterType.Method, (int) reader.ReadCompressedUInt32());
+                    return new GenericParameterSignature(module, GenericParameterType.Method, (int) reader.ReadCompressedUInt32());
 
                 case ElementType.Array:
                     return ArrayTypeSignature.FromReader(module, reader, protection);
@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Signatures
                     return GenericInstanceTypeSignature.FromReader(module, reader, protection);
 
                 case ElementType.FnPtr:
-                    break;
+                    throw new NotImplementedException();
 
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(FromReader(module, reader, protection));
@@ -109,8 +109,6 @@ namespace AsmResolver.DotNet.Signatures
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
             }
-
-            throw new NotImplementedException();
         }
 
         /// <summary>
