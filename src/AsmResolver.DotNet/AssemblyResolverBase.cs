@@ -24,6 +24,7 @@ namespace AsmResolver.DotNet
             get;
         } = new List<string>();
 
+        /// <inheritdoc />
         public AssemblyDefinition Resolve(AssemblyDescriptor assembly)
         {
             if (_cache.TryGetValue(assembly, out var assemblyDef))
@@ -36,6 +37,15 @@ namespace AsmResolver.DotNet
             return assemblyDef;
         }
 
+        /// <summary>
+        /// Resolves a new unseen reference to an assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly to resolve.</param>
+        /// <returns>The resolved assembly, or <c>null</c> if the resolution failed.</returns>
+        /// <remarks>
+        /// This method should not implement caching of resolved assemblies. The caller of this method already implements
+        /// this.
+        /// </remarks>
         protected abstract AssemblyDefinition ResolveImpl(AssemblyDescriptor assembly);
 
         /// <summary>

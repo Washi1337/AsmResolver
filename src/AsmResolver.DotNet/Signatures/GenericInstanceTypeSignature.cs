@@ -109,6 +109,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             writer.WriteByte((byte) ElementType);
             writer.WriteByte((byte) (IsValueType ? ElementType.ValueType : ElementType.Class));
+            TypeSignature.WriteTypeDefOrRef(writer, provider, GenericType);
             writer.WriteCompressedUInt32((uint) TypeArguments.Count);
             for (int i = 0; i < TypeArguments.Count; i++)
                 TypeArguments[i].Write(writer, provider);

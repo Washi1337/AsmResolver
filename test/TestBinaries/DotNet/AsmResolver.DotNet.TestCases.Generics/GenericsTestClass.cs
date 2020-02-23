@@ -2,6 +2,8 @@
 {
     public class GenericsTestClass
     {
+        public GenericType<string, int, object> GenericField;
+        
         public GenericType<string, int, object> TypeInstantiation()
         {
             return new GenericType<string, int, object>();

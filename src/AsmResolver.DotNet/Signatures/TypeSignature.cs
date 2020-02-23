@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -151,6 +152,11 @@ namespace AsmResolver.DotNet.Signatures
             return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
         } 
         
+        internal static void WriteTypeDefOrRef(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider, ITypeDefOrRef type)
+        {
+            writer.WriteCompressedUInt32(provider.GetTypeDefOrRefIndex(type));
+        }
+        
         internal static TypeSignature ReadFieldOrPropType(ModuleDefinition parentModule, IBinaryStreamReader reader)
         {
             var elementType = (ElementType) reader.ReadByte();
@@ -256,9 +262,8 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <returns>The base signature.</returns>
         public abstract ITypeDefOrRef GetUnderlyingTypeDefOrRef();
-        
+
         /// <inheritdoc />
         public override string ToString() => FullName;
-        
     }
 }
