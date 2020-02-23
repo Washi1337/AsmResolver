@@ -15,6 +15,7 @@ using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.DotNet
 {
@@ -275,6 +276,86 @@ namespace AsmResolver.DotNet
             set => _encBaseId.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the attributes associated to the underlying .NET directory of this module.
+        /// </summary>
+        public DotNetDirectoryFlags Attributes
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the .NET module only contains CIL code or also contains
+        /// code targeting other architectures.
+        /// </summary>
+        public bool IsILOnly
+        {
+            get => (Attributes & DotNetDirectoryFlags.ILOnly) != 0;
+            set => Attributes = (Attributes & ~DotNetDirectoryFlags.ILOnly)
+                                | (value ? DotNetDirectoryFlags.ILOnly : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the .NET module requires a 32-bit environment to run. 
+        /// </summary>
+        public bool IsBit32Required
+        {
+            get => (Attributes & DotNetDirectoryFlags.Bit32Required) != 0;
+            set => Attributes = (Attributes & ~DotNetDirectoryFlags.Bit32Required)
+                                | (value ? DotNetDirectoryFlags.Bit32Required : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the .NET module is a library. 
+        /// </summary>
+        public bool IsILLibrary
+        {
+            get => (Attributes & DotNetDirectoryFlags.ILLibrary) != 0;
+            set => Attributes = (Attributes & ~DotNetDirectoryFlags.ILLibrary)
+                                | (value ? DotNetDirectoryFlags.ILLibrary : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the .NET module is signed with a strong name.
+        /// </summary>
+        public bool IsStrongNameSigned
+        {
+            get => (Attributes & DotNetDirectoryFlags.StrongNameSigned) != 0;
+            set => Attributes = (Attributes & ~DotNetDirectoryFlags.StrongNameSigned)
+                                | (value ? DotNetDirectoryFlags.StrongNameSigned : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the .NET module has a native entrypoint or not. 
+        /// </summary>
+        public bool HasNativeEntrypoint
+        {
+            get => (Attributes & DotNetDirectoryFlags.NativeEntrypoint) != 0;
+            set => Attributes = (Attributes & ~DotNetDirectoryFlags.NativeEntrypoint)
+                                | (value ? DotNetDirectoryFlags.NativeEntrypoint : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether debug data is tracked in this .NET module. 
+        /// </summary>
+        public bool TrackDebugData
+        {
+            get => (Attributes & DotNetDirectoryFlags.TrackDebugData) != 0;
+            set => Attributes = (Attributes & ~DotNetDirectoryFlags.TrackDebugData)
+                                | (value ? DotNetDirectoryFlags.TrackDebugData : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the .NET module prefers a 32-bit environment to run in. 
+        /// </summary>
+        public bool IsBit32Preferred
+        {
+            get => (Attributes & DotNetDirectoryFlags.Bit32Preferred) != 0;
+            set => Attributes = (Attributes & ~DotNetDirectoryFlags.Bit32Preferred)
+                                | (value ? DotNetDirectoryFlags.Bit32Preferred : 0);
+        }
+        
         /// <summary>
         /// Gets a collection of top-level (not nested) types defined in the module. 
         /// </summary>

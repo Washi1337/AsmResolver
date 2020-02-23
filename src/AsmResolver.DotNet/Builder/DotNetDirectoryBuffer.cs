@@ -63,6 +63,7 @@ namespace AsmResolver.DotNet.Builder
             var directory = new DotNetDirectory();
             directory.Metadata = Metadata.CreateMetadata();
             directory.Entrypoint = GetEntrypoint();
+            directory.Flags = Module.Attributes;
             return directory;
         }
 

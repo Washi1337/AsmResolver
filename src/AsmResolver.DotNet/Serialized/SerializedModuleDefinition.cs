@@ -55,12 +55,13 @@ namespace AsmResolver.DotNet.Serialized
             // Copy over "simple" columns.
             Generation = row.Generation;
             MetadataToken = token;
-
+            Attributes = DotNetDirectory.Flags;
+            
             // Initialize member factory.
             var metadata = dotNetDirectory.Metadata;
             _memberFactory = new CachedSerializedMemberFactory(metadata, this);
             
-            // Find assembly + referenced corlib.
+            // Find assembly definitino and corlib assembly.
             Assembly = FindParentAssembly();
             var corLib = FindMostRecentCorLib();
             CorLibTypeFactory = corLib == null
