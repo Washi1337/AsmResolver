@@ -83,8 +83,8 @@ namespace AsmResolver.PE.File
                 var contentsReader = reader.Fork(header.PointerToRawData, header.SizeOfRawData);
                 var contents = DataSegment.FromReader(contentsReader);
                 contents.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
-                
-                peFile.Sections.Add(new PESection(header, contents));
+
+                peFile.Sections.Add(new PESection(header, new VirtualSegment(contents, header.VirtualSize)));
             }
             
             // Data between section headers and sections.
