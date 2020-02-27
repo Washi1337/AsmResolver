@@ -268,5 +268,24 @@ namespace AsmResolver.PE.DotNet.Cil
                     return false;
             }
         }
+
+        /// <summary>
+        /// Determines whether the instruction is a branching instruction (either conditional or unconditional).
+        /// </summary>
+        public bool IsBranch() =>
+            OpCode.FlowControl == CilFlowControl.Branch
+            || OpCode.FlowControl == CilFlowControl.ConditionalBranch;
+
+        /// <summary>
+        /// Determines whether the instruction is an unconditional branch instruction.
+        /// </summary>
+        public bool IsUnconditionalBranch() => 
+            OpCode.FlowControl == CilFlowControl.Branch;
+
+        /// <summary>
+        /// Determines whether the instruction is a conditional branch instruction.
+        /// </summary>
+        public bool IsConditionalBranch() => 
+            OpCode.FlowControl == CilFlowControl.ConditionalBranch;
     }
 }
