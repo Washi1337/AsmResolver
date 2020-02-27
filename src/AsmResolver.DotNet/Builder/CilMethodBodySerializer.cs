@@ -59,7 +59,8 @@ namespace AsmResolver.DotNet.Builder
             }
 
             var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, code);
-
+            fatBody.InitLocals = body.InitializeLocals;
+            
             // Build up EH table section.
             if (body.ExceptionHandlers.Count > 0)
             {

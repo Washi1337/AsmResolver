@@ -31,7 +31,6 @@ namespace AsmResolver.DotNet.Tests
             return GetFieldConstantInModule(newModule, name);
         }
 
-
         [Theory]
         [InlineData(nameof(Constants.Boolean), Constants.Boolean)]
         [InlineData(nameof(Constants.Byte), Constants.Byte)]

@@ -164,7 +164,7 @@ namespace AsmResolver.DotNet
                 ArrayTypeSignature arrayType => ImportArrayTypeSignature(arrayType),
                 CustomModifierTypeSignature modifierType => ImportModifierTypeSignature(modifierType),
                 GenericInstanceTypeSignature genericInstance => ImportGenericInstanceTypeSignature(genericInstance),
-                GenericParameterSignature genericParameter => new GenericParameterSignature(genericParameter.ParameterType, genericParameter.Index),
+                GenericParameterSignature genericParameter => new GenericParameterSignature(_module, genericParameter.ParameterType, genericParameter.Index),
                 PinnedTypeSignature pinnedType => new PinnedTypeSignature(ImportTypeSignature(pinnedType.BaseType)),
                 PointerTypeSignature pointerType => new PointerTypeSignature(ImportTypeSignature(pointerType.BaseType)),
                 SzArrayTypeSignature szArrayType => new SzArrayTypeSignature(ImportTypeSignature(szArrayType.BaseType)),

@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -68,10 +69,10 @@ namespace AsmResolver.DotNet.Signatures
                     return new ByReferenceTypeSignature(FromReader(module, reader, protection));
 
                 case ElementType.Var:
-                    return new GenericParameterSignature(GenericParameterType.Type, (int) reader.ReadCompressedUInt32());
+                    return new GenericParameterSignature(module, GenericParameterType.Type, (int) reader.ReadCompressedUInt32());
                 
                 case ElementType.MVar:
-                    return new GenericParameterSignature(GenericParameterType.Method, (int) reader.ReadCompressedUInt32());
+                    return new GenericParameterSignature(module, GenericParameterType.Method, (int) reader.ReadCompressedUInt32());
 
                 case ElementType.Array:
                     return ArrayTypeSignature.FromReader(module, reader, protection);
@@ -80,7 +81,7 @@ namespace AsmResolver.DotNet.Signatures
                     return GenericInstanceTypeSignature.FromReader(module, reader, protection);
 
                 case ElementType.FnPtr:
-                    break;
+                    throw new NotImplementedException();
 
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(FromReader(module, reader, protection));
@@ -109,8 +110,6 @@ namespace AsmResolver.DotNet.Signatures
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
             }
-
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -152,6 +151,11 @@ namespace AsmResolver.DotNet.Signatures
 
             return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
         } 
+        
+        internal static void WriteTypeDefOrRef(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider, ITypeDefOrRef type)
+        {
+            writer.WriteCompressedUInt32(provider.GetTypeDefOrRefIndex(type));
+        }
         
         internal static TypeSignature ReadFieldOrPropType(ModuleDefinition parentModule, IBinaryStreamReader reader)
         {
@@ -258,9 +262,8 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <returns>The base signature.</returns>
         public abstract ITypeDefOrRef GetUnderlyingTypeDefOrRef();
-        
+
         /// <inheritdoc />
         public override string ToString() => FullName;
-        
     }
 }

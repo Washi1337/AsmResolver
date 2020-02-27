@@ -9,6 +9,8 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class GenericParameterSignature : TypeSignature
     {
+        private readonly IResolutionScope _scope;
+
         /// <summary>
         /// Creates a new reference to a generic parameter. 
         /// </summary>
@@ -16,6 +18,19 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="index">The index of the referenced parameter.</param>
         public GenericParameterSignature(GenericParameterType parameterType, int index)
         {
+            ParameterType = parameterType;
+            Index = index;
+        }
+
+        /// <summary>
+        /// Creates a new reference to a generic parameter. 
+        /// </summary>
+        /// <param name="module">The module in which this generic parameter signature resides.</param>
+        /// <param name="parameterType">Indicates the parameter signature is declared by a type or a method.</param>
+        /// <param name="index">The index of the referenced parameter.</param>
+        public GenericParameterSignature(ModuleDefinition module, GenericParameterType parameterType, int index)
+        {
+            _scope = module;
             ParameterType = parameterType;
             Index = index;
         }
@@ -59,7 +74,7 @@ namespace AsmResolver.DotNet.Signatures
         public override string Namespace => null;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => null;
+        public override IResolutionScope Scope => _scope;
 
         /// <inheritdoc />
         public override bool IsValueType => false;
