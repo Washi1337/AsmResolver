@@ -79,7 +79,7 @@ namespace AsmResolver.PE.File.Tests
                 .GetTestExecutablePath(nameof(PEFileTest), nameof(RebuildNetPEAddSection), fileName));
 
             // Verify the section and its data is present:
-            var newSection = newPEFile.Sections.First(s => s.Header.Name == sectionName);
+            var newSection = newPEFile.Sections.First(s => s.Name == sectionName);
             var newData = new byte[sectionData.Length];
             
             Assert.Equal(sectionData.Length, newSection

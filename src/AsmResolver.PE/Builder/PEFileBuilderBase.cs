@@ -148,21 +148,20 @@ namespace AsmResolver.PE.Builder
             header.SizeOfImage = 0;
             foreach (var section in peFile.Sections)
             {
-                if (section.Header.IsContentCode)
-                    header.SizeOfCode += section.Header.SizeOfRawData;
-                if (section.Header.IsContentInitializedData)
-                    header.SizeOfInitializedData += section.Header.SizeOfRawData;
-                if (section.Header.IsContentUninitializedData)
-                    header.SizeOfUninitializedData += section.Header.GetPhysicalSize();
-                header.SizeOfImage += section.Header.VirtualSize;
+                uint physicalSize = section.GetPhysicalSize();
+                if (section.IsContentCode)
+                    header.SizeOfCode += physicalSize;
+                if (section.IsContentInitializedData)
+                    header.SizeOfInitializedData += physicalSize;
+                if (section.IsContentUninitializedData)
+                    header.SizeOfUninitializedData += physicalSize;
+                header.SizeOfImage += section.GetVirtualSize();
             }
 
             header.AddressOfEntrypoint = GetEntrypointAddress(peFile, image, context);
             
-            header.BaseOfCode = peFile.Sections.FirstOrDefault(s => s.Header.IsContentCode)?
-                                    .Header.VirtualAddress ?? 0;
-            header.BaseOfData = peFile.Sections.FirstOrDefault(s => s.Header.IsContentInitializedData)?
-                                    .Header.VirtualAddress ?? 0;
+            header.BaseOfCode = peFile.Sections.FirstOrDefault(s => s.IsContentCode)?.Rva ?? 0;
+            header.BaseOfData = peFile.Sections.FirstOrDefault(s => s.IsContentInitializedData)?.Rva ?? 0;
 
             header.MajorOperatingSystemVersion = 4;
             header.MinorOperatingSystemVersion = 0;

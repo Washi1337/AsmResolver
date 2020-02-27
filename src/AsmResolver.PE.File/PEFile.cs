@@ -156,18 +156,11 @@ namespace AsmResolver.PE.File
         public ISegmentReference GetReferenceToRva(uint rva) => new PESegmentReference(this, rva);
 
         /// <inheritdoc />
-        public uint FileOffsetToRva(uint fileOffset)
-        {
-            return GetSectionContainingOffset(fileOffset)
-                .Header.FileOffsetToRva(fileOffset);
-        }
+        public uint FileOffsetToRva(uint fileOffset) => 
+            GetSectionContainingOffset(fileOffset).FileOffsetToRva(fileOffset);
 
         /// <inheritdoc />
-        public uint RvaToFileOffset(uint rva)
-        {
-            return GetSectionContainingRva(rva)
-                .Header.RvaToFileOffset(rva);
-        }
+        public uint RvaToFileOffset(uint rva) => GetSectionContainingRva(rva).RvaToFileOffset(rva);
 
         /// <summary>
         /// Finds the section containing the provided file offset.
@@ -190,7 +183,7 @@ namespace AsmResolver.PE.File
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
         public bool TryGetSectionContainingOffset(uint fileOffset, out PESection section)
         {
-            section = Sections.FirstOrDefault(s => s.Header.ContainsFileOffset(fileOffset));
+            section = Sections.FirstOrDefault(s => s.ContainsFileOffset(fileOffset));
             return section != null;
         }
 
@@ -215,7 +208,7 @@ namespace AsmResolver.PE.File
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
         public bool TryGetSectionContainingRva(uint rva, out PESection section)
         {
-            section = Sections.FirstOrDefault(s => s.Header.ContainsRva(rva));
+            section = Sections.FirstOrDefault(s => s.ContainsRva(rva));
             return section != null;
         }
 
@@ -227,7 +220,7 @@ namespace AsmResolver.PE.File
         public IBinaryStreamReader CreateDataDirectoryReader(DataDirectory dataDirectory)
         {
             var section = GetSectionContainingRva(dataDirectory.VirtualAddress);
-            uint fileOffset = section.Header.RvaToFileOffset(dataDirectory.VirtualAddress);
+            uint fileOffset = section.RvaToFileOffset(dataDirectory.VirtualAddress);
             return section.CreateReader(fileOffset, dataDirectory.Size);
         }
 
@@ -241,7 +234,7 @@ namespace AsmResolver.PE.File
         {
             if (TryGetSectionContainingRva(dataDirectory.VirtualAddress, out var section))
             {
-                uint fileOffset = section.Header.RvaToFileOffset(dataDirectory.VirtualAddress);
+                uint fileOffset = section.RvaToFileOffset(dataDirectory.VirtualAddress);
                 reader = section.CreateReader(fileOffset, dataDirectory.Size);
                 return true;
             }
@@ -318,7 +311,7 @@ namespace AsmResolver.PE.File
         public IBinaryStreamReader CreateReaderAtRva(uint rva)
         {
             var section = GetSectionContainingRva(rva);
-            return section.CreateReader(section.Header.RvaToFileOffset(rva));
+            return section.CreateReader(section.RvaToFileOffset(rva));
         }
 
         /// <summary>
@@ -331,7 +324,7 @@ namespace AsmResolver.PE.File
         {
             if (TryGetSectionContainingRva(rva, out var section))
             {
-                reader = section.CreateReader(section.Header.RvaToFileOffset(rva));
+                reader = section.CreateReader(section.RvaToFileOffset(rva));
                 return true;
             }
 
@@ -348,7 +341,7 @@ namespace AsmResolver.PE.File
         public IBinaryStreamReader CreateReaderAtRva(uint rva, uint size)
         {
             var section = GetSectionContainingRva(rva);
-            return section.CreateReader(section.Header.RvaToFileOffset(rva), size);
+            return section.CreateReader(section.RvaToFileOffset(rva), size);
         }
 
         /// <summary>
@@ -362,7 +355,7 @@ namespace AsmResolver.PE.File
         {
             if (TryGetSectionContainingRva(rva, out var section))
             {
-                reader = section.CreateReader(section.Header.RvaToFileOffset(rva), size);
+                reader = section.CreateReader(section.RvaToFileOffset(rva), size);
                 return true;
             }
 
@@ -398,7 +391,7 @@ namespace AsmResolver.PE.File
         /// </remarks>
         public void UpdateHeaders()
         {
-            var oldSections = Sections.Copy().Select(_ => _.Header).ToList();
+            var oldSections = Sections.Select(_ => _.CreateHeader()).ToList();
 
             FileHeader.NumberOfSections = (ushort) Sections.Count;
             
@@ -419,8 +412,8 @@ namespace AsmResolver.PE.File
             AlignDataDirectoryEntries(oldSections);
 
             var lastSection = Sections[Sections.Count - 1];
-            OptionalHeader.SizeOfImage = lastSection.Header.VirtualAddress
-                                         + lastSection.Header.VirtualSize.Align(OptionalHeader.SectionAlignment);
+            OptionalHeader.SizeOfImage = lastSection.Rva
+                                         + lastSection.GetVirtualSize().Align(OptionalHeader.SectionAlignment);
         }
 
         /// <summary>
@@ -431,7 +424,6 @@ namespace AsmResolver.PE.File
             for (int i = 0; i < Sections.Count; i++)
             {
                 var section = Sections[i];
-                var header = section.Header;
 
                 uint fileOffset = i > 0
                     ? Sections[i - 1].FileOffset + Sections[i - 1].GetPhysicalSize()
@@ -440,19 +432,17 @@ namespace AsmResolver.PE.File
                     ? Sections[i - 1].Rva + Sections[i - 1].GetVirtualSize()
                     : OptionalHeader.SizeOfHeaders.Align(OptionalHeader.SectionAlignment);
 
-                header.PointerToRawData = fileOffset.Align(OptionalHeader.FileAlignment);
-                header.VirtualAddress = rva.Align(OptionalHeader.SectionAlignment);
-                section.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
-               
-                header.SizeOfRawData = section.Contents.GetPhysicalSize().Align(OptionalHeader.FileAlignment);
-                header.VirtualSize = section.Contents.GetVirtualSize();
+                section.UpdateOffsets(
+                    fileOffset.Align(OptionalHeader.FileAlignment),
+                    rva.Align(OptionalHeader.SectionAlignment));
             }
         }
 
         /// <summary>
         /// Aligns all data directories' virtual address according to the section header's ones. 
         /// </summary>
-        public void AlignDataDirectoryEntries(IList<SectionHeader> oldHeaders) {
+        public void AlignDataDirectoryEntries(IList<SectionHeader> oldHeaders) 
+        {
             var dataDirectoryEntries = OptionalHeader.DataDirectories;
             for (int j = 0; j < dataDirectoryEntries.Count; j++)
             {
@@ -505,7 +495,7 @@ namespace AsmResolver.PE.File
             // Section headers.
             writer.FileOffset = OptionalHeader.FileOffset + FileHeader.SizeOfOptionalHeader;
             foreach (var section in Sections) 
-                section.Header.Write(writer);
+                section.CreateHeader().Write(writer);
 
             // Data between section headers and sections.
             ExtraSectionData?.Write(writer);
@@ -515,7 +505,7 @@ namespace AsmResolver.PE.File
             writer.FileOffset = OptionalHeader.SizeOfHeaders;
             foreach (var section in Sections)
             {
-                writer.FileOffset = section.Header.PointerToRawData;
+                writer.FileOffset = section.FileOffset;
                 section.Contents.Write(writer);
                 writer.Align(OptionalHeader.FileAlignment);
             }

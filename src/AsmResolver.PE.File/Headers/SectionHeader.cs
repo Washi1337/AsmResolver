@@ -85,7 +85,6 @@ namespace AsmResolver.PE.File.Headers
             Characteristics = value.Characteristics;
         }
 
-
         /// <inheritdoc />
         uint IOffsetProvider.FileOffset => _fileOffset;
 
@@ -207,105 +206,7 @@ namespace AsmResolver.PE.File.Headers
             get;
             set;
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating the section contains executable code.
-        /// </summary>
-        public bool IsContentCode
-        {
-            get => (Characteristics & SectionFlags.ContentCode) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.ContentCode)
-                                     | (value ? SectionFlags.ContentCode : 0);
-        }
-        /// <summary>
-        /// Gets or sets a value indicating the section contains initialized data.
-        /// </summary>
-        public bool IsContentInitializedData
-        {
-            get => (Characteristics & SectionFlags.ContentInitializedData) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.ContentInitializedData)
-                                     | (value ? SectionFlags.ContentInitializedData : 0);
-        }
-        /// <summary>
-        /// Gets or sets a value indicating the section contains uninitialized data.
-        /// </summary>
-        public bool IsContentUninitializedData
-        {
-            get => (Characteristics & SectionFlags.ContentUninitializedData) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.ContentUninitializedData)
-                                     | (value ? SectionFlags.ContentUninitializedData : 0);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating the section can be discarded as needed.
-        /// </summary>
-        public bool IsMemoryDiscardable
-        {
-            get => (Characteristics & SectionFlags.MemoryDiscardable) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.MemoryDiscardable)
-                                     | (value ? SectionFlags.MemoryDiscardable : 0);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating the section cannot be cached.
-        /// </summary>
-        public bool IsMemoryNotCached
-        {
-            get => (Characteristics & SectionFlags.MemoryNotCached) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.MemoryNotCached)
-                                     | (value ? SectionFlags.MemoryNotCached : 0);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating the section is not pageable.
-        /// </summary>
-        public bool IsMemoryNotPaged
-        {
-            get => (Characteristics & SectionFlags.MemoryNotPaged) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.MemoryNotPaged)
-                                     | (value ? SectionFlags.MemoryNotPaged : 0);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating the section can be shared in memory.
-        /// </summary>
-        public bool IsMemoryShared
-        {
-            get => (Characteristics & SectionFlags.MemoryShared) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.MemoryShared)
-                                     | (value ? SectionFlags.MemoryShared : 0);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating the section can be executed as code.
-        /// </summary>
-        public bool IsMemoryExecute
-        {
-            get => (Characteristics & SectionFlags.MemoryExecute) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.MemoryExecute)
-                                     | (value ? SectionFlags.MemoryExecute : 0);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating the section can be read.
-        /// </summary>
-        public bool IsMemoryRead
-        {
-            get => (Characteristics & SectionFlags.MemoryRead) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.MemoryRead)
-                                     | (value ? SectionFlags.MemoryRead : 0);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating the section can be written.
-        /// </summary>
-        public bool IsMemoryWrite
-        {
-            get => (Characteristics & SectionFlags.MemoryWrite) != 0;
-            set => Characteristics = (Characteristics & ~SectionFlags.MemoryWrite)
-                                     | (value ? SectionFlags.MemoryWrite : 0);
-        }
-
+        
         /// <inheritdoc />
         public void UpdateOffsets(uint newFileOffset, uint newRva)
         {
@@ -359,7 +260,6 @@ namespace AsmResolver.PE.File.Headers
                 throw new ArgumentOutOfRangeException(nameof(rva));
             return rva - VirtualAddress + PointerToRawData;
         }
-
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
