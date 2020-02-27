@@ -44,13 +44,13 @@ Every change made to these headers will be reflected in the output executable, h
 Inspecting the PE sections
 --------------------------
 
-Sections can be read and modified by accessing the ``PEFile.Sections`` property, which is a collection of ``PESection`` objects. Each of these objects has a ``Header`` property, representing the section header as it appears in the PE header:
+Sections can be read and modified by accessing the ``PEFile.Sections`` property, which is a collection of ``PESection`` objects.
 
 .. code-block:: csharp
 
         foreach (var section in peFile.Sections)
         {
-            Console.WriteLine(section.Header.Name);
+            Console.WriteLine(section.Name);
         }
 
 Each ``PESection`` object also has the ``Contents`` property defined, which is a `IReadableSegment`. This object is capable of creating a `IBinaryStreamReader` instance:
@@ -74,6 +74,18 @@ The ``Sections`` property is mutable, which means you can add new sections and r
         section.Contents = new DataSegment(new byte[] {1, 2, 3, 4});
 
         peFile.Sections.Add(section);
+
+
+Some sections (such as `.data` or `.bss`) contain uninitialized data, and might be resized in virtual memory at runtime. As such, the virtual size of the contents might be different than its physical size. You can use `VirtualSegment` to decorate a normal `ISegment` with a different virtual size.
+
+.. code-block:: csharp
+
+        var section = new PESection(".asmres", SectionFlags.MemoryRead | SectionFlags.ContentUninitializedData);
+        var physicalContents = new DataSegment(new byte[] {1, 2, 3, 4});
+        section = new VirtualSegment(physicalContents, 0x1000); // Create a new segment with a virtual size of 0x1000 bytes.
+        
+        peFile.Sections.Add(section);
+
 
 Writing PE files
 ----------------
