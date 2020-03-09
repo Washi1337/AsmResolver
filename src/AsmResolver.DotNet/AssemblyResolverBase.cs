@@ -58,6 +58,11 @@ namespace AsmResolver.DotNet
             return AssemblyDefinition.FromFile(path);
         }
 
+        /// <summary>
+        /// Probes all search directories in <see cref="SearchDirectories"/> for the provided assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly descriptor to search.</param>
+        /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
         protected string ProbeSearchDirectories(AssemblyDescriptor assembly)
         {
             foreach (string directory in SearchDirectories)
@@ -71,6 +76,12 @@ namespace AsmResolver.DotNet
             return null;
         }
 
+        /// <summary>
+        /// Probes a directory for the provided assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly descriptor to search.</param>
+        /// <param name="directory">The path to the directory to probe.</param>
+        /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
         protected static string ProbeDirectory(AssemblyDescriptor assembly, string directory)
         {
             string path = string.IsNullOrEmpty(assembly.Culture)
