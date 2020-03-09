@@ -85,6 +85,11 @@ namespace AsmResolver.DotNet.Builder
                 guidStream.GetGuidIndex(module.EncBaseId));
             
             var token = table.Add(row, module.MetadataToken.Rid);
+            
+            // Ensure reference to corlib is added. 
+            if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
+                AddAssemblyReference(corLibScope);
+            
             AddCustomAttributes(token, module);
             AddTypeDefinitionsInModule(module);
         }

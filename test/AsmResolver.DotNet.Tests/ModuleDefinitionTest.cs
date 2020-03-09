@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -139,6 +140,22 @@ namespace AsmResolver.DotNet.Tests
             var moduleRef = (ModuleReference) member;
             Assert.Equal("MyModel.netmodule", moduleRef.Name);
             Assert.Same(module.ModuleReferences[0], moduleRef);
+        }
+
+        [Fact]
+        public void EmptyModuleShouldAlwaysContainCorLibReference()
+        {
+            // Issue #39 (https://github.com/Washi1337/AsmResolver/issues/39)
+            
+            var module = new ModuleDefinition("TestModule");
+            var corLib = module.CorLibTypeFactory.CorLibScope;
+            
+            using var stream = new MemoryStream();
+            module.Write(stream);
+            
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            var comparer = new SignatureComparer();
+            Assert.Contains(newModule.AssemblyReferences, reference => comparer.Equals(corLib, reference));
         }
 
         [Fact]
