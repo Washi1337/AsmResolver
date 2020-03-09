@@ -64,9 +64,16 @@ namespace AsmResolver.DotNet.Serialized
             // Find assembly definitino and corlib assembly.
             Assembly = FindParentAssembly();
             var corLib = FindMostRecentCorLib();
-            CorLibTypeFactory = corLib == null
-                ? CorLibTypeFactory.CreateMscorlib40TypeFactory()
-                : new CorLibTypeFactory(corLib);
+            if (corLib is {})
+            {
+                CorLibTypeFactory = new CorLibTypeFactory(corLib);
+            }
+            else
+            {
+                CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory();
+                corLib = CorLibTypeFactory.CorLibScope;
+            }
+
             MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(corLib));
 
             // Prepare lazy RID lists.
