@@ -11,7 +11,10 @@ namespace AsmResolver.DotNet.TestCases.Methods
         public static void FatMethodWithLocals()
         {
             int x = int.Parse(Console.ReadLine());
-            Console.WriteLine(x);
+            
+            // HACK: We include some additional code to prevent Release mode optimizing away the local variable.
+            if (x < 10)
+                Console.WriteLine(x);
         }
 
         public static void FatMethodWithExceptionHandler()
