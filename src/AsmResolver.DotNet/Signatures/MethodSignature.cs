@@ -101,7 +101,6 @@ namespace AsmResolver.DotNet.Signatures
         protected MethodSignature(CallingConventionAttributes attributes)
             : base(attributes, null, Enumerable.Empty<TypeSignature>())
         {
-            SentinelParameterTypes = new List<TypeSignature>();
         }
 
         /// <summary>
@@ -113,7 +112,6 @@ namespace AsmResolver.DotNet.Signatures
         public MethodSignature(CallingConventionAttributes attributes, TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes) 
             : base(attributes, returnType, parameterTypes)
         {
-            SentinelParameterTypes = new List<TypeSignature>();
         }
 
         /// <summary>
@@ -124,16 +122,7 @@ namespace AsmResolver.DotNet.Signatures
             get;
             set;
         }
-
-        /// <summary>
-        /// Gets an ordered list of types indicating the types of the sentinel parameters appearing after the normal
-        /// parameter list defined by the original method. This is used for encoding vararg method references.
-        /// </summary>
-        public IList<TypeSignature> SentinelParameterTypes
-        {
-            get;
-        }
-
+        
         /// <inheritdoc />
         protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {

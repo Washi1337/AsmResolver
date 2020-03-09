@@ -196,6 +196,11 @@ namespace AsmResolver.DotNet
             return result;
         }
 
+        /// <summary>
+        /// Imports a <see cref="Type"/> as a type reference or specification.
+        /// </summary>
+        /// <param name="type">The type to import.</param>
+        /// <returns>The imported type.</returns>
         public virtual ITypeDefOrRef ImportType(Type type)
         {
             var importedTypeSig = ImportTypeSignature(type);
@@ -204,7 +209,12 @@ namespace AsmResolver.DotNet
             return new TypeSpecification(importedTypeSig);
         }
 
-        private TypeSignature ImportTypeSignature(Type type)
+        /// <summary>
+        /// Imports a <see cref="Type"/> as a type signature.
+        /// </summary>
+        /// <param name="type">The type to import.</param>
+        /// <returns>The imported type.</returns>
+        public virtual TypeSignature ImportTypeSignature(Type type)
         {
             if (type.IsArray)
                 return ImportArrayType(type);
