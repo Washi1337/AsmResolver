@@ -73,6 +73,12 @@ namespace AsmResolver.PE.File
             Contents = contents;
         }
 
+        public PEFile ContainingFile
+        {
+            get;
+            internal set;
+        }
+
         /// <summary>
         /// Gets or sets the name of the section.
         /// </summary>
@@ -242,10 +248,11 @@ namespace AsmResolver.PE.File
         /// </summary>
         public SectionHeader CreateHeader()
         {
+            uint alignment = ContainingFile?.OptionalHeader.FileAlignment ?? 0x200;
             return new SectionHeader(Name, Characteristics)
             {
                 PointerToRawData = FileOffset,
-                SizeOfRawData = GetPhysicalSize(),
+                SizeOfRawData = GetPhysicalSize().Align(alignment),
                 VirtualAddress = Rva,
                 VirtualSize = GetVirtualSize(),
                 NumberOfRelocations = 0,

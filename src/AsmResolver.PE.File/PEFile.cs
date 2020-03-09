@@ -105,6 +105,7 @@ namespace AsmResolver.PE.File
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
+            Sections = new PESectionCollection(this);
         }
 
         /// <summary>
@@ -140,7 +141,7 @@ namespace AsmResolver.PE.File
         public IList<PESection> Sections
         {
             get;
-        } = new List<PESection>();
+        }
 
 
         /// <summary>
