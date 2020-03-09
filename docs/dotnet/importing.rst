@@ -68,15 +68,7 @@ Below an example of how to import a type definition called ``SomeType``:
 Importing type signatures
 -------------------------
 
-Type signatures can also be imported using the ``ReferenceImporter`` class, but these should be imported using the ``ImportTypeSignature`` method instead:
-
-.. code-block:: csharp
-
-    ModuleDefinition externalModule = ModuleDefinition.FromFile(...);
-    TypeDefinition typeToImport = externalModule.TopLevelTypes.First(t => t.Name == "SomeType");
-
-    ITypeDefOrRef importedType = importer.ImportType(typeToImport);
-
+Type signatures can also be imported using the ``ReferenceImporter`` class, but these should be imported using the ``ImportTypeSignature`` method instead.
 
 Some key points:
 
