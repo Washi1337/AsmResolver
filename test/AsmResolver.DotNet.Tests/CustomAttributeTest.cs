@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
+using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -30,7 +31,7 @@ namespace AsmResolver.DotNet.Tests
         {
             int parentToken = typeof(CustomAttributesTestClass).MetadataToken;
             string filePath = typeof(CustomAttributesTestClass).Assembly.Location;
-            
+
             var image = PEImage.FromFile(filePath);
             var tablesStream = image.DotNetDirectory.Metadata.GetStream<TablesStream>();
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
@@ -42,10 +43,10 @@ namespace AsmResolver.DotNet.Tests
             {
                 var row = attributeTable[i];
                 var token = encoder.DecodeIndex(row.Parent);
-                if (token == parentToken) 
+                if (token == parentToken)
                     attributeToken = new MetadataToken(TableIndex.CustomAttribute, (uint) (i + 1));
             }
-            
+
             // Resolve by token and verify parent (forcing parent to execute the lazy initialization ).
             var module = ModuleDefinition.FromFile(filePath);
             var attribute = (CustomAttribute) module.LookupMember(attributeToken);
@@ -59,7 +60,8 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             var method = type.Methods.First(m => m.Name == methodName);
-            var attribute = method.CustomAttributes.First(c => c.Constructor.DeclaringType.Name == nameof(TestCaseAttribute));
+            var attribute =
+                method.CustomAttributes.First(c => c.Constructor.DeclaringType.Name == nameof(TestCaseAttribute));
             return attribute;
         }
 
@@ -107,7 +109,7 @@ namespace AsmResolver.DotNet.Tests
             var expected = new TypeReference(
                 attribute.Constructor.Module.CorLibTypeFactory.CorLibScope,
                 "System", "String");
-            
+
             Assert.Equal(new TypeDefOrRefSignature(expected), argument.Element.Value as TypeSignature, _comparer);
         }
 
@@ -147,5 +149,15 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal((int) TestEnum.Value2, argument.Argument.Element.Value);
         }
 
+        [Fact]
+        public void IsCompilerGeneratedMember()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
+            var property = type.Properties.First();
+            var setMethod = property.SetMethod;
+
+            Assert.True(setMethod.IsCompilerGenerated());
+        }
     }
 }
