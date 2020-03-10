@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using AsmResolver.Lazy;
 
 namespace AsmResolver.DotNet.Collections
@@ -60,6 +62,17 @@ namespace AsmResolver.DotNet.Collections
             AssertNotNullAndHasNoOwner(item);
             item.Owner = Owner;
             base.OnInsertItem(index, item);
+        }
+
+        /// <inheritdoc />
+        protected override void OnInsertRange(int index, IEnumerable<TItem> items)
+        {
+            var elements = items.ToList();
+            foreach (var item in elements)
+                AssertNotNullAndHasNoOwner(item);
+            base.OnInsertRange(index, elements);
+            foreach (var item in elements)
+                item.Owner = Owner;
         }
 
         /// <inheritdoc />
