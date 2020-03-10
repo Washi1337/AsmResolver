@@ -96,6 +96,12 @@ namespace AsmResolver.Lazy
         /// <inheritdoc />
         public void Add(TItem item) => Insert(Count, item);
 
+        /// <summary>
+        /// Appends the elements of a collection to the end of the <see cref="LazyList{TItem}"/>.
+        /// </summary>
+        /// <param name="items">The items to append.</param>
+        public void AddRange(IEnumerable<TItem> items) => InsertRange(Count, items);
+
         /// <inheritdoc />
         public void Clear()
         {
@@ -142,6 +148,17 @@ namespace AsmResolver.Lazy
             OnInsertItem(index, item);
         }
 
+        /// <summary>
+        /// Inserts the elements of a collection into the <see cref="LazyList{TItem}"/> at the provided index.
+        /// </summary>
+        /// <param name="index">The starting index to insert the items in.</param>
+        /// <param name="items">The items to insert.</param>
+        private void InsertRange(int index, IEnumerable<TItem> items)
+        {
+            EnsureIsInitialized();
+            OnInsertRange(index, items);
+        }
+
         /// <inheritdoc />
         public void RemoveAt(int index)
         {
@@ -149,13 +166,15 @@ namespace AsmResolver.Lazy
             OnRemoveItem(index);
         }
 
-        protected virtual void OnSetItem(int index, TItem item) => Items[index] = item;
+        protected virtual void OnSetItem(int index, TItem item) => _items[index] = item;
         
-        protected virtual void OnInsertItem(int index, TItem item) => Items.Insert(index, item);
+        protected virtual void OnInsertItem(int index, TItem item) => _items.Insert(index, item);
         
-        protected virtual void OnRemoveItem(int index) => Items.RemoveAt(index);
+        protected virtual void OnInsertRange(int index, IEnumerable<TItem> items) => _items.InsertRange(index, items);
+        
+        protected virtual void OnRemoveItem(int index) => _items.RemoveAt(index);
 
-        protected virtual void OnClearItems() => Items.Clear();
+        protected virtual void OnClearItems() => _items.Clear();
 
         /// <summary>
         /// Returns an enumerator that enumerates the lazy list.
