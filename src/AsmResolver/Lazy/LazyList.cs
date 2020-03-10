@@ -15,6 +15,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,6 +29,8 @@ namespace AsmResolver.Lazy
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public abstract class LazyList<TItem> : IList<TItem>
     {
+        private readonly List<TItem> _items = new List<TItem>();
+
         /// <inheritdoc />
         public TItem this[int index]
         {
@@ -68,10 +71,7 @@ namespace AsmResolver.Lazy
         /// <summary>
         /// Gets the underlying list.
         /// </summary>
-        public IList<TItem> Items
-        {
-            get;
-        } = new List<TItem>();
+        public IList<TItem> Items => _items;
 
         /// <summary>
         /// Initializes the list. This method is called in a thread-safe manner.
@@ -157,17 +157,69 @@ namespace AsmResolver.Lazy
 
         protected virtual void OnClearItems() => Items.Clear();
 
-        /// <inheritdoc />
-        public IEnumerator<TItem> GetEnumerator()
-        {
-            EnsureIsInitialized();
-            return Items.GetEnumerator();
-        }
+        /// <summary>
+        /// Returns an enumerator that enumerates the lazy list.
+        /// </summary>
+        /// <returns>The enumerator.</returns>
+        /// <remarks>
+        /// This enumerator only ensures the list is initialized upon calling the <see cref="Enumerator.MoveNext"/> method.
+        /// </remarks>
+        public Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator()
+        IEnumerator<TItem> IEnumerable<TItem>.GetEnumerator() => GetEnumerator();
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Represents an enumerator that enumerates all items in a lazy initialized list.
+        /// </summary>
+        /// <remarks>
+        /// The enumerator only initializes the list when it is needed. If no calls to <see cref="MoveNext"/> were
+        /// made, and the lazy list was not initialized yet, it will remain uninitialized.
+        /// </remarks>
+        public struct Enumerator : IEnumerator<TItem>
         {
-            return GetEnumerator();
+            private readonly LazyList<TItem> _list;
+            private List<TItem>.Enumerator _enumerator;
+            private bool hasEnumerator;
+            
+            public Enumerator(LazyList<TItem> list)
+            {
+                _list = list;
+                _enumerator = default;
+                hasEnumerator = false;
+            }
+
+            /// <inheritdoc />
+            public TItem Current => hasEnumerator ? _enumerator.Current : default;
+
+            /// <inheritdoc />
+            object IEnumerator.Current => Current;
+
+            /// <inheritdoc />
+            public bool MoveNext()
+            {
+                if (!hasEnumerator)
+                {
+                    _list.EnsureIsInitialized();
+                    _enumerator = _list._items.GetEnumerator();
+                    hasEnumerator = true;
+                }
+
+                return _enumerator.MoveNext();
+            }
+
+            /// <inheritdoc />
+            public void Reset() => throw new NotSupportedException();
+
+            /// <inheritdoc />
+            public void Dispose()
+            {
+                if (hasEnumerator)
+                    _enumerator.Dispose();
+            }
         }
         
     }

@@ -3,6 +3,7 @@ using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Code.Cil
@@ -74,7 +75,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithLocals));
             Assert.True(body.IsFat);
-            Assert.Single(body.LocalVariables);
+            Assert.Contains(body.LocalVariables, x => x.VariableType.ElementType == ElementType.I4);
         }
 
         [Fact]
