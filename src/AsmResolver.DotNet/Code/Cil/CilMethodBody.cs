@@ -269,7 +269,7 @@ namespace AsmResolver.DotNet.Code.Cil
         Parameter ICilOperandResolver.ResolveParameter(int index)
         {
             var parameters = Owner.Parameters;
-            return index >= 0 && index < parameters.Count ? parameters[index] : null;
+            return parameters.ContainsSignatureIndex(index) ? parameters.GetBySignatureIndex(index) : null;
         }
 
         /// <summary>

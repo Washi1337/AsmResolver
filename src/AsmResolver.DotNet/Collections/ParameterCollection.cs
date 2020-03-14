@@ -145,6 +145,32 @@ namespace AsmResolver.DotNet.Collections
                 _owner.Signature.ParameterTypes[parameter.MethodSignatureIndex] = parameter.ParameterType;
         }
 
+        /// <summary>
+        /// Determines whether a parameter with the provided signature index exists within this parameter collection.
+        /// </summary>
+        /// <param name="index">The method signature index of the parameter.</param>
+        /// <returns><c>true</c> if the parameter exists, <c>false</c> otherwise.</returns>
+        public bool ContainsSignatureIndex(int index)
+        {
+            int actualIndex = index - MethodSignatureIndexBase;
+            int lowerIndex = _hasThis ? -1 : 0;
+            return actualIndex >= lowerIndex && actualIndex < Count;
+        }
+
+        /// <summary>
+        /// Gets a parameter by its method signature index.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <returns>The parameter.</returns>
+        /// <remarks>
+        /// This method can be used to resolve parameter indices in a method body to parameter objects.
+        /// </remarks>
+        public Parameter GetBySignatureIndex(int index)
+        {
+            int actualIndex = index - MethodSignatureIndexBase;
+            return actualIndex == -1 && _hasThis ? ThisParameter : this[actualIndex];
+        }
+        
         /// <inheritdoc />
         public IEnumerator<Parameter> GetEnumerator() => _parameters.GetEnumerator();
 
