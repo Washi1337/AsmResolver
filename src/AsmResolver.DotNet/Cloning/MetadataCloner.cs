@@ -33,7 +33,15 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="type">The type to include.</param>
         /// <returns>The metadata cloner that this type was added to.</returns>
-        public MetadataCloner Include(TypeDefinition type)
+        public MetadataCloner Include(TypeDefinition type) => Include(type, true);
+
+        /// <summary>
+        /// Adds the provided type, and all its members, to the list of members to clone.
+        /// </summary>
+        /// <param name="type">The type to include.</param>
+        /// <param name="recursive">Indicates whether all nested types should be included as well.</param>
+        /// <returns>The metadata cloner that this type was added to.</returns>
+        public MetadataCloner Include(TypeDefinition type, bool recursive)
         {
             var agenda = new Stack<TypeDefinition>();
             agenda.Push(type);
@@ -59,9 +67,12 @@ namespace AsmResolver.DotNet.Cloning
                 foreach (var @event in type.Events)
                     Include(@event);
 
-                // Include remaining nested types.
-                foreach (var nestedType in type.NestedTypes)
-                    agenda.Push(nestedType);
+                if (recursive)
+                {
+                    // Include remaining nested types.
+                    foreach (var nestedType in type.NestedTypes)
+                        agenda.Push(nestedType);
+                }
             }
 
             return this;
