@@ -26,10 +26,10 @@ namespace AsmResolver.DotNet.Tests.Cloning
             return module;
         }
 
-        private static MethodDefinition CloneMethod(string methodName, out MethodDefinition method)
+        private static MethodDefinition CloneMethod(string typeName, string methodName, out MethodDefinition method)
         {
             var sourceModule = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location);
-            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(MethodBodyTypes));
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == typeName);
             method = type.Methods.First(m => m.Name == methodName);
 
             var targetModule = PrepareTempModule();
@@ -64,7 +64,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneBranchInstructions()
         {
-            var clonedMethod = CloneMethod(nameof(MethodBodyTypes.Switch), out var method);
+            var clonedMethod = CloneMethod(nameof(MethodBodyTypes), nameof(MethodBodyTypes.Switch), out var method);
 
             var originalBranches = method.CilMethodBody.Instructions
                 .Where(i => i.IsBranch())
@@ -92,7 +92,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneSwitchInstruction()
         {
-            var clonedMethod = CloneMethod(nameof(MethodBodyTypes.Switch), out var method);
+            var clonedMethod = CloneMethod(nameof(MethodBodyTypes), nameof(MethodBodyTypes.Switch), out var method);
 
             var originalBranches = (IEnumerable<ICilLabel>) method.CilMethodBody.Instructions
                 .First(i => i.OpCode.Code == CilCode.Switch)
@@ -111,6 +111,58 @@ namespace AsmResolver.DotNet.Tests.Cloning
             Assert.All(newBranches, label => Assert.Same(
                 clonedMethod.CilMethodBody.Instructions.GetByOffset(label.Offset),
                 ((CilInstructionLabel) label).Instruction));
+        }
+
+        [Fact]
+        public void CallToClonedMethods()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
+            
+            var targetModule = PrepareTempModule();
+
+            var result = new MetadataCloner(targetModule)
+                .Include(type.Methods.First(m => m.Name == nameof(Miscellaneous.CallsToMethods)))
+                .Include(type.Methods.First(m => m.Name == nameof(Miscellaneous.MethodA)))
+                .Include(type.Methods.First(m => m.Name == nameof(Miscellaneous.MethodB)))
+                .Clone();
+
+            var clonedMethod = (MethodDefinition) result.ClonedMembers
+                .First(m => m.Name == nameof(Miscellaneous.CallsToMethods));
+
+            var references = clonedMethod.CilMethodBody.Instructions
+                .Where(i => i.OpCode.Code == CilCode.Call)
+                .Select(i => i.Operand)
+                .Cast<MethodDefinition>()
+                .ToArray();
+
+            Assert.All(references, method => Assert.Contains(result.ClonedMembers, descriptor => descriptor == method));
+        }
+
+        [Fact]
+        public void ReferenceToNestedClass()
+        {
+            var sourceModule = ModuleDefinition.FromFile(typeof(Miscellaneous).Assembly.Location);
+            var type = sourceModule.TopLevelTypes.First(t => t.Name == nameof(Miscellaneous));
+            
+            var targetModule = PrepareTempModule();
+
+            var result = new MetadataCloner(targetModule)
+                .Include(type.NestedTypes.First(t=>t.Name == nameof(Miscellaneous.NestedClass)))
+                .Include(type.Methods.First(m => m.Name == nameof(Miscellaneous.NestedClassLocal)))
+                .Clone();
+
+            var clonedMethod = (MethodDefinition) result.ClonedMembers
+                .First(m => m.Name == nameof(Miscellaneous.NestedClassLocal));
+ 
+            var references = clonedMethod.CilMethodBody.Instructions
+                .Where(i => i.OpCode.Code == CilCode.Callvirt || i.OpCode.Code == CilCode.Newobj)
+                .Select(i => i.Operand)
+                .Cast<MethodDefinition>()
+                .ToArray();
+
+            Assert.Equal(3, references.Length);
+            Assert.All(references, method => Assert.Contains(result.ClonedMembers, descriptor => descriptor == method));
         }
     }
 }

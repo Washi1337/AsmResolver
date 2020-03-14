@@ -156,7 +156,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="type">The type signature to import.</param>
         /// <returns>The imported type signature.</returns>
-        public TypeSignature ImportTypeSignature(TypeSignature type)
+        public virtual TypeSignature ImportTypeSignature(TypeSignature type)
         {
             if (type.Module == _module)
                 return type;
@@ -274,7 +274,7 @@ namespace AsmResolver.DotNet
         /// <param name="method">The method to import.</param>
         /// <returns>The imported method.</returns>
         /// <exception cref="ArgumentException">Occurs when a method is not added to a type.</exception>
-        public IMethodDefOrRef ImportMethod(IMethodDefOrRef method)
+        public virtual IMethodDefOrRef ImportMethod(IMethodDefOrRef method)
         {
             if (method.DeclaringType is null)
                 throw new ArgumentException("Cannot import a method that is not added to a type.");
