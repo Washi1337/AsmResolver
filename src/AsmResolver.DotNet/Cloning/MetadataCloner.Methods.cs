@@ -8,22 +8,15 @@ namespace AsmResolver.DotNet.Cloning
 {
     public partial class MetadataCloner
     {
-        private void CreateMethodStubsInType(MetadataCloneContext context, TypeDefinition type)
-        {
-            var owner = (TypeDefinition) context.ClonedMembers[type];
-            foreach (var method in type.Methods)
-                owner.Methods.Add(CreateMethodStub(context, method));
-        }
-
         private MethodDefinition CreateMethodStub(MetadataCloneContext context, MethodDefinition method)
         {
             var clonedMethod = new MethodDefinition(method.Name, method.Attributes,
                 context.Importer.ImportMethodSignature(method.Signature));
             clonedMethod.ImplAttributes = method.ImplAttributes;
 
-            clonedMethod.Parameters.PullUpdatesFromMethodSignature();
-
+            // Clone parameters.
             CloneParameterDefinitionsInMethod(method, clonedMethod);
+            clonedMethod.Parameters.PullUpdatesFromMethodSignature();
 
             context.ClonedMembers[method] = clonedMethod;
             return clonedMethod;
@@ -41,12 +34,6 @@ namespace AsmResolver.DotNet.Cloning
             return clonedParameterDef;
         }
 
-        private void DeepCopyMethodsInType(MetadataCloneContext context, TypeDefinition type)
-        {
-            foreach (var method in type.Methods)
-                DeepCopyMethod(context, method);
-        }
-
         private void DeepCopyMethod(MetadataCloneContext context, MethodDefinition method)
         {
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
@@ -60,11 +47,13 @@ namespace AsmResolver.DotNet.Cloning
             var body = method.CilMethodBody;
             
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
+            
+            // Clone method body header.
             var clonedBody = new CilMethodBody(clonedMethod);
-
             clonedBody.InitializeLocals = body.InitializeLocals;
             clonedBody.MaxStack = body.MaxStack;
 
+            // Clone contents.
             CloneLocalVariables(context, body, clonedBody);
             CloneCilInstructions(context, body, clonedBody);
             CloneExceptionHandlers(context, body, clonedBody);
@@ -86,6 +75,7 @@ namespace AsmResolver.DotNet.Cloning
             var branches = new List<CilInstruction>();
             var switches = new List<CilInstruction>();
 
+            // Clone all instructions.
             foreach (var instruction in body.Instructions)
             {
                 var clonedInstruction = CloneInstruction(context, clonedBody, instruction);
@@ -96,12 +86,14 @@ namespace AsmResolver.DotNet.Cloning
                 clonedBody.Instructions.Add(clonedInstruction);
             }
 
+            // Fixup branches.
             foreach (var branch in branches)
             {
                 var label = (ICilLabel) branch.Operand;
                 branch.Operand = new CilInstructionLabel(clonedBody.Instructions.GetByOffset(label.Offset));
             }
 
+            // Fixup switches.
             foreach (var @switch in switches)
             {
                 var labels = (ICollection<ICilLabel>) @switch.Operand;

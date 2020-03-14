@@ -328,9 +328,14 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
                 0x2A                           // ret
             });
 
+            var expectedLabels = new[] { 0x0013,  0x0015,  0x0017 }
+                .Select(offset => new CilOffsetLabel(offset))
+                .Cast<ICilLabel>()
+                .ToArray();
+            
             var expected = new[]
             {
-                new CilInstruction(0, CilOpCodes.Switch, new[] {0x0013u, 0x0015u, 0x0017u}.ToList()),
+                new CilInstruction(0, CilOpCodes.Switch, expectedLabels),
                 new CilInstruction(17, CilOpCodes.Nop),
                 new CilInstruction(18, CilOpCodes.Nop),
                 new CilInstruction(19, CilOpCodes.Nop),
