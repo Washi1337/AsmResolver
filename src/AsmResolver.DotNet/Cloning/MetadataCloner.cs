@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet.Cloning
         private readonly HashSet<MethodDefinition> _methodsToClone = new HashSet<MethodDefinition>();
         private readonly HashSet<FieldDefinition> _fieldsToClone = new HashSet<FieldDefinition>();
         private readonly HashSet<PropertyDefinition> _propertiesToClone = new HashSet<PropertyDefinition>();
+        private readonly HashSet<EventDefinition> _eventsToClone = new HashSet<EventDefinition>();
         
         /// <summary>
         /// Creates a new instance of the <see cref="MetadataCloner"/> class.
@@ -53,6 +54,10 @@ namespace AsmResolver.DotNet.Cloning
                 // Include properties.
                 foreach (var property in type.Properties)
                     Include(property);
+
+                // Include events.
+                foreach (var @event in type.Events)
+                    Include(@event);
 
                 // Include remaining nested types.
                 foreach (var nestedType in type.NestedTypes)
@@ -106,9 +111,25 @@ namespace AsmResolver.DotNet.Cloning
             return this;
         }
 
+        /// <summary>
+        /// Adds a single property to the list of members to clone.
+        /// </summary>
+        /// <param name="property">The property to include.</param>
+        /// <returns>The metadata cloner that the property is added to.</returns>
         public MetadataCloner Include(PropertyDefinition property)
         {
             _propertiesToClone.Add(property);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a single event to the list of members to clone.
+        /// </summary>
+        /// <param name="event">The event to include.</param>
+        /// <returns>The metadata cloner that the event is added to.</returns>
+        public MetadataCloner Include(EventDefinition @event)
+        {
+            _eventsToClone.Add(@event);
             return this;
         }
         
@@ -151,6 +172,7 @@ namespace AsmResolver.DotNet.Cloning
             DeepCopyMethods(context);
             DeepCopyFields(context);
             DeepCopyProperties(context);
+            DeepCopyEvents(context);
         }
 
         private void DeepCopyTypes(MetadataCloneContext context)
