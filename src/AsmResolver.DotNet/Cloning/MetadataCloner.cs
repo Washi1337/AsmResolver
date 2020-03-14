@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -19,6 +16,7 @@ namespace AsmResolver.DotNet.Cloning
         private readonly HashSet<TypeDefinition> _typesToClone = new HashSet<TypeDefinition>();
         private readonly HashSet<MethodDefinition> _methodsToClone = new HashSet<MethodDefinition>();
         private readonly HashSet<FieldDefinition> _fieldsToClone = new HashSet<FieldDefinition>();
+        private readonly HashSet<PropertyDefinition> _propertiesToClone = new HashSet<PropertyDefinition>();
         
         /// <summary>
         /// Creates a new instance of the <see cref="MetadataCloner"/> class.
@@ -51,6 +49,10 @@ namespace AsmResolver.DotNet.Cloning
                 // Include fields.
                 foreach (var field in type.Fields)
                     Include(field);
+
+                // Include properties.
+                foreach (var property in type.Properties)
+                    Include(property);
 
                 // Include remaining nested types.
                 foreach (var nestedType in type.NestedTypes)
@@ -104,6 +106,12 @@ namespace AsmResolver.DotNet.Cloning
             return this;
         }
 
+        public MetadataCloner Include(PropertyDefinition property)
+        {
+            _propertiesToClone.Add(property);
+            return this;
+        }
+        
         /// <summary>
         /// Clones all included members.
         /// </summary>
@@ -142,6 +150,7 @@ namespace AsmResolver.DotNet.Cloning
             DeepCopyTypes(context);
             DeepCopyMethods(context);
             DeepCopyFields(context);
+            DeepCopyProperties(context);
         }
 
         private void DeepCopyTypes(MetadataCloneContext context)

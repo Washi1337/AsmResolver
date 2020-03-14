@@ -389,6 +389,11 @@ namespace AsmResolver.DotNet
                 ImportFieldSignature(field.Signature));
         }
 
+        /// <summary>
+        /// Imports a field signature into the module.
+        /// </summary>
+        /// <param name="signature">The signature to import.</param>
+        /// <returns>The imported signature.</returns>
         public FieldSignature ImportFieldSignature(FieldSignature signature)
         {
             return new FieldSignature(signature.Attributes, ImportTypeSignature(signature.FieldType));
@@ -410,6 +415,18 @@ namespace AsmResolver.DotNet
                 ImportTypeSignature(field.FieldType));
             
             return new MemberReference(scope, field.Name, signature);
+        }
+
+        public PropertySignature ImportPropertySignature(PropertySignature signature)
+        {
+            var parameterTypes = new TypeSignature[signature.ParameterTypes.Count];
+            for (int i = 0; i < parameterTypes.Length; i++)
+                parameterTypes[i] = ImportTypeSignature(signature.ParameterTypes[i]);
+            
+            return new PropertySignature(
+                signature.Attributes,
+                ImportTypeSignature(signature.ReturnType), 
+                parameterTypes);
         }
     }
 }
