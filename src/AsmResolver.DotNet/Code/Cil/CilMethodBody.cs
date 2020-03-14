@@ -85,7 +85,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     var labels = (IEnumerable<ICilLabel>) instruction.Operand;
                     foreach (var label in labels)
                     {
-                        var target = methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset);
+                        var target = methodBody.Instructions.GetByOffset(label.Offset);
                         result.Add(target == null ? label : new CilInstructionLabel(target));
                     }
 

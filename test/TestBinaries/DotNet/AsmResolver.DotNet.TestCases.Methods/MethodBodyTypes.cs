@@ -42,5 +42,42 @@ namespace AsmResolver.DotNet.TestCases.Methods
             Console.WriteLine("8");
             Console.WriteLine("9");
         }
+
+        public static void Branch()
+        {
+            int x = int.Parse(Console.ReadLine());
+
+            if (x == 10)
+            {
+                Console.WriteLine("x == 10");
+            }
+            else
+            {
+                Console.WriteLine("x != 10");
+            }
+        }
+
+        public static void Switch()
+        {
+            int x = int.Parse(Console.ReadLine());
+            switch (x)
+            {
+                case 0:
+                    Console.WriteLine("0");
+                    break;
+                case 1:
+                    Console.WriteLine("1");
+                    break;
+                case 2:
+                    Console.WriteLine("2");
+                    break;
+                case 3:
+                    Console.WriteLine("3");
+                    break;
+                default:
+                    Console.WriteLine("default");
+                    break;
+            }
+        }
     }
 }

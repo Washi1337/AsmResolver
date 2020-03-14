@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
@@ -10,24 +11,31 @@ namespace AsmResolver.DotNet.Cloning
         private readonly ModuleDefinition _targetModule;
         
         private readonly List<TypeDefinition> _typesToClone = new List<TypeDefinition>();
+        private readonly List<MethodDefinition> _methodsToClone = new List<MethodDefinition>();
         
         public MetadataCloner(ModuleDefinition targetModule)
         {
             _targetModule = targetModule ?? throw new ArgumentNullException(nameof(targetModule));
         }
 
-        public MetadataCloner IncludeType(TypeDefinition type)
+        public MetadataCloner Include(TypeDefinition type)
         {
             _typesToClone.Add(type);
             return this;
         }
 
-        public MetadataCloner IncludeTypes(params TypeDefinition[] types) => 
-            IncludeTypes((IEnumerable<TypeDefinition>) types);
+        public MetadataCloner Include(params TypeDefinition[] types) => 
+            Include((IEnumerable<TypeDefinition>) types);
 
-        public MetadataCloner IncludeTypes(IEnumerable<TypeDefinition> types)
+        public MetadataCloner Include(IEnumerable<TypeDefinition> types)
         {
             _typesToClone.AddRange(types);
+            return this;
+        }
+
+        public MetadataCloner Include(MethodDefinition method)
+        {
+            _methodsToClone.Add(method);
             return this;
         }
 
@@ -35,17 +43,26 @@ namespace AsmResolver.DotNet.Cloning
         {
             var context = new MetadataCloneContext(_targetModule);
 
-            CreateTypeStubs(context);
-            DeepCopyTypes(context);
-            
+            CloneTypes(context);
+            CloneRemainingMethods(context);
+
             var result = new MetadataCloneResult(context.ClonedMembers.Values);
             return result;
+        }
+
+        private void CloneTypes(MetadataCloneContext context)
+        {
+            CreateTypeStubs(context);
+            DeepCopyTypes(context);
         }
 
         private void CreateTypeStubs(MetadataCloneContext context)
         {
             foreach (var type in _typesToClone)
                 CreateTypeStub(context, type);
+            
+            foreach (var type in _typesToClone)
+                CreateMethodStubsInType(context, type);
         }
 
         private void CreateTypeStub(MetadataCloneContext context, TypeDefinition type)
@@ -65,8 +82,26 @@ namespace AsmResolver.DotNet.Cloning
             var clonedType = (TypeDefinition) context.ClonedMembers[type];
             clonedType.BaseType = context.Importer.ImportType(type.BaseType);
 
-            CloneMethodsInType(context, type);
+            DeepCopyMethodsInType(context, type);
         }
-        
+
+        private void CloneRemainingMethods(MetadataCloneContext context)
+        {
+            var alreadyCloned = new BitArray(_methodsToClone.Count);
+            for (int i = 0; i < _methodsToClone.Count; i++)
+            {
+                var method = _methodsToClone[i];
+                alreadyCloned[i] = context.ClonedMembers.ContainsKey(method);
+                if (!alreadyCloned[i])
+                    CreateMethodStub(context, method);
+            }
+
+            for (int i = 0; i < _methodsToClone.Count; i++)
+            {
+                var method = _methodsToClone[i];
+                if (!alreadyCloned[i])
+                    DeepCopyMethod(context, method);
+            }
+        }
     }
 }

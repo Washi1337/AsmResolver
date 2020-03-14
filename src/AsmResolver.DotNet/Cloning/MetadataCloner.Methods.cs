@@ -8,19 +8,14 @@ namespace AsmResolver.DotNet.Cloning
 {
     public partial class MetadataCloner
     {
-        private void CloneMethodsInType(MetadataCloneContext context, TypeDefinition type)
-        {
-            CreateMethodStubsInType(context, type);
-            DeepCopyMethodsInType(context, type);
-        }
-
         private void CreateMethodStubsInType(MetadataCloneContext context, TypeDefinition type)
         {
+            var owner = (TypeDefinition) context.ClonedMembers[type];
             foreach (var method in type.Methods)
-                CreateMethodStub(context, method);
+                owner.Methods.Add(CreateMethodStub(context, method));
         }
 
-        private void CreateMethodStub(MetadataCloneContext context, MethodDefinition method)
+        private MethodDefinition CreateMethodStub(MetadataCloneContext context, MethodDefinition method)
         {
             var clonedMethod = new MethodDefinition(method.Name, method.Attributes,
                 context.Importer.ImportMethodSignature(method.Signature));
@@ -30,10 +25,8 @@ namespace AsmResolver.DotNet.Cloning
 
             CloneParameterDefinitionsInMethod(method, clonedMethod);
 
-            var clonedType = (TypeDefinition) context.ClonedMembers[method.DeclaringType];
-            clonedType.Methods.Add(clonedMethod);
-
             context.ClonedMembers[method] = clonedMethod;
+            return clonedMethod;
         }
 
         private void CloneParameterDefinitionsInMethod(MethodDefinition method, MethodDefinition clonedMethod)
@@ -96,25 +89,27 @@ namespace AsmResolver.DotNet.Cloning
             foreach (var instruction in body.Instructions)
             {
                 var clonedInstruction = CloneInstruction(context, clonedBody, instruction);
-                if (clonedInstruction.IsBranch())
-                    branches.Add(clonedInstruction);
-                else if (clonedInstruction.OpCode.Code == CilCode.Switch)
+                if (clonedInstruction.OpCode.Code == CilCode.Switch)
                     switches.Add(clonedInstruction);
+                else if (clonedInstruction.IsBranch())
+                    branches.Add(clonedInstruction);
                 clonedBody.Instructions.Add(clonedInstruction);
             }
 
             foreach (var branch in branches)
             {
                 var label = (ICilLabel) branch.Operand;
-                branch.Operand = new CilInstructionLabel(body.Instructions.GetByOffset(label.Offset));
+                branch.Operand = new CilInstructionLabel(clonedBody.Instructions.GetByOffset(label.Offset));
             }
 
             foreach (var @switch in switches)
             {
-                var labels = (IEnumerable<ICilLabel>) @switch.Operand;
-                var clonedLabels = new List<ICilLabel>();
+                var labels = (ICollection<ICilLabel>) @switch.Operand;
+                var clonedLabels = new List<ICilLabel>(labels.Count);
                 foreach (var label in labels)
-                    clonedLabels.Add(new CilInstructionLabel(body.Instructions.GetByOffset(label.Offset)));
+                    clonedLabels.Add(new CilInstructionLabel(clonedBody.Instructions.GetByOffset(label.Offset)));
+                @switch.Operand = clonedLabels;
+
             }
         }
 

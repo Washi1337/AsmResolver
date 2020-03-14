@@ -110,14 +110,14 @@ namespace AsmResolver.PE.DotNet.Cil
             };
         }
 
-        private IList<uint> ReadSwitchTable()
+        private IList<ICilLabel> ReadSwitchTable()
         {
             int count = Reader.ReadInt32();
-            uint nextOffset = (uint) (Reader.FileOffset + count * sizeof(int));
+            int nextOffset = (int) (Reader.FileOffset + count * sizeof(int));
             
-            var offsets = new List<uint>(count);
+            var offsets = new List<ICilLabel>(count);
             for (int i = 0; i < count; i++)
-                offsets.Add((uint) (nextOffset + Reader.ReadInt32()));
+                offsets.Add(new CilOffsetLabel(nextOffset + Reader.ReadInt32()));
             
             return offsets;
         }
