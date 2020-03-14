@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Collections
         /// <summary>
         /// Gets the sequence number of the parameter, as used in the parameter definition list of the method definition.
         /// </summary>
-        public ushort Sequence => (ushort) (MethodSignatureIndex + 1);
+        public ushort Sequence => (ushort) (Index + 1);
 
         /// <summary>
         /// Gets the index of the parameter within the method's signature. 
@@ -49,9 +49,10 @@ namespace AsmResolver.DotNet.Collections
             get => _parameterType;
             set
             {
+                if (Index < 0)
+                    throw new InvalidOperationException("Cannot update parameter type of return or this parameters.");
                 _parameterType = value;
-                if (_parentCollection != null)
-                    _parentCollection.PushParameterUpdateToSignature(this);
+                _parentCollection?.PushParameterUpdateToSignature(this);
             }
         }
 
@@ -67,6 +68,11 @@ namespace AsmResolver.DotNet.Collections
         {
             _parentCollection = null;
             Index = -1;
+        }
+
+        internal void SetParameterTypeInternal(TypeSignature type)
+        {
+            _parameterType = type;
         }
 
         /// <inheritdoc />

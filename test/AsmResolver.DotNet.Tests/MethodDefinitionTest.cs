@@ -106,55 +106,5 @@ namespace AsmResolver.DotNet.Tests
                 "Expected third parameter to be of type AsmResolver.TestCases.DotNet.MultipleMethods.");
         }
 
-        [Fact]
-        public void ReadEmptyParametersInstance()
-        {
-            var module = ModuleDefinition.FromFile(typeof(InstanceMethods).Assembly.Location);
-            var method = (MethodDefinition) module.LookupMember(
-                typeof(InstanceMethods).GetMethod(nameof(InstanceMethods.InstanceParameterlessMethod)).MetadataToken);
-            Assert.Single(method.Parameters);
-            Assert.True(method.Parameters[0].ParameterType.IsTypeOf("AsmResolver.DotNet.TestCases.Methods", "InstanceMethods"),
-                "Expected this parameter to be of type AsmResolver.DotNet.TestCases.Methods.InstanceMethods.");
-        }
-
-        [Fact]
-        public void ReadSingleParameterInstance()
-        {
-            var module = ModuleDefinition.FromFile(typeof(InstanceMethods).Assembly.Location);
-            var method = (MethodDefinition) module.LookupMember(
-                typeof(InstanceMethods).GetMethod(nameof(InstanceMethods.InstanceSingleParameterMethod)).MetadataToken);
-            
-            Assert.Equal(2, method.Parameters.Count);
-            
-            Assert.True(method.Parameters[0].ParameterType.IsTypeOf("AsmResolver.DotNet.TestCases.Methods", "InstanceMethods"),
-                "Expected this parameter to be of type AsmResolver.DotNet.TestCases.Methods.InstanceMethods.");
-            
-            Assert.Equal("intParameter", method.Parameters[1].Name);
-            Assert.True(method.Parameters[1].ParameterType.IsTypeOf("System", "Int32"));
-        }
-
-        [Fact]
-        public void ReadMultipleParameterInstance()
-        {
-            var module = ModuleDefinition.FromFile(typeof(InstanceMethods).Assembly.Location);
-            var method = (MethodDefinition) module.LookupMember(
-                typeof(InstanceMethods).GetMethod(nameof(InstanceMethods.InstanceMultipleParametersMethod)).MetadataToken);
-            Assert.Equal(4, method.Parameters.Count);
-            
-            Assert.True(method.Parameters[0].ParameterType.IsTypeOf("AsmResolver.DotNet.TestCases.Methods", "InstanceMethods"),
-                "Expected this parameter to be of type AsmResolver.DotNet.TestCases.Methods.InstanceMethods.");
-            
-            Assert.Equal("intParameter", method.Parameters[1].Name);
-            Assert.True(method.Parameters[1].ParameterType.IsTypeOf("System", "Int32"), 
-                "Expected first parameter to be of type System.Int32.");
-            
-            Assert.Equal("stringParameter", method.Parameters[2].Name);
-            Assert.True(method.Parameters[2].ParameterType.IsTypeOf("System", "String"), 
-                "Expected second parameter to be of type System.String.");
-            
-            Assert.Equal("boolParameter", method.Parameters[3].Name);
-            Assert.True(method.Parameters[3].ParameterType.IsTypeOf("System", "Boolean"), 
-                "Expected third parameter to be of type System.Boolean");
-        }
     }
 }

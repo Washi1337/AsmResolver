@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Collections
         /// Gets the displacement of the parameters in the method signature, depending on the value of
         /// <see cref="CallingConventionSignature.HasThis"/>.
         /// </summary>
-        public int MethodSignatureIndexBase => _owner.Signature.HasThis ? -1 : 0;
+        public int MethodSignatureIndexBase => _hasThis ? 1 : 0;
 
         /// <inheritdoc />
         public Parameter this[int index] => _parameters[index];
@@ -48,6 +48,15 @@ namespace AsmResolver.DotNet.Collections
         public Parameter ReturnParameter
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets the virtual parameter containing the current instance of the class that the method is defined in.
+        /// </summary>
+        public Parameter ThisParameter
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -70,7 +79,11 @@ namespace AsmResolver.DotNet.Collections
 
         private void EnsureAllParametersCreated()
         {
-            int signatureCount = _owner.Signature.ParameterTypes.Count - MethodSignatureIndexBase;
+            ThisParameter = _hasThis 
+                ? new Parameter(this, -1, 0) 
+                : null;
+            
+            int signatureCount = _owner.Signature.ParameterTypes.Count;
 
             // Add missing parameters.
             while (_parameters.Count < signatureCount)
@@ -90,16 +103,13 @@ namespace AsmResolver.DotNet.Collections
 
         private void UpdateParameterTypes()
         {
-            // Update return parameter type.
-            ReturnParameter.ParameterType = _owner.Signature.ReturnType;
+            // Update implicit parameters.
+            ReturnParameter.SetParameterTypeInternal(_owner.Signature.ReturnType);
+            ThisParameter?.SetParameterTypeInternal(GetThisParameterType());
 
-            // Update this parameter type.
-            if (_owner.Signature.HasThis)
-                _parameters[0].ParameterType = GetThisParameterType(); 
-                    
             // Update remaining parameter types.
-            for (int i = -MethodSignatureIndexBase; i < _parameters.Count; i++)
-                _parameters[i].ParameterType = _owner.Signature.ParameterTypes[i + MethodSignatureIndexBase];
+            for (int i = 0; i < _parameters.Count; i++)
+                _parameters[i].SetParameterTypeInternal(_owner.Signature.ParameterTypes[i]);
         }
 
         private TypeSignature GetThisParameterType()
@@ -120,8 +130,10 @@ namespace AsmResolver.DotNet.Collections
 
         internal void PushParameterUpdateToSignature(Parameter parameter)
         {
-            if (parameter.MethodSignatureIndex == -1)
+            if (parameter.Index == -2)
                 _owner.Signature.ReturnType = parameter.ParameterType;
+            else if (parameter.Index == -1)
+                throw new InvalidOperationException("Cannot update the parameter type of the this parameter.");
             else
                 _owner.Signature.ParameterTypes[parameter.MethodSignatureIndex] = parameter.ParameterType;
         }
