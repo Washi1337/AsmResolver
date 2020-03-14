@@ -151,7 +151,12 @@ namespace AsmResolver.DotNet
                 throw new ArgumentException("Cannot import types that are not added to a module.");
         }
 
-        private TypeSignature ImportTypeSignature(TypeSignature type)
+        /// <summary>
+        /// Imports the given type signature into the target module.
+        /// </summary>
+        /// <param name="type">The type signature to import.</param>
+        /// <returns>The imported type signature.</returns>
+        public TypeSignature ImportTypeSignature(TypeSignature type)
         {
             if (type.Module == _module)
                 return type;
@@ -283,7 +288,12 @@ namespace AsmResolver.DotNet
                 ImportMethodSignature(method.Signature));
         }
 
-        private MethodSignature ImportMethodSignature(MethodSignature signature)
+        /// <summary>
+        /// Imports the provided method signature into the module.
+        /// </summary>
+        /// <param name="signature">The method signature to import.</param>
+        /// <returns>The imported signature.</returns>
+        public virtual MethodSignature ImportMethodSignature(MethodSignature signature)
         {
             var parameterTypes = new TypeSignature[signature.ParameterTypes.Count];
             for (int i = 0; i < parameterTypes.Length; i++)
@@ -365,7 +375,7 @@ namespace AsmResolver.DotNet
         /// <param name="field">The field to import.</param>
         /// <returns>The imported field.</returns>
         /// <exception cref="ArgumentException">Occurs when a field is not added to a type.</exception>
-        public IFieldDescriptor ImportField(IFieldDescriptor field)
+        public virtual IFieldDescriptor ImportField(IFieldDescriptor field)
         {
             if (field.DeclaringType is null)
                 throw new ArgumentException("Cannot import a field that is not added to a type.");

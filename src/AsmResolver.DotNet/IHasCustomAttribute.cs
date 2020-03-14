@@ -14,6 +14,9 @@ namespace AsmResolver.DotNet
         IList<CustomAttribute> CustomAttributes { get; }
     }
 
+    /// <summary>
+    /// Provides extensions for various metadata members. 
+    /// </summary>
     public static partial class Extensions
     {
         /// <summary>
