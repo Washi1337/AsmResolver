@@ -437,6 +437,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the type is enclosed by another type. 
+        /// </summary>
+        public bool IsNested => DeclaringType != null;
+
+        /// <summary>
         /// Gets a collection of nested types that this type defines.
         /// </summary>
         public IList<TypeDefinition> NestedTypes
@@ -558,7 +563,7 @@ namespace AsmResolver.DotNet
             get => _classLayout.Value;
             set => _classLayout.Value = value;
         }
-        
+
         /// <inheritdoc />
         public TypeSignature ToTypeSignature() => 
             new TypeDefOrRefSignature(this, IsValueType);

@@ -185,6 +185,14 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedType = (TypeDefinition) context.ClonedMembers[type];
             clonedType.BaseType = context.Importer.ImportType(type.BaseType);
+
+            // If the type is nested and the declaring type is cloned as well, we should add it to the cloned type. 
+            if (type.IsNested 
+                && context.ClonedMembers.TryGetValue(type.DeclaringType, out var member)
+                && member is TypeDefinition clonedDeclaringType)
+            {
+                clonedDeclaringType.NestedTypes.Add(clonedType);
+            }
         }
 
     }
