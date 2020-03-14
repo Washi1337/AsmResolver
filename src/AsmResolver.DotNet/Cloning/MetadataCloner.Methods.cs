@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Cloning
 
         private ParameterDefinition CloneParameterDefinition(ParameterDefinition parameterDef)
         {
-            var clonedParameterDef = new ParameterDefinition(parameterDef.Name, parameterDef.Attributes);
+            var clonedParameterDef = new ParameterDefinition(parameterDef.Sequence, parameterDef.Name, parameterDef.Attributes);
             return clonedParameterDef;
         }
 

@@ -67,5 +67,6 @@ namespace AsmResolver.DotNet.Cloning
 
             CloneMethodsInType(context, type);
         }
+        
     }
 }
