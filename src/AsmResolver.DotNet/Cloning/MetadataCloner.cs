@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet.Cloning
         
         private readonly HashSet<TypeDefinition> _typesToClone = new HashSet<TypeDefinition>();
         private readonly HashSet<MethodDefinition> _methodsToClone = new HashSet<MethodDefinition>();
+        private readonly HashSet<FieldDefinition> _fieldsToClone = new HashSet<FieldDefinition>();
         
         /// <summary>
         /// Creates a new instance of the <see cref="MetadataCloner"/> class.
@@ -46,6 +47,10 @@ namespace AsmResolver.DotNet.Cloning
                 // Include methods.
                 foreach (var method in type.Methods)
                     Include(method);
+
+                // Include fields.
+                foreach (var field in type.Fields)
+                    Include(field);
 
                 // Include remaining nested types.
                 foreach (var nestedType in type.NestedTypes)
@@ -81,10 +86,21 @@ namespace AsmResolver.DotNet.Cloning
         /// Adds a single method to the list of members to clone.
         /// </summary>
         /// <param name="method">The method to include.</param>
-        /// <returns>The metadata cloner that the types were added to.</returns>
+        /// <returns>The metadata cloner that the method is added to.</returns>
         public MetadataCloner Include(MethodDefinition method)
         {
             _methodsToClone.Add(method);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a single field to the list of members to clone.
+        /// </summary>
+        /// <param name="field">The field to include.</param>
+        /// <returns>The metadata cloner that the field is added to.</returns>
+        public MetadataCloner Include(FieldDefinition field)
+        {
+            _fieldsToClone.Add(field);
             return this;
         }
 
@@ -106,6 +122,7 @@ namespace AsmResolver.DotNet.Cloning
         {
             CreateTypeStubs(context);
             CreateMethodStubs(context);
+            CreateFieldStubs(context);
         }
 
         private void CreateTypeStubs(MetadataCloneContext context)
@@ -120,25 +137,11 @@ namespace AsmResolver.DotNet.Cloning
             context.ClonedMembers.Add(type, typeStub);
         }
 
-        private void CreateMethodStubs(MetadataCloneContext context)
-        {
-            foreach (var method in _methodsToClone)
-            {
-                var stub = CreateMethodStub(context, method);
-                
-                // If method's declaring type is cloned as well, add the cloned method to the cloned type.
-                if (context.ClonedMembers.TryGetValue(method.DeclaringType, out var member)
-                    && member is TypeDefinition declaringType)
-                {
-                    declaringType.Methods.Add(stub);
-                }
-            }
-        }
-
         private void DeepCopyMembers(MetadataCloneContext context)
         {
             DeepCopyTypes(context);
             DeepCopyMethods(context);
+            DeepCopyFields(context);
         }
 
         private void DeepCopyTypes(MetadataCloneContext context)
@@ -151,12 +154,6 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedType = (TypeDefinition) context.ClonedMembers[type];
             clonedType.BaseType = context.Importer.ImportType(type.BaseType);
-        }
-
-        private void DeepCopyMethods(MetadataCloneContext context)
-        {
-            foreach (var method in _methodsToClone)
-                DeepCopyMethod(context, method);
         }
 
     }

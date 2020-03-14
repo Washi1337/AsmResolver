@@ -389,7 +389,7 @@ namespace AsmResolver.DotNet
                 ImportFieldSignature(field.Signature));
         }
 
-        private FieldSignature ImportFieldSignature(FieldSignature signature)
+        public FieldSignature ImportFieldSignature(FieldSignature signature)
         {
             return new FieldSignature(signature.Attributes, ImportTypeSignature(signature.FieldType));
         }

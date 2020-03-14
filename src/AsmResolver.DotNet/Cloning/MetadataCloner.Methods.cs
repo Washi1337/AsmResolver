@@ -8,14 +8,27 @@ namespace AsmResolver.DotNet.Cloning
 {
     public partial class MetadataCloner
     {
+        private void CreateMethodStubs(MetadataCloneContext context)
+        {
+            foreach (var method in _methodsToClone)
+            {
+                var stub = CreateMethodStub(context, method);
+                
+                // If method's declaring type is cloned as well, add the cloned method to the cloned type.
+                if (context.ClonedMembers.TryGetValue(method.DeclaringType, out var member)
+                    && member is TypeDefinition declaringType)
+                {
+                    declaringType.Methods.Add(stub);
+                }
+            }
+        }
+        
         private MethodDefinition CreateMethodStub(MetadataCloneContext context, MethodDefinition method)
         {
             var clonedMethod = new MethodDefinition(method.Name, method.Attributes,
                 context.Importer.ImportMethodSignature(method.Signature));
             clonedMethod.ImplAttributes = method.ImplAttributes;
 
-            // Clone parameters.
-            CloneParameterDefinitionsInMethod(method, clonedMethod);
             clonedMethod.Parameters.PullUpdatesFromMethodSignature();
 
             context.ClonedMembers[method] = clonedMethod;
@@ -34,9 +47,17 @@ namespace AsmResolver.DotNet.Cloning
             return clonedParameterDef;
         }
 
+        private void DeepCopyMethods(MetadataCloneContext context)
+        {
+            foreach (var method in _methodsToClone)
+                DeepCopyMethod(context, method);
+        }
+
         private void DeepCopyMethod(MetadataCloneContext context, MethodDefinition method)
         {
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
+            
+            CloneParameterDefinitionsInMethod(method, clonedMethod);
             
             if (method.CilMethodBody != null)
                 clonedMethod.CilMethodBody = CloneCilMethodBody(context, method);
