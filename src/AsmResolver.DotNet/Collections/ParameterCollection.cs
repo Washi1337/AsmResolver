@@ -79,10 +79,17 @@ namespace AsmResolver.DotNet.Collections
 
         private void EnsureAllParametersCreated()
         {
-            ThisParameter = _hasThis 
-                ? new Parameter(this, -1, 0) 
-                : null;
-            
+            // Update this parameter if necessary.
+            if (!_hasThis)
+            {
+                ThisParameter = null;
+            }
+            else
+            {
+                if (ThisParameter is null)
+                    ThisParameter = new Parameter(this, -1, 0);
+            }
+
             int signatureCount = _owner.Signature.ParameterTypes.Count;
 
             // Add missing parameters.
