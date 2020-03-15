@@ -177,6 +177,7 @@ namespace AsmResolver.DotNet.Builder
             _fieldTokens.Add(field, token);
             AddCustomAttributes(token, field);
             AddConstant(token, field.Constant);
+            AddImplementationMap(token, field.ImplementationMap);
             return token;
         }
 
@@ -195,6 +196,7 @@ namespace AsmResolver.DotNet.Builder
             var token = table.Add(row, method.MetadataToken.Rid);
             _methodTokens.Add(method, token);
             AddCustomAttributes(token, method);
+            AddImplementationMap(token, method.ImplementationMap);
             return token;
         }
 

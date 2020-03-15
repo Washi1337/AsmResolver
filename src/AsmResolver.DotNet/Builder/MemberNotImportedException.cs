@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Builder
         /// Creates a new instance of the <see cref="MemberNotImportedException"/>.
         /// </summary>
         /// <param name="member">The member that was not imported.</param>
-        public MemberNotImportedException(IMemberDescriptor member)
+        public MemberNotImportedException(IMetadataMember member)
             : base($"Member {member} was not imported into the module.")
         {
             Member = member;
@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Builder
         /// <summary>
         /// Gets the member that was not imported.
         /// </summary>
-        public IMemberDescriptor Member
+        public IMetadataMember Member
         {
             get;
         }

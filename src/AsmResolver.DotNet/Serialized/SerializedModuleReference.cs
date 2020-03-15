@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -25,6 +26,8 @@ namespace AsmResolver.DotNet.Serialized
         {
             _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
+
+            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = parentModule;
         }
 
         /// <inheritdoc />

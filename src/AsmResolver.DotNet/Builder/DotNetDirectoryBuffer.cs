@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Builder
         private void AssertIsImported(IModuleProvider member)
         {
             if (member.Module != Module)
-                throw new MemberNotImportedException((IMemberDescriptor) member);
+                throw new MemberNotImportedException((IMetadataMember) member);
         }
 
         /// <summary>
@@ -280,6 +280,16 @@ namespace AsmResolver.DotNet.Builder
 
             var row = new ClassLayoutRow(layout.PackingSize, layout.ClassSize, ownerToken.Rid);
             return table.Add(row, layout.MetadataToken.Rid);
+        }
+        
+        private MetadataToken AddModuleReference(ModuleReference reference)
+        {
+            AssertIsImported(reference);
+            
+            var table = Metadata.TablesStream.GetTable<ModuleReferenceRow>(TableIndex.ModuleRef);
+
+            var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
+            return table.Add(row, reference.MetadataToken.Rid);
         }
     }
 }

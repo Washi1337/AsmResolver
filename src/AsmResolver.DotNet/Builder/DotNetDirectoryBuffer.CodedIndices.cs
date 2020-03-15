@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Builder
     {
         private uint AddResolutionScope(IResolutionScope scope)
         {
-            if (scope == null)
+            if (scope is null)
                 return 0;
             
             AssertIsImported(scope);
@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet.Builder
             {
                 AssemblyReference assemblyReference => AddAssemblyReference(assemblyReference),
                 TypeReference typeReference => AddTypeReference(typeReference),
+                ModuleReference moduleReference => AddModuleReference(moduleReference),
                 ModuleDefinition _ => 0u,
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
             };
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddTypeDefOrRef(ITypeDefOrRef type)
         {
-            if (type == null)
+            if (type is null)
                 return 0;
             
             AssertIsImported(type);
@@ -50,7 +51,7 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddMemberRefParent(IMemberRefParent parent)
         {
-            if (parent == null)
+            if (parent is null)
                 return 0;
             
             AssertIsImported(parent);
@@ -72,7 +73,7 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddMethodDefOrRef(IMethodDefOrRef method)
         {
-            if (method == null)
+            if (method is null)
                 return 0;
 
             AssertIsImported(method);
@@ -91,7 +92,7 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddCustomAttributeType(ICustomAttributeType constructor)
         {
-            if (constructor == null)
+            if (constructor is null)
                 return 0;
 
             AssertIsImported(constructor);
@@ -110,7 +111,7 @@ namespace AsmResolver.DotNet.Builder
 
         private MetadataToken AddConstant(MetadataToken ownerToken, Constant constant)
         {
-            if (constant == null)
+            if (constant is null)
                 return 0;
 
             var table = Metadata.TablesStream.GetTable<ConstantRow>(TableIndex.Constant);
@@ -122,6 +123,23 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.BlobStream.GetBlobIndex(this, constant.Value));
 
             return table.Add(row, constant.MetadataToken.Rid);
+        }
+
+        private MetadataToken AddImplementationMap(MetadataToken ownerToken, ImplementationMap implementationMap)
+        {
+            if (implementationMap is null)
+                return 0;
+            
+            var table = Metadata.TablesStream.GetTable<ImplementationMapRow>(TableIndex.ImplMap);
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.MemberForwarded);
+
+            var row = new ImplementationMapRow(
+                implementationMap.Attributes,
+                encoder.EncodeToken(ownerToken),
+                Metadata.StringsStream.GetStringIndex(implementationMap.Name),
+                AddModuleReference(implementationMap.Scope).Rid);
+
+            return table.Add(row, implementationMap.MetadataToken.Rid);
         }
 
     }
