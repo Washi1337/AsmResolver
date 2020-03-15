@@ -1,5 +1,6 @@
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet
 {
@@ -30,11 +31,13 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="scope">The scope that declares the imported member.</param>
         /// <param name="name">The name of the imported member.</param>
-        public ImplementationMap(ModuleReference scope, string name)
+        /// <param name="attributes">The attributes associated to the implementation mapping.</param>
+        public ImplementationMap(ModuleReference scope, string name, ImplementationMapAttributes attributes)
             : this(new MetadataToken(TableIndex.ImplMap, 0))
         {
             Scope = scope;
             Name = name;
+            Attributes = attributes;
         }
         
         /// <inheritdoc />
@@ -42,6 +45,15 @@ namespace AsmResolver.DotNet
         {
             get;
             protected set;
+        }
+
+        /// <summary>
+        /// Gets the attributes associated to the implementation mapping.
+        /// </summary>
+        public ImplementationMapAttributes Attributes
+        {
+            get;
+            set;
         }
 
         /// <summary>

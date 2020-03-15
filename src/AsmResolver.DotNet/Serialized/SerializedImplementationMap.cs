@@ -26,6 +26,8 @@ namespace AsmResolver.DotNet.Serialized
         {
             _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
             _row = row;
+
+            Attributes = _row.Attributes;
         }
 
         /// <inheritdoc />
