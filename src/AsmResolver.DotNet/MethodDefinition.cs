@@ -570,6 +570,11 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the method is a (class) constructor.
+        /// </summary>
+        public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && (Name == ".cctor" || Name == ".ctor");
+
         MethodDefinition IMethodDescriptor.Resolve() => this;
 
         /// <summary>
