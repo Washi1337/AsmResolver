@@ -575,7 +575,7 @@ namespace AsmResolver.DotNet
         /// Obtains the global scope type of the .NET module.
         /// </summary>
         /// <returns>The module type.</returns>
-        public TypeDefinition GetModuleType() => TopLevelTypes[0];
+        public TypeDefinition GetModuleType() => TopLevelTypes.Count > 0 ? TopLevelTypes[0] : null;
 
         /// <summary>
         /// Obtains the name of the module definition.
