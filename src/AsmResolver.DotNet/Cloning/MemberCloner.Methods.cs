@@ -35,15 +35,10 @@ namespace AsmResolver.DotNet.Cloning
             return clonedMethod;
         }
 
-        private void CloneParameterDefinitionsInMethod(MethodDefinition method, MethodDefinition clonedMethod)
-        {
-            foreach (var parameterDef in method.ParameterDefinitions)
-                clonedMethod.ParameterDefinitions.Add(CloneParameterDefinition(parameterDef));
-        }
-
-        private ParameterDefinition CloneParameterDefinition(ParameterDefinition parameterDef)
+        private ParameterDefinition CloneParameterDefinition(MemberCloneContext context, ParameterDefinition parameterDef)
         {
             var clonedParameterDef = new ParameterDefinition(parameterDef.Sequence, parameterDef.Name, parameterDef.Attributes);
+            clonedParameterDef.Constant = CloneConstant(context, parameterDef.Constant);
             return clonedParameterDef;
         }
 
@@ -57,13 +52,19 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
             
-            CloneParameterDefinitionsInMethod(method, clonedMethod);
+            CloneParameterDefinitionsInMethod(context, method, clonedMethod);
             
             if (method.CilMethodBody != null)
                 clonedMethod.CilMethodBody = CloneCilMethodBody(context, method);
             
             CloneCustomAttributes(context, method, clonedMethod);
             clonedMethod.ImplementationMap = CloneImplementationMap(context, method.ImplementationMap);
+        }
+
+        private void CloneParameterDefinitionsInMethod(MemberCloneContext context, MethodDefinition method, MethodDefinition clonedMethod)
+        {
+            foreach (var parameterDef in method.ParameterDefinitions)
+                clonedMethod.ParameterDefinitions.Add(CloneParameterDefinition(context, parameterDef));
         }
 
         private CilMethodBody CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)

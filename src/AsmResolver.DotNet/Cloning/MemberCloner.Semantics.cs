@@ -25,6 +25,7 @@ namespace AsmResolver.DotNet.Cloning
 
             CloneSemantics(context, property, clonedProperty);
             CloneCustomAttributes(context, property, clonedProperty);
+            property.Constant = CloneConstant(context, property.Constant);
 
             return clonedProperty;
         }

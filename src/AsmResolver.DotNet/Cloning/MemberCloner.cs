@@ -226,7 +226,7 @@ namespace AsmResolver.DotNet.Cloning
 
             // Fixed args.
             foreach (var argument in attribute.Signature.FixedArguments)
-                clonedSignature.FixedArguments.Add(CloneCustomAttributeArgument(context, argument, clonedSignature));
+                clonedSignature.FixedArguments.Add(CloneCustomAttributeArgument(context, argument));
 
             // Named args.
             foreach (var namedArgument in attribute.Signature.NamedArguments)
@@ -235,7 +235,7 @@ namespace AsmResolver.DotNet.Cloning
                     namedArgument.MemberType,
                     namedArgument.MemberName, 
                     namedArgument.ArgumentType,
-                    CloneCustomAttributeArgument(context, namedArgument.Argument, clonedSignature));
+                    CloneCustomAttributeArgument(context, namedArgument.Argument));
                 
                 clonedSignature.NamedArguments.Add(clonedArgument);
             }
@@ -246,8 +246,7 @@ namespace AsmResolver.DotNet.Cloning
             return clonedAttribute;
         }
 
-        private static CustomAttributeArgument CloneCustomAttributeArgument(MemberCloneContext context, CustomAttributeArgument argument,
-            CustomAttributeSignature clonedSignature)
+        private static CustomAttributeArgument CloneCustomAttributeArgument(MemberCloneContext context, CustomAttributeArgument argument)
         {
             var clonedArgument = new CustomAttributeArgument(context.Importer.ImportTypeSignature(argument.ArgumentType));
             clonedArgument.IsNullArray = argument.IsNullArray;
@@ -263,6 +262,13 @@ namespace AsmResolver.DotNet.Cloning
         {
             return map != null
                 ? new ImplementationMap(context.Importer.ImportModule(map.Scope), map.Name, map.Attributes)
+                : null;
+        }
+
+        private Constant CloneConstant(MemberCloneContext context, Constant constant)
+        {
+            return constant != null
+                ? new Constant(constant.Type, new DataBlobSignature(constant.Value.Data))
                 : null;
         }
     }

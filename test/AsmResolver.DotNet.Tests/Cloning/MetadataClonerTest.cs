@@ -174,5 +174,16 @@ namespace AsmResolver.DotNet.Tests.Cloning
             Assert.Equal(method.ImplementationMap.Scope.Name, clonedMethod.ImplementationMap.Scope.Name);
             Assert.Equal(method.ImplementationMap.Attributes, clonedMethod.ImplementationMap.Attributes);
         }
+
+        [Fact]
+        public void CloneConstant()
+        {
+            var clonedMethod = CloneMethod(nameof(Miscellaneous), nameof(Miscellaneous.OptionalParameter), out var method);
+            
+            Assert.NotEmpty(clonedMethod.ParameterDefinitions);
+            Assert.NotNull(clonedMethod.ParameterDefinitions[0].Constant);
+            Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Type, method.ParameterDefinitions[0].Constant.Type);
+            Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Value.Data, method.ParameterDefinitions[0].Constant.Value.Data);
+        }
     }
 }

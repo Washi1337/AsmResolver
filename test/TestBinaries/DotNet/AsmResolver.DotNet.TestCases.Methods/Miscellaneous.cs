@@ -33,5 +33,9 @@ namespace AsmResolver.DotNet.TestCases.Methods
         public void MethodB(int x)
         {
         }
+
+        public void OptionalParameter(int x = 123)
+        {
+        }
     }
 }
