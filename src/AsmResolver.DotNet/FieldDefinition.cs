@@ -15,12 +15,15 @@ namespace AsmResolver.DotNet
         IFieldDescriptor, 
         IHasCustomAttribute, 
         IHasConstant,
+        IMemberForwarded,
         IOwnedCollectionElement<TypeDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<FieldSignature> _signature;
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<Constant> _constant;
+        private readonly LazyVariable<ImplementationMap> _implementationMap;
+
         private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
@@ -34,6 +37,7 @@ namespace AsmResolver.DotNet
             _signature = new LazyVariable<FieldSignature>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
             _constant = new LazyVariable<Constant>(GetConstant);
+            _implementationMap = new LazyVariable<ImplementationMap>(GetImplementationMap);
         }
 
         /// <summary>
@@ -312,6 +316,13 @@ namespace AsmResolver.DotNet
             set => _constant.Value = value;
         }
 
+        /// <inheritdoc />
+        public ImplementationMap ImplementationMap
+        {
+            get => _implementationMap.Value;
+            set => _implementationMap.Value = value;
+        }
+        
         FieldDefinition IFieldDescriptor.Resolve() => this;
 
         /// <summary>
@@ -360,8 +371,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual Constant GetConstant() => null;
 
+        /// <summary>
+        /// Obtains the platform invoke information assigned to the field.
+        /// </summary>
+        /// <returns>The mapping.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ImplementationMap"/> property.
+        /// </remarks>
+        protected virtual ImplementationMap GetImplementationMap() => null;
+
         /// <inheritdoc />
         public override string ToString() => FullName;
-
     }
 }

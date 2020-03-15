@@ -35,6 +35,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
         private OneToManyRelation<MetadataToken, uint> _interfaces;
         private OneToOneRelation<MetadataToken, uint> _classLayouts;
+        private OneToOneRelation<MetadataToken, uint> _implementationMaps;
 
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -433,6 +434,41 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureClassLayoutsInitialized();
             return _classLayouts.GetValue(ownerToken);
+        }
+
+        private void EnsureImplementationMapsInitialized()
+        {
+            if (_implementationMaps is null)
+                Interlocked.CompareExchange(ref _implementationMaps, InitializeImplementationMaps(), null);
+        }
+
+        private OneToOneRelation<MetadataToken, uint> InitializeImplementationMaps()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var mapTable = tablesStream.GetTable<ImplementationMapRow>(TableIndex.ImplMap);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
+            
+            var maps = new OneToOneRelation<MetadataToken, uint>();
+            for (int i = 0; i < mapTable.Count; i++)
+            {
+                var ownerToken = encoder.DecodeIndex(mapTable[i].MemberForwarded);
+                uint mapRid = (uint) (i + 1);
+                maps.Add(ownerToken, mapRid);
+            }
+
+            return maps;
+        }
+
+        internal uint GetImplementationMapRid(MetadataToken ownerToken)
+        {
+            EnsureImplementationMapsInitialized();
+            return _implementationMaps.GetValue(ownerToken);
+        }
+
+        internal MetadataToken GetImplementationMapOwner(uint mapRid)
+        {
+            EnsureImplementationMapsInitialized();
+            return _implementationMaps.GetKey(mapRid);
         }
 
         /// <inheritdoc />

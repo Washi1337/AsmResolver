@@ -79,6 +79,15 @@ namespace AsmResolver.DotNet.Serialized
             _parentModule.ReadParameters.MethodBodyReader.ReadMethodBody(this, _row);
 
         /// <inheritdoc />
+        protected override ImplementationMap GetImplementationMap()
+        {
+            uint mapRid = _parentModule.GetImplementationMapRid(MetadataToken);
+            return _parentModule.TryLookupMember(new MetadataToken(TableIndex.ImplMap, mapRid), out var member)
+                ? member as ImplementationMap
+                : null;
+        }
+
+        /// <inheritdoc />
         protected override IList<GenericParameter> GetGenericParameters()
         {
             var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);

@@ -58,6 +58,15 @@ namespace AsmResolver.DotNet.Serialized
             _parentModule.GetConstant(MetadataToken);
 
         /// <inheritdoc />
+        protected override ImplementationMap GetImplementationMap()
+        {
+            uint mapRid = _parentModule.GetImplementationMapRid(MetadataToken);
+            return _parentModule.TryLookupMember(new MetadataToken(TableIndex.ImplMap, mapRid), out var member)
+                ? member as ImplementationMap
+                : null;
+        }
+
+        /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
             _parentModule.GetCustomAttributeCollection(this);
     }

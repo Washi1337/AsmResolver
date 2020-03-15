@@ -18,12 +18,14 @@ namespace AsmResolver.DotNet
         IMemberRefParent, 
         ICustomAttributeType,
         IHasGenericParameters,
+        IMemberForwarded,
         IManagedEntrypoint
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<MethodSignature> _signature;
         private readonly LazyVariable<MethodBody> _methodBody;
+        private readonly LazyVariable<ImplementationMap> _implementationMap;
         private IList<ParameterDefinition> _parameterDefinitions;
         private ParameterCollection _parameters;
         private IList<CustomAttribute> _customAttributes;
@@ -39,7 +41,8 @@ namespace AsmResolver.DotNet
             _name  =new LazyVariable<string>(GetName);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
             _signature = new LazyVariable<MethodSignature>(GetSignature);
-            _methodBody= new LazyVariable<MethodBody>(GetBody);
+            _methodBody = new LazyVariable<MethodBody>(GetBody);
+            _implementationMap = new LazyVariable<ImplementationMap>(GetImplementationMap);
         }
 
         /// <summary>
@@ -549,6 +552,13 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public ImplementationMap ImplementationMap
+        {
+            get => _implementationMap.Value;
+            set => _implementationMap.Value = value;
+        }
+
+        /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
             get
@@ -623,6 +633,15 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual MethodBody GetBody() => null;
 
+        /// <summary>
+        /// Obtains the platform invoke information assigned to the method.
+        /// </summary>
+        /// <returns>The mapping.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="ImplementationMap"/> property.
+        /// </remarks>
+        protected virtual ImplementationMap GetImplementationMap() => null;
+        
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
         /// </summary>
