@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="module">The module to import.</param>
         /// <returns>The imported module.</returns>
-        protected virtual ModuleReference ImportModule(ModuleReference module)
+        public virtual ModuleReference ImportModule(ModuleReference module)
         {
             if (module.Module == _module)
                 return module;

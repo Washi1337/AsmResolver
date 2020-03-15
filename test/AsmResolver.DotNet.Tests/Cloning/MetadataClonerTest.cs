@@ -164,5 +164,15 @@ namespace AsmResolver.DotNet.Tests.Cloning
             Assert.Equal(3, references.Length);
             Assert.All(references, method => Assert.Contains(result.ClonedMembers, descriptor => descriptor == method));
         }
+
+        [Fact]
+        public void CloneImplMap()
+        {
+            var clonedMethod = CloneMethod(nameof(PlatformInvoke), nameof(PlatformInvoke.Method), out var method);
+            Assert.NotNull(clonedMethod.ImplementationMap);
+            Assert.Equal(method.ImplementationMap.Name, clonedMethod.ImplementationMap.Name);
+            Assert.Equal(method.ImplementationMap.Scope.Name, clonedMethod.ImplementationMap.Scope.Name);
+            Assert.Equal(method.ImplementationMap.Attributes, clonedMethod.ImplementationMap.Attributes);
+        }
     }
 }

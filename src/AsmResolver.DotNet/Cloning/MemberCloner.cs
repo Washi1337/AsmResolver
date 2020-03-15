@@ -258,5 +258,12 @@ namespace AsmResolver.DotNet.Cloning
             
             return clonedArgument;
         }
+
+        private ImplementationMap CloneImplementationMap(MemberCloneContext context, ImplementationMap map)
+        {
+            return map != null
+                ? new ImplementationMap(context.Importer.ImportModule(map.Scope), map.Name, map.Attributes)
+                : null;
+        }
     }
 }
