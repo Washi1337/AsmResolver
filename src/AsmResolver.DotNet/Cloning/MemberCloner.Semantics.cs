@@ -24,6 +24,7 @@ namespace AsmResolver.DotNet.Cloning
                 context.Importer.ImportPropertySignature(property.Signature));
 
             CloneSemantics(context, property, clonedProperty);
+            CloneCustomAttributes(context, property, clonedProperty);
 
             return clonedProperty;
         }
@@ -50,6 +51,7 @@ namespace AsmResolver.DotNet.Cloning
                 context.Importer.ImportType(@event.EventType));
 
             CloneSemantics(context, @event, clonedEvent);
+            CloneCustomAttributes(context, @event, clonedEvent);
 
             return clonedEvent;
         }

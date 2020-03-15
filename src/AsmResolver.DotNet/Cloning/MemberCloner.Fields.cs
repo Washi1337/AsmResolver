@@ -30,6 +30,7 @@ namespace AsmResolver.DotNet.Cloning
                 field.Attributes,
                 context.Importer.ImportFieldSignature(field.Signature));
 
+            context.ClonedMembers.Add(field, clonedField);
             return clonedField;
         }
 
@@ -41,6 +42,8 @@ namespace AsmResolver.DotNet.Cloning
 
         private void DeepCopyField(MemberCloneContext context, FieldDefinition field)
         {
+            var clonedField = (FieldDefinition) context.ClonedMembers[field];
+            CloneCustomAttributes(context, field, clonedField);
         }
     }
 }

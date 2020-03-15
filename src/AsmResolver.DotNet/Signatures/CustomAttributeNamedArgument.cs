@@ -28,6 +28,18 @@ namespace AsmResolver.DotNet.Signatures
             return result;
         }
 
+        private CustomAttributeNamedArgument()
+        {
+        }
+
+        public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType memberType, string memberName, TypeSignature argumentType, CustomAttributeArgument argument)
+        {
+            MemberType = memberType;
+            MemberName = memberName;
+            ArgumentType = argumentType;
+            Argument = argument;
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether the referenced member is a field or a property.
         /// </summary>

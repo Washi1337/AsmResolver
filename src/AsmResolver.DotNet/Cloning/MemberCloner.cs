@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -198,7 +199,7 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedType = (TypeDefinition) context.ClonedMembers[type];
             clonedType.BaseType = context.Importer.ImportType(type.BaseType);
-
+            
             // If the type is nested and the declaring type is cloned as well, we should add it to the cloned type. 
             if (type.IsNested 
                 && context.ClonedMembers.TryGetValue(type.DeclaringType, out var member)
@@ -206,7 +207,56 @@ namespace AsmResolver.DotNet.Cloning
             {
                 clonedDeclaringType.NestedTypes.Add(clonedType);
             }
+
+            CloneCustomAttributes(context, type, clonedType);
         }
 
+        private void CloneCustomAttributes(
+            MemberCloneContext context, 
+            IHasCustomAttribute sourceProvider,
+            IHasCustomAttribute clonedProvider)
+        {
+            foreach (var attribute in sourceProvider.CustomAttributes)
+                clonedProvider.CustomAttributes.Add(CloneCustomAttribute(context, attribute));
+        }
+
+        private CustomAttribute CloneCustomAttribute(MemberCloneContext context, CustomAttribute attribute)
+        {
+            var clonedSignature = new CustomAttributeSignature();
+
+            // Fixed args.
+            foreach (var argument in attribute.Signature.FixedArguments)
+                clonedSignature.FixedArguments.Add(CloneCustomAttributeArgument(context, argument, clonedSignature));
+
+            // Named args.
+            foreach (var namedArgument in attribute.Signature.NamedArguments)
+            {
+                var clonedArgument = new CustomAttributeNamedArgument(
+                    namedArgument.MemberType,
+                    namedArgument.MemberName, 
+                    namedArgument.ArgumentType,
+                    CloneCustomAttributeArgument(context, namedArgument.Argument, clonedSignature));
+                
+                clonedSignature.NamedArguments.Add(clonedArgument);
+            }
+
+            var clonedAttribute = new CustomAttribute(
+                (ICustomAttributeType) context.Importer.ImportMethod(attribute.Constructor),
+                clonedSignature);
+            return clonedAttribute;
+        }
+
+        private static CustomAttributeArgument CloneCustomAttributeArgument(MemberCloneContext context, CustomAttributeArgument argument,
+            CustomAttributeSignature clonedSignature)
+        {
+            var clonedArgument = new CustomAttributeArgument(context.Importer.ImportTypeSignature(argument.ArgumentType));
+            clonedArgument.IsNullArray = argument.IsNullArray;
+            
+            // Copy all elements.
+            foreach (var element in argument.Elements)
+                clonedArgument.Elements.Add(new CustomAttributeArgumentElement(element.Value));
+            
+            return clonedArgument;
+        }
     }
 }

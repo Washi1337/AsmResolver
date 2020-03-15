@@ -61,6 +61,8 @@ namespace AsmResolver.DotNet.Cloning
             
             if (method.CilMethodBody != null)
                 clonedMethod.CilMethodBody = CloneCilMethodBody(context, method);
+            
+            CloneCustomAttributes(context, method, clonedMethod);
         }
 
         private CilMethodBody CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)
