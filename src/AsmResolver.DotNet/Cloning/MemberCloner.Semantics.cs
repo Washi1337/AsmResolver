@@ -1,8 +1,8 @@
 namespace AsmResolver.DotNet.Cloning
 {
-    public partial class MetadataCloner
+    public partial class MemberCloner
     {
-        private void DeepCopyProperties(MetadataCloneContext context)
+        private void DeepCopyProperties(MemberCloneContext context)
         {
             foreach (var property in _propertiesToClone)
             {
@@ -17,7 +17,7 @@ namespace AsmResolver.DotNet.Cloning
             }
         }
 
-        private PropertyDefinition DeepCopyProperty(MetadataCloneContext context, PropertyDefinition property)
+        private PropertyDefinition DeepCopyProperty(MemberCloneContext context, PropertyDefinition property)
         {
             var clonedProperty = new PropertyDefinition(property.Name,
                 property.Attributes,
@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Cloning
             return clonedProperty;
         }
         
-        private void DeepCopyEvents(MetadataCloneContext context)
+        private void DeepCopyEvents(MemberCloneContext context)
         {
             foreach (var @event in _eventsToClone)
             {
@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Cloning
             }
         }
 
-        private EventDefinition DeepCopyEvent(MetadataCloneContext context, EventDefinition @event)
+        private EventDefinition DeepCopyEvent(MemberCloneContext context, EventDefinition @event)
         {
             var clonedEvent = new EventDefinition(@event.Name,
                 @event.Attributes,
@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Cloning
             return clonedEvent;
         }
 
-        private static void CloneSemantics(MetadataCloneContext context, IHasSemantics semanticsProvider,
+        private static void CloneSemantics(MemberCloneContext context, IHasSemantics semanticsProvider,
             IHasSemantics clonedProvider)
         {
             foreach (var semantics in semanticsProvider.Semantics)

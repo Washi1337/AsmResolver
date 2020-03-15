@@ -6,13 +6,13 @@ namespace AsmResolver.DotNet.Cloning
     /// <summary>
     /// Provides a working space for a member cloning procedure.
     /// </summary>
-    public class MetadataCloneContext
+    public class MemberCloneContext
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="MetadataCloneContext"/> class.
+        /// Creates a new instance of the <see cref="MemberCloneContext"/> class.
         /// </summary>
         /// <param name="module">The target module to copy the cloned members into.</param>
-        public MetadataCloneContext(ModuleDefinition module)
+        public MemberCloneContext(ModuleDefinition module)
         {
             Module = module ?? throw new ArgumentNullException(nameof(module));
             Importer = new CloneContextAwareReferenceImporter(this);

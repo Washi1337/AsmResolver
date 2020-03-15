@@ -6,9 +6,9 @@ using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Cloning
 {
-    public partial class MetadataCloner
+    public partial class MemberCloner
     {
-        private void CreateFieldStubs(MetadataCloneContext context)
+        private void CreateFieldStubs(MemberCloneContext context)
         {
             foreach (var field in _fieldsToClone)
             {
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Cloning
             }
         }
         
-        private FieldDefinition CreateFieldStub(MetadataCloneContext context, FieldDefinition field)
+        private FieldDefinition CreateFieldStub(MemberCloneContext context, FieldDefinition field)
         {
             var clonedField = new FieldDefinition(
                 field.Name, 
@@ -33,13 +33,13 @@ namespace AsmResolver.DotNet.Cloning
             return clonedField;
         }
 
-        private void DeepCopyFields(MetadataCloneContext context)
+        private void DeepCopyFields(MemberCloneContext context)
         {
             foreach (var field in _fieldsToClone)
                 DeepCopyField(context, field);
         }
 
-        private void DeepCopyField(MetadataCloneContext context, FieldDefinition field)
+        private void DeepCopyField(MemberCloneContext context, FieldDefinition field)
         {
         }
     }

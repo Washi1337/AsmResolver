@@ -5,13 +5,13 @@ namespace AsmResolver.DotNet.Cloning
     /// </summary>
     public class CloneContextAwareReferenceImporter : ReferenceImporter
     {
-        private readonly MetadataCloneContext _context;
+        private readonly MemberCloneContext _context;
 
         /// <summary>
         /// Creates a new instance of the <see cref="CloneContextAwareReferenceImporter"/> class.
         /// </summary>
         /// <param name="context">The metadata cloning workspace.</param>
-        public CloneContextAwareReferenceImporter(MetadataCloneContext context)
+        public CloneContextAwareReferenceImporter(MemberCloneContext context)
             : base(context.Module)
         {
             _context = context;

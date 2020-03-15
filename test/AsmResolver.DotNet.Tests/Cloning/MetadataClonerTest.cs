@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             var targetModule = PrepareTempModule();
 
-            var result = new MetadataCloner(targetModule)
+            var result = new MemberCloner(targetModule)
                 .Include(method)
                 .Clone();
 
@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var sourceModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var targetModule = PrepareTempModule();
 
-            var result = new MetadataCloner(targetModule)
+            var result = new MemberCloner(targetModule)
                 .Include(sourceModule.TopLevelTypes.First(t => t.Name == "Program"))
                 .Clone();
 
@@ -121,7 +121,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             
             var targetModule = PrepareTempModule();
 
-            var result = new MetadataCloner(targetModule)
+            var result = new MemberCloner(targetModule)
                 .Include(type.Methods.First(m => m.Name == nameof(Miscellaneous.CallsToMethods)))
                 .Include(type.Methods.First(m => m.Name == nameof(Miscellaneous.MethodA)))
                 .Include(type.Methods.First(m => m.Name == nameof(Miscellaneous.MethodB)))
@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
             
             var targetModule = PrepareTempModule();
 
-            var result = new MetadataCloner(targetModule)
+            var result = new MemberCloner(targetModule)
                 .Include(type.NestedTypes.First(t=>t.Name == nameof(Miscellaneous.NestedClass)))
                 .Include(type.Methods.First(m => m.Name == nameof(Miscellaneous.NestedClassLocal)))
                 .Clone();

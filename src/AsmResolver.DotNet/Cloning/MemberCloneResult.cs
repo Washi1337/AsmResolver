@@ -5,13 +5,13 @@ namespace AsmResolver.DotNet.Cloning
     /// <summary>
     /// Provides information about the result of a metadata cloning procedure.
     /// </summary>
-    public class MetadataCloneResult
+    public class MemberCloneResult
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="MetadataCloneResult"/> class.
+        /// Creates a new instance of the <see cref="MemberCloneResult"/> class.
         /// </summary>
         /// <param name="clonedMembers">The cloned members.</param>
-        public MetadataCloneResult(IEnumerable<IMemberDescriptor> clonedMembers)
+        public MemberCloneResult(IEnumerable<IMemberDescriptor> clonedMembers)
         {
             ClonedMembers = new List<IMemberDescriptor>(clonedMembers);
         }

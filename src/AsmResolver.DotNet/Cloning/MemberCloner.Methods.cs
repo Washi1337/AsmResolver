@@ -6,9 +6,9 @@ using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Cloning
 {
-    public partial class MetadataCloner
+    public partial class MemberCloner
     {
-        private void CreateMethodStubs(MetadataCloneContext context)
+        private void CreateMethodStubs(MemberCloneContext context)
         {
             foreach (var method in _methodsToClone)
             {
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Cloning
             }
         }
         
-        private MethodDefinition CreateMethodStub(MetadataCloneContext context, MethodDefinition method)
+        private MethodDefinition CreateMethodStub(MemberCloneContext context, MethodDefinition method)
         {
             var clonedMethod = new MethodDefinition(method.Name, method.Attributes,
                 context.Importer.ImportMethodSignature(method.Signature));
@@ -47,13 +47,13 @@ namespace AsmResolver.DotNet.Cloning
             return clonedParameterDef;
         }
 
-        private void DeepCopyMethods(MetadataCloneContext context)
+        private void DeepCopyMethods(MemberCloneContext context)
         {
             foreach (var method in _methodsToClone)
                 DeepCopyMethod(context, method);
         }
 
-        private void DeepCopyMethod(MetadataCloneContext context, MethodDefinition method)
+        private void DeepCopyMethod(MemberCloneContext context, MethodDefinition method)
         {
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
             
@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Cloning
                 clonedMethod.CilMethodBody = CloneCilMethodBody(context, method);
         }
 
-        private CilMethodBody CloneCilMethodBody(MetadataCloneContext context, MethodDefinition method)
+        private CilMethodBody CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)
         {
             var body = method.CilMethodBody;
             
@@ -82,7 +82,7 @@ namespace AsmResolver.DotNet.Cloning
             return clonedBody;
         }
 
-        private void CloneLocalVariables(MetadataCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
+        private void CloneLocalVariables(MemberCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
         {
             foreach (var variable in body.LocalVariables)
             {
@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet.Cloning
             }
         }
 
-        private void CloneCilInstructions(MetadataCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
+        private void CloneCilInstructions(MemberCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
         {
             var branches = new List<CilInstruction>();
             var switches = new List<CilInstruction>();
@@ -126,7 +126,7 @@ namespace AsmResolver.DotNet.Cloning
             }
         }
 
-        private CilInstruction CloneInstruction(MetadataCloneContext context, CilMethodBody clonedBody, CilInstruction instruction)
+        private CilInstruction CloneInstruction(MemberCloneContext context, CilMethodBody clonedBody, CilInstruction instruction)
         {
             var clonedInstruction = new CilInstruction(instruction.Offset, instruction.OpCode);
             switch (instruction.OpCode.OperandType)
@@ -184,7 +184,7 @@ namespace AsmResolver.DotNet.Cloning
             return clonedInstruction;
         }
 
-        private object CloneInlineTokOperand(MetadataCloneContext context, CilInstruction instruction)
+        private object CloneInlineTokOperand(MemberCloneContext context, CilInstruction instruction)
         {
             return instruction.Operand switch
             {
@@ -197,7 +197,7 @@ namespace AsmResolver.DotNet.Cloning
             };
         }
 
-        private static void CloneExceptionHandlers(MetadataCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
+        private static void CloneExceptionHandlers(MemberCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
         {
             foreach (var handler in body.ExceptionHandlers)
             {
