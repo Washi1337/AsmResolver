@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mime;
 using System.Threading;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -612,7 +616,62 @@ namespace AsmResolver.DotNet
 
             return null;
         }
+        
+        /// <summary>
+        /// Gets the static constructor that is executed when the CLR loads this type.
+        /// </summary>
+        /// <returns>The static constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition GetStaticConstructor()
+        {
+            return Methods.FirstOrDefault(m =>
+                m.IsPrivate
+                && m.IsConstructor
+                && m.IsStatic
+                && m.Parameters.Count == 0);
+        }
 
+        /// <summary>
+        /// Gets or creates the static constructor that is executed when the CLR loads this type.
+        /// </summary>
+        /// <returns>The static constructor, or <c>null</c> if none is present.</returns>
+        /// <remarks>
+        /// If the static constructor was not present in the type, it will be inserted as the first method in the type.
+        /// This method can only be used when the type has already been added to the metadata image.
+        /// </remarks>
+        public MethodDefinition GetOrCreateStaticConstructor() => GetOrCreateStaticConstructor(Module);
+
+        /// <summary>
+        /// Gets or creates the static constructor that is executed when the CLR loads this type.
+        /// </summary>
+        /// <param name="module">The image to use for creating the signature of the constructor if it is not present yet.</param>
+        /// <returns>The static constructor, or <c>null</c> if none is present.</returns>
+        /// <remarks>
+        /// If the static constructor was not present in the type, it will be inserted as the first method in the type.
+        /// </remarks>
+        public MethodDefinition GetOrCreateStaticConstructor(ModuleDefinition module)
+        {
+            var cctor = GetStaticConstructor();
+            if (cctor == null)
+            {
+                if (module == null)
+                    throw new ArgumentNullException(nameof(module));
+
+                cctor = new MethodDefinition(".cctor",
+                    MethodAttributes.Private 
+                    | MethodAttributes.Static 
+                    | MethodAttributes.SpecialName
+                    | MethodAttributes.RuntimeSpecialName,
+                    MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+
+                cctor.CilMethodBody = new CilMethodBody(cctor);
+                cctor.CilMethodBody.Instructions.Add(new CilInstruction(0, CilOpCodes.Ret));
+
+                Methods.Insert(0, cctor);
+            }
+
+            return cctor;
+        }
+        
         /// <summary>
         /// Obtains the namespace of the type definition.
         /// </summary>
