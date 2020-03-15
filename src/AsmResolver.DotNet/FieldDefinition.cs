@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Signatures;
@@ -315,12 +316,21 @@ namespace AsmResolver.DotNet
             get => _constant.Value;
             set => _constant.Value = value;
         }
-
+        
         /// <inheritdoc />
         public ImplementationMap ImplementationMap
         {
             get => _implementationMap.Value;
-            set => _implementationMap.Value = value;
+            set
+            {
+                if (value?.MemberForwarded is {})
+                    throw new ArgumentException("Cannot add an implementation map that was already added to another member.");
+                if (_implementationMap.Value is {})
+                    _implementationMap.Value.MemberForwarded = null;
+                _implementationMap.Value = value;
+                if (value is {})
+                    value.MemberForwarded = this;
+            }
         }
         
         FieldDefinition IFieldDescriptor.Resolve() => this;

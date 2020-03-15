@@ -33,7 +33,5 @@ namespace AsmResolver.DotNet.TestCases.Methods
         public void MethodB(int x)
         {
         }
-
-
     }
 }

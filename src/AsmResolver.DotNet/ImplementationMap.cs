@@ -61,8 +61,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         public IMemberForwarded MemberForwarded
         {
-            get;
-            internal set;
+            get => _memberForwarded.Value;
+            internal set => _memberForwarded.Value = value;
         }
 
         /// <inheritdoc />
