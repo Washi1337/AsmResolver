@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
@@ -552,6 +553,29 @@ namespace AsmResolver.DotNet
                     agenda.Enqueue(nestedType);
             }
         }
+  
+        /// <summary>
+        /// Gets the module static constructor of this metadata image. That is, the first method that is executed
+        /// upon loading the .NET module. 
+        /// </summary>
+        /// <returns>The module constructor, or <c>null</c> if none is present.</returns>
+        public MethodDefinition GetModuleConstructor() => GetModuleType()?.GetStaticConstructor();
+
+        /// <summary>
+        /// Gets or creates the module static constructor of this metadata image. That is, the first method that is
+        /// executed upon loading the .NET module. 
+        /// </summary>
+        /// <returns>The module constructor.</returns>
+        /// <remarks>
+        /// If the static constructor was not present in the image, the new one is automatically added.
+        /// </remarks>
+        public MethodDefinition GetOrCreateModuleConstructor() => GetModuleType().GetOrCreateStaticConstructor();
+
+        /// <summary>
+        /// Obtains the global scope type of the .NET module.
+        /// </summary>
+        /// <returns>The module type.</returns>
+        public TypeDefinition GetModuleType() => TopLevelTypes[0];
 
         /// <summary>
         /// Obtains the name of the module definition.
