@@ -22,7 +22,8 @@ namespace AsmResolver.DotNet.Builder
             Module = module;
             MethodBodySerializer = methodBodySerializer;
             Metadata = metadata;
-        }    
+            Resources = new DotNetResourcesDirectoryBuffer();
+        }
         
         /// <summary>
         /// Gets the module for which this .NET directory is built.
@@ -48,6 +49,14 @@ namespace AsmResolver.DotNet.Builder
             get;
         }
 
+        /// <summary>
+        /// Gets the .NET resources data directory buffer, containing all the resources data stored in the .NET module. 
+        /// </summary>
+        public DotNetResourcesDirectoryBuffer Resources
+        {
+            get;
+        }
+
         private void AssertIsImported(IModuleProvider member)
         {
             if (member.Module != Module)
@@ -62,6 +71,7 @@ namespace AsmResolver.DotNet.Builder
         {
             var directory = new DotNetDirectory();
             directory.Metadata = Metadata.CreateMetadata();
+            directory.DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null;
             directory.Entrypoint = GetEntrypoint();
             directory.Flags = Module.Attributes;
             return directory;

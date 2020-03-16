@@ -11,6 +11,7 @@ namespace AsmResolver.DotNet
     public class FileReference : IImplementation, IOwnedCollectionElement<ModuleDefinition>
     {
         private readonly LazyVariable<string> _name;
+        private readonly LazyVariable<byte[]> _hashValue;
 
         /// <summary>
         /// Initializes the file reference with a metadata token.
@@ -20,6 +21,7 @@ namespace AsmResolver.DotNet
         {
             MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
+            _hashValue = new LazyVariable<byte[]>(GetHashValue);
         }
 
         /// <summary>
@@ -90,7 +92,16 @@ namespace AsmResolver.DotNet
             get => Module;
             set => Module = value;
         }
-        
+
+        /// <summary>
+        /// Gets or sets the checksum of the referenced file.
+        /// </summary>
+        public byte[] HashValue
+        {
+            get => _hashValue.Value;
+            set => _hashValue.Value = value;
+        }
+
         /// <summary>
         /// Obtains the name of the referenced file.
         /// </summary>
@@ -99,5 +110,14 @@ namespace AsmResolver.DotNet
         /// This method is called upon initializing the <see cref="Name"/> property.
         /// </remarks>
         protected virtual string GetName() => null;
+
+        /// <summary>
+        /// Obtains the hash of the referenced file.
+        /// </summary>
+        /// <returns>The hash.</returns>
+        /// <remarks>
+        /// This method is called upon initializing the <see cref="Hash"/> property.
+        /// </remarks>
+        protected virtual byte[] GetHashValue() => null;
     }
 }

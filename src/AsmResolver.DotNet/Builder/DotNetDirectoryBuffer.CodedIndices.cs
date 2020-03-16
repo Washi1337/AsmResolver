@@ -142,5 +142,22 @@ namespace AsmResolver.DotNet.Builder
             return table.Add(row, implementationMap.MetadataToken.Rid);
         }
 
+        private uint AddImplementation(IImplementation implementation)
+        {
+            if (implementation is null)
+                return 0;
+
+            var token = implementation switch
+            {
+                AssemblyReference assemblyReference => AddAssemblyReference(assemblyReference),
+                ExportedType exportedType => AddExportedType(exportedType),
+                FileReference fileReference => AddFileReference(fileReference),
+                _ => throw new ArgumentOutOfRangeException(nameof(implementation))
+            };
+            
+            return Metadata.TablesStream
+                .GetIndexEncoder(CodedIndex.Implementation)
+                .EncodeToken(token);
+        }
     }
 }

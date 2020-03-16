@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -36,6 +37,14 @@ namespace AsmResolver.DotNet.Serialized
             return _parentModule.DotNetDirectory.Metadata
                 .GetStream<StringsStream>()
                 .GetStringByIndex(_row.Name);
+        }
+
+        /// <inheritdoc />
+        protected override byte[] GetHashValue()
+        {
+            return _parentModule.DotNetDirectory.Metadata
+                .GetStream<BlobStream>()
+                .GetBlobByIndex(_row.HashValue);
         }
     }
 }

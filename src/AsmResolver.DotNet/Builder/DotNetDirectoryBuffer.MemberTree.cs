@@ -1,4 +1,5 @@
-﻿using AsmResolver.DotNet.Collections;
+﻿using System.IO;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -92,6 +93,35 @@ namespace AsmResolver.DotNet.Builder
             
             AddCustomAttributes(token, module);
             AddTypeDefinitionsInModule(module);
+            AddResourcesInModule(module);
+        }
+
+        private void AddResourcesInModule(ModuleDefinition module)
+        {
+            foreach (var resource in module.Resources)
+                AddManifestResource(resource);
+        }
+
+        private MetadataToken AddManifestResource(ManifestResource resource)
+        {
+            uint offset = resource.Offset;
+            if (resource.IsEmbedded)
+            {
+                using var stream = new MemoryStream();
+                resource.EmbeddedDataSegment.Write(new BinaryStreamWriter(stream));
+                offset = Resources.GetResourceDataOffset(stream.ToArray());
+            }
+            
+            var table = Metadata.TablesStream.GetTable<ManifestResourceRow>(TableIndex.ManifestResource);
+            var row = new ManifestResourceRow(
+                offset,
+                resource.Attributes,
+                Metadata.StringsStream.GetStringIndex(resource.Name),
+                AddImplementation(resource.Implementation));
+
+            var token = table.Add(row, resource.MetadataToken.Rid);
+
+            return token;
         }
 
         private void AddTypeDefinitionsInModule(ModuleDefinition module)
@@ -317,6 +347,34 @@ namespace AsmResolver.DotNet.Builder
                     table[rid] = row;
                 }
             }
+        }
+
+        private MetadataToken AddExportedType(ExportedType exportedType)
+        {
+            var table = Metadata.TablesStream.GetTable<ExportedTypeRow>(TableIndex.ExportedType);
+
+            var row = new ExportedTypeRow(
+                exportedType.Attributes,
+                exportedType.TypeDefId,
+                Metadata.StringsStream.GetStringIndex(exportedType.Name),
+                Metadata.StringsStream.GetStringIndex(exportedType.Namespace),
+                AddImplementation(exportedType.Implementation));
+
+            var token = table.Add(row, exportedType.MetadataToken.Rid);
+            return token;
+        }
+
+        private MetadataToken AddFileReference(FileReference fileReference)
+        {
+            var table = Metadata.TablesStream.GetTable<FileReferenceRow>(TableIndex.File);
+
+            var row = new FileReferenceRow(
+                fileReference.Attributes,
+                Metadata.StringsStream.GetStringIndex(fileReference.Name),
+                Metadata.BlobStream.GetBlobIndex(fileReference.HashValue));
+
+            var token = table.Add(row, fileReference.MetadataToken.Rid);
+            return token;
         }
     }
 }
