@@ -529,6 +529,25 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        protected override IList<ManifestResource> GetResources()
+        {
+            var result = new OwnedCollection<ModuleDefinition, ManifestResource>(this);
+
+            var table = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable(TableIndex.ManifestResource);
+            
+            for (int i = 0; i < table.Count; i++)
+            {
+                var token = new MetadataToken(TableIndex.ManifestResource, (uint) i + 1);
+                if (_memberFactory.TryLookupMember(token, out var member) && member is ManifestResource resource)
+                    result.Add(resource);
+            }
+            
+            return result;
+        }
+
+        /// <inheritdoc />
         protected override IList<ExportedType> GetExportedTypes()
         {
             var result = new OwnedCollection<ModuleDefinition, ExportedType>(this);

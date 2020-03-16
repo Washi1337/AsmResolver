@@ -130,6 +130,7 @@ namespace AsmResolver.DotNet
         private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
         private IList<ModuleReference> _moduleReferences;
         private IList<FileReference> _fileReferences;
+        private IList<ManifestResource> _resources;
         private IList<ExportedType> _exportedTypes;
 
         /// <summary>
@@ -410,6 +411,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a collection of resources stored in the module.
+        /// </summary>
+        public IList<ManifestResource> Resources
+        {
+            get
+            {
+                if (_resources is null)
+                    Interlocked.CompareExchange(ref _resources, GetResources(), null);
+                return _resources;
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of types that are forwarded to another .NET module.
         /// </summary>
         public IList<ExportedType> ExportedTypes
@@ -653,6 +667,16 @@ namespace AsmResolver.DotNet
         protected virtual IList<FileReference> GetFileReferences() =>
             new OwnedCollection<ModuleDefinition, FileReference>(this);
 
+        /// <summary>
+        /// Obtains the list of resources stored in the module. 
+        /// </summary>
+        /// <returns>The resources.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Resources"/> property.
+        /// </remarks>
+        protected virtual IList<ManifestResource> GetResources() =>
+            new OwnedCollection<ModuleDefinition, ManifestResource>(this);
+        
         /// <summary>
         /// Obtains the list of types that are redirected to another external module. 
         /// </summary>

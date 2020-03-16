@@ -27,6 +27,7 @@ namespace AsmResolver.DotNet.Serialized
         private GenericParameter[] _genericParameters;
         private ModuleReference[] _moduleReferences;
         private FileReference[] _fileReferences;
+        private ManifestResource[] _resources;
         private ExportedType[] _exportedTypes;
         private Constant[] _constants;
         private ClassLayout[] _classLayouts;
@@ -60,6 +61,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.GenericParam => LookupGenericParameter(token),
                 TableIndex.ModuleRef => LookupModuleReference(token),
                 TableIndex.File => LookupFileReference(token),
+                TableIndex.ManifestResource => LookupManifestResource(token),
                 TableIndex.ExportedType => LookupExportedType(token),
                 TableIndex.Constant => LookupConstant(token),
                 TableIndex.ClassLayout => LookupClassLayout(token),
@@ -178,6 +180,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<FileReference, FileReferenceRow>(ref _fileReferences, token,
                 (m, t, r) => new SerializedFileReference(m, t, r));
+        }
+
+        private ManifestResource LookupManifestResource(MetadataToken token)
+        {
+            return LookupOrCreateMember<ManifestResource, ManifestResourceRow>(ref _resources, token,
+                (m, t, r) => new SerializedManifestResource(m, t, r));
         }
 
         private ExportedType LookupExportedType(MetadataToken token)
