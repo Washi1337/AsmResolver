@@ -299,7 +299,9 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetTable<ModuleReferenceRow>(TableIndex.ModuleRef);
 
             var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
-            return table.Add(row, reference.MetadataToken.Rid);
+            var token = table.Add(row, reference.MetadataToken.Rid);
+            AddCustomAttributes(token, reference);
+            return token;
         }
     }
 }
