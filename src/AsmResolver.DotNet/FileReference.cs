@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -8,10 +10,14 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to an external file that a .NET module depends on.
     /// </summary>
-    public class FileReference : IImplementation, IOwnedCollectionElement<ModuleDefinition>
+    public class FileReference : 
+        IImplementation, 
+        IHasCustomAttribute,
+        IOwnedCollectionElement<ModuleDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<byte[]> _hashValue;
+        private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
         /// Initializes the file reference with a metadata token.
@@ -102,6 +108,17 @@ namespace AsmResolver.DotNet
             set => _hashValue.Value = value;
         }
 
+        /// <inheritdoc />
+        public IList<CustomAttribute> CustomAttributes
+        {
+            get
+            {
+                if (_customAttributes is null)
+                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
+                return _customAttributes;
+            }
+        }
+
         /// <summary>
         /// Obtains the name of the referenced file.
         /// </summary>
@@ -119,5 +136,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initializing the <see cref="Hash"/> property.
         /// </remarks>
         protected virtual byte[] GetHashValue() => null;
+
+        /// <summary>
+        /// Obtains the list of custom attributes assigned to the member.
+        /// </summary>
+        /// <returns>The attributes</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
+        /// </remarks>
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
+            new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
     }
 }

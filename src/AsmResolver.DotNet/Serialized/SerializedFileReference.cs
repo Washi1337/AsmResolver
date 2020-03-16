@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -46,5 +47,9 @@ namespace AsmResolver.DotNet.Serialized
                 .GetStream<BlobStream>()
                 .GetBlobByIndex(_row.HashValue);
         }
+
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
     }
 }

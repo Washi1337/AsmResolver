@@ -375,6 +375,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.BlobStream.GetBlobIndex(fileReference.HashValue));
 
             var token = table.Add(row, fileReference.MetadataToken.Rid);
+            AddCustomAttributes(token, fileReference);
             return token;
         }
     }
