@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -53,5 +54,9 @@ namespace AsmResolver.DotNet.Serialized
                 ? member as IImplementation
                 : null;
         }
+
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
+            _parentModule.GetCustomAttributeCollection(this);
     }
 }

@@ -361,6 +361,7 @@ namespace AsmResolver.DotNet.Builder
                 AddImplementation(exportedType.Implementation));
 
             var token = table.Add(row, exportedType.MetadataToken.Rid);
+            AddCustomAttributes(token, exportedType);
             return token;
         }
 
