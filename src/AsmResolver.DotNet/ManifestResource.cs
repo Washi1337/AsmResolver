@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Threading;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -9,11 +11,16 @@ namespace AsmResolver.DotNet
     /// Represents a single manifest resource file either embedded into the .NET assembly, or put into a separate file.
     /// In this case, it contains also a reference to the file the resource is located in.
     /// </summary>
-    public class ManifestResource : IMetadataMember, INameProvider, IOwnedCollectionElement<ModuleDefinition>
+    public class ManifestResource : 
+        IMetadataMember, 
+        INameProvider,
+        IHasCustomAttribute,
+        IOwnedCollectionElement<ModuleDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<IImplementation> _implementation;
         private readonly LazyVariable<ISegment> _embeddedData;
+        private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
         /// Initializes the <see cref="ManifestResource"/> with a metadata token.
@@ -147,6 +154,17 @@ namespace AsmResolver.DotNet
             set => Module = value;
         }
 
+        /// <inheritdoc />
+        public IList<CustomAttribute> CustomAttributes
+        {
+            get
+            {
+                if (_customAttributes is null)
+                    Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
+                return _customAttributes;
+            }
+        }
+
         /// <summary>
         /// Gets the data stored in the manifest resource.
         /// </summary>
@@ -183,6 +201,16 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>The data, or <c>null</c> if the resource is not embedded.</returns>
         protected virtual ISegment GetEmbeddedDataSegment() => null;
+
+        /// <summary>
+        /// Obtains the list of custom attributes assigned to the member.
+        /// </summary>
+        /// <returns>The attributes</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
+        /// </remarks>
+        protected virtual IList<CustomAttribute> GetCustomAttributes() => 
+            new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <inheritdoc />
         public override string ToString() => Name;

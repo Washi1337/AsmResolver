@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -64,5 +65,9 @@ namespace AsmResolver.DotNet.Serialized
             var reader = _parentModule.DotNetDirectory.DotNetResources.CreateManifestResourceReader(_row.Offset);
             return reader is null ? null : DataSegment.FromReader(reader);
         }
+
+        /// <inheritdoc />
+        protected override IList<CustomAttribute> GetCustomAttributes() => 
+            _parentModule.GetCustomAttributeCollection(this);
     }
 }

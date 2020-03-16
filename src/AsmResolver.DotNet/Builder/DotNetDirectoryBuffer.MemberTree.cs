@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet.Builder
                 AddImplementation(resource.Implementation));
 
             var token = table.Add(row, resource.MetadataToken.Rid);
-
+            AddCustomAttributes(token, resource);
             return token;
         }
 
