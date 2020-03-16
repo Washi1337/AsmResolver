@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Builder
             };
 
             AddIfPresent(dotNetDirectory.Metadata);
-            AddIfPresent(dotNetDirectory.Resources);
+            AddIfPresent(dotNetDirectory.DotNetResources);
             AddIfPresent(dotNetDirectory.StrongName);
             AddIfPresent(dotNetDirectory.VTableFixups);
             AddIfPresent(dotNetDirectory.ExportAddressTable);

@@ -17,6 +17,7 @@
 
 using System;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Resources;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
@@ -60,7 +61,6 @@ namespace AsmResolver.PE.DotNet
             _vtableFixupsDirectory = DataDirectory.FromReader(reader);
             _exportsDirectory = DataDirectory.FromReader(reader);
             _nativeHeaderDirectory = DataDirectory.FromReader(reader);
-
         }
 
         /// <inheritdoc />
@@ -76,13 +76,12 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetResources()
+        protected override DotNetResourcesDirectory GetResources()
         {
             if (_resourcesDirectory.IsPresentInPE
                 && _peFile.TryCreateDataDirectoryReader(_resourcesDirectory, out var directoryReader))
             {
-                // TODO: interpretation instead of raw contents.
-                return DataSegment.FromReader(directoryReader);
+                return new SerializedDotNetResourcesDirectory(directoryReader);
             }
 
             return null;

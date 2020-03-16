@@ -17,6 +17,7 @@
 
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Resources;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet
@@ -27,7 +28,7 @@ namespace AsmResolver.PE.DotNet
     public class DotNetDirectory : SegmentBase, IDotNetDirectory
     {
         private readonly LazyVariable<IMetadata> _metadata;
-        private readonly LazyVariable<IReadableSegment> _resources;
+        private readonly LazyVariable<DotNetResourcesDirectory> _resources;
         private readonly LazyVariable<IReadableSegment> _strongName;
         private readonly LazyVariable<IReadableSegment> _codeManagerTable;
         private readonly LazyVariable<IReadableSegment> _exportAddressTable;
@@ -40,7 +41,7 @@ namespace AsmResolver.PE.DotNet
         public DotNetDirectory()
         {
             _metadata = new LazyVariable<IMetadata>(GetMetadata);
-            _resources = new LazyVariable<IReadableSegment>(GetResources);
+            _resources = new LazyVariable<DotNetResourcesDirectory>(GetResources);
             _strongName = new LazyVariable<IReadableSegment>(GetStrongName);
             _codeManagerTable = new LazyVariable<IReadableSegment>(GetCodeManagerTable);
             _exportAddressTable = new LazyVariable<IReadableSegment>(GetExportAddressTable);
@@ -84,7 +85,7 @@ namespace AsmResolver.PE.DotNet
         }
 
         /// <inheritdoc />
-        public IReadableSegment Resources
+        public DotNetResourcesDirectory DotNetResources
         {
             get => _resources.Value;
             set => _resources.Value = value;
@@ -143,7 +144,7 @@ namespace AsmResolver.PE.DotNet
             CreateDataDirectoryHeader(Metadata).Write(writer);
             writer.WriteUInt32((uint) Flags);
             writer.WriteUInt32(Entrypoint);
-            CreateDataDirectoryHeader(Resources).Write(writer);
+            CreateDataDirectoryHeader(DotNetResources).Write(writer);
             CreateDataDirectoryHeader(StrongName).Write(writer);
             CreateDataDirectoryHeader(CodeManagerTable).Write(writer);
             CreateDataDirectoryHeader(VTableFixups).Write(writer);
@@ -170,9 +171,9 @@ namespace AsmResolver.PE.DotNet
         /// </summary>
         /// <returns>The data directory.</returns>
         /// <remarks>
-        /// This method is called upon initialization of the <see cref="Resources"/> property
+        /// This method is called upon initialization of the <see cref="DotNetResources"/> property
         /// </remarks>
-        protected virtual IReadableSegment GetResources() => null;
+        protected virtual DotNetResourcesDirectory GetResources() => null;
 
         /// <summary>
         /// Obtains the data directory containing the strong name signature of the .NET binary. 

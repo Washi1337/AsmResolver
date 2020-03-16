@@ -16,6 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Resources;
 
 namespace AsmResolver.PE.DotNet
 {
@@ -79,7 +80,7 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Gets or sets the data directory containing the embedded resources data of the .NET binary (if available).
         /// </summary>
-        IReadableSegment Resources
+        DotNetResourcesDirectory DotNetResources
         {
             get;
             set;

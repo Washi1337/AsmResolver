@@ -17,6 +17,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\AsmResolver.PE\AsmResolver.PE.csproj" />
       <ProjectReference Include="..\AsmResolver.Tests\AsmResolver.Tests.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Resources\AsmResolver.DotNet.TestCases.Resources.csproj" />
     </ItemGroup>
 
 </Project>
