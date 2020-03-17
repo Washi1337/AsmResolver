@@ -130,22 +130,18 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IList<ITypeDefOrRef> GetInterfaces()
+        protected override IList<InterfaceImplementation> GetInterfaces()
         {
-            var result = new List<ITypeDefOrRef>();
-            
-            var tablesStream = _parentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
-            var implementationTable = tablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
-            var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeDefOrRef);
+            var result = new OwnedCollection<TypeDefinition, InterfaceImplementation>(this);
             
             var rids = _parentModule.GetInterfaceImplementationRids(MetadataToken);
             foreach (uint rid in rids)
             {
-                var row = implementationTable[(int) (rid - 1)];
-                var interfaceToken = encoder.DecodeIndex(row.Interface);
-
-                if (_parentModule.TryLookupMember(interfaceToken, out var member) && member is ITypeDefOrRef type)
+                if (_parentModule.TryLookupMember(new MetadataToken(TableIndex.InterfaceImpl, rid), out var member)
+                    && member is InterfaceImplementation type)
+                {
                     result.Add(type);
+                }
             }
 
             return result;

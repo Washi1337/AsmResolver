@@ -272,14 +272,15 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
-        private void AddInterfaces(MetadataToken ownerToken, IEnumerable<ITypeDefOrRef> interfaces)
+        private void AddInterfaces(MetadataToken ownerToken, IEnumerable<InterfaceImplementation> interfaces)
         {
             var table = Metadata.TablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
 
-            foreach (var @interface in interfaces)
+            foreach (var implementation in interfaces)
             {
-                var row = new InterfaceImplementationRow(ownerToken.Rid, AddTypeDefOrRef(@interface));
-                table.Add(row, 0);
+                var row = new InterfaceImplementationRow(ownerToken.Rid, AddTypeDefOrRef(implementation.Interface));
+                var token = table.Add(row, 0);
+                AddCustomAttributes(token, implementation);
             }
         }
 

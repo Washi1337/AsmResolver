@@ -33,6 +33,7 @@ namespace AsmResolver.DotNet.Serialized
         private Constant[] _constants;
         private ClassLayout[] _classLayouts;
         private ImplementationMap[] _implementationMaps;
+        private InterfaceImplementation[] _interfaceImplementations;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -68,6 +69,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.Constant => LookupConstant(token),
                 TableIndex.ClassLayout => LookupClassLayout(token),
                 TableIndex.ImplMap => LookupImplementationMap(token),
+                TableIndex.InterfaceImpl => LookupInterfaceImplementation(token),
                 _ => null
             };
 
@@ -218,6 +220,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<ImplementationMap, ImplementationMapRow>(ref _implementationMaps, token,
                 (m, t, r) => new SerializedImplementationMap(m, t, r));
+        }
+
+        private InterfaceImplementation LookupInterfaceImplementation(MetadataToken token)
+        {
+            return LookupOrCreateMember<InterfaceImplementation, InterfaceImplementationRow>(ref _interfaceImplementations, token,
+                (m, t, r) => new SerializedInterfaceImplementation(m, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet
         private IList<EventDefinition> _events;
         private IList<CustomAttribute> _customAttributes;
         private IList<GenericParameter> _genericParameters;
-        private IList<ITypeDefOrRef> _interfaces;
+        private IList<InterfaceImplementation> _interfaces;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -546,7 +546,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets a collection of interfaces that are implemented by the type.
         /// </summary>
-        public IList<ITypeDefOrRef> Interfaces
+        public IList<InterfaceImplementation> Interfaces
         {
             get
             {
@@ -786,8 +786,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Interfaces"/> property.
         /// </remarks>
-        protected virtual IList<ITypeDefOrRef> GetInterfaces() =>
-            new List<ITypeDefOrRef>();
+        protected virtual IList<InterfaceImplementation> GetInterfaces() =>
+            new OwnedCollection<TypeDefinition, InterfaceImplementation>(this);
 
         /// <summary>
         /// Obtains the class layout of this type.

@@ -437,6 +437,12 @@ namespace AsmResolver.DotNet.Serialized
             return interfaces;
         }
 
+        internal MetadataToken GetInterfaceImplementationOwner(uint implementationRid)
+        {
+            EnsureInterfacesInitialized();
+            return _interfaces.GetMemberOwner(implementationRid);
+        }
+
         internal ICollection<uint> GetInterfaceImplementationRids(MetadataToken ownerToken)
         {
             EnsureInterfacesInitialized();
