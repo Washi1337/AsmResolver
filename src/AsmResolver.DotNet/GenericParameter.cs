@@ -14,6 +14,7 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<IHasGenericParameters> _owner;
+        private IList<GenericParameterConstraint> _constraints;
         private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
@@ -96,14 +97,27 @@ namespace AsmResolver.DotNet
             internal set;
         }
 
+        /// <summary>
+        /// Gets a collection of constraints put on the generic parameter.
+        /// </summary>
+        public IList<GenericParameterConstraint> Constraints
+        {
+            get
+            {
+                if (_constraints is null)
+                    Interlocked.CompareExchange(ref _constraints, GetConstraints(), null);
+                return _constraints;
+            }
+        }
+
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes
         {
-            get{
+            get
+            {
                 if (_customAttributes is null)
                     Interlocked.CompareExchange(ref _customAttributes, GetCustomAttributes(), null);
                 return _customAttributes;
-                
             }
         }
         
@@ -124,6 +138,16 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Owner"/> property.
         /// </remarks>
         protected virtual IHasGenericParameters GetOwner() => null;
+
+        /// <summary>
+        /// Obtains a collection of constraints put on the generic parameter.
+        /// </summary>
+        /// <returns>The constraints</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Constraints"/> property.
+        /// </remarks>
+        protected virtual IList<GenericParameterConstraint> GetConstraints() => 
+            new OwnedCollection<GenericParameter, GenericParameterConstraint>(this);
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

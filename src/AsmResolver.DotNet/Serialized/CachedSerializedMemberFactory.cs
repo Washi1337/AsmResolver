@@ -25,6 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         private CustomAttribute[] _customAttributes;
         private MethodSpecification[] _methodSpecifications;
         private GenericParameter[] _genericParameters;
+        private GenericParameterConstraint[] _genericParameterConstraints;
         private ModuleReference[] _moduleReferences;
         private FileReference[] _fileReferences;
         private ManifestResource[] _resources;
@@ -59,6 +60,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.CustomAttribute => LookupCustomAttribute(token),
                 TableIndex.MethodSpec => LookupMethodSpecification(token),
                 TableIndex.GenericParam => LookupGenericParameter(token),
+                TableIndex.GenericParamConstraint => LookupGenericParameterConstraint(token),
                 TableIndex.ModuleRef => LookupModuleReference(token),
                 TableIndex.File => LookupFileReference(token),
                 TableIndex.ManifestResource => LookupManifestResource(token),
@@ -128,37 +130,37 @@ namespace AsmResolver.DotNet.Serialized
                 (m, t, r) => new SerializedMemberReference(m, t, r));
         }
 
-        private StandAloneSignature LookupStandAloneSignature(in MetadataToken token)
+        private StandAloneSignature LookupStandAloneSignature(MetadataToken token)
         {
             return LookupOrCreateMember<StandAloneSignature, StandAloneSignatureRow>(ref _standAloneSignatures, token,
                 (m, t, r) => new SerializedStandAloneSignature(m, t, r));
         }
 
-        private PropertyDefinition LookupPropertyDefinition(in MetadataToken token)
+        private PropertyDefinition LookupPropertyDefinition(MetadataToken token)
         {
             return LookupOrCreateMember<PropertyDefinition, PropertyDefinitionRow>(ref _propertyDefinitions, token,
                 (m, t, r) => new SerializedPropertyDefinition(m, t, r));
         }
 
-        private EventDefinition LookupEventDefinition(in MetadataToken token)
+        private EventDefinition LookupEventDefinition(MetadataToken token)
         {
             return LookupOrCreateMember<EventDefinition, EventDefinitionRow>(ref _eventDefinition, token,
                 (m, t, r) => new SerializedEventDefinition(m, t, r));
         }
 
-        private MethodSemantics LookupMethodSemantics(in MetadataToken token)
+        private MethodSemantics LookupMethodSemantics(MetadataToken token)
         {
             return LookupOrCreateMember<MethodSemantics, MethodSemanticsRow>(ref _methodSemantics, token,
                 (m, t, r) => new SerializedMethodSemantics(m, t, r));
         }
 
-        private CustomAttribute LookupCustomAttribute(in MetadataToken token)
+        private CustomAttribute LookupCustomAttribute(MetadataToken token)
         {
             return LookupOrCreateMember<CustomAttribute, CustomAttributeRow>(ref _customAttributes, token,
                 (m, t, r) => new SerializedCustomAttribute(m, t, r));
         }
 
-        private IMetadataMember LookupMethodSpecification(in MetadataToken token)
+        private IMetadataMember LookupMethodSpecification(MetadataToken token)
         {
             return LookupOrCreateMember<MethodSpecification, MethodSpecificationRow>(ref _methodSpecifications, token,
                 (m, t, r) => new SerializedMethodSpecification(m, t, r));
@@ -168,6 +170,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<GenericParameter, GenericParameterRow>(ref _genericParameters, token,
                 (m, t, r) => new SerializedGenericParameter(m, t, r));
+        }
+
+        private GenericParameterConstraint LookupGenericParameterConstraint(in MetadataToken token)
+        {
+            return LookupOrCreateMember<GenericParameterConstraint, GenericParameterConstraintRow>(ref _genericParameterConstraints, token,
+                (m, t, r) => new SerializedGenericParameterConstraint(m, t, r));
         }
 
         private ModuleReference LookupModuleReference(MetadataToken token)

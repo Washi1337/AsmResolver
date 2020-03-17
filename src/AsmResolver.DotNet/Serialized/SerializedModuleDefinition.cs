@@ -33,6 +33,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _constants;
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
+        private OneToManyRelation<MetadataToken, uint> _genericParameterConstraints;
         private OneToManyRelation<MetadataToken, uint> _interfaces;
         private OneToOneRelation<MetadataToken, uint> _classLayouts;
         private OneToOneRelation<MetadataToken, uint> _implementationMaps;
@@ -378,6 +379,40 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureGenericParametersInitialized();
             return _genericParameters.GetMemberList(ownerToken);
+        }
+
+        private void EnsureGenericParameterConstrainsInitialized()
+        {
+            if (_genericParameterConstraints is null)
+                Interlocked.CompareExchange(ref _genericParameterConstraints, InitializeGenericParameterConstraints(), null);
+        }
+
+        private OneToManyRelation<MetadataToken, uint> InitializeGenericParameterConstraints()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var constraintTable = tablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
+            
+            var constraints = new OneToManyRelation<MetadataToken, uint>();
+            for (int i = 0; i < constraintTable.Count; i++)
+            {
+                var ownerToken = new MetadataToken(TableIndex.GenericParam, constraintTable[i].Owner);
+                uint parameterRid = (uint) (i + 1);
+                constraints.Add(ownerToken, parameterRid);
+            }
+
+            return constraints;
+        }
+
+        internal MetadataToken GetGenericParameterConstraintOwner(uint constraintRid)
+        {
+            EnsureGenericParameterConstrainsInitialized();
+            return _genericParameterConstraints.GetMemberOwner(constraintRid);
+        }
+        
+        internal ICollection<uint> GetGenericParameterConstraints(MetadataToken ownerToken)
+        {
+            EnsureGenericParameterConstrainsInitialized();
+            return _genericParameterConstraints.GetMemberList(ownerToken);
         }
 
         private void EnsureInterfacesInitialized()

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -48,6 +49,20 @@ namespace AsmResolver.DotNet.Serialized
             return _parentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IHasGenericParameters
                 : null;
+        }
+
+        /// <inheritdoc />
+        protected override IList<GenericParameterConstraint> GetConstraints()
+        {
+            var result = new OwnedCollection<GenericParameter, GenericParameterConstraint>(this);
+            
+            foreach (uint rid in _parentModule.GetGenericParameterConstraints(MetadataToken))
+            {
+                var constraintToken = new MetadataToken(TableIndex.GenericParamConstraint, rid);
+                result.Add((GenericParameterConstraint) _parentModule.LookupMember(constraintToken));
+            }
+
+            return result;
         }
 
         /// <inheritdoc />
