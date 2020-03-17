@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Builder
                 TypeReference reference => GetTypeReferenceToken(reference),
                 TypeSpecification specification => GetTypeSpecificationToken(specification),
                 MethodDefinition methodDefinition => GetMethodDefinitionToken(methodDefinition),
-                // TODO: moduleref
+                ModuleReference moduleReference => AddModuleReference(moduleReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(parent))
             };
             

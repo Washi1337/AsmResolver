@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Signatures
                     return MethodSignature.FromReader(module, reader, protection);
                 
                 case CallingConventionAttributes.Property:
-                    throw new NotImplementedException();
+                    return PropertySignature.FromReader(module, reader, protection);
                 
                 case CallingConventionAttributes.Local:
                     return LocalVariablesSignature.FromReader(module, reader, protection);

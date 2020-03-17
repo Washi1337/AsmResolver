@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Module => DeclaringType.Module; // TODO: handle module ref.
+        public ModuleDefinition Module => Parent?.Module;
 
         /// <summary>
         /// Gets the type that declares the referenced member, if available.
