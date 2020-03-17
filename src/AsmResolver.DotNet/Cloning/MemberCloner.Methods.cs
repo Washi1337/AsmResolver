@@ -157,7 +157,7 @@ namespace AsmResolver.DotNet.Cloning
                     break;
 
                 case CilOperandType.InlineMethod:
-                    clonedInstruction.Operand = context.Importer.ImportMethod((IMethodDefOrRef) instruction.Operand);
+                    clonedInstruction.Operand = context.Importer.ImportMethod((IMethodDescriptor) instruction.Operand);
                     break;
 
                 case CilOperandType.InlineSig:
