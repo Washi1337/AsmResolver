@@ -10,7 +10,11 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type parameter that a generic method or type in a .NET module defines.
     /// </summary>
-    public class GenericParameter : INameProvider, IHasCustomAttribute, IOwnedCollectionElement<IHasGenericParameters>
+    public class GenericParameter : 
+        INameProvider, 
+        IHasCustomAttribute,
+        IModuleProvider,
+        IOwnedCollectionElement<IHasGenericParameters>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<IHasGenericParameters> _owner;
@@ -96,6 +100,9 @@ namespace AsmResolver.DotNet
             get;
             internal set;
         }
+
+        /// <inheritdoc />
+        public ModuleDefinition Module => Owner?.Module;
 
         /// <summary>
         /// Gets a collection of constraints put on the generic parameter.

@@ -154,6 +154,7 @@ namespace AsmResolver.DotNet.Builder
             
             AddCustomAttributes(token, type);
             AddInterfaces(token, type.Interfaces);
+            AddGenericParameters(token, type);
 
             if (type.ClassLayout is {})
                 AddClassLayout(token, type.ClassLayout);
@@ -227,6 +228,7 @@ namespace AsmResolver.DotNet.Builder
             _methodTokens.Add(method, token);
             AddCustomAttributes(token, method);
             AddImplementationMap(token, method.ImplementationMap);
+            AddGenericParameters(token, method);
             return token;
         }
 

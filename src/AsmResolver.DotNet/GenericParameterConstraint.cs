@@ -12,6 +12,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class GenericParameterConstraint :
         IHasCustomAttribute,
+        IModuleProvider,
         IOwnedCollectionElement<GenericParameter>
     {
         private readonly LazyVariable<GenericParameter> _owner;
@@ -70,6 +71,9 @@ namespace AsmResolver.DotNet
             get => _constraint.Value;
             set => _constraint.Value = value;
         }
+
+        /// <inheritdoc />
+        public ModuleDefinition Module => Owner?.Module;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes

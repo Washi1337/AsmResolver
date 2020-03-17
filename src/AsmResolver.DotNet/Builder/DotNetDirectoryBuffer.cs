@@ -260,7 +260,6 @@ namespace AsmResolver.DotNet.Builder
         private MetadataToken AddMethodSemantics(MetadataToken ownerToken, MethodSemantics semantics)
         {
             var table = Metadata.TablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
-
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
 
             var row = new MethodSemanticsRow(
@@ -282,6 +281,54 @@ namespace AsmResolver.DotNet.Builder
                 var row = new InterfaceImplementationRow(ownerToken.Rid, AddTypeDefOrRef(@interface));
                 table.Add(row, 0);
             }
+        }
+
+        private void AddGenericParameters(MetadataToken ownerToken, IHasGenericParameters provider)
+        {
+            foreach (var parameter in provider.GenericParameters)
+                AddGenericParameter(ownerToken, parameter);
+        }
+
+        private MetadataToken AddGenericParameter(MetadataToken ownerToken, GenericParameter parameter)
+        {
+            if (parameter is null)
+                return 0;
+
+            AssertIsImported(parameter);
+
+            var table = Metadata.TablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
+            
+            var row = new GenericParameterRow(
+                parameter.Number, 
+                parameter.Attributes, 
+                encoder.EncodeToken(ownerToken),
+                Metadata.StringsStream.GetStringIndex(parameter.Name));
+
+            var token = table.Add(row, parameter.MetadataToken.Rid);
+            
+            AddCustomAttributes(token, parameter);
+
+            foreach (var constraint in parameter.Constraints)
+                AddGenericParameterConstraint(token, constraint);
+            
+            return token;
+        }
+
+        private MetadataToken AddGenericParameterConstraint(MetadataToken ownerToken,
+            GenericParameterConstraint constraint)
+        {
+            if (constraint is null)
+                return 0;
+            
+            var table = Metadata.TablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
+            
+            var row = new GenericParameterConstraintRow(ownerToken.Rid, AddTypeDefOrRef(constraint.Constraint));
+
+            var token = table.Add(row, constraint.MetadataToken.Rid);
+            AddCustomAttributes(token, constraint);
+            
+            return token;
         }
 
         private MetadataToken AddClassLayout(MetadataToken ownerToken, ClassLayout layout)
