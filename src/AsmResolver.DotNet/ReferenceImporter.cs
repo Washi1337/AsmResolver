@@ -268,6 +268,16 @@ namespace AsmResolver.DotNet
             return result;
         }
 
+        public virtual IMethodDescriptor ImportMethod(IMethodDescriptor method)
+        {
+            return method switch
+            {
+                IMethodDefOrRef methodDefOrRef => ImportMethod(methodDefOrRef),
+                MethodSpecification specification => ImportMethod(specification),
+                _ => throw new ArgumentOutOfRangeException(nameof(method))
+            };
+        }
+        
         /// <summary>
         /// Imports a reference to a method into the module.
         /// </summary>
@@ -300,7 +310,8 @@ namespace AsmResolver.DotNet
                 parameterTypes[i] = ImportTypeSignature(signature.ParameterTypes[i]);
             
             var result = new MethodSignature(signature.Attributes, ImportTypeSignature(signature.ReturnType), parameterTypes);
-
+            result.GenericParameterCount = signature.GenericParameterCount;
+            
             for (int i = 0; i < signature.SentinelParameterTypes.Count; i++)
                 result.SentinelParameterTypes.Add(ImportTypeSignature(signature.SentinelParameterTypes[i]));
             
