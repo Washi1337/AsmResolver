@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Builder.Metadata
 {
     /// <summary>
     /// Represents the exception that occurs when an external metadata member was used in a .NET module, but was not

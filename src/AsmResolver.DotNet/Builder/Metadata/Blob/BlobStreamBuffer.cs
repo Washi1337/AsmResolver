@@ -5,7 +5,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 
-namespace AsmResolver.DotNet.Builder.Blob
+namespace AsmResolver.DotNet.Builder.Metadata.Blob
 {
     /// <summary>
     /// Provides a mutable buffer for building up a blob stream in a .NET portable executable. 

@@ -32,6 +32,13 @@ namespace AsmResolver.DotNet.Signatures
         {
         }
 
+        /// <summary>
+        /// Creates a new named custom attribute argument.
+        /// </summary>
+        /// <param name="memberType">Indicates whether the provided name references a field or a property.</param>
+        /// <param name="memberName">The name of the referenced member.</param>
+        /// <param name="argumentType">The type of the argument to store.</param>
+        /// <param name="argument">The argument value.</param>
         public CustomAttributeNamedArgument(CustomAttributeArgumentMemberType memberType, string memberName, TypeSignature argumentType, CustomAttributeArgument argument)
         {
             MemberType = memberType;

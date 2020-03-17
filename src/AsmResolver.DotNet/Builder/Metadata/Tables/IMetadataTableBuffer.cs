@@ -1,7 +1,7 @@
 ﻿using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Builder.Tables
+namespace AsmResolver.DotNet.Builder.Metadata.Tables
 {
     /// <summary>
     /// Provides members for constructing a new metadata table.

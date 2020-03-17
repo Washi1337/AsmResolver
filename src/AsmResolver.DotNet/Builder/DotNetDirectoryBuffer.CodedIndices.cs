@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -15,8 +16,8 @@ namespace AsmResolver.DotNet.Builder
 
             var token = scope switch
             {
-                AssemblyReference assemblyReference => AddAssemblyReference(assemblyReference),
-                TypeReference typeReference => AddTypeReference(typeReference),
+                AssemblyReference assemblyReference => GetAssemblyReferenceToken(assemblyReference),
+                TypeReference typeReference => GetTypeReferenceToken(typeReference),
                 ModuleReference moduleReference => AddModuleReference(moduleReference),
                 ModuleDefinition _ => 0u,
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
@@ -37,8 +38,8 @@ namespace AsmResolver.DotNet.Builder
             var token = type switch
             {
                 TypeDefinition definition => GetTypeDefinitionToken(definition),
-                TypeReference reference => AddTypeReference(reference),
-                TypeSpecification specification => AddTypeSpecification(specification),
+                TypeReference reference => GetTypeReferenceToken(reference),
+                TypeSpecification specification => GetTypeSpecificationToken(specification),
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 
@@ -59,8 +60,8 @@ namespace AsmResolver.DotNet.Builder
             var token = parent switch
             {
                 TypeDefinition definition => GetTypeDefinitionToken(definition),
-                TypeReference reference => AddTypeReference(reference),
-                TypeSpecification specification => AddTypeSpecification(specification),
+                TypeReference reference => GetTypeReferenceToken(reference),
+                TypeSpecification specification => GetTypeSpecificationToken(specification),
                 MethodDefinition methodDefinition => GetMethodDefinitionToken(methodDefinition),
                 // TODO: moduleref
                 _ => throw new ArgumentOutOfRangeException(nameof(parent))
@@ -81,7 +82,7 @@ namespace AsmResolver.DotNet.Builder
             var token = method switch
             {
                 MethodDefinition definition => GetMethodDefinitionToken(definition),
-                MemberReference reference => AddMemberReference(reference),
+                MemberReference reference => GetMemberReferenceToken(reference),
                 _ => throw new ArgumentOutOfRangeException(nameof(method))
             };
             
@@ -100,7 +101,7 @@ namespace AsmResolver.DotNet.Builder
             var token = constructor switch
             {
                 MethodDefinition definition => GetMethodDefinitionToken(definition),
-                MemberReference reference => AddMemberReference(reference),
+                MemberReference reference => GetMemberReferenceToken(reference),
                 _ => throw new ArgumentOutOfRangeException(nameof(constructor))
             };
             
@@ -149,7 +150,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = implementation switch
             {
-                AssemblyReference assemblyReference => AddAssemblyReference(assemblyReference),
+                AssemblyReference assemblyReference => GetAssemblyReferenceToken(assemblyReference),
                 ExportedType exportedType => AddExportedType(exportedType),
                 FileReference fileReference => AddFileReference(fileReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(implementation))

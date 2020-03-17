@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Builder.Tables
+namespace AsmResolver.DotNet.Builder.Metadata.Tables
 {
     /// <summary>
     /// Decorates a metadata table buffer with a filter that removes all duplicated rows from the buffer.  

@@ -1,6 +1,6 @@
 using AsmResolver.PE.DotNet.Metadata;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Builder.Metadata
 {
     /// <summary>
     /// Represents a mutable buffer for a metadata stream. 

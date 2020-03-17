@@ -1,12 +1,11 @@
-﻿using AsmResolver.DotNet.Builder.Blob;
-using AsmResolver.DotNet.Builder.Guid;
-using AsmResolver.DotNet.Builder.Strings;
-using AsmResolver.DotNet.Builder.Tables;
-using AsmResolver.DotNet.Builder.UserStrings;
+﻿using AsmResolver.DotNet.Builder.Metadata.Blob;
+using AsmResolver.DotNet.Builder.Metadata.Guid;
+using AsmResolver.DotNet.Builder.Metadata.Strings;
+using AsmResolver.DotNet.Builder.Metadata.Tables;
+using AsmResolver.DotNet.Builder.Metadata.UserStrings;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Builder.Metadata
 {
     /// <summary>
     /// Provides access to various metadata stream buffers, including tables, strings, user-strings, GUID and blob

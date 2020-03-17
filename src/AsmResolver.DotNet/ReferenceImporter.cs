@@ -267,7 +267,13 @@ namespace AsmResolver.DotNet
                 result.TypeArguments.Add(ImportTypeSignature(argument));
             return result;
         }
-
+        
+        /// <summary>
+        /// Imports a reference to- or an instantiation of a method into the module.
+        /// </summary>
+        /// <param name="method">The method to import.</param>
+        /// <returns>The imported method.</returns>
+        /// <exception cref="ArgumentException">Occurs when a method is not added to a type.</exception>
         public virtual IMethodDescriptor ImportMethod(IMethodDescriptor method)
         {
             return method switch
@@ -428,6 +434,11 @@ namespace AsmResolver.DotNet
             return new MemberReference(scope, field.Name, signature);
         }
 
+        /// <summary>
+        /// Imports a signature of a property into the module.
+        /// </summary>
+        /// <param name="signature">The signature to import.</param>
+        /// <returns>The imported signature.</returns>
         public PropertySignature ImportPropertySignature(PropertySignature signature)
         {
             var parameterTypes = new TypeSignature[signature.ParameterTypes.Count];

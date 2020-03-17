@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>The hash.</returns>
         /// <remarks>
-        /// This method is called upon initializing the <see cref="Hash"/> property.
+        /// This method is called upon initializing the <see cref="HashValue"/> property.
         /// </remarks>
         protected virtual byte[] GetHashValue() => null;
 

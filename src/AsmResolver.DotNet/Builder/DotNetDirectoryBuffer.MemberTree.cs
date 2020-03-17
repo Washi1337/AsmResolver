@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -7,43 +6,6 @@ namespace AsmResolver.DotNet.Builder
 {
     public partial class DotNetDirectoryBuffer
     {
-        private readonly OneToOneRelation<TypeDefinition, MetadataToken> _typeDefTokens = new OneToOneRelation<TypeDefinition, MetadataToken>();
-        private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
-        private readonly OneToOneRelation<FieldDefinition, MetadataToken> _fieldTokens = new OneToOneRelation<FieldDefinition, MetadataToken>();
-
-        /// <summary>
-        /// Gets the newly assigned metadata token of a type definition that was added to the buffer.
-        /// </summary>
-        /// <param name="type">The type to get the metadata token for.</param>
-        /// <returns>The metadata token.</returns>
-        public MetadataToken GetTypeDefinitionToken(TypeDefinition type)
-        {
-            AssertIsImported(type);
-            return _typeDefTokens.GetValue(type);
-        }
-
-        /// <summary>
-        /// Gets the newly assigned metadata token of a field definition that was added to the buffer.
-        /// </summary>
-        /// <param name="field">The field to get the metadata token for.</param>
-        /// <returns>The metadata token.</returns>
-        public MetadataToken GetFieldDefinitionToken(FieldDefinition field)
-        {
-            AssertIsImported(field);
-            return _fieldTokens.GetValue(field);
-        }
-
-        /// <summary>
-        /// Gets the newly assigned metadata token of a method definition that was added to the buffer.
-        /// </summary>
-        /// <param name="method">The method to get the metadata token for.</param>
-        /// <returns>The metadata token.</returns>
-        public MetadataToken GetMethodDefinitionToken(MethodDefinition method)
-        {
-            AssertIsImported(method);
-            return _methodTokens.GetValue(method);
-        }
-
         /// <summary>
         /// Adds an assembly, its entire manifest module, and all secondary module file references, to the buffer.
         /// </summary>
@@ -89,7 +51,7 @@ namespace AsmResolver.DotNet.Builder
             
             // Ensure reference to corlib is added. 
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
-                AddAssemblyReference(corLibScope);
+                GetAssemblyReferenceToken(corLibScope);
             
             AddCustomAttributes(token, module);
             AddTypeDefinitionsInModule(module);

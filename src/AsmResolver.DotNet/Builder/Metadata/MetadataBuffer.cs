@@ -1,12 +1,12 @@
 ﻿using System;
-using AsmResolver.DotNet.Builder.Blob;
-using AsmResolver.DotNet.Builder.Guid;
-using AsmResolver.DotNet.Builder.Strings;
-using AsmResolver.DotNet.Builder.Tables;
-using AsmResolver.DotNet.Builder.UserStrings;
+using AsmResolver.DotNet.Builder.Metadata.Blob;
+using AsmResolver.DotNet.Builder.Metadata.Guid;
+using AsmResolver.DotNet.Builder.Metadata.Strings;
+using AsmResolver.DotNet.Builder.Metadata.Tables;
+using AsmResolver.DotNet.Builder.Metadata.UserStrings;
 using AsmResolver.PE.DotNet.Metadata;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Builder.Metadata
 {
     /// <summary>
     /// Provides a default implementation for <see cref="IMetadataBuffer" /> that produces compressed metadata (#~).
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Builder
             tablesStream.BlobIndexSize = blobStream.IndexSize;
             
             // Create metadata directory.
-            return new Metadata
+            return new PE.DotNet.Metadata.Metadata
             {
                 VersionString = _versionString,
                 Streams =

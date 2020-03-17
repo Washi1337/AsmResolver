@@ -4,7 +4,7 @@ using System.IO;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 
-namespace AsmResolver.DotNet.Builder.Guid
+namespace AsmResolver.DotNet.Builder.Metadata.Guid
 {
     /// <summary>
     /// Provides a mutable buffer for building up a GUID stream in a .NET portable executable. 

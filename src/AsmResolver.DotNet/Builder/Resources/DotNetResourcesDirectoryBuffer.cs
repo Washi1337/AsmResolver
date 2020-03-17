@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using AsmResolver.PE.DotNet.Resources;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Builder.Resources
 {
     /// <summary>
     /// Provides a mutable buffer for building up a .NET resources directory, containing all data of all resources

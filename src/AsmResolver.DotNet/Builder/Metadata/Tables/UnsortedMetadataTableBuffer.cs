@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Builder.Tables
+namespace AsmResolver.DotNet.Builder.Metadata.Tables
 {
     /// <summary>
     /// Represents a metadata stream buffer that adds every new row at the end of the table, without any further

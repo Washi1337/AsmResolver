@@ -1,5 +1,5 @@
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Builder.Blob;
+using AsmResolver.DotNet.Builder.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using Xunit;
 

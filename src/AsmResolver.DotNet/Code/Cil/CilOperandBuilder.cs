@@ -1,10 +1,9 @@
 ﻿using System;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet.Code.Cil
 {
     /// <summary>
     /// Provides a default implementation of the <see cref="ICilOperandBuilder"/> interface, that pulls metadata tokens
@@ -12,15 +11,14 @@ namespace AsmResolver.DotNet.Builder
     /// </summary>
     public class CilOperandBuilder : ICilOperandBuilder
     {
-        private readonly DotNetDirectoryBuffer _buffer;
+        private readonly IMetadataTokenProvider _provider;
 
         /// <summary>
         /// Creates a new CIL operand builder that pulls metadata tokens from a mutable metadata buffer.
         /// </summary>
-        /// <param name="buffer"></param>
-        public CilOperandBuilder(DotNetDirectoryBuffer buffer)
+        public CilOperandBuilder(IMetadataTokenProvider provider)
         {
-            _buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
+            _provider = provider;
         }
 
         /// <inheritdoc />
@@ -52,7 +50,7 @@ namespace AsmResolver.DotNet.Builder
         {
             return operand switch
             {
-                string value => 0x70000000 | _buffer.Metadata.UserStringsStream.GetStringIndex(value),
+                string value => 0x70000000 | _provider.GetUserStringIndex(value),
                 uint raw => raw,
                 _ => throw new NotSupportedException("Unsupported string operand.")
             };
@@ -74,14 +72,14 @@ namespace AsmResolver.DotNet.Builder
         {
             return member.MetadataToken.Table switch
             {
-                TableIndex.TypeRef => _buffer.AddTypeReference((TypeReference) member),
-                TableIndex.TypeDef => _buffer.GetTypeDefinitionToken((TypeDefinition) member),
-                TableIndex.Field => _buffer.GetFieldDefinitionToken((FieldDefinition) member),
-                TableIndex.Method => _buffer.GetMethodDefinitionToken((MethodDefinition) member),
-                TableIndex.MemberRef => _buffer.AddMemberReference((MemberReference) member),
-                TableIndex.StandAloneSig => _buffer.AddStandAloneSignature((StandAloneSignature) member),
-                TableIndex.TypeSpec => _buffer.AddTypeSpecification((TypeSpecification) member),
-                TableIndex.MethodSpec => _buffer.AddMethodSpecification((MethodSpecification) member),
+                TableIndex.TypeRef => _provider.GetTypeReferenceToken((TypeReference) member),
+                TableIndex.TypeDef => _provider.GetTypeDefinitionToken((TypeDefinition) member),
+                TableIndex.TypeSpec => _provider.GetTypeSpecificationToken((TypeSpecification) member),
+                TableIndex.Field => _provider.GetFieldDefinitionToken((FieldDefinition) member),
+                TableIndex.Method => _provider.GetMethodDefinitionToken((MethodDefinition) member),
+                TableIndex.MethodSpec => _provider.GetMethodSpecificationToken((MethodSpecification) member),
+                TableIndex.MemberRef => _provider.GetMemberReferenceToken((MemberReference) member),
+                TableIndex.StandAloneSig => _provider.GetStandAloneSignatureToken((StandAloneSignature) member),
                 _ => throw new ArgumentOutOfRangeException(nameof(member))
             };
         }

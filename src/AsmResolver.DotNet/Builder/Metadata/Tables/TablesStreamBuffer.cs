@@ -1,9 +1,10 @@
 ﻿using System.Linq;
+using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Builder.Tables
+namespace AsmResolver.DotNet.Builder.Metadata.Tables
 {
     /// <summary>
     /// Provides a mutable buffer for building up a tables stream in a .NET portable executable. 

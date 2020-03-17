@@ -4,7 +4,7 @@ using System.Diagnostics;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Builder.Tables
+namespace AsmResolver.DotNet.Builder.Metadata.Tables
 {
     /// <summary>
     /// Represents a metadata stream buffer that sorts all added rows by one or two primary columns.

@@ -1,4 +1,4 @@
-﻿namespace AsmResolver.DotNet.Builder
+﻿namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
     /// Provides members for obtaining coded indices into a metadata tables stream.

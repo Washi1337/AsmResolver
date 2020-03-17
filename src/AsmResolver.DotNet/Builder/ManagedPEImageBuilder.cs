@@ -1,4 +1,6 @@
-﻿using AsmResolver.PE;
+﻿using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
 
 namespace AsmResolver.DotNet.Builder
