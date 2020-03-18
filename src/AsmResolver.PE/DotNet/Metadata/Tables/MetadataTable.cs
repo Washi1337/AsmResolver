@@ -135,6 +135,55 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         IMetadataRow IMetadataTable.GetByRid(uint rid) => GetByRid(rid);
 
         /// <summary>
+        /// Gets a single row in a table by a key. This requires the table to be sorted.
+        /// </summary>
+        /// <param name="keyColumnIndex">The column number to get the key from.</param>
+        /// <param name="key">The key to search.</param>
+        /// <param name="row">When this functions returns <c>true</c>, this parameter contains the first row that
+        /// contains the given key.</param>
+        /// <returns><c>true</c> if the row was found, <c>false</c> otherwise.</returns>
+        public bool TryGetRowByKey(int keyColumnIndex, uint key, out TRow row)
+        {
+            row = default;
+            if (Count == 0)
+                return false;
+
+            int left = 0;
+            int right = Count - 1;
+           
+            while (left <= right)
+            {
+                int m = (left + right) / 2;
+                var currentRow = Rows[m];
+                uint currentKey = currentRow[keyColumnIndex];
+
+                if (currentKey > key)
+                {
+                    right = m - 1;
+                }
+                else if (currentKey < key)
+                {
+                    left = m + 1;
+                }
+                else
+                {
+                    row = currentRow;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        bool IMetadataTable.TryGetRowByKey(int keyColumnIndex, uint key, out IMetadataRow row)
+        {
+            bool result = TryGetRowByKey(keyColumnIndex, key, out var r);
+            row = r;
+            return result;
+        }
+
+        /// <summary>
         /// Sets the contents of a row by its row identifier.
         /// </summary>
         /// <param name="rid">The row identifier.</param>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
@@ -58,6 +59,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 DotNetSegment = new DotNetSegmentBuffer(image.DotNetDirectory);
                 ResourceDirectory = new ResourceDirectoryBuffer();
                 RelocationsDirectory = new RelocationsDirectoryBuffer();
+                FieldRvaDataReader = new FieldRvaDataReader(image.DotNetDirectory.Metadata);
                 Bootstrapper = CreateBootstrapper(image);
             }
 
@@ -103,6 +105,14 @@ namespace AsmResolver.PE.DotNet.Builder
             /// managed PE files targeting 64-bit architectures. 
             /// </remarks>
             public BootstrapperSegment Bootstrapper
+            {
+                get;
+            }
+
+            /// <summary>
+            /// Gets the object responsible for reading a field RVA data.
+            /// </summary>
+            public IFieldRvaDataReader FieldRvaDataReader
             {
                 get;
             }
@@ -273,7 +283,7 @@ namespace AsmResolver.PE.DotNet.Builder
             var dotNetSegment = context.DotNetSegment;
             var tablesStream = dotNetSegment.DotNetDirectory.Metadata.GetStream<TablesStream>();
             AddMethodBodiesToTable(dotNetSegment.MethodBodyTable, tablesStream);
-            AddFieldRvasToTable(dotNetSegment.FieldRvaTable, tablesStream);
+            AddFieldRvasToTable(context);
         }
 
         private static void AddMethodBodiesToTable(MethodBodyTableBuffer table, TablesStream tablesStream)
@@ -320,11 +330,23 @@ namespace AsmResolver.PE.DotNet.Builder
                 $"Invalid or unsupported method body reference for method {i + 1}.");
         }
 
-        private static void AddFieldRvasToTable(SegmentBuilder table, TablesStream tablesStream)
+        private static void AddFieldRvasToTable(ManagedPEBuilderContext context)
         {
-            var fieldRvaTable = tablesStream.GetTable<FieldRvaRow>();
-            if (fieldRvaTable.Count > 0)
-                throw new NotImplementedException(); // TODO
+            var fieldRvaTable = context.DotNetSegment.DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable<FieldRvaRow>(TableIndex.FieldRva);
+            
+            if (fieldRvaTable.Count == 0)
+                return;
+            
+            var table = context.DotNetSegment.FieldRvaTable;
+            var reader = context.FieldRvaDataReader;
+            
+            foreach (var row in fieldRvaTable)
+            {
+                var data = reader.ResolveFieldData(row);
+                table.Add(data);
+            }
         }
     }
 }

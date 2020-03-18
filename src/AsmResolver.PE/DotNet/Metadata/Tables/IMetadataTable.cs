@@ -44,6 +44,16 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         IMetadataRow GetByRid(uint rid);
 
         /// <summary>
+        /// Gets a single row in a table by a key. This requires the table to be sorted.
+        /// </summary>
+        /// <param name="keyColumnIndex">The column number to get the key from.</param>
+        /// <param name="key">The key to search.</param>
+        /// <param name="row">When this functions returns <c>true</c>, this parameter contains the first row that
+        /// contains the given key.</param>
+        /// <returns><c>true</c> if the row was found, <c>false</c> otherwise.</returns>
+        bool TryGetRowByKey(int keyColumnIndex, uint key, out IMetadataRow row);
+        
+        /// <summary>
         /// Sets the contents of a row by its row identifier.
         /// </summary>
         /// <param name="rid">The row identifier.</param>
