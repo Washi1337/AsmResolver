@@ -286,8 +286,20 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedParameter = new GenericParameter(parameter.Name, parameter.Attributes);
 
+            foreach (var constraint in parameter.Constraints)
+                clonedParameter.Constraints.Add(CloneGenericParameterConstraint(context, constraint));
+
             CloneCustomAttributes(context, parameter, clonedParameter);
             return clonedParameter;
+        }
+
+        private GenericParameterConstraint CloneGenericParameterConstraint(MemberCloneContext context,
+            GenericParameterConstraint constraint)
+        {
+            var clonedConstraint = new GenericParameterConstraint(context.Importer.ImportType(constraint.Constraint));
+            
+            CloneCustomAttributes(context, constraint, clonedConstraint);
+            return clonedConstraint;
         }
     }
 }

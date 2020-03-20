@@ -233,12 +233,25 @@ namespace AsmResolver.DotNet.Tests.Cloning
         {
             var clonedType = CloneType(typeof(GenericType<,,>), out var typeDef);
 
-            Assert.Equal(new[]
+            Assert.Equal(
+                typeDef.GenericParameters.Select(p => p.Name),
+                clonedType.GenericParameters.Select(p => p.Name));
+        }
+
+        [Fact]
+        public void CloneGenericParameterConstraints()
+        {
+            var clonedMethod = CloneMethod(
+                typeof(NonGenericType).GetMethod(nameof(NonGenericType.GenericMethodWithConstraints)),
+                    out var methodDef);
+
+            for (int i = 0; i < clonedMethod.GenericParameters.Count; i++)
             {
-                "T1",
-                "T2",
-                "T3"
-            }, clonedType.GenericParameters.Select(p => p.Name));
+                var originalParameter = methodDef.GenericParameters[i];
+                var newParameter  = clonedMethod.GenericParameters[i];
+                Assert.Equal(originalParameter.Constraints.Select(c => c.Constraint.FullName),
+                    newParameter.Constraints.Select(c => c.Constraint.FullName));
+            }
         }
     }
 }
