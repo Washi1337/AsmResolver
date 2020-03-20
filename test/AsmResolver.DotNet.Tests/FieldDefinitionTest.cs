@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.PE.DotNet.Cil;
@@ -9,6 +10,17 @@ namespace AsmResolver.DotNet.Tests
 {
     public class FieldDefinitionTest
     {
+        private FieldDefinition RebuildAndLookup(FieldDefinition field)
+        {
+            var stream = new MemoryStream();
+            field.Module.Write(stream);
+            
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            return newModule
+                .TopLevelTypes.First(t => t.FullName == field.DeclaringType.FullName)
+                .Fields.First(f => f.Name == field.Name);
+        }
+        
         [Fact]
         public void ReadName()
         {
@@ -37,21 +49,6 @@ namespace AsmResolver.DotNet.Tests
             Assert.True(field.Signature.FieldType.IsTypeOf("System", "Int32"), "Field type should be System.Int32");
         }
 
-        [Fact]
-        public void ReadFieldRva()
-        {
-            var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location);
-            var field = module
-                .TopLevelTypes.First(t => t.Name == nameof(InitialValues))
-                .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
-
-            var initializer = FindInitializerField(field);
-            Assert.NotNull(initializer.FieldRva);
-            Assert.IsAssignableFrom<IReadableSegment>(initializer.FieldRva);
-            
-            Assert.Equal(InitialValues.ByteArray, ((IReadableSegment) initializer.FieldRva).ToArray());
-        }
-        
         private static FieldDefinition FindInitializerField(FieldDefinition field)
         {
             var cctor = field.DeclaringType.GetStaticConstructor();
@@ -69,6 +66,45 @@ namespace AsmResolver.DotNet.Tests
             }
 
             return null;
+        }
+
+        [Fact]
+        public void ReadFieldRva()
+        {
+            var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location);
+            var field = module
+                .TopLevelTypes.First(t => t.Name == nameof(InitialValues))
+                .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
+
+            var initializer = FindInitializerField(field);
+            Assert.NotNull(initializer.FieldRva);
+            Assert.IsAssignableFrom<IReadableSegment>(initializer.FieldRva);
+            
+            Assert.Equal(InitialValues.ByteArray, ((IReadableSegment) initializer.FieldRva).ToArray());
+        }
+
+        [Fact]
+        public void PersistentFieldRva()
+        {
+            var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location);
+            var field = module
+                .TopLevelTypes.First(t => t.Name == nameof(InitialValues))
+                .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
+
+            var initializer = FindInitializerField(field);
+            
+            var data = new byte[]
+            {
+                1, 2, 3, 4
+            };
+            initializer.FieldRva = new DataSegment(data);
+            initializer.Signature.FieldType.Resolve().ClassLayout.ClassSize = (uint) data.Length;
+            
+            var newInitializer = RebuildAndLookup(initializer);
+            
+            Assert.NotNull(newInitializer.FieldRva);
+            Assert.IsAssignableFrom<IReadableSegment>(newInitializer.FieldRva);
+            Assert.Equal(data, ((IReadableSegment) newInitializer.FieldRva).ToArray());
         }
     }
 }

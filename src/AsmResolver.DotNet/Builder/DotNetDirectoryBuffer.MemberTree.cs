@@ -171,7 +171,22 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, field);
             AddConstant(token, field.Constant);
             AddImplementationMap(token, field.ImplementationMap);
+            AddFieldRva(token, field.FieldRva);
             return token;
+        }
+
+        private void AddFieldRva(MetadataToken ownerToken, ISegment fieldRva)
+        {
+            if (fieldRva is null)
+                return;
+            
+            var table = Metadata.TablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
+            
+            var row = new FieldRvaRow(
+                new SegmentReference(fieldRva), 
+                ownerToken.Rid);
+
+            table.Add(row, 0);
         }
 
         private MetadataToken AddMethodDefinitionStub(MethodDefinition method)
