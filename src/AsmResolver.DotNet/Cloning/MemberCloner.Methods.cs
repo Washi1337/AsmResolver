@@ -58,6 +58,8 @@ namespace AsmResolver.DotNet.Cloning
                 clonedMethod.CilMethodBody = CloneCilMethodBody(context, method);
             
             CloneCustomAttributes(context, method, clonedMethod);
+            CloneGenericParameters(context, method, clonedMethod);
+            
             clonedMethod.ImplementationMap = CloneImplementationMap(context, method.ImplementationMap);
         }
 

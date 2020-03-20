@@ -209,6 +209,7 @@ namespace AsmResolver.DotNet.Cloning
             }
 
             CloneCustomAttributes(context, type, clonedType);
+            CloneGenericParameters(context, type, clonedType);
         }
 
         private void CloneCustomAttributes(
@@ -270,6 +271,23 @@ namespace AsmResolver.DotNet.Cloning
             return constant != null
                 ? new Constant(constant.Type, new DataBlobSignature(constant.Value.Data))
                 : null;
+        }
+
+        private void CloneGenericParameters(
+            MemberCloneContext context, 
+            IHasGenericParameters sourceProvider,
+            IHasGenericParameters clonedProvider)
+        {
+            foreach (var parameter in sourceProvider.GenericParameters)
+                clonedProvider.GenericParameters.Add(CloneGenericParameter(context, parameter));
+        }
+
+        private GenericParameter CloneGenericParameter(MemberCloneContext context, GenericParameter parameter)
+        {
+            var clonedParameter = new GenericParameter(parameter.Name, parameter.Attributes);
+
+            CloneCustomAttributes(context, parameter, clonedParameter);
+            return clonedParameter;
         }
     }
 }

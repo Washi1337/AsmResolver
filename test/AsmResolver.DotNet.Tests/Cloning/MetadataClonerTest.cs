@@ -31,6 +31,22 @@ namespace AsmResolver.DotNet.Tests.Cloning
             return module;
         }
         
+        private static TypeDefinition CloneType(Type type, out TypeDefinition originalTypeDef)
+        {
+            var sourceModule = ModuleDefinition.FromFile(type.Module.Assembly.Location);
+            originalTypeDef= (TypeDefinition) sourceModule.LookupMember(type.MetadataToken);
+
+            var targetModule = PrepareTempModule();
+
+            var result = new MemberCloner(targetModule)
+                .Include(originalTypeDef)
+                .Clone();
+
+            return result.ClonedMembers
+                .OfType<TypeDefinition>()
+                .First();
+        }
+        
         private static MethodDefinition CloneMethod(MethodBase methodBase, out MethodDefinition originalMethodDef)
         {
             var sourceModule = ModuleDefinition.FromFile(methodBase.Module.Assembly.Location);
@@ -210,6 +226,19 @@ namespace AsmResolver.DotNet.Tests.Cloning
             Assert.NotNull(clonedMethod.ParameterDefinitions[0].Constant);
             Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Type, method.ParameterDefinitions[0].Constant.Type);
             Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Value.Data, method.ParameterDefinitions[0].Constant.Value.Data);
+        }
+
+        [Fact]
+        public void CloneGenericParameters()
+        {
+            var clonedType = CloneType(typeof(GenericType<,,>), out var typeDef);
+
+            Assert.Equal(new[]
+            {
+                "T1",
+                "T2",
+                "T3"
+            }, clonedType.GenericParameters.Select(p => p.Name));
         }
     }
 }
