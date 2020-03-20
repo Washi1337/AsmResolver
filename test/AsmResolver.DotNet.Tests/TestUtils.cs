@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.CompilerServices;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -16,6 +17,25 @@ namespace AsmResolver.DotNet.Tests
             module.Write(path);
             string actualOutput = runner.RunAndCaptureOutput(path, timeout);
             Assert.Equal(expectedOutput, actualOutput);
+        }
+
+        public static FieldDefinition FindInitializerField(this FieldDefinition field)
+        {
+            var cctor = field.DeclaringType.GetStaticConstructor();
+            
+            var instructions = cctor.CilMethodBody.Instructions;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].OpCode.Code == CilCode.Ldtoken
+                    && instructions[i + 2].OpCode.Code == CilCode.Stsfld
+                    && instructions[i+2].Operand is FieldDefinition f
+                    && f == field)
+                {
+                    return (FieldDefinition) instructions[i].Operand;
+                }
+            }
+
+            return null;
         }
     }
 }

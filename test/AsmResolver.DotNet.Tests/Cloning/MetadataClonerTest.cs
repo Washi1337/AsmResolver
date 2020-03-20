@@ -5,6 +5,7 @@ using System.Reflection;
 using AsmResolver.DotNet.Cloning;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Events;
+using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.PE.DotNet.Cil;
@@ -50,8 +51,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         private static MethodDefinition CloneMethod(MethodBase methodBase, out MethodDefinition originalMethodDef)
         {
             var sourceModule = ModuleDefinition.FromFile(methodBase.Module.Assembly.Location);
-            var type = sourceModule.TopLevelTypes.First(t => t.Name == methodBase.DeclaringType.Name);
-            originalMethodDef = type.Methods.First(m => m.Name == methodBase.Name);
+            originalMethodDef = (MethodDefinition) sourceModule.LookupMember(methodBase.MetadataToken);
 
             var targetModule = PrepareTempModule();
 
@@ -61,6 +61,23 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             var clonedMethod = (MethodDefinition) result.ClonedMembers.First();
             return clonedMethod;
+        }
+        
+        private static FieldDefinition CloneIntializerField(FieldInfo field, out FieldDefinition originalFieldDef)
+        {
+            var sourceModule = ModuleDefinition.FromFile(field.Module.Assembly.Location);
+            originalFieldDef = (FieldDefinition) sourceModule.LookupMember(field.MetadataToken);
+
+            originalFieldDef = originalFieldDef.FindInitializerField();
+
+            var targetModule = PrepareTempModule();
+
+            var result = new MemberCloner(targetModule)
+                .Include(originalFieldDef)
+                .Clone();
+
+            var clonedField = (FieldDefinition) result.ClonedMembers.First();
+            return clonedField;
         }
 
         [Fact]
@@ -226,6 +243,18 @@ namespace AsmResolver.DotNet.Tests.Cloning
             Assert.NotNull(clonedMethod.ParameterDefinitions[0].Constant);
             Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Type, method.ParameterDefinitions[0].Constant.Type);
             Assert.Equal(clonedMethod.ParameterDefinitions[0].Constant.Value.Data, method.ParameterDefinitions[0].Constant.Value.Data);
+        }
+
+        [Fact]
+        public void CloneFieldRva()
+        {
+            var clonedInitializerField =
+                CloneIntializerField(typeof(InitialValues).GetField(nameof(InitialValues.ByteArray)), out var field);
+            
+            var originalData = ((IReadableSegment) field.FieldRva).ToArray();
+            var newData = ((IReadableSegment) clonedInitializerField.FieldRva).ToArray();
+
+            Assert.Equal(originalData, newData);
         }
 
         [Fact]

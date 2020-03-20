@@ -46,6 +46,8 @@ namespace AsmResolver.DotNet.Cloning
             CloneCustomAttributes(context, field, clonedField);
             clonedField.ImplementationMap = CloneImplementationMap(context, field.ImplementationMap);
             clonedField.Constant = CloneConstant(context, field.Constant);
+            clonedField.FieldRva = FieldRvaCloner.CloneFieldRvaData(field);
         }
+
     }
 }

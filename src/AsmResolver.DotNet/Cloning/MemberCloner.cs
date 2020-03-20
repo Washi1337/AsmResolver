@@ -32,6 +32,15 @@ namespace AsmResolver.DotNet.Cloning
         }
 
         /// <summary>
+        /// Gets or sets the object responsible for cloning a data segment of a field RVA (initialization data) entry.
+        /// </summary>
+        public IFieldRvaCloner FieldRvaCloner
+        {
+            get;
+            set;
+        } = new FieldRvaCloner();
+
+        /// <summary>
         /// Adds the provided type, and all its members and nested types, to the list of members to clone.
         /// </summary>
         /// <param name="type">The type to include.</param>

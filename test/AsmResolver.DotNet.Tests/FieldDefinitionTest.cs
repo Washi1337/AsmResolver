@@ -77,25 +77,6 @@ namespace AsmResolver.DotNet.Tests
             Assert.True(newField.Signature.FieldType.IsTypeOf("System", "Byte"), "Field type should be System.Byte");
         }
 
-        private static FieldDefinition FindInitializerField(FieldDefinition field)
-        {
-            var cctor = field.DeclaringType.GetStaticConstructor();
-            
-            var instructions = cctor.CilMethodBody.Instructions;
-            for (int i = 0; i < instructions.Count; i++)
-            {
-                if (instructions[i].OpCode.Code == CilCode.Ldtoken
-                    && instructions[i + 2].OpCode.Code == CilCode.Stsfld
-                    && instructions[i+2].Operand is FieldDefinition f
-                    && f == field)
-                {
-                    return (FieldDefinition) instructions[i].Operand;
-                }
-            }
-
-            return null;
-        }
-
         [Fact]
         public void ReadFieldRva()
         {
@@ -104,7 +85,7 @@ namespace AsmResolver.DotNet.Tests
                 .TopLevelTypes.First(t => t.Name == nameof(InitialValues))
                 .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
 
-            var initializer = FindInitializerField(field);
+            var initializer = field.FindInitializerField();
             Assert.NotNull(initializer.FieldRva);
             Assert.IsAssignableFrom<IReadableSegment>(initializer.FieldRva);
             
@@ -119,7 +100,7 @@ namespace AsmResolver.DotNet.Tests
                 .TopLevelTypes.First(t => t.Name == nameof(InitialValues))
                 .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
 
-            var initializer = FindInitializerField(field);
+            var initializer = field.FindInitializerField();
             
             var data = new byte[]
             {
