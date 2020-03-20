@@ -67,6 +67,22 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        protected override ISegment GetFieldRva()
+        {
+            uint rid = _parentModule.GetFieldRvaRid(MetadataToken);
+            bool result = _parentModule.DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable<FieldRvaRow>()
+                .TryGetByRid(rid, out var fieldRvaRow);
+            
+            if (!result)
+                return null;
+
+            return _parentModule.ReadParameters.FieldRvaDataReader
+                .ResolveFieldData(_parentModule.DotNetDirectory.Metadata, fieldRvaRow);
+        }
+
+        /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
             _parentModule.GetCustomAttributeCollection(this);
     }

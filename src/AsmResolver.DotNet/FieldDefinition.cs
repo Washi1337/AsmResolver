@@ -24,6 +24,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<Constant> _constant;
         private readonly LazyVariable<ImplementationMap> _implementationMap;
+        private readonly LazyVariable<ISegment> _fieldRva;
 
         private IList<CustomAttribute> _customAttributes;
 
@@ -39,6 +40,7 @@ namespace AsmResolver.DotNet
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
             _constant = new LazyVariable<Constant>(GetConstant);
             _implementationMap = new LazyVariable<ImplementationMap>(GetImplementationMap);
+            _fieldRva = new LazyVariable<ISegment>(GetFieldRva);
         }
 
         /// <summary>
@@ -332,7 +334,21 @@ namespace AsmResolver.DotNet
                     value.MemberForwarded = this;
             }
         }
-        
+
+        /// <summary>
+        /// Gets or sets a segment containing the initial value of the field.
+        /// </summary>
+        /// <remarks>
+        /// Updating this property does not automatically update the <see cref="HasFieldRva"/> property, nor does the
+        /// value of <see cref="HasFieldRva"/> reflect whether the field has initialization data or not. Well-formed
+        /// .NET binaries should always set the <see cref="HasFieldRva"/> flag to <c>true</c> if this property is non-null.
+        /// </remarks>
+        public ISegment FieldRva
+        {
+            get => _fieldRva.Value;
+            set => _fieldRva.Value = value;
+        }
+
         FieldDefinition IFieldDescriptor.Resolve() => this;
 
         /// <summary>
@@ -390,6 +406,15 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual ImplementationMap GetImplementationMap() => null;
 
+        /// <summary>
+        /// Obtains the initial value of the field.
+        /// </summary>
+        /// <returns>The initial value.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="FieldRva"/> property.
+        /// </remarks>
+        protected virtual ISegment GetFieldRva() => null;
+        
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

@@ -1,5 +1,8 @@
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -32,6 +35,40 @@ namespace AsmResolver.DotNet.Tests
                 typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
             Assert.NotNull(field.Signature);
             Assert.True(field.Signature.FieldType.IsTypeOf("System", "Int32"), "Field type should be System.Int32");
+        }
+
+        [Fact]
+        public void ReadFieldRva()
+        {
+            var module = ModuleDefinition.FromFile(typeof(InitialValues).Assembly.Location);
+            var field = module
+                .TopLevelTypes.First(t => t.Name == nameof(InitialValues))
+                .Fields.First(f => f.Name == nameof(InitialValues.ByteArray));
+
+            var initializer = FindInitializerField(field);
+            Assert.NotNull(initializer.FieldRva);
+            Assert.IsAssignableFrom<IReadableSegment>(initializer.FieldRva);
+            
+            Assert.Equal(InitialValues.ByteArray, ((IReadableSegment) initializer.FieldRva).ToArray());
+        }
+        
+        private static FieldDefinition FindInitializerField(FieldDefinition field)
+        {
+            var cctor = field.DeclaringType.GetStaticConstructor();
+            
+            var instructions = cctor.CilMethodBody.Instructions;
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].OpCode.Code == CilCode.Ldtoken
+                    && instructions[i + 2].OpCode.Code == CilCode.Stsfld
+                    && instructions[i+2].Operand is FieldDefinition f
+                    && f == field)
+                {
+                    return (FieldDefinition) instructions[i].Operand;
+                }
+            }
+
+            return null;
         }
     }
 }

@@ -1,3 +1,5 @@
+using AsmResolver.PE.DotNet.Metadata;
+
 namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
@@ -38,5 +40,14 @@ namespace AsmResolver.DotNet.Serialized
             get;
             set;
         } = new DefaultMethodBodyReader();
+
+        /// <summary>
+        /// Gets or sets the field initial value reader.
+        /// </summary>
+        public IFieldRvaDataReader FieldRvaDataReader
+        {
+            get;
+            set;
+        } = new FieldRvaDataReader();
     }
 }

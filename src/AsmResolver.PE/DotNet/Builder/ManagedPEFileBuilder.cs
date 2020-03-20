@@ -59,7 +59,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 DotNetSegment = new DotNetSegmentBuffer(image.DotNetDirectory);
                 ResourceDirectory = new ResourceDirectoryBuffer();
                 RelocationsDirectory = new RelocationsDirectoryBuffer();
-                FieldRvaDataReader = new FieldRvaDataReader(image.DotNetDirectory.Metadata);
+                FieldRvaDataReader = new FieldRvaDataReader();
                 Bootstrapper = CreateBootstrapper(image);
             }
 
@@ -332,7 +332,8 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void AddFieldRvasToTable(ManagedPEBuilderContext context)
         {
-            var fieldRvaTable = context.DotNetSegment.DotNetDirectory.Metadata
+            var metadata = context.DotNetSegment.DotNetDirectory.Metadata;
+            var fieldRvaTable = metadata
                 .GetStream<TablesStream>()
                 .GetTable<FieldRvaRow>(TableIndex.FieldRva);
             
@@ -344,7 +345,7 @@ namespace AsmResolver.PE.DotNet.Builder
             
             foreach (var row in fieldRvaTable)
             {
-                var data = reader.ResolveFieldData(row);
+                var data = reader.ResolveFieldData(metadata, row);
                 table.Add(data);
             }
         }

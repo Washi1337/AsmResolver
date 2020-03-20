@@ -59,8 +59,8 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
             var fieldRvaRow = FindFieldRvaRow(metadata.GetStream<TablesStream>(), cctorToken, fieldToken);
 
             // Read the data.
-            var dataReader = new FieldRvaDataReader(metadata);
-            var segment = dataReader.ResolveFieldData(fieldRvaRow) as IReadableSegment;
+            var dataReader = new FieldRvaDataReader();
+            var segment = dataReader.ResolveFieldData(metadata, fieldRvaRow) as IReadableSegment;
             
             Assert.NotNull(segment);
             Assert.Equal(InitialValues.ByteArray, segment.ToArray());

@@ -37,6 +37,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToManyRelation<MetadataToken, uint> _interfaces;
         private OneToOneRelation<MetadataToken, uint> _classLayouts;
         private OneToOneRelation<MetadataToken, uint> _implementationMaps;
+        private OneToOneRelation<MetadataToken, uint> _fieldRvas;
 
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -512,6 +513,34 @@ namespace AsmResolver.DotNet.Serialized
             return _implementationMaps.GetKey(mapRid);
         }
 
+        private void EnsureFieldRvasInitialized()
+        {
+            if (_fieldRvas is null)
+                Interlocked.CompareExchange(ref _fieldRvas, InitializeFieldRvas(), null);
+        }
+
+        private OneToOneRelation<MetadataToken, uint> InitializeFieldRvas()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var rvaTable = tablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
+            
+            var rvas = new OneToOneRelation<MetadataToken, uint>();
+            for (int i = 0; i < rvaTable.Count; i++)
+            {
+                var ownerToken = new MetadataToken(TableIndex.Field, rvaTable[i].Field);
+                uint rvaRid = (uint) (i + 1);
+                rvas.Add(ownerToken, rvaRid);
+            }
+
+            return rvas;
+        }
+
+        internal uint GetFieldRvaRid(MetadataToken fieldToken)
+        {
+            EnsureFieldRvasInitialized();
+            return _fieldRvas.GetValue(fieldToken);
+        }
+        
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {
