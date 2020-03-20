@@ -1,9 +1,8 @@
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.PE.DotNet.Cil;
-using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -30,6 +29,21 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
+        public void PersistentName()
+        {
+            const string newName = "NewName";
+            
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
+            var field = type.Fields[0];
+            
+            type.Fields[0].Name = newName;
+            
+            var newField = RebuildAndLookup(field);
+            Assert.Equal(newName, newField.Name);
+        }
+
+        [Fact]
         public void ReadDeclaringType()
         {
             var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
@@ -47,6 +61,20 @@ namespace AsmResolver.DotNet.Tests
                 typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
             Assert.NotNull(field.Signature);
             Assert.True(field.Signature.FieldType.IsTypeOf("System", "Int32"), "Field type should be System.Int32");
+        }
+
+        [Fact]
+        public void PersistentFieldSignature()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleField).Assembly.Location);
+            var field = (FieldDefinition) module.LookupMember(
+                typeof(SingleField).GetField(nameof(SingleField.IntField)).MetadataToken);
+
+            field.Signature = FieldSignature.CreateInstance(module.CorLibTypeFactory.Byte);
+
+            var newField = RebuildAndLookup(field);
+            
+            Assert.True(newField.Signature.FieldType.IsTypeOf("System", "Byte"), "Field type should be System.Byte");
         }
 
         private static FieldDefinition FindInitializerField(FieldDefinition field)
