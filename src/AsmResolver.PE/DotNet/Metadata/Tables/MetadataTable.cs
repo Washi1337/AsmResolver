@@ -135,6 +135,31 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         IMetadataRow IMetadataTable.GetByRid(uint rid) => GetByRid(rid);
 
         /// <summary>
+        /// Attempts to get the contents of a row by its row identifier.
+        /// </summary>
+        /// <param name="rid">The row identifier.</param>
+        /// <param name="row">When successful, the read row.</param>
+        /// <returns><c>true</c> if the RID existed an the row was obtained successfully, <c>false</c> otherwise.</returns>
+        public bool TryGetByRid(uint rid, out TRow row)
+        {
+            if (rid >= 1 && rid <= Count)
+            {
+                row = GetByRid(rid);
+                return true;
+            }
+
+            row = default;
+            return false;
+        }
+
+        bool IMetadataTable.TryGetByRid(uint rid, out IMetadataRow row)
+        {
+            bool result = TryGetByRid(rid, out var r);
+            row = r;
+            return result;
+        }
+
+        /// <summary>
         /// Gets a single row in a table by a key. This requires the table to be sorted.
         /// </summary>
         /// <param name="keyColumnIndex">The column number to get the key from.</param>
