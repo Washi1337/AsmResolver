@@ -367,7 +367,8 @@ namespace AsmResolver
 
         public override uint GetPhysicalLength()
         {
-            return 0xE0; // TODO: make dynamic
+            // TODO: make configurable?
+            return Magic == OptionalHeaderMagic.Pe32 ? 0xE0u : 0xF0u;
             return (uint)(sizeof (ushort) +
                           2 * sizeof (byte) +
                           5 * sizeof (uint) +

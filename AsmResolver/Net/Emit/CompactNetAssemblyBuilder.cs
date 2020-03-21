@@ -60,19 +60,33 @@ namespace AsmResolver.Net.Emit
 
         private void CreateRelocationSection()
         {
-            Assembly.RelocationDirectory.Blocks.Clear();
-            var block = new BaseRelocationBlock(0);
-            block.Entries.Add(new BaseRelocationEntry(BaseRelocationType.HighLow, 0));
-            block.Entries.Add(new BaseRelocationEntry(BaseRelocationType.Absolute, 0));
-            Assembly.RelocationDirectory.Blocks.Add(block);
-
-            _relocSectionHeader = new ImageSectionHeader
+            if (Assembly.NtHeaders.OptionalHeader.Magic == OptionalHeaderMagic.Pe32Plus)
             {
-                Name = ".reloc",
-                Attributes = ImageSectionAttributes.MemoryRead |
-                             ImageSectionAttributes.ContentInitializedData,
-                Section = {Segments = {Assembly.RelocationDirectory}}
-            };
+                // 64-bit assemblies do not have native bootstrappers, and therefore do not need relocations.
+                Assembly.RelocationDirectory = null;
+            }
+            else
+            {
+                Assembly.RelocationDirectory.Blocks.Clear();
+                var block = new BaseRelocationBlock(0);
+                block.Entries.Add(new BaseRelocationEntry(BaseRelocationType.HighLow, 0));
+                block.Entries.Add(new BaseRelocationEntry(BaseRelocationType.Absolute, 0));
+                Assembly.RelocationDirectory.Blocks.Add(block);
+
+                _relocSectionHeader = new ImageSectionHeader
+                {
+                    Name = ".reloc",
+                    Attributes = ImageSectionAttributes.MemoryRead |
+                                 ImageSectionAttributes.ContentInitializedData,
+                    Section =
+                    {
+                        Segments =
+                        {
+                            Assembly.RelocationDirectory
+                        }
+                    }
+                };
+            }
         }
 
         private void CreateResourceSection()
@@ -107,7 +121,7 @@ namespace AsmResolver.Net.Emit
         {
             var header = Assembly.NtHeaders.FileHeader;
             header.NumberOfSections = (ushort)SectionTable.GetSections().Count();
-            header.SizeOfOptionalHeader = 0xE0;
+            header.SizeOfOptionalHeader = (ushort) Assembly.NtHeaders.OptionalHeader.GetPhysicalLength();
         }
 
         private void UpdateOptionalHeader()
@@ -126,8 +140,10 @@ namespace AsmResolver.Net.Emit
                                  Align(lastSection.VirtualSize, Assembly.NtHeaders.OptionalHeader.SectionAlignment);
             header.SizeOfHeaders = 0x200;
 
-            header.AddressOfEntrypoint = (uint) Assembly.FileOffsetToRva(_textContents.Bootstrapper.StartOffset);
-            
+            header.AddressOfEntrypoint = _textContents.Bootstrapper != null
+                ? (uint) Assembly.FileOffsetToRva(_textContents.Bootstrapper.StartOffset)
+                : 0u;
+
             UpdateDataDirectories();
         }
         
@@ -158,14 +174,25 @@ namespace AsmResolver.Net.Emit
                 resourceDirectory.VirtualAddress = _rsrcSectionHeader.VirtualAddress;
                 resourceDirectory.Size = _rsrcSectionHeader.VirtualSize;
             }
-            
-            var importDirectory = optionalHeader.DataDirectories[ImageDataDirectory.ImportDirectoryIndex];
-            importDirectory.VirtualAddress = (uint)Assembly.FileOffsetToRva(_textContents.ImportDirectory.StartOffset);
-            importDirectory.Size = _textContents.ImportDirectory.GetPhysicalLength();
 
+            var importDirectory = optionalHeader.DataDirectories[ImageDataDirectory.ImportDirectoryIndex];
             var iatDirectory = optionalHeader.DataDirectories[ImageDataDirectory.IatDirectoryIndex];
-            iatDirectory.VirtualAddress = (uint) Assembly.FileOffsetToRva(_textContents.ImportBuffer.AddressTables.StartOffset);
-            iatDirectory.Size = _textContents.ImportBuffer.AddressTables.GetPhysicalLength();
+
+            if (_textContents.ImportDirectory == null)
+            {
+                importDirectory.VirtualAddress = 0;
+                importDirectory.Size = 0;
+                iatDirectory.VirtualAddress = 0;
+                iatDirectory.Size = 0;
+            }
+            else
+            {
+                importDirectory.VirtualAddress =
+                    (uint) Assembly.FileOffsetToRva(_textContents.ImportDirectory.StartOffset);
+                importDirectory.Size = _textContents.ImportDirectory.GetPhysicalLength();
+                iatDirectory.VirtualAddress = (uint) Assembly.FileOffsetToRva(_textContents.ImportBuffer.AddressTables.StartOffset);
+                iatDirectory.Size = _textContents.ImportBuffer.AddressTables.GetPhysicalLength();
+            }
 
             var exportDirectory = optionalHeader.DataDirectories[ImageDataDirectory.ExportDirectoryIndex];
             if (_textContents.ExportDirectory == null)

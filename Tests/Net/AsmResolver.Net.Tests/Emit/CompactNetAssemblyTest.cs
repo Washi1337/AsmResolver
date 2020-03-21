@@ -376,6 +376,31 @@ namespace AsmResolver.Tests.Net.Emit
                 }
             }
         }
+
+        [Fact]
+        public void Build64BitAssembly()
+        {
+            var assembly = CreateTempAssembly();
+            assembly.NtHeaders.FileHeader.Machine = ImageMachineType.Amd64;
+            assembly.NtHeaders.OptionalHeader.Magic = OptionalHeaderMagic.Pe32Plus;
+
+            var image = assembly.NetDirectory.MetadataHeader.Image;
+
+            var importer = new ReferenceImporter(image);
+            var writeLine = importer.ImportMethod(typeof(Console).GetMethod("WriteLine", new[] {typeof(string)}));
+            
+            var instructions = image.ManagedEntrypoint.CilMethodBody.Instructions;
+
+            instructions.AddRange(new[]
+            {
+                CilInstruction.Create(CilOpCodes.Ldstr, "Hello, world!"),
+                CilInstruction.Create(CilOpCodes.Call, writeLine), 
+                CilInstruction.Create(CilOpCodes.Ret), 
+            });
+
+            image.Header.UnlockMetadata();
+            _context.VerifyOutput(assembly, "Hello, world!");
+        }
         
     }
 }

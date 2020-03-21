@@ -8,15 +8,19 @@ namespace AsmResolver.Net.Emit
     /// </summary>
     public class CompactNetTextContents : FileSegmentBuilder
     {
-        private readonly SimpleFileSegmentBuilder _importDirectory = new SimpleFileSegmentBuilder();
+        private readonly SimpleFileSegmentBuilder _importDirectory;
         
         public CompactNetTextContents(WindowsAssembly assembly)
         {
-            ImportBuffer = new ImportDirectoryBuffer(assembly);
-            
-            // IAT
-            Segments.Add(ImportBuffer.AddressTables);
-            
+            if (assembly.NtHeaders.OptionalHeader.Magic == OptionalHeaderMagic.Pe32)
+            {
+                ImportBuffer = new ImportDirectoryBuffer(assembly);
+                _importDirectory = new SimpleFileSegmentBuilder();
+                
+                // IAT
+                Segments.Add(ImportBuffer.AddressTables);
+            }
+
             // .NET Directory
             Segments.Add(NetDirectory = assembly.NetDirectory);
             
@@ -56,14 +60,20 @@ namespace AsmResolver.Net.Emit
             if (assembly.ExportDirectory != null)
                 Segments.Add(ExportDirectory = new ExportDirectoryBuffer(assembly.ExportDirectory, assembly));
 
-            // Remaining bits of the import tables.
-            _importDirectory.Segments.Add(ImportBuffer.ModuleImportTable);
-            _importDirectory.Segments.Add(ImportBuffer.LookupTables);
-            _importDirectory.Segments.Add(ImportBuffer.NameTable);
-            Segments.Add(_importDirectory);
+            if (ImportBuffer != null)
+            {
+                // Remaining bits of the import tables.
+                _importDirectory.Segments.Add(ImportBuffer.ModuleImportTable);
+                _importDirectory.Segments.Add(ImportBuffer.LookupTables);
+                _importDirectory.Segments.Add(ImportBuffer.NameTable);
+                Segments.Add(_importDirectory);
+            }
 
-            // Bootstrapper (Call to _CorExeMain / _CorDllMain).
-            Segments.Add(Bootstrapper = new BootstrapperSegment());
+            if (assembly.NtHeaders.OptionalHeader.Magic == OptionalHeaderMagic.Pe32)
+            {
+                // Bootstrapper (Call to _CorExeMain / _CorDllMain).
+                Segments.Add(Bootstrapper = new BootstrapperSegment());
+            }
 
             var tableStream = assembly.NetDirectory.MetadataHeader.GetStream<TableStream>();
             
@@ -80,7 +90,6 @@ namespace AsmResolver.Net.Emit
                 if (method.Column1 != null)
                     MethodBodyTable.Segments.Add(method.Column1);
             }
-
         }
 
         public ImportDirectoryBuffer ImportBuffer
@@ -132,7 +141,7 @@ namespace AsmResolver.Net.Emit
 
         public override void UpdateReferences(EmitContext context)
         {
-            ImportBuffer.UpdateTableRvas();
+            ImportBuffer?.UpdateTableRvas();
             VTableFixups?.UpdateTableRvas(context);
             if (DebugDirectory != null)
             {
