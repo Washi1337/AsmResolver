@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Serialized
             }
             else
             {
-                CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory();
+                CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
                 corLib = CorLibTypeFactory.CorLibScope;
             }
 
@@ -681,7 +681,7 @@ namespace AsmResolver.DotNet.Serialized
             var mostRecentVersion = new Version();
             foreach (var reference in AssemblyReferences)
             {
-                if (CorLibTypeFactory.KnownCorLibNames.Contains(reference.Name))
+                if (KnownCorLibs.KnownCorLibNames.Contains(reference.Name))
                 {
                     if (mostRecentVersion < reference.Version)
                         mostRecentCorLib = reference;
@@ -690,7 +690,7 @@ namespace AsmResolver.DotNet.Serialized
 
             if (mostRecentCorLib is null && Assembly is {})
             {
-                if (CorLibTypeFactory.KnownCorLibNames.Contains(Assembly.Name))
+                if (KnownCorLibs.KnownCorLibNames.Contains(Assembly.Name))
                     mostRecentCorLib = this;
             }
 

@@ -155,7 +155,7 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
-            CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory();
+            CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
             AssemblyReferences.Add((AssemblyReference) CorLibTypeFactory.CorLibScope);
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
             MetadataResolver = new DefaultMetadataResolver(new NetFrameworkAssemblyResolver());
@@ -170,6 +170,10 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
+            
+            var importer = new ReferenceImporter(this);
+            corLib = (AssemblyReference) importer.ImportScope(corLib);
+            
             CorLibTypeFactory = new CorLibTypeFactory(corLib);
             AssemblyReferences.Add(corLib);
 

@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet
 {
@@ -7,6 +10,16 @@ namespace AsmResolver.DotNet
     /// </summary>
     public static class KnownCorLibs
     {
+        /// <summary>
+        /// A collection of references to all known implementations of the Common Object Runtime (COR) library.
+        /// </summary>
+        public static readonly ICollection<AssemblyReference> KnownCorLibReferences;
+
+        /// <summary>
+        /// A collection of names of known implementations of the common runtime library.
+        /// </summary>
+        public static readonly ICollection<string> KnownCorLibNames;
+
         /// <summary>
         /// References mscorlib.dll, Version=2.0.0.0, PublicKeyToken=B77A5C561934E089. This is used by .NET assemblies
         /// targeting the .NET Framework 2.0, 3.0 and 3.5.
@@ -96,5 +109,23 @@ namespace AsmResolver.DotNet
             {
                 0xCC, 0x7B, 0x13, 0xFF, 0xCD, 0x2D, 0xDD, 0x51
             });
+
+        static KnownCorLibs()
+        {
+            KnownCorLibReferences = new HashSet<AssemblyReference>(new SignatureComparer())
+            {
+                NetStandard_v2_0_0_0,
+                NetStandard_v2_1_0_0,
+                MsCorLib_v2_0_0_0,
+                MsCorLib_v4_0_0_0,
+                SystemRuntime_v4_0_20_0,
+                SystemRuntime_v4_1_0_0,
+                SystemRuntime_v4_2_1_0,
+                SystemRuntime_v4_2_2_0,
+                SystemPrivateCoreLib_v4_0_0_0
+            };
+
+            KnownCorLibNames = new HashSet<string>(KnownCorLibReferences.Select(r => r.Name));
+        }
     }
 }
