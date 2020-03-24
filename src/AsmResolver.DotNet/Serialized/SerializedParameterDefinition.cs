@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Serialized
                 var reader = metadata
                     .GetStream<BlobStream>()
                     .GetBlobReaderByIndex(row.NativeType);
-                return MarshalDescriptor.FromReader(reader);
+                return MarshalDescriptor.FromReader(_parentModule, reader);
             }
 
             return null;

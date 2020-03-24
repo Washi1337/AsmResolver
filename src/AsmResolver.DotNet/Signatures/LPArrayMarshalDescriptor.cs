@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <remarks>
         /// This method assumes the native type has already been read from the binary stream reader.
         /// </remarks>
-        public new static LPArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static LPArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var descriptor = new LPArrayMarshalDescriptor((NativeType) reader.ReadByte());
 

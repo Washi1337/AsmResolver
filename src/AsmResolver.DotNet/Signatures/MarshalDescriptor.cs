@@ -11,14 +11,15 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a marshal descriptor signature from the provided input stream.
         /// </summary>
+        /// <param name="parentModule">The module that defines the marshal descriptor</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The marshal descriptor.</returns>
-        public static MarshalDescriptor FromReader(IBinaryStreamReader reader)
+        public static MarshalDescriptor FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
         {
             var nativeType = (NativeType) reader.ReadByte();
             MarshalDescriptor descriptor = nativeType switch
             {
-                NativeType.SafeArray => throw new NotImplementedException(),
+                NativeType.SafeArray => SafeArrayMarshalDescriptor.FromReader(parentModule, reader),
                 NativeType.FixedArray => throw new NotImplementedException(),
                 NativeType.LPArray => LPArrayMarshalDescriptor.FromReader(reader),
                 NativeType.CustomMarshaller => throw new NotImplementedException(),

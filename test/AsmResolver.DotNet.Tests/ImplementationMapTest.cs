@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadMemberForwarded()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            Assert.Equal(nameof(PlatformInvoke.LPArrayFixedSizeMarshaller), map.MemberForwarded.Name);
+            Assert.Equal(nameof(PlatformInvoke.ExternalMethod), map.MemberForwarded.Name);
         }
 
         [Fact]
@@ -141,6 +141,40 @@ namespace AsmResolver.DotNet.Tests
 
             var arrayMarshaller = (LPArrayMarshalDescriptor) marshaller;
             Assert.Equal(1, arrayMarshaller.ParameterIndex);
+        }
+
+        [Fact]
+        public void ReadSafeArrayMarshaller()
+        {
+            var method = LookupMethod(nameof(PlatformInvoke.SafeArrayMarshaller));
+            var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
+            Assert.IsAssignableFrom<SafeArrayMarshalDescriptor>(marshaller);
+
+            var arrayMarshaller = (SafeArrayMarshalDescriptor) marshaller;
+            Assert.Equal(SafeArrayVariantType.NotSet, arrayMarshaller.VariantType);
+        }
+
+        [Fact]
+        public void ReadSafeArrayMarshallerWithSubType()
+        {
+            var method = LookupMethod(nameof(PlatformInvoke.SafeArrayMarshallerWithSubType));
+            var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
+            Assert.IsAssignableFrom<SafeArrayMarshalDescriptor>(marshaller);
+
+            var arrayMarshaller = (SafeArrayMarshalDescriptor) marshaller;
+            Assert.Equal(SafeArrayVariantType.UI1, arrayMarshaller.VariantType);
+        }
+
+        [Fact]
+        public void ReadSafeArrayMarshallerWithUserDefinedSubType()
+        {
+            var method = LookupMethod(nameof(PlatformInvoke.SafeArrayMarshallerWithUserSubType));
+            var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
+            Assert.IsAssignableFrom<SafeArrayMarshalDescriptor>(marshaller);
+
+            var arrayMarshaller = (SafeArrayMarshalDescriptor) marshaller;
+            Assert.NotNull(arrayMarshaller.UserDefinedSubType);
+            Assert.Equal(nameof(PlatformInvoke), arrayMarshaller.UserDefinedSubType.Name);
         }
     }
 }
