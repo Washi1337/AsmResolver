@@ -16,11 +16,11 @@ namespace AsmResolver.DotNet.Signatures
         public static MarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var nativeType = (NativeType) reader.ReadByte();
-            var descriptor = nativeType switch
+            MarshalDescriptor descriptor = nativeType switch
             {
                 NativeType.SafeArray => throw new NotImplementedException(),
                 NativeType.FixedArray => throw new NotImplementedException(),
-                NativeType.LPArray => throw new NotImplementedException(),
+                NativeType.LPArray => LPArrayMarshalDescriptor.FromReader(reader),
                 NativeType.CustomMarshaller => throw new NotImplementedException(),
                 _ => new SimpleMarshalDescriptor(nativeType)
             };

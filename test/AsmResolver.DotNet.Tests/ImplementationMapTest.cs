@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Tests
         public void ReadMemberForwarded()
         {
             var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
-            Assert.Equal(nameof(PlatformInvoke.FixedArrayMarshaller), map.MemberForwarded.Name);
+            Assert.Equal(nameof(PlatformInvoke.LPArrayFixedSizeMarshaller), map.MemberForwarded.Name);
         }
 
         [Fact]
@@ -119,6 +119,28 @@ namespace AsmResolver.DotNet.Tests
             var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
             Assert.NotNull(marshaller);
             Assert.Equal(NativeType.Boolean, marshaller.NativeType);
+        }
+
+        [Fact]
+        public void ReadFixedArrayMarshaller()
+        {
+            var method = LookupMethod(nameof(PlatformInvoke.LPArrayFixedSizeMarshaller));
+            var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
+            Assert.IsAssignableFrom<LPArrayMarshalDescriptor>(marshaller);
+
+            var arrayMarshaller = (LPArrayMarshalDescriptor) marshaller;
+            Assert.Equal(10, arrayMarshaller.NumberOfElements);
+        }
+
+        [Fact]
+        public void ReadVariableArrayMarshaller()
+        {
+            var method = LookupMethod(nameof(PlatformInvoke.LPArrayVariableSizeMarshaller));
+            var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
+            Assert.IsAssignableFrom<LPArrayMarshalDescriptor>(marshaller);
+
+            var arrayMarshaller = (LPArrayMarshalDescriptor) marshaller;
+            Assert.Equal(1, arrayMarshaller.ParameterIndex);
         }
     }
 }

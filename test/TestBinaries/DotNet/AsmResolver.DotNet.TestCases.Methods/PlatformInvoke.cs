@@ -11,10 +11,10 @@ namespace AsmResolver.DotNet.TestCases.Methods
         public static extern void SimpleMarshaller([MarshalAs(UnmanagedType.Bool)] bool b);
         
         [DllImport("SomeDll.dll")]
-        public static extern void FixedArrayMarshaller([MarshalAs(UnmanagedType.LPArray, SizeConst = 10)] byte[] array);
+        public static extern void LPArrayFixedSizeMarshaller([MarshalAs(UnmanagedType.LPArray, SizeConst = 10)] byte[] array);
         
         [DllImport("SomeDll.dll")]
-        public static extern void VariableSizedArrayMarshaller([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] array, int count);
+        public static extern void LPArrayVariableSizeMarshaller([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] array, int count);
         
         public static void NonImplementationMapMethod()
         {

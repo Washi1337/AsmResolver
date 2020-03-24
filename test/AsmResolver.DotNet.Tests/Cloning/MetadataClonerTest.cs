@@ -227,7 +227,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneImplMap()
         {
-            var clonedMethod = CloneMethod(typeof(PlatformInvoke).GetMethod(nameof(PlatformInvoke.FixedArrayMarshaller)), out var method);
+            var clonedMethod = CloneMethod(typeof(PlatformInvoke).GetMethod(nameof(PlatformInvoke.LPArrayFixedSizeMarshaller)), out var method);
             Assert.NotNull(clonedMethod.ImplementationMap);
             Assert.Equal(method.ImplementationMap.Name, clonedMethod.ImplementationMap.Name);
             Assert.Equal(method.ImplementationMap.Scope.Name, clonedMethod.ImplementationMap.Scope.Name);

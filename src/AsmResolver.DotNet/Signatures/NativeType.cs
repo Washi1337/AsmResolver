@@ -239,6 +239,11 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Indicates a pointer to a UTF-8 encoded string.
         /// </summary>
-        LPUTF8Str   = 0x30, // utf-8 string
+        LPUTF8Str   = 0x30,
+        
+        /// <summary>
+        /// Indicates 
+        /// </summary>
+        Max = 0x50
     }
 }
