@@ -1,3 +1,5 @@
+using System;
+
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
@@ -6,6 +8,27 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public abstract class MarshalDescriptor : ExtendableBlobSignature
     {
+        /// <summary>
+        /// Reads a marshal descriptor signature from the provided input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The marshal descriptor.</returns>
+        public static MarshalDescriptor FromReader(IBinaryStreamReader reader)
+        {
+            var nativeType = (NativeType) reader.ReadByte();
+            var descriptor = nativeType switch
+            {
+                NativeType.SafeArray => throw new NotImplementedException(),
+                NativeType.FixedArray => throw new NotImplementedException(),
+                NativeType.LPArray => throw new NotImplementedException(),
+                NativeType.CustomMarshaller => throw new NotImplementedException(),
+                _ => new SimpleMarshalDescriptor(nativeType)
+            };
+
+            descriptor.ExtraData = reader.ReadToEnd();
+            return descriptor;
+        }
+        
         /// <summary>
         /// Gets the native type of the marshal descriptor. This is the byte any descriptor starts with. 
         /// </summary>
