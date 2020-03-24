@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -18,11 +19,13 @@ namespace AsmResolver.DotNet
     public class ParameterDefinition :
         IHasCustomAttribute,
         IHasConstant,
+        IHasFieldMarshal,
         IOwnedCollectionElement<MethodDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<MethodDefinition> _method;
         private readonly LazyVariable<Constant> _constant;
+        private readonly LazyVariable<MarshalDescriptor> _marshalDescriptor;
         private IList<CustomAttribute> _customAttributes;
 
         /// <summary>
@@ -35,6 +38,7 @@ namespace AsmResolver.DotNet
             _name = new LazyVariable<string>(GetName);
             _method = new LazyVariable<MethodDefinition>(GetMethod);
             _constant = new LazyVariable<Constant>(GetConstant);
+            _marshalDescriptor = new LazyVariable<MarshalDescriptor>(GetMarshalDescriptor);
         }
 
         /// <summary>
@@ -129,6 +133,13 @@ namespace AsmResolver.DotNet
             set => _constant.Value = value;
         }
 
+        /// <inheritdoc />
+        public MarshalDescriptor MarshalDescriptor
+        {
+            get => _marshalDescriptor.Value;
+            set => _marshalDescriptor.Value = value;
+        }
+
         /// <summary>
         /// Obtains the name of the parameter.
         /// </summary>
@@ -166,6 +177,15 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual Constant GetConstant() => null;
 
+        /// <summary>
+        /// Obtains the marshal descriptor value assigned to the parameter definition.
+        /// </summary>
+        /// <returns>The marshal descriptor.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="MarshalDescriptor"/> property.
+        /// </remarks>
+        protected virtual MarshalDescriptor GetMarshalDescriptor() => null;
+        
         /// <inheritdoc />
         public override string ToString() => Name;
     }
