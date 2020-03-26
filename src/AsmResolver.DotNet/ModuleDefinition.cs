@@ -155,10 +155,12 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
+            
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
             AssemblyReferences.Add((AssemblyReference) CorLibTypeFactory.CorLibScope);
-            TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
             MetadataResolver = new DefaultMetadataResolver(new NetFrameworkAssemblyResolver());
+            
+            TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
 
         /// <summary>
@@ -179,6 +181,8 @@ namespace AsmResolver.DotNet
 
             var resolver = CreateAssemblyResolver(corLib);
             MetadataResolver = new DefaultMetadataResolver(resolver);
+            
+            TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
 
         /// <summary>
@@ -587,13 +591,28 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// If the static constructor was not present in the image, the new one is automatically added.
         /// </remarks>
-        public MethodDefinition GetOrCreateModuleConstructor() => GetModuleType().GetOrCreateStaticConstructor();
+        public MethodDefinition GetOrCreateModuleConstructor() => GetOrCreateModuleType().GetOrCreateStaticConstructor();
 
         /// <summary>
         /// Obtains the global scope type of the .NET module.
         /// </summary>
         /// <returns>The module type.</returns>
         public TypeDefinition GetModuleType() => TopLevelTypes.Count > 0 ? TopLevelTypes[0] : null;
+
+        /// <summary>
+        /// Obtains or creates the global scope type of the .NET module.
+        /// </summary>
+        /// <returns>The module type.</returns>
+        public TypeDefinition GetOrCreateModuleType()
+        {
+            if (TopLevelTypes.Count == 0 || TopLevelTypes[0].Name != "<Module>")
+            {
+                var moduleType = new TypeDefinition(null, "<Module>", 0);
+                TopLevelTypes.Insert(0, moduleType);
+            }
+            
+            return TopLevelTypes[0];
+        }
 
         /// <summary>
         /// Obtains the name of the module definition.
