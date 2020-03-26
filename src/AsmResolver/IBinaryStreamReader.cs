@@ -337,7 +337,7 @@ namespace AsmResolver
         /// <returns>The string that was read from the stream.</returns>
         public static string ReadSerString(this IBinaryStreamReader reader)
         {
-            if (reader.ReadByte() == 0xFF)
+            if (!reader.CanRead(1) || reader.ReadByte() == 0xFF)
                 return null;
             reader.FileOffset--;
             if (!reader.TryReadCompressedUInt32(out uint length))

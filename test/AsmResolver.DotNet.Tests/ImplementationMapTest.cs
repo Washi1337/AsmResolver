@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.PE;
 using Xunit;
@@ -11,10 +12,18 @@ namespace AsmResolver.DotNet.Tests
     {
         private ImplementationMap Lookup(string methodName)
         {
+            var method = LookupMethod(methodName);
+            return method.ImplementationMap;
+        }
+
+        private static MethodDefinition LookupMethod(string methodName)
+        {
             var module = ModuleDefinition.FromFile(typeof(PlatformInvoke).Assembly.Location);
             var t = module.TopLevelTypes.First(t => t.Name == nameof(PlatformInvoke));
-            return t.Methods.First(m => m.Name == methodName).ImplementationMap;
+            var method = t.Methods.First(m => m.Name == methodName);
+            return method;
         }
+
         private ImplementationMap RebuildAndLookup(ImplementationMap implementationMap)
         {
             using var stream = new MemoryStream();
@@ -28,14 +37,14 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadName()
         {
-            var map = Lookup(nameof(PlatformInvoke.Method));
+            var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
             Assert.Equal("SomeEntrypoint", map.Name);
         }
 
         [Fact]
         public void PersistentName()
         {
-            var map = Lookup(nameof(PlatformInvoke.Method));
+            var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
             map.Name = "NewName";
             var newMap = RebuildAndLookup(map);
             Assert.Equal(map.Name, newMap.Name);
@@ -44,14 +53,14 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadScope()
         {
-            var map = Lookup(nameof(PlatformInvoke.Method));
+            var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
             Assert.Equal("SomeDll.dll", map.Scope.Name);
         }
         
         [Fact]
         public void PersistentScope()
         {
-            var map = Lookup(nameof(PlatformInvoke.Method));
+            var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
             
             var newModule = new ModuleReference("SomeOtherDll.dll");
             map.MemberForwarded.Module.ModuleReferences.Add(newModule);
@@ -64,14 +73,14 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ReadMemberForwarded()
         {
-            var map = Lookup(nameof(PlatformInvoke.Method));
-            Assert.Equal(nameof(PlatformInvoke.Method), map.MemberForwarded.Name);
+            var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
+            Assert.Equal(nameof(PlatformInvoke.ExternalMethod), map.MemberForwarded.Name);
         }
 
         [Fact]
         public void RemoveMapShouldUnsetMemberForwarded()
         {
-            var map = Lookup(nameof(PlatformInvoke.Method));
+            var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
             map.MemberForwarded.ImplementationMap = null;
             Assert.Null(map.MemberForwarded);
         }
@@ -79,7 +88,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void AddingAlreadyAddedMapToAnotherMemberShouldThrow()
         {
-            var map = Lookup(nameof(PlatformInvoke.Method));
+            var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
             var declaringType = (TypeDefinition) map.MemberForwarded.DeclaringType;
             var otherMethod = declaringType.Methods.First(m =>
                 m.Name == nameof(PlatformInvoke.NonImplementationMapMethod));
@@ -90,7 +99,7 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PersistentMemberForwarded()
         {
-            var map = Lookup(nameof(PlatformInvoke.Method));
+            var map = Lookup(nameof(PlatformInvoke.ExternalMethod));
             
             var declaringType = (TypeDefinition) map.MemberForwarded.DeclaringType;
             var otherMethod = declaringType.Methods.First(m =>
@@ -102,5 +111,6 @@ namespace AsmResolver.DotNet.Tests
             var newMap = RebuildAndLookup(map);
             Assert.Equal(otherMethod.Name, newMap.MemberForwarded.Name);
         }
+
     }
 }

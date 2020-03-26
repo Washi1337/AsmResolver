@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -38,6 +40,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _classLayouts;
         private OneToOneRelation<MetadataToken, uint> _implementationMaps;
         private OneToOneRelation<MetadataToken, uint> _fieldRvas;
+        private OneToOneRelation<MetadataToken, uint> _fieldMarshals;
 
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -539,6 +542,55 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureFieldRvasInitialized();
             return _fieldRvas.GetValue(fieldToken);
+        }
+
+        private void EnsureFieldMarshalsInitialized()
+        {
+            if (_fieldMarshals is null)
+                Interlocked.CompareExchange(ref _fieldMarshals, InitializeFieldMarshals(), null);
+        }
+
+        private OneToOneRelation<MetadataToken, uint> InitializeFieldMarshals()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var marshalTable = tablesStream.GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasFieldMarshal);
+
+            var marshals = new OneToOneRelation<MetadataToken, uint>();
+            for (int i = 0; i < marshalTable.Count; i++)
+            {
+                var ownerToken = encoder.DecodeIndex(marshalTable[i].Parent);
+                uint rvaRid = (uint) (i + 1);
+                marshals.Add(ownerToken, rvaRid);
+            }
+
+            return marshals;
+        }
+
+        internal uint GetFieldMarshalRid(MetadataToken fieldToken)
+        {
+            EnsureFieldMarshalsInitialized();
+            return _fieldMarshals.GetValue(fieldToken);
+        }
+
+        internal MarshalDescriptor GetFieldMarshal(MetadataToken ownerToken)
+        {
+            var metadata = DotNetDirectory.Metadata;
+            var table = metadata
+                .GetStream<TablesStream>()
+                .GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
+            
+            uint rid = GetFieldMarshalRid(ownerToken);
+
+            if (table.TryGetByRid(rid, out var row))
+            {
+                var reader = metadata
+                    .GetStream<BlobStream>()
+                    .GetBlobReaderByIndex(row.NativeType);
+                return MarshalDescriptor.FromReader(this, reader);
+            }
+
+            return null;
         }
         
         /// <inheritdoc />

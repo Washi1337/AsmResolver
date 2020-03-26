@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -53,5 +56,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override Constant GetConstant() => 
             _parentModule.GetConstant(MetadataToken);
+
+        /// <inheritdoc />
+        protected override MarshalDescriptor GetMarshalDescriptor() =>
+            _parentModule.GetFieldMarshal(MetadataToken);
+
     }
 }
