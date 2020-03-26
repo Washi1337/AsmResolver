@@ -1,4 +1,4 @@
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Provides members describing native types used for marshalling managed types to unmanaged types and vice versa.

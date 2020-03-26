@@ -1,6 +1,4 @@
-using System;
-
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// When derived from this class, provides a description on how a specific type needs to be marshaled upon

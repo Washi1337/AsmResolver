@@ -1,4 +1,4 @@
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Represents a description for marshalling a safe array, which is a self-describing array that carries the type,

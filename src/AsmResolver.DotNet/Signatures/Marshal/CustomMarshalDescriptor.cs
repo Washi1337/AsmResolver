@@ -1,6 +1,4 @@
-using System;
-
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Represents a description for a marshaller that marshals a value using a custom marshaller type.

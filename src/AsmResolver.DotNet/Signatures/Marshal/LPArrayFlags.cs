@@ -1,6 +1,6 @@
 using System;
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Provides flags that can be assigned to an instance of a <see cref="LPArrayMarshalDescriptor"/>.

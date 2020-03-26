@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Represents the marshal descriptor for a pointer to the first element of a C-style array.

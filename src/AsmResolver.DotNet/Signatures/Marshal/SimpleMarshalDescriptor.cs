@@ -1,4 +1,4 @@
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Represents a marshal descriptor that requires no further parameters.

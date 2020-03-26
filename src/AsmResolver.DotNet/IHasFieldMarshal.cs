@@ -1,4 +1,5 @@
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Marshal;
 
 namespace AsmResolver.DotNet
 {

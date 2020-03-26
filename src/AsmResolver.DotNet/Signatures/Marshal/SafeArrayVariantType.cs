@@ -1,6 +1,6 @@
 #pragma warning disable 1591
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Provides members defining all valid element types for a safe array.

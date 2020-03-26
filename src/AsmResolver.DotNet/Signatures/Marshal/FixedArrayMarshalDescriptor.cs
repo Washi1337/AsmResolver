@@ -1,4 +1,6 @@
-namespace AsmResolver.DotNet.Signatures
+using AsmResolver.DotNet.Signatures.Marshal;
+
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Represents a description for a marshaller that marshals a value as a fixed-length array.

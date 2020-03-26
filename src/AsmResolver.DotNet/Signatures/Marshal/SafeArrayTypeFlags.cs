@@ -1,6 +1,6 @@
 using System;
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Marshal
 {
     /// <summary>
     /// Provides members defining all valid flags for an element type in a safe array marshal descriptor.  
