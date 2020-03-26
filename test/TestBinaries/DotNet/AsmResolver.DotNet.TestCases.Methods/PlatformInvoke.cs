@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.TestCases.Methods
                 SafeArraySubType = VarEnum.VT_RECORD,
                 SafeArrayUserDefinedSubType = typeof(PlatformInvoke))]
             byte[] array);
-        
+
         public static void NonImplementationMapMethod()
         {
         }

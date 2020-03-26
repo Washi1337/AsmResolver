@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Signatures
             MarshalDescriptor descriptor = nativeType switch
             {
                 NativeType.SafeArray => SafeArrayMarshalDescriptor.FromReader(parentModule, reader),
-                NativeType.FixedArray => throw new NotImplementedException(),
+                NativeType.FixedArray => FixedArrayMarshalDescriptor.FromReader(reader),
                 NativeType.LPArray => LPArrayMarshalDescriptor.FromReader(reader),
                 NativeType.CustomMarshaller => throw new NotImplementedException(),
                 _ => new SimpleMarshalDescriptor(nativeType)
