@@ -22,6 +22,9 @@ namespace AsmResolver.DotNet.Signatures.Marshal
                 NativeType.LPArray => LPArrayMarshalDescriptor.FromReader(reader),
                 NativeType.CustomMarshaller => CustomMarshalDescriptor.FromReader(parentModule, reader),
                 NativeType.FixedSysString => FixedSysStringMarshalDescriptor.FromReader(reader),
+                NativeType.Interface => ComInterfaceMarshalDescriptor.FromReader(nativeType, reader),
+                NativeType.IDispatch => ComInterfaceMarshalDescriptor.FromReader(nativeType, reader),
+                NativeType.IUnknown => ComInterfaceMarshalDescriptor.FromReader(nativeType, reader),
                 _ => new SimpleMarshalDescriptor(nativeType)
             };
 

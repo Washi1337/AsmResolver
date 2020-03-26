@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 
 namespace AsmResolver.DotNet.TestCases.Methods
@@ -29,6 +30,15 @@ namespace AsmResolver.DotNet.TestCases.Methods
                 SafeArraySubType = VarEnum.VT_RECORD,
                 SafeArrayUserDefinedSubType = typeof(PlatformInvoke))]
             byte[] array);
+
+
+        [DllImport("SomeDll.dll")]
+        public static extern void ComInterface([MarshalAs(UnmanagedType.Interface)] byte[] array);
+
+        [DllImport("SomeDll.dll")]
+        public static extern void ComInterfaceWithIidParameter(
+            [MarshalAs(UnmanagedType.Interface, IidParameterIndex = 1)]
+            byte[] array, Guid iid);
 
         public static void NonImplementationMapMethod()
         {

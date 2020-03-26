@@ -153,5 +153,27 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var stringMarshaller = (FixedSysStringMarshalDescriptor) marshaller;
             Assert.Equal(123, stringMarshaller.Size);
         }
+
+        [Fact]
+        public void ReadComInterface()
+        {
+            var method = LookupMethod(nameof(PlatformInvoke.ComInterface));
+            var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
+            Assert.IsAssignableFrom<ComInterfaceMarshalDescriptor>(marshaller);
+            
+            var comMarshaller = (ComInterfaceMarshalDescriptor) marshaller;
+            Assert.Null(comMarshaller.IidParameterIndex);
+        }
+
+        [Fact]
+        public void ReadComInterfaceWithParameterIndex()
+        {
+            var method = LookupMethod(nameof(PlatformInvoke.ComInterfaceWithIidParameter));
+            var marshaller = method.Parameters[0].Definition.MarshalDescriptor;
+            Assert.IsAssignableFrom<ComInterfaceMarshalDescriptor>(marshaller);
+            
+            var comMarshaller = (ComInterfaceMarshalDescriptor) marshaller;
+            Assert.Equal(1, comMarshaller.IidParameterIndex);
+        }
     }
 }
