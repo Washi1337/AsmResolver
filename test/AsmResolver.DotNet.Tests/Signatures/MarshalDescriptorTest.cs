@@ -119,5 +119,28 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(10, arrayMarshaller.Size);
             Assert.Equal(NativeType.U1, arrayMarshaller.ArrayElementType);
         }
+
+        [Fact]
+        public void ReadCustomMarshallerType()
+        {
+            var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomType));
+            var marshaller = field.MarshalDescriptor;
+            Assert.IsAssignableFrom<CustomMarshalDescriptor>(marshaller);
+            
+            var customMarshaller = (CustomMarshalDescriptor) marshaller;
+            Assert.Equal(nameof(Marshalling), customMarshaller.MarshalType.Name);
+        }
+
+        [Fact]
+        public void ReadCustomMarshallerTypeWithCOokie()
+        {
+            var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomTypeAndCookie));
+            var marshaller = field.MarshalDescriptor;
+            Assert.IsAssignableFrom<CustomMarshalDescriptor>(marshaller);
+            
+            var customMarshaller = (CustomMarshalDescriptor) marshaller;
+            Assert.Equal(nameof(Marshalling), customMarshaller.MarshalType.Name);
+            Assert.Equal("abc", customMarshaller.Cookie);
+        }
     }
 }

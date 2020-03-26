@@ -1,7 +1,15 @@
 namespace AsmResolver.DotNet.Signatures
 {
+    /// <summary>
+    /// Represents a description for a marshaller that marshals a value as a fixed-length array.
+    /// </summary>
     public class FixedArrayMarshalDescriptor : MarshalDescriptor
     {
+        /// <summary>
+        /// Reads a single fixed array marshal descriptor from the provided input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The descriptor.</returns>
         public static FixedArrayMarshalDescriptor FromReader(IBinaryStreamReader reader)
         {
             var result = new FixedArrayMarshalDescriptor();

@@ -4,7 +4,6 @@ namespace AsmResolver.DotNet.TestCases.Fields
 {
     public class Marshalling
     {
-
         [MarshalAs(UnmanagedType.ByValArray)]
         public static byte[] FixedArrayMarshaller;
 
@@ -13,5 +12,11 @@ namespace AsmResolver.DotNet.TestCases.Fields
         
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10, ArraySubType = UnmanagedType.U1)]
         public static byte[] FixedArrayMarshallerWithFixedSizeAndArrayType;
+
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Marshalling))]
+        public static byte[] CustomMarshallerWithCustomType;
+
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Marshalling), MarshalCookie = "abc")]
+        public static byte[] CustomMarshallerWithCustomTypeAndCookie;
     }
 }

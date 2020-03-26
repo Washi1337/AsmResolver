@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Signatures
                 NativeType.SafeArray => SafeArrayMarshalDescriptor.FromReader(parentModule, reader),
                 NativeType.FixedArray => FixedArrayMarshalDescriptor.FromReader(reader),
                 NativeType.LPArray => LPArrayMarshalDescriptor.FromReader(reader),
-                NativeType.CustomMarshaller => throw new NotImplementedException(),
+                NativeType.CustomMarshaller => CustomMarshalDescriptor.FromReader(parentModule, reader),
                 _ => new SimpleMarshalDescriptor(nativeType)
             };
 
