@@ -18,5 +18,8 @@ namespace AsmResolver.DotNet.TestCases.Fields
 
         [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Marshalling), MarshalCookie = "abc")]
         public static byte[] CustomMarshallerWithCustomTypeAndCookie;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 123)]
+        public static string FixedSysString;
     }
 }

@@ -132,7 +132,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
-        public void ReadCustomMarshallerTypeWithCOokie()
+        public void ReadCustomMarshallerTypeWithCookie()
         {
             var field = LookupField(nameof(Marshalling.CustomMarshallerWithCustomTypeAndCookie));
             var marshaller = field.MarshalDescriptor;
@@ -141,6 +141,17 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var customMarshaller = (CustomMarshalDescriptor) marshaller;
             Assert.Equal(nameof(Marshalling), customMarshaller.MarshalType.Name);
             Assert.Equal("abc", customMarshaller.Cookie);
+        }
+
+        [Fact]
+        public void ReadFixedSysString()
+        {
+            var field = LookupField(nameof(Marshalling.FixedSysString));
+            var marshaller = field.MarshalDescriptor;
+            Assert.IsAssignableFrom<FixedSysStringMarshalDescriptor>(marshaller);
+            
+            var stringMarshaller = (FixedSysStringMarshalDescriptor) marshaller;
+            Assert.Equal(123, stringMarshaller.Size);
         }
     }
 }
