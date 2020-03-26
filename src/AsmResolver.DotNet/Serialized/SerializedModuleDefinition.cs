@@ -5,6 +5,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -569,6 +570,26 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureFieldMarshalsInitialized();
             return _fieldMarshals.GetValue(fieldToken);
+        }
+
+        internal MarshalDescriptor GetFieldMarshal(MetadataToken ownerToken)
+        {
+            var metadata = DotNetDirectory.Metadata;
+            var table = metadata
+                .GetStream<TablesStream>()
+                .GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
+            
+            uint rid = GetFieldMarshalRid(ownerToken);
+
+            if (table.TryGetByRid(rid, out var row))
+            {
+                var reader = metadata
+                    .GetStream<BlobStream>()
+                    .GetBlobReaderByIndex(row.NativeType);
+                return MarshalDescriptor.FromReader(this, reader);
+            }
+
+            return null;
         }
         
         /// <inheritdoc />

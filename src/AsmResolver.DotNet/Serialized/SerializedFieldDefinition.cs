@@ -58,6 +58,10 @@ namespace AsmResolver.DotNet.Serialized
             _parentModule.GetConstant(MetadataToken);
 
         /// <inheritdoc />
+        protected override MarshalDescriptor GetMarshalDescriptor() =>
+            _parentModule.GetFieldMarshal(MetadataToken);
+        
+        /// <inheritdoc />
         protected override ImplementationMap GetImplementationMap()
         {
             uint mapRid = _parentModule.GetImplementationMapRid(MetadataToken);

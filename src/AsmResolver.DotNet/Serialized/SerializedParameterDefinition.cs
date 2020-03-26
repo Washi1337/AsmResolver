@@ -57,24 +57,8 @@ namespace AsmResolver.DotNet.Serialized
             _parentModule.GetConstant(MetadataToken);
 
         /// <inheritdoc />
-        protected override MarshalDescriptor GetMarshalDescriptor()
-        {
-            var metadata = _parentModule.DotNetDirectory.Metadata;
-            var table = metadata
-                .GetStream<TablesStream>()
-                .GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
-            
-            uint rid = _parentModule.GetFieldMarshalRid(MetadataToken);
+        protected override MarshalDescriptor GetMarshalDescriptor() =>
+            _parentModule.GetFieldMarshal(MetadataToken);
 
-            if (table.TryGetByRid(rid, out var row))
-            {
-                var reader = metadata
-                    .GetStream<BlobStream>()
-                    .GetBlobReaderByIndex(row.NativeType);
-                return MarshalDescriptor.FromReader(_parentModule, reader);
-            }
-
-            return null;
-        }
     }
 }

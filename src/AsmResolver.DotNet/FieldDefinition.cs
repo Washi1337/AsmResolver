@@ -17,12 +17,14 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute, 
         IHasConstant,
         IMemberForwarded,
+        IHasFieldMarshal,
         IOwnedCollectionElement<TypeDefinition>
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<FieldSignature> _signature;
         private readonly LazyVariable<TypeDefinition> _declaringType;
         private readonly LazyVariable<Constant> _constant;
+        private readonly LazyVariable<MarshalDescriptor> _marshalDescriptor;
         private readonly LazyVariable<ImplementationMap> _implementationMap;
         private readonly LazyVariable<ISegment> _fieldRva;
 
@@ -39,6 +41,7 @@ namespace AsmResolver.DotNet
             _signature = new LazyVariable<FieldSignature>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
             _constant = new LazyVariable<Constant>(GetConstant);
+            _marshalDescriptor = new LazyVariable<MarshalDescriptor>(GetMarshalDescriptor);
             _implementationMap = new LazyVariable<ImplementationMap>(GetImplementationMap);
             _fieldRva = new LazyVariable<ISegment>(GetFieldRva);
         }
@@ -318,6 +321,13 @@ namespace AsmResolver.DotNet
             get => _constant.Value;
             set => _constant.Value = value;
         }
+
+        /// <inheritdoc />
+        public MarshalDescriptor MarshalDescriptor
+        {
+            get => _marshalDescriptor.Value;
+            set => _marshalDescriptor.Value = value;
+        }
         
         /// <inheritdoc />
         public ImplementationMap ImplementationMap
@@ -396,6 +406,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Constant"/> property.
         /// </remarks>
         protected virtual Constant GetConstant() => null;
+
+        /// <summary>
+        /// Obtains the marshal descriptor value assigned to the field definition.
+        /// </summary>
+        /// <returns>The marshal descriptor.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="MarshalDescriptor"/> property.
+        /// </remarks>
+        protected virtual MarshalDescriptor GetMarshalDescriptor() => null;
 
         /// <summary>
         /// Obtains the platform invoke information assigned to the field.
