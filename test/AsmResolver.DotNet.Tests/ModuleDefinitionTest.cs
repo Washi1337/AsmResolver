@@ -180,5 +180,36 @@ namespace AsmResolver.DotNet.Tests
             var comparer = new SignatureComparer();
             Assert.Contains(newModule.TopLevelTypes, t => comparer.Equals(newType, t));
         }
+
+        [Fact]
+        public void NewFW40ModuleShouldAlwaysContainModuleType()
+        {
+            var module = new ModuleDefinition("TestModule");
+            Assert.NotNull(module.GetModuleType());
+        }
+
+        [Fact]
+        public void NewModuleShouldAlwaysContainModuleType()
+        {
+            var module = new ModuleDefinition("TestModule", KnownCorLibs.NetStandard_v2_1_0_0);
+            Assert.NotNull(module.GetModuleType());
+        }
+
+        [Fact]
+        public void GetOrCreateModuleConstructorShouldAddNewConstructorIfNotPresent()
+        {
+            var module = new ModuleDefinition("TestModule", KnownCorLibs.NetStandard_v2_1_0_0);
+            var cctor = module.GetOrCreateModuleConstructor();
+            Assert.Contains(cctor, module.GetModuleType().Methods);
+        }
+
+        [Fact]
+        public void GetOrCreateModuleConstructorShouldGetExistingConstructorIfPresent()
+        {
+            var module = new ModuleDefinition("TestModule", KnownCorLibs.NetStandard_v2_1_0_0);
+            var cctor = module.GetOrCreateModuleConstructor();
+            var cctor2 = module.GetOrCreateModuleConstructor();
+            Assert.Same(cctor, cctor2);
+        }
     }
 }
