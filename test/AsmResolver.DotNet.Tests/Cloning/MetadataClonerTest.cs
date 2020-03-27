@@ -287,9 +287,19 @@ namespace AsmResolver.DotNet.Tests.Cloning
         [Fact]
         public void CloneInterface()
         {
-            var clonedType = CloneType(typeof(IInterface1), out var originalTypeDef);
+            var clonedType = CloneType(typeof(IInterface1), out _);
             Assert.Null(clonedType.BaseType);
             Assert.True(clonedType.IsInterface);
+        }
+
+        [Fact]
+        public void CloneInterfaceImplementations()
+        {
+            var clonedType = CloneType(typeof(InterfaceImplementations), out var originalTypeDef);
+
+            Assert.Equal(
+                originalTypeDef.Interfaces.Select(t => t.Interface.FullName),
+                clonedType.Interfaces.Select(t => t.Interface.FullName));
         }
     }
 }

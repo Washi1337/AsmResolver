@@ -207,8 +207,14 @@ namespace AsmResolver.DotNet.Cloning
         private void DeepCopyType(MemberCloneContext context, TypeDefinition type)
         {
             var clonedType = (TypeDefinition) context.ClonedMembers[type];
+            
+            // Copy base type.
             if (type.BaseType is {})
                 clonedType.BaseType = context.Importer.ImportType(type.BaseType);
+            
+            // Copy interface implementations.
+            foreach (var implementation in type.Interfaces)
+                clonedType.Interfaces.Add(CloneInterfaceImplementation(context, implementation));
             
             // If the type is nested and the declaring type is cloned as well, we should add it to the cloned type. 
             if (type.IsNested 
@@ -220,6 +226,13 @@ namespace AsmResolver.DotNet.Cloning
 
             CloneCustomAttributes(context, type, clonedType);
             CloneGenericParameters(context, type, clonedType);
+        }
+
+        private InterfaceImplementation CloneInterfaceImplementation(MemberCloneContext context, InterfaceImplementation implementation)
+        {
+            var clonedImplementation = new InterfaceImplementation(context.Importer.ImportType(implementation.Interface));
+            CloneCustomAttributes(context, implementation, clonedImplementation);
+            return clonedImplementation;
         }
 
         private void CloneCustomAttributes(
