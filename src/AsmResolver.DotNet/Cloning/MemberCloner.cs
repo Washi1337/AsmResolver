@@ -207,7 +207,8 @@ namespace AsmResolver.DotNet.Cloning
         private void DeepCopyType(MemberCloneContext context, TypeDefinition type)
         {
             var clonedType = (TypeDefinition) context.ClonedMembers[type];
-            clonedType.BaseType = context.Importer.ImportType(type.BaseType);
+            if (type.BaseType is {})
+                clonedType.BaseType = context.Importer.ImportType(type.BaseType);
             
             // If the type is nested and the declaring type is cloned as well, we should add it to the cloned type. 
             if (type.IsNested 

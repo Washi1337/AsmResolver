@@ -8,6 +8,7 @@ using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
 using AsmResolver.DotNet.TestCases.Generics;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.Tests.Runners;
 using Xunit;
@@ -281,6 +282,14 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 Assert.Equal(originalParameter.Constraints.Select(c => c.Constraint.FullName),
                     newParameter.Constraints.Select(c => c.Constraint.FullName));
             }
+        }
+
+        [Fact]
+        public void CloneInterface()
+        {
+            var clonedType = CloneType(typeof(IInterface1), out var originalTypeDef);
+            Assert.Null(clonedType.BaseType);
+            Assert.True(clonedType.IsInterface);
         }
     }
 }
