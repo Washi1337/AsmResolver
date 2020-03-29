@@ -190,12 +190,12 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {
-            if (_publicKeyToken is null)
-            {
-                _publicKeyToken = PublicKey != null
-                    ? ComputePublicKeyToken(PublicKey, HashAlgorithm)
-                    : null;
-            }
+            if (!HasPublicKey)
+                return PublicKey;
+
+            _publicKeyToken ??= PublicKey != null
+                ? ComputePublicKeyToken(PublicKey, HashAlgorithm)
+                : null;
 
             return _publicKeyToken;
         }

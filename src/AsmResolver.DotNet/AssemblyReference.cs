@@ -16,7 +16,8 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<byte[]> _publicKeyOrToken;
         private readonly LazyVariable<byte[]> _hashValue;
-
+        private byte[] _publicKeyToken;
+        
         /// <summary>
         /// Initializes a new assembly reference.
         /// </summary>
@@ -115,9 +116,14 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {
-            if (HasPublicKey)
-                throw new NotImplementedException();
-            return PublicKeyOrToken;
+            if (!HasPublicKey)
+                return PublicKeyOrToken;
+
+            _publicKeyToken ??= PublicKeyOrToken != null
+                ? ComputePublicKeyToken(PublicKeyOrToken, Resolve().HashAlgorithm)
+                : null;
+
+            return _publicKeyToken;
         }
 
         /// <summary>
