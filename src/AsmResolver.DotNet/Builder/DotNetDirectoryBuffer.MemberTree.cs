@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using AsmResolver.DotNet.Builder.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -89,7 +91,7 @@ namespace AsmResolver.DotNet.Builder
         private void AddTypeDefinitionsInModule(ModuleDefinition module)
         {
             AddTypeDefinitionStubs(module);
-            AddTypeDefinitionMembers();
+            FinalizeTypeDefinitionMembers();
             FinalizeMethodDefinitions();
         }
 
@@ -114,17 +116,10 @@ namespace AsmResolver.DotNet.Builder
             var token = table.Add(row, type.MetadataToken.Rid);
             _typeDefTokens.Add(type, token);
             
-            AddCustomAttributes(token, type);
-            AddInterfaces(token, type.Interfaces);
-            AddGenericParameters(token, type);
-
-            if (type.ClassLayout is {})
-                AddClassLayout(token, type.ClassLayout);
-            
             return token;
         }
 
-        private void AddTypeDefinitionMembers()
+        private void FinalizeTypeDefinitionMembers()
         {
             var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
 
@@ -135,26 +130,55 @@ namespace AsmResolver.DotNet.Builder
             
             for (uint rid = 1; rid <= table.Count; rid++)
             {
-                var type = _typeDefTokens.GetKey(new MetadataToken(TableIndex.TypeDef, rid));
+                var typeToken = new MetadataToken(TableIndex.TypeDef, rid);
+                var type = _typeDefTokens.GetKey(typeToken);
                 
-                var row = table[rid];
-                row = new TypeDefinitionRow(row.Attributes, row.Name, row.Namespace, 
-                    AddTypeDefOrRef(type.BaseType), fieldList, methodList);
-                table[rid] = row;
-                
-                foreach (var field in type.Fields)
-                    AddFieldDefinition(field);
-                foreach (var method in type.Methods)
-                    AddMethodDefinitionStub(method);
-
+                AddFieldAndMethodStubsInType(table, rid, type, ref fieldList, ref methodList);
                 AddPropertyDefinitionsInType(type, rid, ref propertyList);
                 AddEventDefinitionsInType(type, rid, ref eventList);
-                
-                fieldList += (uint) type.Fields.Count;
-                methodList += (uint) type.Methods.Count;
+            
+                AddCustomAttributes(typeToken, type);
+                AddInterfaces(typeToken, type.Interfaces);
+                AddMethodImplementations(typeToken, type.MethodImplementations);
+                AddGenericParameters(typeToken, type);
+
+                if (type.ClassLayout is {})
+                    AddClassLayout(typeToken, type.ClassLayout);
             }
             
             AddParameterDefinitions();
+        }
+
+        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
+        {
+            var table = Metadata.TablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
+
+            foreach (var implementation in methodImplementations)
+            {
+                var row = new MethodImplementationRow(
+                    typeToken.Rid,
+                    AddMethodDefOrRef(implementation.Body),
+                    AddMethodDefOrRef(implementation.Declaration));
+
+                table.Add(row, 0);
+            }
+        }
+
+        private void AddFieldAndMethodStubsInType(IMetadataTableBuffer<TypeDefinitionRow> table, uint rid, TypeDefinition type, ref uint fieldList,
+            ref uint methodList)
+        {
+            var row = table[rid];
+            row = new TypeDefinitionRow(row.Attributes, row.Name, row.Namespace,
+                AddTypeDefOrRef(type.BaseType), fieldList, methodList);
+            table[rid] = row;
+
+            foreach (var field in type.Fields)
+                AddFieldDefinition(field);
+            foreach (var method in type.Methods)
+                AddMethodDefinitionStub(method);
+
+            fieldList += (uint) type.Fields.Count;
+            methodList += (uint) type.Methods.Count;
         }
 
         private MetadataToken AddFieldDefinition(FieldDefinition field)

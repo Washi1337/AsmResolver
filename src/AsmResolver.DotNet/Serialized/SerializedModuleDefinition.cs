@@ -37,6 +37,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
         private OneToManyRelation<MetadataToken, uint> _genericParameterConstraints;
         private OneToManyRelation<MetadataToken, uint> _interfaces;
+        private OneToManyRelation<MetadataToken, uint> _methodImplementations;
         private OneToOneRelation<MetadataToken, uint> _classLayouts;
         private OneToOneRelation<MetadataToken, uint> _implementationMaps;
         private OneToOneRelation<MetadataToken, uint> _fieldRvas;
@@ -451,6 +452,34 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureInterfacesInitialized();
             return _interfaces.GetMemberList(ownerToken);
+        }
+
+        private void EnsureMethodImplementationsInitialized()
+        {
+            if (_methodImplementations is null)
+                Interlocked.CompareExchange(ref _methodImplementations, InitializeMethodImplementations(), null);
+        }
+
+        private OneToManyRelation<MetadataToken, uint> InitializeMethodImplementations()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var methodImplTable = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
+            
+            var methodImplementations = new OneToManyRelation<MetadataToken, uint>();
+            for (int i = 0; i < methodImplTable.Count; i++)
+            {
+                var ownerToken = new MetadataToken(TableIndex.TypeDef, methodImplTable[i].Class);
+                uint interfaceImplRid = (uint) (i + 1);
+                methodImplementations.Add(ownerToken, interfaceImplRid);
+            }
+
+            return methodImplementations;
+        }
+
+        internal ICollection<uint> GetMethodImplementationRids(MetadataToken ownerToken)
+        {
+            EnsureMethodImplementationsInitialized();
+            return _methodImplementations.GetMemberList(ownerToken);
         }
 
         private void EnsureClassLayoutsInitialized()

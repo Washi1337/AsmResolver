@@ -148,6 +148,31 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        protected override IList<MethodImplementation> GetMethodImplementations()
+        {
+            var result = new List<MethodImplementation>();
+
+            var tablesStream = _parentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var table = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
+
+            var rids = _parentModule.GetMethodImplementationRids(MetadataToken);
+            foreach (uint rid in rids)
+            {
+                var row = table.GetByRid(rid);
+
+                _parentModule.TryLookupMember(encoder.DecodeIndex(row.MethodBody), out var body);
+                _parentModule.TryLookupMember(encoder.DecodeIndex(row.MethodDeclaration), out var declaration);
+
+                result.Add(new MethodImplementation(
+                    declaration as IMethodDefOrRef,
+                    body as IMethodDefOrRef));
+            }
+            
+            return result;
+        }
+
+        /// <inheritdoc />
         protected override ClassLayout GetClassLayout()
         {
             uint rid = _parentModule.GetClassLayoutRid(MetadataToken);

@@ -457,5 +457,24 @@ namespace AsmResolver.DotNet.Tests
                 nameof(IInterface1), nameof(IInterface2),
             }), new HashSet<string>(newType.Interfaces.Select(i => i.Interface.Name)));   
         }
+
+        [Fact]
+        public void ReadMethodImplementations()
+        {
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
+
+            Assert.Contains(type.MethodImplementations, i => i.Declaration.Name == "Interface2Method");
+        }
+
+        [Fact]
+        public void PersistentMethodImplementations()
+        {
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
+            var newType = RebuildAndLookup(type);
+
+            Assert.Contains(newType.MethodImplementations, i => i.Declaration.Name == "Interface2Method");
+        }
     }
 }

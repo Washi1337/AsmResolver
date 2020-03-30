@@ -35,6 +35,7 @@ namespace AsmResolver.DotNet
         private IList<CustomAttribute> _customAttributes;
         private IList<GenericParameter> _genericParameters;
         private IList<InterfaceImplementation> _interfaces;
+        private IList<MethodImplementation> _methodImplementations;
 
         /// <summary>
         /// Initializes a new type definition.
@@ -557,6 +558,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a collection of methods that are explicitly implemented by the type.
+        /// </summary>
+        public IList<MethodImplementation> MethodImplementations
+        {
+            get
+            {
+                if (_methodImplementations is null)
+                    Interlocked.CompareExchange(ref _methodImplementations, GetMethodImplementations(), null);
+                return _methodImplementations;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets an override to the layout of a class, indicating its total and packing size. 
         /// </summary>
         /// <remarks>
@@ -789,6 +803,16 @@ namespace AsmResolver.DotNet
         protected virtual IList<InterfaceImplementation> GetInterfaces() =>
             new OwnedCollection<TypeDefinition, InterfaceImplementation>(this);
 
+        /// <summary>
+        /// Obtains the list of methods this type implements.
+        /// </summary>
+        /// <returns>The method implementations.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="MethodImplementations"/> property.
+        /// </remarks>
+        protected virtual IList<MethodImplementation> GetMethodImplementations() => 
+            new List<MethodImplementation>();
+        
         /// <summary>
         /// Obtains the class layout of this type.
         /// </summary>
