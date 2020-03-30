@@ -216,6 +216,15 @@ namespace AsmResolver.DotNet.Cloning
             foreach (var implementation in type.Interfaces)
                 clonedType.Interfaces.Add(CloneInterfaceImplementation(context, implementation));
             
+            // Copy method implementations.
+            foreach (var implementation in type.MethodImplementations)
+            {
+                clonedType.MethodImplementations.Add(new MethodImplementation(
+                    context.Importer.ImportMethod(implementation.Declaration),
+                    context.Importer.ImportMethod(implementation.Body)
+                ));
+            }
+            
             // If the type is nested and the declaring type is cloned as well, we should add it to the cloned type. 
             if (type.IsNested 
                 && context.ClonedMembers.TryGetValue(type.DeclaringType, out var member)
