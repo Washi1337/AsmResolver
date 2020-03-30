@@ -466,5 +466,15 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Contains(type.MethodImplementations, i => i.Declaration.Name == "Interface2Method");
         }
+
+        [Fact]
+        public void PersistentMethodImplementations()
+        {
+            var module = ModuleDefinition.FromFile(typeof(InterfaceImplementations).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(InterfaceImplementations));
+            var newType = RebuildAndLookup(type);
+
+            Assert.Contains(newType.MethodImplementations, i => i.Declaration.Name == "Interface2Method");
+        }
     }
 }
