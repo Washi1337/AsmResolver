@@ -152,18 +152,17 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new List<MethodImplementation>();
 
-            var table = _parentModule.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
-                .GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
-            
+            var tablesStream = _parentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var table = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
+
             var rids = _parentModule.GetMethodImplementationRids(MetadataToken);
-            
             foreach (uint rid in rids)
             {
                 var row = table.GetByRid(rid);
 
-                _parentModule.TryLookupMember(row.MethodBody, out var body);
-                _parentModule.TryLookupMember(row.MethodDeclaration, out var declaration);
+                _parentModule.TryLookupMember(encoder.DecodeIndex(row.MethodBody), out var body);
+                _parentModule.TryLookupMember(encoder.DecodeIndex(row.MethodDeclaration), out var declaration);
 
                 result.Add(new MethodImplementation(
                     declaration as IMethodDefOrRef,
