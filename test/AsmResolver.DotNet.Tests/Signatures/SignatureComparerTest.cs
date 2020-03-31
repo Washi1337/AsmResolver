@@ -103,5 +103,15 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
             Assert.NotEqual(typeSig1, typeSig2, _comparer);
         }
+
+        [Fact]
+        public void MatchPropertySignature()
+        {
+            var type = new TypeReference(_someAssemblyReference, "SomeNamespace", "SomeType");
+            var signature1 = PropertySignature.CreateStatic(type.ToTypeSignature());
+            var signature2 = PropertySignature.CreateStatic(type.ToTypeSignature());
+
+            Assert.Equal(signature1, signature2, _comparer);
+        }
     }
 }
