@@ -9,6 +9,7 @@ using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.DotNet.TestCases.Types;
+using AsmResolver.DotNet.TestCases.Types.Structs;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -475,6 +476,16 @@ namespace AsmResolver.DotNet.Tests
             var newType = RebuildAndLookup(type);
 
             Assert.Contains(newType.MethodImplementations, i => i.Declaration.Name == "Interface2Method");
+        }
+
+        [Fact]
+        public void ReadClassLayout()
+        {
+            var module = ModuleDefinition.FromFile(typeof(ExplicitSizeStruct).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(ExplicitSizeStruct));
+            
+            Assert.NotNull(type.ClassLayout);
+            Assert.Equal(100u, type.ClassLayout.ClassSize);
         }
     }
 }
