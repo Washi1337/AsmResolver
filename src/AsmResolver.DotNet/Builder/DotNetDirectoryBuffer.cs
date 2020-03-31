@@ -204,6 +204,9 @@ namespace AsmResolver.DotNet.Builder
 
         private MetadataToken AddClassLayout(MetadataToken ownerToken, ClassLayout layout)
         {
+            if (layout is null)
+                return MetadataToken.Zero;
+            
             var table = Metadata.TablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
 
             var row = new ClassLayoutRow(layout.PackingSize, layout.ClassSize, ownerToken.Rid);
