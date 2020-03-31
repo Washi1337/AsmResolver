@@ -88,6 +88,21 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        protected override int? GetFieldOffset()
+        {
+            uint rid = _parentModule.GetFieldLayoutRid(MetadataToken);
+            bool result = _parentModule.DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable<FieldLayoutRow>()
+                .TryGetByRid(rid, out var fieldLayoutRow);
+            
+            if (!result)
+                return null;
+
+            return (int?) fieldLayoutRow.Offset;
+        }
+
+        /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
             _parentModule.GetCustomAttributeCollection(this);
     }

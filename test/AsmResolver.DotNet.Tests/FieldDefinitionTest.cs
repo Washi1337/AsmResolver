@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Fields;
+using AsmResolver.DotNet.TestCases.Types.Structs;
 using AsmResolver.PE.DotNet.Cil;
 using Xunit;
 
@@ -115,5 +116,36 @@ namespace AsmResolver.DotNet.Tests
             Assert.IsAssignableFrom<IReadableSegment>(newInitializer.FieldRva);
             Assert.Equal(data, ((IReadableSegment) newInitializer.FieldRva).ToArray());
         }
+
+        [Theory]
+        [InlineData(nameof(ExplicitOffsetsStruct.IntField), 0)]
+        [InlineData(nameof(ExplicitOffsetsStruct.ByteField), 10)]
+        [InlineData(nameof(ExplicitOffsetsStruct.BoolField), 100)]
+        public void ReadFieldOffset(string name, int offset)
+        {
+            var module = ModuleDefinition.FromFile(typeof(ExplicitOffsetsStruct).Assembly.Location);
+            var field = module
+                .TopLevelTypes.First(t => t.Name == nameof(ExplicitOffsetsStruct))
+                .Fields.First(f => f.Name == name);
+
+            Assert.Equal(offset, field.FieldOffset);
+        }
+
+        [Theory]
+        [InlineData(nameof(ExplicitOffsetsStruct.IntField), 0)]
+        [InlineData(nameof(ExplicitOffsetsStruct.ByteField), 10)]
+        [InlineData(nameof(ExplicitOffsetsStruct.BoolField), 100)]
+        public void PersistentFieldOffset(string name, int offset)
+        {
+            var module = ModuleDefinition.FromFile(typeof(ExplicitOffsetsStruct).Assembly.Location);
+            var field = module
+                .TopLevelTypes.First(t => t.Name == nameof(ExplicitOffsetsStruct))
+                .Fields.First(f => f.Name == name);
+            var newField = RebuildAndLookup(field);
+
+            Assert.Equal(offset, newField.FieldOffset);
+        }
+        
+        
     }
 }

@@ -42,6 +42,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _implementationMaps;
         private OneToOneRelation<MetadataToken, uint> _fieldRvas;
         private OneToOneRelation<MetadataToken, uint> _fieldMarshals;
+        private OneToOneRelation<MetadataToken, uint> _fieldLayouts;
 
         /// <summary>
         /// Creates a module definition from a module metadata row.
@@ -620,6 +621,34 @@ namespace AsmResolver.DotNet.Serialized
             }
 
             return null;
+        } 
+        
+        private void EnsureFieldLayoutsInitialized()
+        {
+            if (_fieldLayouts is null)
+                Interlocked.CompareExchange(ref _fieldLayouts, InitializeFieldLayouts(), null);
+        }
+
+        private OneToOneRelation<MetadataToken, uint> InitializeFieldLayouts()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var layoutTable = tablesStream.GetTable<FieldLayoutRow>(TableIndex.FieldLayout);
+
+            var fieldLayouts = new OneToOneRelation<MetadataToken, uint>();
+            for (int i = 0; i < layoutTable.Count; i++)
+            {
+                var ownerToken = new MetadataToken(TableIndex.Field, layoutTable[i].Field);
+                uint layoutRid = (uint) (i + 1);
+                fieldLayouts.Add(ownerToken, layoutRid);
+            }
+
+            return fieldLayouts;
+        }
+
+        internal uint GetFieldLayoutRid(MetadataToken fieldToken)
+        {
+            EnsureFieldLayoutsInitialized();
+            return _fieldLayouts.GetValue(fieldToken);
         }
         
         /// <inheritdoc />
