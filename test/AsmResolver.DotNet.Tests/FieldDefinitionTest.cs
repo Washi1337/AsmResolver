@@ -130,6 +130,22 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.Equal(offset, field.FieldOffset);
         }
+
+        [Theory]
+        [InlineData(nameof(ExplicitOffsetsStruct.IntField), 0)]
+        [InlineData(nameof(ExplicitOffsetsStruct.ByteField), 10)]
+        [InlineData(nameof(ExplicitOffsetsStruct.BoolField), 100)]
+        public void PersistentFieldOffset(string name, int offset)
+        {
+            var module = ModuleDefinition.FromFile(typeof(ExplicitOffsetsStruct).Assembly.Location);
+            var field = module
+                .TopLevelTypes.First(t => t.Name == nameof(ExplicitOffsetsStruct))
+                .Fields.First(f => f.Name == name);
+            var newField = RebuildAndLookup(field);
+
+            Assert.Equal(offset, newField.FieldOffset);
+        }
+        
         
     }
 }

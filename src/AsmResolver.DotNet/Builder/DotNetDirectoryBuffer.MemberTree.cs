@@ -192,10 +192,13 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, field.MetadataToken.Rid);
             _fieldTokens.Add(field, token);
+            
             AddCustomAttributes(token, field);
             AddConstant(token, field.Constant);
             AddImplementationMap(token, field.ImplementationMap);
             AddFieldRva(token, field.FieldRva);
+            AddFieldLayout(token, field.FieldOffset);
+            
             return token;
         }
 
@@ -208,6 +211,20 @@ namespace AsmResolver.DotNet.Builder
             
             var row = new FieldRvaRow(
                 new SegmentReference(fieldRva), 
+                ownerToken.Rid);
+
+            table.Add(row, 0);
+        }
+
+        private void AddFieldLayout(MetadataToken ownerToken, int? fieldOffset)
+        {
+            if (fieldOffset is null)
+                return;
+            
+            var table = Metadata.TablesStream.GetTable<FieldLayoutRow>(TableIndex.FieldLayout);
+            
+            var row = new FieldLayoutRow(
+                (uint) fieldOffset.Value, 
                 ownerToken.Rid);
 
             table.Add(row, 0);
