@@ -28,6 +28,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MarshalDescriptor> _marshalDescriptor;
         private readonly LazyVariable<ImplementationMap> _implementationMap;
         private readonly LazyVariable<ISegment> _fieldRva;
+        private readonly LazyVariable<int?> _fieldOffset;
 
         private IList<CustomAttribute> _customAttributes;
 
@@ -45,6 +46,7 @@ namespace AsmResolver.DotNet
             _marshalDescriptor = new LazyVariable<MarshalDescriptor>(GetMarshalDescriptor);
             _implementationMap = new LazyVariable<ImplementationMap>(GetImplementationMap);
             _fieldRva = new LazyVariable<ISegment>(GetFieldRva);
+            _fieldOffset = new LazyVariable<int?>(GetFieldOffset);
         }
 
         /// <summary>
@@ -360,6 +362,15 @@ namespace AsmResolver.DotNet
             set => _fieldRva.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the explicit offset of the field, relative to the starting address of the object (if available).
+        /// </summary>
+        public int? FieldOffset
+        {
+            get => _fieldOffset.Value;
+            set => _fieldOffset.Value = value;
+        }
+
         FieldDefinition IFieldDescriptor.Resolve() => this;
 
         /// <summary>
@@ -434,6 +445,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="FieldRva"/> property.
         /// </remarks>
         protected virtual ISegment GetFieldRva() => null;
+        
+        /// <summary>
+        /// Obtains the offset of the field as defined in the field layout.
+        /// </summary>
+        /// <returns>The field offset.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="FieldOffset"/> property.
+        /// </remarks>
+        protected virtual int? GetFieldOffset() => null;
         
         /// <inheritdoc />
         public override string ToString() => FullName;
