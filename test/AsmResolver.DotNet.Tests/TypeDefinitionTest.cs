@@ -487,5 +487,18 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(type.ClassLayout);
             Assert.Equal(100u, type.ClassLayout.ClassSize);
         }
+
+        [Fact]
+        public void PersistentClassLayout()
+        {
+            var module = ModuleDefinition.FromFile(typeof(ExplicitSizeStruct).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(ExplicitSizeStruct));
+            var newType = RebuildAndLookup(type);
+            
+            Assert.NotNull(newType.ClassLayout);
+            Assert.Equal(100u, newType.ClassLayout.ClassSize);
+        }
+        
+        
     }
 }

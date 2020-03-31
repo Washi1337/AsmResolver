@@ -141,9 +141,7 @@ namespace AsmResolver.DotNet.Builder
                 AddInterfaces(typeToken, type.Interfaces);
                 AddMethodImplementations(typeToken, type.MethodImplementations);
                 AddGenericParameters(typeToken, type);
-
-                if (type.ClassLayout is {})
-                    AddClassLayout(typeToken, type.ClassLayout);
+                AddClassLayout(typeToken, type.ClassLayout);
             }
             
             AddParameterDefinitions();
