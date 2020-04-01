@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Signatures
     /// <summary>
     /// Represents an instantiation of a generic method.
     /// </summary>
-    public class GenericInstanceMethodSignature : CallingConventionSignature
+    public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
         internal static GenericInstanceMethodSignature FromReader(ModuleDefinition parentModule,
             IBinaryStreamReader reader)
