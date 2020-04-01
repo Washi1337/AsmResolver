@@ -216,7 +216,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Semantics"/> property.
         /// </remarks>
         protected virtual IList<MethodSemantics> GetSemantics() =>
-            new OwnedCollection<IHasSemantics, MethodSemantics>(this);
+            new MethodSemanticsCollection(this);
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.
