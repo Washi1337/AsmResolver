@@ -604,27 +604,27 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets a value indicating whether the method is a get method for a property. 
         /// </summary>
-        public bool IsGetMethod => (Semantics?.Attributes & MethodSemanticsAttributes.Getter) != 0;
+        public bool IsGetMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Getter) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a set method for a property. 
         /// </summary>
-        public bool IsSetMethod => (Semantics?.Attributes & MethodSemanticsAttributes.Setter) != 0;
+        public bool IsSetMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Setter) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is an add method for an event. 
         /// </summary>
-        public bool IsAddMethod => (Semantics?.Attributes & MethodSemanticsAttributes.AddOn) != 0;
+        public bool IsAddMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.AddOn) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a remove method for an event. 
         /// </summary>
-        public bool IsRemoveMethod => (Semantics?.Attributes & MethodSemanticsAttributes.RemoveOn) != 0;
+        public bool IsRemoveMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.RemoveOn) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a fire method for an event. 
         /// </summary>
-        public bool IsFireMethod => (Semantics?.Attributes & MethodSemanticsAttributes.Fire) != 0;
+        public bool IsFireMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Fire) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the method is a (class) constructor.
