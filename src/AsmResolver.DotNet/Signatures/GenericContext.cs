@@ -14,8 +14,8 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="method">The method providing type arguments.</param>
         public GenericContext(IGenericArgumentsProvider type, IGenericArgumentsProvider method)
         {
-            Type = type ?? throw new ArgumentNullException(nameof(type));
-            Method = method ?? throw new ArgumentNullException(nameof(method));
+            Type = type;
+            Method = method;
         }
         
         /// <summary>
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="parameter">The parameter to get the argument value for.</param>
         /// <returns>The argument type.</returns>
-        public TypeSignature GetTypeParameter(GenericParameterSignature parameter)
+        public TypeSignature GetTypeArgument(GenericParameterSignature parameter)
         {
             var argumentProvider = parameter.ParameterType switch
             {
