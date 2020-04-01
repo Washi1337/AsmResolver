@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<MethodSemantics> GetSemantics()
         {
-            var result = new OwnedCollection<IHasSemantics, MethodSemantics>(this);
+            var result = new MethodSemanticsCollection(this);
 
             foreach (uint rid in _parentModule.GetMethodSemantics(MetadataToken))
             {
