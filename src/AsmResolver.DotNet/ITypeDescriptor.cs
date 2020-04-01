@@ -37,5 +37,12 @@ namespace AsmResolver.DotNet
         /// This method can only be invoked if the reference was added to a module. 
         /// </remarks>
         TypeDefinition Resolve();
+
+        /// <summary>
+        /// Calculates the runtime size of the type.
+        /// </summary>
+        /// <param name="is32Bit"></param>
+        /// <returns>The size of the type, in bytes</returns>
+        int CalculateSize(bool? is32Bit = null);
     }
 }

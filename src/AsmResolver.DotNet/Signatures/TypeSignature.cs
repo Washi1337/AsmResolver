@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Analysis;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -256,6 +257,12 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public abstract TypeDefinition Resolve();
+
+        /// <inheritdoc />
+        public int CalculateSize(bool? is32Bit = null)
+        {
+            return SizeCalculator.CalculateSize(this, is32Bit);
+        }
 
         /// <summary>
         /// Gets the underlying base type signature, without any extra adornments.

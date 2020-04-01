@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.DotNet.Analysis;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
@@ -91,7 +92,13 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
-        
+
+        /// <inheritdoc />
+        public int CalculateSize(bool? is32Bit = null)
+        {
+            return SizeCalculator.CalculateSize(this, is32Bit);
+        }
+
         /// <summary>
         /// Obtains the signature the type specification is referencing.
         /// </summary>

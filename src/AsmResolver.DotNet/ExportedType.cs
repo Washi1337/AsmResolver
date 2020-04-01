@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.DotNet.Analysis;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -136,7 +137,13 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
-        
+
+        /// <inheritdoc />
+        public int CalculateSize(bool? is32Bit = null)
+        {
+            return SizeCalculator.CalculateSize(Resolve(), is32Bit);
+        }
+
         /// <summary>
         /// Obtains the namespace of the exported type.
         /// </summary>

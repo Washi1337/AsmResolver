@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading;
+using AsmResolver.DotNet.Analysis;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
@@ -608,6 +609,12 @@ namespace AsmResolver.DotNet
         }
 
         TypeDefinition ITypeDescriptor.Resolve() => this;
+
+        /// <inheritdoc />
+        public int CalculateSize(bool? is32Bit = null)
+        {
+            return SizeCalculator.CalculateSize(this, is32Bit);
+        }
 
         /// <summary>
         /// When this type is an enum, extracts the underlying enum type.

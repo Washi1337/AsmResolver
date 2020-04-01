@@ -80,6 +80,12 @@ namespace AsmResolver.DotNet
         TypeDefinition ITypeDescriptor.Resolve() => null;
 
         /// <inheritdoc />
+        public int CalculateSize(bool? is32Bit = null)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <inheritdoc />
         TypeSignature ITypeDefOrRef.ToTypeSignature() => throw new InvalidOperationException();
 
         /// <inheritdoc />
