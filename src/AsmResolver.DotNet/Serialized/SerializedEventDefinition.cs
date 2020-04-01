@@ -58,12 +58,12 @@ namespace AsmResolver.DotNet.Serialized
                 ? member as TypeDefinition
                 : null;
         }
-        
 
         /// <inheritdoc />
         protected override IList<MethodSemantics> GetSemantics()
         {
             var result = new MethodSemanticsCollection(this);
+            result.ValidateMembership = false;
 
             foreach (uint rid in _parentModule.GetMethodSemantics(MetadataToken))
             {
@@ -71,6 +71,7 @@ namespace AsmResolver.DotNet.Serialized
                 result.Add((MethodSemantics) _parentModule.LookupMember(semanticsToken));
             }
 
+            result.ValidateMembership = true;
             return result;
         }
 

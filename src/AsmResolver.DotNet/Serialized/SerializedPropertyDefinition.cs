@@ -62,13 +62,15 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<MethodSemantics> GetSemantics()
         {
             var result = new MethodSemanticsCollection(this);
-
+            result.ValidateMembership = false;
+            
             foreach (uint rid in _parentModule.GetMethodSemantics(MetadataToken))
             {
                 var semanticsToken = new MetadataToken(TableIndex.MethodSemantics, rid);
                 result.Add((MethodSemantics) _parentModule.LookupMember(semanticsToken));
             }
 
+            result.ValidateMembership = true;
             return result;
         }
         
