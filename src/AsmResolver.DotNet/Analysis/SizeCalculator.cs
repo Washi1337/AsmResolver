@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -84,9 +83,10 @@ namespace AsmResolver.DotNet.Analysis
                 case ElementType.Ptr:
                 case ElementType.FnPtr:
                 {
-                    if (is32Bit is null)
+                    if (!is32Bit.HasValue)
                     {
-                        throw new NotSupportedException();
+                        throw new SizeCalculationException("Cannot calculate the size of pointers without knowing"
+                            + "the bitness of the module");
                     }
 
                     return is32Bit.Value ? 4 : 8;
