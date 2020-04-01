@@ -18,8 +18,17 @@ namespace AsmResolver.DotNet.Collections
         {
         }
 
-        private static void AssertSemanticsValidity(MethodSemantics item)
+        internal bool ValidateMembership
         {
+            get;
+            set;
+        } = true;
+
+        private void AssertSemanticsValidity(MethodSemantics item)
+        {
+            if (!ValidateMembership)
+                return;
+            
             if (item.Method.Semantics is {})
                 throw new ArgumentException($"Method {item.Method} is already assigned semantics.");
         }
