@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -33,7 +34,7 @@ namespace AsmResolver.DotNet
         public MethodSemantics(MethodDefinition method, MethodSemanticsAttributes attributes)
             : this(new MetadataToken(TableIndex.MethodSemantics, 0))
         {
-            Method = method;
+            Method = method ?? throw new ArgumentNullException(nameof(method));
             Attributes = attributes;
         }
         
@@ -59,7 +60,7 @@ namespace AsmResolver.DotNet
         public MethodDefinition Method
         {
             get => _method.Value;
-            set => _method.Value = value;
+            private set => _method.Value = value;
         }
 
         /// <summary>

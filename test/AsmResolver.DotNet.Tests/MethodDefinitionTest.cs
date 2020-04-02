@@ -1,5 +1,7 @@
 using System.Linq;
+using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.DotNet.TestCases.Properties;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -104,6 +106,60 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal("typeDefOrRefParameter", method.Parameters[2].Name);
             Assert.True(method.Parameters[2].ParameterType.IsTypeOf("AsmResolver.DotNet.TestCases.Methods", "MultipleMethods"), 
                 "Expected third parameter to be of type AsmResolver.TestCases.DotNet.MultipleMethods.");
+        }
+
+        [Fact]
+        public void ReadNormalMethod()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleMethod).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(SingleMethod).GetMethod(nameof(SingleMethod.VoidParameterlessMethod)).MetadataToken);
+            
+            Assert.False(method.IsGetMethod);
+            Assert.False(method.IsSetMethod);
+            Assert.False(method.IsAddMethod);
+            Assert.False(method.IsRemoveMethod);
+            Assert.False(method.IsFireMethod);
+        }
+
+        [Fact]
+        public void ReadIsGetMethod()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(SingleProperty).GetMethod("get_" + nameof(SingleProperty.IntProperty)).MetadataToken);
+            
+            Assert.True(method.IsGetMethod);
+        }
+
+        [Fact]
+        public void ReadIsSetMethod()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(SingleProperty).GetMethod("set_" + nameof(SingleProperty.IntProperty)).MetadataToken);
+            
+            Assert.True(method.IsSetMethod);
+        }
+
+        [Fact]
+        public void ReadIsAddMethod()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(SingleEvent).GetMethod("add_" + nameof(SingleEvent.SimpleEvent)).MetadataToken);
+            
+            Assert.True(method.IsAddMethod);
+        }
+
+        [Fact]
+        public void ReadIsRemoveMethod()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SingleEvent).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(
+                typeof(SingleEvent).GetMethod("remove_" + nameof(SingleEvent.SimpleEvent)).MetadataToken);
+            
+            Assert.True(method.IsRemoveMethod);
         }
 
     }
