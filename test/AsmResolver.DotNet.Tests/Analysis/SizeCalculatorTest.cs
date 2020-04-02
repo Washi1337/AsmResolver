@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Analysis
@@ -29,11 +30,17 @@ namespace AsmResolver.DotNet.Tests.Analysis
         public int Dummy1;
     }
 
-    [StructLayout(LayoutKind.Explicit)]
-    public struct CustomStructWithFieldOffset
+    [StructLayout(LayoutKind.Explicit, Pack = 1)]
+    public struct CustomUnionStruct
     {
-        [FieldOffset(2)]
+        [FieldOffset(0)]
         public long Dummy1;
+
+        [FieldOffset(0)]
+        public int Dummy2;
+
+        [FieldOffset(8)]
+        public float Dummy3;
     }
 
     public class SizeCalculatorTest
@@ -44,7 +51,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStruct).MetadataToken);
             
-            Assert.Equal(8, custom.CalculateSize());
+            Assert.Equal(Unsafe.SizeOf<CustomStruct>(), custom.CalculateSize(null));
         }
 
         [Fact]
@@ -53,7 +60,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomGenericStruct<byte>).MetadataToken);
             
-            Assert.Equal(9, custom.CalculateSize());
+            Assert.Equal(Unsafe.SizeOf<CustomGenericStruct<byte>>(), custom.CalculateSize(null));
         }
 
         [Fact]
@@ -62,7 +69,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStructWithBigSize).MetadataToken);
             
-            Assert.Equal(8, custom.CalculateSize());
+            Assert.Equal(Unsafe.SizeOf<CustomStructWithBigSize>(), custom.CalculateSize(null));
         }
 
         [Fact]
@@ -71,16 +78,16 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStructWithSmallSize).MetadataToken);
             
-            Assert.Equal(4, custom.CalculateSize());
+            Assert.Equal(Unsafe.SizeOf<CustomStructWithSmallSize>(), custom.CalculateSize(null));
         }
 
         [Fact]
-        public void CustomStructWithFieldOffset()
+        public void CustomUnionStruct()
         {
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
-            var custom = (TypeDefinition) module.LookupMember(typeof(CustomStructWithFieldOffset).MetadataToken);
+            var custom = (TypeDefinition) module.LookupMember(typeof(CustomUnionStruct).MetadataToken);
             
-            Assert.Equal(10, custom.CalculateSize());
+            Assert.Equal(Unsafe.SizeOf<CustomUnionStruct>(), custom.CalculateSize(null));
         }
     }
 }
