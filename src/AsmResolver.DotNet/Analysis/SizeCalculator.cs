@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using AsmResolver.DotNet.Analysis.SizeCalculation;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -19,24 +20,48 @@ namespace AsmResolver.DotNet.Analysis
         /// <exception cref="SizeCalculationException">It isn't possible to compute the size statically</exception>
         public static int CalculateSize(TypeDefinition typeDefinition, bool is32Bit)
         {
+            // We check if the type has an explicit size set, and if it is bigger than the calculated size,
+            // we need to return the explicitly set size.
+            // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute.pack
+            static int CheckExplicitSize(TypeDefinition typeDefinition, int calculated)
+            {
+                if (typeDefinition.ClassLayout is null)
+                {
+                    return calculated;
+                }
+
+                var explicitSize = typeDefinition.ClassLayout.ClassSize;
+                return (int)Math.Max(explicitSize, calculated);
+            }
+            
+            // If the type is a reference type, return the pointer size
             if (!typeDefinition.IsValueType)
             {
                 return is32Bit ? 4 : 8;
             }
 
+            var biggest = new BiggestSizeCalculationStrategy().CalculateSize(typeDefinition, is32Bit);
+            
+            // If the type has explicit layout, we need to return the largest field's size
             if (typeDefinition.IsExplicitLayout)
             {
-                return new BiggestSizeCalculationStrategy().CalculateSize(typeDefinition, is32Bit);
+                return CheckExplicitSize(typeDefinition, biggest);
             }
             
-            var realSize = new AlignEachCalculationStrategy(is32Bit ? 4 : 8).CalculateSize(typeDefinition, is32Bit);
-            
-            if (typeDefinition.ClassLayout is {} && typeDefinition.ClassLayout.ClassSize > realSize)
+            // The type has sequential/auto layout
+            if (typeDefinition.ClassLayout is {})
             {
-                return (int)typeDefinition.ClassLayout.ClassSize;
+                // We only need to use the explicitly set pack size if it is smaller
+                // than the type's largest field's size
+                var customPackingSize = typeDefinition.ClassLayout.PackingSize;
+                if (customPackingSize < biggest)
+                {
+                    biggest = customPackingSize;
+                }
             }
-            
-            return realSize;
+                
+            var aligned = new AlignEachCalculationStrategy(biggest).CalculateSize(typeDefinition, is32Bit);
+            return CheckExplicitSize(typeDefinition, aligned);
         }
 
         /// <summary>
@@ -101,7 +126,7 @@ namespace AsmResolver.DotNet.Analysis
 
                 case ElementType.ValueType:
                 {
-                    return CalculateSize(typeSignature.Resolve(), (bool) is32Bit);
+                    return CalculateSize(typeSignature.Resolve(), is32Bit);
                 }
 
                 default:
