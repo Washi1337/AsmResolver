@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Analysis.SizeCalculation
         private readonly int _alignment;
         
         /// <inheritdoc />
-        public int CalculateSize(ITypeDescriptor typeDescriptor, bool? is32Bit)
+        public int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit)
         {
             return typeDescriptor.Resolve().Fields.Select(f =>
                 (int)((uint)f.Signature.FieldType.CalculateSize(is32Bit)).Align((uint)_alignment)

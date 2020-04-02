@@ -11,6 +11,6 @@
         /// <param name="typeDescriptor">The <see cref="ITypeDescriptor"/> to calculate the size of</param>
         /// <param name="is32Bit"></param>
         /// <returns>The size of <paramref name="typeDescriptor"/></returns>
-        int CalculateSize(ITypeDescriptor typeDescriptor, bool? is32Bit);
+        int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit);
     }
 }

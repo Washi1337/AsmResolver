@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Analysis.SizeCalculation
     public sealed class BiggestSizeCalculationStrategy : ISizeCalculationStrategy
     {
         /// <inheritdoc />
-        public int CalculateSize(ITypeDescriptor typeDescriptor, bool? is32Bit)
+        public int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit)
         {
             return typeDescriptor.Resolve().Fields.Select(f =>
                 f.FieldOffset.GetValueOrDefault() + f.Signature.FieldType.CalculateSize(is32Bit)
