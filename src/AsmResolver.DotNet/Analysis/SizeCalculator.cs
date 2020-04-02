@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using AsmResolver.DotNet.Analysis.SizeCalculation;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -16,19 +17,26 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeDefinition"/></returns>
         /// <exception cref="SizeCalculationException">It isn't possible to compute the size statically</exception>
-        public static int CalculateSize(TypeDefinition typeDefinition, bool? is32Bit = null)
+        public static int CalculateSize(TypeDefinition typeDefinition, bool is32Bit)
         {
             if (!typeDefinition.IsValueType)
             {
-                if (is32Bit.HasValue)
-                {
-                    return is32Bit.Value ? 4 : 8;
-                }
-                
-                throw new SizeCalculationException("Cannot calculate the size of a reference type");
+                return is32Bit ? 4 : 8;
             }
 
-            return typeDefinition.Fields.Sum(f => CalculateSize(f.Signature.FieldType, is32Bit));
+            if (typeDefinition.IsExplicitLayout)
+            {
+                return new BiggestSizeCalculationStrategy().CalculateSize(typeDefinition, is32Bit);
+            }
+            
+            var realSize = new AlignEachCalculationStrategy(is32Bit ? 4 : 8).CalculateSize(typeDefinition, is32Bit);
+            
+            if (typeDefinition.ClassLayout is {} && typeDefinition.ClassLayout.ClassSize > realSize)
+            {
+                return (int)typeDefinition.ClassLayout.ClassSize;
+            }
+            
+            return realSize;
         }
 
         /// <summary>
@@ -38,7 +46,7 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeSignature"/></returns>
         /// <exception cref="SizeCalculationException">It isn't possible to compute the size statically</exception>
-        public static int CalculateSize(TypeSignature typeSignature, bool? is32Bit = null)
+        public static int CalculateSize(TypeSignature typeSignature, bool is32Bit)
         {
             switch (typeSignature.ElementType)
             {
@@ -83,23 +91,17 @@ namespace AsmResolver.DotNet.Analysis
                 case ElementType.Ptr:
                 case ElementType.FnPtr:
                 {
-                    if (!is32Bit.HasValue)
-                    {
-                        throw new SizeCalculationException("Cannot calculate the size of pointers without knowing"
-                            + "the bitness of the module");
-                    }
-
-                    return is32Bit.Value ? 4 : 8;
+                    return is32Bit ? 4 : 8;
                 }
-                
+
                 case ElementType.Enum:
                 {
                     return CalculateSize(typeSignature.GetUnderlyingTypeDefOrRef().ToTypeSignature(), is32Bit);
                 }
-                
+
                 case ElementType.ValueType:
                 {
-                    return CalculateSize(typeSignature.Resolve(), is32Bit);
+                    return CalculateSize(typeSignature.Resolve(), (bool) is32Bit);
                 }
 
                 default:
@@ -115,7 +117,7 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="typeSpecification">The <see cref="TypeSpecification"/> to calculate the size of</param>
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeSpecification"/></returns>
-        public static int CalculateSize(TypeSpecification typeSpecification, bool? is32Bit = null)
+        public static int CalculateSize(TypeSpecification typeSpecification, bool is32Bit)
         {
             return CalculateSize(typeSpecification.Signature, is32Bit);
         }

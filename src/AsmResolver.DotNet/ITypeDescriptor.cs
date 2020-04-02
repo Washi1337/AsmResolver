@@ -43,6 +43,6 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="is32Bit"></param>
         /// <returns>The size of the type, in bytes</returns>
-        int CalculateSize(bool? is32Bit = null);
+        int CalculateSize(bool is32Bit);
     }
 }

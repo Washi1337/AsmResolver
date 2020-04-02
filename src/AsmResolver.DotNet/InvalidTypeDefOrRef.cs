@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet
         TypeDefinition ITypeDescriptor.Resolve() => null;
 
         /// <inheritdoc />
-        public int CalculateSize(bool? is32Bit = null)
+        public int CalculateSize(bool is32Bit)
         {
             throw new NotSupportedException();
         }

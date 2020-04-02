@@ -259,9 +259,9 @@ namespace AsmResolver.DotNet.Signatures
         public abstract TypeDefinition Resolve();
 
         /// <inheritdoc />
-        public int CalculateSize(bool? is32Bit = null)
+        public int CalculateSize(bool is32Bit)
         {
-            return SizeCalculator.CalculateSize(this, is32Bit);
+            return SizeCalculator.CalculateSize(this, (bool) is32Bit);
         }
 
         /// <summary>
