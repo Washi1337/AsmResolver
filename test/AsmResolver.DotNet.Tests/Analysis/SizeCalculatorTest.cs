@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -51,7 +52,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStruct).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomStruct>(), custom.CalculateSize(null));
+            Assert.Equal(Unsafe.SizeOf<CustomStruct>(), custom.CalculateSize(IntPtr.Size == 4));
         }
 
         [Fact]
@@ -60,7 +61,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomGenericStruct<byte>).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomGenericStruct<byte>>(), custom.CalculateSize(null));
+            Assert.Equal(Unsafe.SizeOf<CustomGenericStruct<byte>>(), custom.CalculateSize(IntPtr.Size == 4));
         }
 
         [Fact]
@@ -69,7 +70,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStructWithBigSize).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomStructWithBigSize>(), custom.CalculateSize(null));
+            Assert.Equal(Unsafe.SizeOf<CustomStructWithBigSize>(), custom.CalculateSize(IntPtr.Size == 4));
         }
 
         [Fact]
@@ -78,7 +79,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStructWithSmallSize).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomStructWithSmallSize>(), custom.CalculateSize(null));
+            Assert.Equal(Unsafe.SizeOf<CustomStructWithSmallSize>(), custom.CalculateSize(IntPtr.Size == 4));
         }
 
         [Fact]
@@ -87,7 +88,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomUnionStruct).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomUnionStruct>(), custom.CalculateSize(null));
+            Assert.Equal(Unsafe.SizeOf<CustomUnionStruct>(), custom.CalculateSize(IntPtr.Size == 4));
         }
     }
 }
