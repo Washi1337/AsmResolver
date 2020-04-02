@@ -27,6 +27,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<MethodSignature> _signature;
         private readonly LazyVariable<MethodBody> _methodBody;
         private readonly LazyVariable<ImplementationMap> _implementationMap;
+        private readonly LazyVariable<MethodSemantics> _semantics;
         private IList<ParameterDefinition> _parameterDefinitions;
         private ParameterCollection _parameters;
         private IList<CustomAttribute> _customAttributes;
@@ -44,6 +45,7 @@ namespace AsmResolver.DotNet
             _signature = new LazyVariable<MethodSignature>(GetSignature);
             _methodBody = new LazyVariable<MethodBody>(GetBody);
             _implementationMap = new LazyVariable<ImplementationMap>(GetImplementationMap);
+            _semantics = new LazyVariable<MethodSemantics>(GetSemantics);
         }
 
         /// <summary>
@@ -464,7 +466,7 @@ namespace AsmResolver.DotNet
             set => ImplAttributes = (ImplAttributes & ~MethodImplAttributes.NoInlining)
                                     | (value ? MethodImplAttributes.NoInlining : 0);
         }
-
+        
         /// <inheritdoc />
         public ModuleDefinition Module => DeclaringType?.Module;
 
@@ -591,6 +593,40 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets the semantics associated to this method (if available).
+        /// </summary>
+        public MethodSemantics Semantics
+        {
+            get => _semantics.Value;
+            set => _semantics.Value = value;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the method is a get method for a property. 
+        /// </summary>
+        public bool IsGetMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Getter) != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether the method is a set method for a property. 
+        /// </summary>
+        public bool IsSetMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Setter) != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether the method is an add method for an event. 
+        /// </summary>
+        public bool IsAddMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.AddOn) != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether the method is a remove method for an event. 
+        /// </summary>
+        public bool IsRemoveMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.RemoveOn) != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether the method is a fire method for an event. 
+        /// </summary>
+        public bool IsFireMethod => Semantics != null && (Semantics.Attributes & MethodSemanticsAttributes.Fire) != 0;
+
+        /// <summary>
         /// Gets a value indicating whether the method is a (class) constructor.
         /// </summary>
         public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && (Name == ".cctor" || Name == ".ctor");
@@ -672,6 +708,15 @@ namespace AsmResolver.DotNet
         protected virtual IList<GenericParameter> GetGenericParameters() =>
             new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
 
+        /// <summary>
+        /// Obtains the semantics associated to the method (if available).
+        /// </summary>
+        /// <returns>The semantics, or <c>null</c> if the method was not assigned semantics.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Semantics"/> property.
+        /// </remarks>
+        protected virtual MethodSemantics GetSemantics() => null;
+        
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

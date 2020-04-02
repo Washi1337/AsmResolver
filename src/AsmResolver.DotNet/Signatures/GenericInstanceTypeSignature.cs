@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Signatures
     /// <summary>
     /// Represents an instantiation of a generic type.
     /// </summary>
-    public class GenericInstanceTypeSignature : TypeSignature
+    public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
         internal new static GenericInstanceTypeSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader,
             RecursionProtection protection)

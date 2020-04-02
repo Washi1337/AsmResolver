@@ -1,4 +1,5 @@
 using System.Linq;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;

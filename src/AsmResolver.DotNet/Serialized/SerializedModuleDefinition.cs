@@ -32,6 +32,7 @@ namespace AsmResolver.DotNet.Serialized
 
         private OneToManyRelation<uint, uint> _typeDefTree;
         private OneToManyRelation<MetadataToken, uint> _semantics;
+        private Dictionary<uint, MetadataToken> _semanticMethods;
         private OneToOneRelation<MetadataToken, uint> _constants;
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
@@ -226,24 +227,29 @@ namespace AsmResolver.DotNet.Serialized
         private void EnsureMethodSemanticsInitialized()
         {
             if (_semantics is null)
-                Interlocked.CompareExchange(ref _semantics, InitializeMethodSemantics(), null);
+                InitializeMethodSemantics();
         }
 
-        private OneToManyRelation<MetadataToken, uint> InitializeMethodSemantics()
+        private void InitializeMethodSemantics()
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var semanticsTable = tablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
             
             var semantics = new OneToManyRelation<MetadataToken, uint>();
+            var semanticMethods = new Dictionary<uint, MetadataToken>();
             for (int i = 0; i < semanticsTable.Count; i++)
             {
-                var ownerToken = encoder.DecodeIndex(semanticsTable[i].Association);
-                uint semanticsRid = (uint) (i + 1);
-                semantics.Add(ownerToken, semanticsRid);
+                var methodSemanticsRow = semanticsTable[i];
+                var semanticsToken = new MetadataToken(TableIndex.MethodSemantics, (uint) (i + 1));
+                
+                var ownerToken = encoder.DecodeIndex(methodSemanticsRow.Association);
+                semantics.Add(ownerToken, semanticsToken.Rid);
+                semanticMethods.Add(methodSemanticsRow.Method, semanticsToken);
             }
 
-            return semantics;
+            Interlocked.CompareExchange(ref _semantics, semantics, null);
+            Interlocked.CompareExchange(ref _semanticMethods, semanticMethods, null);
         }
 
         internal IEnumerable<uint> GetMethodSemantics(MetadataToken owner)
@@ -252,10 +258,17 @@ namespace AsmResolver.DotNet.Serialized
             return _semantics.GetMemberList(owner);
         }
 
-        internal MetadataToken GetMethodSemanticsOwner(uint methodRid)
+        internal MetadataToken GetMethodSemanticsOwner(uint semanticsRid)
         {
             EnsureMethodSemanticsInitialized();
-            return _semantics.GetMemberOwner(methodRid);
+            return _semantics.GetMemberOwner(semanticsRid);
+        }
+
+        internal MetadataToken GetMethodParentSemantics(uint methodRid)
+        {
+            EnsureMethodSemanticsInitialized();
+            _semanticMethods.TryGetValue(methodRid, out var token);
+            return token;
         }
 
         private void EnsureConstantsInitialized()

@@ -104,5 +104,13 @@ namespace AsmResolver.DotNet.Serialized
             return result;
         }
 
+        /// <inheritdoc />
+        protected override MethodSemantics GetSemantics()
+        {
+            var ownerToken = _parentModule.GetMethodParentSemantics(MetadataToken.Rid);
+            return _parentModule.TryLookupMember(ownerToken, out var member)
+                ? member as MethodSemantics
+                : null;
+        }
     }
 }
