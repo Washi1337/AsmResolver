@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Analysis
                 // We only need to use the explicitly set pack size if it is smaller
                 // than the type's largest field's size
                 var customPackingSize = typeDefinition.ClassLayout.PackingSize;
-                if (customPackingSize < biggest)
+                if (customPackingSize > 0 && customPackingSize < biggest)
                 {
                     biggest = customPackingSize;
                 }
