@@ -1,4 +1,6 @@
-﻿namespace AsmResolver.DotNet.Analysis.SizeCalculation
+﻿using AsmResolver.DotNet.Signatures;
+
+namespace AsmResolver.DotNet.Analysis.SizeCalculation
 {
     /// <summary>
     /// An interface that different size calculating strategies implement
@@ -10,7 +12,8 @@
         /// </summary>
         /// <param name="typeDescriptor">The <see cref="ITypeDescriptor"/> to calculate the size of</param>
         /// <param name="is32Bit"></param>
+        /// <param name="context"></param>
         /// <returns>The size of <paramref name="typeDescriptor"/></returns>
-        int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit);
+        int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit, GenericContext context);
     }
 }

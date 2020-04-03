@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Analysis.SizeCalculation
 {
@@ -8,10 +9,10 @@ namespace AsmResolver.DotNet.Analysis.SizeCalculation
     public sealed class BiggestSizeCalculationStrategy : ISizeCalculationStrategy
     {
         /// <inheritdoc />
-        public int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit)
+        public int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit, GenericContext context)
         {
             return typeDescriptor.Resolve().Fields.Select(f =>
-                f.FieldOffset.GetValueOrDefault() + f.Signature.FieldType.CalculateSize(is32Bit)
+                f.FieldOffset.GetValueOrDefault() + SizeCalculator.CalculateSize(f.Signature.FieldType, is32Bit, context)
             ).Max();
         }
     }

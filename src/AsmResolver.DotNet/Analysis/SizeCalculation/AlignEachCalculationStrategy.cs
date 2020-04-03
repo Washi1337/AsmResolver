@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Analysis.SizeCalculation
 {
@@ -20,10 +21,10 @@ namespace AsmResolver.DotNet.Analysis.SizeCalculation
         private readonly int _alignment;
         
         /// <inheritdoc />
-        public int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit)
+        public int CalculateSize(ITypeDescriptor typeDescriptor, bool is32Bit, GenericContext context)
         {
             return typeDescriptor.Resolve().Fields.Select(f =>
-                (int)((uint)f.Signature.FieldType.CalculateSize(is32Bit)).Align((uint)_alignment)
+                (int)((uint) SizeCalculator.CalculateSize(f.Signature.FieldType, is32Bit, context)).Align((uint)_alignment)
             ).Sum();
         }
     }
