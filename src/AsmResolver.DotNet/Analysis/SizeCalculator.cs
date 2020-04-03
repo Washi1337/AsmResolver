@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeDefinition"/></returns>
         /// <exception cref="SizeCalculationException">It isn't possible to compute the size statically</exception>
-        public static int CalculateSize(TypeDefinition typeDefinition, bool is32Bit)
+        public static int CalculateSize(TypeDefinition typeDefinition, bool is32Bit, in GenericContext context = default)
         {
             // We check if the type has an explicit size set, and if it is bigger than the calculated size,
             // we need to return the explicitly set size.
@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Analysis
                 return is32Bit ? 4 : 8;
             }
 
-            var biggest = new BiggestSizeCalculationStrategy().CalculateSize(typeDefinition, is32Bit);
+            var biggest = new BiggestSizeCalculationStrategy().CalculateSize(typeDefinition, is32Bit, context);
             
             // If the type has explicit layout, we need to return the largest field's size
             if (typeDefinition.IsExplicitLayout)
@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Analysis
                 }
             }
                 
-            var aligned = new AlignEachCalculationStrategy(biggest).CalculateSize(typeDefinition, is32Bit);
+            var aligned = new AlignEachCalculationStrategy(biggest).CalculateSize(typeDefinition, is32Bit, context);
             return CheckExplicitSize(typeDefinition, aligned);
         }
 
@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeSignature"/></returns>
         /// <exception cref="SizeCalculationException">It isn't possible to compute the size statically</exception>
-        public static int CalculateSize(TypeSignature typeSignature, bool is32Bit)
+        public static int CalculateSize(TypeSignature typeSignature, bool is32Bit, in GenericContext context)
         {
             switch (typeSignature.ElementType)
             {
@@ -119,14 +119,27 @@ namespace AsmResolver.DotNet.Analysis
                     return is32Bit ? 4 : 8;
                 }
 
-                case ElementType.Enum:
+                case ElementType.MVar:
                 {
-                    return CalculateSize(typeSignature.GetUnderlyingTypeDefOrRef().ToTypeSignature(), is32Bit);
+                    return context.GetTypeArgument((GenericParameterSignature) typeSignature).CalculateSize(is32Bit);
                 }
 
+                case ElementType.GenericInst:
+                {
+                    var generic = (GenericInstanceTypeSignature) typeSignature;
+                    var ctx = context.WithType(generic);
+                    return new BiggestSizeCalculationStrategy().CalculateSize(generic, is32Bit, ctx);
+                }
+
+                case ElementType.Enum:
+                {
+                    return CalculateSize(typeSignature.GetUnderlyingTypeDefOrRef().ToTypeSignature(), is32Bit, context);
+                }
+
+                // Structs are "inlined"
                 case ElementType.ValueType:
                 {
-                    return CalculateSize(typeSignature.Resolve(), is32Bit);
+                    return new BiggestSizeCalculationStrategy().CalculateSize(typeSignature, is32Bit, context);
                 }
 
                 default:
@@ -144,7 +157,7 @@ namespace AsmResolver.DotNet.Analysis
         /// <returns>The size of <paramref name="typeSpecification"/></returns>
         public static int CalculateSize(TypeSpecification typeSpecification, bool is32Bit)
         {
-            return CalculateSize(typeSpecification.Signature, is32Bit);
+            return CalculateSize(typeSpecification.Signature, is32Bit, new GenericContext());
         }
     }
 }
