@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public int CalculateSize(bool is32Bit)
         {
-            return SizeCalculator.CalculateSize(this, (bool) is32Bit);
+            return SizeCalculator.CalculateSize(this, is32Bit);
         }
 
         /// <summary>
