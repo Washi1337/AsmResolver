@@ -12,6 +12,13 @@ namespace AsmResolver.DotNet.Tests.Analysis
         public int Dummy2;
     }
 
+    public struct CustomNest
+    {
+        public CustomGenericStruct<byte> Dummy1;
+
+        public ulong Dummy2;
+    }
+
     public struct CustomGenericStruct<T>
     {
         public T Dummy1;
@@ -59,9 +66,9 @@ namespace AsmResolver.DotNet.Tests.Analysis
         public void CustomGenericStruct()
         {
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
-            var custom = (TypeDefinition) module.LookupMember(typeof(CustomGenericStruct<byte>).MetadataToken);
+            var custom = (TypeDefinition) module.LookupMember(typeof(CustomNest).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomGenericStruct<byte>>(), custom.CalculateSize(IntPtr.Size == 4));
+            Assert.Equal(Unsafe.SizeOf<CustomNest>(), custom.CalculateSize(IntPtr.Size == 4));
         }
 
         [Fact]
