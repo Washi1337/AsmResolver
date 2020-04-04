@@ -613,7 +613,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public int CalculateSize(bool is32Bit)
         {
-            return SizeCalculator.CalculateSize(this, is32Bit);
+            return SizeCalculator.CalculateSize(this, is32Bit, new GenericContext());
         }
 
         /// <summary>

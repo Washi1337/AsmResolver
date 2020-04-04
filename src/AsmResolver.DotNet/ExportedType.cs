@@ -2,6 +2,7 @@
 using System.Threading;
 using AsmResolver.DotNet.Analysis;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -141,7 +142,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public int CalculateSize(bool is32Bit)
         {
-            return SizeCalculator.CalculateSize(Resolve(), is32Bit);
+            return SizeCalculator.CalculateSize(Resolve(), is32Bit, new GenericContext());
         }
 
         /// <summary>
