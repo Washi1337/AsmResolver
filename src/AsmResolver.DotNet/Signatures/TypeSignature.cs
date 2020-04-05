@@ -168,6 +168,9 @@ namespace AsmResolver.DotNet.Signatures
                     return new SzArrayTypeSignature(ReadFieldOrPropType(parentModule, reader));
                 case ElementType.Enum:
                     return TypeNameParser.ParseType(parentModule, reader.ReadSerString());
+                case ElementType.Type:
+                    return new TypeDefOrRefSignature(new TypeReference(parentModule,
+                        parentModule.CorLibTypeFactory.CorLibScope, "System", "Type"));
                 default:
                     return parentModule.CorLibTypeFactory.FromElementType(elementType);
             }
@@ -200,15 +203,27 @@ namespace AsmResolver.DotNet.Signatures
                     break;
                 
                 case ElementType.SzArray:
+                    writer.WriteByte((byte) ElementType.SzArray);
+                    
                     var arrayType = (SzArrayTypeSignature) type;
                     WriteFieldOrPropType(writer, arrayType.BaseType);
                     break;
                 
-                case ElementType.Enum:
-                    writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(type));
-                    break;
-                
                 default:
+                    if (type.IsTypeOf("System", "Type"))
+                    {
+                        writer.WriteByte((byte) ElementType.Type);
+                        return;
+                    }
+                    
+                    var typeDef = type.Resolve();
+                    if (typeDef != null && typeDef.IsEnum)
+                    {
+                        writer.WriteByte((byte) ElementType.Enum);
+                        writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(type));
+                        return;
+                    }
+
                     throw new ArgumentOutOfRangeException();
             }
         }

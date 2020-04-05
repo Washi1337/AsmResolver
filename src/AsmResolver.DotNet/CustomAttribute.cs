@@ -105,9 +105,6 @@ namespace AsmResolver.DotNet
         protected virtual CustomAttributeSignature GetSignature() => null;
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return Constructor.FullName;
-        }
+        public override string ToString() => Constructor?.FullName ?? "<<<NULL CONSTRUCTOR>>>";
     }
 }

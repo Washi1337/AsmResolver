@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -7,25 +8,35 @@ namespace AsmResolver.DotNet.Tests
 {
     public class SecurityDeclarationTest
     {
-        private static MethodDefinition LookupMethod(string methodName)
+        private static MethodDefinition LookupMethod(string methodName, bool rebuild)
         {
             var module = ModuleDefinition.FromFile(typeof(SecurityAttributes).Assembly.Location);
-            return (MethodDefinition) module.LookupMember(
-                typeof(SecurityAttributes).GetMethod(methodName).MetadataToken
-            );
+            if (rebuild)
+            {
+                var stream = new MemoryStream();
+                module.Write(stream);
+                module = ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
+            }
+
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(SecurityAttributes));
+            return type.Methods.First(m => m.Name == methodName);
         }
 
-        [Fact]
-        public void ReadSecurityAction()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadSecurityAction(bool rebuild)
         {
-            var method = LookupMethod(nameof(SecurityAttributes.NoParameters));
+            var method = LookupMethod(nameof(SecurityAttributes.NoParameters), rebuild);
             Assert.Contains(method.SecurityDeclarations, declaration => declaration.Action == SecurityAction.Assert);
         }
 
-        [Fact]
-        public void ReadAttributeType()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadAttributeType(bool rebuild)
         {
-            var method = LookupMethod(nameof(SecurityAttributes.NoParameters));
+            var method = LookupMethod(nameof(SecurityAttributes.NoParameters), rebuild);
 
             var declaration = method.SecurityDeclarations[0];
             Assert.Single(declaration.PermissionSet.Attributes);
@@ -35,20 +46,24 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.NamedArguments);
         }
 
-        [Fact]
-        public void ReadNoParameters()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadNoParameters(bool rebuild)
         {
-            var method = LookupMethod(nameof(SecurityAttributes.NoParameters));
+            var method = LookupMethod(nameof(SecurityAttributes.NoParameters), rebuild);
 
             var declaration = method.SecurityDeclarations[0];
             var attribute = declaration.PermissionSet.Attributes[0];
             Assert.Empty(attribute.NamedArguments);
         }
 
-        [Fact]
-        public void ReadSingleParameter()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadSingleParameter(bool rebuild)
         {
-            var method = LookupMethod(nameof(SecurityAttributes.SingleParameter));
+            var method = LookupMethod(nameof(SecurityAttributes.SingleParameter), rebuild);
 
             var declaration = method.SecurityDeclarations[0];
             var attribute = declaration.PermissionSet.Attributes[0];
@@ -56,5 +71,6 @@ namespace AsmResolver.DotNet.Tests
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyA)
                 && argument.Argument.Element.Value.Equals(1));
         }
+        
     }
 }

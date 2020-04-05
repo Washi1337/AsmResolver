@@ -160,5 +160,21 @@ namespace AsmResolver.DotNet.Builder
                 .GetIndexEncoder(CodedIndex.Implementation)
                 .EncodeToken(token);
         }
+
+        private void AddSecurityDeclarations(MetadataToken ownerToken, IHasSecurityDeclaration provider)
+        {
+            var table = Metadata.TablesStream.GetTable<SecurityDeclarationRow>(TableIndex.DeclSecurity);
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
+            
+            foreach (var declaration in provider.SecurityDeclarations)
+            {
+                var row = new SecurityDeclarationRow(
+                    declaration.Action,
+                    encoder.EncodeToken(ownerToken), 
+                    Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet));
+                table.Add(row, 0);
+            }
+        }
+        
     }
 }

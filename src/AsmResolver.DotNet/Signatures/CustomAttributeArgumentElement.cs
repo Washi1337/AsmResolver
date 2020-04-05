@@ -104,6 +104,12 @@ namespace AsmResolver.DotNet.Signatures
 
         private void WriteValue(IBinaryStreamWriter writer, TypeSignature argumentType, ITypeCodedIndexProvider provider, object value)
         {
+            if (argumentType.IsTypeOf("System", "Type"))
+            {
+                writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName((TypeSignature) value));
+                return;
+            }
+
             switch (argumentType.ElementType)
             {
                 case ElementType.Boolean:
