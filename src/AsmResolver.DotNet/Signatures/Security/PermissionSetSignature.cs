@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Signatures.Security
             var result = new PermissionSetSignature();
             if (reader.ReadByte() != '.')
                 return result;
-
+            
             if (!reader.TryReadCompressedUInt32(out uint count))
                 return result;
 

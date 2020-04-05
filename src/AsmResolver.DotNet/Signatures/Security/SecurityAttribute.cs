@@ -17,9 +17,13 @@ namespace AsmResolver.DotNet.Signatures.Security
         {
             var type = TypeNameParser.ParseType(parentModule, reader.ReadSerString());
             var result = new SecurityAttribute(type);
+
+            if (!reader.TryReadCompressedUInt32(out _))
+                return result;
             
-            // Read named arguments.
-            ushort namedArgumentCount = reader.ReadUInt16(); 
+            if (!reader.TryReadCompressedUInt32(out uint namedArgumentCount))
+                return result;
+
             for (int i = 0; i < namedArgumentCount; i++)
             {
                 var argument = CustomAttributeNamedArgument.FromReader(parentModule, reader);
