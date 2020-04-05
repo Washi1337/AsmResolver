@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Signatures
         public static TypeSignature ParseType(ModuleDefinition parentModule, string name)
         {
             int position = 0;
-            var defaultScope = parentModule?.Assembly.Modules[0];
+            var defaultScope = parentModule;
             var type = ReadTypeSignature(defaultScope, name, ref position);
 
             if (position >= name.Length)
@@ -111,8 +111,8 @@ namespace AsmResolver.DotNet.Signatures
         {
             var dotIndex = fullName.LastIndexOf('.');
             var type = dotIndex == -1
-                ? new TypeReference(scope, string.Empty, fullName)
-                : new TypeReference(scope, fullName.Remove(dotIndex), fullName.Substring(dotIndex + 1));
+                ? new TypeReference(scope.Module, scope, string.Empty, fullName)
+                : new TypeReference(scope.Module, scope, fullName.Remove(dotIndex), fullName.Substring(dotIndex + 1));
             return type;
         }
 

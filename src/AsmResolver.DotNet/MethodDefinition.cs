@@ -20,6 +20,7 @@ namespace AsmResolver.DotNet
         ICustomAttributeType,
         IHasGenericParameters,
         IMemberForwarded,
+        IHasSecurityDeclaration,
         IManagedEntrypoint
     {
         private readonly LazyVariable<string> _name;
@@ -31,6 +32,7 @@ namespace AsmResolver.DotNet
         private IList<ParameterDefinition> _parameterDefinitions;
         private ParameterCollection _parameters;
         private IList<CustomAttribute> _customAttributes;
+        private IList<SecurityDeclaration> _securityDeclarations;
         private IList<GenericParameter> _genericParameters;
 
         /// <summary>
@@ -582,6 +584,17 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public IList<SecurityDeclaration> SecurityDeclarations
+        {
+            get
+            {
+                if (_securityDeclarations is null)
+                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
+                return _securityDeclarations;
+            }
+        }
+
+        /// <inheritdoc />
         public IList<GenericParameter> GenericParameters
         {
             get
@@ -698,6 +711,16 @@ namespace AsmResolver.DotNet
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
+        /// <summary>
+        /// Obtains the list of security declarations assigned to the member.
+        /// </summary>
+        /// <returns>The security declarations</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="SecurityDeclarations"/> property.
+        /// </remarks>
+        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() => 
+            new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
+        
         /// <summary>
         /// Obtains the list of generic parameters this member declares.
         /// </summary>

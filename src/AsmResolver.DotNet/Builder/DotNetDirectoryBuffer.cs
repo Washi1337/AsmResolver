@@ -101,7 +101,6 @@ namespace AsmResolver.DotNet.Builder
             return entrypointToken.ToUInt32();
         }
 
-
         private void AddCustomAttributes(MetadataToken ownerToken, IHasCustomAttribute provider)
         {
             foreach (var attribute in provider.CustomAttributes)

@@ -29,6 +29,7 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, assembly.MetadataToken.Rid);
             AddCustomAttributes(token, assembly);
+            AddSecurityDeclarations(token, assembly);
             AddModule(assembly.ManifestModule);
         }
 
@@ -91,95 +92,55 @@ namespace AsmResolver.DotNet.Builder
         private void AddTypeDefinitionsInModule(ModuleDefinition module)
         {
             AddTypeDefinitionStubs(module);
-            FinalizeTypeDefinitionMembers();
-            FinalizeMethodDefinitions();
+            AddMemberDefinitionStubs();
+            FinalizeTypeDefinitions();
         }
 
         private void AddTypeDefinitionStubs(ModuleDefinition module)
         {
-            foreach (var type in module.GetAllTypes())
-                AddTypeDefinitionStub(type);
-        }
-
-        private MetadataToken AddTypeDefinitionStub(TypeDefinition type)
-        {
             var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            foreach (var type in module.GetAllTypes())
+            {
+                var row = new TypeDefinitionRow(
+                    type.Attributes,
+                    Metadata.StringsStream.GetStringIndex(type.Name),
+                    Metadata.StringsStream.GetStringIndex(type.Namespace),
+                    0,
+                    0,
+                    0);
 
-            var row = new TypeDefinitionRow(
-                type.Attributes,
-                Metadata.StringsStream.GetStringIndex(type.Name),
-                Metadata.StringsStream.GetStringIndex(type.Namespace),
-                0,
-                0,
-                0);
-
-            var token = table.Add(row, type.MetadataToken.Rid);
-            _typeDefTokens.Add(type, token);
-            
-            return token;
+                var token = table.Add(row, type.MetadataToken.Rid);
+                _typeDefTokens.Add(type, token);
+            }
         }
 
-        private void FinalizeTypeDefinitionMembers()
+        private void AddMemberDefinitionStubs()
         {
             var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
 
             uint fieldList = 1;
             uint methodList = 1;
-            uint propertyList = 1;
-            uint eventList = 1;
-            
             for (uint rid = 1; rid <= table.Count; rid++)
             {
                 var typeToken = new MetadataToken(TableIndex.TypeDef, rid);
                 var type = _typeDefTokens.GetKey(typeToken);
                 
-                AddFieldAndMethodStubsInType(table, rid, type, ref fieldList, ref methodList);
-                AddPropertyDefinitionsInType(type, rid, ref propertyList);
-                AddEventDefinitionsInType(type, rid, ref eventList);
-            
-                AddCustomAttributes(typeToken, type);
-                AddInterfaces(typeToken, type.Interfaces);
-                AddMethodImplementations(typeToken, type.MethodImplementations);
-                AddGenericParameters(typeToken, type);
-                AddClassLayout(typeToken, type.ClassLayout);
-            }
-            
-            AddParameterDefinitions();
-        }
+                var row = table[rid];
+                row = new TypeDefinitionRow(row.Attributes, row.Name, row.Namespace,
+                    AddTypeDefOrRef(type.BaseType), fieldList, methodList);
+                table[rid] = row;
 
-        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
-        {
-            var table = Metadata.TablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
+                foreach (var field in type.Fields)
+                    AddFieldDefinitionStub(field);
+                foreach (var method in type.Methods)
+                    AddMethodDefinitionStub(method);
 
-            foreach (var implementation in methodImplementations)
-            {
-                var row = new MethodImplementationRow(
-                    typeToken.Rid,
-                    AddMethodDefOrRef(implementation.Body),
-                    AddMethodDefOrRef(implementation.Declaration));
-
-                table.Add(row, 0);
+                fieldList += (uint) type.Fields.Count;
+                methodList += (uint) type.Methods.Count;
             }
         }
 
-        private void AddFieldAndMethodStubsInType(IMetadataTableBuffer<TypeDefinitionRow> table, uint rid, TypeDefinition type, ref uint fieldList,
-            ref uint methodList)
-        {
-            var row = table[rid];
-            row = new TypeDefinitionRow(row.Attributes, row.Name, row.Namespace,
-                AddTypeDefOrRef(type.BaseType), fieldList, methodList);
-            table[rid] = row;
-
-            foreach (var field in type.Fields)
-                AddFieldDefinition(field);
-            foreach (var method in type.Methods)
-                AddMethodDefinitionStub(method);
-
-            fieldList += (uint) type.Fields.Count;
-            methodList += (uint) type.Methods.Count;
-        }
-
-        private MetadataToken AddFieldDefinition(FieldDefinition field)
+        private void AddFieldDefinitionStub(FieldDefinition field)
         {
             var table = Metadata.TablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
 
@@ -190,45 +151,9 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, field.MetadataToken.Rid);
             _fieldTokens.Add(field, token);
-            
-            AddCustomAttributes(token, field);
-            AddConstant(token, field.Constant);
-            AddImplementationMap(token, field.ImplementationMap);
-            AddFieldRva(token, field.FieldRva);
-            AddFieldLayout(token, field.FieldOffset);
-            
-            return token;
         }
-
-        private void AddFieldRva(MetadataToken ownerToken, ISegment fieldRva)
-        {
-            if (fieldRva is null)
-                return;
-            
-            var table = Metadata.TablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
-            
-            var row = new FieldRvaRow(
-                new SegmentReference(fieldRva), 
-                ownerToken.Rid);
-
-            table.Add(row, 0);
-        }
-
-        private void AddFieldLayout(MetadataToken ownerToken, int? fieldOffset)
-        {
-            if (fieldOffset is null)
-                return;
-            
-            var table = Metadata.TablesStream.GetTable<FieldLayoutRow>(TableIndex.FieldLayout);
-            
-            var row = new FieldLayoutRow(
-                (uint) fieldOffset.Value, 
-                ownerToken.Rid);
-
-            table.Add(row, 0);
-        }
-
-        private MetadataToken AddMethodDefinitionStub(MethodDefinition method)
+        
+        private void AddMethodDefinitionStub(MethodDefinition method)
         {
             var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             
@@ -242,47 +167,49 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, method.MetadataToken.Rid);
             _methodTokens.Add(method, token);
-            AddCustomAttributes(token, method);
-            AddImplementationMap(token, method.ImplementationMap);
-            AddGenericParameters(token, method);
-            return token;
         }
-
-        private void AddParameterDefinitions()
+        
+        private void FinalizeTypeDefinitions()
         {
-            var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
+            var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
 
-            uint paramList = 1;
-            
+            uint propertyList = 1;
+            uint eventList = 1;
+
             for (uint rid = 1; rid <= table.Count; rid++)
             {
-                var row = table[rid];
-                row = new MethodDefinitionRow(row.Body, row.ImplAttributes, row.Attributes, row.Name, row.Signature,
-                    paramList);
-                table[rid] = row;
-
-                var method = _methodTokens.GetKey(new MetadataToken(TableIndex.Method, rid));
+                var typeToken = new MetadataToken(TableIndex.TypeDef, rid);
+                var type = _typeDefTokens.GetKey(typeToken);
                 
-                foreach (var parameter in method.ParameterDefinitions)
-                    AddParameterDefinition(parameter);
+                AddPropertyDefinitionsInType(type, rid, ref propertyList);
+                AddEventDefinitionsInType(type, rid, ref eventList);
                 
-                paramList += (uint) method.ParameterDefinitions.Count;
+                AddCustomAttributes(typeToken, type);
+                AddSecurityDeclarations(typeToken, type);
+                AddInterfaces(typeToken, type.Interfaces);
+                AddMethodImplementations(typeToken, type.MethodImplementations);
+                AddGenericParameters(typeToken, type);
+                AddClassLayout(typeToken, type.ClassLayout);
             }
-        }
-
-        private MetadataToken AddParameterDefinition(ParameterDefinition parameter)
-        {
-            var table = Metadata.TablesStream.GetTable<ParameterDefinitionRow>(TableIndex.Param);
             
-            var row = new ParameterDefinitionRow(
-                parameter.Attributes,
-                parameter.Sequence,
-                Metadata.StringsStream.GetStringIndex(parameter.Name));
+            FinalizeFieldDefinitions();
+            FinalizeMethodDefinitions();
+            AddParameterDefinitions();
+        }
+        
+        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
+        {
+            var table = Metadata.TablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
 
-            var token = table.Add(row, parameter.MetadataToken.Rid);
-            AddCustomAttributes(token, parameter);
-            AddConstant(token, parameter.Constant);
-            return token;
+            foreach (var implementation in methodImplementations)
+            {
+                var row = new MethodImplementationRow(
+                    typeToken.Rid,
+                    AddMethodDefOrRef(implementation.Body),
+                    AddMethodDefOrRef(implementation.Declaration));
+
+                table.Add(row, 0);
+            }
         }
 
         private void AddPropertyDefinitionsInType(TypeDefinition type, uint typeRid, ref uint propertyList)
@@ -346,12 +273,58 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
+        private void FinalizeFieldDefinitions()
+        {
+            var table = Metadata.TablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
+            for (uint rid = 1; rid <= table.Count; rid++)
+            {
+                var fieldToken = new MetadataToken(TableIndex.Field, rid);
+                var field = _fieldTokens.GetKey(fieldToken);
+                
+                AddCustomAttributes(fieldToken, field);
+                AddConstant(fieldToken, field.Constant);
+                AddImplementationMap(fieldToken, field.ImplementationMap);
+                AddFieldRva(fieldToken, field.FieldRva);
+                AddFieldLayout(fieldToken, field.FieldOffset);
+            }
+        }
+
+        private void AddFieldRva(MetadataToken ownerToken, ISegment fieldRva)
+        {
+            if (fieldRva is null)
+                return;
+            
+            var table = Metadata.TablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
+            
+            var row = new FieldRvaRow(
+                new SegmentReference(fieldRva), 
+                ownerToken.Rid);
+
+            table.Add(row, 0);
+        }
+
+        private void AddFieldLayout(MetadataToken ownerToken, int? fieldOffset)
+        {
+            if (fieldOffset is null)
+                return;
+            
+            var table = Metadata.TablesStream.GetTable<FieldLayoutRow>(TableIndex.FieldLayout);
+            
+            var row = new FieldLayoutRow(
+                (uint) fieldOffset.Value, 
+                ownerToken.Rid);
+
+            table.Add(row, 0);
+        }
+        
         private void FinalizeMethodDefinitions()
         {
             var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             for (uint rid = 1; rid <= table.Count; rid++)
             {
-                var method = _methodTokens.GetKey(new MetadataToken(TableIndex.Method, rid));
+                var methodToken = new MetadataToken(TableIndex.Method, rid);
+                var method = _methodTokens.GetKey(methodToken);
+                
                 if (method.MethodBody != null)
                 {
                     var row = table[rid];
@@ -364,7 +337,49 @@ namespace AsmResolver.DotNet.Builder
                         row.ParameterList);
                     table[rid] = row;
                 }
+                
+                AddCustomAttributes(methodToken, method);
+                AddSecurityDeclarations(methodToken, method);
+                AddImplementationMap(methodToken, method.ImplementationMap);
+                AddGenericParameters(methodToken, method);
             }
+        }
+        
+        private void AddParameterDefinitions()
+        {
+            var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
+
+            uint paramList = 1;
+            
+            for (uint rid = 1; rid <= table.Count; rid++)
+            {
+                var row = table[rid];
+                row = new MethodDefinitionRow(row.Body, row.ImplAttributes, row.Attributes, row.Name, row.Signature,
+                    paramList);
+                table[rid] = row;
+
+                var method = _methodTokens.GetKey(new MetadataToken(TableIndex.Method, rid));
+                
+                foreach (var parameter in method.ParameterDefinitions)
+                    AddParameterDefinition(parameter);
+                
+                paramList += (uint) method.ParameterDefinitions.Count;
+            }
+        }
+
+        private MetadataToken AddParameterDefinition(ParameterDefinition parameter)
+        {
+            var table = Metadata.TablesStream.GetTable<ParameterDefinitionRow>(TableIndex.Param);
+            
+            var row = new ParameterDefinitionRow(
+                parameter.Attributes,
+                parameter.Sequence,
+                Metadata.StringsStream.GetStringIndex(parameter.Name));
+
+            var token = table.Add(row, parameter.MetadataToken.Rid);
+            AddCustomAttributes(token, parameter);
+            AddConstant(token, parameter.Constant);
+            return token;
         }
 
         private MetadataToken AddExportedType(ExportedType exportedType)

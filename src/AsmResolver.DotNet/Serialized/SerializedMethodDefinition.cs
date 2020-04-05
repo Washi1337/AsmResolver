@@ -50,6 +50,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
             _parentModule.GetCustomAttributeCollection(this);
+
+        /// <inheritdoc />
+        protected override IList<SecurityDeclaration> GetSecurityDeclarations() =>
+            _parentModule.GetSecurityDeclarationCollection(this);
         
         /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()

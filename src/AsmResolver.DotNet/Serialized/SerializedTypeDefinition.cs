@@ -113,6 +113,10 @@ namespace AsmResolver.DotNet.Serialized
             _parentModule.GetCustomAttributeCollection(this);
 
         /// <inheritdoc />
+        protected override IList<SecurityDeclaration> GetSecurityDeclarations() => 
+            _parentModule.GetSecurityDeclarationCollection(this);
+
+        /// <inheritdoc />
         protected override IList<GenericParameter> GetGenericParameters()
         {
             var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
