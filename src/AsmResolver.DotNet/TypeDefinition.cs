@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class TypeDefinition : ITypeDefOrRef,
         IHasGenericParameters,
+        IHasSecurityDeclaration,
         IOwnedCollectionElement<ModuleDefinition>,
         IOwnedCollectionElement<TypeDefinition>
     {
@@ -33,6 +34,7 @@ namespace AsmResolver.DotNet
         private IList<PropertyDefinition> _properties;
         private IList<EventDefinition> _events;
         private IList<CustomAttribute> _customAttributes;
+        private IList<SecurityDeclaration> _securityDeclarations;
         private IList<GenericParameter> _genericParameters;
         private IList<InterfaceImplementation> _interfaces;
         private IList<MethodImplementation> _methodImplementations;
@@ -534,6 +536,17 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        public IList<SecurityDeclaration> SecurityDeclarations
+        {
+            get
+            {
+                if (_securityDeclarations is null)
+                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
+                return _securityDeclarations;
+            }
+        }
+
+        /// <inheritdoc />
         public IList<GenericParameter> GenericParameters
         {
             get
@@ -782,6 +795,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
+
+        /// <summary>
+        /// Obtains the list of security declarations assigned to the member.
+        /// </summary>
+        /// <returns>The security declarations</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="SecurityDeclarations"/> property.
+        /// </remarks>
+        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() => 
+            new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
 
         /// <summary>
         /// Obtains the list of generic parameters this member declares.

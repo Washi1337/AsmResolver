@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents an assembly of self-describing modules of an executable file hosted by a common language runtime (CLR).
     /// </summary>
-    public class AssemblyDefinition : AssemblyDescriptor
+    public class AssemblyDefinition : AssemblyDescriptor, IHasSecurityDeclaration
     { 
         /// <summary>
         /// Reads a .NET assembly from the provided input buffer.
@@ -98,6 +98,7 @@ namespace AsmResolver.DotNet
             ?? throw new BadImageFormatException("The metadata directory does not contain an assembly definition.");
         
         private IList<ModuleDefinition> _modules;
+        private IList<SecurityDeclaration> _securityDeclarations;
         private readonly LazyVariable<byte[]> _publicKey;
         private byte[] _publicKeyToken;
 
@@ -149,6 +150,17 @@ namespace AsmResolver.DotNet
                 return _modules;
             }
         } 
+
+        /// <inheritdoc />
+        public IList<SecurityDeclaration> SecurityDeclarations
+        {
+            get
+            {
+                if (_securityDeclarations is null)
+                    Interlocked.CompareExchange(ref _securityDeclarations, GetSecurityDeclarations(), null);
+                return _securityDeclarations;
+            }
+        }
         
         /// <summary>
         /// Gets or sets the public key of the assembly to use for verification of a signature.
@@ -177,6 +189,16 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ModuleDefinition> GetModules()
             => new OwnedCollection<AssemblyDefinition, ModuleDefinition>(this);
+        
+        /// <summary>
+        /// Obtains the list of security declarations assigned to the member.
+        /// </summary>
+        /// <returns>The security declarations</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="SecurityDeclarations"/> property.
+        /// </remarks>
+        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() => 
+            new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
         
         /// <summary>
         /// Obtains the public key of the assembly definition.
