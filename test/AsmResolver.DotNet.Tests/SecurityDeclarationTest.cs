@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void ReadSecurityAction(bool rebuild)
+        public void RowSecurityAction(bool rebuild)
         {
             var method = LookupMethod(nameof(SecurityAttributes.NoParameters), rebuild);
             Assert.Contains(method.SecurityDeclarations, declaration => declaration.Action == SecurityAction.Assert);
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void ReadAttributeType(bool rebuild)
+        public void RowAttributeType(bool rebuild)
         {
             var method = LookupMethod(nameof(SecurityAttributes.NoParameters), rebuild);
 
@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void ReadNoParameters(bool rebuild)
+        public void NoParameters(bool rebuild)
         {
             var method = LookupMethod(nameof(SecurityAttributes.NoParameters), rebuild);
 
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void ReadSingleParameter(bool rebuild)
+        public void SingleParameter(bool rebuild)
         {
             var method = LookupMethod(nameof(SecurityAttributes.SingleParameter), rebuild);
 
@@ -71,6 +71,25 @@ namespace AsmResolver.DotNet.Tests
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyA)
                 && argument.Argument.Element.Value.Equals(1));
         }
-        
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultipleParameters(bool rebuild)
+        {
+            var method = LookupMethod(nameof(SecurityAttributes.MultipleParameters), rebuild);
+
+            var declaration = method.SecurityDeclarations[0];
+            var attribute = declaration.PermissionSet.Attributes[0];
+            Assert.Contains(attribute.NamedArguments, argument =>
+                argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyA)
+                && argument.Argument.Element.Value.Equals(1));
+            Assert.Contains(attribute.NamedArguments, argument =>
+                argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyB)
+                && argument.Argument.Element.Value.Equals(2));
+            Assert.Contains(attribute.NamedArguments, argument =>
+                argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyC)
+                && argument.Argument.Element.Value.Equals(3));
+        }
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace AsmResolver.DotNet.Signatures.Security
 {
@@ -18,7 +20,7 @@ namespace AsmResolver.DotNet.Signatures.Security
             var type = TypeNameParser.ParseType(parentModule, reader.ReadSerString());
             var result = new SecurityAttribute(type);
 
-            if (!reader.TryReadCompressedUInt32(out _))
+            if (!reader.TryReadCompressedUInt32(out uint size))
                 return result;
             
             if (!reader.TryReadCompressedUInt32(out uint namedArgumentCount))
@@ -67,9 +69,29 @@ namespace AsmResolver.DotNet.Signatures.Security
         public void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
             writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(AttributeType));
-            writer.WriteUInt16((ushort) NamedArguments.Count);
-            for (int i = 0; i < NamedArguments.Count; i++)
-                NamedArguments[i].Write(writer, provider);
+
+            if (NamedArguments.Count == 0)
+            {
+                writer.WriteCompressedUInt32(1);
+                writer.WriteCompressedUInt32(0);
+            }
+            else
+            {
+                using var subBlob = new MemoryStream();
+                var subWriter = new BinaryStreamWriter(subBlob);
+
+                subWriter.WriteCompressedUInt32((uint) NamedArguments.Count);
+                foreach (var argument in NamedArguments)
+                    argument.Write(subWriter, provider);
+
+                writer.WriteCompressedUInt32((uint) subBlob.Length);
+                writer.WriteBytes(subBlob.ToArray());
+            }
         }
+        
+
+        /// <inheritdoc />
+        public override string ToString() =>
+            string.Format("{0}({1})", AttributeType, string.Join(", ", NamedArguments));
     }
 }
