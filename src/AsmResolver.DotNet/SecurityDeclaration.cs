@@ -83,7 +83,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Parent"/> property.
         /// </remarks>
-        private IHasSecurityDeclaration GetParent() => null;
+        protected virtual IHasSecurityDeclaration GetParent() => null;
         
         /// <summary>
         /// Obtains the assigned permission set.
@@ -92,6 +92,6 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="PermissionSet"/> property.
         /// </remarks>
-        private PermissionSetSignature GetPermissionSet() => null;
+        protected virtual PermissionSetSignature GetPermissionSet() => null;
     }
 }

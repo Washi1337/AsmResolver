@@ -34,6 +34,7 @@ namespace AsmResolver.DotNet.Serialized
         private ClassLayout[] _classLayouts;
         private ImplementationMap[] _implementationMaps;
         private InterfaceImplementation[] _interfaceImplementations;
+        private SecurityDeclaration[] _securityDeclarations;
 
         internal CachedSerializedMemberFactory(IMetadata metadata, SerializedModuleDefinition parentModule)
         {
@@ -70,6 +71,7 @@ namespace AsmResolver.DotNet.Serialized
                 TableIndex.ClassLayout => LookupClassLayout(token),
                 TableIndex.ImplMap => LookupImplementationMap(token),
                 TableIndex.InterfaceImpl => LookupInterfaceImplementation(token),
+                TableIndex.DeclSecurity => LookupSecurityDeclaration(token), 
                 _ => null
             };
 
@@ -104,8 +106,7 @@ namespace AsmResolver.DotNet.Serialized
         internal IMetadataMember LookupAssemblyReference(MetadataToken token)
         {
             return token.Rid != 0 && token.Rid <= _parentModule.AssemblyReferences.Count
-                ? _parentModule.AssemblyReferences[(int) (token.Rid - 1)]
-                : null;
+                ? _parentModule.AssemblyReferences[(int) (token.Rid - 1)]                : null;
         }
 
         private FieldDefinition LookupFieldDefinition(MetadataToken token)
@@ -226,6 +227,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             return LookupOrCreateMember<InterfaceImplementation, InterfaceImplementationRow>(ref _interfaceImplementations, token,
                 (m, t, r) => new SerializedInterfaceImplementation(m, t, r));
+        }
+
+        private SecurityDeclaration LookupSecurityDeclaration(MetadataToken token)
+        {
+            return LookupOrCreateMember<SecurityDeclaration, SecurityDeclarationRow>(ref _securityDeclarations, token,
+                (m, t, r) => new SerializedSecurityDeclaration(m, t, r));
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,

@@ -35,6 +35,7 @@ namespace AsmResolver.DotNet.Serialized
         private Dictionary<uint, MetadataToken> _semanticMethods;
         private OneToOneRelation<MetadataToken, uint> _constants;
         private OneToManyRelation<MetadataToken, uint> _customAttributes;
+        private OneToManyRelation<MetadataToken, uint> _securityDeclarations;
         private OneToManyRelation<MetadataToken, uint> _genericParameters;
         private OneToManyRelation<MetadataToken, uint> _genericParameterConstraints;
         private OneToManyRelation<MetadataToken, uint> _interfaces;
@@ -337,12 +338,6 @@ namespace AsmResolver.DotNet.Serialized
             return customAttributes;
         }
 
-        internal IEnumerable<uint> GetCustomAttributes(MetadataToken owner)
-        {
-            EnsureCustomAttributesInitialized();
-            return _customAttributes.GetMemberList(owner);
-        }
-        
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => GetCustomAttributeCollection(this);
 
@@ -354,14 +349,58 @@ namespace AsmResolver.DotNet.Serialized
 
         internal IList<CustomAttribute> GetCustomAttributeCollection(IHasCustomAttribute owner)
         {
+            EnsureCustomAttributesInitialized();
             var result = new OwnedCollection<IHasCustomAttribute, CustomAttribute>(owner);
-
-            foreach (uint rid in GetCustomAttributes(owner.MetadataToken))
+            
+            foreach (uint rid in _customAttributes.GetMemberList(owner.MetadataToken))
             {
                 var attribute = (CustomAttribute) LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
                 result.Add(attribute);
             }
             
+            return result;
+        }
+        
+        private void EnsureSecurityDeclarationsInitialized()
+        {
+            if (_securityDeclarations is null)
+                Interlocked.CompareExchange(ref _securityDeclarations, InitializeSecurityDeclarations(), null);
+        }
+
+        private OneToManyRelation<MetadataToken, uint> InitializeSecurityDeclarations()
+        {
+            var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var declarationTable = tablesStream.GetTable<SecurityDeclarationRow>(TableIndex.DeclSecurity);
+            var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
+            
+            var securityDeclarations = new OneToManyRelation<MetadataToken, uint>();
+            for (int i = 0; i < declarationTable.Count; i++)
+            {
+                var ownerToken = encoder.DecodeIndex(declarationTable[i].Parent);
+                uint attributeRid = (uint) (i + 1);
+                securityDeclarations.Add(ownerToken, attributeRid);
+            }
+
+            return securityDeclarations;
+        }
+
+        internal MetadataToken GetSecurityDeclarationOwner(uint attributeRid)
+        {
+            EnsureCustomAttributesInitialized();
+            return _securityDeclarations.GetMemberOwner(attributeRid);
+        }
+
+        internal IList<SecurityDeclaration> GetSecurityDeclarationCollection(IHasSecurityDeclaration owner)
+        {
+            EnsureSecurityDeclarationsInitialized();
+            var result = new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(owner);
+
+            foreach (uint rid in _securityDeclarations.GetMemberList(owner.MetadataToken))
+            {
+                var attribute = (SecurityDeclaration) LookupMember(new MetadataToken(TableIndex.DeclSecurity, rid));
+                result.Add(attribute);
+            }
+
             return result;
         }
 
