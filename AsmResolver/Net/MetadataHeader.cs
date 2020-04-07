@@ -233,7 +233,20 @@ namespace AsmResolver.Net
             Image = null;
             foreach (var entry in newStreams)
             {
-                var header = StreamHeaders.FirstOrDefault(x => x.Name == entry.Key.Name);
+                bool isTableStream = entry.Value is TableStream;
+                
+                // Find existing header.
+                MetadataStreamHeader header = null;
+                foreach (var existingHeader in StreamHeaders)
+                {
+                    // Tables stream can have different names.
+                    if (existingHeader.Name == entry.Key.Name
+                        || isTableStream && (existingHeader.Name == "#~" || existingHeader.Name == "#-"))
+                    {
+                        header = existingHeader;
+                        break;
+                    }
+                }
 
                 if (header == null)
                 {
@@ -241,6 +254,7 @@ namespace AsmResolver.Net
                     StreamHeaders.Add(header);
                 }
 
+                // Update stream of header.
                 header.Stream = entry.Value;
             }
 

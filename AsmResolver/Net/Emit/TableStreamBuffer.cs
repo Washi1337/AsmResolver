@@ -61,7 +61,28 @@ namespace AsmResolver.Net.Emit
             _files = new Dictionary<MetadataRow<FileAttributes, uint, uint>, MetadataToken>(rowComparer);
         }
 
-        public override string Name => "#~";
+        public override string Name
+        {
+            get
+            {
+                var tables = new[]
+                {
+                    MetadataTokenType.FieldPtr,
+                    MetadataTokenType.MethodPtr,
+                    MetadataTokenType.ParamPtr,
+                    MetadataTokenType.PropertyPtr,
+                    MetadataTokenType.EventPtr,
+                };
+                
+                for (int i = 0; i < tables.Length; i++)
+                {
+                    if (_tableStream.GetTable(tables[i]).Count > 0)
+                        return "#-";
+                }
+
+                return "#~";
+            }
+        }
 
         public override uint Length => 0;
 
