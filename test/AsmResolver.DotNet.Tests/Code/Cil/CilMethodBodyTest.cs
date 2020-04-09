@@ -79,6 +79,24 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         }
 
         [Fact]
+        public void ReadFatMethodWithManyLocals()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/55
+            
+            var body = ReadMethodBody(nameof(MethodBodyTypes.FatMethodWithManyLocals));
+            int expectedIndex = 0;
+            foreach (var instruction in body.Instructions)
+            {
+                if (instruction.IsLdloc())
+                {
+                    var variable = instruction.GetLocalVariable(body.LocalVariables);
+                    Assert.Equal(expectedIndex, variable.Index);
+                    expectedIndex++;
+                }
+            }
+        }
+
+        [Fact]
         public void PersistentFatMethodWithLocals()
         {
             var body = ReadMethodBody(nameof(MethodBodyTypes.FatLongMethod));

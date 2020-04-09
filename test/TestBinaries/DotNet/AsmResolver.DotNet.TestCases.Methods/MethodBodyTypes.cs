@@ -17,6 +17,31 @@ namespace AsmResolver.DotNet.TestCases.Methods
                 Console.WriteLine(x);
         }
 
+        public static void FatMethodWithManyLocals()
+        {
+            int v1 = int.Parse(Console.ReadLine());
+            int v2 = int.Parse(Console.ReadLine());
+            int v3 = int.Parse(Console.ReadLine());
+            int v4 = int.Parse(Console.ReadLine());
+            int v5 = int.Parse(Console.ReadLine());
+            int v6 = int.Parse(Console.ReadLine());
+            int v7 = int.Parse(Console.ReadLine());
+            int v8 = int.Parse(Console.ReadLine());
+            int v9 = int.Parse(Console.ReadLine());
+            int v10 = int.Parse(Console.ReadLine());
+
+            Console.WriteLine(v1);
+            Console.WriteLine(v2);
+            Console.WriteLine(v3);
+            Console.WriteLine(v4);
+            Console.WriteLine(v5);
+            Console.WriteLine(v6);
+            Console.WriteLine(v7);
+            Console.WriteLine(v8);
+            Console.WriteLine(v9);
+            Console.WriteLine(v10);
+        }
+
         public static void FatMethodWithExceptionHandler()
         {
             try
