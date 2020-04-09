@@ -29,8 +29,12 @@ namespace AsmResolver.DotNet.Code.Cil
             if (operandResolver is null)
                 operandResolver = result;
 
-            ReadInstructions(result, rawBody, operandResolver);
+            // Read raw instructions.
+            var reader = new ByteArrayReader(rawBody.Code);
+            var disassembler = new CilDisassembler(reader);
+            result.Instructions.AddRange(disassembler.ReadAllInstructions());
 
+            // Read out extra metadata.
             if (rawBody is CilRawFatMethodBody fatBody)
             {
                 result.MaxStack = fatBody.MaxStack;
@@ -45,19 +49,17 @@ namespace AsmResolver.DotNet.Code.Cil
                 result.InitializeLocals = false;
             }
 
+            // Resolve operands.
+            foreach (var instruction in result.Instructions)
+                instruction.Operand = ResolveOperand(result, instruction, operandResolver) ?? instruction.Operand;
+            
             return result;
         }
 
         private static void ReadInstructions(CilMethodBody result, CilRawMethodBody rawBody,
             ICilOperandResolver operandResolver)
         {
-            var reader = new ByteArrayReader(rawBody.Code);
-            var disassembler = new CilDisassembler(reader);
-            result.Instructions.AddRange(disassembler.ReadAllInstructions());
 
-            // Resolve operands.
-            foreach (var instruction in result.Instructions)
-                instruction.Operand = ResolveOperand(result, instruction, operandResolver) ?? instruction.Operand;
         }
 
         private static object ResolveOperand(CilMethodBody methodBody, CilInstruction instruction,

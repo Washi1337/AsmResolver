@@ -167,6 +167,8 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Ldloc_S:
                 case CilCode.Stloc:
                 case CilCode.Stloc_S:
+                case CilCode.Ldloca:
+                case CilCode.Ldloca_S:
                     return (CilLocalVariable) instruction.Operand;
                 
                 case CilCode.Ldloc_0:
@@ -204,6 +206,8 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 case CilCode.Ldarg:
                 case CilCode.Ldarg_S:
+                case CilCode.Ldarga:
+                case CilCode.Ldarga_S:
                 case CilCode.Starg:
                 case CilCode.Starg_S:
                     return (Parameter) instruction.Operand;
