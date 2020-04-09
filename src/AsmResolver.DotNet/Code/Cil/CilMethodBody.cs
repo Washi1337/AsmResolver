@@ -56,12 +56,6 @@ namespace AsmResolver.DotNet.Code.Cil
             return result;
         }
 
-        private static void ReadInstructions(CilMethodBody result, CilRawMethodBody rawBody,
-            ICilOperandResolver operandResolver)
-        {
-
-        }
-
         private static object ResolveOperand(CilMethodBody methodBody, CilInstruction instruction,
             ICilOperandResolver resolver)
         {
