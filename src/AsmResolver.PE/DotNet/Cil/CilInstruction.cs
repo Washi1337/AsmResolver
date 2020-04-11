@@ -287,5 +287,54 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         public bool IsConditionalBranch() => 
             OpCode.FlowControl == CilFlowControl.ConditionalBranch;
+
+        /// <summary>
+        /// Determines whether the instruction is an instruction pushing an int32 constant onto the stack.
+        /// </summary>
+        public bool IsLdcI4()
+        {
+            switch (OpCode.Code)
+            {
+                case CilCode.Ldc_I4:
+                case CilCode.Ldc_I4_S:
+                case CilCode.Ldc_I4_0:
+                case CilCode.Ldc_I4_1:
+                case CilCode.Ldc_I4_2:
+                case CilCode.Ldc_I4_3:
+                case CilCode.Ldc_I4_4:
+                case CilCode.Ldc_I4_5:
+                case CilCode.Ldc_I4_6:
+                case CilCode.Ldc_I4_7:
+                case CilCode.Ldc_I4_8:
+                case CilCode.Ldc_I4_M1:
+                    return true;
+                
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// When this instruction is an ldc.i4 variant, gets the in32 constant that is being pushed onto the stack.
+        /// </summary>
+        public int GetLdcI4Constant()
+        {
+            return OpCode.Code switch
+            {
+                CilCode.Ldc_I4 => (int) Operand,
+                CilCode.Ldc_I4_S => (sbyte) Operand,
+                CilCode.Ldc_I4_0 => 0,
+                CilCode.Ldc_I4_1 => 1,
+                CilCode.Ldc_I4_2 => 2,
+                CilCode.Ldc_I4_3 => 3,
+                CilCode.Ldc_I4_4 => 4,
+                CilCode.Ldc_I4_5 => 5,
+                CilCode.Ldc_I4_6 => 6,
+                CilCode.Ldc_I4_7 => 7,
+                CilCode.Ldc_I4_8 => 8,
+                CilCode.Ldc_I4_M1 => -1,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
     }
 }
