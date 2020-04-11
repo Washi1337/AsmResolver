@@ -253,4 +253,22 @@ namespace AsmResolver.PE.DotNet.Cil
         Refanytype,
         Readonly
     }
+
+    /// <summary>
+    /// Provides extensions for the <see cref="CilCode"/> enum.
+    /// </summary>
+    public static class CilCodeExtensions
+    {
+        /// <summary>
+        /// Transforms the raw CIL code to a <see cref="CilOpCode"/>.
+        /// </summary>
+        /// <param name="code">The code to convert.</param>
+        /// <returns>The operation code.</returns>
+        public static CilOpCode ToOpCode(this CilCode code)
+        {
+            if (code < (CilCode) 0x100)
+                return CilOpCodes.SingleByteOpCodes[(int) code];
+            return CilOpCodes.MultiByteOpCodes[(int) code - 0x100];
+        }
+    }
 }
