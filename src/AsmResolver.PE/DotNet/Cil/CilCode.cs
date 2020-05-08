@@ -268,7 +268,7 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             if (code < (CilCode) 0x100)
                 return CilOpCodes.SingleByteOpCodes[(int) code];
-            return CilOpCodes.MultiByteOpCodes[(int) code - 0x100];
+            return CilOpCodes.MultiByteOpCodes[(int) code - 0xFE00];
         }
     }
 }
