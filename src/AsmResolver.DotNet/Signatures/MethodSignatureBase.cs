@@ -122,5 +122,21 @@ namespace AsmResolver.DotNet.Signatures
                     sentinelType.Write(writer, provider);
             }
         }
+
+        /// <summary>
+        /// Determines the total number of parameters that this method requires to be invoked.
+        /// </summary>
+        /// <returns>The number of parameters</returns>
+        /// <remarks>
+        /// This number includes the this parameter, as well as any potential sentinel parameters.
+        /// </remarks>
+        public int GetTotalParameterCount()
+        {
+            int count = ParameterTypes.Count + SentinelParameterTypes.Count;
+            if (HasThis || ExplicitThis)
+                count++;
+            return count;
+        }
+        
     }
 }

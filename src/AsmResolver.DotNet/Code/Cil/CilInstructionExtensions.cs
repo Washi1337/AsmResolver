@@ -91,9 +91,19 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             else
             {
-                int count = signature.ParameterTypes.Count;
-                if (signature.HasThis && opCode.Code != CilCode.Newobj)
-                    count++;
+                int count = signature.GetTotalParameterCount();
+                switch (opCode.Code)
+                {
+                    case CilCode.Newobj:
+                        // NewObj produces instead of consumes the this parameter.
+                        count--;
+                        break;
+                    
+                    case CilCode.Calli:
+                        // Calli consumes an extra parameter (the address to call).
+                        count++;
+                        break;
+                }
                 return count;
             }
 
