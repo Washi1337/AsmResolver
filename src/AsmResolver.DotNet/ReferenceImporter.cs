@@ -10,7 +10,6 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class ReferenceImporter
     {
-        private readonly ModuleDefinition _module;
         private readonly SignatureComparer _comparer = new SignatureComparer();
 
         /// <summary>
@@ -19,7 +18,15 @@ namespace AsmResolver.DotNet
         /// <param name="module">The module to import references to.</param>
         public ReferenceImporter(ModuleDefinition module)
         {
-            _module = module ?? throw new ArgumentNullException(nameof(module));
+            TargetModule = module ?? throw new ArgumentNullException(nameof(module));
+        }
+
+        /// <summary>
+        /// Gets the module to imports references to.
+        /// </summary>
+        public ModuleDefinition TargetModule
+        {
+            get;
         }
 
         /// <summary>
@@ -31,7 +38,7 @@ namespace AsmResolver.DotNet
         {
             if (scope is null)
                 throw new ArgumentNullException(nameof(scope));
-            if (scope.Module == _module)
+            if (scope.Module == TargetModule)
                 return scope;
 
             return scope switch
@@ -53,15 +60,15 @@ namespace AsmResolver.DotNet
         {
             if (assembly is null)
                 throw new ArgumentNullException(nameof(assembly));
-            if (assembly is AssemblyReference reference && reference.Module == _module)
+            if (assembly is AssemblyReference reference && reference.Module == TargetModule)
                 return reference;
 
-            reference = _module.AssemblyReferences.FirstOrDefault(a => _comparer.Equals(a, assembly));
+            reference = TargetModule.AssemblyReferences.FirstOrDefault(a => _comparer.Equals(a, assembly));
             
             if (reference == null)
             {
                 reference = new AssemblyReference(assembly);
-                _module.AssemblyReferences.Add(reference);
+                TargetModule.AssemblyReferences.Add(reference);
             }
 
             return reference;
@@ -76,15 +83,15 @@ namespace AsmResolver.DotNet
         {
             if (module is null)
                 throw new ArgumentNullException(nameof(module));
-            if (module.Module == _module)
+            if (module.Module == TargetModule)
                 return module;
 
-            var reference = _module.ModuleReferences.FirstOrDefault(a => _comparer.Equals(a, module));
+            var reference = TargetModule.ModuleReferences.FirstOrDefault(a => _comparer.Equals(a, module));
 
             if (reference == null)
             {
                 reference = new ModuleReference(module.Name);
-                _module.ModuleReferences.Add(reference);
+                TargetModule.ModuleReferences.Add(reference);
             }
 
             return reference;
@@ -116,10 +123,10 @@ namespace AsmResolver.DotNet
         {
             AssertTypeIsValid(type);
             
-            if (type.Module == _module)
+            if (type.Module == TargetModule)
                 return type;
             
-            return new TypeReference(_module, ImportScope(type.Module), type.Namespace, type.Name);
+            return new TypeReference(TargetModule, ImportScope(type.Module), type.Namespace, type.Name);
         }
 
         /// <summary>
@@ -131,10 +138,10 @@ namespace AsmResolver.DotNet
         {
             AssertTypeIsValid(type);
             
-            if (type.Module == _module)
+            if (type.Module == TargetModule)
                 return type;
             
-            return new TypeReference(_module, ImportScope(type.Scope), type.Namespace, type.Name);
+            return new TypeReference(TargetModule, ImportScope(type.Scope), type.Namespace, type.Name);
         }
         
         /// <summary>
@@ -146,7 +153,7 @@ namespace AsmResolver.DotNet
         {
             AssertTypeIsValid(type);
             
-            if (type.Module == _module)
+            if (type.Module == TargetModule)
                 return type;
             
             return new TypeSpecification(ImportTypeSignature(type.Signature));
@@ -169,18 +176,18 @@ namespace AsmResolver.DotNet
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
-            if (type.Module == _module)
+            if (type.Module == TargetModule)
                 return type;
 
             return type switch
             {
-                CorLibTypeSignature corLibType => _module.CorLibTypeFactory.FromElementType(corLibType.ElementType),
+                CorLibTypeSignature corLibType => TargetModule.CorLibTypeFactory.FromElementType(corLibType.ElementType),
                 BoxedTypeSignature boxedType => new BoxedTypeSignature(ImportTypeSignature(boxedType.BaseType)),
                 ByReferenceTypeSignature byReferenceType => new ByReferenceTypeSignature(ImportTypeSignature(byReferenceType.BaseType)),
                 ArrayTypeSignature arrayType => ImportArrayTypeSignature(arrayType),
                 CustomModifierTypeSignature modifierType => ImportModifierTypeSignature(modifierType),
                 GenericInstanceTypeSignature genericInstance => ImportGenericInstanceTypeSignature(genericInstance),
-                GenericParameterSignature genericParameter => new GenericParameterSignature(_module, genericParameter.ParameterType, genericParameter.Index),
+                GenericParameterSignature genericParameter => new GenericParameterSignature(TargetModule, genericParameter.ParameterType, genericParameter.Index),
                 PinnedTypeSignature pinnedType => new PinnedTypeSignature(ImportTypeSignature(pinnedType.BaseType)),
                 PointerTypeSignature pointerType => new PointerTypeSignature(ImportTypeSignature(pointerType.BaseType)),
                 SzArrayTypeSignature szArrayType => new SzArrayTypeSignature(ImportTypeSignature(szArrayType.BaseType)),
@@ -249,12 +256,12 @@ namespace AsmResolver.DotNet
                     type.DeclaringMethod != null ? GenericParameterType.Method : GenericParameterType.Type,
                     type.GenericParameterPosition);
 
-            var corlibType = _module.CorLibTypeFactory.FromName(type.Namespace, type.Name);
+            var corlibType = TargetModule.CorLibTypeFactory.FromName(type.Namespace, type.Name);
             if (corlibType != null)
                 return corlibType;
 
-            var reference = new TypeReference(_module,
-                ImportAssembly(new ReflectionAssemblyDescriptor(_module, type.Assembly.GetName())),
+            var reference = new TypeReference(TargetModule,
+                ImportAssembly(new ReflectionAssemblyDescriptor(TargetModule, type.Assembly.GetName())),
                 type.Namespace,
                 type.Name);
             
@@ -313,7 +320,7 @@ namespace AsmResolver.DotNet
             if (method.DeclaringType is null)
                 throw new ArgumentException("Cannot import a method that is not added to a type.");
 
-            if (method.Module == _module)
+            if (method.Module == TargetModule)
                 return method;
            
             return new MemberReference(
@@ -357,7 +364,7 @@ namespace AsmResolver.DotNet
             if (method.DeclaringType is null)
                 throw new ArgumentException("Cannot import a method that is not added to a type.");
 
-            if (method.Module == _module)
+            if (method.Module == TargetModule)
                 return method;
 
             var memberRef = ImportMethod(method.Method);
@@ -384,7 +391,7 @@ namespace AsmResolver.DotNet
 
             var returnType = method is MethodInfo info
                 ? ImportTypeSignature(info.ReturnType)
-                : _module.CorLibTypeFactory.Void;
+                : TargetModule.CorLibTypeFactory.Void;
 
             var parameters = method.DeclaringType.IsConstructedGenericType
                 ? method.Module.ResolveMethod(method.MetadataToken).GetParameters()
@@ -425,7 +432,7 @@ namespace AsmResolver.DotNet
             if (field.DeclaringType is null)
                 throw new ArgumentException("Cannot import a field that is not added to a type.");
 
-            if (field.Module == _module)
+            if (field.Module == TargetModule)
                 return field;
 
             return new MemberReference(
