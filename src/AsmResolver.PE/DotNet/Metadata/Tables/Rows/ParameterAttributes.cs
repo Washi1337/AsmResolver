@@ -3,7 +3,7 @@ using System;
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
     /// <summary>
-    /// Provides members defining all flags that can be assigned to a parmeter definition.
+    /// Provides members defining all flags that can be assigned to a parameter definition.
     /// </summary>
     [Flags]
     public enum ParameterAttributes : ushort

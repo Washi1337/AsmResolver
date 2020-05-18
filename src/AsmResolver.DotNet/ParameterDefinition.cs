@@ -99,6 +99,66 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the parameter is marked as an input parameter.
+        /// </summary>
+        public bool IsIn
+        {
+            get => (Attributes & ParameterAttributes.In) != 0;
+            set => Attributes = (Attributes & ~ParameterAttributes.In) 
+                                | (value ? ParameterAttributes.In : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the parameter is marked as an output parameter.
+        /// </summary>
+        public bool IsOut
+        {
+            get => (Attributes & ParameterAttributes.Out) != 0;
+            set => Attributes = (Attributes & ~ParameterAttributes.Out) 
+                                | (value ? ParameterAttributes.Out : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the parameter is marked as an optional parameter.
+        /// </summary>
+        public bool IsOptional
+        {
+            get => (Attributes & ParameterAttributes.Optional) != 0;
+            set => Attributes = (Attributes & ~ParameterAttributes.Optional) 
+                                | (value ? ParameterAttributes.Optional : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the parameter has a default value.
+        /// </summary>
+        /// <remarks>
+        /// For valid .NET binaries, when <see cref="Constant"/> is not <c>null</c>, this flag should be set. 
+        /// However, assigning a value to this property does not automatically update the <see cref="Constant"/>
+        /// property, nor does it reflect whether <see cref="Constant"/> has a value or not. 
+        /// </remarks>
+        public bool HasDefault
+        {
+            get => (Attributes & ParameterAttributes.HasDefault) != 0;
+            set => Attributes = (Attributes & ~ParameterAttributes.HasDefault) 
+                                | (value ? ParameterAttributes.HasDefault : 0);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the parameter is marked as an output parameter.
+        /// </summary>
+        /// <remarks>
+        /// For valid .NET binaries, when <see cref="MarshalDescriptor"/> is not <c>null</c>, this flag should be set. 
+        /// However, assigning a value to this property does not automatically update the <see cref="MarshalDescriptor"/>
+        /// property, nor does it reflect whether <see cref="MarshalDescriptor"/> has a value or not. 
+        /// </remarks>
+        public bool HasFieldMarshal
+        {
+            get => (Attributes & ParameterAttributes.HasFieldMarshal) != 0;
+            set => Attributes = (Attributes & ~ParameterAttributes.HasFieldMarshal)
+                                | (value ? ParameterAttributes.HasFieldMarshal : 0);
+        }
+
+        /// <summary>
         /// Gets the method that defines the parameter.
         /// </summary>
         public MethodDefinition Method
@@ -128,6 +188,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        /// For valid .NET binaries, when the value of this property is not <c>null</c>, the <see cref="HasDefault"/>
+        /// flag should be set. However, assigning a new value to this property does not automatically update the value
+        /// of the <see cref="HasDefault"/> property.
+        /// </remarks>
         public Constant Constant
         {
             get => _constant.Value;
@@ -135,6 +200,11 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        /// For valid .NET binaries, when the value of this property is not <c>null</c>, the <see cref="HasFieldMarshal"/>
+        /// flag should be set. However, assigning a new value to this property does not automatically update the value
+        /// of the <see cref="HasFieldMarshal"/> property.
+        /// </remarks>
         public MarshalDescriptor MarshalDescriptor
         {
             get => _marshalDescriptor.Value;
