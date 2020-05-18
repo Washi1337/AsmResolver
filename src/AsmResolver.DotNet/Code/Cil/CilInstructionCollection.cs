@@ -51,82 +51,52 @@ namespace AsmResolver.DotNet.Code.Cil
         }
         
         /// <inheritdoc />
-        public void Add(CilInstruction item)
-        {
-            _items.Add(item);
-        }
+        public void Add(CilInstruction item) => _items.Add(item);
 
         /// <summary>
         /// Adds a collection of CIL instructions to the end of the list.
         /// </summary>
         /// <param name="items">The instructions to add.</param>
-        public void AddRange(IEnumerable<CilInstruction> items)
-        {
-            _items.AddRange(items);
-        }
+        public void AddRange(IEnumerable<CilInstruction> items) => _items.AddRange(items);
 
         /// <summary>
         /// Inserts a collection of CIL instructions at the provided index.
         /// </summary>
         /// <param name="index">The index to insert the instructions into.</param>
         /// <param name="items">The instructions to insert.</param>
-        public void InsertRange(int index, IEnumerable<CilInstruction> items)
-        {
-            _items.InsertRange(index, items);
-        }
+        public void InsertRange(int index, IEnumerable<CilInstruction> items) => _items.InsertRange(index, items);
 
         /// <inheritdoc />
-        public void Clear()
-        {
-            _items.Clear();
-        }
+        public void Clear() => _items.Clear();
 
         /// <inheritdoc />
-        public bool Contains(CilInstruction item)
-        {
-            return _items.Contains(item);
-        }
+        public bool Contains(CilInstruction item) => _items.Contains(item);
 
         /// <inheritdoc />
-        public void CopyTo(CilInstruction[] array, int arrayIndex)
-        {
-            _items.CopyTo(array, arrayIndex);
-        }
+        public void CopyTo(CilInstruction[] array, int arrayIndex) => _items.CopyTo(array, arrayIndex);
 
         /// <inheritdoc />
-        public bool Remove(CilInstruction item)
-        {
-            return _items.Remove(item);
-        }
+        public bool Remove(CilInstruction item) => _items.Remove(item);
 
         /// <inheritdoc />
-        public int IndexOf(CilInstruction item)
-        {
-            return _items.IndexOf(item);
-        }
+        public int IndexOf(CilInstruction item) => _items.IndexOf(item);
 
         /// <inheritdoc />
-        public void Insert(int index, CilInstruction item)
-        {
-            _items.Insert(index, item);
-        }
+        public void Insert(int index, CilInstruction item) => _items.Insert(index, item);
 
         /// <inheritdoc />
-        public void RemoveAt(int index)
-        {
-            _items.RemoveAt(index);
-        }
+        public void RemoveAt(int index) => _items.RemoveAt(index);
+
+        /// <summary>
+        /// Returns an enumerator that enumerates through the instructions sequentially.
+        /// </summary>
+        /// <returns>The enumerator.</returns>
+        public Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <inheritdoc />
-        public IEnumerator<CilInstruction> GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
+        IEnumerator<CilInstruction> IEnumerable<CilInstruction>.GetEnumerator() => GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable) _items).GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Searches for an instruction with the given offset.
@@ -182,6 +152,38 @@ namespace AsmResolver.DotNet.Code.Cil
                 currentOffset += instruction.Size;
             }
         }
+
+        /// <summary>
+        /// Represents an enumerator that enumerates through a collection of CIL instructions.
+        /// </summary>
+        public struct Enumerator : IEnumerator<CilInstruction>
+        {
+            private List<CilInstruction>.Enumerator _enumerator;
+
+            /// <summary>
+            /// Creates a new instance of the <see cref="Enumerator"/> structure.
+            /// </summary>
+            /// <param name="collection">The collection to enumerate.</param>
+            public Enumerator(CilInstructionCollection collection)
+            {
+                _enumerator = collection._items.GetEnumerator();
+            }
+
+            /// <inheritdoc />
+            public bool MoveNext() => _enumerator.MoveNext();
+
+            /// <inheritdoc />
+            public void Reset() => ((IEnumerator) _enumerator).Reset();
+
+            /// <inheritdoc />
+            public CilInstruction Current => _enumerator.Current;
+
+            /// <inheritdoc />
+            object IEnumerator.Current => Current;
+
+            /// <inheritdoc />
+            public void Dispose() => _enumerator.Dispose();
+        } 
 
     }
 }
