@@ -127,7 +127,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public TypeSignature ToTypeSignature()
         {
-            return (TypeSignature) Module.CorLibTypeFactory.FromType(this)
+            return (TypeSignature) Module?.CorLibTypeFactory.FromType(this)
                    ?? new TypeDefOrRefSignature(this, IsValueType);
         }
 
