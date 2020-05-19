@@ -393,8 +393,8 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             var variable = instruction.GetLocalVariable(Owner.LocalVariables);
             
-            CilOpCode code;
-            CilLocalVariable operand;
+            CilOpCode code = instruction.OpCode;
+            object operand = instruction.Operand;
 
             if (instruction.IsLdloc())
             {
@@ -408,7 +408,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     _ => (CilOpCodes.Ldloc, variable),
                 };
             }
-            else
+            else if (instruction.IsStloc())
             {
                 (code, operand) = variable.Index switch
                 {
@@ -434,9 +434,9 @@ namespace AsmResolver.DotNet.Code.Cil
         private bool TryOptimizeArgument(CilInstruction instruction)
         {
             var parameter = instruction.GetParameter(Owner.Owner.Parameters);
-            
-            CilOpCode code;
-            Parameter operand;
+
+            CilOpCode code = instruction.OpCode;
+            object operand = instruction.Operand;
 
             if (instruction.IsLdarg())
             {
@@ -450,7 +450,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     _ => (CilOpCodes.Ldarg, parameter),
                 };
             }
-            else
+            else if (instruction.IsStarg())
             {
                 (code, operand) = parameter.MethodSignatureIndex switch
                 {
