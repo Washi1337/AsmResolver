@@ -20,9 +20,13 @@ namespace AsmResolver.DotNet.Signatures
         public override ElementType ElementType => ElementType.ByRef;
 
         /// <inheritdoc />
-        public override string Name => BaseType.Name + '&';
+        public override string Name => $"{BaseType.Name}&";
 
         /// <inheritdoc />
         public override bool IsValueType => false;
+        
+        /// <inheritdoc />
+        public override TypeSignature InstantiateGenericTypes(GenericContext context) => 
+            new ByReferenceTypeSignature(BaseType.InstantiateGenericTypes(context));
     }
 }

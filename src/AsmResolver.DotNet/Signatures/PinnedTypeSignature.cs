@@ -25,5 +25,9 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public override bool IsValueType => BaseType.IsValueType;
+        
+        /// <inheritdoc />
+        public override TypeSignature InstantiateGenericTypes(GenericContext context) => 
+            new PinnedTypeSignature(BaseType.InstantiateGenericTypes(context));
     }
 }

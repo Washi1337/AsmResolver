@@ -150,6 +150,15 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
+        public override TypeSignature InstantiateGenericTypes(GenericContext context)
+        {
+            var result = new ArrayTypeSignature(BaseType.InstantiateGenericTypes(context));
+            for (int i = 0; i < Dimensions.Count; i++)
+                result.Dimensions.Add(Dimensions[i]);
+            return result;
+        }
+
+        /// <inheritdoc />
         protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
             if (!Validate())

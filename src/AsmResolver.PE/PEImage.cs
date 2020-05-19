@@ -45,9 +45,11 @@ namespace AsmResolver.PE
         /// Opens a PE image from a specific file on the disk.
         /// </summary>
         /// <param name="filePath">The </param>
+        /// <param name="readParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(string filePath, PEReadParameters parameters) => FromFile(PEFile.FromFile(filePath), parameters);
+        public static IPEImage FromFile(string filePath, PEReadParameters readParameters) => 
+            FromFile(PEFile.FromFile(filePath), readParameters);
 
         /// <summary>
         /// Opens a PE image from a buffer.
@@ -64,11 +66,8 @@ namespace AsmResolver.PE
         /// <param name="readParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromBytes(byte[] bytes, PEReadParameters readParameters)
-        {
-            var peFile = PEFile.FromBytes(bytes);
-            return FromFile(peFile, readParameters);
-        }
+        public static IPEImage FromBytes(byte[] bytes, PEReadParameters readParameters) => 
+            FromFile(PEFile.FromBytes(bytes), readParameters);
 
         /// <summary>
         /// Opens a PE image from an input stream.

@@ -63,5 +63,8 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public override bool IsValueType => BaseType.IsValueType;
         
+        /// <inheritdoc />
+        public override TypeSignature InstantiateGenericTypes(GenericContext context) => 
+            new CustomModifierTypeSignature(ModifierType, IsRequired, BaseType.InstantiateGenericTypes(context));
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -282,6 +281,18 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <returns>The base signature.</returns>
         public abstract ITypeDefOrRef GetUnderlyingTypeDefOrRef();
+
+        /// <summary>
+        /// Substitutes any generic type parameter in the type signature with the parameters provided by
+        /// the generic context. 
+        /// </summary>
+        /// <param name="context">The generic context.</param>
+        /// <returns>The instantiated type signature.</returns>
+        /// <remarks>
+        /// When the type signature does not contain any generic parameter, this method might return the current
+        /// instance of the type signature.
+        /// </remarks>
+        public abstract TypeSignature InstantiateGenericTypes(GenericContext context);
 
         /// <inheritdoc />
         public override string ToString() => FullName;

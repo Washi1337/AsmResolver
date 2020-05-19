@@ -91,5 +91,9 @@ namespace AsmResolver.DotNet.Signatures
             writer.WriteByte((byte) ElementType);
             writer.WriteCompressedUInt32((uint) Index);
         }
+
+        /// <inheritdoc />
+        public override TypeSignature InstantiateGenericTypes(GenericContext context) =>
+            context.GetTypeArgument(this);
     }
 }

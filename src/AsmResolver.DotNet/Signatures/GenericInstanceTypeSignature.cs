@@ -114,5 +114,14 @@ namespace AsmResolver.DotNet.Signatures
             for (int i = 0; i < TypeArguments.Count; i++)
                 TypeArguments[i].Write(writer, provider);
         }
+        
+        /// <inheritdoc />
+        public override TypeSignature InstantiateGenericTypes(GenericContext context)
+        {
+            var result = new GenericInstanceTypeSignature(GenericType, IsValueType);
+            for (int i = 0; i < TypeArguments.Count; i++)
+                result.TypeArguments.Add(TypeArguments[i].InstantiateGenericTypes(context));
+            return result;
+        }
     }
 }
