@@ -142,7 +142,7 @@ namespace AsmResolver.DotNet.Collections
             else if (parameter.Index == -1)
                 throw new InvalidOperationException("Cannot update the parameter type of the this parameter.");
             else
-                _owner.Signature.ParameterTypes[parameter.MethodSignatureIndex] = parameter.ParameterType;
+                _owner.Signature.ParameterTypes[parameter.Index] = parameter.ParameterType;
         }
 
         /// <summary>
