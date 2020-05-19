@@ -97,6 +97,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public MethodDefinition Resolve() => Method.Resolve();
 
+        IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
+
         /// <summary>
         /// Obtains the instantiated method.
         /// </summary>

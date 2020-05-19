@@ -22,6 +22,6 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method can only be invoked if the reference was added to a module. 
         /// </remarks>
-        MethodDefinition Resolve();
+        new MethodDefinition Resolve();
     }
 }

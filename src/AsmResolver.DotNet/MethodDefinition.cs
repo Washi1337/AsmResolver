@@ -647,6 +647,8 @@ namespace AsmResolver.DotNet
 
         MethodDefinition IMethodDescriptor.Resolve() => this;
 
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
+
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {

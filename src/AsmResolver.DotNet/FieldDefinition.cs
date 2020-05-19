@@ -373,6 +373,8 @@ namespace AsmResolver.DotNet
         }
 
         FieldDefinition IFieldDescriptor.Resolve() => this;
+        
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)

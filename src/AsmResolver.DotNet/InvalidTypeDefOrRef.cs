@@ -75,6 +75,7 @@ namespace AsmResolver.DotNet
             }
         }
 
+        IMemberDefinition IMemberDescriptor.Resolve() => null;
 
         TypeDefinition ITypeDescriptor.Resolve() => null;
         

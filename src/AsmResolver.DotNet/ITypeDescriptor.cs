@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method can only be invoked if the reference was added to a module. 
         /// </remarks>
-        TypeDefinition Resolve();
+        new TypeDefinition Resolve();
 
         /// <summary>
         /// Transforms the type descriptor to an instance of a <see cref="ITypeDefOrRef"/>, which can be referenced by

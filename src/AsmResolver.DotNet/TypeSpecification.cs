@@ -94,6 +94,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
         
+        IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
+        
         /// <summary>
         /// Obtains the signature the type specification is referencing.
         /// </summary>

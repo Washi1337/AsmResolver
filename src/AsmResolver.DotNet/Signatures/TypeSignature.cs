@@ -270,6 +270,8 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public abstract TypeDefinition Resolve();
+        
+        IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
 
         /// <inheritdoc />
         public virtual ITypeDefOrRef ToTypeDefOrRef() => new TypeSpecification(this);

@@ -137,6 +137,8 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
+        
+        IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
 
         /// <inheritdoc />
         public ITypeDefOrRef ToTypeDefOrRef() => new TypeReference(Module, Scope, Namespace, Name);

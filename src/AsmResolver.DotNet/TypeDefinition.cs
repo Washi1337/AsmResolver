@@ -648,6 +648,8 @@ namespace AsmResolver.DotNet
         }
 
         TypeDefinition ITypeDescriptor.Resolve() => this;
+        
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <summary>
         /// When this type is an enum, extracts the underlying enum type.

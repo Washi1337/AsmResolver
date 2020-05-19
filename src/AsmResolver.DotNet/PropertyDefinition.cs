@@ -183,6 +183,8 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type) => 
             Semantics.Any(s => s.Method.IsAccessibleFromType(type));
+
+        IMemberDefinition IMemberDescriptor.Resolve() => this;
         
         /// <summary>
         /// Obtains the name of the property definition.
