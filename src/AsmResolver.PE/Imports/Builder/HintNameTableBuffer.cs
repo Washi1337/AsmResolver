@@ -13,6 +13,30 @@ namespace AsmResolver.PE.Imports.Builder
         private readonly IDictionary<MemberImportEntry, uint> _hintNameOffsets = new Dictionary<MemberImportEntry, uint>();
         private uint _length;
 
+        /// <inheritdoc />
+        public override void UpdateOffsets(uint newFileOffset, uint newRva)
+        {
+            base.UpdateOffsets(newFileOffset, newRva);
+
+            uint offset = newFileOffset;
+            foreach (var module in _modules)
+            {
+                foreach (var entry in module.Members)
+                {
+                    if (entry.IsImportByName)
+                    {
+                        _hintNameOffsets[entry] = offset - newFileOffset;
+                        offset += (uint) (sizeof(ushort) + Encoding.ASCII.GetByteCount(entry.Name) + 1);
+                        offset = offset.Align(2);
+                    }
+                }
+                _moduleNameOffsets[module] = offset - newFileOffset;
+                offset += (uint) Encoding.ASCII.GetByteCount(module.Name) + 1;
+            }
+
+            _length = offset - newFileOffset;
+        }
+
         /// <summary>
         /// Adds the name of the module and the names of all named entries to the hint-name table.
         /// </summary>
@@ -20,21 +44,6 @@ namespace AsmResolver.PE.Imports.Builder
         public void AddModule(IModuleImportEntry module)
         {
             _modules.Add(module);
-
-            foreach (var entry in module.Members)
-            {
-                if (entry.IsImportByName)
-                {
-                    _hintNameOffsets[entry] = _length;
-                    _length += (uint) (sizeof(ushort) + Encoding.ASCII.GetByteCount(entry.Name) + 1);
-
-                    if (_length % 2 != 0)
-                        _length++;
-                }
-            }
-
-            _moduleNameOffsets[module] = _length;
-            _length += (uint) Encoding.ASCII.GetByteCount(module.Name) + 1;
         }
 
         /// <summary>
