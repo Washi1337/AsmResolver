@@ -149,12 +149,22 @@ namespace AsmResolver.DotNet.Signatures
         public CorLibTypeSignature Object => GetOrCreateCorLibTypeSignature(ref _object, ElementType.Object, nameof(Object));
 
         /// <summary>
+        /// Transforms the provided type descriptor to a common object runtime type signature.
+        /// </summary>
+        /// <param name="type">The type to transform to a corlib type signature.</param>
+        /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
+        public CorLibTypeSignature FromType(ITypeDescriptor type)
+        {
+            return type is CorLibTypeSignature typeSig
+                ? FromElementType(typeSig.ElementType)
+                : FromName(type.Namespace, type.Name);
+        }
+        
+        /// <summary>
         /// Obtains the common object runtime type signature from its element type.
         /// </summary>
         /// <param name="elementType">The element type.</param>
-        /// <returns>The type signature.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="elementType"/> does not specify a
-        /// CorLib type signature.</exception>
+        /// <returns>The corlib type, or <c>null</c> if none was found.</returns>
         public CorLibTypeSignature FromElementType(ElementType elementType)
         {
             return elementType switch
@@ -177,7 +187,7 @@ namespace AsmResolver.DotNet.Signatures
                 ElementType.U => UIntPtr,
                 ElementType.TypedByRef => TypedReference,
                 ElementType.Object => Object,
-                _ => throw new ArgumentOutOfRangeException(nameof(elementType))
+                _ => null
             };
         }
 
