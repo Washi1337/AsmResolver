@@ -8,6 +8,16 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<IResolutionScope>,
         IEqualityComparer<AssemblyDescriptor>
     {
+        /// <summary>
+        /// Gets or sets a value indicating whether version numbers should be excluded in the comparison of two
+        /// assembly descriptors.
+        /// </summary>
+        public bool IgnoreAssemblyVersionNumbers
+        {
+            get;
+            set;
+        }
+        
         /// <inheritdoc />
         public bool Equals(IResolutionScope x, IResolutionScope y)
         {
@@ -47,10 +57,10 @@ namespace AsmResolver.DotNet.Signatures
             if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
                 return false;
                 
-            return x.Version == y.Version
-                   && x.Name == y.Name
-                   && x.Culture == y.Culture
-                   && Equals(x.GetPublicKeyToken(), y.GetPublicKeyToken());
+            return (IgnoreAssemblyVersionNumbers || x.Version == y.Version)
+                    && x.Name == y.Name
+                    && x.Culture == y.Culture
+                    && Equals(x.GetPublicKeyToken(), y.GetPublicKeyToken());
         }
 
         /// <inheritdoc />
