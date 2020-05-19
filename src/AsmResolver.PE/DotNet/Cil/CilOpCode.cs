@@ -40,7 +40,24 @@ namespace AsmResolver.PE.DotNet.Cil
 
         internal const int FlowControlBitLength = 4;
         internal const int FlowControlOffset = OperandTypeOffset + OperandTypeBitLength;
-        
+
+        /// <summary>
+        /// Determines whether two operation codes encode the same operation.
+        /// </summary>
+        /// <param name="a">The first operation code.</param>
+        /// <param name="b">The second operation code.</param>
+        /// <returns><c>true</c> if the same operation code is encoded, <c>false</c> otherwise.</returns>
+        public static bool operator ==(CilOpCode a, CilOpCode b) => a.Equals(b);
+
+        /// <summary>
+        /// Determines whether two operation codes do not encode the same operation.
+        /// </summary>
+        /// <param name="a">The first operation code.</param>
+        /// <param name="b">The second operation code.</param>
+        /// <returns><c>true</c> if a different operation code is encoded, <c>false</c> otherwise.</returns>
+        public static bool operator !=(CilOpCode a, CilOpCode b) => !(a == b);
+
+
         // To reduce the memory footprint of a single CIL operation code, we put every property into a single 32 bit
         // number, using the following layout:
         //
@@ -126,5 +143,18 @@ namespace AsmResolver.PE.DotNet.Cil
 
         /// <inheritdoc />
         public override string ToString() => Mnemonic;
+
+        /// <summary>
+        /// Determines whether the provided operation code is encoding the same operation.
+        /// </summary>
+        /// <param name="other">The other operation code.</param>
+        /// <returns><c>true</c> if the same operation code is encoded, <c>false</c> otherwise.</returns>
+        public bool Equals(CilOpCode other) => Code == other.Code;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => obj is CilOpCode other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => (int) Code;
     }
 }
