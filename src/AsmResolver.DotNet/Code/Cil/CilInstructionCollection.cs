@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -156,6 +157,9 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <summary>
         /// Simplifies the CIL instructions by transforming macro instructions to their expanded form.
         /// </summary>
+        /// <remarks>
+        /// This method reverses any optimizations done by <see cref="OptimizeMacros"/>.
+        /// </remarks>
         public void ExpandMacros()
         {
             foreach (var instruction in _items)
@@ -265,6 +269,208 @@ namespace AsmResolver.DotNet.Code.Cil
                     instruction.OpCode = CilOpCodes.Leave;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Optimizes all instructions to use the least amount of bytes required to encode all operations.
+        /// </summary>
+        /// <remarks>
+        /// This method reverses any effects introduced by <see cref="ExpandMacros"/>.
+        /// </remarks>
+        public void OptimizeMacros()
+        {
+            while (OptimizeMacrosPass())
+            {
+                // Repeat until no more optimizations can be done.
+            }
+            
+            CalculateOffsets();
+        }
+
+        private bool OptimizeMacrosPass()
+        {
+            CalculateOffsets();
+            
+            bool changed = false;
+            foreach (var instruction in _items)
+                changed |= TryOptimizeMacro(instruction);
+
+            return changed;
+        }
+
+        private bool TryOptimizeMacro(CilInstruction instruction)
+        {
+            return instruction.OpCode.OperandType switch
+            {
+                CilOperandType.InlineBrTarget => TryOptimizeBranch(instruction),
+                CilOperandType.ShortInlineBrTarget => TryOptimizeBranch(instruction),
+                CilOperandType.InlineI => TryOptimizeLdc(instruction),
+                CilOperandType.ShortInlineI => TryOptimizeLdc(instruction),
+                CilOperandType.InlineVar => TryOptimizeVariable(instruction),
+                CilOperandType.ShortInlineVar => TryOptimizeVariable(instruction),
+                CilOperandType.InlineArgument => TryOptimizeArgument(instruction),
+                CilOperandType.ShortInlineArgument => TryOptimizeArgument(instruction),
+                _ => false
+            };
+        }
+
+        private bool TryOptimizeBranch(CilInstruction instruction)
+        {
+            int nextOffset = instruction.Offset + instruction.Size;
+            int targetOffset = ((ICilLabel) instruction.Operand).Offset;
+            int delta = targetOffset - nextOffset;
+            bool isShortJump = delta >= sbyte.MinValue && delta <= sbyte.MaxValue;
+
+            CilOpCode code;
+            if (isShortJump)
+            {
+                code = instruction.OpCode.Code switch
+                {
+                    CilCode.Beq => CilOpCodes.Beq_S,
+                    CilCode.Bge => CilOpCodes.Bge_S,
+                    CilCode.Bgt => CilOpCodes.Bgt_S,
+                    CilCode.Ble => CilOpCodes.Ble_S,
+                    CilCode.Blt => CilOpCodes.Blt_S,
+                    CilCode.Br => CilOpCodes.Br_S,
+                    CilCode.Brfalse => CilOpCodes.Brfalse_S,
+                    CilCode.Brtrue => CilOpCodes.Brtrue_S,
+                    CilCode.Bge_Un => CilOpCodes.Bge_Un_S,
+                    CilCode.Bgt_Un => CilOpCodes.Bgt_Un_S,
+                    CilCode.Ble_Un => CilOpCodes.Ble_Un_S,
+                    CilCode.Blt_Un => CilOpCodes.Blt_Un_S,
+                    CilCode.Bne_Un => CilOpCodes.Bne_Un_S,
+                    CilCode.Leave => CilOpCodes.Leave_S,
+                    _ => instruction.OpCode
+                };
+            }
+            else
+            {
+                code = instruction.OpCode.Code switch
+                {
+                    CilCode.Beq_S => CilOpCodes.Beq,
+                    CilCode.Bge_S => CilOpCodes.Bge,
+                    CilCode.Bgt_S => CilOpCodes.Bgt,
+                    CilCode.Ble_S => CilOpCodes.Ble,
+                    CilCode.Blt_S => CilOpCodes.Blt,
+                    CilCode.Br_S => CilOpCodes.Br,
+                    CilCode.Brfalse_S => CilOpCodes.Brfalse,
+                    CilCode.Brtrue_S => CilOpCodes.Brtrue,
+                    CilCode.Bge_Un_S => CilOpCodes.Bge_Un,
+                    CilCode.Bgt_Un_S => CilOpCodes.Bgt_Un,
+                    CilCode.Ble_Un_S => CilOpCodes.Ble_Un,
+                    CilCode.Blt_Un_S => CilOpCodes.Blt_Un,
+                    CilCode.Bne_Un_S => CilOpCodes.Bne_Un,
+                    CilCode.Leave_S => CilOpCodes.Leave,
+                    _ => instruction.OpCode
+                };
+            }
+
+            if (instruction.OpCode != code)
+            {
+                instruction.OpCode = code;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool TryOptimizeLdc(CilInstruction instruction)
+        {
+            int value = instruction.GetLdcI4Constant();
+            var (code, operand) = CilInstruction.GetLdcI4OpCodeOperand(value);
+            
+            if (code != instruction.OpCode)
+            {
+                instruction.OpCode = code;
+                instruction.Operand = operand;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryOptimizeVariable(CilInstruction instruction)
+        {
+            var variable = instruction.GetLocalVariable(Owner.LocalVariables);
+            
+            CilOpCode code;
+            CilLocalVariable operand;
+
+            if (instruction.IsLdloc())
+            {
+                (code, operand) = variable.Index switch
+                {
+                    0 => (CilOpCodes.Ldloc_0, null),
+                    1 => (CilOpCodes.Ldloc_1, null),
+                    2 => (CilOpCodes.Ldloc_2, null),
+                    3 => (CilOpCodes.Ldloc_3, null),
+                    {} x when x >= sbyte.MinValue && x <= sbyte.MaxValue => (CilOpCodes.Ldloc_S, variable),
+                    _ => (CilOpCodes.Ldloc, variable),
+                };
+            }
+            else
+            {
+                (code, operand) = variable.Index switch
+                {
+                    0 => (CilOpCodes.Stloc_0, null),
+                    1 => (CilOpCodes.Stloc_1, null),
+                    2 => (CilOpCodes.Stloc_2, null),
+                    3 => (CilOpCodes.Stloc_3, null),
+                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Stloc_S, variable),
+                    _ => (CilOpCodes.Stloc, variable),
+                };
+            }
+
+            if (code != instruction.OpCode)
+            {
+                instruction.OpCode = code;
+                instruction.Operand = operand;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryOptimizeArgument(CilInstruction instruction)
+        {
+            var parameter = instruction.GetParameter(Owner.Owner.Parameters);
+            
+            CilOpCode code;
+            Parameter operand;
+
+            if (instruction.IsLdarg())
+            {
+                (code, operand) = parameter.MethodSignatureIndex switch
+                {
+                    0 => (CilOpCodes.Ldarg_0, null),
+                    1 => (CilOpCodes.Ldarg_1, null),
+                    2 => (CilOpCodes.Ldarg_2, null),
+                    3 => (CilOpCodes.Ldarg_3, null),
+                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Ldarg_S, parameter),
+                    _ => (CilOpCodes.Ldarg, parameter),
+                };
+            }
+            else
+            {
+                (code, operand) = parameter.MethodSignatureIndex switch
+                {
+                    0 => (CilOpCodes.Stloc_0, null),
+                    1 => (CilOpCodes.Stloc_1, null),
+                    2 => (CilOpCodes.Stloc_2, null),
+                    3 => (CilOpCodes.Stloc_3, null),
+                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Stloc_S, parameter),
+                    _ => (CilOpCodes.Stloc, parameter),
+                };
+            }
+
+            if (code != instruction.OpCode)
+            {
+                instruction.OpCode = code;
+                instruction.Operand = operand;
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

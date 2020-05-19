@@ -27,6 +27,72 @@ namespace AsmResolver.PE.DotNet.Cil
     public class CilInstruction
     {
         /// <summary>
+        /// Create a new instruction pushing the provided integer value, using the smallest possible operation code and
+        /// operand size. 
+        /// </summary>
+        /// <param name="value">The constant to push.</param>
+        /// <returns>The instruction.</returns>
+        public static CilInstruction CreateLdcI4(int value)
+        {
+            var (code, operand) = GetLdcI4OpCodeOperand(value);
+            return new CilInstruction(code, operand);
+        }
+
+        /// <summary>
+        /// Determines the smallest possible operation code and operand required to push the provided integer constant.
+        /// </summary>
+        /// <param name="value">The constant to push.</param>
+        /// <returns>The operation code and operand.</returns>
+        public static (CilOpCode code, object operand) GetLdcI4OpCodeOperand(int value)
+        {
+            CilOpCode code;
+            object operand = null;
+            switch (value)
+            {
+                case -1:
+                    code = CilOpCodes.Ldc_I4_M1;
+                    break;
+                case 0:
+                    code = CilOpCodes.Ldc_I4_0;
+                    break;
+                case 1:
+                    code = CilOpCodes.Ldc_I4_1;
+                    break;
+                case 2:
+                    code = CilOpCodes.Ldc_I4_2;
+                    break;
+                case 3:
+                    code = CilOpCodes.Ldc_I4_3;
+                    break;
+                case 4:
+                    code = CilOpCodes.Ldc_I4_4;
+                    break;
+                case 5:
+                    code = CilOpCodes.Ldc_I4_5;
+                    break;
+                case 6:
+                    code = CilOpCodes.Ldc_I4_6;
+                    break;
+                case 7:
+                    code = CilOpCodes.Ldc_I4_7;
+                    break;
+                case 8:
+                    code = CilOpCodes.Ldc_I4_8;
+                    break;
+                case { } x when x >= sbyte.MinValue && x <= sbyte.MaxValue:
+                    code = CilOpCodes.Ldc_I4_S;
+                    operand = (sbyte) x;
+                    break;
+                default:
+                    code = CilOpCodes.Ldc_I4;
+                    operand = value;
+                    break;
+            }
+
+            return (code, operand);
+        }
+
+        /// <summary>
         /// Creates a new CIL instruction with no operand.
         /// </summary>
         /// <param name="opCode">The operation to perform.</param>
