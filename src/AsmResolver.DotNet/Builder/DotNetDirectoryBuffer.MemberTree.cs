@@ -28,9 +28,9 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Culture));
 
             var token = table.Add(row, assembly.MetadataToken.Rid);
+            AddModule(assembly.ManifestModule);
             AddCustomAttributes(token, assembly);
             AddSecurityDeclarations(token, assembly);
-            AddModule(assembly.ManifestModule);
         }
 
         /// <summary>
@@ -56,9 +56,9 @@ namespace AsmResolver.DotNet.Builder
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
                 GetAssemblyReferenceToken(corLibScope);
             
-            AddCustomAttributes(token, module);
             AddTypeDefinitionsInModule(module);
             AddResourcesInModule(module);
+            AddCustomAttributes(token, module);
         }
 
         private void AddResourcesInModule(ModuleDefinition module)
