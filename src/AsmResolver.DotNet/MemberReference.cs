@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a method or a field in an (external) .NET assembly.
     /// </summary>
-    public class MemberReference : ICustomAttributeType, IMethodDescriptor, IFieldDescriptor
+    public class MemberReference : ICustomAttributeType, IFieldDescriptor
     {
         private readonly LazyVariable<IMemberRefParent> _parent;
         private readonly LazyVariable<string> _name;

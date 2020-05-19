@@ -5,7 +5,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides members for describing a field in a managed assembly. 
     /// </summary>
-    public interface IFieldDescriptor : IMemberDescriptor
+    public interface IFieldDescriptor : IMemberDescriptor, IMetadataMember
     {
         /// <summary>
         /// Gets the signature of the field.

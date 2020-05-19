@@ -5,7 +5,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides members for describing a method in a managed assembly. 
     /// </summary>
-    public interface IMethodDescriptor : IMemberDescriptor
+    public interface IMethodDescriptor : IMemberDescriptor, IMetadataMember
     {
         /// <summary>
         /// Gets the signature of the method.
