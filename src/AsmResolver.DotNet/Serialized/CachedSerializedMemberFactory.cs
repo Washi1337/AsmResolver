@@ -46,6 +46,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             member = token.Table switch
             {
+                TableIndex.Module => LookupModuleDefinition(token),
                 TableIndex.TypeRef => LookupTypeReference(token),
                 TableIndex.TypeDef => LookupTypeDefinition(token),
                 TableIndex.TypeSpec => LookupTypeSpecification(token),
@@ -76,6 +77,13 @@ namespace AsmResolver.DotNet.Serialized
             };
 
             return member != null;
+        }
+
+        private IMetadataMember LookupModuleDefinition(in MetadataToken token)
+        {
+            return token.Rid == 1
+                ? _parentModule
+                : null; // TODO: handle spurious assembly definition rows.
         }
 
         internal TypeReference LookupTypeReference(MetadataToken token)
