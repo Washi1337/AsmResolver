@@ -98,7 +98,9 @@ namespace AsmResolver.DotNet.Builder
 
         private void AddTypeDefinitionStubs(ModuleDefinition module)
         {
-            var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            var nestedClassTable = Metadata.TablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
+            
             foreach (var type in module.GetAllTypes())
             {
                 var row = new TypeDefinitionRow(
@@ -109,8 +111,17 @@ namespace AsmResolver.DotNet.Builder
                     0,
                     0);
 
-                var token = table.Add(row, type.MetadataToken.Rid);
+                var token = typeDefTable.Add(row, type.MetadataToken.Rid);
                 _typeDefTokens.Add(type, token);
+
+                if (type.IsNested)
+                {
+                    var nestedClassRow = new NestedClassRow(
+                        token.Rid,
+                        GetTypeDefinitionToken(type.DeclaringType).Rid);
+                    
+                    nestedClassTable.Add(nestedClassRow, 0);
+                }
             }
         }
 
