@@ -86,11 +86,11 @@ namespace AsmResolver.PE.DotNet.Cil
                     break;
 
                 case CilOperandType.ShortInlineBrTarget:
-                    sbyte shortOffset = (sbyte) (((ICilLabel) instruction.Operand).Offset - (_writer.FileOffset + 1));
+                    sbyte shortOffset = (sbyte) (((ICilLabel) instruction.Operand).Offset - (_writer.FileOffset + sizeof(sbyte)));
                     _writer.WriteSByte(shortOffset);
                     break;
                 case CilOperandType.InlineBrTarget:
-                    int longOffset = (int) (((ICilLabel) instruction.Operand).Offset - (_writer.FileOffset + 1));
+                    int longOffset = (int) (((ICilLabel) instruction.Operand).Offset - (_writer.FileOffset + sizeof(int)));
                     _writer.WriteInt32(longOffset);
                     break;
                 
