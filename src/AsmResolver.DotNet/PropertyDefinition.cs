@@ -13,9 +13,8 @@ namespace AsmResolver.DotNet
     /// Represents a single property in a type definition of a .NET module.
     /// </summary>
     public class PropertyDefinition :
-        IMemberDefinition,
-        IHasCustomAttribute,
         IHasSemantics,
+        IHasCustomAttribute,
         IHasConstant,
         IOwnedCollectionElement<TypeDefinition>
     {

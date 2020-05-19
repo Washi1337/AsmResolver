@@ -13,7 +13,6 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class EventDefinition : 
         IHasSemantics,
-        IMemberDefinition,
         IHasCustomAttribute,
         IOwnedCollectionElement<TypeDefinition>
     { 
