@@ -22,6 +22,7 @@ namespace AsmResolver.DotNet
         {
             _parentModule = parentModule;
             _assemblyName = assemblyName;
+            Version = assemblyName.Version;
         }
 
         /// <inheritdoc />
