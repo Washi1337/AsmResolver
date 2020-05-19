@@ -62,7 +62,6 @@ namespace AsmResolver.DotNet
 
         ITypeDescriptor IMemberDescriptor.DeclaringType => null;
 
-
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => null;
 
         /// <inheritdoc />
@@ -78,9 +77,10 @@ namespace AsmResolver.DotNet
 
 
         TypeDefinition ITypeDescriptor.Resolve() => null;
+        
+        ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
-        /// <inheritdoc />
-        TypeSignature ITypeDefOrRef.ToTypeSignature() => throw new InvalidOperationException();
+        TypeSignature ITypeDescriptor.ToTypeSignature() => throw new InvalidOperationException();
 
         /// <inheritdoc />
         public override string ToString() =>  ((IFullNameProvider) this).Name;

@@ -272,6 +272,11 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public abstract TypeDefinition Resolve();
 
+        /// <inheritdoc />
+        public virtual ITypeDefOrRef ToTypeDefOrRef() => new TypeSpecification(this);
+
+        TypeSignature ITypeDescriptor.ToTypeSignature() => this;
+
         /// <summary>
         /// Gets the underlying base type signature, without any extra adornments.
         /// </summary>

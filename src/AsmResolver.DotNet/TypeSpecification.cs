@@ -85,6 +85,8 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
+        
+        ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
         /// <inheritdoc />
         public TypeSignature ToTypeSignature() => Signature;

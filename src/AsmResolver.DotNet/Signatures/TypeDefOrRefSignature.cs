@@ -62,10 +62,10 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef()
-        {
-            return Type;
-        }
+        public override ITypeDefOrRef ToTypeDefOrRef() => Type;
+
+        /// <inheritdoc />
+        public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => Type;
 
         /// <inheritdoc />
         protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)

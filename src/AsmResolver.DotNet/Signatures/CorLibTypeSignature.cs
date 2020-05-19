@@ -90,6 +90,9 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
+        public override ITypeDefOrRef ToTypeDefOrRef() => Type;
+
+        /// <inheritdoc />
         protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider tokenProvider) =>
             writer.WriteByte((byte) ElementType);
         

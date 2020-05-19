@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -136,7 +137,13 @@ namespace AsmResolver.DotNet
 
         /// <inheritdoc />
         public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
-        
+
+        /// <inheritdoc />
+        public ITypeDefOrRef ToTypeDefOrRef() => new TypeReference(Module, Scope, Namespace, Name);
+
+        /// <inheritdoc />
+        public TypeSignature ToTypeSignature() => new TypeDefOrRefSignature(ToTypeDefOrRef());
+
         /// <summary>
         /// Obtains the namespace of the exported type.
         /// </summary>

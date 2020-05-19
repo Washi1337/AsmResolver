@@ -595,6 +595,8 @@ namespace AsmResolver.DotNet
             set => _classLayout.Value = value;
         }
 
+        ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
+
         /// <inheritdoc />
         public TypeSignature ToTypeSignature() => 
             new TypeDefOrRefSignature(this, IsValueType);

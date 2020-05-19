@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Signatures;
+
 namespace AsmResolver.DotNet
 {
     /// <summary>
@@ -37,5 +39,19 @@ namespace AsmResolver.DotNet
         /// This method can only be invoked if the reference was added to a module. 
         /// </remarks>
         TypeDefinition Resolve();
+
+        /// <summary>
+        /// Transforms the type descriptor to an instance of a <see cref="ITypeDefOrRef"/>, which can be referenced by
+        /// a metadata token.
+        /// </summary>
+        /// <returns>The constructed TypeDefOrRef instance.</returns>
+        ITypeDefOrRef ToTypeDefOrRef();
+
+        /// <summary>
+        /// Transforms the type descriptor to an instance of a <see cref="TypeSignature"/>, which can be used in
+        /// blob signatures.
+        /// </summary>
+        /// <returns>The constructed type signature instance.</returns>
+        TypeSignature ToTypeSignature();
     }
 }
