@@ -32,61 +32,77 @@ namespace AsmResolver.PE
     /// </summary>
     public class SerializedPEImage : PEImage
     {
-        private readonly PEFile _peFile;
-
         /// <summary>
         /// Opens a PE image from a file.
         /// </summary>
         /// <param name="peFile">The file to base the image from.</param>
-        public SerializedPEImage(PEFile peFile)
+        /// <param name="readParameters">The parameters to use while reading the PE image.</param>
+        public SerializedPEImage(PEFile peFile, PEReadParameters readParameters)
         {
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            PEFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            ReadParameters = readParameters;
 
-            MachineType = _peFile.FileHeader.Machine;
-            Characteristics = _peFile.FileHeader.Characteristics;
+            MachineType = PEFile.FileHeader.Machine;
+            Characteristics = PEFile.FileHeader.Characteristics;
             TimeDateStamp = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(peFile.FileHeader.TimeDateStamp);
-            PEKind = _peFile.OptionalHeader.Magic;
-            SubSystem = _peFile.OptionalHeader.SubSystem;
-            DllCharacteristics = _peFile.OptionalHeader.DllCharacteristics;
-            ImageBase = _peFile.OptionalHeader.ImageBase;
+            PEKind = PEFile.OptionalHeader.Magic;
+            SubSystem = PEFile.OptionalHeader.SubSystem;
+            DllCharacteristics = PEFile.OptionalHeader.DllCharacteristics;
+            ImageBase = PEFile.OptionalHeader.ImageBase;
+        }
+
+        /// <summary>
+        /// Gets the underlying PE file.
+        /// </summary>
+        public PEFile PEFile
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the reading parameters used for reading the PE image.
+        /// </summary>
+        public PEReadParameters ReadParameters
+        {
+            get;
         }
 
         /// <inheritdoc />
         protected override IList<IModuleImportEntry> GetImports()
         {
-            var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
+            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
             return dataDirectory.IsPresentInPE
-                ? (IList<IModuleImportEntry>) new SerializedModuleImportEntryList(_peFile, dataDirectory)
+                ? (IList<IModuleImportEntry>) new SerializedModuleImportEntryList(PEFile, dataDirectory)
                 : new List<IModuleImportEntry>();
         }
 
         /// <inheritdoc />
         protected override IResourceDirectory GetResources()
         {
-            var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
-            if (!dataDirectory.IsPresentInPE || !_peFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
+            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
+            if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return new SerializedResourceDirectory(_peFile, null, reader);
+            return new SerializedResourceDirectory(PEFile, null, reader);
         }
 
         /// <inheritdoc />
         protected override IList<BaseRelocation> GetRelocations()
         {
-            var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
+            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
             return dataDirectory.IsPresentInPE
-                ? new SerializedRelocationList(_peFile, dataDirectory)
+                ? new SerializedRelocationList(PEFile, dataDirectory)
                 : (IList<BaseRelocation>) new List<BaseRelocation>();
         }
 
         /// <inheritdoc />
         protected override IDotNetDirectory GetDotNetDirectory()
         {
-            var dataDirectory = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ClrDirectoryIndex];
-            if (!dataDirectory.IsPresentInPE || !_peFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
+            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ClrDirectoryIndex];
+            if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
             
-            return new SerializedDotNetDirectory(_peFile, reader);
+            return new SerializedDotNetDirectory(PEFile, reader, ReadParameters.MetadataStreamReader);
         }
     }
 }

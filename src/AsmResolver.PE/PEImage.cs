@@ -39,32 +39,54 @@ namespace AsmResolver.PE
         /// <param name="filePath">The </param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(string filePath)
-        {
-            return FromFile(PEFile.FromFile(filePath));
-        }
-        
+        public static IPEImage FromFile(string filePath) => FromFile(PEFile.FromFile(filePath));
+
+        /// <summary>
+        /// Opens a PE image from a specific file on the disk.
+        /// </summary>
+        /// <param name="filePath">The </param>
+        /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static IPEImage FromFile(string filePath, PEReadParameters parameters) => FromFile(PEFile.FromFile(filePath), parameters);
+
         /// <summary>
         /// Opens a PE image from a buffer.
         /// </summary>
         /// <param name="bytes">The bytes to interpret.</param>
-        /// <returns>The PE iamge that was opened.</returns>
+        /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromBytes(byte[] bytes)
+        public static IPEImage FromBytes(byte[] bytes) => FromFile(PEFile.FromBytes(bytes));
+
+        /// <summary>
+        /// Opens a PE image from a buffer.
+        /// </summary>
+        /// <param name="bytes">The bytes to interpret.</param>
+        /// <param name="readParameters">The parameters to use while reading the PE image.</param>
+        /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static IPEImage FromBytes(byte[] bytes, PEReadParameters readParameters)
         {
-            return FromFile(PEFile.FromBytes(bytes));
+            var peFile = PEFile.FromBytes(bytes);
+            return FromFile(peFile, readParameters);
         }
-        
+
         /// <summary>
         /// Opens a PE image from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader)
-        {
-            return FromFile(PEFile.FromReader(reader));
-        }
+        public static IPEImage FromReader(IBinaryStreamReader reader) => FromFile(PEFile.FromReader(reader));
+
+        /// <summary>
+        /// Opens a PE image from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="readParameters">The parameters to use while reading the PE image.</param>
+        /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static IPEImage FromReader(IBinaryStreamReader reader, PEReadParameters readParameters) => 
+            FromFile(PEFile.FromReader(reader), readParameters);
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -72,10 +94,20 @@ namespace AsmResolver.PE
         /// <param name="peFile">The PE file object.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(PEFile peFile)
-        {
-            return new SerializedPEImage(peFile);
-        }
+        public static IPEImage FromFile(PEFile peFile) => FromFile(peFile, CreateDefaultReadParameters(peFile));
+
+        /// <summary>
+        /// Opens a PE image from a PE file object.
+        /// </summary>
+        /// <param name="peFile">The PE file object.</param>
+        /// <param name="readParameters">The parameters to use while reading the PE image.</param>
+        /// <returns>The PE image that was opened.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
+        public static IPEImage FromFile(PEFile peFile, PEReadParameters readParameters) =>
+            new SerializedPEImage(peFile, readParameters);
+
+        private static PEReadParameters CreateDefaultReadParameters(PEFile peFile) => new PEReadParameters(peFile);
+
 
         private IList<IModuleImportEntry> _imports;
         private readonly LazyVariable<IResourceDirectory> _resources;
@@ -183,10 +215,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Imports"/> property.
         /// </remarks>
-        protected virtual IList<IModuleImportEntry> GetImports()
-        {
-            return new List<IModuleImportEntry>();
-        }
+        protected virtual IList<IModuleImportEntry> GetImports() => new List<IModuleImportEntry>();
 
         /// <summary>
         /// Obtains the root resource directory in the PE.
@@ -195,10 +224,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Resources"/> property.
         /// </remarks>
-        protected virtual IResourceDirectory GetResources()
-        {
-            return null;
-        }
+        protected virtual IResourceDirectory GetResources() => null;
 
         /// <summary>
         /// Obtains the base relocation blocks in the PE. 
@@ -207,10 +233,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Relocations"/> property.
         /// </remarks>
-        protected virtual IList<BaseRelocation> GetRelocations()
-        {
-            return new List<BaseRelocation>();
-        }
+        protected virtual IList<BaseRelocation> GetRelocations() => new List<BaseRelocation>();
 
         /// <summary>
         /// Obtains the data directory containing the CLR 2.0 header of a .NET binary.
@@ -219,10 +242,6 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="DotNetDirectory"/> property.
         /// </remarks>
-        protected virtual IDotNetDirectory GetDotNetDirectory()
-        {
-            return null;
-        }
-        
+        protected virtual IDotNetDirectory GetDotNetDirectory() => null;
     }
 }

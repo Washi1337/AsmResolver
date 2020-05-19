@@ -17,11 +17,6 @@
 
 using System;
 using AsmResolver.Lazy;
-using AsmResolver.PE.DotNet.Metadata.Blob;
-using AsmResolver.PE.DotNet.Metadata.Guid;
-using AsmResolver.PE.DotNet.Metadata.Strings;
-using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -33,7 +28,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         private readonly IBinaryStreamReader _metadataReader;
         private readonly IBinaryStreamReader _entriesReader;
         private readonly int _numberOfStreams;
-        private readonly ISegmentReferenceResolver _referenceResolver;
+        private readonly IMetadataStreamReader _metadataStreamReader;
 
         /// <summary>
         /// Prepares a new lazy-initialized metadata stream list.
@@ -41,14 +36,14 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="metadataReader">The input stream containing the metadata directory.</param>
         /// <param name="reader">The input stream containing the metadata stream entries.</param>
         /// <param name="numberOfStreams">The number of streams.</param>
-        /// <param name="referenceResolver">The instance to use for resolving virtual addresses to other segments in the file.</param>
+        /// <param name="metadataStreamReader"></param>
         public MetadataStreamList(IBinaryStreamReader metadataReader, IBinaryStreamReader reader, int numberOfStreams, 
-            ISegmentReferenceResolver referenceResolver)
+            IMetadataStreamReader metadataStreamReader)
         {
             _metadataReader = metadataReader ?? throw new ArgumentNullException(nameof(metadataReader));
             _entriesReader = reader ?? throw new ArgumentNullException(nameof(reader));
             _numberOfStreams = numberOfStreams;
-            _referenceResolver = referenceResolver ?? throw new ArgumentNullException(nameof(referenceResolver));
+            _metadataStreamReader = metadataStreamReader;
         }
 
         /// <inheritdoc />
@@ -65,41 +60,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             {
                 var header = headers[i];
                 var streamReader = _metadataReader.Fork(_metadataReader.FileOffset + header.Offset, headers[i].Size);
-                Items.Add(ReadStream(header, streamReader));
-            }
-        }
-
-        /// <summary>
-        /// Reads a single stream from the metadata directory.
-        /// </summary>
-        /// <param name="header">The header of the stream to read.</param>
-        /// <param name="reader">The reader that spans the contents of the stream.</param>
-        /// <returns>The stream.</returns>
-        /// <remarks>
-        /// This method is called for every metadata stream header upon initializing the list.
-        /// </remarks>
-        protected virtual IMetadataStream ReadStream(MetadataStreamHeader header, IBinaryStreamReader reader)
-        {
-            switch (header.Name)
-            {
-                case TablesStream.CompressedStreamName:
-                case TablesStream.EncStreamName:
-                    return new SerializedTableStream(header.Name,DataSegment.FromReader(reader), _referenceResolver);
-                    
-                case StringsStream.DefaultName:
-                    return new SerializedStringsStream(header.Name, DataSegment.FromReader(reader));
-
-                case UserStringsStream.DefaultName:
-                    return new SerializedUserStringsStream(header.Name, DataSegment.FromReader(reader));
-
-                case BlobStream.DefaultName:
-                    return new SerializedBlobStream(header.Name, DataSegment.FromReader(reader));
-
-                case GuidStream.DefaultName:
-                    return new SerializedGuidStream(header.Name, DataSegment.FromReader(reader));
-
-                default:
-                    return new CustomMetadataStream(header.Name, DataSegment.FromReader(reader));
+                Items.Add(_metadataStreamReader.ReadStream(header, streamReader));
             }
         }
         

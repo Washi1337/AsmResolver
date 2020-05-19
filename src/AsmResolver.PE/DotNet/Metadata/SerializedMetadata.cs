@@ -26,7 +26,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class SerializedMetadata : Metadata
     {
-        private readonly ISegmentReferenceResolver _referenceResolver;
+        private readonly IMetadataStreamReader _metadataStreamReader;
         private readonly IBinaryStreamReader _streamEntriesReader;
         private readonly IBinaryStreamReader _streamContentsReader;
         private readonly int _numberOfStreams;
@@ -35,15 +35,15 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// Reads a metadata directory from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        /// <param name="referenceResolver">The instance to use for resolving references to other segments in the PE file.</param>
+        /// <param name="metadataStreamReader"></param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
         /// <exception cref="NotSupportedException">Occurs when an unsupported metadata directory format was encountered.</exception>
         /// <exception cref="BadImageFormatException">Occurs when the metadata directory header is invalid.</exception>
-        public SerializedMetadata(IBinaryStreamReader reader, ISegmentReferenceResolver referenceResolver)
+        public SerializedMetadata(IBinaryStreamReader reader, IMetadataStreamReader metadataStreamReader)
         {
             if (reader == null) 
                 throw new ArgumentNullException(nameof(reader));
-            _referenceResolver = referenceResolver ?? throw new ArgumentNullException(nameof(referenceResolver));
+            _metadataStreamReader = metadataStreamReader;
 
             _streamContentsReader = reader.Fork();
             
@@ -86,7 +86,7 @@ namespace AsmResolver.PE.DotNet.Metadata
                 _streamContentsReader.Fork(),
                 _streamEntriesReader.Fork(),
                 _numberOfStreams,
-                _referenceResolver);
+                _metadataStreamReader);
         }
 
     }

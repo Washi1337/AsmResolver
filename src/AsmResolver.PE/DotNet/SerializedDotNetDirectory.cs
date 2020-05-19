@@ -29,6 +29,7 @@ namespace AsmResolver.PE.DotNet
     public class SerializedDotNetDirectory : DotNetDirectory
     {
         private readonly PEFile _peFile;
+        private readonly IMetadataStreamReader _metadataStreamReader;
         private readonly DataDirectory _metadataDirectory;
         private readonly DataDirectory _resourcesDirectory;
         private readonly DataDirectory _strongNameDirectory;
@@ -42,12 +43,15 @@ namespace AsmResolver.PE.DotNet
         /// </summary>
         /// <param name="peFile">The PE file containing the .NET directory.</param>
         /// <param name="reader">The input stream.</param>
+        /// <param name="metadataStreamReader"></param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
-        public SerializedDotNetDirectory(PEFile peFile, IBinaryStreamReader reader)
+        public SerializedDotNetDirectory(PEFile peFile, IBinaryStreamReader reader,
+            IMetadataStreamReader metadataStreamReader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            _metadataStreamReader = metadataStreamReader;
 
             uint cb = reader.ReadUInt32();
             MajorRuntimeVersion = reader.ReadUInt16();
@@ -69,7 +73,7 @@ namespace AsmResolver.PE.DotNet
             if (_metadataDirectory.IsPresentInPE
                 && _peFile.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
             {
-                return new SerializedMetadata(directoryReader, _peFile);
+                return new SerializedMetadata(directoryReader, _metadataStreamReader);
             }
 
             return null;
