@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet
     /// Represents a single property in a type definition of a .NET module.
     /// </summary>
     public class PropertyDefinition :
-        IMemberDescriptor,
+        IMemberDefinition,
         IHasCustomAttribute,
         IHasSemantics,
         IHasConstant,
@@ -181,6 +181,10 @@ namespace AsmResolver.DotNet
         public MethodDefinition SetMethod => 
             Semantics.FirstOrDefault(s => s.Attributes == MethodSemanticsAttributes.Setter)?.Method;
 
+        /// <inheritdoc />
+        public bool IsAccessibleFromType(TypeDefinition type) => 
+            Semantics.Any(s => s.Method.IsAccessibleFromType(type));
+        
         /// <summary>
         /// Obtains the name of the property definition.
         /// </summary>

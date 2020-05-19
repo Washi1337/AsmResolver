@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
@@ -16,7 +15,9 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
-    public class TypeDefinition : ITypeDefOrRef,
+    public class TypeDefinition : 
+        ITypeDefOrRef,
+        IMemberDefinition,
         IHasGenericParameters,
         IHasSecurityDeclaration,
         IOwnedCollectionElement<ModuleDefinition>,
@@ -432,7 +433,6 @@ namespace AsmResolver.DotNet
             private set => _declaringType.Value = value;
         }
 
-
         ITypeDefOrRef ITypeDefOrRef.DeclaringType => DeclaringType;
 
         ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
@@ -600,6 +600,31 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public TypeSignature ToTypeSignature() => 
             new TypeDefOrRefSignature(this, IsValueType);
+
+        /// <inheritdoc />
+        public bool IsAccessibleFromType(TypeDefinition type)
+        {
+            // TODO: Check types of the same family.
+            
+            if (this == type)
+                return true;
+
+            var comparer = new SignatureComparer();
+            bool isInSameAssembly = comparer.Equals(Module, type.Module);
+
+            if (IsNested)
+            {
+                if (!DeclaringType.IsAccessibleFromType(type))
+                    return false;
+                
+                return IsNestedPublic
+                       || isInSameAssembly && IsNestedAssembly
+                       || DeclaringType == type;
+            }
+
+            return IsPublic
+                   || isInSameAssembly;
+        }
 
         /// <summary>
         /// Creates a new type reference to this type definition. 

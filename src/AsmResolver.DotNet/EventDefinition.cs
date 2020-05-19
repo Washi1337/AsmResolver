@@ -11,7 +11,11 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single event in a type definition of a .NET module.
     /// </summary>
-    public class EventDefinition : IHasSemantics, IMemberDescriptor, IHasCustomAttribute, IOwnedCollectionElement<TypeDefinition>
+    public class EventDefinition : 
+        IHasSemantics,
+        IMemberDefinition,
+        IHasCustomAttribute,
+        IOwnedCollectionElement<TypeDefinition>
     { 
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<TypeDefinition> _declaringType;
@@ -159,6 +163,10 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
+        
+        /// <inheritdoc />
+        public bool IsAccessibleFromType(TypeDefinition type) => 
+            Semantics.Any(s => s.Method.IsAccessibleFromType(type));
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

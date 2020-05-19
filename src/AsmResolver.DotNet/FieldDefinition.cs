@@ -13,7 +13,8 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a single field in a type definition of a .NET module.
     /// </summary>
-    public class FieldDefinition : 
+    public class FieldDefinition :
+        IMemberDefinition,
         IFieldDescriptor, 
         IHasCustomAttribute, 
         IHasConstant,
@@ -372,6 +373,22 @@ namespace AsmResolver.DotNet
         }
 
         FieldDefinition IFieldDescriptor.Resolve() => this;
+
+        /// <inheritdoc />
+        public bool IsAccessibleFromType(TypeDefinition type)
+        {
+            if (!DeclaringType.IsAccessibleFromType(type))
+                return false;
+            
+            var comparer = new SignatureComparer();
+            bool isInSameAssembly = comparer.Equals(DeclaringType.Module, type.Module);
+
+            return IsPublic
+                   || isInSameAssembly && IsAssembly
+                   || comparer.Equals(DeclaringType, type);
+            // TODO: check if in the same family of declaring types.
+        }
+
 
         /// <summary>
         /// Obtains the list of custom attributes assigned to the member.

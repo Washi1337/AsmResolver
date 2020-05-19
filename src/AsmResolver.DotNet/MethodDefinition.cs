@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet
     /// Represents a single method in a type definition of a .NET module.
     /// </summary>
     public class MethodDefinition :
+        IMemberDefinition,
         IOwnedCollectionElement<TypeDefinition>,
         IMemberRefParent, 
         ICustomAttributeType,
@@ -480,7 +481,7 @@ namespace AsmResolver.DotNet
             get => _declaringType.Value;
             set => _declaringType.Value = value;
         }
-        
+
         ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
         
         ITypeDefOrRef IMethodDefOrRef.DeclaringType => DeclaringType;
@@ -645,6 +646,21 @@ namespace AsmResolver.DotNet
         public bool IsConstructor => IsSpecialName && IsRuntimeSpecialName && (Name == ".cctor" || Name == ".ctor");
 
         MethodDefinition IMethodDescriptor.Resolve() => this;
+
+        /// <inheritdoc />
+        public bool IsAccessibleFromType(TypeDefinition type)
+        {
+            if (!DeclaringType.IsAccessibleFromType(type))
+                return false;
+            
+            var comparer = new SignatureComparer();
+            bool isInSameAssembly = comparer.Equals(DeclaringType.Module, type.Module);
+
+            return IsPublic
+                   || isInSameAssembly && IsAssembly
+                   || comparer.Equals(DeclaringType, type);
+            // TODO: check if in the same family of declaring types.
+        }
 
         /// <summary>
         /// Obtains the name of the method definition.
