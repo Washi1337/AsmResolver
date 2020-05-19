@@ -145,6 +145,8 @@ namespace AsmResolver.DotNet
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
             _managedEntrypoint = new LazyVariable<IManagedEntrypoint>(GetManagedEntrypoint);
+
+            Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
         /// <summary>
@@ -492,7 +494,7 @@ namespace AsmResolver.DotNet
             get => _managedEntrypoint.Value;
             set => _managedEntrypoint.Value = value;
         }
-
+        
         /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>
