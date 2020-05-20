@@ -84,7 +84,8 @@ namespace AsmResolver.DotNet.Serialized
                 corLib = CorLibTypeFactory.CorLibScope;
             }
 
-            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver(corLib));
+            var assemblyResolver = CreateAssemblyResolver(corLib, readParameters.WorkingDirectory);
+            MetadataResolver = new DefaultMetadataResolver(assemblyResolver);
 
             // Prepare lazy RID lists.
             var tablesStream = metadata.GetStream<TablesStream>();

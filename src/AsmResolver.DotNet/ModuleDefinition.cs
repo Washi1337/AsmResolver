@@ -737,12 +737,17 @@ namespace AsmResolver.DotNet
         /// Creates an assembly resolver based on the corlib reference.
         /// </summary>
         /// <param name="corLib">The corlib reference.</param>
+        /// <param name="workingDirectory">The working directory to search</param>
         /// <returns>The resolver.</returns>
-        protected static IAssemblyResolver CreateAssemblyResolver(IResolutionScope corLib)
+        protected static IAssemblyResolver CreateAssemblyResolver(IResolutionScope corLib, string workingDirectory=null)
         {
             var resolver = corLib.Name == "mscorlib"
-                ? (IAssemblyResolver) new NetFrameworkAssemblyResolver()
+                ? (AssemblyResolverBase) new NetFrameworkAssemblyResolver()
                 : new NetCoreAssemblyResolver();
+
+            if (!string.IsNullOrEmpty(workingDirectory))
+                resolver.SearchDirectories.Add(workingDirectory);
+            
             return resolver;
         }
 
