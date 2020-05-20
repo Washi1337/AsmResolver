@@ -82,7 +82,7 @@ namespace AsmResolver.PE.DotNet.Cil
                     _writer.WriteSByte((sbyte) _operandBuilder.GetArgumentIndex(instruction.Operand));
                     break;
                 case CilOperandType.InlineArgument:
-                    _writer.WriteUInt16((ushort) _operandBuilder.GetVariableIndex(instruction.Operand));
+                    _writer.WriteUInt16((ushort) _operandBuilder.GetArgumentIndex(instruction.Operand));
                     break;
 
                 case CilOperandType.ShortInlineBrTarget:

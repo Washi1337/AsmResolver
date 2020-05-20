@@ -1919,7 +1919,7 @@ namespace AsmResolver.PE.DotNet.Cil
             | ((ushort) PushI << StackBehaviourPushOffset)
             | ((ushort) Pop0 << StackBehaviourPopOffset)
             | ((byte) Primitive << OpCodeTypeOffset)
-            | ((byte) InlineVar << OperandTypeOffset)
+            | ((byte) InlineArgument << OperandTypeOffset)
             | ((byte) Next << FlowControlOffset));
 
         public static readonly CilOpCode Starg = new CilOpCode(
