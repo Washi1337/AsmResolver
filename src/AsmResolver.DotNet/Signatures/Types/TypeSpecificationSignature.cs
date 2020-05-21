@@ -1,6 +1,4 @@
-using AsmResolver.DotNet.Builder;
-
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Provides a base for type signatures that are based on another type signature.

@@ -1,4 +1,4 @@
-﻿namespace AsmResolver.DotNet.Signatures
+﻿namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Represents a single dimension in an array specification. 

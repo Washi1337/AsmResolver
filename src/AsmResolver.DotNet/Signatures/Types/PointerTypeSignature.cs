@@ -1,6 +1,6 @@
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Represents a type signature that describes an unmanaged pointer that addresses a chunk of data in memory. 

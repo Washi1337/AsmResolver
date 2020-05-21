@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Signatures
 {

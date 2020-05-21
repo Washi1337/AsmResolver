@@ -1,6 +1,6 @@
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Represents a type signature describing a single dimension array with 0 as a lower bound.

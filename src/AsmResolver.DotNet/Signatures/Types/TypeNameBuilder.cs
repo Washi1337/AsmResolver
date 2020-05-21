@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Types
 {
     internal static class TypeNameBuilder
     {

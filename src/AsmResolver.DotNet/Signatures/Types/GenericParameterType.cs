@@ -1,4 +1,4 @@
-﻿namespace AsmResolver.DotNet.Signatures
+﻿namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Provides members indicating whether a reference to a generic parameter is declared in a type or a method.

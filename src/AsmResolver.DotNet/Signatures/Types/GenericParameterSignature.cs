@@ -1,8 +1,7 @@
 ﻿using System;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Represents a type signature that references a type argument from a generic type or method.

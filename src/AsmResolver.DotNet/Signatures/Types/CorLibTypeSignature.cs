@@ -1,9 +1,8 @@
 using System;
 using System.Linq;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Signatures
+namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Represents a blob type signature referencing an element type defined in a common object runtime library such as

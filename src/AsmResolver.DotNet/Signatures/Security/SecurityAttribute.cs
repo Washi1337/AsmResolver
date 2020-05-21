@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Signatures.Security
 {

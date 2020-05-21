@@ -4,6 +4,7 @@ using System.Threading;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;

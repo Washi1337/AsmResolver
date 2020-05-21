@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using Xunit;
 using Xunit.Sdk;
 
