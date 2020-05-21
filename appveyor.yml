@@ -4,7 +4,7 @@
       - master
 
   image: Visual Studio 2017
-  version: 3.0.3-{branch}-build{build}
+  version: 3.0.4-{branch}-build.{build}
   configuration: Release
   
   before_build:
@@ -16,41 +16,22 @@
 
   artifacts:
     - path: AsmResolver/bin/Release
-      name: Latest stable release
+      name: 3.0.3-{branch}-build.{build}
 
   deploy:
     provider: NuGet
     api_key:
-      secure: PVEUaSEahOzJfYurDeVaY8zzkeyuxqL0KlUvgM6cQeldGh2xCvyPeKgEXOOt2ECy
+      secure: +NAjxjewtZM6YJXeCJPMcy+/Hhon2o1sC3+DfAMbjUbQCdwUvgujce7V+MnLD89Q
     skip_symbols: false
     artifact: /.*\.nupkg/
+
 -
   branches:
     only:
       - development
   
-  image: Visual Studio 2017
-  version: 3.0.4-{branch}-build{build}
-  configuration: Release
-
-  before_build:
-    - nuget restore
-    
-  build:
-    publish_nuget: false
-    verbosity: minimal
-
-  artifacts:
-    - path: AsmResolver/bin/Release
-      name: Bleeding edge
-
--
-  branches:
-    only:
-      - v4
-  
   image: Visual Studio 2019
-  version: 4.0.0-alpha-build{build}
+  version: 4.0.0-alpha-build.{build}
   configuration: Release
 
   skip_commits:
@@ -61,9 +42,15 @@
     - dotnet restore
     
   build:
-    publish_nuget: false
     verbosity: minimal
 
   artifacts:
-    - path: src/AsmResolver/bin/Release
-      name: alpha-v4
+    - path: src/AsmResolver.DotNet/bin/Release/netstandard2.0
+      name: 4.0.0-{branch}-build.{build}
+
+  deploy:
+    provider: NuGet
+    api_key:
+      secure: +NAjxjewtZM6YJXeCJPMcy+/Hhon2o1sC3+DfAMbjUbQCdwUvgujce7V+MnLD89Q
+    skip_symbols: false
+    artifact: /.*\.nupkg/
