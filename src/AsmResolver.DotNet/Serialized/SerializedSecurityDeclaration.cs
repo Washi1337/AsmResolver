@@ -5,6 +5,10 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Serialized
 {
+    /// <summary>
+    /// Represents a lazily initialized implementation of <see cref="SecurityDeclaration"/>  that is read from a
+    /// .NET metadata image. 
+    /// </summary>
     public class SerializedSecurityDeclaration : SecurityDeclaration
     {
         private readonly SerializedModuleDefinition _parentModule;

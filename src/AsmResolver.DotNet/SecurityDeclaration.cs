@@ -16,6 +16,10 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<IHasSecurityDeclaration> _parent;
         private readonly LazyVariable<PermissionSetSignature> _permissionSet;
         
+        /// <summary>
+        /// Initializes the <see cref="SecurityDeclaration"/> with a metadata token.
+        /// </summary>
+        /// <param name="token">The token.</param>
         protected SecurityDeclaration(MetadataToken token)
         {
             MetadataToken = token;
