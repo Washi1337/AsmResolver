@@ -1,10 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Title>AsmResolver.PE</Title>
+        <Description>PE image models for the AsmResolver executable file inspection toolsuite.</Description>
+        <Copyright>Copyright © Washi 2016-2020</Copyright>
+        <PackageProjectUrl>https://github.com/Washi1337/AsmResolver</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
         <LangVersion>8</LangVersion>
-        <PackageVersion>4.0.0</PackageVersion>
-        <AssemblyVersion>4.0</AssemblyVersion>
-        <FileVersion>4.0</FileVersion>
+        <Version>4.0.0-alpha.1</Version>
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 
