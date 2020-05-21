@@ -16,7 +16,7 @@
 
   artifacts:
     - path: AsmResolver/bin/Release
-      name: 3.0.3-{branch}-build.{build}
+      name: 3.0.3-master
 
   deploy:
     provider: NuGet
@@ -46,7 +46,7 @@
 
   artifacts:
     - path: src/AsmResolver.DotNet/bin/Release/netstandard2.0
-      name: 4.0.0-{branch}-build.{build}
+      name: 4.0.0-development
 
   deploy:
     provider: NuGet
