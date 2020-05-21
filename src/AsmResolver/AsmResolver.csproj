@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Title>AsmResolver</Title>
+        <Description>The base library for the AsmResolver executable file inspection toolsuite.</Description>
+        <Copyright>Copyright © Washi 2016-2020</Copyright>
+        <PackageProjectUrl>https://github.com/Washi1337/AsmResolver</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>exe pe dotnet cil inspection manipulation assembly disassembly</PackageTags>
+        <LangVersion>8</LangVersion>
+        <Version>4.0.0-alpha.1</Version>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+</Project>

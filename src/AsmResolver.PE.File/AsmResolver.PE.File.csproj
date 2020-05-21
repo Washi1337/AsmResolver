@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Title>AsmResolver.PE.File</Title>
+        <Description>Raw PE file models for the AsmResolver executable file inspection toolsuite.</Description>
+        <Copyright>Copyright © Washi 2016-2020</Copyright>
+        <PackageProjectUrl>https://github.com/Washi1337/AsmResolver</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>exe pe headers sections inspection manipulation assembly disassembly</PackageTags>
+        <LangVersion>8</LangVersion>
+        <Version>4.0.0-alpha.1</Version>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AsmResolver\AsmResolver.csproj" />
+    </ItemGroup>
+
+</Project>
