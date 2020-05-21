@@ -45,8 +45,7 @@
     verbosity: minimal
 
   artifacts:
-    - path: src/AsmResolver.DotNet/bin/Release/netstandard2.0
-      name: 4.0.0-development
+    - path: '**\*.nupkg'
 
   deploy:
     provider: NuGet
