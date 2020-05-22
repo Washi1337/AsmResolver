@@ -12,17 +12,23 @@ namespace AsmResolver.DotNet.Tests.Analysis
         public int Dummy2;
     }
 
+    [StructLayout(LayoutKind.Explicit)]
     public struct CustomNest
     {
+        [FieldOffset(0)]
         public CustomGenericStruct<byte> Dummy1;
 
+        [FieldOffset(32)]
         public ulong Dummy2;
     }
 
+    [StructLayout(LayoutKind.Explicit)]
     public struct CustomGenericStruct<T>
     {
+        [FieldOffset(0)]
         public T Dummy1;
 
+        [FieldOffset(64)]
         public ulong Dummy2;
     }
 
