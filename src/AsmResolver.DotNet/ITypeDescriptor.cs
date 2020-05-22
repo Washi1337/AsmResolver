@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Analysis;
+
 namespace AsmResolver.DotNet
 {
     /// <summary>
@@ -43,6 +45,6 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="is32Bit"></param>
         /// <returns>The size of the type, in bytes</returns>
-        int CalculateSize(bool is32Bit);
+        TypeMemoryLayout GetImpliedMemoryLayout(bool is32Bit);
     }
 }

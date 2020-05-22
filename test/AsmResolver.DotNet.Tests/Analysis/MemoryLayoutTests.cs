@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStruct).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomStruct>(), custom.CalculateSize(IntPtr.Size == 4));
+            Assert.Equal(Unsafe.SizeOf<CustomStruct>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomNest).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomNest>(), custom.CalculateSize(IntPtr.Size == 4));
+            Assert.Equal(Unsafe.SizeOf<CustomNest>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStructWithBigSize).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomStructWithBigSize>(), custom.CalculateSize(IntPtr.Size == 4));
+            Assert.Equal(Unsafe.SizeOf<CustomStructWithBigSize>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomStructWithSmallSize).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomStructWithSmallSize>(), custom.CalculateSize(IntPtr.Size == 4));
+            Assert.Equal(Unsafe.SizeOf<CustomStructWithSmallSize>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomUnionStruct).MetadataToken);
             
-            Assert.Equal(Unsafe.SizeOf<CustomUnionStruct>(), custom.CalculateSize(IntPtr.Size == 4));
+            Assert.Equal(Unsafe.SizeOf<CustomUnionStruct>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
         }
     }
 }

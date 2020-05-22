@@ -611,9 +611,9 @@ namespace AsmResolver.DotNet
         TypeDefinition ITypeDescriptor.Resolve() => this;
 
         /// <inheritdoc />
-        public int CalculateSize(bool is32Bit)
+        public TypeMemoryLayout GetImpliedMemoryLayout(bool is32Bit)
         {
-            return TypeMemoryLayoutDetector.CalculateSize(this, is32Bit);
+            return TypeMemoryLayoutDetector.GetImpliedMemoryLayout(this, is32Bit);
         }
 
         /// <summary>

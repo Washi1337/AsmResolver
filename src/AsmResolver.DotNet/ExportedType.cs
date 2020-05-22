@@ -140,9 +140,9 @@ namespace AsmResolver.DotNet
         public TypeDefinition Resolve() => Module?.MetadataResolver?.ResolveType(this);
 
         /// <inheritdoc />
-        public int CalculateSize(bool is32Bit)
+        public TypeMemoryLayout GetImpliedMemoryLayout(bool is32Bit)
         {
-            return TypeMemoryLayoutDetector.CalculateSize(Resolve(), is32Bit);
+            return TypeMemoryLayoutDetector.GetImpliedMemoryLayout(Resolve(), is32Bit);
         }
 
         /// <summary>

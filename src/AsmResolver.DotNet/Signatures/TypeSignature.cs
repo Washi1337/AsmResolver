@@ -259,9 +259,9 @@ namespace AsmResolver.DotNet.Signatures
         public abstract TypeDefinition Resolve();
 
         /// <inheritdoc />
-        public int CalculateSize(bool is32Bit)
+        public TypeMemoryLayout GetImpliedMemoryLayout(bool is32Bit)
         {
-            return TypeMemoryLayoutDetector.CalculateSize(this, is32Bit, new GenericContext());
+            return TypeMemoryLayoutDetector.GetImpliedMemoryLayout(this, is32Bit, new GenericContext());
         }
 
         /// <summary>

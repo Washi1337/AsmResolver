@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.DotNet.Analysis;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -80,7 +81,7 @@ namespace AsmResolver.DotNet
         TypeDefinition ITypeDescriptor.Resolve() => null;
 
         /// <inheritdoc />
-        public int CalculateSize(bool is32Bit)
+        public TypeMemoryLayout GetImpliedMemoryLayout(bool is32Bit)
         {
             throw new NotSupportedException();
         }
