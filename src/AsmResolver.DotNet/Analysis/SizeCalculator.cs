@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using AsmResolver.DotNet.Analysis.SizeCalculation;
-using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+﻿using AsmResolver.DotNet.Signatures;
 
 namespace AsmResolver.DotNet.Analysis
 {
@@ -17,10 +13,9 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="typeDefinition">The <see cref="TypeDefinition"/> to calculate the size of</param>
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeDefinition"/></returns>
-        /// <exception cref="SizeCalculationException">It isn't possible to compute the size statically</exception>
-        public static int CalculateSize(TypeDefinition typeDefinition, bool is32Bit, in GenericContext context)
+        public static int CalculateSize(TypeDefinition typeDefinition, bool is32Bit)
         {
-
+            return CalculateSize(typeDefinition.ToTypeSignature(), is32Bit, new GenericContext());
         }
 
         /// <summary>
@@ -29,10 +24,9 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="typeSignature">The <see cref="TypeSignature"/> to calculate the size of</param>
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeSignature"/></returns>
-        /// <exception cref="SizeCalculationException">It isn't possible to compute the size statically</exception>
         public static int CalculateSize(TypeSignature typeSignature, bool is32Bit, in GenericContext context)
         {
-
+            return 0;
         }
 
         /// <summary>

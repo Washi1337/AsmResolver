@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public int CalculateSize(bool is32Bit)
         {
-            return SizeCalculator.CalculateSize(Resolve(), is32Bit, new GenericContext());
+            return SizeCalculator.CalculateSize(Resolve(), is32Bit);
         }
 
         /// <summary>
