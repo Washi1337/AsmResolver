@@ -5,7 +5,7 @@ namespace AsmResolver.DotNet.Analysis
     /// <summary>
     /// Statically computes sizes of Types 
     /// </summary>
-    public static class SizeCalculator
+    internal static class TypeMemoryLayoutDetector
     {
         /// <summary>
         /// Calculates the size of a <see cref="TypeDefinition"/>
@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="typeDefinition">The <see cref="TypeDefinition"/> to calculate the size of</param>
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeDefinition"/></returns>
-        public static int CalculateSize(TypeDefinition typeDefinition, bool is32Bit)
+        internal static int CalculateSize(TypeDefinition typeDefinition, bool is32Bit)
         {
             return CalculateSize(typeDefinition.ToTypeSignature(), is32Bit, new GenericContext());
         }
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="typeSignature">The <see cref="TypeSignature"/> to calculate the size of</param>
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeSignature"/></returns>
-        public static int CalculateSize(TypeSignature typeSignature, bool is32Bit, in GenericContext context)
+        internal static int CalculateSize(TypeSignature typeSignature, bool is32Bit, in GenericContext context)
         {
             return 0;
         }
@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Analysis
         /// <param name="typeSpecification">The <see cref="TypeSpecification"/> to calculate the size of</param>
         /// <param name="is32Bit">Whether the parent <see cref="ModuleDefinition"/> is 32 bit</param>
         /// <returns>The size of <paramref name="typeSpecification"/></returns>
-        public static int CalculateSize(TypeSpecification typeSpecification, bool is32Bit)
+        internal static int CalculateSize(TypeSpecification typeSpecification, bool is32Bit)
         {
             return CalculateSize(typeSpecification.Signature, is32Bit, new GenericContext());
         }

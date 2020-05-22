@@ -142,7 +142,7 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public int CalculateSize(bool is32Bit)
         {
-            return SizeCalculator.CalculateSize(Resolve(), is32Bit);
+            return TypeMemoryLayoutDetector.CalculateSize(Resolve(), is32Bit);
         }
 
         /// <summary>
