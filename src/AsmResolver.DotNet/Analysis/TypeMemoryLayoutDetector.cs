@@ -30,38 +30,43 @@ namespace AsmResolver.DotNet.Analysis
             var flattened = FlattenValueType(typeSignature.Resolve(), mapping);
             var resolved = typeSignature.Resolve();
 
-            var biggestSize = flattened.Select(t => GetSize(t, is32Bit, context)).Max();
-
-            int GetRealSize()
+            int GetRealSize(int biggest)
             {
                 if (resolved.ClassLayout is null)
-                    return biggestSize;
+                    return biggest;
 
                 var explicitSize = resolved.ClassLayout.ClassSize;
-                return (int) Math.Max(biggestSize, explicitSize);
+                return (int) Math.Max(biggest, explicitSize);
             }
             
             if (resolved.IsExplicitLayout)
             {
                 var offsets = resolved.Fields.ToDictionary(k => k, v => v.FieldOffset.GetValueOrDefault());
-                return new TypeMemoryLayout(offsets, GetRealSize());
+                return new TypeMemoryLayout(offsets, GetRealSize(
+                    resolved.Fields
+                        .Select(f => (f, mapping[f]))
+                        .Select(p => p.f.FieldOffset.GetValueOrDefault() + p.Item2.Select(t => GetSize(t, is32Bit, context)).Sum())
+                        .Max()
+                    )
+                );
             }
             
             if (resolved.IsSequentialLayout)
             {
-                int GetAlignment()
+                int GetAlignment(int biggest)
                 {
                     if (resolved.ClassLayout is {})
                     {
                         var pack = resolved.ClassLayout.PackingSize;
-                        if (pack > 0 && pack < biggestSize)
+                        if (pack > 0 && pack < biggest)
                             return pack;
                     }
 
-                    return biggestSize;
+                    return biggest;
                 }
 
-                var alignment = (uint) GetAlignment();
+                var biggestSize = flattened.Select(t => GetSize(t, is32Bit, context)).Max();
+                var alignment = (uint) GetAlignment(biggestSize);
                 var offsets = new Dictionary<FieldDefinition, int>();
                 var size = resolved.Fields
                     .Select(f => (f, GetSize(f.Signature.FieldType, is32Bit, context)))
@@ -71,7 +76,7 @@ namespace AsmResolver.DotNet.Analysis
                         return (curr.f, curr.Item2 + (int) ((uint) next.Item2).Align(alignment));
                     });
                 
-                return new TypeMemoryLayout(offsets, size.Item2);
+                return new TypeMemoryLayout(offsets, GetRealSize(size.Item2));
             }
 
             // Auto layout is not supported
