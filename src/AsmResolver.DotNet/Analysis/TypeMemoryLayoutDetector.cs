@@ -16,10 +16,10 @@ namespace AsmResolver.DotNet.Analysis
             return GetImpliedMemoryLayout(typeSpecification.Signature, is32Bit, new GenericContext());
         }
 
-        internal static TypeMemoryLayout GetImpliedMemoryLayout(TypeSignature typeSignature, bool is32Bit,
-                                                       in GenericContext context)
+        internal static TypeMemoryLayout GetImpliedMemoryLayout(
+            TypeSignature typeSignature, bool is32Bit, in GenericContext context)
         {
-            var size = typeSignature.ElementType switch
+            int GetSize(in GenericContext ctx) => typeSignature.ElementType switch
             {
                 ElementType.Boolean => 1,
                 ElementType.Char => 2,
@@ -39,11 +39,11 @@ namespace AsmResolver.DotNet.Analysis
                 ElementType.Class => is32Bit ? 4 : 8,
                 ElementType.Array => is32Bit ? 4 : 8,
                 ElementType.GenericInst => GetImpliedMemoryLayout(typeSignature.Resolve().ToTypeSignature(), is32Bit,
-                    context.WithType((GenericInstanceTypeSignature) typeSignature)),
+                    ctx.WithType((GenericInstanceTypeSignature) typeSignature)).Size,
                 ElementType.MVar => GetImpliedMemoryLayout(
-                    context.GetTypeArgument((GenericParameterSignature) typeSignature), is32Bit, context),
+                    ctx.GetTypeArgument((GenericParameterSignature) typeSignature), is32Bit, ctx).Size,
                 ElementType.Var => GetImpliedMemoryLayout(
-                    context.GetTypeArgument((GenericParameterSignature) typeSignature), is32Bit, context),
+                    ctx.GetTypeArgument((GenericParameterSignature) typeSignature), is32Bit, ctx).Size,
                 ElementType.TypedByRef => is32Bit ? 4 : 8,
                 ElementType.I => is32Bit ? 4 : 8,
                 ElementType.U => is32Bit ? 4 : 8,
@@ -51,14 +51,24 @@ namespace AsmResolver.DotNet.Analysis
                 ElementType.Object => is32Bit ? 4 : 8,
                 ElementType.SzArray => is32Bit ? 4 : 8,
                 ElementType.CModReqD => GetImpliedMemoryLayout(
-                    ((CustomModifierTypeSignature) typeSignature).BaseType, is32Bit, context),
+                    ((CustomModifierTypeSignature) typeSignature).BaseType, is32Bit, ctx).Size,
                 ElementType.CModOpt => GetImpliedMemoryLayout(
-                    ((CustomModifierTypeSignature) typeSignature).BaseType, is32Bit, context),
+                    ((CustomModifierTypeSignature) typeSignature).BaseType, is32Bit, ctx).Size,
                 ElementType.Boxed => is32Bit ? 4 : 8,
                 _ => throw new TypeMemoryLayoutDetectionException()
             };
-            
-            return new TypeMemoryLayout(null, 0);
+
+            if (!typeSignature.IsValueType)
+            {
+                return new TypeMemoryLayout(null, is32Bit ? 4 : 8);
+            }
+            else
+            {
+                var offsets = new Dictionary<FieldDefinition, int>();
+                var flattened = FlattenValueType(typeSignature.Resolve());
+                
+                return new TypeMemoryLayout(null, 0);
+            }
         }
 
         private static IReadOnlyList<TypeSignature> FlattenValueType(
