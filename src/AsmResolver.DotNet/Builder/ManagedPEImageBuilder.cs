@@ -10,6 +10,14 @@ namespace AsmResolver.DotNet.Builder
     /// </summary>
     public class ManagedPEImageBuilder : IPEImageBuilder
     {
+        /// <summary>
+        /// Gets the parameters for constructing the .NET data directory. 
+        /// </summary>
+        public DotNetDirectoryBuilderParameters BuilderParameters
+        {
+            get;
+        } = new DotNetDirectoryBuilderParameters();
+        
         /// <inheritdoc />
         public IPEImage CreateImage(ModuleDefinition module)
         {
@@ -22,7 +30,7 @@ namespace AsmResolver.DotNet.Builder
 
         private IDotNetDirectory CreateDotNetDirectory(PEImage image, ModuleDefinition module)
         {
-            var buffer = new DotNetDirectoryBuffer(module, new CilMethodBodySerializer(), new MetadataBuffer());
+            var buffer = new DotNetDirectoryBuffer(module, BuilderParameters.MethodBodySerializer, new MetadataBuffer());
             
             // If module is the manifest module, include the entire assembly.
             if (module.Assembly?.ManifestModule == module)
