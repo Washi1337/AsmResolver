@@ -75,11 +75,6 @@ Corlib type signatures can also be looked up by their element type, by their ful
 
 If an invalid element type, name or type descriptor is passed on, these methods return ``null``.
 
-.. warning::
-
-    While it is technically possible to reference a basic type sucha s ``System.Int32`` as a ``TypeDefOrRefSignature``, it renders the .NET module invalid by most implementations of the CLR. Always use the ``CorLibTypeSignature`` to reference basic types within your blob signatures.
-
-
 TypeDefOrRefSignature
 ---------------------
 
@@ -89,6 +84,11 @@ The ``TypeDefOrRefSignature`` class is used to reference types in either the ``T
 
     TypeReference streamTypeRef = new TypeReference(corlibScope, "System.IO", "Stream");
     TypeSignature streamTypeSig = new TypeDefOrRefSignature(streamTypeRef);
+
+
+.. warning::
+
+    While it is technically possible to reference a basic type such as ``System.Int32`` as a ``TypeDefOrRefSignature``, it renders the .NET module invalid by most implementations of the CLR. Always use the ``CorLibTypeSignature`` to reference basic types within your blob signatures.
 
 
 GenericInstanceTypeSignature
@@ -110,7 +110,7 @@ The ``GenericInstanceTypeSignature`` class is used to instantiate generic types 
 Shortcuts
 ---------
 
-To quickly transform any ``ITypeDescriptor`` into a ``TypeSignature``, it is possible to use the ``.ToTypeSignature()`` method on any ``ITypeDescriptor``. For ``TypeReference`s, this will also check whether the object is referencing a basic type and return the appropriate ``CorLibTypeSignature`` instead.
+To quickly transform any ``ITypeDescriptor`` into a ``TypeSignature``, it is possible to use the ``.ToTypeSignature()`` method on any ``ITypeDescriptor``. For ``TypeReference``s, this will also check whether the object is referencing a basic type and return the appropriate ``CorLibTypeSignature`` instead.
 
 .. code-block:: csharp
 
