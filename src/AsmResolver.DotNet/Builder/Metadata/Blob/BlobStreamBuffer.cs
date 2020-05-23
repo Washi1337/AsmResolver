@@ -72,17 +72,18 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
                 uint startOffset = reader.FileOffset;
                 if (!reader.TryReadCompressedUInt32(out uint dataLength))
                     break;
-                if (dataLength == 0)
-                    continue;
                 
                 uint headerLength = reader.FileOffset - startOffset;
                 reader.FileOffset -= headerLength;
-                
-                // Read data at index.
-                uint newIndex = (uint) _rawStream.Length;
-                var blob = stream.GetBlobByIndex(index);
-                _blobs[blob] = newIndex;
-                    
+
+                if (dataLength > 0)
+                {
+                    // Read data at index.
+                    uint newIndex = (uint) _rawStream.Length;
+                    var blob = stream.GetBlobByIndex(index);
+                    _blobs[blob] = newIndex;
+                }
+
                 // Copy over raw data of blob to output stream.
                 // This is important since technically it is possible to encode the same blob in multiple ways.
                 var buffer = new byte[headerLength + dataLength];
