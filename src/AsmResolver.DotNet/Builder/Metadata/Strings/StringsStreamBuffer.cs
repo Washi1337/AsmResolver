@@ -42,6 +42,23 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         }
 
         /// <summary>
+        /// Imports the contents of a strings stream and indexes all present strings.
+        /// </summary>
+        /// <param name="stream">The stream to import.</param>
+        public void ImportStringsStream(StringsStream stream)
+        {
+            uint index = 1;
+            while (index < stream.GetPhysicalSize())
+            {
+                var @string = stream.GetStringByIndex(index);
+                uint newIndex = AppendString(@string);
+                _strings[@string] = newIndex;
+
+                index += (uint) Encoding.UTF8.GetByteCount(@string) + 1;
+            }
+        }
+
+        /// <summary>
         /// Appends raw data to the stream.
         /// </summary>
         /// <param name="data">The data to append.</param>
@@ -56,7 +73,15 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             _writer.WriteBytes(data, 0, data.Length);
             return offset;
         }
-        
+
+        private uint AppendString(string value)
+        {
+            uint offset = (uint) _rawStream.Length;
+            AppendRawData(Encoding.UTF8.GetBytes(value));
+            _writer.WriteByte(0);
+            return offset;
+        }
+
         /// <summary>
         /// Gets the index to the provided string. If the string is not present in the buffer, it will be appended to
         /// the end of the stream.
@@ -73,9 +98,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
 
             if (!_strings.TryGetValue(value, out uint offset))
             {
-                offset = (uint) _rawStream.Length;
-                AppendRawData(Encoding.UTF8.GetBytes(value));
-                _writer.WriteByte(0);
+                offset = AppendString(value);
                 _strings.Add(value, offset);
             }
             
