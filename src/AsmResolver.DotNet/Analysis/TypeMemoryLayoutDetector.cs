@@ -10,45 +10,64 @@ namespace AsmResolver.DotNet.Analysis
     {
         internal static TypeMemoryLayout GetImpliedMemoryLayout(TypeDefinition typeDefinition, bool is32Bit)
         {
-            return GetImpliedMemoryLayout(typeDefinition.ToTypeSignature(), is32Bit, new GenericContext());
+            return GetImpliedMemoryLayout(typeDefinition.ToTypeSignature(), is32Bit);
         }
 
         internal static TypeMemoryLayout GetImpliedMemoryLayout(TypeSpecification typeSpecification, bool is32Bit)
         {
-            return GetImpliedMemoryLayout(typeSpecification.Signature, is32Bit, new GenericContext());
+            return GetImpliedMemoryLayout(typeSpecification.Signature, is32Bit);
         }
 
-        internal static TypeMemoryLayout GetImpliedMemoryLayout(
-            TypeSignature typeSignature, bool is32Bit, GenericContext context)
+        internal static TypeMemoryLayout GetImpliedMemoryLayout(TypeSignature typeSignature, bool is32Bit)
         {
-            if (!typeSignature.IsValueType)
+            var elementType = typeSignature.ElementType;
+            if (elementType == ElementType.Class)
             {
                 return new TypeMemoryLayout(null, is32Bit ? 4 : 8);
             }
 
+            if (elementType != ElementType.ValueType && elementType != ElementType.GenericInst)
+            {
+                return new TypeMemoryLayout(null, GetSize(typeSignature, is32Bit));
+            }
+            
             var mapping = new Dictionary<FieldDefinition, List<TypeSignature>>();
-            var flattened = FlattenValueType(typeSignature.Resolve(), mapping);
+            var genericContext = typeSignature is GenericInstanceTypeSignature g
+                ? new GenericContext().WithType(g)
+                : new GenericContext();
+            
+            var flattened = FlattenValueType(typeSignature.Resolve(), mapping, genericContext);
             var resolved = typeSignature.Resolve();
 
-            int GetRealSize(int biggest)
+            int GetRealSize(int inferredSize)
             {
                 if (resolved.ClassLayout is null)
-                    return biggest;
+                    return inferredSize;
 
                 var explicitSize = resolved.ClassLayout.ClassSize;
-                return (int) Math.Max(biggest, explicitSize);
+                return (int) Math.Max(inferredSize, explicitSize);
             }
             
             if (resolved.IsExplicitLayout)
             {
                 var offsets = resolved.Fields.ToDictionary(k => k, v => v.FieldOffset.GetValueOrDefault());
-                return new TypeMemoryLayout(offsets, GetRealSize(
-                    resolved.Fields
-                        .Select(f => (f, mapping[f]))
-                        .Select(p => p.f.FieldOffset.GetValueOrDefault() + p.Item2.Select(t => GetSize(t, is32Bit, context)).Sum())
-                        .Max()
-                    )
-                );
+                var biggest = 0;
+                foreach (var field in resolved.Fields)
+                {
+                    var resolvedField = field.Signature.FieldType;
+                    var signatures = mapping[field];
+                    if (signatures.Count == 1)
+                    {
+                        biggest = Math.Max(biggest, GetSize(signatures[0], is32Bit));
+                    }
+                    else
+                    {
+                        var layout = resolvedField.GetImpliedMemoryLayout(is32Bit);
+                        biggest = Math.Max(biggest, offsets[field] + layout.Size);
+                    }
+                }
+
+                return new TypeMemoryLayout(offsets, GetRealSize(biggest));
             }
             
             if (resolved.IsSequentialLayout)
@@ -65,40 +84,64 @@ namespace AsmResolver.DotNet.Analysis
                     return biggest;
                 }
 
-                var biggestSize = flattened.Select(t => GetSize(t, is32Bit, context)).Max();
+                var biggestSize = flattened.Select(t => GetSize(t, is32Bit)).Max();
                 var alignment = (uint) GetAlignment(biggestSize);
                 var offsets = new Dictionary<FieldDefinition, int>();
-                var size = resolved.Fields
-                    .Select(f => (f, GetSize(f.Signature.FieldType, is32Bit, context)))
-                    .Aggregate((curr, next) =>
+                var size = 0;
+
+                foreach (var field in resolved.Fields)
+                {
+                    offsets[field] = size;
+                    var signatures = mapping[field];
+                    if (signatures.Count == 1)
                     {
-                        offsets[curr.f] = curr.Item2;
-                        return (curr.f, curr.Item2 + (int) ((uint) next.Item2).Align(alignment));
-                    });
+                        size += signatures.Select(s => (int) ((uint) GetSize(s, is32Bit)).Align(alignment)).Sum();
+                    }
+                    else
+                    {
+                        var resolvedField = field.Signature.FieldType;
+                        var layout = resolvedField.GetImpliedMemoryLayout(is32Bit);
+                        size += (int) ((uint) layout.Size).Align(alignment);
+                    }
+                }
                 
-                return new TypeMemoryLayout(offsets, GetRealSize(size.Item2));
+                return new TypeMemoryLayout(offsets, GetRealSize(size));
             }
 
-            // Auto layout is not supported
-            throw new TypeMemoryLayoutDetectionException();
+            throw new TypeMemoryLayoutDetectionException("Value types with auto layout are not supported");
         }
 
-        private static List<TypeSignature> FlattenValueType(
-            TypeDefinition valueType, Dictionary<FieldDefinition, List<TypeSignature>> mapping,
-            HashSet<TypeDefinition> visited = null)
+        private static List<TypeSignature> FlattenValueType(TypeDefinition valueType,
+            Dictionary<FieldDefinition, List<TypeSignature>> mapping, in GenericContext context)
         {
             var signatures = new List<TypeSignature>();
-            visited ??= new HashSet<TypeDefinition>();
-            visited.Add(valueType);
 
             foreach (var field in valueType.Fields)
             {
                 var sig = field.Signature.FieldType;
                 if (sig.ElementType == ElementType.ValueType)
                 {
-                    var flattened = FlattenValueType(sig.Resolve(), mapping, visited);
+                    var resolved = sig.Resolve();
+                    
+                    var flattened = FlattenValueType(resolved, mapping, context);
                     signatures.AddRange(flattened);
                     mapping[field] = flattened;
+                }
+                else if (sig.ElementType == ElementType.GenericInst)
+                {
+                    var generic = (GenericInstanceTypeSignature) sig;
+                    var resolved = generic.Resolve();
+                    
+                    var newContext = context.WithType(generic);
+                    var flattened = FlattenValueType(resolved, mapping, newContext);
+                    signatures.AddRange(flattened);
+                    mapping[field] = flattened;
+                }
+                else if (sig.ElementType == ElementType.MVar || sig.ElementType == ElementType.Var)
+                {
+                    var generic = context.GetTypeArgument((GenericParameterSignature) sig);
+                    signatures.Add(generic);
+                    mapping[field] = new List<TypeSignature>(1) { generic };
                 }
                 else
                 {
@@ -110,8 +153,9 @@ namespace AsmResolver.DotNet.Analysis
             return signatures;
         }
 
-        private static int GetSize(TypeSignature sig, bool is32Bit, GenericContext ctx)
+        private static int GetSize(TypeSignature sig, bool is32Bit)
         {
+            #pragma warning disable 8509
             return sig.ElementType switch
             {
                 ElementType.Boolean => 1,
@@ -131,23 +175,17 @@ namespace AsmResolver.DotNet.Analysis
                 ElementType.ByRef => is32Bit ? 4 : 8,
                 ElementType.Class => is32Bit ? 4 : 8,
                 ElementType.Array => is32Bit ? 4 : 8,
-                ElementType.GenericInst => GetSize(
-                    sig.Resolve().ToTypeSignature(), is32Bit, ctx.WithType((GenericInstanceTypeSignature) sig)),
-                ElementType.MVar => GetSize(
-                    ctx.GetTypeArgument((GenericParameterSignature) sig), is32Bit, ctx),
-                ElementType.Var => GetSize(
-                    ctx.GetTypeArgument((GenericParameterSignature) sig), is32Bit, ctx),
                 ElementType.TypedByRef => is32Bit ? 4 : 8,
                 ElementType.I => is32Bit ? 4 : 8,
                 ElementType.U => is32Bit ? 4 : 8,
                 ElementType.FnPtr => is32Bit ? 4 : 8,
                 ElementType.Object => is32Bit ? 4 : 8,
                 ElementType.SzArray => is32Bit ? 4 : 8,
-                ElementType.CModReqD => GetSize(((CustomModifierTypeSignature) sig).BaseType, is32Bit, ctx),
-                ElementType.CModOpt => GetSize(((CustomModifierTypeSignature) sig).BaseType, is32Bit, ctx),
+                ElementType.CModReqD => GetSize(((CustomModifierTypeSignature) sig).BaseType, is32Bit),
+                ElementType.CModOpt => GetSize(((CustomModifierTypeSignature) sig).BaseType, is32Bit),
                 ElementType.Boxed => is32Bit ? 4 : 8,
-                _ => throw new TypeMemoryLayoutDetectionException()
             };
+            #pragma warning restore 8509
         }
     }
 }
