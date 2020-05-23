@@ -103,14 +103,6 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <summary>
-        /// Gets the underlying object providing access to the data directory containing .NET metadata.  
-        /// </summary>
-        public IDotNetDirectory DotNetDirectory
-        {
-            get;
-        }
-
-        /// <summary>
         /// Gets the reading parameters that are used for reading the contents of the module.
         /// </summary>
         public ModuleReadParameters ReadParameters

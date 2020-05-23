@@ -42,6 +42,24 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         }
 
         /// <summary>
+        /// Imports the contents of a blob stream and indexes all present blob signatures.
+        /// </summary>
+        /// <param name="stream">The stream to import.</param>
+        public void ImportBlobStream(BlobStream stream)
+        {
+            uint index = 1;
+            while (index < stream.GetPhysicalSize())
+            {
+                var blob = stream.GetBlobByIndex(index);
+                uint offset = AppendBlob(blob);
+                _blobs[blob] = offset;
+
+                uint totalBlobLength = ((uint) blob.Length).GetCompressedSize() + (uint) blob.Length;
+                index += totalBlobLength;
+            }
+        }
+
+        /// <summary>
         /// Appends raw data to the stream.
         /// </summary>
         /// <param name="data">The data to append.</param>
@@ -56,7 +74,15 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
             _writer.WriteBytes(data, 0, data.Length);
             return offset;
         }
-        
+
+        private uint AppendBlob(byte[] blob)
+        {
+            uint offset = (uint) _rawStream.Length;
+            _writer.WriteCompressedUInt32((uint) blob.Length);
+            AppendRawData(blob);
+            return offset;
+        }
+
         /// <summary>
         /// Gets the index to the provided blob. If the blob is not present in the buffer, it will be appended to the end
         /// of the stream.
@@ -70,9 +96,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
             
             if (!_blobs.TryGetValue(blob, out uint offset))
             {
-                offset = (uint) _rawStream.Length;
-                _writer.WriteCompressedUInt32((uint) blob.Length);
-                 AppendRawData(blob);
+                offset = AppendBlob(blob);
                 _blobs.Add(blob, offset);
             }
             

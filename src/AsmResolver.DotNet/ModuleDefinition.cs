@@ -197,6 +197,18 @@ namespace AsmResolver.DotNet
             internal set;
         }
 
+        /// <summary>
+        /// Gets the underlying object providing access to the data directory containing .NET metadata (if available).  
+        /// </summary>
+        /// <remarks>
+        /// When this property is <c>null</c>, the module is a new module that is not yet assembled.
+        /// </remarks>
+        public IDotNetDirectory DotNetDirectory
+        {
+            get;
+            protected set;
+        }
+
         /// <inheritdoc />
         public MetadataToken MetadataToken
         {

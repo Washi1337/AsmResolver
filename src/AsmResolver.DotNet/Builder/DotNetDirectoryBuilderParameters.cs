@@ -9,9 +9,9 @@ namespace AsmResolver.DotNet.Builder
     public class DotNetDirectoryBuilderParameters 
     {
         /// <summary>
-        /// Gets or sets the flags defining the behaviour of the .NET directory builder.
+        /// Gets or sets the flags defining the behaviour of the .NET metadata directory builder.
         /// </summary>
-        public DotNetDirectoryBuilderFlags BuilderFlags
+        public MetadataBuilderFlags MetadataBuilderFlags
         {
             get;
             set;

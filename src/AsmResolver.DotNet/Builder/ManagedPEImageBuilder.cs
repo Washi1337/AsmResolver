@@ -1,7 +1,7 @@
 ﻿using AsmResolver.DotNet.Builder.Metadata;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.DotNet.Metadata.Blob;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -30,15 +30,32 @@ namespace AsmResolver.DotNet.Builder
 
         private IDotNetDirectory CreateDotNetDirectory(PEImage image, ModuleDefinition module)
         {
-            var buffer = new DotNetDirectoryBuffer(module, BuilderParameters.MethodBodySerializer, new MetadataBuffer());
+            var metadataBuffer = CreateMetadataBuffer(module);
+            var dotNetDirectoryBuffer = new DotNetDirectoryBuffer(module, BuilderParameters.MethodBodySerializer, metadataBuffer);
             
             // If module is the manifest module, include the entire assembly.
             if (module.Assembly?.ManifestModule == module)
-                buffer.AddAssembly(module.Assembly);
+                dotNetDirectoryBuffer.AddAssembly(module.Assembly);
             else
-                buffer.AddModule(module);
+                dotNetDirectoryBuffer.AddModule(module);
 
-            return buffer.CreateDirectory();
+            return dotNetDirectoryBuffer.CreateDirectory();
+        }
+
+        private IMetadataBuffer CreateMetadataBuffer(ModuleDefinition module)
+        {
+            var metadataBuffer = new MetadataBuffer();
+            
+            // Check if there exists a .NET directory to base off the metadata buffer on.
+            var originalMetadata = module.DotNetDirectory?.Metadata;
+            if (originalMetadata is null)
+                return metadataBuffer;
+            
+            // Import original contents of the blob stream if specified.
+            if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveBlobIndices) != 0)
+                metadataBuffer.BlobStream.ImportBlobStream(originalMetadata.GetStream<BlobStream>());
+
+            return metadataBuffer;
         }
     }
 }
