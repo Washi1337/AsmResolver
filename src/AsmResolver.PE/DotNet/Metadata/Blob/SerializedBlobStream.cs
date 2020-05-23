@@ -71,8 +71,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
             var blobReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
             if (blobReader.TryReadCompressedUInt32(out uint length))
             {
-                uint headerSize = blobReader.FileOffset - blobReader.StartPosition; 
-                blobReader.ChangeSize(length + headerSize);
+                uint headerSize = blobReader.FileOffset - blobReader.StartPosition;
+                blobReader.ChangeSize(Math.Min(length + headerSize, blobReader.Length));
                 return blobReader;
             }
 

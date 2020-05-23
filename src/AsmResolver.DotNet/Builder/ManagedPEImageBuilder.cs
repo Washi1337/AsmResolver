@@ -1,6 +1,4 @@
 ﻿using AsmResolver.DotNet.Builder.Metadata;
-using AsmResolver.DotNet.Code.Cil;
-using AsmResolver.DotNet.Serialized;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Blob;

@@ -139,5 +139,32 @@ namespace AsmResolver.DotNet.Tests.Builder
                 0, 1, 2
             }, newStream.GetBlobByIndex(9));
         }
+
+        [Fact]
+        public void ImportBlobStreamWithGarbageData()
+        {
+            var existingBlobStream = new SerializedBlobStream(BlobStream.DefaultName, new byte[]
+            {
+                0,
+                3, 0, 1, 2,
+                123,
+                3, 0, 1, 2,
+            });
+            
+            var buffer = new BlobStreamBuffer();
+            buffer.ImportBlobStream(existingBlobStream);
+            
+            var newStream = buffer.CreateStream();
+
+            Assert.Equal(new byte[]
+            {
+                0, 1, 2
+            }, newStream.GetBlobByIndex(1));
+            
+            Assert.Equal(new byte[]
+            {
+                0, 1, 2
+            }, newStream.GetBlobByIndex(6));
+        }
     }
 }
