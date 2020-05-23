@@ -8,6 +8,10 @@ namespace AsmResolver.DotNet.Builder
     [Flags]
     public enum MetadataBuilderFlags
     {
-        PreserveBlobIndices
+        /// <summary>
+        /// Indicates indices into the blob stream should be preserved whenever possible during the construction
+        /// of the metadata directory. 
+        /// </summary>
+        PreserveBlobIndices = 1
     }
 }
