@@ -43,3 +43,4 @@ Table of Contents:
    dotnet/basics
    dotnet/traversal
    dotnet/importing
+   dotnet/cloning
