@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using AsmResolver.DotNet.Analysis;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Analysis
@@ -36,6 +39,8 @@ namespace AsmResolver.DotNet.Tests.Analysis
     public struct CustomStructWithSmallSize
     {
         public int Dummy1;
+
+        public long Dummy2;
     }
 
     [StructLayout(LayoutKind.Explicit, Pack = 1)]
@@ -49,6 +54,9 @@ namespace AsmResolver.DotNet.Tests.Analysis
 
         [FieldOffset(8)]
         public float Dummy3;
+
+        [FieldOffset(12)]
+        public CustomStructWithSmallSize Nest;
     }
 
     public class SizeCalculatorTest
@@ -96,6 +104,24 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomUnionStruct).MetadataToken);
             
             Assert.Equal(Unsafe.SizeOf<CustomUnionStruct>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
+        }
+
+        [Fact]
+        public void ReferenceType()
+        {
+            var module = ModuleDefinition.FromFile(typeof(TypeMemoryLayout).Assembly.Location);
+            var custom = (TypeDefinition) module.LookupMember(typeof(TypeMemoryLayout).MetadataToken);
+            
+            Assert.Equal(Unsafe.SizeOf<TypeMemoryLayout>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
+        }
+
+        [Fact]
+        public void PrimitiveInt32()
+        {
+            var module = ModuleDefinition.FromFile(typeof(SizeCalculatorTest).Assembly.Location);
+            var custom = module.CorLibTypeFactory.Int32;
+            
+            Assert.Equal(Unsafe.SizeOf<int>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
         }
     }
 }
