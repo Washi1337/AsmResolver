@@ -42,20 +42,56 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         }
 
         /// <summary>
-        /// Imports the contents of a blob stream and indexes all present blob signatures.
+        /// Imports the contents of a user strings stream and indexes all present strings.
         /// </summary>
         /// <param name="stream">The stream to import.</param>
         public void ImportBlobStream(BlobStream stream)
         {
+            if (!stream.CanRead)
+                throw new ArgumentException("Blob stream to import must be readable.");
+
+            var reader = stream.CreateReader();
+            
+            // Only copy first byte to output stream if we have already written something to the output stream.   
+            byte b = reader.ReadByte();
+            if (_rawStream.Length != 1)
+                _writer.WriteByte(b);
+
+            // Perform linear sweep of the raw data. 
+            
+            // Note: This might result in incorrect strings being indexed if garbage data was injected in the heap. 
+            //       This is okay as long as we still copy all the data, including the garbage data.
+            //       The only side-effect we get is that blobs that did appear in the original stream might 
+            //       be duplicated in the new stream. This is an acceptable side-effect, as the purpose of this
+            //       import function is to only preserve existing data, and not necessarily make sure that we use
+            //       the most efficient storage mechanism.
+            
             uint index = 1;
             while (index < stream.GetPhysicalSize())
             {
+                uint startOffset = reader.FileOffset;
+                if (!reader.TryReadCompressedUInt32(out uint dataLength))
+                    break;
+                if (dataLength == 0)
+                    continue;
+                
+                uint headerLength = reader.FileOffset - startOffset;
+                reader.FileOffset -= headerLength;
+                
+                // Read data at index.
+                uint newIndex = (uint) _rawStream.Length;
                 var blob = stream.GetBlobByIndex(index);
-                uint offset = AppendBlob(blob);
-                _blobs[blob] = offset;
+                _blobs[blob] = newIndex;
+                    
+                // Copy over raw data of blob to output stream.
+                // This is important since technically it is possible to encode the same blob in multiple ways.
+                var buffer = new byte[headerLength + dataLength];
+                int actualLength = reader.ReadBytes(buffer, 0, buffer.Length);
+                
+                _writer.WriteBytes(buffer, 0, actualLength);
 
-                uint totalBlobLength = ((uint) blob.Length).GetCompressedSize() + (uint) blob.Length;
-                index += totalBlobLength;
+                // Move to next user string.
+                index += (uint) actualLength;
             }
         }
 
