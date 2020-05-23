@@ -125,7 +125,7 @@ namespace AsmResolver.DotNet.Analysis
                 var sig = field.Signature.FieldType;
                 if (sig.ElementType == ElementType.ValueType)
                 {
-                    var flattened = FlattenValueType(sig, mapping, context);
+                    var flattened = FlattenValueType(sig, mapping, context, visited);
                     signatures.AddRange(flattened);
                     mapping[field] = flattened;
                 }
@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet.Analysis
                 {
                     var generic = (GenericInstanceTypeSignature) sig;
                     var newContext = context.WithType(generic);
-                    var flattened = FlattenValueType(generic.Resolve().ToTypeSignature(), mapping, newContext);
+                    var flattened = FlattenValueType(generic.Resolve().ToTypeSignature(), mapping, newContext, visited);
                     signatures.AddRange(flattened);
                     mapping[field] = flattened;
                 }
