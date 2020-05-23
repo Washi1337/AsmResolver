@@ -46,13 +46,13 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
         public void ImportGuidStream(GuidStream stream)
         {
             uint index = 1;
-            while (index < stream.GetPhysicalSize())
+            while (index < stream.GetPhysicalSize() / GuidStream.GuidSize + 1)
             {
                 var guid = stream.GetGuidByIndex(index);
                 uint newIndex = AppendGuid(guid);
                 _guids[guid] = newIndex;
 
-                index += GuidStream.GuidSize;
+                index++;
             }
         }
 
