@@ -12,6 +12,12 @@ namespace AsmResolver.DotNet.Builder
         /// Indicates indices into the blob stream should be preserved whenever possible during the construction
         /// of the metadata directory. 
         /// </summary>
-        PreserveBlobIndices = 1
+        PreserveBlobIndices = 1,
+        
+        /// <summary>
+        /// Indicates indices into the GUID stream should be preserved whenever possible during the construction
+        /// of the metadata directory. 
+        /// </summary>
+        PreserveGuidIndices = 2,
     }
 }

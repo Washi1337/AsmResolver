@@ -39,13 +39,38 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
             get;
         }
 
+        /// <summary>
+        /// Imports the contents of a GUID stream and indexes all present GUIDs.
+        /// </summary>
+        /// <param name="stream">The stream to import.</param>
+        public void ImportGuidStream(GuidStream stream)
+        {
+            uint index = 1;
+            while (index < stream.GetPhysicalSize() / GuidStream.GuidSize + 1)
+            {
+                var guid = stream.GetGuidByIndex(index);
+                uint newIndex = AppendGuid(guid);
+                _guids[guid] = newIndex;
+
+                index++;
+            }
+        }
+
         private uint AppendRawData(byte[] data)
         {
             uint offset = (uint) _rawStream.Length;
             _writer.WriteBytes(data, 0, data.Length);
             return offset;
         }
-        
+
+        private uint AppendGuid(System.Guid guid)
+        {
+            uint index;
+            index = (uint) _rawStream.Length / GuidStream.GuidSize + 1;
+            AppendRawData(guid.ToByteArray());
+            return index;
+        }
+
         /// <summary>
         /// Gets the index to the provided GUID. If the GUID. is not present in the buffer, it will be appended to the
         /// end of the stream.
@@ -59,8 +84,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
             
             if (!_guids.TryGetValue(guid, out uint index))
             {
-                index = (uint) _rawStream.Length / 16 + 1;
-                 AppendRawData(guid.ToByteArray());
+                index = AppendGuid(guid);
                 _guids.Add(guid, index);
             }
 
