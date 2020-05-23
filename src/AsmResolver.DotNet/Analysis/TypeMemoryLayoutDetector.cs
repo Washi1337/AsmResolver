@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Analysis
                 ? new GenericContext().WithType(g)
                 : new GenericContext();
             
-            var flattened = FlattenValueType(typeSignature.Resolve(), mapping, genericContext);
+            var flattened = FlattenValueType(typeSignature, mapping, genericContext);
             var resolved = typeSignature.Resolve();
 
             int GetRealSize(int inferredSize)
@@ -111,37 +111,46 @@ namespace AsmResolver.DotNet.Analysis
             throw new TypeMemoryLayoutDetectionException("Value types with auto layout are not supported");
         }
 
-        private static List<TypeSignature> FlattenValueType(TypeDefinition valueType,
-            Dictionary<FieldDefinition, List<TypeSignature>> mapping, in GenericContext context)
+        private static List<TypeSignature> FlattenValueType(TypeSignature valueType,
+            Dictionary<FieldDefinition, List<TypeSignature>> mapping,
+            in GenericContext context, HashSet<TypeSignature> visited = null)
         {
             var signatures = new List<TypeSignature>();
+            visited ??= new HashSet<TypeSignature>(new SignatureComparer());
+            if (!visited.Add(valueType))
+                throw new TypeMemoryLayoutDetectionException("Cyclic dependency");
 
-            foreach (var field in valueType.Fields)
+            foreach (var field in valueType.Resolve().Fields)
             {
                 var sig = field.Signature.FieldType;
                 if (sig.ElementType == ElementType.ValueType)
                 {
-                    var resolved = sig.Resolve();
-                    
-                    var flattened = FlattenValueType(resolved, mapping, context);
+                    var flattened = FlattenValueType(sig, mapping, context);
                     signatures.AddRange(flattened);
                     mapping[field] = flattened;
                 }
                 else if (sig.ElementType == ElementType.GenericInst)
                 {
                     var generic = (GenericInstanceTypeSignature) sig;
-                    var resolved = generic.Resolve();
-                    
                     var newContext = context.WithType(generic);
-                    var flattened = FlattenValueType(resolved, mapping, newContext);
+                    var flattened = FlattenValueType(generic.Resolve().ToTypeSignature(), mapping, newContext);
                     signatures.AddRange(flattened);
                     mapping[field] = flattened;
                 }
                 else if (sig.ElementType == ElementType.MVar || sig.ElementType == ElementType.Var)
                 {
                     var generic = context.GetTypeArgument((GenericParameterSignature) sig);
-                    signatures.Add(generic);
-                    mapping[field] = new List<TypeSignature>(1) { generic };
+                    if (generic.ElementType == ElementType.ValueType)
+                    {
+                        var resolved = FlattenValueType(generic.Resolve().ToTypeSignature(), mapping, context, visited);
+                        signatures.AddRange(resolved);
+                        mapping[field] = resolved;
+                    }
+                    else
+                    {
+                        signatures.Add(generic);
+                        mapping[field] = new List<TypeSignature>(1) { generic };
+                    }
                 }
                 else
                 {
