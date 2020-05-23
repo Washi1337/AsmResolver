@@ -69,22 +69,29 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
             uint index = 1;
             while (index < stream.GetPhysicalSize())
             {
-                if (!reader.TryReadCompressedUInt32(out uint length))
+                uint startOffset = reader.FileOffset;
+                if (!reader.TryReadCompressedUInt32(out uint dataLength))
                     break;
+                if (dataLength == 0)
+                    continue;
                 
-                // Read string at index.
+                uint headerLength = reader.FileOffset - startOffset;
+                reader.FileOffset -= headerLength;
+                
+                // Read data at index.
                 uint newIndex = (uint) _rawStream.Length;
-                _strings[stream.GetStringByIndex(index)] = newIndex;
+                string @string = stream.GetStringByIndex(index);
+                _strings[@string] = newIndex;
                     
                 // Copy over raw data of string to output stream.
                 // This is important since technically it is possible to encode the same string in multiple ways.
-                var buffer = new byte[length];
-                int actualLength = reader.ReadBytes(buffer, 0, (int) length);
-                _writer.WriteCompressedUInt32(length);
+                var buffer = new byte[headerLength + dataLength];
+                int actualLength = reader.ReadBytes(buffer, 0, buffer.Length);
+                
                 _writer.WriteBytes(buffer, 0, actualLength);
 
                 // Move to next user string.
-                index += (uint) _rawStream.Length - newIndex;
+                index += (uint) actualLength;
             }
         }
 
