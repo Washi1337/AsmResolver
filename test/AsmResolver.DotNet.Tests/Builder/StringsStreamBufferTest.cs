@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 + "AnEvenLongerString\0"));
             
             var buffer = new StringsStreamBuffer();
-            buffer.ImportStringsStream(existingStringsStream);
+            buffer.ImportStream(existingStringsStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal("String", newStream.GetStringByIndex(1));
@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 + "String\0"));
             
             var buffer = new StringsStreamBuffer();
-            buffer.ImportStringsStream(existingStringsStream);
+            buffer.ImportStream(existingStringsStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal("String", newStream.GetStringByIndex(1));

@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         /// Imports the contents of a user strings stream and indexes all present strings.
         /// </summary>
         /// <param name="stream">The stream to import.</param>
-        public void ImportBlobStream(BlobStream stream)
+        public void ImportStream(BlobStream stream)
         {
             if (!stream.CanRead)
                 throw new ArgumentException("Blob stream to import must be readable.");

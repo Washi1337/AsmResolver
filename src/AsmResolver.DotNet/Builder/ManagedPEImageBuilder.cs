@@ -4,6 +4,7 @@ using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -55,15 +56,19 @@ namespace AsmResolver.DotNet.Builder
             
             // Import original contents of the blob stream if specified.
             if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveBlobIndices) != 0)
-                metadataBuffer.BlobStream.ImportBlobStream(originalMetadata.GetStream<BlobStream>());
+                metadataBuffer.BlobStream.ImportStream(originalMetadata.GetStream<BlobStream>());
             
             // Import original contents of the GUID stream if specified.
             if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveGuidIndices) != 0)
-                metadataBuffer.GuidStream.ImportGuidStream(originalMetadata.GetStream<GuidStream>());
+                metadataBuffer.GuidStream.ImportStream(originalMetadata.GetStream<GuidStream>());
             
             // Import original contents of the strings stream if specified.
             if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveStringIndices) != 0)
-                metadataBuffer.StringsStream.ImportStringsStream(originalMetadata.GetStream<StringsStream>());
+                metadataBuffer.StringsStream.ImportStream(originalMetadata.GetStream<StringsStream>());
+            
+            // Import original contents of the strings stream if specified.
+            if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveUserStringIndices) != 0)
+                metadataBuffer.UserStringsStream.ImportStream(originalMetadata.GetStream<UserStringsStream>());
 
             return metadataBuffer;
         }

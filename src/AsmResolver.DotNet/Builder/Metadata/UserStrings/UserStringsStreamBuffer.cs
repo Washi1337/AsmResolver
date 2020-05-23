@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         /// Imports the contents of a user strings stream and indexes all present strings.
         /// </summary>
         /// <param name="stream">The stream to import.</param>
-        public void ImportUserStringsStream(UserStringsStream stream)
+        public void ImportStream(UserStringsStream stream)
         {
             if (!stream.CanRead)
                 throw new ArgumentException("User strings stream to import must be readable.");

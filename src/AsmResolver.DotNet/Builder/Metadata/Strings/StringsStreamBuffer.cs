@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         /// Imports the contents of a strings stream and indexes all present strings.
         /// </summary>
         /// <param name="stream">The stream to import.</param>
-        public void ImportStringsStream(StringsStream stream)
+        public void ImportStream(StringsStream stream)
         {
             uint index = 1;
             while (index < stream.GetPhysicalSize())

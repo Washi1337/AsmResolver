@@ -24,6 +24,12 @@ namespace AsmResolver.DotNet.Builder
         /// Indicates indices into the #Strings stream should be preserved whenever possible during the construction
         /// of the metadata directory. 
         /// </summary>
-        PreserveStringIndices = 2,
+        PreserveStringIndices = 4,
+        
+        /// <summary>
+        /// Indicates indices into the #US stream should be preserved whenever possible during the construction
+        /// of the metadata directory. 
+        /// </summary>
+        PreserveUserStringIndices = 8,
     }
 }

@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
             
             var buffer = new GuidStreamBuffer();
-            buffer.ImportGuidStream(existingGuidStream);
+            buffer.ImportStream(existingGuidStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal(new Guid(new byte[]
@@ -90,7 +90,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
             
             var buffer = new GuidStreamBuffer();
-            buffer.ImportGuidStream(existingGuidStream);
+            buffer.ImportStream(existingGuidStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal(new Guid(new byte[]

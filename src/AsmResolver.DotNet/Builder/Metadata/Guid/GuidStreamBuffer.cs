@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
         /// Imports the contents of a GUID stream and indexes all present GUIDs.
         /// </summary>
         /// <param name="stream">The stream to import.</param>
-        public void ImportGuidStream(GuidStream stream)
+        public void ImportStream(GuidStream stream)
         {
             uint index = 1;
             while (index < stream.GetPhysicalSize() / GuidStream.GuidSize + 1)

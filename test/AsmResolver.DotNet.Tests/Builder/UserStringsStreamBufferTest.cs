@@ -117,7 +117,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
             
             var buffer = new UserStringsStreamBuffer();
-            buffer.ImportUserStringsStream(existingUserStringsStream);
+            buffer.ImportStream(existingUserStringsStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal("User string", newStream.GetStringByIndex(1));
@@ -149,7 +149,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
             
             var buffer = new UserStringsStreamBuffer();
-            buffer.ImportUserStringsStream(existingUserStringsStream);
+            buffer.ImportStream(existingUserStringsStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal("User string", newStream.GetStringByIndex(1));
@@ -178,7 +178,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
             
             var buffer = new UserStringsStreamBuffer();
-            buffer.ImportUserStringsStream(existingUserStringsStream);
+            buffer.ImportStream(existingUserStringsStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal("User string", newStream.GetStringByIndex(1));

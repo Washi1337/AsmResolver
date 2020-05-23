@@ -89,7 +89,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
             
             var buffer = new BlobStreamBuffer();
-            buffer.ImportBlobStream(existingBlobStream);
+            buffer.ImportStream(existingBlobStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal(new byte[]
@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
             
             var buffer = new BlobStreamBuffer();
-            buffer.ImportBlobStream(existingBlobStream);
+            buffer.ImportStream(existingBlobStream);
 
             var newStream = buffer.CreateStream();
             
@@ -152,7 +152,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
 
             var buffer = new BlobStreamBuffer();
-            buffer.ImportBlobStream(existingBlobStream);
+            buffer.ImportStream(existingBlobStream);
 
             var newStream = buffer.CreateStream();
 
@@ -179,7 +179,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             });
 
             var buffer = new BlobStreamBuffer();
-            buffer.ImportBlobStream(existingBlobStream);
+            buffer.ImportStream(existingBlobStream);
 
             var newStream = buffer.CreateStream();
 
