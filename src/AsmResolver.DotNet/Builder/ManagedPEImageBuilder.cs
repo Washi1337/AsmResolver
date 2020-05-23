@@ -3,6 +3,7 @@ using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -59,6 +60,10 @@ namespace AsmResolver.DotNet.Builder
             // Import original contents of the GUID stream if specified.
             if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveGuidIndices) != 0)
                 metadataBuffer.GuidStream.ImportGuidStream(originalMetadata.GetStream<GuidStream>());
+            
+            // Import original contents of the strings stream if specified.
+            if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveStringIndices) != 0)
+                metadataBuffer.StringsStream.ImportStringsStream(originalMetadata.GetStream<StringsStream>());
 
             return metadataBuffer;
         }
