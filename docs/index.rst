@@ -43,5 +43,5 @@ Table of Contents:
    dotnet/basics
    dotnet/traversal
    dotnet/importing
-   dotnet/cloning
    dotnet/managed-method-bodies
+   dotnet/cloning
