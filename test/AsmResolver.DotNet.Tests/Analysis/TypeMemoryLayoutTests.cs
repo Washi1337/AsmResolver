@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -40,6 +41,37 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var signature = corlib.FromElementType(type);
 
             var layout = signature.GetImpliedMemoryLayout(IntPtr.Size == 4);
+            Assert.Equal(IntPtr.Size, layout.Size);
+        }
+
+        [Theory]
+        [InlineData("DateTime", 8)]
+        [InlineData("Guid", 16)]
+        [InlineData("HashCode", 32)]
+        [InlineData("TimeSpan", 8)]
+        [InlineData("Decimal", 16)]
+        public void BuiltInTypes(string name, int realSize)
+        {
+            var module = ModuleDefinition.FromFile(typeof(TypeMemoryLayoutTests).Assembly.Location);
+            var mscorlib = ((AssemblyReference) module.CorLibTypeFactory.CorLibScope).Resolve().ManifestModule;
+            var target = mscorlib.ExportedTypes.Single(t => t.Name == name);
+
+            var layout = target.GetImpliedMemoryLayout(IntPtr.Size == 4);
+            Assert.Equal(realSize, layout.Size);
+        }
+
+        [Theory]
+        [InlineData("ModuleHandle")]
+        [InlineData("RuntimeArgumentHandle")]
+        [InlineData("TaskAwaiter")]
+        [InlineData("EventArgs")]
+        public void BuiltInNativeSizedTypes(string name)
+        {
+            var module = ModuleDefinition.FromFile(typeof(TypeMemoryLayoutTests).Assembly.Location);
+            var mscorlib = ((AssemblyReference) module.CorLibTypeFactory.CorLibScope).Resolve().ManifestModule;
+            var target = mscorlib.ExportedTypes.Single(t => t.Name == name);
+
+            var layout = target.GetImpliedMemoryLayout(IntPtr.Size == 4);
             Assert.Equal(IntPtr.Size, layout.Size);
         }
     }
