@@ -40,7 +40,6 @@ Instructions that are assembled into the method body are automatically disassemb
     var instructions = body.Instructions;
 
 The ``CilInstruction`` class defines three basic properties:
-
 - ``Offset``: The offset of the instruction, relative to the start of the code stream.
 - ``OpCode``: The operation the instruction performs.
 - ``Operand``: The operand of the instruction.
@@ -50,7 +49,7 @@ By default, depending on the value of ``OpCode.OperandType``, ``Operand`` contai
 +----------------------------------------+----------------------------------------------+
 | OpCode.OperandType                     | Type of Operand                              |
 +========================================+==============================================+
-| ``CilOperandType.InlineNone``          | N/A (is always ``null``                      |
+| ``CilOperandType.InlineNone``          | N/A (is always ``null``)                     |
 +----------------------------------------+----------------------------------------------+
 | ``CilOperandType.ShortInlineI``        | ``sbyte``                                    |
 +----------------------------------------+----------------------------------------------+
@@ -94,13 +93,15 @@ By default, depending on the value of ``OpCode.OperandType``, ``Operand`` contai
     Providing an incorrect operand type will result in the CIL assembler to fail assembling the method body upon writing the module to the disk.
 
 
-Creating a new instruction can be done using one of the constructors, together with the ``CilOpCodes`` static class.
+Creating a new instruction can be done using one of the constructors, together with the ``CilOpCodes`` static class:
 
 .. code-block:: csharp 
 
-    var instruction = new CilInstruction(CilOpCodes.Nop);
-
-    var instruction = new CilInstruction(CilOpCodes.Ldstr, "Hello, World!);
+    body.Instructions.AddRange(new[] 
+    {
+        new CilInstruction(CilOpCodes.Ldstr, "Hello, World!),
+        new CilInstruction(CilOpCodes.Ret),
+    });
 
 
 Pushing 32-bit integer constants onto the stack
@@ -176,9 +177,27 @@ Below an example on how to use the ``ReferenceImporter`` to emit a call to ``Con
 Expanding and optimising macros
 -------------------------------
 
-CIL defines a couple of macro operations that do the same as their full counterpart, but require less space to be encoded. For example, the``ldc.i4.1`` instruction is a macro for ``ldc.i4 1`` which requires 1 byte instead of 5 bytes to do the same thing.
+CIL defines a couple of macro operations that do the same as their full counterpart, but require less space to be encoded. For example, the ``ldc.i4.1`` instruction is a macro for ``ldc.i4 1``, and requires 1 byte instead of 5 bytes to do the same thing.
 
 AsmResolver is able to expand macros to their larger sized counterparts and back using the ``Instructions.ExpandMacros()`` and ``Instructions.OptimizeMacros()``.
+
+.. code-block:: csharp
+
+    var instruction = new CilInstruction(CilOpCodes.Ldc_I4, 1);
+    body.Instructions.Add(instruction);
+
+    body.Instructions.OptimizeMacros();
+
+    // instruction is now optimized to "ldc.i4.1".
+
+.. code-block:: csharp
+
+    var instruction = new CilInstruction(CilOpCodes.Ldc_I4_1);
+    body.Instructions.Add(instruction);
+
+    body.Instructions.ExpandMacros();
+
+    // instruction is now expanded to "ldc.i4 1".
 
 
 Pretty printing CIL instructions
