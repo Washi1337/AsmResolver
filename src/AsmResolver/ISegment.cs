@@ -37,5 +37,14 @@ namespace AsmResolver
             alignment--;
             return (value + alignment) & ~alignment;
         }
+
+        public static uint GetCompressedSize(this uint value)
+        {
+            if (value < 0x80)
+                return sizeof(byte);
+            if (value < 0x4000)
+                return sizeof(ushort);
+            return sizeof(uint);
+        }
     }
 }
