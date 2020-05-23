@@ -30,14 +30,29 @@ namespace AsmResolver.DotNet.Analysis
             {
                 return new TypeMemoryLayout(null, GetSize(typeSignature, is32Bit));
             }
-            
+
             var mapping = new Dictionary<FieldDefinition, List<TypeSignature>>();
             var genericContext = typeSignature is GenericInstanceTypeSignature g
                 ? new GenericContext().WithType(g)
                 : new GenericContext();
-            
+
             var flattened = FlattenValueType(typeSignature, mapping, genericContext);
             var resolved = typeSignature.Resolve();
+            var biggestSize = flattened.Select(t => GetSize(t, is32Bit)).Max();
+
+            int GetAlignment(int biggest)
+            {
+                if (resolved.ClassLayout is {})
+                {
+                    var pack = resolved.ClassLayout.PackingSize;
+                    if (pack > 0)
+                        return Math.Min(pack, biggest);
+                }
+
+                return biggest;
+            }
+
+            var typeAlignment = (uint) GetAlignment(biggestSize);
 
             int GetRealSize(int inferredSize)
             {
@@ -47,65 +62,73 @@ namespace AsmResolver.DotNet.Analysis
                 var explicitSize = resolved.ClassLayout.ClassSize;
                 return (int) Math.Max(inferredSize, explicitSize);
             }
-            
+
             if (resolved.IsExplicitLayout)
             {
                 var offsets = resolved.Fields.ToDictionary(k => k, v => v.FieldOffset.GetValueOrDefault());
                 var biggest = 0;
                 foreach (var field in resolved.Fields)
                 {
+                    if (field.IsStatic)
+                        continue;
+
                     var resolvedField = field.Signature.FieldType;
                     var signatures = mapping[field];
                     if (signatures.Count == 1)
                     {
-                        biggest = Math.Max(biggest, GetSize(signatures[0], is32Bit));
+                        var size = GetSize(signatures[0], is32Bit);
+                        var aligned = (int) ((uint) size).Align((uint) Math.Min(size, typeAlignment));
+                        var padding = aligned % size;
+                        biggest = Math.Max(biggest, offsets[field] + aligned + padding);
                     }
                     else
                     {
                         var layout = resolvedField.GetImpliedMemoryLayout(is32Bit);
-                        biggest = Math.Max(biggest, offsets[field] + layout.Size);
+                        var alignment = (uint) Math.Min(layout.Size, typeAlignment);
+                        biggest = Math.Max(biggest, offsets[field] + (int) ((uint) layout.Size).Align(alignment));
                     }
                 }
 
                 return new TypeMemoryLayout(offsets, GetRealSize(biggest));
             }
-            
+
             if (resolved.IsSequentialLayout)
             {
-                int GetAlignment(int biggest)
-                {
-                    if (resolved.ClassLayout is {})
-                    {
-                        var pack = resolved.ClassLayout.PackingSize;
-                        if (pack > 0 && pack < biggest)
-                            return pack;
-                    }
-
-                    return biggest;
-                }
-
-                var biggestSize = flattened.Select(t => GetSize(t, is32Bit)).Max();
-                var alignment = (uint) GetAlignment(biggestSize);
                 var offsets = new Dictionary<FieldDefinition, int>();
                 var size = 0;
 
                 foreach (var field in resolved.Fields)
                 {
+                    if (field.IsStatic)
+                        continue;
+
                     offsets[field] = size;
                     var signatures = mapping[field];
                     if (signatures.Count == 1)
                     {
-                        size += signatures.Select(s => (int) ((uint) GetSize(s, is32Bit)).Align(alignment)).Sum();
+                        var currentSize = GetSize(signatures[0], is32Bit);
+                        var aligned = (int) ((uint) currentSize).Align((uint) Math.Min(currentSize, typeAlignment));
+                        var padding = size % aligned;
+                        size += aligned + padding;
                     }
                     else
                     {
                         var resolvedField = field.Signature.FieldType;
                         var layout = resolvedField.GetImpliedMemoryLayout(is32Bit);
-                        size += (int) ((uint) layout.Size).Align(alignment);
+                        size += (int) ((uint) layout.Size).Align((uint) Math.Min(layout.Size, typeAlignment));
                     }
                 }
-                
+
                 return new TypeMemoryLayout(offsets, GetRealSize(size));
+            }
+
+            if (flattened.Count == 1)
+            {
+                var offsets = new Dictionary<FieldDefinition, int>
+                {
+                    [resolved.Fields[0]] = 0
+                };
+                return new TypeMemoryLayout(offsets, GetSize(flattened[0], is32Bit));
             }
 
             throw new TypeMemoryLayoutDetectionException("Value types with auto layout are not supported");
@@ -122,6 +145,9 @@ namespace AsmResolver.DotNet.Analysis
 
             foreach (var field in valueType.Resolve().Fields)
             {
+                if (field.IsStatic)
+                    continue;
+
                 var sig = field.Signature.FieldType;
                 if (sig.ElementType == ElementType.ValueType)
                 {
@@ -158,7 +184,7 @@ namespace AsmResolver.DotNet.Analysis
                     mapping[field] = new List<TypeSignature>(1) { sig };
                 }
             }
-            
+
             return signatures;
         }
 
