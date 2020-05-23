@@ -42,6 +42,53 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         }
 
         /// <summary>
+        /// Imports the contents of a user strings stream and indexes all present strings.
+        /// </summary>
+        /// <param name="stream">The stream to import.</param>
+        public void ImportUserStringsStream(UserStringsStream stream)
+        {
+            if (!stream.CanRead)
+                throw new ArgumentException("User strings stream to import must be readable.");
+
+            var reader = stream.CreateReader();
+            
+            // Only copy first byte to output stream if we have already written something to the output stream.   
+            byte b = reader.ReadByte();
+            if (_rawStream.Length != 1)
+                _writer.WriteByte(b);
+
+            // Perform linear sweep of the raw data. 
+            
+            // Note: This might result in incorrect strings being indexed if garbage data was injected in the heap. 
+            //       This is okay as long as we still copy all the data, including the garbage data.
+            //       The only side-effect we get is that strings that did appear in the original stream might 
+            //       be duplicated in the new stream. This is an acceptable side-effect, as the purpose of this
+            //       import function is to only preserve existing data, and not necessarily make sure that we use
+            //       the most efficient storage mechanism.
+            
+            uint index = 1;
+            while (index < stream.GetPhysicalSize())
+            {
+                if (!reader.TryReadCompressedUInt32(out uint length))
+                    break;
+                
+                // Read string at index.
+                uint newIndex = (uint) _rawStream.Length;
+                _strings[stream.GetStringByIndex(index)] = newIndex;
+                    
+                // Copy over raw data of string to output stream.
+                // This is important since technically it is possible to encode the same string in multiple ways.
+                var buffer = new byte[length];
+                int actualLength = reader.ReadBytes(buffer, 0, (int) length);
+                _writer.WriteCompressedUInt32(length);
+                _writer.WriteBytes(buffer, 0, actualLength);
+
+                // Move to next user string.
+                index += (uint) _rawStream.Length - newIndex;
+            }
+        }
+
+        /// <summary>
         /// Appends raw data to the stream.
         /// </summary>
         /// <param name="data">The data to append.</param>
@@ -56,7 +103,28 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
             _writer.WriteBytes(data, 0, data.Length);
             return offset;
         }
-        
+
+        private uint AppendString(string value)
+        {
+            uint offset = (uint) _rawStream.Length;
+
+            if (string.IsNullOrEmpty(value))
+            {
+                _writer.WriteByte(0);
+                return offset;
+            }
+            
+            int byteCount = Encoding.Unicode.GetByteCount(value) + 1;
+            _writer.WriteCompressedUInt32((uint) byteCount);
+
+            var rawData = new byte[byteCount];
+            Encoding.Unicode.GetBytes(value, 0, value.Length, rawData, 0);
+            rawData[byteCount - 1] = GetTerminatorByte(value);
+
+            AppendRawData(rawData);
+            return offset;
+        }
+
         /// <summary>
         /// Gets the index to the provided user-string. If the string is not present in the buffer, it will be appended to
         /// the end of the stream.
@@ -70,16 +138,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
 
             if (!_strings.TryGetValue(value, out uint offset))
             {
-                offset = (uint) _rawStream.Length;
-
-                int byteCount = Encoding.Unicode.GetByteCount(value) + 1;
-                _writer.WriteCompressedUInt32((uint) byteCount);
-                
-                var rawData = new byte[byteCount];
-                Encoding.Unicode.GetBytes(value, 0, value.Length, rawData, 0);
-                rawData[byteCount - 1] = GetTerminatorByte(value);
-                
-                AppendRawData(rawData);
+                offset = AppendString(value);
                 _strings.Add(value, offset);
             }
             
