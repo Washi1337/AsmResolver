@@ -36,9 +36,9 @@ namespace AsmResolver.DotNet.Tests.Analysis
     [StructLayout(LayoutKind.Sequential, Size = 2)]
     public struct CustomStructWithSmallSize
     {
-        public int Dummy1;
-
         public long Dummy2;
+    
+        public int Dummy1;
     }
 
     [StructLayout(LayoutKind.Explicit, Pack = 1)]
@@ -102,6 +102,24 @@ namespace AsmResolver.DotNet.Tests.Analysis
             var custom = (TypeDefinition) module.LookupMember(typeof(CustomUnionStruct).MetadataToken);
             
             Assert.Equal(Unsafe.SizeOf<CustomUnionStruct>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
+        }
+
+        [Fact]
+        public void DateTime()
+        {
+            var module = ModuleDefinition.FromFile(typeof(DateTime).Assembly.Location);
+            var custom = (TypeDefinition) module.LookupMember(typeof(DateTime).MetadataToken);
+
+            Assert.Equal(Unsafe.SizeOf<DateTime>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
+        }
+
+        [Fact]
+        public void Guid()
+        {
+            var module = ModuleDefinition.FromFile(typeof(Guid).Assembly.Location);
+            var custom = (TypeDefinition) module.LookupMember(typeof(Guid).MetadataToken);
+            
+            Assert.Equal(Unsafe.SizeOf<Guid>(), custom.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
         }
 
         [Fact]
