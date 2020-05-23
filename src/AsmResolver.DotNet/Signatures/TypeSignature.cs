@@ -261,7 +261,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <inheritdoc />
         public TypeMemoryLayout GetImpliedMemoryLayout(bool is32Bit)
         {
-            return TypeMemoryLayoutDetector.GetImpliedMemoryLayout(this, is32Bit, new GenericContext());
+            return TypeMemoryLayoutDetector.GetImpliedMemoryLayout(this, is32Bit);
         }
 
         /// <summary>
