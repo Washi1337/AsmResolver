@@ -67,5 +67,41 @@ namespace AsmResolver.DotNet.Tests.Builder
             var buffer = new StringsStreamBuffer();
             Assert.Throws<ArgumentException>(() => buffer.GetStringIndex("Test\0Test"));
         }
+        
+        [Fact]
+        public void ImportStringStreamShouldIndexExistingStrings()
+        {
+            var existingStringsStream = new SerializedStringsStream(StringsStream.DefaultName, Encoding.UTF8.GetBytes(
+                "\0"
+                + "String\0"
+                + "LongerString\0"
+                + "AnEvenLongerString\0"));
+            
+            var buffer = new StringsStreamBuffer();
+            buffer.ImportStringsStream(existingStringsStream);
+            var newStream = buffer.CreateStream();
+
+            Assert.Equal("String", newStream.GetStringByIndex(1));
+            Assert.Equal("LongerString", newStream.GetStringByIndex(8));
+            Assert.Equal("AnEvenLongerString", newStream.GetStringByIndex(21));
+        }
+
+        [Fact]
+        public void ImportStringsStreamWithDuplicateStrings()
+        {
+            var existingStringsStream = new SerializedStringsStream(StringsStream.DefaultName, Encoding.UTF8.GetBytes(
+                "\0"
+                + "String\0"
+                + "String\0"
+                + "String\0"));
+            
+            var buffer = new StringsStreamBuffer();
+            buffer.ImportStringsStream(existingStringsStream);
+            var newStream = buffer.CreateStream();
+
+            Assert.Equal("String", newStream.GetStringByIndex(1));
+            Assert.Equal("String", newStream.GetStringByIndex(8));
+            Assert.Equal("String", newStream.GetStringByIndex(15));
+        }
     }
 }
