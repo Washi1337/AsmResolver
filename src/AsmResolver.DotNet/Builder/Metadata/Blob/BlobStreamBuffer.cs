@@ -42,6 +42,21 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         }
 
         /// <summary>
+        /// Imports the contents of a blob stream and indexes all present blob signatures.
+        /// </summary>
+        /// <param name="stream">The stream to import.</param>
+        public void ImportBlobStream(BlobStream stream)
+        {
+            uint index = 0;
+            while (index < stream.GetPhysicalSize())
+            {
+                var blob = stream.GetBlobByIndex(index);
+                uint offset = AppendRawData(blob);
+                _blobs[blob] = offset;
+            }
+        }
+
+        /// <summary>
         /// Appends raw data to the stream.
         /// </summary>
         /// <param name="data">The data to append.</param>

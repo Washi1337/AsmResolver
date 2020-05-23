@@ -6,7 +6,8 @@ namespace AsmResolver.DotNet.Builder
     /// Provides members for describing the behaviour of the .NET directory builder.
     /// </summary>
     [Flags]
-    public enum DotNetDirectoryBuilderFlags
+    public enum MetadataBuilderFlags
     {
+        PreserveBlobIndices
     }
 }
