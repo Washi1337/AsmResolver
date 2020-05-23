@@ -16,6 +16,12 @@ Creating a new image can be done by instantiating a ``ModuleDefinition`` class:
 
     var module = new ModuleDefinition("MyModule.exe");
 
+The above will create a module that references mscorlib.dll 4.0.0.0 (.NET Framework 4.0). If another version of the Common Object Runtime Library is desired, we can use one of the overloads of the constructor, and use a custom ``AssemblyReference``, or one of the pre-defined assembly references in the ``KnownCorLibs`` class to target another version of the library.
+
+.. code-block:: csharp 
+
+    var module = new ModuleDefinition("MyModule.exe", KnownCorLibs.SystemRuntime_v4_2_2_0);
+
 
 Opening a .NET module
 ---------------------
