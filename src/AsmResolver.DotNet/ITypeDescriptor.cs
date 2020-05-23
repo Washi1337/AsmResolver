@@ -41,10 +41,10 @@ namespace AsmResolver.DotNet
         TypeDefinition Resolve();
 
         /// <summary>
-        /// Calculates the runtime size of the type.
+        /// Infers the runtime layout of a type, this includes the size and offsets of the type's fields
         /// </summary>
-        /// <param name="is32Bit"></param>
-        /// <returns>The size of the type, in bytes</returns>
+        /// <param name="is32Bit">Whether the runtime is a 32bit environment</param>
+        /// <returns>The inferred runtime layout of the type</returns>
         TypeMemoryLayout GetImpliedMemoryLayout(bool is32Bit);
     }
 }
