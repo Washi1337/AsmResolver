@@ -1,5 +1,5 @@
-Editing Managed Method Bodies
-=============================
+CIL Method Bodies
+=================
 
 The relevant models in this document can be found in the following namespaces:
 

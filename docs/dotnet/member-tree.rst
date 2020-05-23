@@ -1,5 +1,5 @@
-Traversing the member tree
-==========================
+The Member Tree
+===============
 
 Assemblies and modules
 ----------------------

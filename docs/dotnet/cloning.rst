@@ -1,5 +1,5 @@
-Cloning metadata members
-========================
+Member Cloning
+==============
 
 When processing a .NET module, it often involves injecting additional code. Even though all models representing .NET metadata and CIL code are mutable, it might be very time consuming and error-prone to manually import and inject metadata members and/or CIL code into the target module.
 

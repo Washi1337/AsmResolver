@@ -41,7 +41,7 @@ Table of Contents:
 
    dotnet/index
    dotnet/basics
-   dotnet/traversal
+   dotnet/member-tree
    dotnet/importing
    dotnet/managed-method-bodies
    dotnet/cloning
