@@ -25,6 +25,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             Type = type;
             IsValueType = isValueType;
+            
         }
 
         /// <summary>

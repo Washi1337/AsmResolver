@@ -42,6 +42,7 @@ Table of Contents:
    dotnet/index
    dotnet/basics
    dotnet/member-tree
+   dotnet/type-signatures
    dotnet/importing
    dotnet/managed-method-bodies
    dotnet/cloning
