@@ -9,6 +9,11 @@ namespace AsmResolver.DotNet.Builder
     public enum MetadataBuilderFlags
     {
         /// <summary>
+        /// Indicates no special metadata builder flags.
+        /// </summary>
+        None = 0,
+        
+        /// <summary>
         /// Indicates indices into the #Blob stream should be preserved whenever possible during the construction
         /// of the metadata directory. 
         /// </summary>
@@ -31,5 +36,11 @@ namespace AsmResolver.DotNet.Builder
         /// of the metadata directory. 
         /// </summary>
         PreserveUserStringIndices = 8,
+        
+        /// <summary>
+        /// Indicates indices into the type references table should be preserved whenever possible during the construction
+        /// of the metadata directory.
+        /// </summary>
+        PreserveTypeReferenceIndices = 16,
     }
 }
