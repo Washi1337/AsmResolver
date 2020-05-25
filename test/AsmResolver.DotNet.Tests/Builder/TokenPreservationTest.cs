@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
@@ -139,6 +140,59 @@ namespace AsmResolver.DotNet.Tests.Builder
             var newMemberRefs = GetMembers<MemberReference>(newModule, TableIndex.MemberRef);
             
             Assert.Equal(originalMemberRefs, newMemberRefs.Take(originalMemberRefs.Count), Comparer);
+        }
+
+        [Fact]
+        public void PreserveAssemblyRefsNoChangeShouldAtLeastHaveOriginalAssemblyRefs()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var originalAssemblyRefs = GetMembers<AssemblyReference>(module, TableIndex.AssemblyRef);
+            
+            var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveAssemblyReferenceIndices);
+            var newAssemblyRefs = GetMembers<AssemblyReference>(newModule, TableIndex.AssemblyRef);
+            
+            Assert.Equal(originalAssemblyRefs, newAssemblyRefs.Take(originalAssemblyRefs.Count), Comparer);
+        }
+
+        [Fact]
+        public void PreserveAssemblyRefsWithTypeRefRemovedShouldAtLeastHaveOriginalAssemblyRefs()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var originalAssemblyRefs = GetMembers<AssemblyReference>(module, TableIndex.AssemblyRef);
+            
+            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            instructions.Clear();
+            instructions.Add(new CilInstruction(CilOpCodes.Ret));
+            
+            var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveAssemblyReferenceIndices);
+            var newAssemblyRefs = GetMembers<AssemblyReference>(newModule, TableIndex.AssemblyRef);
+            
+            Assert.Equal(originalAssemblyRefs, newAssemblyRefs.Take(originalAssemblyRefs.Count), Comparer);
+        }
+
+        [Fact]
+        public void PreserveAssemblyRefsWithExtraImportShouldAtLeastHaveOriginalAssemblyRefs()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            var originalAssemblyRefs = GetMembers<AssemblyReference>(module, TableIndex.AssemblyRef);
+            
+            var importer = new ReferenceImporter(module);
+            var exists = importer.ImportMethod(typeof(File).GetMethod("Exists", new[] {typeof(string)}));
+
+            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            instructions.RemoveAt(instructions.Count-1);
+            instructions.AddRange(new[]
+            {
+                new CilInstruction(CilOpCodes.Ldstr, "file.txt"),
+                new CilInstruction(CilOpCodes.Call, exists),
+                new CilInstruction(CilOpCodes.Pop),
+                new CilInstruction(CilOpCodes.Ret),
+            });
+            
+            var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveAssemblyReferenceIndices);
+            var newAssemblyRefs = GetMembers<AssemblyReference>(newModule, TableIndex.AssemblyRef);
+            
+            Assert.Equal(originalAssemblyRefs, newAssemblyRefs.Take(originalAssemblyRefs.Count), Comparer);
         }
     }
 }
