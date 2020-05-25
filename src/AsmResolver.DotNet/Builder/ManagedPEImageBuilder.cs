@@ -1,5 +1,7 @@
 ﻿using System;
 using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.DotNet.Code;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Blob;
@@ -16,13 +18,23 @@ namespace AsmResolver.DotNet.Builder
     public class ManagedPEImageBuilder : IPEImageBuilder
     {
         /// <summary>
-        /// Gets the parameters for constructing the .NET data directory. 
+        /// Gets or sets the flags defining the behaviour of the .NET metadata directory builder.
         /// </summary>
-        public DotNetDirectoryBuilderParameters BuilderParameters
+        public MetadataBuilderFlags MetadataBuilderFlags
         {
             get;
-        } = new DotNetDirectoryBuilderParameters();
-        
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the method body serializer to use for constructing method bodies.
+        /// </summary>
+        public IMethodBodySerializer MethodBodySerializer
+        {
+            get;
+            set;
+        } = new CilMethodBodySerializer();
+
         /// <inheritdoc />
         public IPEImage CreateImage(ModuleDefinition module)
         {
@@ -36,7 +48,7 @@ namespace AsmResolver.DotNet.Builder
         private IDotNetDirectory CreateDotNetDirectory(PEImage image, ModuleDefinition module)
         {
             var metadataBuffer = CreateMetadataBuffer(module);
-            var dotNetDirectoryBuffer = new DotNetDirectoryBuffer(module, BuilderParameters.MethodBodySerializer, metadataBuffer);
+            var dotNetDirectoryBuffer = new DotNetDirectoryBuffer(module, MethodBodySerializer, metadataBuffer);
             
             ImportTablesStreamIfSpecified(dotNetDirectoryBuffer, module);
             
@@ -59,19 +71,19 @@ namespace AsmResolver.DotNet.Builder
                 return metadataBuffer;
             
             // Import original contents of the blob stream if specified.
-            if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveBlobIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveBlobIndices) != 0)
                 metadataBuffer.BlobStream.ImportStream(originalMetadata.GetStream<BlobStream>());
 
             // Import original contents of the GUID stream if specified.
-            if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveGuidIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveGuidIndices) != 0)
                 metadataBuffer.GuidStream.ImportStream(originalMetadata.GetStream<GuidStream>());
 
             // Import original contents of the strings stream if specified.
-            if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveStringIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStringIndices) != 0)
                 metadataBuffer.StringsStream.ImportStream(originalMetadata.GetStream<StringsStream>());
 
             // Import original contents of the strings stream if specified.
-            if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveUserStringIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveUserStringIndices) != 0)
                 metadataBuffer.UserStringsStream.ImportStream(originalMetadata.GetStream<UserStringsStream>());
 
             return metadataBuffer;
@@ -79,7 +91,7 @@ namespace AsmResolver.DotNet.Builder
         
         private void ImportTablesStreamIfSpecified(DotNetDirectoryBuffer buffer, ModuleDefinition module)
         {
-            if ((BuilderParameters.MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeReferenceIndices) != 0)
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<TypeReference>(module, TableIndex.TypeRef, buffer.GetTypeReferenceToken);
         }
 
