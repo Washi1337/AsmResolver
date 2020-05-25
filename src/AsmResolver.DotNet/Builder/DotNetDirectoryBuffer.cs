@@ -212,7 +212,12 @@ namespace AsmResolver.DotNet.Builder
             return table.Add(row, layout.MetadataToken.Rid);
         }
         
-        private MetadataToken AddModuleReference(ModuleReference reference)
+        /// <summary>
+        /// Adds a single module reference to the buffer.
+        /// </summary>
+        /// <param name="reference">The reference to add.</param>
+        /// <returns>The new metadata token assigned to the module reference.</returns>
+        public MetadataToken AddModuleReference(ModuleReference reference)
         {
             AssertIsImported(reference);
             

@@ -99,6 +99,9 @@ namespace AsmResolver.DotNet.Builder
             
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStandAloneSignatureIndices) != 0)
                 ImportTableIntoTableBuffers<StandAloneSignature>(module, TableIndex.StandAloneSig, buffer.GetStandAloneSignatureToken);
+            
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveModuleReferenceIndices) != 0)
+                ImportTableIntoTableBuffers<ModuleReference>(module, TableIndex.ModuleRef, buffer.AddModuleReference);
         }
 
         private static void ImportTableIntoTableBuffers<TMember>(ModuleDefinition module, TableIndex tableIndex,
