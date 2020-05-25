@@ -102,6 +102,9 @@ namespace AsmResolver.DotNet.Builder
             
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveModuleReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<ModuleReference>(module, TableIndex.ModuleRef, buffer.AddModuleReference);
+            
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
+                ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
         }
 
         private static void ImportTableIntoTableBuffers<TMember>(ModuleDefinition module, TableIndex tableIndex,
