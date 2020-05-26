@@ -213,16 +213,5 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(nameof(TestCaseAttribute.TypeValue), argument.MemberName);
             Assert.Equal(expected, (ITypeDescriptor) argument.Argument.Element.Value, _comparer);
         }
-
-        [Fact]
-        public void IsCompilerGeneratedMember()
-        {
-            var module = ModuleDefinition.FromFile(typeof(SingleProperty).Assembly.Location);
-            var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleProperty));
-            var property = type.Properties.First();
-            var setMethod = property.SetMethod;
-
-            Assert.True(setMethod.IsCompilerGenerated());
-        }
     }
 }
