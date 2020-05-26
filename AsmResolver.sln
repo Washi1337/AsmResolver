@@ -55,7 +55,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCase
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.TestCases.Resources", "test\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Resources\AsmResolver.DotNet.TestCases.Resources.csproj", "{4197C9D4-A5F1-473F-8EB8-29CC5663D212}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Extensions", "src\AsmResolver.Extensions\AsmResolver.Extensions.csproj", "{86A030C7-B529-4484-898F-9865CD64566C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.DotNet.Extensions", "src\AsmResolver.DotNet.Extensions\AsmResolver.DotNet.Extensions.csproj", "{86A030C7-B529-4484-898F-9865CD64566C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

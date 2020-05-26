@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using AsmResolver.DotNet;
 
-namespace AsmResolver.Extensions.TypeMemoryLayoutDetection
+namespace AsmResolver.DotNet.Extensions.Memory
 {
     /// <summary>
     /// Provides information about how a type is laid out in memory
