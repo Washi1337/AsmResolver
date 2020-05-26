@@ -498,7 +498,7 @@ namespace AsmResolver.DotNet
 
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitGenericParameter(GenericParameterSignature signature)
         {
-            return new GenericParameterSignature(signature.ParameterType, signature.Index);
+            return new GenericParameterSignature(TargetModule, signature.ParameterType, signature.Index);
         }
 
         TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitPinnedType(PinnedTypeSignature signature)
