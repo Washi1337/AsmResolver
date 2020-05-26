@@ -296,6 +296,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </remarks>
         public abstract TypeSignature InstantiateGenericTypes(GenericContext context);
 
+        public abstract TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor);
+
         /// <inheritdoc />
         public override string ToString() => FullName;
     }

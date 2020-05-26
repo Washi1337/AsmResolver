@@ -66,5 +66,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         public override TypeSignature InstantiateGenericTypes(GenericContext context) => 
             new CustomModifierTypeSignature(ModifierType, IsRequired, BaseType.InstantiateGenericTypes(context));
+        
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+            visitor.VisitCustomModifierType(this);
     }
 }

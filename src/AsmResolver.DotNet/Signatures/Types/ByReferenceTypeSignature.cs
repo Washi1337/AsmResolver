@@ -28,5 +28,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         public override TypeSignature InstantiateGenericTypes(GenericContext context) => 
             new ByReferenceTypeSignature(BaseType.InstantiateGenericTypes(context));
+        
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+            visitor.VisitByReferenceType(this);
     }
 }

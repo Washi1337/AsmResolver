@@ -70,6 +70,10 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override TypeSignature InstantiateGenericTypes(GenericContext context) => this;
         
         /// <inheritdoc />
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+            visitor.VisitTypeDefOrRef(this);
+        
+        /// <inheritdoc />
         protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
             writer.WriteByte((byte) ElementType);

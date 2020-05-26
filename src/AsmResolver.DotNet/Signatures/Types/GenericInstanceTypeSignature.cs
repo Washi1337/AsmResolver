@@ -122,5 +122,9 @@ namespace AsmResolver.DotNet.Signatures.Types
                 result.TypeArguments.Add(TypeArguments[i].InstantiateGenericTypes(context));
             return result;
         }
+        
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+            visitor.VisitGenericInstanceType(this);
     }
 }
