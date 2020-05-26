@@ -65,9 +65,10 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => Type;
-
+        
         /// <inheritdoc />
-        public override TypeSignature InstantiateGenericTypes(GenericContext context) => this;
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+            visitor.VisitTypeDefOrRef(this);
         
         /// <inheritdoc />
         protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)

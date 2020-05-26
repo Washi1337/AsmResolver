@@ -294,7 +294,19 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// When the type signature does not contain any generic parameter, this method might return the current
         /// instance of the type signature.
         /// </remarks>
-        public abstract TypeSignature InstantiateGenericTypes(GenericContext context);
+        public TypeSignature InstantiateGenericTypes(GenericContext context)
+        {
+            var activator = new GenericTypeActivator(context);
+            return AcceptVisitor(activator);
+        }
+
+        /// <summary>
+        /// Visit the current type signature using the provided visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor to accept.</param>
+        /// <typeparam name="TResult">The type of result the visitor produces.</typeparam>
+        /// <returns>The result the visitor produced after visiting this type signature.</returns>
+        public abstract TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor);
 
         /// <inheritdoc />
         public override string ToString() => FullName;
