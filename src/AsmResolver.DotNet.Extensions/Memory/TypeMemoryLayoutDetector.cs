@@ -30,23 +30,28 @@ namespace AsmResolver.DotNet.Extensions.Memory
         /// <returns>The type's memory layout</returns>
         public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeSignature typeSignature, bool is32Bit)
         {
-            // TODO: Steps to get the memory layout of a value type (for ref type it's 4 or 8 depending on bitness)
-            // 1. Flatten all other value types into one list.
-            // 2. We don't really need to touch fields in an explicit layout struct, their offset
-            //    is just the explicitly set offset.
-            // 3. For explicitly laid out structs, the size is simply the largest field. Their offsets
-            //    are the explicitly set offset. If the struct has a field that has a type of a sequentially
-            //    laid out struct, the method recursively calls itself to infer the layout of that struct first.
-            //    We cannot do anything about auto layout, since it's an implementation detail of the CLR,
-            //    so we should throw an exception for auto layout types.
+            // For explicitly laid out structs, the size is simply the largest field. Their offsets
+            // are the explicitly set offset. If the struct has a field that has a type of a sequentially
+            // laid out struct, the method recursively calls itself to infer the layout of that struct first.
+            // 
+            // We cannot do anything about auto layout, since it's an implementation detail of the CLR,
+            // so we should throw an exception for auto layout types.
+            // (although, that is not to say that is impossible to infer the layout of such types,
+            // but rather that it entirely depends what CLR the binary is running in, so even if we infer
+            // the layout for CLR A, it won't be the correct layout for CLR B, thus giving false results)
             //
-            //    (although, that is not to say that is impossible to infer the layout of such types,
-            //     but rather that it entirely depends what CLR the binary is running in, so even if we infer
-            //     the layout for CLR A, it won't be the correct layout for CLR B, thus giving false results)
-            // 4. Now we are left with a flattened struct with a sequential layout (meaning the order of the fields
-            //    is the order they appear in the metadata, it's constant), we need to iterate over the flattened
-            //    fields and align them + insert padding if needed.
-            // 5. Boom, we are left with the inferred type layout. :)
+            // Now we are left with a flattened struct with a sequential layout (meaning the order of the fields
+            // is the order they appear in the metadata, it's constant), we need to iterate over the flattened
+            // fields and align them + insert padding if needed.
+            
+            // 1. Check if we are dealing with a reference type, if so, return the pointer's size
+            //    depending on the bitness. If not, flatten the struct into a list of its fields.
+            if (!typeSignature.IsValueType)
+                return new TypeMemoryLayout(null, is32Bit ? 4u : 8u);
+
+            var definition = typeSignature.Resolve();
+            var flattened = definition.Fields;
+            
             return new TypeMemoryLayout(null, 0);
         }
     }
