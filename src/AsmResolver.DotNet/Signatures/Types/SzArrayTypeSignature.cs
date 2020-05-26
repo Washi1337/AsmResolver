@@ -50,10 +50,6 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override bool IsValueType => false;
         
         /// <inheritdoc />
-        public override TypeSignature InstantiateGenericTypes(GenericContext context) => 
-            new SzArrayTypeSignature(BaseType.InstantiateGenericTypes(context));
-
-        /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
             visitor.VisitSzArrayType(this);
     }
