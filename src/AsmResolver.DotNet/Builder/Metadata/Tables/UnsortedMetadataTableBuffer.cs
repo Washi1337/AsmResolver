@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
     public class UnsortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow> 
         where TRow : struct, IMetadataRow
     {
-        private readonly IList<TRow> _entries = new List<TRow>();
+        private readonly List<TRow> _entries = new List<TRow>();
         private readonly MetadataTable<TRow> _table;
 
         /// <summary>
