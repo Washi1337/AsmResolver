@@ -296,6 +296,12 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// </remarks>
         public abstract TypeSignature InstantiateGenericTypes(GenericContext context);
 
+        /// <summary>
+        /// Visit the current type signature using the provided visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor to accept.</param>
+        /// <typeparam name="TResult">The type of result the visitor produces.</typeparam>
+        /// <returns>The result the visitor produced after visiting this type signature.</returns>
         public abstract TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor);
 
         /// <inheritdoc />
