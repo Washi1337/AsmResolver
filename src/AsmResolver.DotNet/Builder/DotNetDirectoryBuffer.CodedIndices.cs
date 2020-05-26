@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Builder
             {
                 AssemblyReference assemblyReference => GetAssemblyReferenceToken(assemblyReference),
                 TypeReference typeReference => GetTypeReferenceToken(typeReference),
-                ModuleReference moduleReference => AddModuleReference(moduleReference),
+                ModuleReference moduleReference => GetModuleReferenceToken(moduleReference),
                 ModuleDefinition _ => 0u,
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
             };
@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Builder
                 TypeReference reference => GetTypeReferenceToken(reference),
                 TypeSpecification specification => GetTypeSpecificationToken(specification),
                 MethodDefinition methodDefinition => GetMethodDefinitionToken(methodDefinition),
-                ModuleReference moduleReference => AddModuleReference(moduleReference),
+                ModuleReference moduleReference => GetModuleReferenceToken(moduleReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(parent))
             };
             
@@ -138,7 +138,7 @@ namespace AsmResolver.DotNet.Builder
                 implementationMap.Attributes,
                 encoder.EncodeToken(ownerToken),
                 Metadata.StringsStream.GetStringIndex(implementationMap.Name),
-                AddModuleReference(implementationMap.Scope).Rid);
+                GetModuleReferenceToken(implementationMap.Scope).Rid);
 
             return table.Add(row, implementationMap.MetadataToken.Rid);
         }

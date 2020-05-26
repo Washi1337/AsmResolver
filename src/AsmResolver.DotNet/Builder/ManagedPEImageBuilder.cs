@@ -102,7 +102,7 @@ namespace AsmResolver.DotNet.Builder
                 ImportTableIntoTableBuffers<AssemblyReference>(module, TableIndex.AssemblyRef, buffer.GetAssemblyReferenceToken);
             
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveModuleReferenceIndices) != 0)
-                ImportTableIntoTableBuffers<ModuleReference>(module, TableIndex.ModuleRef, buffer.AddModuleReference);
+                ImportTableIntoTableBuffers<ModuleReference>(module, TableIndex.ModuleRef, buffer.GetModuleReferenceToken);
             
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<TypeReference>(module, TableIndex.TypeRef, buffer.GetTypeReferenceToken);

@@ -103,6 +103,23 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, assembly);
             return token;
         }
+        
+        /// <summary>
+        /// Adds a single module reference to the buffer.
+        /// </summary>
+        /// <param name="reference">The reference to add.</param>
+        /// <returns>The new metadata token assigned to the module reference.</returns>
+        public MetadataToken GetModuleReferenceToken(ModuleReference reference)
+        {
+            AssertIsImported(reference);
+            
+            var table = Metadata.TablesStream.GetTable<ModuleReferenceRow>(TableIndex.ModuleRef);
+
+            var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
+            var token = table.Add(row, reference.MetadataToken.Rid);
+            AddCustomAttributes(token, reference);
+            return token;
+        }
 
         /// <inheritdoc />
         public MetadataToken GetTypeSpecificationToken(TypeSpecification type)
