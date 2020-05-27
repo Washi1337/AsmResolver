@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.Builder.Discovery;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
@@ -58,7 +59,8 @@ namespace AsmResolver.DotNet.Builder
             ImportBasicTablesIntoTableBuffersIfSpecified(module, buffer);
 
             // Define all types defined in the module.
-            buffer.DefineTypeDefinitions(module.GetAllTypes());
+            var strategy = ChooseTypeDiscoveryStrategy(module);
+            buffer.DefineTypeDefinitions(strategy.CollectTypes(module));
             
             // All types defs and refs are added to the buffer at this point. We can therefore safely start adding
             // TypeSpecs if they need to be preserved: 
@@ -121,6 +123,9 @@ namespace AsmResolver.DotNet.Builder
 
         private void ImportBasicTablesIntoTableBuffersIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
+            if (module.DotNetDirectory is null)
+                return;
+            
             // NOTE: The order of this table importing is crucial.
             //
             // Assembly refs should always be imported prior to importing type refs, which should be imported before
@@ -144,6 +149,9 @@ namespace AsmResolver.DotNet.Builder
         
         private void ImportRemainingTablesIntoTableBuffersIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
+            if (module.DotNetDirectory is null)
+                return;
+            
             // NOTE: The order of this table importing is crucial.
             //
             // Type specs should always be imported prior to other signatures, as type specs reference type sigs that may
@@ -170,6 +178,17 @@ namespace AsmResolver.DotNet.Builder
             for (uint rid = 1; rid <= count; rid++)
                 importAction((TMember) module.LookupMember(new MetadataToken(tableIndex, rid)));
         }
-        
+
+        private ITypeDiscoveryStrategy ChooseTypeDiscoveryStrategy(ModuleDefinition module)
+        {
+            if (module.DotNetDirectory is null
+                || (MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeDefinitionIndices) == 0)
+            {
+                return TreeTraversalTypeDiscoveryStrategy.Instance;
+            }
+
+            return MetadataTypeDiscoveryStrategy.Instance;
+        }
+
     }
 }
