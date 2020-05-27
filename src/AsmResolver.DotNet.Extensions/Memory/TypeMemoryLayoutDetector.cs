@@ -80,6 +80,11 @@ namespace AsmResolver.DotNet.Extensions.Memory
                 // If we have an explicitly set Packing size
                 if (resolved.ClassLayout?.PackingSize is {} pack)
                 {
+                    // If the packing is 0, the automatic packing size is 4 or 8
+                    // depending on bitness, but it also checked against the largest field
+                    if (pack == 0)
+                        return Math.Min(is32Bit ? 4u : 8u, largest);
+                    
                     // The alignment is the packing size or the largest field,
                     // whichever is smaller
                     return Math.Min(pack, largest);
