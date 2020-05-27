@@ -14,12 +14,12 @@ namespace AsmResolver.DotNet.Builder
             
             AssertIsImported(scope);
 
-            var token = scope switch
+            var token = scope.MetadataToken.Table switch
             {
-                AssemblyReference assemblyReference => GetAssemblyReferenceToken(assemblyReference),
-                TypeReference typeReference => GetTypeReferenceToken(typeReference),
-                ModuleReference moduleReference => GetModuleReferenceToken(moduleReference),
-                ModuleDefinition _ => 0u,
+                TableIndex.AssemblyRef => GetAssemblyReferenceToken(scope as AssemblyReference),
+                TableIndex.TypeRef => GetTypeReferenceToken(scope as TypeReference),
+                TableIndex.ModuleRef => GetModuleReferenceToken(scope as ModuleReference),
+                TableIndex.Module => 0,
                 _ => throw new ArgumentOutOfRangeException(nameof(scope))
             };
 
@@ -36,11 +36,11 @@ namespace AsmResolver.DotNet.Builder
             
             AssertIsImported(type);
 
-            var token = type switch
+            var token = type.MetadataToken.Table switch
             {
-                TypeDefinition definition => GetTypeDefinitionToken(definition),
-                TypeReference reference => GetTypeReferenceToken(reference),
-                TypeSpecification specification => GetTypeSpecificationToken(specification),
+                TableIndex.TypeDef => GetTypeDefinitionToken(type as TypeDefinition),
+                TableIndex.TypeRef => GetTypeReferenceToken(type as TypeReference),
+                TableIndex.TypeSpec => GetTypeSpecificationToken(type as TypeSpecification),
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 
@@ -56,16 +56,16 @@ namespace AsmResolver.DotNet.Builder
             
             AssertIsImported(parent);
 
-            var token = parent switch
+            var token = parent.MetadataToken.Table switch
             {
-                TypeDefinition definition => GetTypeDefinitionToken(definition),
-                TypeReference reference => GetTypeReferenceToken(reference),
-                TypeSpecification specification => GetTypeSpecificationToken(specification),
-                MethodDefinition methodDefinition => GetMethodDefinitionToken(methodDefinition),
-                ModuleReference moduleReference => GetModuleReferenceToken(moduleReference),
+                TableIndex.TypeDef => GetTypeDefinitionToken(parent as TypeDefinition),
+                TableIndex.TypeRef => GetTypeReferenceToken(parent as TypeReference),
+                TableIndex.TypeSpec => GetTypeSpecificationToken(parent as TypeSpecification),
+                TableIndex.Method => GetMethodDefinitionToken(parent as MethodDefinition),
+                TableIndex.ModuleRef => GetModuleReferenceToken(parent as ModuleReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(parent))
             };
-            
+                
             return Metadata.TablesStream
                 .GetIndexEncoder(CodedIndex.MemberRefParent)
                 .EncodeToken(token);
@@ -78,10 +78,10 @@ namespace AsmResolver.DotNet.Builder
 
             AssertIsImported(method);
 
-            var token = method switch
+            var token = method.MetadataToken.Table switch
             {
-                MethodDefinition definition => GetMethodDefinitionToken(definition),
-                MemberReference reference => GetMemberReferenceToken(reference),
+                TableIndex.Method => GetMethodDefinitionToken(method as MethodDefinition),
+                TableIndex.MemberRef => GetMemberReferenceToken(method as MemberReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(method))
             };
             
@@ -97,10 +97,10 @@ namespace AsmResolver.DotNet.Builder
 
             AssertIsImported(constructor);
 
-            var token = constructor switch
+            var token = constructor.MetadataToken.Table switch
             {
-                MethodDefinition definition => GetMethodDefinitionToken(definition),
-                MemberReference reference => GetMemberReferenceToken(reference),
+                TableIndex.Method => GetMethodDefinitionToken(constructor as MethodDefinition),
+                TableIndex.MemberRef => GetMemberReferenceToken(constructor as MemberReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(constructor))
             };
             
