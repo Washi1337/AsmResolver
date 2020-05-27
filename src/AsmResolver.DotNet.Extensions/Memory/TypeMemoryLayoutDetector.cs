@@ -1,4 +1,8 @@
-﻿using AsmResolver.DotNet.Signatures.Types;
+﻿using System.Collections.Generic;
+using System.Linq;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Extensions.Memory
 {
@@ -10,13 +14,13 @@ namespace AsmResolver.DotNet.Extensions.Memory
         /// <inheritdoc cref="GetImpliedMemoryLayout(AsmResolver.DotNet.Signatures.Types.TypeSignature,bool)"/>
         public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeDefinition typeDefinition, bool is32Bit)
         {
-            return GetImpliedMemoryLayout(typeDefinition.ToTypeSignature(), is32Bit);
+            return typeDefinition.ToTypeSignature().GetImpliedMemoryLayout(is32Bit);
         }
 
         /// <inheritdoc cref="GetImpliedMemoryLayout(AsmResolver.DotNet.Signatures.Types.TypeSignature,bool)"/>
         public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeSpecification typeSpecification, bool is32Bit)
         {
-            return GetImpliedMemoryLayout(typeSpecification.Signature, is32Bit);
+            return typeSpecification.Signature.GetImpliedMemoryLayout(is32Bit);
         }
 
         /// <summary>
@@ -38,21 +42,63 @@ namespace AsmResolver.DotNet.Extensions.Memory
             // so we should throw an exception for auto layout types.
             // (although, that is not to say that is impossible to infer the layout of such types,
             // but rather that it entirely depends what CLR the binary is running in, so even if we infer
-            // the layout for CLR A, it won't be the correct layout for CLR B, thus giving false results)
+            // the layout for CLR A, it won't be the correct layout for CLR B, thus potentially giving false results)
             //
             // Now we are left with a flattened struct with a sequential layout (meaning the order of the fields
             // is the order they appear in the metadata, it's constant), we need to iterate over the flattened
             // fields and align them + insert padding if needed.
-            
-            // 1. Check if we are dealing with a reference type, if so, return the pointer's size
-            //    depending on the bitness. If not, flatten the struct into a list of its fields.
-            if (!typeSignature.IsValueType)
-                return new TypeMemoryLayout(null, is32Bit ? 4u : 8u);
 
-            var definition = typeSignature.Resolve();
-            var flattened = definition.Fields;
+            var resolved = typeSignature.Resolve();
+            var context = typeSignature is GenericInstanceTypeSignature g
+                ? new GenericContext().WithType(g)
+                : new GenericContext();
+            
+            var graph = Flatten(resolved, context);
             
             return new TypeMemoryLayout(null, 0);
+        }
+
+        // TODO: Detect cyclic dependencies properly
+        private static List<FieldNode> Flatten(TypeDefinition root, in GenericContext generic, int maxRec = 0)
+        {
+            if (maxRec > 100)
+                throw new TypeMemoryLayoutDetectionException("Maximum recursion depth reached");
+            
+            var list = new List<FieldNode>();
+
+            foreach (var field in root.Fields.Where(f => !f.IsStatic))
+            {
+                var signature = field.Signature.FieldType;
+                var node = new FieldNode(root, signature, field.FieldOffset);
+
+                switch (signature.ElementType)
+                {
+                    case ElementType.ValueType:
+                    {
+                        node.Children.AddRange(Flatten(signature.Resolve(), generic, maxRec++));
+                        break;
+                    }
+
+                    case ElementType.GenericInst:
+                    {
+                        var provider = (GenericInstanceTypeSignature) signature;
+                        node.Children.AddRange(Flatten(provider.Resolve(), generic.WithType(provider), maxRec++));
+                        break;
+                    }
+
+                    case ElementType.Var:
+                    case ElementType.MVar:
+                    {
+                        var resolved = generic.GetTypeArgument((GenericParameterSignature) signature);
+                        node = new FieldNode(root, resolved, field.FieldOffset);
+                        break;
+                    }
+                }
+                
+                list.Add(node);
+            }
+
+            return list;
         }
     }
 }
