@@ -114,7 +114,10 @@ namespace AsmResolver.DotNet.Builder
         /// <summary>
         /// Allocates metadata rows for the provided type definitions in the buffer.  
         /// </summary>
-        /// <param name="types"></param>
+        /// <param name="types">The types to define.</param>
+        /// <remarks>
+        /// This method does not define any member defined in the type, except for nested types.
+        /// </remarks>
         public void DefineTypeDefinitions(IEnumerable<TypeDefinition> types)
         {
             var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
@@ -135,6 +138,10 @@ namespace AsmResolver.DotNet.Builder
 
                 if (type.IsNested)
                 {
+                    // As per the ECMA-335; nested types should always follow their enclosing types in the TypeDef table.
+                    // Proper type def collections that are passed onto this function therefore should have been added
+                    // already to the buffer. If not, we have an invalid ordering of types.
+                    
                     var enclosingTypeToken = GetTypeDefinitionToken(type.DeclaringType);
                     if (enclosingTypeToken.Rid ==0)
                         throw new ArgumentException($"Nested type {type.FullName} is added before enclosing class.");

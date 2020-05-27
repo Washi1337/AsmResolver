@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
@@ -47,22 +48,47 @@ namespace AsmResolver.DotNet.Builder
 
         private IDotNetDirectory CreateDotNetDirectory(PEImage image, ModuleDefinition module)
         {
-            var metadataBuffer = CreateMetadataBuffer(module);
-            var dotNetDirectoryBuffer = new DotNetDirectoryBuffer(module, MethodBodySerializer, metadataBuffer);
+            var buffer = CreateDotNetDirectoryBuffer(module);
             
-            ImportTablesStreamIfSpecified(dotNetDirectoryBuffer, module);
+            // Add the module to the buffer.
+            buffer.DefineModule(module);
             
-            dotNetDirectoryBuffer.DefineModule(module);
-            dotNetDirectoryBuffer.DefineTypeDefinitions(module.GetAllTypes());
-            dotNetDirectoryBuffer.DefineMemberDefinitionsInTypes();
-            dotNetDirectoryBuffer.FinalizeTypeDefinitions();
-            dotNetDirectoryBuffer.FinalizeModule(module);
-            
-            // If module is the manifest module, include the entire assembly.
-            if (module.Assembly?.ManifestModule == module)
-                dotNetDirectoryBuffer.DefineAssembly(module.Assembly);
+            // When specified, import existing AssemblyRef, ModuleRef, TypeRef and MemberRef prior to adding any other
+            // member reference or definition, to ensure that they are assigned their original RIDs. 
+            ImportBasicTablesIntoTableBuffersIfSpecified(module, buffer);
 
-            return dotNetDirectoryBuffer.CreateDirectory();
+            // Define all types defined in the module.
+            buffer.DefineTypeDefinitions(module.GetAllTypes());
+            
+            // All types defs and refs are added to the buffer at this point. We can therefore safely start adding
+            // TypeSpecs if they need to be preserved: 
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
+                ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
+            
+            // Define all members in the added types.
+            buffer.DefineMemberDefinitionsInTypes();
+            
+            // Import remaining preservable tables (Type specs, method specs, signatures etc).
+            // We do this before finalizing any member to ensure that they are assigned their original RIDs. 
+            ImportRemainingTablesIntoTableBuffersIfSpecified(module, buffer);
+            
+            // Finalize member definitions.
+            buffer.FinalizeTypeDefinitions();
+
+            // If module is the manifest module, include the assembly definition.
+            if (module.Assembly?.ManifestModule == module)
+                buffer.DefineAssembly(module.Assembly);
+            
+            // Finalize module.
+            buffer.FinalizeModule(module);
+
+            return buffer.CreateDirectory();
+        }
+
+        private DotNetDirectoryBuffer CreateDotNetDirectoryBuffer(ModuleDefinition module)
+        {
+            var metadataBuffer = CreateMetadataBuffer(module);
+            return new DotNetDirectoryBuffer(module, MethodBodySerializer, metadataBuffer);
         }
 
         private IMetadataBuffer CreateMetadataBuffer(ModuleDefinition module)
@@ -92,30 +118,39 @@ namespace AsmResolver.DotNet.Builder
 
             return metadataBuffer;
         }
-        
-        private void ImportTablesStreamIfSpecified(DotNetDirectoryBuffer buffer, ModuleDefinition module)
+
+        private void ImportBasicTablesIntoTableBuffersIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
-            // NOTE: The order of the table importing is crucial.
+            // NOTE: The order of this table importing is crucial.
             //
             // Assembly refs should always be imported prior to importing type refs, which should be imported before
             // any other member reference or definition, as the Get/Add methods of DotNetDirectoryBuffer try to add
             // any missing assembly and/or type references to the buffer as well. Therefore, to make sure that assembly
             // and type reference tokens are still preserved, we need to prioritize these.
-            
+
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveAssemblyReferenceIndices) != 0)
-                ImportTableIntoTableBuffers<AssemblyReference>(module, TableIndex.AssemblyRef, buffer.GetAssemblyReferenceToken);
-            
+                ImportTableIntoTableBuffers<AssemblyReference>(module, TableIndex.AssemblyRef,
+                    buffer.GetAssemblyReferenceToken);
+
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveModuleReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<ModuleReference>(module, TableIndex.ModuleRef, buffer.GetModuleReferenceToken);
-            
+
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<TypeReference>(module, TableIndex.TypeRef, buffer.GetTypeReferenceToken);
             
-            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
-                ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
-            
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMemberReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<MemberReference>(module, TableIndex.MemberRef, buffer.GetMemberReferenceToken);
+        }
+        
+        private void ImportRemainingTablesIntoTableBuffersIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
+        {
+            // NOTE: The order of this table importing is crucial.
+            //
+            // Type specs should always be imported prior to other signatures, as type specs reference type sigs that may
+            // be referenced by other metadata members.
+            
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
+                ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
             
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStandAloneSignatureIndices) != 0)
                 ImportTableIntoTableBuffers<StandAloneSignature>(module, TableIndex.StandAloneSig, buffer.GetStandAloneSignatureToken);
