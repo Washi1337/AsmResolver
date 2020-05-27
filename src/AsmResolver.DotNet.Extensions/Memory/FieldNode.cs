@@ -5,14 +5,19 @@ namespace AsmResolver.DotNet.Extensions.Memory
 {
     internal sealed class FieldNode
     {
-        internal FieldNode(TypeDefinition parent, TypeSignature signature, int? explicitOffset)
+        internal FieldNode(TypeDefinition parent, FieldDefinition field, TypeSignature signature)
         {
             Parent = parent;
+            Field = field;
             Signature = signature;
-            ExplicitOffset = explicitOffset;
         }
         
         internal TypeDefinition Parent
+        {
+            get;
+        }
+
+        internal FieldDefinition Field
         {
             get;
         }
@@ -22,39 +27,37 @@ namespace AsmResolver.DotNet.Extensions.Memory
             get;
         }
 
-        internal int? ExplicitOffset
-        {
-            get;
-        }
-
         internal List<FieldNode> Children
         {
             get;
         } = new List<FieldNode>();
+
+        internal uint? ExplicitOffset
+        {
+            get => (uint?) Field.FieldOffset;
+        }
 
         internal bool IsPrimitive
         {
             get => Children.Count == 0;
         }
 
-        internal bool IsParentSequentialLayout
+        internal bool IsSequentialLayout
         {
-            get => Parent.IsSequentialLayout;
+            get => Signature.Resolve().IsSequentialLayout;
         }
 
-        internal bool IsParentExplicitLayout
+        internal bool IsExplicitLayout
         {
-            get => Parent.IsExplicitLayout;
+            get => Signature.Resolve().IsExplicitLayout;
         }
 
-        internal void Accept(IFieldNodeVisitor visitor)
+        internal void Accept(IVisitor visitor)
         {
-            if (!IsPrimitive)
-            {
-                foreach (var child in Children)
-                    visitor.Visit(child);
-            }
-            else visitor.Visit(this);
+            if (IsPrimitive)
+                visitor.VisitPrimitive(this);
+            else
+                visitor.VisitComplex(this);
         }
     }
 }
