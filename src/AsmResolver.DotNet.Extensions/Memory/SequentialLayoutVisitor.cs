@@ -14,35 +14,45 @@ namespace AsmResolver.DotNet.Extensions.Memory
         public override void VisitComplex(FieldNode node)
         {
             var layout = node.Signature.GetImpliedMemoryLayout(Is32Bit);
-            var size = layout.Size;
-            
-            var alignment = Math.Min(Alignment, size);
-            var aligned = size.Align(alignment);
-            var padding = aligned - size;
-
-            _size += padding;
-            _offsets[node.Field] = _size;
-            _size += size;
+            CommenceInference(node.Field, layout.Size);
         }
 
         public override void VisitPrimitive(FieldNode node)
         {
             var size = node.Signature.SizeInBytes(Is32Bit);
-            var alignment = Math.Min(Alignment, size);
-            var aligned = size.Align(alignment);
-            var padding = aligned - size;
-
-            _size += padding;
-            _offsets[node.Field] = _size;
-            _size += size;
+            CommenceInference(node.Field, size);
         }
 
         internal override TypeMemoryLayout ConstructLayout()
         {
-            var realSize = _size.Align(Alignment);
-            var explicitSize = Parent.ClassLayout?.ClassSize ?? 0;
+            // We first need to align the type it to its alignment
+            var inferredSize = _size.Align(Alignment); 
             
-            return new TypeMemoryLayout(_offsets, Math.Max(realSize, explicitSize));
+            // We try to get the explicit size, if there is none, we'll just use 0
+            var explicitSize = Parent.ClassLayout?.ClassSize ?? 0; 
+            
+            // If there is an explicitly set size for the struct, the "real" size is
+            // the bigger one of the explicit size or the inferred size
+            return new TypeMemoryLayout(_offsets, Math.Max(inferredSize, explicitSize));
+        }
+
+        private void CommenceInference(FieldDefinition field, uint inferredSize)
+        {
+            // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute.pack
+            // Each field must align with fields of its own size (1, 2, 4, 8, etc., bytes)
+            // or the alignment of the type, whichever is smaller.
+            var alignment = Math.Min(Alignment, inferredSize);
+            var aligned = inferredSize.Align(alignment);
+            var padding = aligned - inferredSize;
+
+            // First we add the padding so it aligns correctly
+            _size += padding;
+            
+            // We can now set the offset, since it aligns on the boundary
+            _offsets[field] = _size;
+            
+            // Finally we add the actual inferred size
+            _size += inferredSize;
         }
     }
 }
