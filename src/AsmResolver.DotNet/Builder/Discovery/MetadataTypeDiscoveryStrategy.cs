@@ -100,8 +100,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 result[(int) (rid - 1)] = new PlaceHolderTypeDefinition(module, placeHolderNamespace, token);
             }
         }
-        
-        internal sealed class PlaceHolderTypeDefinition : TypeDefinition
+
+        private sealed class PlaceHolderTypeDefinition : TypeDefinition
         {
             public PlaceHolderTypeDefinition(ModuleDefinition module, string ns, MetadataToken token)
                 : base(token)
