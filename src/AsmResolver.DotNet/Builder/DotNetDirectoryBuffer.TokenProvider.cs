@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Builder
         private readonly OneToOneRelation<FieldDefinition, MetadataToken> _fieldTokens = new OneToOneRelation<FieldDefinition, MetadataToken>();
 
         /// <inheritdoc />
-        uint IMetadataTokenProvider.GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
+        public uint GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
 
         /// <inheritdoc />
         public MetadataToken GetTypeReferenceToken(TypeReference type)

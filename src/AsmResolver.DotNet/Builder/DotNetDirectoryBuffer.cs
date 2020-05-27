@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet.Builder
 
             foreach (var implementation in interfaces)
             {
-                var row = new InterfaceImplementationRow(ownerToken.Rid, AddTypeDefOrRef(implementation.Interface));
+                var row = new InterfaceImplementationRow(ownerToken.Rid, GetTypeDefOrRefIndex(implementation.Interface));
                 var token = table.Add(row, 0);
                 AddCustomAttributes(token, implementation);
             }
@@ -193,7 +193,7 @@ namespace AsmResolver.DotNet.Builder
             
             var table = Metadata.TablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
             
-            var row = new GenericParameterConstraintRow(ownerToken.Rid, AddTypeDefOrRef(constraint.Constraint));
+            var row = new GenericParameterConstraintRow(ownerToken.Rid, GetTypeDefOrRefIndex(constraint.Constraint));
 
             var token = table.Add(row, constraint.MetadataToken.Rid);
             AddCustomAttributes(token, constraint);

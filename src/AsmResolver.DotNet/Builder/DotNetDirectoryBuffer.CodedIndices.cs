@@ -28,7 +28,8 @@ namespace AsmResolver.DotNet.Builder
                 .EncodeToken(token);
         }
 
-        private uint AddTypeDefOrRef(ITypeDefOrRef type)
+        /// <inheritdoc />
+        public uint GetTypeDefOrRefIndex(ITypeDefOrRef type)
         {
             if (type is null)
                 return 0;
@@ -47,8 +48,6 @@ namespace AsmResolver.DotNet.Builder
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)
                 .EncodeToken(token);
         }
-
-        uint ITypeCodedIndexProvider.GetTypeDefOrRefIndex(ITypeDefOrRef type) => AddTypeDefOrRef(type);
 
         private uint AddMemberRefParent(IMemberRefParent parent)
         {

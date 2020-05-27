@@ -60,7 +60,7 @@ namespace AsmResolver.DotNet.Builder
 
             // Define all types defined in the module.
             var strategy = ChooseTypeDiscoveryStrategy(module);
-            buffer.DefineTypeDefinitions(strategy.CollectTypes(module));
+            buffer.DefineTypes(strategy.CollectTypes(module));
             
             // All types defs and refs are added to the buffer at this point. We can therefore safely start adding
             // TypeSpecs if they need to be preserved: 
@@ -68,14 +68,14 @@ namespace AsmResolver.DotNet.Builder
                 ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
             
             // Define all members in the added types.
-            buffer.DefineMemberDefinitionsInTypes();
+            buffer.DefineMembersInTypes();
             
             // Import remaining preservable tables (Type specs, method specs, signatures etc).
             // We do this before finalizing any member to ensure that they are assigned their original RIDs. 
             ImportRemainingTablesIntoTableBuffersIfSpecified(module, buffer);
             
             // Finalize member definitions.
-            buffer.FinalizeTypeDefinitions();
+            buffer.FinalizeTypes();
 
             // If module is the manifest module, include the assembly definition.
             if (module.Assembly?.ManifestModule == module)
