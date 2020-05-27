@@ -59,9 +59,9 @@ namespace AsmResolver.DotNet.Extensions.Memory
         }
 
         // TODO: Detect cyclic dependencies properly
-        private static List<FieldNode> Flatten(TypeDefinition root, in GenericContext generic, int maxRec = 0)
+        private static List<FieldNode> Flatten(TypeDefinition root, in GenericContext generic, int depth = 0)
         {
-            if (maxRec > 100)
+            if (depth > 100)
                 throw new TypeMemoryLayoutDetectionException("Maximum recursion depth reached");
             
             var list = new List<FieldNode>();
@@ -75,14 +75,14 @@ namespace AsmResolver.DotNet.Extensions.Memory
                 {
                     case ElementType.ValueType:
                     {
-                        node.Children.AddRange(Flatten(signature.Resolve(), generic, maxRec++));
+                        node.Children.AddRange(Flatten(signature.Resolve(), generic, depth++));
                         break;
                     }
 
                     case ElementType.GenericInst:
                     {
                         var provider = (GenericInstanceTypeSignature) signature;
-                        node.Children.AddRange(Flatten(provider.Resolve(), generic.WithType(provider), maxRec++));
+                        node.Children.AddRange(Flatten(provider.Resolve(), generic.WithType(provider), depth++));
                         break;
                     }
 
