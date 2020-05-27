@@ -19,8 +19,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
 
         public override void VisitPrimitive(FieldNode node)
         {
-            var size = node.Signature.SizeInBytes(Is32Bit);
-            CommenceInference(node.Field, size);
+            CommenceInference(node.Field, node.Signature.SizeInBytes(Is32Bit));
         }
 
         internal override TypeMemoryLayout ConstructLayout()
