@@ -8,11 +8,14 @@ namespace AsmResolver.DotNet.Builder
 {
     public partial class DotNetDirectoryBuffer
     {
+        private readonly IDictionary<ModuleDefinition, MetadataToken> _moduleDefTokens =
+            new Dictionary<ModuleDefinition, MetadataToken>();
+        
         /// <summary>
         /// Adds an assembly, its entire manifest module, and all secondary module file references, to the buffer.
         /// </summary>
         /// <param name="assembly">The assembly to add.</param>
-        public void AddAssembly(AssemblyDefinition assembly)
+        public void DefineAssembly(AssemblyDefinition assembly)
         {
             var table = Metadata.TablesStream.GetTable<AssemblyDefinitionRow>(TableIndex.Assembly);
 
@@ -28,16 +31,20 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Culture));
 
             var token = table.Add(row, assembly.MetadataToken.Rid);
-            AddModule(assembly.ManifestModule);
             AddCustomAttributes(token, assembly);
             AddSecurityDeclarations(token, assembly);
         }
 
         /// <summary>
-        /// Adds a module and all its contents to the buffer. 
+        /// Adds a module metadata row to the buffer. 
         /// </summary>
         /// <param name="module">The module to add.</param>
-        public void AddModule(ModuleDefinition module)
+        /// <remarks>
+        /// This method only adds the metadata row of the module definition to the module table buffer,
+        /// it does not add any type definition to the buffer, nor does it add custom attributes or any
+        /// other metadata model object related to this module to the buffer.
+        /// </remarks>
+        public void DefineModule(ModuleDefinition module)
         {
             var stringsStream = Metadata.StringsStream;
             var guidStream = Metadata.GuidStream;
@@ -51,12 +58,21 @@ namespace AsmResolver.DotNet.Builder
                 guidStream.GetGuidIndex(module.EncBaseId));
             
             var token = table.Add(row, module.MetadataToken.Rid);
+            _moduleDefTokens[module] = token;
+        }
+
+        /// <summary>
+        /// Finalizes the module definition.
+        /// </summary>
+        /// <param name="module">The module to finalize.</param>
+        public void FinalizeModule(ModuleDefinition module)
+        {
+            var token = _moduleDefTokens[module];
             
             // Ensure reference to corlib is added. 
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
                 GetAssemblyReferenceToken(corLibScope);
-            
-            AddTypeDefinitionsInModule(module);
+
             AddResourcesInModule(module);
             AddCustomAttributes(token, module);
         }
@@ -67,7 +83,12 @@ namespace AsmResolver.DotNet.Builder
                 AddManifestResource(resource);
         }
 
-        private MetadataToken AddManifestResource(ManifestResource resource)
+        /// <summary>
+        /// Adds a single manifest resource to the buffer.
+        /// </summary>
+        /// <param name="resource">The resource to add.</param>
+        /// <returns>The new metadata token of the resource.</returns>
+        public MetadataToken AddManifestResource(ManifestResource resource)
         {
             uint offset = resource.Offset;
             if (resource.IsEmbedded)
@@ -89,7 +110,12 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
-        private void AddTypeDefinitionsInModule(ModuleDefinition module)
+        /// <summary>
+        /// Recursively adds all type definitions defined in the module, as well as any members defined by the
+        /// type definitions. 
+        /// </summary>
+        /// <param name="module">The module.</param>
+        public void AddTypeDefinitionsInModule(ModuleDefinition module)
         {
             AddTypeDefinitionStubs(module);
             AddMemberDefinitionStubs();

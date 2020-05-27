@@ -52,11 +52,13 @@ namespace AsmResolver.DotNet.Builder
             
             ImportTablesStreamIfSpecified(dotNetDirectoryBuffer, module);
             
+            dotNetDirectoryBuffer.DefineModule(module);
+            dotNetDirectoryBuffer.AddTypeDefinitionsInModule(module);
+            dotNetDirectoryBuffer.FinalizeModule(module);
+            
             // If module is the manifest module, include the entire assembly.
             if (module.Assembly?.ManifestModule == module)
-                dotNetDirectoryBuffer.AddAssembly(module.Assembly);
-            else
-                dotNetDirectoryBuffer.AddModule(module);
+                dotNetDirectoryBuffer.DefineAssembly(module.Assembly);
 
             return dotNetDirectoryBuffer.CreateDirectory();
         }
