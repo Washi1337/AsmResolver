@@ -1,8 +1,8 @@
 ﻿namespace AsmResolver.DotNet.Extensions.Memory
 {
-    internal interface IFieldNodeVisitor
+    internal interface IVisitor
     {
-        void Visit(FieldNode node);
+        void VisitComplex(FieldNode node);
         void VisitPrimitive(FieldNode node);
     }
 }
