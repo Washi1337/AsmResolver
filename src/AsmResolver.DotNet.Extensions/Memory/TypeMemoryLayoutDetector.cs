@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
@@ -48,28 +49,65 @@ namespace AsmResolver.DotNet.Extensions.Memory
             // is the order they appear in the metadata, it's constant), we need to iterate over the flattened
             // fields and align them + insert padding if needed.
 
+            // For reference types, just return the pointer size of the environment
+            if (!typeSignature.IsValueType)
+            {
+                return new TypeMemoryLayout(null, is32Bit ? 4u : 8u);
+            }
+            
             var resolved = typeSignature.Resolve();
+            if (resolved.IsAutoLayout)
+                throw new TypeMemoryLayoutDetectionException("Cannot infer layout of auto layout structs");
+            
             var context = typeSignature is GenericInstanceTypeSignature g
                 ? new GenericContext().WithType(g)
                 : new GenericContext();
-            
+
             var graph = Flatten(resolved, context);
+            var largestLocator = new LargestFieldLocatorVisitor(is32Bit);
             
-            return new TypeMemoryLayout(null, 0);
+            foreach (var node in graph)
+                node.Accept(largestLocator);
+
+            uint GetAlignment()
+            {
+                var biggest = largestLocator.Largest;
+                
+                if (resolved.ClassLayout?.PackingSize is {} pack)
+                {
+                    if (pack > 0)
+                        return Math.Min(pack, biggest);
+                }
+
+                return biggest;
+            }
+
+            var alignment = GetAlignment();
+            
+            var visitor = resolved.IsExplicitLayout
+                ? (VisitorBase) new ExplicitLayoutVisitor(resolved, alignment, is32Bit)
+                : new SequentialLayoutVisitor(resolved, alignment, is32Bit);
+
+            foreach (var node in graph)
+                node.Accept(visitor);
+
+            return visitor.ConstructLayout();
         }
 
-        // TODO: Detect cyclic dependencies properly
         private static List<FieldNode> Flatten(TypeDefinition root, in GenericContext generic, int depth = 0)
         {
             if (depth > 1000)
                 throw new TypeMemoryLayoutDetectionException("Maximum recursion depth reached");
+            
+            if (root.IsAutoLayout)
+                throw new TypeMemoryLayoutDetectionException("Cannot infer layout of auto layout structs");
             
             var list = new List<FieldNode>();
 
             foreach (var field in root.Fields.Where(f => !f.IsStatic))
             {
                 var signature = field.Signature.FieldType;
-                var node = new FieldNode(root, signature, field.FieldOffset);
+                var node = new FieldNode(root, field, signature);
 
                 switch (signature.ElementType)
                 {
@@ -90,7 +128,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                     case ElementType.MVar:
                     {
                         var resolved = generic.GetTypeArgument((GenericParameterSignature) signature);
-                        node = new FieldNode(root, resolved, field.FieldOffset);
+                        node = new FieldNode(root, field, resolved);
                         break;
                     }
 
@@ -102,7 +140,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                         break;
                     }
                 }
-                
+
                 list.Add(node);
             }
 

@@ -21,7 +21,6 @@ namespace AsmResolver.DotNet.Extensions.Memory
         public uint Size
         {
             get;
-            internal set;
         }
 
         /// <summary>
