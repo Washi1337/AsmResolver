@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Builder.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -109,25 +110,17 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, resource);
             return token;
         }
-
+        
         /// <summary>
-        /// Recursively adds all type definitions defined in the module, as well as any members defined by the
-        /// type definitions. 
+        /// Allocates metadata rows for the provided type definitions in the buffer.  
         /// </summary>
-        /// <param name="module">The module.</param>
-        public void AddTypeDefinitionsInModule(ModuleDefinition module)
-        {
-            AddTypeDefinitionStubs(module);
-            AddMemberDefinitionStubs();
-            FinalizeTypeDefinitions();
-        }
-
-        private void AddTypeDefinitionStubs(ModuleDefinition module)
+        /// <param name="types"></param>
+        public void DefineTypeDefinitions(IEnumerable<TypeDefinition> types)
         {
             var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             var nestedClassTable = Metadata.TablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
             
-            foreach (var type in module.GetAllTypes())
+            foreach (var type in types)
             {
                 var row = new TypeDefinitionRow(
                     type.Attributes,
@@ -142,16 +135,23 @@ namespace AsmResolver.DotNet.Builder
 
                 if (type.IsNested)
                 {
+                    var enclosingTypeToken = GetTypeDefinitionToken(type.DeclaringType);
+                    if (enclosingTypeToken.Rid ==0)
+                        throw new ArgumentException($"Nested type {type.FullName} is added before enclosing class.");
+                    
                     var nestedClassRow = new NestedClassRow(
                         token.Rid,
-                        GetTypeDefinitionToken(type.DeclaringType).Rid);
+                        enclosingTypeToken.Rid);
                     
                     nestedClassTable.Add(nestedClassRow, 0);
                 }
             }
         }
 
-        private void AddMemberDefinitionStubs()
+        /// <summary>
+        /// Allocates metadata rows for all fields and methods defined in the types that are added to the buffer. 
+        /// </summary>
+        public void DefineMemberDefinitionsInTypes()
         {
             var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
 
@@ -168,16 +168,16 @@ namespace AsmResolver.DotNet.Builder
                 table[rid] = row;
 
                 foreach (var field in type.Fields)
-                    AddFieldDefinitionStub(field);
+                    DefineFieldDefinition(field);
                 foreach (var method in type.Methods)
-                    AddMethodDefinitionStub(method);
+                    DefineMethodDefinition(method);
 
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
             }
         }
 
-        private void AddFieldDefinitionStub(FieldDefinition field)
+        private void DefineFieldDefinition(FieldDefinition field)
         {
             var table = Metadata.TablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
 
@@ -190,7 +190,7 @@ namespace AsmResolver.DotNet.Builder
             _fieldTokens.Add(field, token);
         }
         
-        private void AddMethodDefinitionStub(MethodDefinition method)
+        private void DefineMethodDefinition(MethodDefinition method)
         {
             var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             
@@ -206,7 +206,10 @@ namespace AsmResolver.DotNet.Builder
             _methodTokens.Add(method, token);
         }
         
-        private void FinalizeTypeDefinitions()
+        /// <summary>
+        /// Finalizes all type definitions added in the buffer.
+        /// </summary>
+        public void FinalizeTypeDefinitions()
         {
             var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
 

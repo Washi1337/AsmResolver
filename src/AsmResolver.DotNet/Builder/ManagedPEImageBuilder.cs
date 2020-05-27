@@ -53,7 +53,9 @@ namespace AsmResolver.DotNet.Builder
             ImportTablesStreamIfSpecified(dotNetDirectoryBuffer, module);
             
             dotNetDirectoryBuffer.DefineModule(module);
-            dotNetDirectoryBuffer.AddTypeDefinitionsInModule(module);
+            dotNetDirectoryBuffer.DefineTypeDefinitions(module.GetAllTypes());
+            dotNetDirectoryBuffer.DefineMemberDefinitionsInTypes();
+            dotNetDirectoryBuffer.FinalizeTypeDefinitions();
             dotNetDirectoryBuffer.FinalizeModule(module);
             
             // If module is the manifest module, include the entire assembly.
