@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
         // TODO: Detect cyclic dependencies properly
         private static List<FieldNode> Flatten(TypeDefinition root, in GenericContext generic, int depth = 0)
         {
-            if (depth > 100)
+            if (depth > 1000)
                 throw new TypeMemoryLayoutDetectionException("Maximum recursion depth reached");
             
             var list = new List<FieldNode>();
