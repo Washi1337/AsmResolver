@@ -65,11 +65,6 @@ namespace AsmResolver.DotNet.Extensions.Memory
 
             var tree = Flatten(resolved, context);
             
-            // Verify that the tree is valid
-            var cycleDetector = new CycleDetectionVisitor();
-            foreach (var node in tree)
-                node.Accept(cycleDetector);
-            
             // Get the tree's largest field
             var largestLocator = new LargestFieldLocatorVisitor(is32Bit);
             foreach (var node in tree)
@@ -106,11 +101,15 @@ namespace AsmResolver.DotNet.Extensions.Memory
             return visitor.ConstructLayout();
         }
 
-        private static List<FieldNode> Flatten(TypeDefinition root, in GenericContext generic, int depth = 0)
+        private static List<FieldNode> Flatten(
+            TypeDefinition root, in GenericContext generic, Stack<TypeDefinition> dfs = null)
         {
-            if (depth > 1000)
-                throw new TypeMemoryLayoutDetectionException("Maximum recursion depth reached");
+            dfs ??= new Stack<TypeDefinition>();
+            if (dfs.Contains(root))
+                throw new TypeMemoryLayoutDetectionException("Cyclic dependency in struct");
             
+            dfs.Push(root);
+
             if (root.IsAutoLayout)
                 throw new TypeMemoryLayoutDetectionException("Cannot infer layout of auto layout structs");
             
@@ -128,7 +127,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                     // Nested struct, flatten it
                     case ElementType.ValueType:
                     {
-                        node.Children.AddRange(Flatten(signature.Resolve(), generic, depth++));
+                        node.Children.AddRange(Flatten(signature.Resolve(), generic, dfs));
                         break;
                     }
 
@@ -137,7 +136,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                     case ElementType.GenericInst:
                     {
                         var provider = (GenericInstanceTypeSignature) signature;
-                        node.Children.AddRange(Flatten(provider.Resolve(), generic.WithType(provider), depth++));
+                        node.Children.AddRange(Flatten(provider.Resolve(), generic.WithType(provider), dfs));
                         break;
                     }
 
@@ -155,7 +154,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                     case ElementType.CModReqD:
                     {
                         var resolved = ((CustomModifierTypeSignature) signature).BaseType.Resolve();
-                        node.Children.AddRange(Flatten(resolved, generic, depth++));
+                        node.Children.AddRange(Flatten(resolved, generic, dfs));
                         break;
                     }
                 }
@@ -163,6 +162,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                 list.Add(node);
             }
 
+            dfs.Pop();
             return list;
         }
     }
