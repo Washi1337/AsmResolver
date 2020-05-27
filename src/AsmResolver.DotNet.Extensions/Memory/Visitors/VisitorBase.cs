@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures.Types;
 
-namespace AsmResolver.DotNet.Extensions.Memory
+namespace AsmResolver.DotNet.Extensions.Memory.Visitors
 {
     internal abstract class VisitorBase : IVisitor
     {

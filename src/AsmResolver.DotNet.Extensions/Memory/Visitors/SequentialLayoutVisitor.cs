@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AsmResolver.DotNet.Extensions.Memory
+namespace AsmResolver.DotNet.Extensions.Memory.Visitors
 {
     internal sealed class SequentialLayoutVisitor : VisitorBase
     {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AsmResolver.DotNet.Extensions.Memory.Visitors;
 using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Extensions.Memory

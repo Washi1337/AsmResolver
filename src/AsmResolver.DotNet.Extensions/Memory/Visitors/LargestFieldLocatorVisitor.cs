@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AsmResolver.DotNet.Extensions.Memory
+namespace AsmResolver.DotNet.Extensions.Memory.Visitors
 {
     internal sealed class LargestFieldLocatorVisitor : IVisitor
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace AsmResolver.DotNet.Extensions.Memory
+namespace AsmResolver.DotNet.Extensions.Memory.Visitors
 {
     internal sealed class ExplicitLayoutVisitor : VisitorBase
     {

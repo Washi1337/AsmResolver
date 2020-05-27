@@ -1,4 +1,4 @@
-﻿namespace AsmResolver.DotNet.Extensions.Memory
+﻿namespace AsmResolver.DotNet.Extensions.Memory.Visitors
 {
     internal interface IVisitor
     {
