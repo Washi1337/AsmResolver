@@ -1,10 +1,13 @@
-﻿using AsmResolver.DotNet.Extensions.Memory;
+﻿using System.Diagnostics.CodeAnalysis;
+using AsmResolver.DotNet.Extensions.Memory;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Extensions.Tests.Memory
 {
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "ArrangeTypeMemberModifiers")]
     public sealed class CyclicStructTest : IClassFixture<TemporaryModuleFixture>
     {
         private readonly TemporaryModuleFixture _fixture;
@@ -21,7 +24,9 @@ namespace AsmResolver.DotNet.Extensions.Tests.Memory
 
         struct Abnormal
         {
+            #pragma warning disable 169
             Normal Dummy;
+            #pragma warning restore 169
         }
         
         [Fact]
