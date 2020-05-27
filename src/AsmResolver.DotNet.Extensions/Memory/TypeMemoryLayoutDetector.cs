@@ -63,32 +63,44 @@ namespace AsmResolver.DotNet.Extensions.Memory
                 ? new GenericContext().WithType(g)
                 : new GenericContext();
 
-            var graph = Flatten(resolved, context);
-            var largestLocator = new LargestFieldLocatorVisitor(is32Bit);
+            var tree = Flatten(resolved, context);
             
-            foreach (var node in graph)
+            // Verify that the tree is valid
+            var cycleDetector = new CycleDetectionVisitor();
+            foreach (var node in tree)
+                node.Accept(cycleDetector);
+            
+            // Get the tree's largest field
+            var largestLocator = new LargestFieldLocatorVisitor(is32Bit);
+            foreach (var node in tree)
                 node.Accept(largestLocator);
 
             uint GetAlignment()
             {
-                var biggest = largestLocator.Largest;
+                // The type's alignment is either the explicitly set packing size
+                // or the type's biggest field, whichever is smaller
+                var largest = largestLocator.Largest;
                 
+                // If we have an explicitly set Packing size
                 if (resolved.ClassLayout?.PackingSize is {} pack)
                 {
-                    if (pack > 0)
-                        return Math.Min(pack, biggest);
+                    // The alignment is the packing size or the largest field,
+                    // whichever is smaller
+                    return Math.Min(pack, largest);
                 }
 
-                return biggest;
+                // Otherwise the alignment is the largest field
+                return largest;
             }
 
             var alignment = GetAlignment();
             
+            // Select the correct visitor based on the layout
             var visitor = resolved.IsExplicitLayout
                 ? (VisitorBase) new ExplicitLayoutVisitor(resolved, alignment, is32Bit)
                 : new SequentialLayoutVisitor(resolved, alignment, is32Bit);
 
-            foreach (var node in graph)
+            foreach (var node in tree)
                 node.Accept(visitor);
 
             return visitor.ConstructLayout();
@@ -104,6 +116,8 @@ namespace AsmResolver.DotNet.Extensions.Memory
             
             var list = new List<FieldNode>();
 
+            // Static fields do NOT affect how a struct
+            // is laid out in memory, so we can ignore them
             foreach (var field in root.Fields.Where(f => !f.IsStatic))
             {
                 var signature = field.Signature.FieldType;
@@ -111,12 +125,15 @@ namespace AsmResolver.DotNet.Extensions.Memory
 
                 switch (signature.ElementType)
                 {
+                    // Nested struct, flatten it
                     case ElementType.ValueType:
                     {
                         node.Children.AddRange(Flatten(signature.Resolve(), generic, depth++));
                         break;
                     }
 
+                    // Field with a generic signature (ie. List<int>),
+                    // flatten it but keep track of the generic type arguments
                     case ElementType.GenericInst:
                     {
                         var provider = (GenericInstanceTypeSignature) signature;
@@ -124,6 +141,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                         break;
                     }
 
+                    // Generic field, resolve it using the context
                     case ElementType.Var:
                     case ElementType.MVar:
                     {
@@ -132,6 +150,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                         break;
                     }
 
+                    // Special trickery for mixed-mode assemblies
                     case ElementType.CModOpt:
                     case ElementType.CModReqD:
                     {
