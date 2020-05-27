@@ -93,6 +93,14 @@ namespace AsmResolver.DotNet.Extensions.Memory
                         node = new FieldNode(root, resolved, field.FieldOffset);
                         break;
                     }
+
+                    case ElementType.CModOpt:
+                    case ElementType.CModReqD:
+                    {
+                        var resolved = ((CustomModifierTypeSignature) signature).BaseType.Resolve();
+                        node.Children.AddRange(Flatten(resolved, generic, depth++));
+                        break;
+                    }
                 }
                 
                 list.Add(node);
