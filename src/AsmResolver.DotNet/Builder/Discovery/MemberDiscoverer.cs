@@ -7,8 +7,17 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder.Discovery
 {
-    public static class MemberDiscoverer
+    /// <summary>
+    /// Provides a mechanism for traversing a module and collecting all members defined in it.
+    /// </summary>
+    public sealed class MemberDiscoverer
     {
+        /// <summary>
+        /// Performs a traversal on the provided module and collects all member defined in it. 
+        /// </summary>
+        /// <param name="module">The module to traverse.</param>
+        /// <param name="flags">Flags indicating which member lists the original order needs to be preserved.</param>
+        /// <returns>The collected members.</returns>
         public static MemberDiscoveryResult DiscoverMembersInModule(ModuleDefinition module, MemberDiscoveryFlags flags)
         {
             // Strategy:
@@ -23,51 +32,88 @@ namespace AsmResolver.DotNet.Builder.Discovery
             //    added to a dummy namespace for placeholder types, and added to a dummy type definition for all
             //    member definitions.
             
-            var context = new MemberDiscoveryContext(module, flags);
+            var context = new MemberDiscoverer(module, flags);
             
-            CollectExistingMembers(context);
-            CollectNewlyAddedMembers(context);
-            StuffFreeMemberSlots(context);
+            if (flags != MemberDiscoveryFlags.None)
+                context.CollectExistingMembers();
 
-            return context.Result;
+            context.CollectNewlyAddedMembers();
+                
+            if (flags != MemberDiscoveryFlags.None)
+                context.StuffFreeMemberSlots();
+
+            return context._result;
         }
 
-        private static void CollectExistingMembers(MemberDiscoveryContext context)
+        private readonly ModuleDefinition _module;
+        private readonly MemberDiscoveryFlags _flags;
+        private readonly MemberDiscoveryResult _result = new MemberDiscoveryResult();
+
+        private readonly IDictionary<TableIndex, Queue<uint>> _freeRids= new Dictionary<TableIndex, Queue<uint>>
         {
-            var flags = context.Flags;
+            [TableIndex.TypeDef] = new Queue<uint>(),
+            [TableIndex.Field] = new Queue<uint>(),
+            [TableIndex.Method] = new Queue<uint>(),
+            [TableIndex.Param] = new Queue<uint>(),
+            [TableIndex.Property] = new Queue<uint>(),
+            [TableIndex.Event] = new Queue<uint>(),
+        };
 
-            if ((flags & MemberDiscoveryFlags.PreserveTypeOrder) != 0)
-                CollectMembersFromTable<TypeDefinition>(context, TableIndex.TypeDef);
-            if ((flags & MemberDiscoveryFlags.PreserveFieldOrder) != 0)
-                CollectMembersFromTable<FieldDefinition>(context, TableIndex.Field);
-            if ((flags & MemberDiscoveryFlags.PreserveMethodOrder) != 0)
-                CollectMembersFromTable<MethodDefinition>(context, TableIndex.Method);
-            if ((flags & MemberDiscoveryFlags.PreserveParameterOrder) != 0)
-                CollectMembersFromTable<ParameterDefinition>(context, TableIndex.Param);
-            if ((flags & MemberDiscoveryFlags.PreservePropertyOrder) != 0)
-                CollectMembersFromTable<PropertyDefinition>(context, TableIndex.Property);
-            if ((flags & MemberDiscoveryFlags.PreserveEventOrder) != 0)
-                CollectMembersFromTable<EventDefinition>(context, TableIndex.Event);
+        private MemberDiscoverer(ModuleDefinition module, MemberDiscoveryFlags flags)
+        {
+            _module = module ?? throw new ArgumentNullException(nameof(module));
+            _flags = flags;
         }
 
-        private static void CollectMembersFromTable<TMember>(MemberDiscoveryContext context, TableIndex tableIndex)
+        private IList<TMember> GetResultList<TMember>(TableIndex tableIndex)
+            where TMember : IMetadataMember
+        {
+            return tableIndex switch
+            {
+                TableIndex.TypeDef => (IList<TMember>) _result.Types,
+                TableIndex.Field => (IList<TMember>) _result.Fields,
+                TableIndex.Method => (IList<TMember>) _result.Methods,
+                TableIndex.Param => (IList<TMember>) _result.Parameters,
+                TableIndex.Property => (IList<TMember>) _result.Properties,
+                TableIndex.Event => (IList<TMember>) _result.Events,
+                _ => throw new ArgumentOutOfRangeException(nameof(tableIndex))
+            };
+        }
+
+        private void CollectExistingMembers()
+        {
+            if ((_flags & MemberDiscoveryFlags.PreserveTypeOrder) != 0)
+                CollectMembersFromTable<TypeDefinition>(TableIndex.TypeDef);
+            if ((_flags & MemberDiscoveryFlags.PreserveFieldOrder) != 0)
+                CollectMembersFromTable<FieldDefinition>(TableIndex.Field);
+            if ((_flags & MemberDiscoveryFlags.PreserveMethodOrder) != 0)
+                CollectMembersFromTable<MethodDefinition>(TableIndex.Method);
+            if ((_flags & MemberDiscoveryFlags.PreserveParameterOrder) != 0)
+                CollectMembersFromTable<ParameterDefinition>(TableIndex.Param);
+            if ((_flags & MemberDiscoveryFlags.PreservePropertyOrder) != 0)
+                CollectMembersFromTable<PropertyDefinition>(TableIndex.Property);
+            if ((_flags & MemberDiscoveryFlags.PreserveEventOrder) != 0)
+                CollectMembersFromTable<EventDefinition>(TableIndex.Event);
+        }
+
+        private void CollectMembersFromTable<TMember>(TableIndex tableIndex)
             where TMember: IMetadataMember, IModuleProvider
         {
             // Get original number of elements in the table. 
-            int count = context.Module.DotNetDirectory.Metadata
+            int count = _module.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(tableIndex)
                 .Count;
 
-            var resultingList = context.GetResultList<TMember>(tableIndex);
+            var resultingList = GetResultList<TMember>(tableIndex);
 
             // Traverse the table, look up the high-level metadata model, and see if it is still present.
             for (uint rid = 1; rid <= count; rid++)
             {
                 var token = new MetadataToken(tableIndex, rid);
-                var definition = (TMember) context.Module.LookupMember(token);
+                var definition = (TMember) _module.LookupMember(token);
 
-                if (definition.Module == context.Module)
+                if (definition.Module == _module)
                 {
                     // Member is still present in the module.
                     resultingList.Add(definition);
@@ -75,55 +121,55 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 else
                 {
                     // Member was removed from the module, mark current RID available.
-                    context.FreeRids[tableIndex].Enqueue(rid);
+                    _freeRids[tableIndex].Enqueue(rid);
                     resultingList.Add(default);
                 }
             }
         }
 
-        private static void CollectNewlyAddedMembers(MemberDiscoveryContext context)
+        private void CollectNewlyAddedMembers()
         {
             // Do a normal traversal of the member tree, and try to place newly added members in either the
             // available slots, or at the end of the member lists.
             
-            foreach (var type in context.Module.GetAllTypes())
+            foreach (var type in _module.GetAllTypes())
             {
-                InsertOrAppendIfNew(context, type);
+                InsertOrAppendIfNew(type);
 
                 // Try find new fields.
                 for (int i = 0; i < type.Fields.Count; i++)
-                    InsertOrAppendIfNew(context, type.Fields[i]);
+                    InsertOrAppendIfNew(type.Fields[i]);
 
                 // Try find new methods.
                 for (int i = 0; i < type.Methods.Count; i++)
                 {
                     var method = type.Methods[i];
-                    InsertOrAppendIfNew(context, method);
+                    InsertOrAppendIfNew(method);
 
                     foreach (var parameter in method.ParameterDefinitions)
-                        InsertOrAppendIfNew(context, parameter);
+                        InsertOrAppendIfNew(parameter);
                 }
 
                 // Try find new properties.
                 for (int i = 0; i < type.Properties.Count; i++)
-                    InsertOrAppendIfNew(context, type.Properties[i]);
+                    InsertOrAppendIfNew(type.Properties[i]);
 
                 // Try find new events.
                 for (int i = 0; i < type.Events.Count; i++)
-                    InsertOrAppendIfNew(context, type.Events[i]);
+                    InsertOrAppendIfNew(type.Events[i]);
             }
         }
 
-        private static void InsertOrAppendIfNew<TMember>(MemberDiscoveryContext context, TMember member)
+        private void InsertOrAppendIfNew<TMember>(TMember member)
             where TMember : class, IMetadataMember
         {
             var memberType = member.MetadataToken.Table;
-            var memberList = context.GetResultList<TMember>(memberType);
+            var memberList = GetResultList<TMember>(memberType);
             
             if (IsNewMember(memberList, member))
             {
                 // Check if there is any free RID available to use.
-                var freeRids = context.FreeRids[memberType];
+                var freeRids = _freeRids[memberType];
                 if (freeRids.Count > 0)
                     memberList[(int) (freeRids.Dequeue() - 1)] = member;
                 else
@@ -134,82 +180,30 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private static bool IsNewMember<TMember>(IList<TMember> existingMembers, TMember member)
             where TMember : class, IMetadataMember
         {
-            return member.MetadataToken.Rid == 0 // Type has not been assigned a RID.
-                   || member.MetadataToken.Rid > existingMembers.Count // Type's RID does not fall within the existing md range.
-                   || existingMembers[(int) (member.MetadataToken.Rid - 1)] != member; // Type's RID refers to a different type.
+            return member.MetadataToken.Rid == 0 // Member has not been assigned a RID.
+                   || member.MetadataToken.Rid > existingMembers.Count // Member's RID does not fall within the existing md range.
+                   || existingMembers[(int) (member.MetadataToken.Rid - 1)] != member; // Member's RID refers to a different member.
         }
 
-        private static void StuffFreeMemberSlots(MemberDiscoveryContext context)
+        private void StuffFreeMemberSlots()
         {
-            if (context.FreeRids.Values.All(q => q.Count == 0))
+            if (_freeRids.Values.All(q => q.Count == 0))
                 return;
             
             string placeHolderNamespace = Guid.NewGuid().ToString();
 
             // Stuff type rows with placeholders.
-            var freeRids = context.FreeRids[TableIndex.TypeDef];
-            var types = context.Result.Types;
+            var freeRids = _freeRids[TableIndex.TypeDef];
+            var types = _result.Types;
             while (freeRids.Count > 0)
             {
                 uint rid = freeRids.Dequeue();
                 var token = new MetadataToken(TableIndex.TypeDef, rid);
-                types[(int) (rid - 1)] = new PlaceHolderTypeDefinition(context.Module, placeHolderNamespace, token);
+                types[(int) (rid - 1)] = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token);
             }
             
             // TODO: stuff remaining member types.
         }
-
-        private sealed class MemberDiscoveryContext
-        {
-            public MemberDiscoveryContext(ModuleDefinition module, MemberDiscoveryFlags flags)
-            {
-                Module = module ?? throw new ArgumentNullException(nameof(module));
-                Flags = flags;
-            }
-            
-            public ModuleDefinition Module
-            {
-                get;
-            }
-
-            public MemberDiscoveryFlags Flags
-            {
-                get;
-            }
-
-            public IDictionary<TableIndex, Queue<uint>> FreeRids
-            {
-                get;
-            } = new Dictionary<TableIndex, Queue<uint>>
-            {
-                [TableIndex.TypeDef] = new Queue<uint>(),
-                [TableIndex.Field] = new Queue<uint>(),
-                [TableIndex.Method] = new Queue<uint>(),
-                [TableIndex.Param] = new Queue<uint>(),
-                [TableIndex.Property] = new Queue<uint>(),
-                [TableIndex.Event] = new Queue<uint>(),
-            };
-
-            public MemberDiscoveryResult Result
-            {
-                get;
-            } = new MemberDiscoveryResult();
-
-            public IList<TMember> GetResultList<TMember>(TableIndex tableIndex)
-                where TMember : IMetadataMember
-            {
-                return tableIndex switch
-                {
-                    TableIndex.TypeDef => (IList<TMember>) Result.Types,
-                    TableIndex.Field => (IList<TMember>) Result.Fields,
-                    TableIndex.Method => (IList<TMember>) Result.Methods,
-                    TableIndex.Param => (IList<TMember>) Result.Parameters,
-                    TableIndex.Property => (IList<TMember>) Result.Properties,
-                    TableIndex.Event => (IList<TMember>) Result.Events,
-                    _ => throw new ArgumentOutOfRangeException(nameof(tableIndex))
-                };
-            }
-        } 
 
         private sealed class PlaceHolderTypeDefinition : TypeDefinition
         {
