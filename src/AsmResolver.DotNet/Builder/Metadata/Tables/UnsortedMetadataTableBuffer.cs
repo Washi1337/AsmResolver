@@ -48,5 +48,8 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             foreach (var row in _entries)
                 _table.Add(row);
         }
+
+        /// <inheritdoc />
+        public void Clear() => _table.Clear();
     }
 }
