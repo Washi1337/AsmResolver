@@ -39,14 +39,19 @@ namespace AsmResolver.DotNet.Extensions.Tests.Memory
         }
         
         [Theory]
-        [InlineData(typeof(Struct1), 8u)]
-        [InlineData(typeof(Struct2), 16u)]
-        [InlineData(typeof(Struct3), 16u)]
-        public void NoNest(Type type, uint expected)
+        [InlineData(typeof(Struct1), 8u, new uint[] { 0, 4 })]
+        [InlineData(typeof(Struct2), 16u, new uint[] { 0, 8 })]
+        [InlineData(typeof(Struct3), 16u, new uint[] { 0, 8 })]
+        public void NoNest(Type type, uint expectedSize, uint[] fieldOffsets)
         {
             var target = _fixture.LookupType(type);
+            var layout = target.GetImpliedMemoryLayout(IntPtr.Size == 4);
             
-            Assert.Equal(expected, target.GetImpliedMemoryLayout(IntPtr.Size == 4).Size);
+            Assert.Equal(expectedSize, layout.Size);
+            for (var i = 0; i < target.Fields.Count; i++)
+            {
+                Assert.Equal(fieldOffsets[i], layout.GetFieldOffset(target.Fields[i]));
+            }
         }
     }
 }
