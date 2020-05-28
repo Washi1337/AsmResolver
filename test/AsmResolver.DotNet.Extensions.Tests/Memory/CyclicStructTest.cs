@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Extensions.Tests.Memory
         }
         
         [Fact]
-        public void CyclicStructShouldThrow()
+        public void CyclicStruct()
         {
             var normal = _fixture.LookupType(typeof(Normal));
             var abnormal = _fixture.LookupType(typeof(Abnormal));

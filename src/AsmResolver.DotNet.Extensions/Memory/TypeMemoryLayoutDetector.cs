@@ -113,14 +113,14 @@ namespace AsmResolver.DotNet.Extensions.Memory
             
             dfs.Push(root);
             
-            if (root.IsAutoLayout && !root.IsEnum && root.Fields.Count(f => !f.IsStatic) > 1)
+            if (root.IsAutoLayout && !root.IsEnum && root.Fields.Count(f => !f.IsStatic && !f.IsLiteral) > 1)
                 throw new TypeMemoryLayoutDetectionException("Cannot infer layout of auto layout structs");
             
             var list = new List<FieldNode>();
 
-            // Static fields do NOT affect how a struct
+            // Static fields and literals (const) do NOT affect how a struct
             // is laid out in memory, so we can ignore them
-            foreach (var field in root.Fields.Where(f => !f.IsStatic))
+            foreach (var field in root.Fields.Where(f => !f.IsStatic && !f.IsLiteral))
             {
                 var signature = field.Signature.FieldType;
                 var node = new FieldNode(root, field, signature);
