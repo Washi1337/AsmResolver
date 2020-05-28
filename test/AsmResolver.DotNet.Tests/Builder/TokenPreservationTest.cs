@@ -284,7 +284,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
         }
 
-        private static void AssertSameTokens(ModuleDefinition module, ModuleDefinition newModule)
+        private static void AssertSameTokens(ModuleDefinition module, ModuleDefinition newModule, params MetadataToken[] excludeTokens)
         {
             Assert.True(module.TopLevelTypes.Count <= newModule.TopLevelTypes.Count);
             foreach (var originalType in module.TopLevelTypes)
@@ -294,6 +294,9 @@ namespace AsmResolver.DotNet.Tests.Builder
                 Assert.True(originalType.Fields.Count <= newType.Fields.Count);
                 foreach (var originalField in originalType.Fields)
                 {
+                    if (originalField.MetadataToken.Rid == 0 || excludeTokens.Contains(originalField.MetadataToken))
+                        continue;
+                    
                     var newField = newType.Fields.First(f => f.Name == originalField.Name);
                     Assert.Equal(originalField.MetadataToken, newField.MetadataToken);
                 }
@@ -324,5 +327,53 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             AssertSameTokens(module, newModule);
         }
+
+        [Fact]
+        public void PreserveFieldDefsChangeOrderOfFieldsInType()
+        {
+            var module = CreateSampleFieldDefsModule(10, 10);
+
+            const int swapIndex = 3;
+            var type = module.TopLevelTypes[2];
+            var field = type.Fields[swapIndex];
+            type.Fields.RemoveAt(swapIndex);
+            type.Fields.Insert(swapIndex + 1, field);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
+
+            AssertSameTokens(module, newModule);
+        }
+
+        [Fact]
+        public void PreserveFieldDefsAddExtraField()
+        {
+            var module = CreateSampleFieldDefsModule(10, 10);
+
+            var type = module.TopLevelTypes[2];
+            type.Fields.Insert(3,
+                new FieldDefinition("ExtraField", FieldAttributes.Public | FieldAttributes.Static,
+                    FieldSignature.CreateStatic(module.CorLibTypeFactory.Int32)));
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
+
+            AssertSameTokens(module, newModule);
+        }
+
+        [Fact]
+        public void PreserveFieldDefsRemoveField()
+        {
+            var module = CreateSampleFieldDefsModule(10, 10);
+
+            var type = module.TopLevelTypes[2];
+            const int indexToRemove = 3;
+            var field = type.Fields[indexToRemove];
+            type.Fields.RemoveAt(indexToRemove);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
+
+            AssertSameTokens(module, newModule, field.MetadataToken);
+        }
+        
+        
     }
 }
