@@ -49,18 +49,19 @@ namespace AsmResolver.DotNet.Builder
 
         private IDotNetDirectory CreateDotNetDirectory(PEImage image, ModuleDefinition module)
         {
-            var buffer = CreateDotNetDirectoryBuffer(module);
+            // Find all members in the module.
+            var discoveryResult = DiscoverMemberDefinitionsInModule(module);
             
-            // Add the module to the buffer.
+            // Creat new .NET dir buffer.
+            var buffer = CreateDotNetDirectoryBuffer(module);
             buffer.DefineModule(module);
             
             // When specified, import existing AssemblyRef, ModuleRef, TypeRef and MemberRef prior to adding any other
             // member reference or definition, to ensure that they are assigned their original RIDs. 
             ImportBasicTablesIntoTableBuffersIfSpecified(module, buffer);
-
+            
             // Define all types defined in the module.
-            var strategy = ChooseTypeDiscoveryStrategy(module);
-            buffer.DefineTypes(strategy.CollectTypes(module));
+            buffer.DefineTypes(discoveryResult.Types);
             
             // All types defs and refs are added to the buffer at this point. We can therefore safely start adding
             // TypeSpecs if they need to be preserved: 
@@ -85,6 +86,26 @@ namespace AsmResolver.DotNet.Builder
             buffer.FinalizeModule(module);
 
             return buffer.CreateDirectory();
+        }
+
+        private MemberDiscoveryResult DiscoverMemberDefinitionsInModule(ModuleDefinition module)
+        {
+            var discoveryFlags = MemberDiscoveryFlags.None;
+
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeDefinitionIndices) != 0)
+                discoveryFlags |= MemberDiscoveryFlags.PreserveTypeOrder;
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveFieldDefinitionIndices) != 0)
+                discoveryFlags |= MemberDiscoveryFlags.PreserveFieldOrder;
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMethodDefinitionIndices) != 0)
+                discoveryFlags |= MemberDiscoveryFlags.PreserveMethodOrder;
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveParameterDefinitionIndices) != 0)
+                discoveryFlags |= MemberDiscoveryFlags.PreserveParameterOrder;
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreservePropertyDefinitionIndices) != 0)
+                discoveryFlags |= MemberDiscoveryFlags.PreservePropertyOrder;
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveEventDefinitionIndices) != 0)
+                discoveryFlags |= MemberDiscoveryFlags.PreserveEventOrder;
+
+            return MemberDiscoverer.DiscoverMembersInModule(module, discoveryFlags);
         }
 
         private DotNetDirectoryBuffer CreateDotNetDirectoryBuffer(ModuleDefinition module)
@@ -178,17 +199,5 @@ namespace AsmResolver.DotNet.Builder
             for (uint rid = 1; rid <= count; rid++)
                 importAction((TMember) module.LookupMember(new MetadataToken(tableIndex, rid)));
         }
-
-        private ITypeDiscoveryStrategy ChooseTypeDiscoveryStrategy(ModuleDefinition module)
-        {
-            if (module.DotNetDirectory is null
-                || (MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeDefinitionIndices) == 0)
-            {
-                return TreeTraversalTypeDiscoveryStrategy.Instance;
-            }
-
-            return MetadataTypeDiscoveryStrategy.Instance;
-        }
-
     }
 }
