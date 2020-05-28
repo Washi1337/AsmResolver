@@ -48,10 +48,10 @@ namespace AsmResolver.DotNet.Extensions.Tests.Memory
         }
 
         [StructLayout(LayoutKind.Explicit)]
-        unsafe struct Struct4
+        struct Struct4
         {
             [FieldOffset(0)]
-            int* Dummy1;
+            ulong Dummy1;
 
             [FieldOffset(8)]
             ConsoleKey Dummy2;
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Extensions.Tests.Memory
         public void NoNest(Type type, uint expectedSize, uint[] fieldOffsets)
         {
             var target = _fixture.LookupType(type);
-            var layout = target.GetImpliedMemoryLayout(IntPtr.Size == 4);
+            var layout = target.GetImpliedMemoryLayout();
             
             Assert.Equal(expectedSize, layout.Size);
             for (var i = 0; i < target.Fields.Count; i++)
