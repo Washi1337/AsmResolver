@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
-using AsmResolver.DotNet.Signatures.Types;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AsmResolver.DotNet.Extensions.Memory.Visitors
 {
     internal abstract class VisitorBase : IVisitor
     {
+        protected readonly Dictionary<FieldDefinition, uint> Offsets = new Dictionary<FieldDefinition, uint>();
         protected readonly TypeDefinition Parent;
         protected readonly bool Is32Bit;
         protected readonly uint Alignment;
+        protected uint Size;
         
         protected VisitorBase(TypeDefinition parent, uint alignment, bool is32Bit)
         {
@@ -16,20 +18,41 @@ namespace AsmResolver.DotNet.Extensions.Memory.Visitors
             Is32Bit = is32Bit;
         }
 
-        public virtual void VisitComplex(FieldNode node)
+        public void VisitComplex(FieldNode node)
         {
+            var resolved = node.Signature.Resolve();
+            var visitor = node.IsExplicitLayout
+                ? (VisitorBase) new ExplicitLayoutVisitor(resolved, Alignment, Is32Bit)
+                : new SequentialLayoutVisitor(resolved, Alignment, Is32Bit);
+            
             foreach (var child in node.Children)
-                child.Accept(this);
+                child.Accept(visitor);
+
+            var layout = visitor.ConstructLayout(out _);
+            CommenceInference(node.Field, layout.Size, layout.Offsets);
         }
 
-        public virtual void VisitPrimitive(FieldNode node) { }
-
-        internal abstract TypeMemoryLayout ConstructLayout();
-
-        protected void EnsureCycle(HashSet<TypeSignature> visited, TypeSignature current)
+        public void VisitPrimitive(FieldNode node)
         {
-            if (!visited.Add(current))
-                throw new TypeMemoryLayoutDetectionException("Cyclic dependency in graph");
+            CommenceInference(node.Field, node.Signature.SizeInBytes(Is32Bit));
+        }
+
+        protected abstract void CommenceInference(
+            FieldDefinition field, uint inferredSize, IReadOnlyDictionary<FieldDefinition, uint> nested = null);
+
+        internal TypeMemoryLayout ConstructLayout(out bool needsTypeAlignment)
+        {
+            // We first need to align the type it to its alignment
+            // Even if the struct is seemingly empty, its size will be 1
+            var inferredSize = Math.Max(1, Size); 
+            
+            // We try to get the explicit size, if there is none, we'll just use 0
+            var explicitSize = Parent.ClassLayout?.ClassSize ?? 0;
+            needsTypeAlignment = explicitSize < inferredSize;
+            
+            // If there is an explicitly set size for the struct, the "real" size is
+            // the bigger one of the explicit size or the inferred size
+            return new TypeMemoryLayout(Offsets, Math.Max(inferredSize, explicitSize));
         }
     }
 }

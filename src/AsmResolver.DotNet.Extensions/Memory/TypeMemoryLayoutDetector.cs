@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                 : new GenericContext();
 
             var resolved = typeSignature.Resolve();
-            var tree = Flatten(resolved, context);
+            var tree = CreateTree(resolved, context);
             
             // Get the tree's largest field
             var largestLocator = new LargestFieldLocatorVisitor(is32Bit);
@@ -101,10 +101,14 @@ namespace AsmResolver.DotNet.Extensions.Memory
             foreach (var node in tree)
                 node.Accept(visitor);
 
-            return visitor.ConstructLayout();
+            var layout = visitor.ConstructLayout(out var needsTypeAlignment);
+            if (needsTypeAlignment)
+                layout.Size = layout.Size.Align(alignment);
+
+            return layout;
         }
 
-        private static List<FieldNode> Flatten(
+        private static List<FieldNode> CreateTree(
             TypeDefinition root, in GenericContext generic, Stack<TypeDefinition> dfs = null)
         {
             dfs ??= new Stack<TypeDefinition>();
@@ -130,7 +134,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                     // Nested struct, flatten it
                     case ElementType.ValueType:
                     {
-                        node.Children.AddRange(Flatten(signature.Resolve(), generic, dfs));
+                        node.Children.AddRange(CreateTree(signature.Resolve(), generic, dfs));
                         break;
                     }
 
@@ -139,7 +143,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                     case ElementType.GenericInst:
                     {
                         var provider = (GenericInstanceTypeSignature) signature;
-                        node.Children.AddRange(Flatten(provider.Resolve(), generic.WithType(provider), dfs));
+                        node.Children.AddRange(CreateTree(provider.Resolve(), generic.WithType(provider), dfs));
                         break;
                     }
 
@@ -148,7 +152,9 @@ namespace AsmResolver.DotNet.Extensions.Memory
                     case ElementType.MVar:
                     {
                         var resolved = generic.GetTypeArgument((GenericParameterSignature) signature);
-                        node = new FieldNode(root, field, resolved);
+                        if (resolved.IsValueType)
+                            node.Children.AddRange(CreateTree(resolved.Resolve(), generic, dfs));
+                        else node = new FieldNode(root, field, resolved);
                         break;
                     }
 
@@ -157,7 +163,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
                     case ElementType.CModReqD:
                     {
                         var resolved = ((CustomModifierTypeSignature) signature).BaseType.Resolve();
-                        node.Children.AddRange(Flatten(resolved, generic, dfs));
+                        node.Children.AddRange(CreateTree(resolved, generic, dfs));
                         break;
                     }
                 }
