@@ -113,7 +113,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
             
             dfs.Push(root);
             
-            if (root.IsAutoLayout && !root.IsEnum)
+            if (root.IsAutoLayout && !root.IsEnum && root.Fields.Count(f => !f.IsStatic) > 1)
                 throw new TypeMemoryLayoutDetectionException("Cannot infer layout of auto layout structs");
             
             var list = new List<FieldNode>();
