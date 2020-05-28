@@ -36,6 +36,9 @@ namespace AsmResolver
     {
         public static uint Align(this uint value, uint alignment)
         {
+            if (alignment == 0)
+                return value;
+            
             var padding = (alignment - value % alignment) % alignment;
             return value + padding;
         }

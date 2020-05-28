@@ -25,7 +25,8 @@ namespace AsmResolver.DotNet.Extensions.Memory.Visitors
         internal override TypeMemoryLayout ConstructLayout()
         {
             // We first need to align the type it to its alignment
-            var inferredSize = _size.Align(Alignment); 
+            // Even if the struct is seemingly empty, its size will be 1
+            var inferredSize = Math.Max(1, _size.Align(Alignment)); 
             
             // We try to get the explicit size, if there is none, we'll just use 0
             var explicitSize = Parent.ClassLayout?.ClassSize ?? 0; 
