@@ -203,11 +203,10 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         public void FinalizeTypes()
         {
-            var tablesStreamBuffer = Metadata.TablesStream;
-            var typeDefTable = tablesStreamBuffer.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
             
-            var fieldPtrTable = tablesStreamBuffer.GetTable<FieldPointerRow>(TableIndex.FieldPtr);
             bool fieldPtrRequired = false;
+            bool methodPtrRequired = false;
 
             uint fieldList = 1;
             uint methodList = 1;
@@ -229,7 +228,9 @@ namespace AsmResolver.DotNet.Builder
                     fieldList,
                     methodList);
 
-                FinalizeFieldsInType(type, fieldPtrTable, ref fieldPtrRequired);
+                // Finalize fields and methods.
+                FinalizeFieldsInType(type, ref fieldPtrRequired);
+                FinalizeMethodsInType(type, ref methodPtrRequired);
                 
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
@@ -247,32 +248,66 @@ namespace AsmResolver.DotNet.Builder
             }
             
             if (!fieldPtrRequired)
-                fieldPtrTable.Clear();
+                Metadata.TablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr).Clear();
+            if (!methodPtrRequired)
+                Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr).Clear();
             
-            FinalizeMethods();
             AddParameters();
         }
 
-        private void FinalizeFieldsInType(
-            TypeDefinition type, 
-            IMetadataTableBuffer<FieldPointerRow> fieldPtrTable, 
-            ref bool fieldPtrRequired)
+        private void FinalizeFieldsInType(TypeDefinition type, ref bool fieldPtrRequired)
         {
+            var pointerTable = Metadata.TablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr);
+            
             for (int i = 0; i < type.Fields.Count; i++)
             {
                 var field = type.Fields[i];
                 
                 var newToken = GetFieldDefinitionToken(field);
-                if (newToken.Rid != fieldPtrTable.Count + 1)
+                if (newToken.Rid != pointerTable.Count + 1)
                     fieldPtrRequired = true;
                 
-                fieldPtrTable.Add(new FieldPointerRow(newToken.Rid), 0);
+                pointerTable.Add(new FieldPointerRow(newToken.Rid), 0);
 
                 AddCustomAttributes(newToken, field);
                 AddConstant(newToken, field.Constant);
                 AddImplementationMap(newToken, field.ImplementationMap);
                 AddFieldRva(newToken, field.FieldRva);
                 AddFieldLayout(newToken, field.FieldOffset);
+            }
+        }
+        
+        private void FinalizeMethodsInType(TypeDefinition type, ref bool methodPtrRequired)
+        {
+            var definitionTable = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
+            var pointerTable = Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr);
+            
+            for (int i = 0; i < type.Methods.Count; i++)
+            {
+                var method = type.Methods[i];
+                
+                var newToken = GetMethodDefinitionToken(method);
+                if (newToken.Rid != pointerTable.Count + 1)
+                    methodPtrRequired = true;
+                
+                pointerTable.Add(new MethodPointerRow(newToken.Rid), 0);
+                
+                if (method.MethodBody != null)
+                {
+                    var row = definitionTable[newToken.Rid];
+                    definitionTable[newToken.Rid] = new MethodDefinitionRow(
+                        MethodBodySerializer.SerializeMethodBody(this, method),
+                        row.ImplAttributes,
+                        row.Attributes,
+                        row.Name,
+                        row.Signature,
+                        row.ParameterList);
+                }
+
+                AddCustomAttributes(newToken, method);
+                AddSecurityDeclarations(newToken, method);
+                AddImplementationMap(newToken, method.ImplementationMap);
+                AddGenericParameters(newToken, method);
             }
         }
 
@@ -378,34 +413,6 @@ namespace AsmResolver.DotNet.Builder
                 ownerToken.Rid);
 
             table.Add(row, 0);
-        }
-        
-        private void FinalizeMethods()
-        {
-            var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
-            for (uint rid = 1; rid <= table.Count; rid++)
-            {
-                var methodToken = new MetadataToken(TableIndex.Method, rid);
-                var method = _methodTokens.GetKey(methodToken);
-                
-                if (method.MethodBody != null)
-                {
-                    var row = table[rid];
-                    row = new MethodDefinitionRow(
-                        MethodBodySerializer.SerializeMethodBody(this, method),
-                        row.ImplAttributes,
-                        row.Attributes,
-                        row.Name,
-                        row.Signature,
-                        row.ParameterList);
-                    table[rid] = row;
-                }
-                
-                AddCustomAttributes(methodToken, method);
-                AddSecurityDeclarations(methodToken, method);
-                AddImplementationMap(methodToken, method.ImplementationMap);
-                AddGenericParameters(methodToken, method);
-            }
         }
         
         private void AddParameters()
