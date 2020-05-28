@@ -125,6 +125,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         {
             foreach (var tableBuffer in _tableBuffers)
                 tableBuffer.FlushToTable();
+            _tablesStream.Name = Name;
             return _tablesStream;
         }
 

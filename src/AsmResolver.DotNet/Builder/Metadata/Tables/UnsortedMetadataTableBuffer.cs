@@ -50,6 +50,6 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public void Clear() => _table.Clear();
+        public void Clear() => _entries.Clear();
     }
 }

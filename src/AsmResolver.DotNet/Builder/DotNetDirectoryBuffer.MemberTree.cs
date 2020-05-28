@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.DotNet.Builder.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -202,21 +203,25 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         public void FinalizeTypes()
         {
-            var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            var tablesStreamBuffer = Metadata.TablesStream;
+            var typeDefTable = tablesStreamBuffer.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            
+            var fieldPtrTable = tablesStreamBuffer.GetTable<FieldPointerRow>(TableIndex.FieldPtr);
+            bool fieldPtrRequired = false;
 
             uint fieldList = 1;
             uint methodList = 1;
             uint propertyList = 1;
             uint eventList = 1;
 
-            for (uint rid = 1; rid <= table.Count; rid++)
+            for (uint rid = 1; rid <= typeDefTable.Count; rid++)
             {
                 var typeToken = new MetadataToken(TableIndex.TypeDef, rid);
                 var type = _typeDefTokens.GetKey(typeToken);
 
                 // Update extends, field list and method list columns.
-                var typeRow = table[rid];
-                table[rid] = new TypeDefinitionRow(
+                var typeRow = typeDefTable[rid];
+                typeDefTable[rid] = new TypeDefinitionRow(
                     typeRow.Attributes,
                     typeRow.Name,
                     typeRow.Namespace,
@@ -224,6 +229,8 @@ namespace AsmResolver.DotNet.Builder
                     fieldList,
                     methodList);
 
+                FinalizeFieldsInType(type, fieldPtrTable, ref fieldPtrRequired);
+                
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
 
@@ -239,11 +246,36 @@ namespace AsmResolver.DotNet.Builder
                 AddClassLayout(typeToken, type.ClassLayout);
             }
             
-            FinalizeFields();
+            if (!fieldPtrRequired)
+                fieldPtrTable.Clear();
+            
             FinalizeMethods();
             AddParameters();
         }
-        
+
+        private void FinalizeFieldsInType(
+            TypeDefinition type, 
+            IMetadataTableBuffer<FieldPointerRow> fieldPtrTable, 
+            ref bool fieldPtrRequired)
+        {
+            for (int i = 0; i < type.Fields.Count; i++)
+            {
+                var field = type.Fields[i];
+                
+                var newToken = GetFieldDefinitionToken(field);
+                if (newToken.Rid != fieldPtrTable.Count + 1)
+                    fieldPtrRequired = true;
+                
+                fieldPtrTable.Add(new FieldPointerRow(newToken.Rid), 0);
+
+                AddCustomAttributes(newToken, field);
+                AddConstant(newToken, field.Constant);
+                AddImplementationMap(newToken, field.ImplementationMap);
+                AddFieldRva(newToken, field.FieldRva);
+                AddFieldLayout(newToken, field.FieldOffset);
+            }
+        }
+
         private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
         {
             var table = Metadata.TablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
@@ -318,22 +350,6 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, @event);
             AddMethodSemantics(token, @event);
             return token;
-        }
-
-        private void FinalizeFields()
-        {
-            var table = Metadata.TablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
-            for (uint rid = 1; rid <= table.Count; rid++)
-            {
-                var fieldToken = new MetadataToken(TableIndex.Field, rid);
-                var field = _fieldTokens.GetKey(fieldToken);
-                
-                AddCustomAttributes(fieldToken, field);
-                AddConstant(fieldToken, field.Constant);
-                AddImplementationMap(fieldToken, field.ImplementationMap);
-                AddFieldRva(fieldToken, field.FieldRva);
-                AddFieldLayout(fieldToken, field.FieldOffset);
-            }
         }
 
         private void AddFieldRva(MetadataToken ownerToken, ISegment fieldRva)

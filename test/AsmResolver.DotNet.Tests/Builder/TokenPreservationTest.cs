@@ -262,6 +262,67 @@ namespace AsmResolver.DotNet.Tests.Builder
                     Assert.Equal(originalTypeDefs[i], newTypeDefs[i], Comparer);
             }
         }
-        
+
+        private static ModuleDefinition CreateSampleFieldDefsModule(int typeCount, int fieldsPerType)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+            
+            for (int i = 0; i < typeCount; i++)
+            {
+                var dummyType = new TypeDefinition("Namespace", $"Type{i.ToString()}",
+                    TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                
+                module.TopLevelTypes.Add(dummyType);
+                for (int j = 0; j < fieldsPerType; j++)
+                {
+                    dummyType.Fields.Add(new FieldDefinition($"Field{j}",
+                        FieldAttributes.Public | FieldAttributes.Static,
+                        FieldSignature.CreateStatic(module.CorLibTypeFactory.Int32)));
+                }
+            }
+
+            return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
+        }
+
+        private static void AssertSameTokens(ModuleDefinition module, ModuleDefinition newModule)
+        {
+            Assert.True(module.TopLevelTypes.Count <= newModule.TopLevelTypes.Count);
+            foreach (var originalType in module.TopLevelTypes)
+            {
+                var newType = newModule.TopLevelTypes.First(t => t.FullName == originalType.FullName);
+
+                Assert.True(originalType.Fields.Count <= newType.Fields.Count);
+                foreach (var originalField in originalType.Fields)
+                {
+                    var newField = newType.Fields.First(f => f.Name == originalField.Name);
+                    Assert.Equal(originalField.MetadataToken, newField.MetadataToken);
+                }
+            }
+        }
+
+        [Fact]
+        public void PreserveFieldDefsNoChange()
+        {
+            var module = CreateSampleFieldDefsModule(10, 10);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
+
+            AssertSameTokens(module, newModule);
+        }
+
+        [Fact]
+        public void PreserveFieldDefsChangeOrderOfTypes()
+        {
+            var module = CreateSampleFieldDefsModule(10, 10);
+            
+            const int swapIndex = 3;
+            var type = module.TopLevelTypes[swapIndex];
+            module.TopLevelTypes.RemoveAt(swapIndex);
+            module.TopLevelTypes.Insert(swapIndex + 1, type);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
+
+            AssertSameTokens(module, newModule);
+        }
     }
 }
