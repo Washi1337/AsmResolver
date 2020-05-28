@@ -14,13 +14,13 @@ namespace AsmResolver.DotNet.Extensions.Memory
     public static class TypeMemoryLayoutDetector
     {
         /// <inheritdoc cref="GetImpliedMemoryLayout(AsmResolver.DotNet.Signatures.Types.TypeSignature,bool)"/>
-        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeDefinition typeDefinition, bool is32Bit)
+        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeDefinition typeDefinition, bool is32Bit = true)
         {
             return typeDefinition.ToTypeSignature().GetImpliedMemoryLayout(is32Bit);
         }
 
         /// <inheritdoc cref="GetImpliedMemoryLayout(AsmResolver.DotNet.Signatures.Types.TypeSignature,bool)"/>
-        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeSpecification typeSpecification, bool is32Bit)
+        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeSpecification typeSpecification, bool is32Bit = true)
         {
             return typeSpecification.Signature.GetImpliedMemoryLayout(is32Bit);
         }
@@ -34,7 +34,7 @@ namespace AsmResolver.DotNet.Extensions.Memory
         /// <remarks>This is needed to infer pointer sizes</remarks>
         /// </param>
         /// <returns>The type's memory layout</returns>
-        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeSignature typeSignature, bool is32Bit)
+        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeSignature typeSignature, bool is32Bit = true)
         {
             // For explicitly laid out structs, the size is simply the largest field. Their offsets
             // are the explicitly set offset. If the struct has a field that has a type of a sequentially
