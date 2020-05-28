@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Extensions.Memory.Visitors
         public override void VisitComplex(FieldNode node)
         {
             var layout = node.Signature.GetImpliedMemoryLayout(Is32Bit);
-            CommenceInference(node.Field, layout.Size);
+            CommenceInference(node.Field, layout.Size, layout.Offsets);
         }
 
         public override void VisitPrimitive(FieldNode node)
@@ -36,13 +36,23 @@ namespace AsmResolver.DotNet.Extensions.Memory.Visitors
             return new TypeMemoryLayout(_offsets, Math.Max(inferredSize, explicitSize));
         }
 
-        private void CommenceInference(FieldDefinition field, uint inferredSize)
+        private void CommenceInference(
+            FieldDefinition field, uint inferredSize, IReadOnlyDictionary<FieldDefinition, uint> nested = null)
         {
             Debug.Assert(field.FieldOffset != null, "A field in an explicit layout struct must have a FieldOffset");
             var offset = (uint) field.FieldOffset;
 
             // The offset is simply the explicit offset
             _offsets[field] = offset;
+            
+            // Carry over nested fields' offsets
+            if (nested != null)
+            {
+                foreach (var pair in nested)
+                {
+                    _offsets[pair.Key] = _size + pair.Value;
+                }
+            }
             
             // The size of an explicit struct is its largest field
             _size = Math.Max(_size, offset + inferredSize);

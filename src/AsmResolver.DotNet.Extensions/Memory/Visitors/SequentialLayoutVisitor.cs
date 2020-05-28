@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Extensions.Memory.Visitors
         public override void VisitComplex(FieldNode node)
         {
             var layout = node.Signature.GetImpliedMemoryLayout(Is32Bit);
-            CommenceInference(node.Field, layout.Size);
+            CommenceInference(node.Field, layout.Size, layout.Offsets);
         }
 
         public override void VisitPrimitive(FieldNode node)
@@ -35,7 +35,8 @@ namespace AsmResolver.DotNet.Extensions.Memory.Visitors
             return new TypeMemoryLayout(_offsets, Math.Max(inferredSize, explicitSize));
         }
 
-        private void CommenceInference(FieldDefinition field, uint inferredSize)
+        private void CommenceInference(
+            FieldDefinition field, uint inferredSize, IReadOnlyDictionary<FieldDefinition, uint> nested = null)
         {
             // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute.pack
             // Each field must align with fields of its own size (1, 2, 4, 8, etc., bytes)
@@ -50,6 +51,15 @@ namespace AsmResolver.DotNet.Extensions.Memory.Visitors
             // We can now set the offset, since it aligns on the boundary
             _offsets[field] = _size;
             
+            // Carry over nested fields' offsets
+            if (nested != null)
+            {
+                foreach (var pair in nested)
+                {
+                    _offsets[pair.Key] = _size + pair.Value;
+                }
+            }
+
             // Finally we add the actual inferred size
             _size += inferredSize;
         }
