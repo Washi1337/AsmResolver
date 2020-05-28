@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -192,17 +193,62 @@ namespace AsmResolver.DotNet.Builder.Discovery
             
             string placeHolderNamespace = Guid.NewGuid().ToString();
 
-            // Stuff type rows with placeholders.
-            var freeRids = _freeRids[TableIndex.TypeDef];
-            var types = _result.Types;
-            while (freeRids.Count > 0)
+            uint placeHolderTypeRid = 0;
+
+            TypeDefinition placeHolderType;
+            if (_freeRids[TableIndex.TypeDef].Count == 0)
             {
-                uint rid = freeRids.Dequeue();
-                var token = new MetadataToken(TableIndex.TypeDef, rid);
-                types[(int) (rid - 1)] = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token);
+                placeHolderType = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, MetadataToken.Zero);
+                _result.Types.Add(placeHolderType);
             }
+            else
+            {
+                placeHolderType = null;
+                placeHolderTypeRid = _freeRids[TableIndex.TypeDef].Peek();
+            }
+
+            StuffFreeTypeSlots(placeHolderNamespace);
             
+            placeHolderType ??= _result.Types[(int) placeHolderTypeRid - 1];
+
+            StuffFreeFieldSlots(placeHolderType);
+
             // TODO: stuff remaining member types.
+        }
+
+        private void StuffFreeTypeSlots(string placeHolderNamespace)
+        {
+            // Stuff type rows with placeholders.
+            var freeTypeRids = _freeRids[TableIndex.TypeDef];
+            var types = _result.Types;
+            while (freeTypeRids.Count > 0)
+            {
+                uint rid = freeTypeRids.Dequeue();
+                var token = new MetadataToken(TableIndex.TypeDef, rid);
+                types[(int) (rid - 1)] = CreatePlaceHolderTypeDefinition(placeHolderNamespace, token);
+            }
+        }
+
+        private void StuffFreeFieldSlots(TypeDefinition placeHolderType)
+        {
+            var freeFieldRids = _freeRids[TableIndex.Field];
+            var fields = _result.Fields;
+            while (freeFieldRids.Count > 0)
+            {
+                uint rid = freeFieldRids.Dequeue();
+                var token = new MetadataToken(TableIndex.Field, rid);
+
+                var dummyField = new FieldDefinition($"DeletedFieldDef_{token.Rid.ToString()}",
+                    FieldAttributes.Private | FieldAttributes.Static,
+                    FieldSignature.CreateStatic(_module.CorLibTypeFactory.Object));
+                placeHolderType.Fields.Add(dummyField);
+                fields[(int) (rid - 1)] = dummyField;
+            }
+        }
+
+        private TypeDefinition CreatePlaceHolderTypeDefinition(string placeHolderNamespace, MetadataToken token)
+        {
+            return  new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token);
         }
 
         private sealed class PlaceHolderTypeDefinition : TypeDefinition
@@ -212,10 +258,13 @@ namespace AsmResolver.DotNet.Builder.Discovery
             {
                 ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = module;
                 Namespace = ns;
-                Name = $"DeletedTypeDef_{token.Rid.ToString()}";
+                Name = token == MetadataToken.Zero ? "PlaceHolder" : $"DeletedTypeDef_{token.Rid.ToString()}";
                 Attributes = TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed
                              | TypeAttributes.NotPublic;
             }
         }
+
+        
+        
     }
 }

@@ -284,7 +284,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
         }
 
-        private static void AssertSameTokens(ModuleDefinition module, ModuleDefinition newModule, params MetadataToken[] excludeTokens)
+        private static void AssertSameFieldTokens(ModuleDefinition module, ModuleDefinition newModule, params MetadataToken[] excludeTokens)
         {
             Assert.True(module.TopLevelTypes.Count <= newModule.TopLevelTypes.Count);
             foreach (var originalType in module.TopLevelTypes)
@@ -310,7 +310,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameTokens(module, newModule);
+            AssertSameFieldTokens(module, newModule);
         }
 
         [Fact]
@@ -325,7 +325,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameTokens(module, newModule);
+            AssertSameFieldTokens(module, newModule);
         }
 
         [Fact]
@@ -341,7 +341,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameTokens(module, newModule);
+            AssertSameFieldTokens(module, newModule);
         }
 
         [Fact]
@@ -356,7 +356,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameTokens(module, newModule);
+            AssertSameFieldTokens(module, newModule);
         }
 
         [Fact]
@@ -371,7 +371,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameTokens(module, newModule, field.MetadataToken);
+            AssertSameFieldTokens(module, newModule, field.MetadataToken);
         }
         
         
