@@ -56,14 +56,11 @@ namespace AsmResolver.DotNet.Extensions.Memory
                 return new TypeMemoryLayout(null, is32Bit ? 4u : 8u);
             }
             
-            var resolved = typeSignature.Resolve();
-            if (resolved.IsAutoLayout)
-                throw new TypeMemoryLayoutDetectionException("Cannot infer layout of auto layout structs");
-            
             var context = typeSignature is GenericInstanceTypeSignature g
                 ? new GenericContext().WithType(g)
                 : new GenericContext();
 
+            var resolved = typeSignature.Resolve();
             var tree = Flatten(resolved, context);
             
             // Get the tree's largest field
@@ -115,8 +112,8 @@ namespace AsmResolver.DotNet.Extensions.Memory
                 throw new TypeMemoryLayoutDetectionException("Cyclic dependency in struct");
             
             dfs.Push(root);
-
-            if (root.IsAutoLayout)
+            
+            if (root.IsAutoLayout && !root.IsEnum)
                 throw new TypeMemoryLayoutDetectionException("Cannot infer layout of auto layout structs");
             
             var list = new List<FieldNode>();
