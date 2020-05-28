@@ -69,7 +69,8 @@ namespace AsmResolver.DotNet.Builder
                 ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
             
             // Define all members in the added types.
-            buffer.DefineMembersInTypes();
+            buffer.DefineFields(discoveryResult.Fields);
+            buffer.DefineMethods(discoveryResult.Methods);
             
             // Import remaining preservable tables (Type specs, method specs, signatures etc).
             // We do this before finalizing any member to ensure that they are assigned their original RIDs. 

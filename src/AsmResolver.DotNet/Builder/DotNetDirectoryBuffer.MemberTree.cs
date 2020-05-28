@@ -155,61 +155,46 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Allocates metadata rows for all fields and methods defined in the types that are added to the buffer. 
+        /// Allocates metadata rows for the provided field definitions in the buffer. 
         /// </summary>
-        public void DefineMembersInTypes()
-        {
-            var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
-
-            uint fieldList = 1;
-            uint methodList = 1;
-            for (uint rid = 1; rid <= table.Count; rid++)
-            {
-                var typeToken = new MetadataToken(TableIndex.TypeDef, rid);
-                var type = _typeDefTokens.GetKey(typeToken);
-                
-                var row = table[rid];
-                row = new TypeDefinitionRow(row.Attributes, row.Name, row.Namespace,
-                    GetTypeDefOrRefIndex(type.BaseType), fieldList, methodList);
-                table[rid] = row;
-
-                foreach (var field in type.Fields)
-                    DefineField(field);
-                foreach (var method in type.Methods)
-                    DefineMethod(method);
-
-                fieldList += (uint) type.Fields.Count;
-                methodList += (uint) type.Methods.Count;
-            }
-        }
-
-        private void DefineField(FieldDefinition field)
+        /// <param name="fields">The fields to define.</param>
+        public void DefineFields(IEnumerable<FieldDefinition> fields)
         {
             var table = Metadata.TablesStream.GetTable<FieldDefinitionRow>(TableIndex.Field);
 
-            var row = new FieldDefinitionRow(
-                field.Attributes,
-                Metadata.StringsStream.GetStringIndex(field.Name),
-                Metadata.BlobStream.GetBlobIndex(this, field.Signature));
+            foreach (var field in fields)
+            {
+                var row = new FieldDefinitionRow(
+                    field.Attributes,
+                    Metadata.StringsStream.GetStringIndex(field.Name),
+                    Metadata.BlobStream.GetBlobIndex(this, field.Signature));
 
-            var token = table.Add(row, field.MetadataToken.Rid);
-            _fieldTokens.Add(field, token);
+                var token = table.Add(row, field.MetadataToken.Rid);
+                _fieldTokens.Add(field, token);
+            }
         }
         
-        private void DefineMethod(MethodDefinition method)
+        /// <summary>
+        /// Allocates metadata rows for the provided method definitions in the buffer. 
+        /// </summary>
+        /// <param name="methods">The methods to define.</param>
+        public void DefineMethods(IEnumerable<MethodDefinition> methods)
         {
             var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
-            
-            var row = new MethodDefinitionRow(
-                null, 
-                method.ImplAttributes, 
-                method.Attributes, 
-                Metadata.StringsStream.GetStringIndex(method.Name),
-                Metadata.BlobStream.GetBlobIndex(this, method.Signature),
-                0);
 
-            var token = table.Add(row, method.MetadataToken.Rid);
-            _methodTokens.Add(method, token);
+            foreach (var method in methods)
+            {
+                var row = new MethodDefinitionRow(
+                    null,
+                    method.ImplAttributes,
+                    method.Attributes,
+                    Metadata.StringsStream.GetStringIndex(method.Name),
+                    Metadata.BlobStream.GetBlobIndex(this, method.Signature),
+                    0);
+
+                var token = table.Add(row, method.MetadataToken.Rid);
+                _methodTokens.Add(method, token);
+            }
         }
         
         /// <summary>
@@ -219,6 +204,8 @@ namespace AsmResolver.DotNet.Builder
         {
             var table = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
 
+            uint fieldList = 1;
+            uint methodList = 1;
             uint propertyList = 1;
             uint eventList = 1;
 
@@ -226,7 +213,21 @@ namespace AsmResolver.DotNet.Builder
             {
                 var typeToken = new MetadataToken(TableIndex.TypeDef, rid);
                 var type = _typeDefTokens.GetKey(typeToken);
-                
+
+                // Update extends, field list and method list columns.
+                var typeRow = table[rid];
+                table[rid] = new TypeDefinitionRow(
+                    typeRow.Attributes,
+                    typeRow.Name,
+                    typeRow.Namespace,
+                    GetTypeDefOrRefIndex(type.BaseType),
+                    fieldList,
+                    methodList);
+
+                fieldList += (uint) type.Fields.Count;
+                methodList += (uint) type.Methods.Count;
+
+                // Add remaining metadata:
                 AddPropertiesInType(type, rid, ref propertyList);
                 AddEventsInType(type, rid, ref eventList);
                 
