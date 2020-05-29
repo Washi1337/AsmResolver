@@ -212,6 +212,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             placeHolderType ??= _result.Types[(int) placeHolderTypeRid - 1];
 
             StuffFreeFieldSlots(placeHolderType);
+            StuffFreeMethodSlots(placeHolderType);
 
             // TODO: stuff remaining member types.
         }
@@ -225,7 +226,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             {
                 uint rid = freeTypeRids.Dequeue();
                 var token = new MetadataToken(TableIndex.TypeDef, rid);
-                types[(int) (rid - 1)] = CreatePlaceHolderTypeDefinition(placeHolderNamespace, token);
+                types[(int) (rid - 1)] = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token);
             }
         }
 
@@ -238,17 +239,29 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 uint rid = freeFieldRids.Dequeue();
                 var token = new MetadataToken(TableIndex.Field, rid);
 
-                var dummyField = new FieldDefinition($"DeletedFieldDef_{token.Rid.ToString()}",
+                var placeHolderField = new FieldDefinition($"PlaceHolderFieldDef_{token.Rid.ToString()}",
                     FieldAttributes.Private | FieldAttributes.Static,
                     FieldSignature.CreateStatic(_module.CorLibTypeFactory.Object));
-                placeHolderType.Fields.Add(dummyField);
-                fields[(int) (rid - 1)] = dummyField;
+                placeHolderType.Fields.Add(placeHolderField);
+                fields[(int) (rid - 1)] = placeHolderField;
             }
         }
 
-        private TypeDefinition CreatePlaceHolderTypeDefinition(string placeHolderNamespace, MetadataToken token)
+        private void StuffFreeMethodSlots(TypeDefinition placeHolderType)
         {
-            return  new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token);
+            var freeMethodRids = _freeRids[TableIndex.Method];
+            var methods = _result.Methods;
+            while (freeMethodRids.Count > 0)
+            {
+                uint rid = freeMethodRids.Dequeue();
+                var token = new MetadataToken(TableIndex.Field, rid);
+
+                var placeHolderMethod = new MethodDefinition($"PlaceHolderMethodDef_{token.Rid.ToString()}",
+                    MethodAttributes.Private | MethodAttributes.Static,
+                    MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+                placeHolderType.Methods.Add(placeHolderMethod);
+                methods[(int) (rid - 1)] = placeHolderMethod;
+            }
         }
 
         private sealed class PlaceHolderTypeDefinition : TypeDefinition
@@ -258,7 +271,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             {
                 ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = module;
                 Namespace = ns;
-                Name = token == MetadataToken.Zero ? "PlaceHolder" : $"DeletedTypeDef_{token.Rid.ToString()}";
+                Name =  $"PlaceHolderTypeDef_{token.Rid.ToString()}";
                 Attributes = TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed
                              | TypeAttributes.NotPublic;
             }
