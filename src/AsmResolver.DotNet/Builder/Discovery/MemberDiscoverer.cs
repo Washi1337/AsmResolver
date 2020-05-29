@@ -4,6 +4,7 @@ using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -51,6 +52,9 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private readonly ModuleDefinition _module;
         private readonly MemberDiscoveryFlags _flags;
         private readonly MemberDiscoveryResult _result = new MemberDiscoveryResult();
+        
+        private readonly TypeReference _eventHandlerTypeRef;
+        private readonly TypeSignature _eventHandlerTypeSig;
 
         private readonly IDictionary<TableIndex, Queue<uint>> _freeRids= new Dictionary<TableIndex, Queue<uint>>
         {
@@ -66,6 +70,14 @@ namespace AsmResolver.DotNet.Builder.Discovery
         {
             _module = module ?? throw new ArgumentNullException(nameof(module));
             _flags = flags;
+
+            _eventHandlerTypeRef = new TypeReference(
+                module,
+                module.CorLibTypeFactory.CorLibScope,
+                "System",
+                nameof(EventHandler));
+            
+            _eventHandlerTypeSig = _eventHandlerTypeRef.ToTypeSignature();
         }
 
         private IList<TMember> GetResultList<TMember>(TableIndex tableIndex)
@@ -214,8 +226,9 @@ namespace AsmResolver.DotNet.Builder.Discovery
             StuffFreeMemberSlots(placeHolderType, TableIndex.Field, AddPlaceHolderField);
             StuffFreeMemberSlots(placeHolderType, TableIndex.Method, AddPlaceHolderMethod);
             StuffFreeMemberSlots(placeHolderType, TableIndex.Property, AddPlaceHolderProperty);
+            StuffFreeMemberSlots(placeHolderType, TableIndex.Event, AddPlaceHolderEvent);
 
-            // TODO: stuff remaining member types.
+            // TODO: stuff parameter table.
         }
 
         private void StuffFreeTypeSlots(string placeHolderNamespace)
@@ -270,9 +283,11 @@ namespace AsmResolver.DotNet.Builder.Discovery
 
         private PropertyDefinition AddPlaceHolderProperty(TypeDefinition placeHolderType, MetadataToken token)
         {
+            // Define new property.
             var property = new PropertyDefinition($"PlaceHolderProperty_{token.Rid.ToString()}", 0,
                 PropertySignature.CreateStatic(_module.CorLibTypeFactory.Object));
 
+            // Define getter.
             var getMethod = new MethodDefinition($"get_{property.Name}",
                 MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.SpecialName
                 | MethodAttributes.HideBySig, MethodSignature.CreateStatic(_module.CorLibTypeFactory.Object));
@@ -281,13 +296,56 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
             };
             
+            // Add members.
             placeHolderType.Methods.Add(getMethod);
-            property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
             placeHolderType.Properties.Add(property);
-
+            property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
             InsertOrAppendIfNew(getMethod);
             
             return property;
+        }
+
+        private EventDefinition AddPlaceHolderEvent(TypeDefinition placeHolderType, MetadataToken token)
+        {
+            // Define new event.
+            var @event = new EventDefinition($"PlaceHolderEvent_{token.Rid.ToString()}", 0,
+                _eventHandlerTypeRef);
+
+            // Create signature for add/remove methods.
+            var signature = MethodSignature.CreateStatic(
+                _module.CorLibTypeFactory.Void,
+                _module.CorLibTypeFactory.Object, 
+                _eventHandlerTypeSig);
+
+            var methodAttributes = MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.SpecialName
+                                   | MethodAttributes.HideBySig;
+            
+            // Define add.
+            var addMethod = new MethodDefinition($"add_{@event.Name}", methodAttributes, signature);
+            addMethod.CilMethodBody = new CilMethodBody(addMethod)
+            {
+                Instructions = {new CilInstruction(CilOpCodes.Ret)}
+            };
+            
+            // Define remove.
+            var removeMethod = new MethodDefinition($"remove_{@event.Name}", methodAttributes, signature);
+            removeMethod.CilMethodBody = new CilMethodBody(removeMethod)
+            {
+                Instructions = {new CilInstruction(CilOpCodes.Ret)}
+            };
+            
+            // Add members.
+            placeHolderType.Methods.Add(addMethod);
+            placeHolderType.Methods.Add(removeMethod);
+            placeHolderType.Events.Add(@event);
+            
+            @event.Semantics.Add(new MethodSemantics(addMethod, MethodSemanticsAttributes.AddOn));
+            @event.Semantics.Add(new MethodSemantics(removeMethod, MethodSemanticsAttributes.RemoveOn));
+
+            InsertOrAppendIfNew(addMethod);
+            InsertOrAppendIfNew(removeMethod);
+            
+            return @event;
         }
 
         private sealed class PlaceHolderTypeDefinition : TypeDefinition
