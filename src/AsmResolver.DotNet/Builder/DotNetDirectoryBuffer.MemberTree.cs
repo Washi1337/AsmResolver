@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -216,6 +217,26 @@ namespace AsmResolver.DotNet.Builder
                 _propertyTokens.Add(property, token);
             }
         }
+
+        /// <summary>
+        /// Allocates metadata rows for the provided event definitions in the buffer. 
+        /// </summary>
+        /// <param name="events">The events to define.</param>
+        public void DefineEvents(IEnumerable<EventDefinition> events)
+        {
+            var table = Metadata.TablesStream.GetTable<EventDefinitionRow>(TableIndex.Event);
+
+            foreach (var @event in events)
+            {
+                var row = new EventDefinitionRow(
+                    @event.Attributes, 
+                    Metadata.StringsStream.GetStringIndex(@event.Name),
+                    GetTypeDefOrRefIndex(@event.EventType));
+                
+                var token = table.Add(row, @event.MetadataToken.Rid);
+                _eventTokens.Add(@event, token);
+            }
+        }
         
         /// <summary>
         /// Finalizes all type definitions added in the buffer.
@@ -227,6 +248,7 @@ namespace AsmResolver.DotNet.Builder
             bool fieldPtrRequired = false;
             bool methodPtrRequired = false;
             bool propertyPtrRequired = false;
+            bool eventPtrRequired = false;
 
             uint fieldList = 1;
             uint methodList = 1;
@@ -252,13 +274,12 @@ namespace AsmResolver.DotNet.Builder
                 FinalizeFieldsInType(type, ref fieldPtrRequired);
                 FinalizeMethodsInType(type, ref methodPtrRequired);
                 FinalizePropertiesInType(type, rid, ref propertyList, ref propertyPtrRequired);
+                FinalizeEventsInType(type, rid, ref eventList, ref eventPtrRequired);
                 
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
 
                 // Add remaining metadata:
-                AddEventsInType(type, rid, ref eventList);
-                
                 AddCustomAttributes(typeToken, type);
                 AddSecurityDeclarations(typeToken, type);
                 AddInterfaces(typeToken, type.Interfaces);
@@ -274,6 +295,8 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr).Clear();
             if (!propertyPtrRequired)
                 Metadata.TablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr).Clear();
+            if (!eventPtrRequired)
+                Metadata.TablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr).Clear();
             
             AddParameters();
         }
@@ -287,6 +310,12 @@ namespace AsmResolver.DotNet.Builder
                 var field = type.Fields[i];
                 
                 var newToken = GetFieldDefinitionToken(field);
+                if (newToken == MetadataToken.Zero)
+                {
+                    throw new InvalidOperationException(
+                        $"An attempt was made to finalize field {field}, which was not added to the .NET directory buffer yet.");
+                }
+                
                 if (newToken.Rid != pointerTable.Count + 1)
                     fieldPtrRequired = true;
                 
@@ -310,6 +339,12 @@ namespace AsmResolver.DotNet.Builder
                 var method = type.Methods[i];
                 
                 var newToken = GetMethodDefinitionToken(method);
+                if (newToken == MetadataToken.Zero)
+                {
+                    throw new InvalidOperationException(
+                        $"An attempt was made to finalize method {method}, which was not added to the .NET directory buffer yet.");
+                }
+                
                 if (newToken.Rid != pointerTable.Count + 1)
                     methodPtrRequired = true;
                 
@@ -348,6 +383,12 @@ namespace AsmResolver.DotNet.Builder
                 var property = type.Properties[i];
                 
                 var newToken = GetPropertyDefinitionToken(property);
+                if (newToken == MetadataToken.Zero)
+                {
+                    throw new InvalidOperationException(
+                        $"An attempt was made to finalize property {property}, which was not added to the .NET directory buffer yet.");
+                }
+
                 if (newToken.Rid != pointerTable.Count + 1)
                     propertyPtrRequired = true;
                 
@@ -363,6 +404,39 @@ namespace AsmResolver.DotNet.Builder
             propertyList += (uint) type.Properties.Count;
         }
 
+        private void FinalizeEventsInType(TypeDefinition type, uint typeRid, ref uint eventList, ref bool eventPtrRequired)
+        {
+            if (type.Events.Count == 0)
+                return;
+            
+            var mapTable = Metadata.TablesStream.GetTable<EventMapRow>(TableIndex.EventMap);
+            var pointerTable = Metadata.TablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr);
+            
+            for (int i = 0; i < type.Events.Count; i++)
+            {
+                var @event = type.Events[i];
+                
+                var newToken = GetEventDefinitionToken(@event);
+                if (newToken == MetadataToken.Zero)
+                {
+                    throw new InvalidOperationException(
+                        $"An attempt was made to finalize event {@event}, which was not added to the .NET directory buffer yet.");
+                }
+                
+                if (newToken.Rid != pointerTable.Count + 1)
+                    eventPtrRequired = true;
+                
+                pointerTable.Add(new EventPointerRow(newToken.Rid), 0);
+                
+                AddCustomAttributes(newToken, @event);
+                AddMethodSemantics(newToken, @event);
+            }
+            
+            var row = new EventMapRow(typeRid, eventList);
+            mapTable.Add(row, 0);
+            eventList += (uint) type.Events.Count;
+        }
+
         private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
         {
             var table = Metadata.TablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
@@ -376,36 +450,6 @@ namespace AsmResolver.DotNet.Builder
 
                 table.Add(row, 0);
             }
-        }
-
-        private void AddEventsInType(TypeDefinition type, uint typeRid, ref uint eventList)
-        {
-            if (type.Events.Count > 0)
-            {
-                var table = Metadata.TablesStream.GetTable<EventMapRow>(TableIndex.EventMap);
-                    
-                foreach (var @event in type.Events)
-                    AddEvent(@event);
-                
-                var row = new EventMapRow(typeRid, eventList);
-                table.Add(row, 0);
-                eventList += (uint) type.Events.Count;
-            }
-        }
-
-        private MetadataToken AddEvent(EventDefinition @event)
-        {
-            var table = Metadata.TablesStream.GetTable<EventDefinitionRow>(TableIndex.Event);
-            
-            var row = new EventDefinitionRow(
-                @event.Attributes, 
-                Metadata.StringsStream.GetStringIndex(@event.Name),
-                GetTypeDefOrRefIndex(@event.EventType));
-
-            var token = table.Add(row, @event.MetadataToken.Rid);
-            AddCustomAttributes(token, @event);
-            AddMethodSemantics(token, @event);
-            return token;
         }
 
         private void AddFieldRva(MetadataToken ownerToken, ISegment fieldRva)

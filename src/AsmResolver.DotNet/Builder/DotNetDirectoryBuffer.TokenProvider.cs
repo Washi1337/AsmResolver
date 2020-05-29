@@ -11,7 +11,8 @@ namespace AsmResolver.DotNet.Builder
         private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
         private readonly OneToOneRelation<FieldDefinition, MetadataToken> _fieldTokens = new OneToOneRelation<FieldDefinition, MetadataToken>();
         private readonly OneToOneRelation<PropertyDefinition, MetadataToken> _propertyTokens = new OneToOneRelation<PropertyDefinition, MetadataToken>();
-
+        private readonly OneToOneRelation<EventDefinition, MetadataToken> _eventTokens = new OneToOneRelation<EventDefinition, MetadataToken>();
+        
         /// <inheritdoc />
         public uint GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
 
@@ -64,6 +65,17 @@ namespace AsmResolver.DotNet.Builder
         {
             AssertIsImported(property);
             return _propertyTokens.GetValue(property);
+        }
+
+        /// <summary>
+        /// Gets the newly assigned metadata token of an event definition stored in a tables stream or tables stream buffer. 
+        /// </summary>
+        /// <param name="event">The reference to the event to add.</param>
+        /// <returns>The metadata token of the added event definition.</returns>
+        public MetadataToken GetEventDefinitionToken(EventDefinition @event)
+        {
+            AssertIsImported(@event);
+            return _eventTokens.GetValue(@event);
         }
 
         /// <inheritdoc />
