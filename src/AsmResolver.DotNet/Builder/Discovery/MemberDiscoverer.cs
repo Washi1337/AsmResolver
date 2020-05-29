@@ -196,7 +196,6 @@ namespace AsmResolver.DotNet.Builder.Discovery
             string placeHolderNamespace = Guid.NewGuid().ToString();
 
             uint placeHolderTypeRid = 0;
-
             TypeDefinition placeHolderType;
             if (_freeRids[TableIndex.TypeDef].Count == 0)
             {
@@ -210,11 +209,10 @@ namespace AsmResolver.DotNet.Builder.Discovery
             }
 
             StuffFreeTypeSlots(placeHolderNamespace);
-            
             placeHolderType ??= _result.Types[(int) placeHolderTypeRid - 1];
 
-            StuffFreeFieldSlots(placeHolderType);
-            StuffFreeMethodSlots(placeHolderType);
+            StuffFreeMemberSlots(placeHolderType, TableIndex.Field, AddPlaceHolderField);
+            StuffFreeMemberSlots(placeHolderType, TableIndex.Method, AddPlaceHolderMethod);
 
             // TODO: stuff remaining member types.
         }
@@ -232,43 +230,41 @@ namespace AsmResolver.DotNet.Builder.Discovery
             }
         }
 
-        private void StuffFreeFieldSlots(TypeDefinition placeHolderType)
+        private void StuffFreeMemberSlots<TMember>(TypeDefinition placeHolderType, TableIndex tableIndex, 
+            Func<TypeDefinition, MetadataToken, TMember> createPlaceHolder) 
+            where TMember : IMetadataMember
         {
-            var freeFieldRids = _freeRids[TableIndex.Field];
-            var fields = _result.Fields;
-            while (freeFieldRids.Count > 0)
+            var freeRids = _freeRids[tableIndex];
+            var members = GetResultList<TMember>(tableIndex);
+            while (freeRids.Count > 0)
             {
-                uint rid = freeFieldRids.Dequeue();
-                var token = new MetadataToken(TableIndex.Field, rid);
-
-                var placeHolderField = new FieldDefinition($"PlaceHolderFieldDef_{token.Rid.ToString()}",
-                    FieldAttributes.Private | FieldAttributes.Static,
-                    FieldSignature.CreateStatic(_module.CorLibTypeFactory.Object));
-                placeHolderType.Fields.Add(placeHolderField);
-                fields[(int) (rid - 1)] = placeHolderField;
+                uint rid = freeRids.Dequeue();
+                var token = new MetadataToken(tableIndex, rid);
+                members[(int) (rid - 1)] = createPlaceHolder(placeHolderType, token);
             }
         }
 
-        private void StuffFreeMethodSlots(TypeDefinition placeHolderType)
+        private FieldDefinition AddPlaceHolderField(TypeDefinition placeHolderType, MetadataToken token)
         {
-            var freeMethodRids = _freeRids[TableIndex.Method];
-            var methods = _result.Methods;
-            while (freeMethodRids.Count > 0)
-            {
-                uint rid = freeMethodRids.Dequeue();
-                var token = new MetadataToken(TableIndex.Field, rid);
+            var placeHolderField = new FieldDefinition($"PlaceHolderFieldDef_{token.Rid.ToString()}",
+                FieldAttributes.Private | FieldAttributes.Static,
+                FieldSignature.CreateStatic(_module.CorLibTypeFactory.Object));
+            placeHolderType.Fields.Add(placeHolderField);
+            return placeHolderField;
+        }
 
-                var placeHolderMethod = new MethodDefinition($"PlaceHolderMethodDef_{token.Rid.ToString()}",
-                    MethodAttributes.Private | MethodAttributes.Static,
-                    MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
-                placeHolderMethod.CilMethodBody = new CilMethodBody(placeHolderMethod)
-                {
-                    Instructions = {new CilInstruction(CilOpCodes.Ret)}
-                };
-                
-                placeHolderType.Methods.Add(placeHolderMethod);
-                methods[(int) (rid - 1)] = placeHolderMethod;
-            }
+        private MethodDefinition AddPlaceHolderMethod(TypeDefinition placeHolderType, MetadataToken token)
+        {
+            var placeHolderMethod = new MethodDefinition($"PlaceHolderMethodDef_{token.Rid.ToString()}",
+                MethodAttributes.Private | MethodAttributes.Static,
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+            placeHolderMethod.CilMethodBody = new CilMethodBody(placeHolderMethod)
+            {
+                Instructions = {new CilInstruction(CilOpCodes.Ret)}
+            };
+
+            placeHolderType.Methods.Add(placeHolderMethod);
+            return placeHolderMethod;
         }
 
         private sealed class PlaceHolderTypeDefinition : TypeDefinition
