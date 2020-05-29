@@ -280,10 +280,13 @@ namespace AsmResolver.DotNet.Builder.Discovery
             {
                 Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
             };
-            placeHolderType.Methods.Add(getMethod);
             
+            placeHolderType.Methods.Add(getMethod);
             property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
             placeHolderType.Properties.Add(property);
+
+            InsertOrAppendIfNew(getMethod);
+            
             return property;
         }
 
