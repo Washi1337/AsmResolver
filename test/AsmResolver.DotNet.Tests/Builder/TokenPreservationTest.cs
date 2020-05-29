@@ -5,8 +5,6 @@ using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -277,14 +275,17 @@ namespace AsmResolver.DotNet.Tests.Builder
                 
                 module.TopLevelTypes.Add(dummyType);
                 for (int j = 0; j < fieldsPerType; j++)
-                {
-                    dummyType.Fields.Add(new FieldDefinition($"Field{j}",
-                        FieldAttributes.Public | FieldAttributes.Static,
-                        FieldSignature.CreateStatic(module.CorLibTypeFactory.Int32)));
-                }
+                    dummyType.Fields.Add(CreateDummyField(module, $"Field{j}"));
             }
 
             return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
+        }
+
+        private static FieldDefinition CreateDummyField(ModuleDefinition module, string name)
+        {
+            return new FieldDefinition(name,
+                FieldAttributes.Public | FieldAttributes.Static,
+                FieldSignature.CreateStatic(module.CorLibTypeFactory.Int32));
         }
 
         private static void AssertSameTokens(ModuleDefinition module, ModuleDefinition newModule,
@@ -357,9 +358,8 @@ namespace AsmResolver.DotNet.Tests.Builder
             var module = CreateSampleFieldDefsModule(10, 10);
 
             var type = module.TopLevelTypes[2];
-            type.Fields.Insert(3,
-                new FieldDefinition("ExtraField", FieldAttributes.Public | FieldAttributes.Static,
-                    FieldSignature.CreateStatic(module.CorLibTypeFactory.Int32)));
+            var field = CreateDummyField(module, "ExtraField");
+            type.Fields.Insert(3, field);
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
@@ -392,19 +392,22 @@ namespace AsmResolver.DotNet.Tests.Builder
 
                 module.TopLevelTypes.Add(dummyType);
                 for (int j = 0; j < methodsPerType; j++)
-                {
-                    var method = new MethodDefinition($"Method{j}",
-                        MethodAttributes.Public | MethodAttributes.Static,
-                        MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-                    method.CilMethodBody = new CilMethodBody(method);
-                    method.CilMethodBody.Instructions.Add(new CilInstruction(CilOpCodes.Ret));
-                    dummyType.Methods.Add(method);
-                }
+                    dummyType.Methods.Add(CreateDummyMethod(module, $"Method{j}"));
             }
 
             return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
         }
-        
+
+        private static MethodDefinition CreateDummyMethod(ModuleDefinition module, string name)
+        {
+            var method = new MethodDefinition(name,
+                MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+            method.CilMethodBody = new CilMethodBody(method);
+            method.CilMethodBody.Instructions.Add(new CilInstruction(CilOpCodes.Ret));
+            return method;
+        }
+
         [Fact]
         public void PreserveMethodDefsNoChange()
         {
@@ -452,14 +455,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var module = CreateSampleMethodDefsModule(10, 10);
 
             var type = module.TopLevelTypes[2];
-            
-            var method = new MethodDefinition("ExtraMethod", MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-            method.CilMethodBody = new CilMethodBody(method)
-            {
-                Instructions = {new CilInstruction(CilOpCodes.Ret)}
-            };
-            
+            var method = CreateDummyMethod(module, "ExtraMethod");
             type.Methods.Insert(3, method);
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveMethodDefinitionIndices);
@@ -493,26 +489,29 @@ namespace AsmResolver.DotNet.Tests.Builder
 
                 module.TopLevelTypes.Add(dummyType);
                 for (int j = 0; j < propertiesPerType; j++)
-                {
-                    var property = new PropertyDefinition($"Property{j}", 0,
-                        PropertySignature.CreateStatic(module.CorLibTypeFactory.Object));
-                    
-                    var getMethod = new MethodDefinition($"get_Property{j}", MethodAttributes.Public | MethodAttributes.Static,
-                        MethodSignature.CreateStatic(module.CorLibTypeFactory.Object));
-                    getMethod.CilMethodBody = new CilMethodBody(getMethod)
-                    {
-                        Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
-                    };
-                    
-                    dummyType.Methods.Add(getMethod);
-                    property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
-                    dummyType.Properties.Add(property);
-                }
+                    dummyType.Properties.Add(CreateDummyProperty(dummyType, $"Property{j}"));
             }
 
             return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
         }
-        
+
+        private static PropertyDefinition CreateDummyProperty(TypeDefinition dummyType, string name)
+        {
+            var property = new PropertyDefinition(name, 0,
+                PropertySignature.CreateStatic(dummyType.Module.CorLibTypeFactory.Object));
+
+            var getMethod = new MethodDefinition($"get_{property.Name}", MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(dummyType.Module.CorLibTypeFactory.Object));
+            getMethod.CilMethodBody = new CilMethodBody(getMethod)
+            {
+                Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
+            };
+
+            dummyType.Methods.Add(getMethod);
+            property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
+            return property;
+        }
+
         [Fact]
         public void PreservePropertyDefsNoChange()
         {
@@ -560,23 +559,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             var module = CreateSamplePropertyDefsModule(10, 10);
 
             var type = module.TopLevelTypes[2];
-            
-            // Create new property.
-            var property = new PropertyDefinition("ExtraProperty", 0,
-                PropertySignature.CreateStatic(module.CorLibTypeFactory.Object));
-                    
-            // Create getter.
-            var getMethod = new MethodDefinition("get_ExtraProperty", 
-                MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(module.CorLibTypeFactory.Object));
-            getMethod.CilMethodBody = new CilMethodBody(getMethod)
-            {
-                Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
-            };
-                    
-            // Add new members to type.
-            type.Methods.Add(getMethod);
-            property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
+            var property = CreateDummyProperty(type, "ExtraProperty");
             type.Properties.Insert(3, property);
             
             // Rebuild and verify.
@@ -617,13 +600,16 @@ namespace AsmResolver.DotNet.Tests.Builder
 
                 module.TopLevelTypes.Add(dummyType);
                 for (int j = 0; j < EventsPerType; j++)
-                    AddDummyEventToType(dummyType, eventHandlerTypeRef, $"Event_{j.ToString()}");
+                {
+                    dummyType.Events.Add(CreateDummyEventToType(
+                        dummyType, eventHandlerTypeRef, $"Event_{j.ToString()}"));
+                }
             }
 
             return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
         }
 
-        private static EventDefinition AddDummyEventToType(TypeDefinition dummyType, ITypeDefOrRef eventHandlerTypeRef, string name)
+        private static EventDefinition CreateDummyEventToType(TypeDefinition dummyType, ITypeDefOrRef eventHandlerTypeRef, string name)
         {
             var eventHandlerTypeSig = eventHandlerTypeRef.ToTypeSignature();
             
@@ -656,7 +642,6 @@ namespace AsmResolver.DotNet.Tests.Builder
             // Add members.
             dummyType.Methods.Add(addMethod);
             dummyType.Methods.Add(removeMethod);
-            dummyType.Events.Add(@event);
 
             @event.Semantics.Add(new MethodSemantics(addMethod, MethodSemanticsAttributes.AddOn));
             @event.Semantics.Add(new MethodSemantics(removeMethod, MethodSemanticsAttributes.RemoveOn));
@@ -710,17 +695,15 @@ namespace AsmResolver.DotNet.Tests.Builder
         {
             var module = CreateSampleEventDefsModule(10, 10);
 
-            var type = module.TopLevelTypes[2];
-            
-            // Create new event.
             var eventHandlerTypeRef = new TypeReference(
                 module,
                 module.CorLibTypeFactory.CorLibScope,
                 "System",
                 nameof(EventHandler));
-
-            var @event = AddDummyEventToType(type, eventHandlerTypeRef, "ExtraEvent");
-            type.Events.Remove(@event);
+            
+            // Create new event.
+            var type = module.TopLevelTypes[2];
+            var @event = CreateDummyEventToType(type, eventHandlerTypeRef, "ExtraEvent");
             type.Events.Insert(3, @event);
             
             // Rebuild and verify.
