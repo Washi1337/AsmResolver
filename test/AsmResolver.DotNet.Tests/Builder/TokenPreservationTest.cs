@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -284,21 +285,25 @@ namespace AsmResolver.DotNet.Tests.Builder
             return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
         }
 
-        private static void AssertSameFieldTokens(ModuleDefinition module, ModuleDefinition newModule, params MetadataToken[] excludeTokens)
+        private static void AssertSameTokens(ModuleDefinition module, ModuleDefinition newModule,
+            Func<TypeDefinition, IEnumerable<IMemberDefinition>> getMembers, params MetadataToken[] excludeTokens)
         {
             Assert.True(module.TopLevelTypes.Count <= newModule.TopLevelTypes.Count);
             foreach (var originalType in module.TopLevelTypes)
             {
                 var newType = newModule.TopLevelTypes.First(t => t.FullName == originalType.FullName);
 
-                Assert.True(originalType.Fields.Count <= newType.Fields.Count);
-                foreach (var originalField in originalType.Fields)
+                var originalMembers = getMembers(originalType).ToArray();
+                var newMembers = getMembers(newType).ToArray();
+                Assert.True(originalMembers.Length <= newMembers.Length);
+                
+                foreach (IMemberDefinition originalMember in newMembers)
                 {
-                    if (originalField.MetadataToken.Rid == 0 || excludeTokens.Contains(originalField.MetadataToken))
+                    if (originalMember.MetadataToken.Rid == 0 || excludeTokens.Contains(originalMember.MetadataToken))
                         continue;
-                    
-                    var newField = newType.Fields.First(f => f.Name == originalField.Name);
-                    Assert.Equal(originalField.MetadataToken, newField.MetadataToken);
+
+                    var newMember = newMembers.First(f => f.Name == originalMember.Name);
+                    Assert.Equal(originalMember.MetadataToken, newMember.MetadataToken);
                 }
             }
         }
@@ -310,7 +315,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameFieldTokens(module, newModule);
+            AssertSameTokens(module, newModule, t => t.Fields);
         }
 
         [Fact]
@@ -325,7 +330,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameFieldTokens(module, newModule);
+            AssertSameTokens(module, newModule, t => t.Fields);
         }
 
         [Fact]
@@ -341,7 +346,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameFieldTokens(module, newModule);
+            AssertSameTokens(module, newModule, t => t.Fields);
         }
 
         [Fact]
@@ -356,7 +361,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameFieldTokens(module, newModule);
+            AssertSameTokens(module, newModule, t => t.Fields);
         }
 
         [Fact]
@@ -371,9 +376,109 @@ namespace AsmResolver.DotNet.Tests.Builder
             
             var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveFieldDefinitionIndices);
 
-            AssertSameFieldTokens(module, newModule, field.MetadataToken);
+            AssertSameTokens(module, newModule, t => t.Fields, field.MetadataToken);
+        }
+
+        private static ModuleDefinition CreateSampleMethodDefsModule(int typeCount, int methodsPerType)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+
+            for (int i = 0; i < typeCount; i++)
+            {
+                var dummyType = new TypeDefinition("Namespace", $"Type{i.ToString()}",
+                    TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+
+                module.TopLevelTypes.Add(dummyType);
+                for (int j = 0; j < methodsPerType; j++)
+                {
+                    var method = new MethodDefinition($"Method{j}",
+                        MethodAttributes.Public | MethodAttributes.Static,
+                        MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+                    method.CilMethodBody = new CilMethodBody(method);
+                    method.CilMethodBody.Instructions.Add(new CilInstruction(CilOpCodes.Ret));
+                    dummyType.Methods.Add(method);
+                }
+            }
+
+            return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
         }
         
+        [Fact]
+        public void PreserveMethodDefsNoChange()
+        {
+            var module = CreateSampleMethodDefsModule(10, 10);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveMethodDefinitionIndices);
+
+            AssertSameTokens(module, newModule, t => t.Methods);
+        }
+
+        [Fact]
+        public void PreserveMethodDefsChangeOrderOfTypes()
+        {
+            var module = CreateSampleMethodDefsModule(10, 10);
+            
+            const int swapIndex = 3;
+            var type = module.TopLevelTypes[swapIndex];
+            module.TopLevelTypes.RemoveAt(swapIndex);
+            module.TopLevelTypes.Insert(swapIndex + 1, type);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveMethodDefinitionIndices);
+
+            AssertSameTokens(module, newModule, t => t.Methods);
+        }
+
+        [Fact]
+        public void PreserveMethodDefsChangeOrderOfMethodsInType()
+        {
+            var module = CreateSampleMethodDefsModule(10, 10);
+
+            const int swapIndex = 3;
+            var type = module.TopLevelTypes[2];
+            var method = type.Methods[swapIndex];
+            type.Methods.RemoveAt(swapIndex);
+            type.Methods.Insert(swapIndex + 1, method);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveMethodDefinitionIndices);
+
+            AssertSameTokens(module, newModule, t => t.Methods);
+        }
+
+        [Fact]
+        public void PreserveMethodDefsAddExtraMethod()
+        {
+            var module = CreateSampleMethodDefsModule(10, 10);
+
+            var type = module.TopLevelTypes[2];
+            
+            var method = new MethodDefinition("ExtraMethod", MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
+            method.CilMethodBody = new CilMethodBody(method)
+            {
+                Instructions = {new CilInstruction(CilOpCodes.Ret)}
+            };
+            
+            type.Methods.Insert(3, method);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveMethodDefinitionIndices);
+
+            AssertSameTokens(module, newModule, t => t.Methods);
+        }
+
+        [Fact]
+        public void PreserveMethodDefsRemoveMethod()
+        {
+            var module = CreateSampleMethodDefsModule(10, 10);
+
+            var type = module.TopLevelTypes[2];
+            const int indexToRemove = 3;
+            var method = type.Methods[indexToRemove];
+            type.Methods.RemoveAt(indexToRemove);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreserveMethodDefinitionIndices);
+
+            AssertSameTokens(module, newModule, m => m.Methods, method.MetadataToken);
+        }
         
     }
 }
