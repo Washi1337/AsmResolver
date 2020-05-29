@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using AsmResolver.DotNet.Builder.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -197,6 +196,26 @@ namespace AsmResolver.DotNet.Builder
                 _methodTokens.Add(method, token);
             }
         }
+
+        /// <summary>
+        /// Allocates metadata rows for the provided property definitions in the buffer. 
+        /// </summary>
+        /// <param name="properties">The properties to define.</param>
+        public void DefineProperties(IEnumerable<PropertyDefinition> properties)
+        {
+            var table = Metadata.TablesStream.GetTable<PropertyDefinitionRow>(TableIndex.Property);
+
+            foreach (var property in properties)
+            {
+                var row = new PropertyDefinitionRow(
+                    property.Attributes,
+                    Metadata.StringsStream.GetStringIndex(property.Name),
+                    Metadata.BlobStream.GetBlobIndex(this, property.Signature));
+                
+                var token = table.Add(row, property.MetadataToken.Rid);
+                _propertyTokens.Add(property, token);
+            }
+        }
         
         /// <summary>
         /// Finalizes all type definitions added in the buffer.
@@ -207,6 +226,7 @@ namespace AsmResolver.DotNet.Builder
             
             bool fieldPtrRequired = false;
             bool methodPtrRequired = false;
+            bool propertyPtrRequired = false;
 
             uint fieldList = 1;
             uint methodList = 1;
@@ -231,12 +251,12 @@ namespace AsmResolver.DotNet.Builder
                 // Finalize fields and methods.
                 FinalizeFieldsInType(type, ref fieldPtrRequired);
                 FinalizeMethodsInType(type, ref methodPtrRequired);
+                FinalizePropertiesInType(type, rid, ref propertyList, ref propertyPtrRequired);
                 
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
 
                 // Add remaining metadata:
-                AddPropertiesInType(type, rid, ref propertyList);
                 AddEventsInType(type, rid, ref eventList);
                 
                 AddCustomAttributes(typeToken, type);
@@ -247,10 +267,13 @@ namespace AsmResolver.DotNet.Builder
                 AddClassLayout(typeToken, type.ClassLayout);
             }
             
+            // Check if any of the redirection tables can be removed.
             if (!fieldPtrRequired)
                 Metadata.TablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr).Clear();
             if (!methodPtrRequired)
                 Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr).Clear();
+            if (!propertyPtrRequired)
+                Metadata.TablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr).Clear();
             
             AddParameters();
         }
@@ -311,6 +334,35 @@ namespace AsmResolver.DotNet.Builder
             }
         }
 
+        private void FinalizePropertiesInType(TypeDefinition type, uint typeRid, ref uint propertyList,
+            ref bool propertyPtrRequired)
+        {
+            if (type.Properties.Count == 0)
+                return;
+            
+            var mapTable = Metadata.TablesStream.GetTable<PropertyMapRow>(TableIndex.PropertyMap);
+            var pointerTable = Metadata.TablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr);
+
+            for (int i = 0; i < type.Properties.Count; i++)
+            {
+                var property = type.Properties[i];
+                
+                var newToken = GetPropertyDefinitionToken(property);
+                if (newToken.Rid != pointerTable.Count + 1)
+                    propertyPtrRequired = true;
+                
+                pointerTable.Add(new PropertyPointerRow(newToken.Rid), 0);
+                
+                AddCustomAttributes(newToken, property);
+                AddMethodSemantics(newToken, property);
+                AddConstant(newToken, property.Constant);
+            }
+
+            var row = new PropertyMapRow(typeRid, propertyList);
+            mapTable.Add(row, 0);
+            propertyList += (uint) type.Properties.Count;
+        }
+
         private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
         {
             var table = Metadata.TablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
@@ -324,37 +376,6 @@ namespace AsmResolver.DotNet.Builder
 
                 table.Add(row, 0);
             }
-        }
-
-        private void AddPropertiesInType(TypeDefinition type, uint typeRid, ref uint propertyList)
-        {
-            if (type.Properties.Count > 0)
-            {
-                var table = Metadata.TablesStream.GetTable<PropertyMapRow>(TableIndex.PropertyMap);
-                    
-                foreach (var property in type.Properties)
-                    AddProperty(property);
-                
-                var row = new PropertyMapRow(typeRid, propertyList);
-                table.Add(row, 0);
-                propertyList += (uint) type.Properties.Count;
-            }
-        }
-
-        private MetadataToken AddProperty(PropertyDefinition property)
-        {
-            var table = Metadata.TablesStream.GetTable<PropertyDefinitionRow>(TableIndex.Property);
-            
-            var row = new PropertyDefinitionRow(
-                property.Attributes, 
-                Metadata.StringsStream.GetStringIndex(property.Name),
-                Metadata.BlobStream.GetBlobIndex(this, property.Signature));
-
-            var token = table.Add(row, property.MetadataToken.Rid);
-            AddCustomAttributes(token, property);
-            AddMethodSemantics(token, property);
-            AddConstant(token, property.Constant);
-            return token;
         }
 
         private void AddEventsInType(TypeDefinition type, uint typeRid, ref uint eventList)

@@ -10,6 +10,7 @@ namespace AsmResolver.DotNet.Builder
         private readonly OneToOneRelation<TypeDefinition, MetadataToken> _typeDefTokens = new OneToOneRelation<TypeDefinition, MetadataToken>();
         private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
         private readonly OneToOneRelation<FieldDefinition, MetadataToken> _fieldTokens = new OneToOneRelation<FieldDefinition, MetadataToken>();
+        private readonly OneToOneRelation<PropertyDefinition, MetadataToken> _propertyTokens = new OneToOneRelation<PropertyDefinition, MetadataToken>();
 
         /// <inheritdoc />
         public uint GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
@@ -52,6 +53,17 @@ namespace AsmResolver.DotNet.Builder
         {
             AssertIsImported(method);
             return _methodTokens.GetValue(method);
+        }
+
+        /// <summary>
+        /// Gets the newly assigned metadata token of a property definition stored in a tables stream or tables stream buffer. 
+        /// </summary>
+        /// <param name="property">The reference to the property to add.</param>
+        /// <returns>The metadata token of the added property definition.</returns>
+        public MetadataToken GetPropertyDefinitionToken(PropertyDefinition property)
+        {
+            AssertIsImported(property);
+            return _propertyTokens.GetValue(property);
         }
 
         /// <inheritdoc />

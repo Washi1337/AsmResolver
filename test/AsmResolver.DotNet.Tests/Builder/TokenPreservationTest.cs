@@ -481,5 +481,123 @@ namespace AsmResolver.DotNet.Tests.Builder
             AssertSameTokens(module, newModule, m => m.Methods, method.MetadataToken);
         }
         
+
+        private static ModuleDefinition CreateSamplePropertyDefsModule(int typeCount, int propertiesPerType)
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
+
+            for (int i = 0; i < typeCount; i++)
+            {
+                var dummyType = new TypeDefinition("Namespace", $"Type{i.ToString()}",
+                    TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+
+                module.TopLevelTypes.Add(dummyType);
+                for (int j = 0; j < propertiesPerType; j++)
+                {
+                    var property = new PropertyDefinition($"Property{j}", 0,
+                        PropertySignature.CreateStatic(module.CorLibTypeFactory.Object));
+                    
+                    var getMethod = new MethodDefinition($"get_Property{j}", MethodAttributes.Public | MethodAttributes.Static,
+                        MethodSignature.CreateStatic(module.CorLibTypeFactory.Object));
+                    getMethod.CilMethodBody = new CilMethodBody(getMethod)
+                    {
+                        Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
+                    };
+                    
+                    dummyType.Methods.Add(getMethod);
+                    property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
+                    dummyType.Properties.Add(property);
+                }
+            }
+
+            return RebuildAndReloadModule(module, MetadataBuilderFlags.None);
+        }
+        
+        [Fact]
+        public void PreservePropertyDefsNoChange()
+        {
+            var module = CreateSamplePropertyDefsModule(10, 10);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreservePropertyDefinitionIndices);
+
+            AssertSameTokens(module, newModule, t => t.Properties);
+        }
+
+        [Fact]
+        public void PreservePropertyDefsChangeOrderOfTypes()
+        {
+            var module = CreateSamplePropertyDefsModule(10, 10);
+            
+            const int swapIndex = 3;
+            var type = module.TopLevelTypes[swapIndex];
+            module.TopLevelTypes.RemoveAt(swapIndex);
+            module.TopLevelTypes.Insert(swapIndex + 1, type);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreservePropertyDefinitionIndices);
+
+            AssertSameTokens(module, newModule, t => t.Properties);
+        }
+
+        [Fact]
+        public void PreservePropertyDefsChangeOrderOfPropertiesInType()
+        {
+            var module = CreateSamplePropertyDefsModule(10, 10);
+
+            const int swapIndex = 3;
+            var type = module.TopLevelTypes[2];
+            var property = type.Properties[swapIndex];
+            type.Properties.RemoveAt(swapIndex);
+            type.Properties.Insert(swapIndex + 1, property);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreservePropertyDefinitionIndices);
+
+            AssertSameTokens(module, newModule, t => t.Properties);
+        }
+
+        [Fact]
+        public void PreservePropertyDefsAddExtraProperty()
+        {
+            var module = CreateSamplePropertyDefsModule(10, 10);
+
+            var type = module.TopLevelTypes[2];
+            
+            // Create new property.
+            var property = new PropertyDefinition("ExtraProperty", 0,
+                PropertySignature.CreateStatic(module.CorLibTypeFactory.Object));
+                    
+            // Create getter.
+            var getMethod = new MethodDefinition("get_ExtraProperty", 
+                MethodAttributes.Public | MethodAttributes.Static,
+                MethodSignature.CreateStatic(module.CorLibTypeFactory.Object));
+            getMethod.CilMethodBody = new CilMethodBody(getMethod)
+            {
+                Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
+            };
+                    
+            // Add new members to type.
+            type.Methods.Add(getMethod);
+            property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
+            type.Properties.Insert(3, property);
+            
+            // Rebuild and verify.
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreservePropertyDefinitionIndices);
+            AssertSameTokens(module, newModule, t => t.Properties);
+        }
+
+        [Fact]
+        public void PreservePropertyDefsRemoveProperty()
+        {
+            var module = CreateSamplePropertyDefsModule(10, 10);
+
+            var type = module.TopLevelTypes[2];
+            const int indexToRemove = 3;
+            var Property = type.Properties[indexToRemove];
+            type.Properties.RemoveAt(indexToRemove);
+            
+            var newModule = RebuildAndReloadModule(module,MetadataBuilderFlags.PreservePropertyDefinitionIndices);
+
+            AssertSameTokens(module, newModule, m => m.Properties, Property.MetadataToken);
+        }
+        
     }
 }

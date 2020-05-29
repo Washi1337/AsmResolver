@@ -71,6 +71,7 @@ namespace AsmResolver.DotNet.Builder
             // Define all members in the added types.
             buffer.DefineFields(discoveryResult.Fields);
             buffer.DefineMethods(discoveryResult.Methods);
+            buffer.DefineProperties(discoveryResult.Properties);
             
             // Import remaining preservable tables (Type specs, method specs, signatures etc).
             // We do this before finalizing any member to ensure that they are assigned their original RIDs. 
