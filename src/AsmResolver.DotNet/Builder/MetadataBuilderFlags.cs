@@ -110,28 +110,10 @@ namespace AsmResolver.DotNet.Builder
         PreserveAssemblyReferenceIndices = 0x8000,
         
         /// <summary>
-        /// Indicates indices into the file reference table should be preserved whenever possible during the construction
-        /// of the metadata directory.
-        /// </summary>
-        PreserveFileReferenceIndices = 0x10000,
-        
-        /// <summary>
-        /// Indicates indices into the exported type table should be preserved whenever possible during the construction
-        /// of the metadata directory.
-        /// </summary>
-        PreserveExportedTypeIndices = 0x20000,
-        
-        /// <summary>
-        /// Indicates indices into the manifest resource table should be preserved whenever possible during the construction
-        /// of the metadata directory.
-        /// </summary>
-        PreserveManifestResourceIndices = 0x40000,
-        
-        /// <summary>
         /// Indicates indices into the method specification table should be preserved whenever possible during the construction
         /// of the metadata directory.
         /// </summary>
-        PreserveMethodSpecificationIndices = 0x80000,
+        PreserveMethodSpecificationIndices = 0x10000,
         
         /// <summary>
         /// Indicates indices into the tables stream should be preserved whenever possible during the construction
@@ -141,8 +123,7 @@ namespace AsmResolver.DotNet.Builder
             | PreserveFieldDefinitionIndices | PreserveMethodDefinitionIndices | PreserveParameterDefinitionIndices
             | PreserveMemberReferenceIndices | PreserveStandAloneSignatureIndices | PreserveEventDefinitionIndices
             | PreservePropertyDefinitionIndices | PreserveModuleReferenceIndices | PreserveTypeSpecificationIndices
-            | PreserveAssemblyReferenceIndices | PreserveFileReferenceIndices | PreserveExportedTypeIndices
-            | PreserveManifestResourceIndices | PreserveMethodSpecificationIndices,
+            | PreserveAssemblyReferenceIndices | PreserveMethodSpecificationIndices,
         
         /// <summary>
         /// Indicates any kind of index into a blob or tables stream should be preserved whenever possible during the
