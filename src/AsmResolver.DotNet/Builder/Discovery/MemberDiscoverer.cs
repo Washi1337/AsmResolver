@@ -16,6 +16,14 @@ namespace AsmResolver.DotNet.Builder.Discovery
     /// </summary>
     public sealed class MemberDiscoverer
     {
+        private const MethodAttributes MethodPlaceHolderAttributes = MethodAttributes.Public
+                                                                     | MethodAttributes.Abstract
+                                                                     | MethodAttributes.Virtual
+                                                                     | MethodAttributes.HideBySig
+                                                                     | MethodAttributes.NewSlot;
+
+        private const FieldAttributes FieldPlaceHolderAttributes = FieldAttributes.Public;
+
         /// <summary>
         /// Performs a traversal on the provided module and collects all member defined in it. 
         /// </summary>
@@ -259,7 +267,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Create new placeholder field.
             var placeHolderField = new FieldDefinition(
                 $"PlaceHolderField_{token.Rid.ToString()}",
-                FieldAttributes.Private | FieldAttributes.Static,
+                FieldPlaceHolderAttributes,
                 FieldSignature.CreateStatic(_module.CorLibTypeFactory.Object));
             
             // Add the field to the type.
@@ -273,7 +281,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Create new placeholder method.
             var placeHolderMethod = new MethodDefinition(
                 $"PlaceHolderMethod_{token.Rid.ToString()}",
-                MethodAttributes.Private | MethodAttributes.Static,
+                MethodPlaceHolderAttributes,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
             
             placeHolderMethod.CilMethodBody = new CilMethodBody(placeHolderMethod)
@@ -326,13 +334,10 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 PropertySignature.CreateStatic(_module.CorLibTypeFactory.Object));
 
             // Define getter.
-            var getMethod = new MethodDefinition($"get_{property.Name}",
-                MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.SpecialName
-                | MethodAttributes.HideBySig, MethodSignature.CreateStatic(_module.CorLibTypeFactory.Object));
-            getMethod.CilMethodBody = new CilMethodBody(getMethod)
-            {
-                Instructions = {new CilInstruction(CilOpCodes.Ldnull), new CilInstruction(CilOpCodes.Ret)}
-            };
+            var getMethod = new MethodDefinition(
+                $"get_{property.Name}",
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Object));
             
             // Add members.
             placeHolderType.Methods.Add(getMethod);
@@ -354,23 +359,16 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 _module.CorLibTypeFactory.Void,
                 _module.CorLibTypeFactory.Object, 
                 _eventHandlerTypeSig);
-
-            var methodAttributes = MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.SpecialName
-                                   | MethodAttributes.HideBySig;
             
-            // Define add.
-            var addMethod = new MethodDefinition($"add_{@event.Name}", methodAttributes, signature);
-            addMethod.CilMethodBody = new CilMethodBody(addMethod)
-            {
-                Instructions = {new CilInstruction(CilOpCodes.Ret)}
-            };
-            
-            // Define remove.
-            var removeMethod = new MethodDefinition($"remove_{@event.Name}", methodAttributes, signature);
-            removeMethod.CilMethodBody = new CilMethodBody(removeMethod)
-            {
-                Instructions = {new CilInstruction(CilOpCodes.Ret)}
-            };
+            // Define add and remove methods.
+            var addMethod = new MethodDefinition(
+                $"add_{@event.Name}", 
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName, 
+                signature);
+            var removeMethod = new MethodDefinition(
+                $"remove_{@event.Name}", 
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName, 
+                signature);
             
             // Add members.
             placeHolderType.Methods.Add(addMethod);
@@ -386,16 +384,33 @@ namespace AsmResolver.DotNet.Builder.Discovery
             return @event;
         }
 
+        /// <summary>
+        /// Represents a place holder type definition.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This class is kind of a hack. It allows us to return type definitions
+        /// that seem to be present in the module without actually adding the type definition to
+        /// <see cref="ModuleDefinition.TopLevelTypes"/> or as a nested type of one of these types.
+        /// </para>
+        /// <para>
+        /// This has a nice effect that we never really change the internal state of the .NET module during the
+        /// discovery process when we need to stuff free RIDs with placeholder types, preventing all kinds of
+        /// problems.
+        /// </para>
+        /// </remarks>
         private sealed class PlaceHolderTypeDefinition : TypeDefinition
         {
             public PlaceHolderTypeDefinition(ModuleDefinition module, string ns, MetadataToken token)
                 : base(token)
             {
-                ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = module;
                 Namespace = ns;
                 Name =  $"PlaceHolderTypeDef_{token.Rid.ToString()}";
-                Attributes = TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed
-                             | TypeAttributes.NotPublic;
+                Attributes = TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.NotPublic;
+                BaseType = module.CorLibTypeFactory.Object.Type;
+                
+                // HACK: override the module containing this type:
+                ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = module;
             }
         }
 
