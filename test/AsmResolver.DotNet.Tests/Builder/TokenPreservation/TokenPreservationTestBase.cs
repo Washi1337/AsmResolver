@@ -1,14 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Builder;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
@@ -42,7 +38,6 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             };
             
             var newImage = builder.CreateImage(module);
-            new ManagedPEFileBuilder().CreateFile(newImage).Write(new BinaryStreamWriter(fs));
             return ModuleDefinition.FromImage(newImage);
         }
 
