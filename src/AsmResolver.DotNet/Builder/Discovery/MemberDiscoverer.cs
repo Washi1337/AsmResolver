@@ -205,27 +205,31 @@ namespace AsmResolver.DotNet.Builder.Discovery
 
         private void StuffFreeMemberSlots()
         {
+            // Check if we need to do this at all.
             if (_freeRids.Values.All(q => q.Count == 0))
                 return;
             
-            string placeHolderNamespace = Guid.NewGuid().ToString();
+            // Create a new randomly generated namespace.
+            string placeHolderNamespace = Guid.NewGuid().ToString("B");
 
-            uint placeHolderTypeRid = 0;
+            // Ensure that at least one dummy type exists, so that we can use it to insert placeholder members.
             TypeDefinition placeHolderType;
             if (_freeRids[TableIndex.TypeDef].Count == 0)
             {
+                // There is no RID available for the dummy type, allocate a new one. 
                 placeHolderType = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, MetadataToken.Zero);
                 _result.Types.Add(placeHolderType);
             }
             else
             {
-                placeHolderType = null;
-                placeHolderTypeRid = _freeRids[TableIndex.TypeDef].Peek();
+                // There's at least one type RID free. Stuff free type slots and remember the first stuffed type.
+                uint placeHolderTypeRid = _freeRids[TableIndex.TypeDef].Peek();
+                StuffFreeMemberSlots<TypeDefinition>(null, TableIndex.TypeDef,
+                    (_, token) => new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token));
+                placeHolderType = _result.Types[(int) placeHolderTypeRid - 1];
             }
 
-            StuffFreeTypeSlots(placeHolderNamespace);
-            placeHolderType ??= _result.Types[(int) placeHolderTypeRid - 1];
-
+            // Stuff remaining RIDs.
             StuffFreeMemberSlots(placeHolderType, TableIndex.Field, AddPlaceHolderField);
             StuffFreeMemberSlots(placeHolderType, TableIndex.Method, AddPlaceHolderMethod);
             StuffFreeMemberSlots(placeHolderType, TableIndex.Property, AddPlaceHolderProperty);
@@ -233,27 +237,17 @@ namespace AsmResolver.DotNet.Builder.Discovery
             StuffFreeMemberSlots(placeHolderType, TableIndex.Param, AddPlaceHolderParameter);
         }
 
-        private void StuffFreeTypeSlots(string placeHolderNamespace)
-        {
-            // Stuff type rows with placeholders.
-            var freeTypeRids = _freeRids[TableIndex.TypeDef];
-            var types = _result.Types;
-            while (freeTypeRids.Count > 0)
-            {
-                uint rid = freeTypeRids.Dequeue();
-                var token = new MetadataToken(TableIndex.TypeDef, rid);
-                types[(int) (rid - 1)] = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token);
-            }
-        }
-
         private void StuffFreeMemberSlots<TMember>(TypeDefinition placeHolderType, TableIndex tableIndex, 
             Func<TypeDefinition, MetadataToken, TMember> createPlaceHolder) 
             where TMember : IMetadataMember
         {
+            // Get resulting member lists and free RIDs. 
             var freeRids = _freeRids[tableIndex];
             var members = GetResultList<TMember>(tableIndex);
+            
             while (freeRids.Count > 0)
             {
+                // Stuff free RID with a place holder member.
                 uint rid = freeRids.Dequeue();
                 var token = new MetadataToken(tableIndex, rid);
                 members[(int) (rid - 1)] = createPlaceHolder(placeHolderType, token);
@@ -262,45 +256,66 @@ namespace AsmResolver.DotNet.Builder.Discovery
 
         private FieldDefinition AddPlaceHolderField(TypeDefinition placeHolderType, MetadataToken token)
         {
-            var placeHolderField = new FieldDefinition($"PlaceHolderField_{token.Rid.ToString()}",
+            // Create new placeholder field.
+            var placeHolderField = new FieldDefinition(
+                $"PlaceHolderField_{token.Rid.ToString()}",
                 FieldAttributes.Private | FieldAttributes.Static,
                 FieldSignature.CreateStatic(_module.CorLibTypeFactory.Object));
+            
+            // Add the field to the type.
             placeHolderType.Fields.Add(placeHolderField);
+            
             return placeHolderField;
         }
 
         private MethodDefinition AddPlaceHolderMethod(TypeDefinition placeHolderType, MetadataToken token)
         {
-            var placeHolderMethod = new MethodDefinition($"PlaceHolderMethod_{token.Rid.ToString()}",
+            // Create new placeholder method.
+            var placeHolderMethod = new MethodDefinition(
+                $"PlaceHolderMethod_{token.Rid.ToString()}",
                 MethodAttributes.Private | MethodAttributes.Static,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+            
             placeHolderMethod.CilMethodBody = new CilMethodBody(placeHolderMethod)
             {
                 Instructions = {new CilInstruction(CilOpCodes.Ret)}
             };
 
+            // Add the method to the type.
             placeHolderType.Methods.Add(placeHolderMethod);
+            
+            // Record placeholder methods, so that we can use them for adding placeholder parameters as well.
             _allPlaceHolderMethods.Add(placeHolderMethod);
+            
             return placeHolderMethod;
         }
 
         private ParameterDefinition AddPlaceHolderParameter(TypeDefinition placeHolderType, MetadataToken token)
         {
+            // If methods were not preserved, we need to create a new placeholder method to
+            // contain our dummy parameters in.
+            
             if (_allPlaceHolderMethods.Count == 0)
                 InsertOrAppendIfNew(AddPlaceHolderMethod(placeHolderType, token));
 
+            // Get current method to add the parameter def to.
             int methodIndex = _placeHolderParameterCounter % _allPlaceHolderMethods.Count;
-            int parameterIndex = _placeHolderParameterCounter / _allPlaceHolderMethods.Count;
-            
+            int parameterSequence = _placeHolderParameterCounter / _allPlaceHolderMethods.Count;
             var method = _allPlaceHolderMethods[methodIndex];
 
-            if (parameterIndex > 0)
+            // We start by adding parameter definitions for the hidden return parameter (sequence = 0).
+            // If the parameter index is above 0, then we need to add it to the method signature for a
+            // valid .NET module.
+            if (parameterSequence > 0)
                 method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
 
-            var parameter = new ParameterDefinition(null);
+            // Create and add the placeholder parameter.
+            var parameter = new ParameterDefinition((ushort) parameterSequence, null, 0);
             method.ParameterDefinitions.Add(parameter);
             
+            // Move to next method.
             _placeHolderParameterCounter++;
+            
             return parameter;
         }
 
