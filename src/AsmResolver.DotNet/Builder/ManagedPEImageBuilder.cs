@@ -73,6 +73,7 @@ namespace AsmResolver.DotNet.Builder
             buffer.DefineMethods(discoveryResult.Methods);
             buffer.DefineProperties(discoveryResult.Properties);
             buffer.DefineEvents(discoveryResult.Events);
+            buffer.DefineParameters(discoveryResult.Parameters);
             
             // Import remaining preservable tables (Type specs, method specs, signatures etc).
             // We do this before finalizing any member to ensure that they are assigned their original RIDs. 

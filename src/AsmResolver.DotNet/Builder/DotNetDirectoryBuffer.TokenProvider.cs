@@ -8,8 +8,9 @@ namespace AsmResolver.DotNet.Builder
     public partial class DotNetDirectoryBuffer : IMetadataTokenProvider
     {
         private readonly OneToOneRelation<TypeDefinition, MetadataToken> _typeDefTokens = new OneToOneRelation<TypeDefinition, MetadataToken>();
-        private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
         private readonly OneToOneRelation<FieldDefinition, MetadataToken> _fieldTokens = new OneToOneRelation<FieldDefinition, MetadataToken>();
+        private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
+        private readonly OneToOneRelation<ParameterDefinition, MetadataToken> _parameterTokens = new OneToOneRelation<ParameterDefinition, MetadataToken>();
         private readonly OneToOneRelation<PropertyDefinition, MetadataToken> _propertyTokens = new OneToOneRelation<PropertyDefinition, MetadataToken>();
         private readonly OneToOneRelation<EventDefinition, MetadataToken> _eventTokens = new OneToOneRelation<EventDefinition, MetadataToken>();
         
@@ -54,6 +55,18 @@ namespace AsmResolver.DotNet.Builder
         {
             AssertIsImported(method);
             return _methodTokens.GetValue(method);
+        }
+
+        /// <summary>
+        /// Gets the newly assigned metadata token of a parameter definition stored in a tables stream or tables
+        /// stream buffer. 
+        /// </summary>
+        /// <param name="parameter">The reference to the parameter to add.</param>
+        /// <returns>The metadata token of the added parameter definition.</returns>
+        public MetadataToken GetParameterDefinitionToken(ParameterDefinition parameter)
+        {
+            AssertIsImported(parameter);
+            return _parameterTokens.GetValue(parameter);
         }
 
         /// <summary>

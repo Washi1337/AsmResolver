@@ -199,6 +199,26 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
+        /// Allocates metadata rows for the provided parameter definitions in the buffer. 
+        /// </summary>
+        /// <param name="parameters">The parameters to define.</param>
+        public void DefineParameters(IEnumerable<ParameterDefinition> parameters)
+        {
+            var table = Metadata.TablesStream.GetTable<ParameterDefinitionRow>(TableIndex.Param);
+
+            foreach (var parameter in parameters)
+            {
+                var row = new ParameterDefinitionRow(
+                    parameter.Attributes,
+                    parameter.Sequence,
+                    Metadata.StringsStream.GetStringIndex(parameter.Name));
+
+                var token = table.Add(row, parameter.MetadataToken.Rid);
+                _parameterTokens.Add(parameter, token);
+            }
+        }
+
+        /// <summary>
         /// Allocates metadata rows for the provided property definitions in the buffer. 
         /// </summary>
         /// <param name="properties">The properties to define.</param>
@@ -247,11 +267,13 @@ namespace AsmResolver.DotNet.Builder
             
             bool fieldPtrRequired = false;
             bool methodPtrRequired = false;
+            bool paramPtrRequired = false;
             bool propertyPtrRequired = false;
             bool eventPtrRequired = false;
 
             uint fieldList = 1;
             uint methodList = 1;
+            uint paramList = 1;
             uint propertyList = 1;
             uint eventList = 1;
 
@@ -272,7 +294,7 @@ namespace AsmResolver.DotNet.Builder
 
                 // Finalize fields and methods.
                 FinalizeFieldsInType(type, ref fieldPtrRequired);
-                FinalizeMethodsInType(type, ref methodPtrRequired);
+                FinalizeMethodsInType(type, ref methodPtrRequired, ref paramList, ref paramPtrRequired);
                 FinalizePropertiesInType(type, rid, ref propertyList, ref propertyPtrRequired);
                 FinalizeEventsInType(type, rid, ref eventList, ref eventPtrRequired);
                 
@@ -293,12 +315,12 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.TablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr).Clear();
             if (!methodPtrRequired)
                 Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr).Clear();
+            if (!paramPtrRequired)
+                Metadata.TablesStream.GetTable<ParameterPointerRow>(TableIndex.ParamPtr).Clear();
             if (!propertyPtrRequired)
                 Metadata.TablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr).Clear();
             if (!eventPtrRequired)
                 Metadata.TablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr).Clear();
-            
-            AddParameters();
         }
 
         private void FinalizeFieldsInType(TypeDefinition type, ref bool fieldPtrRequired)
@@ -329,7 +351,11 @@ namespace AsmResolver.DotNet.Builder
             }
         }
         
-        private void FinalizeMethodsInType(TypeDefinition type, ref bool methodPtrRequired)
+        private void FinalizeMethodsInType(
+            TypeDefinition type,
+            ref bool methodPtrRequired,
+            ref uint paramList, 
+            ref bool paramPtrRequired)
         {
             var definitionTable = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             var pointerTable = Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr);
@@ -359,8 +385,10 @@ namespace AsmResolver.DotNet.Builder
                         row.Attributes,
                         row.Name,
                         row.Signature,
-                        row.ParameterList);
+                        paramList);
                 }
+                
+                FinalizeParametersInMethod(method, ref paramList, ref paramPtrRequired);
 
                 AddCustomAttributes(newToken, method);
                 AddSecurityDeclarations(newToken, method);
@@ -369,6 +397,33 @@ namespace AsmResolver.DotNet.Builder
             }
         }
 
+        private void FinalizeParametersInMethod(MethodDefinition method, ref uint paramList, ref bool paramPtrRequired)
+        {
+            var pointerTable = Metadata.TablesStream.GetTable<ParameterPointerRow>(TableIndex.ParamPtr);
+            
+            for (int i = 0; i < method.ParameterDefinitions.Count; i++)
+            {
+                var parameter = method.ParameterDefinitions[i];
+
+                var newToken = GetParameterDefinitionToken(parameter);
+                if (newToken == MetadataToken.Zero)
+                {
+                    throw new InvalidOperationException(
+                        $"An attempt was made to finalize parameter {parameter} in {method}, which was not added to the .NET directory buffer yet.");
+                }
+                
+                if (newToken.Rid != pointerTable.Count + 1)
+                    paramPtrRequired = true;
+                
+                pointerTable.Add(new ParameterPointerRow(newToken.Rid), 0);
+                
+                AddCustomAttributes(newToken, parameter);
+                AddConstant(newToken, parameter.Constant);
+            }
+
+            paramList += (uint) method.ParameterDefinitions.Count;
+        }
+        
         private void FinalizePropertiesInType(TypeDefinition type, uint typeRid, ref uint propertyList,
             ref bool propertyPtrRequired)
         {
@@ -478,43 +533,6 @@ namespace AsmResolver.DotNet.Builder
                 ownerToken.Rid);
 
             table.Add(row, 0);
-        }
-        
-        private void AddParameters()
-        {
-            var table = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
-
-            uint paramList = 1;
-            
-            for (uint rid = 1; rid <= table.Count; rid++)
-            {
-                var row = table[rid];
-                row = new MethodDefinitionRow(row.Body, row.ImplAttributes, row.Attributes, row.Name, row.Signature,
-                    paramList);
-                table[rid] = row;
-
-                var method = _methodTokens.GetKey(new MetadataToken(TableIndex.Method, rid));
-                
-                foreach (var parameter in method.ParameterDefinitions)
-                    AddParameter(parameter);
-                
-                paramList += (uint) method.ParameterDefinitions.Count;
-            }
-        }
-
-        private MetadataToken AddParameter(ParameterDefinition parameter)
-        {
-            var table = Metadata.TablesStream.GetTable<ParameterDefinitionRow>(TableIndex.Param);
-            
-            var row = new ParameterDefinitionRow(
-                parameter.Attributes,
-                parameter.Sequence,
-                Metadata.StringsStream.GetStringIndex(parameter.Name));
-
-            var token = table.Add(row, parameter.MetadataToken.Rid);
-            AddCustomAttributes(token, parameter);
-            AddConstant(token, parameter.Constant);
-            return token;
         }
 
         private MetadataToken AddExportedType(ExportedType exportedType)
