@@ -53,6 +53,9 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private readonly MemberDiscoveryFlags _flags;
         private readonly MemberDiscoveryResult _result = new MemberDiscoveryResult();
         
+        private readonly IList<MethodDefinition> _allPlaceHolderMethods = new List<MethodDefinition>();
+        private int _placeHolderParameterCounter;
+        
         private readonly TypeReference _eventHandlerTypeRef;
         private readonly TypeSignature _eventHandlerTypeSig;
 
@@ -227,8 +230,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             StuffFreeMemberSlots(placeHolderType, TableIndex.Method, AddPlaceHolderMethod);
             StuffFreeMemberSlots(placeHolderType, TableIndex.Property, AddPlaceHolderProperty);
             StuffFreeMemberSlots(placeHolderType, TableIndex.Event, AddPlaceHolderEvent);
-
-            // TODO: stuff parameter table.
+            StuffFreeMemberSlots(placeHolderType, TableIndex.Param, AddPlaceHolderParameter);
         }
 
         private void StuffFreeTypeSlots(string placeHolderNamespace)
@@ -278,7 +280,28 @@ namespace AsmResolver.DotNet.Builder.Discovery
             };
 
             placeHolderType.Methods.Add(placeHolderMethod);
+            _allPlaceHolderMethods.Add(placeHolderMethod);
             return placeHolderMethod;
+        }
+
+        private ParameterDefinition AddPlaceHolderParameter(TypeDefinition placeHolderType, MetadataToken token)
+        {
+            if (_allPlaceHolderMethods.Count == 0)
+                AddPlaceHolderMethod(placeHolderType, token);
+
+            int methodIndex = _placeHolderParameterCounter % _allPlaceHolderMethods.Count;
+            int parameterIndex = _placeHolderParameterCounter / _allPlaceHolderMethods.Count;
+            
+            var method = _allPlaceHolderMethods[methodIndex];
+
+            if (parameterIndex > 0)
+                method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
+
+            var parameter = new ParameterDefinition(null);
+            method.ParameterDefinitions.Add(parameter);
+            
+            _placeHolderParameterCounter++;
+            return parameter;
         }
 
         private PropertyDefinition AddPlaceHolderProperty(TypeDefinition placeHolderType, MetadataToken token)
