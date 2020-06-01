@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
 
             // Perform linear sweep of the raw data. 
             
-            // Note: This might result in incorrect strings being indexed if garbage data was injected in the heap. 
+            // Note: This might result in incorrect blob being indexed if garbage data was injected in the heap. 
             //       This is okay as long as we still copy all the data, including the garbage data.
             //       The only side-effect we get is that blobs that did appear in the original stream might 
             //       be duplicated in the new stream. This is an acceptable side-effect, as the purpose of this
@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
                 
                 writer.WriteBytes(buffer, 0, actualLength);
 
-                // Move to next user string.
+                // Move to next blob.
                 index += (uint) actualLength;
             }
         }

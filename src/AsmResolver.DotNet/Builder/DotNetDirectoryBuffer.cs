@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet.Builder
 
             foreach (var implementation in interfaces)
             {
-                var row = new InterfaceImplementationRow(ownerToken.Rid, AddTypeDefOrRef(implementation.Interface));
+                var row = new InterfaceImplementationRow(ownerToken.Rid, GetTypeDefOrRefIndex(implementation.Interface));
                 var token = table.Add(row, 0);
                 AddCustomAttributes(token, implementation);
             }
@@ -193,7 +193,7 @@ namespace AsmResolver.DotNet.Builder
             
             var table = Metadata.TablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
             
-            var row = new GenericParameterConstraintRow(ownerToken.Rid, AddTypeDefOrRef(constraint.Constraint));
+            var row = new GenericParameterConstraintRow(ownerToken.Rid, GetTypeDefOrRefIndex(constraint.Constraint));
 
             var token = table.Add(row, constraint.MetadataToken.Rid);
             AddCustomAttributes(token, constraint);
@@ -210,18 +210,6 @@ namespace AsmResolver.DotNet.Builder
 
             var row = new ClassLayoutRow(layout.PackingSize, layout.ClassSize, ownerToken.Rid);
             return table.Add(row, layout.MetadataToken.Rid);
-        }
-        
-        private MetadataToken AddModuleReference(ModuleReference reference)
-        {
-            AssertIsImported(reference);
-            
-            var table = Metadata.TablesStream.GetTable<ModuleReferenceRow>(TableIndex.ModuleRef);
-
-            var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
-            var token = table.Add(row, reference.MetadataToken.Rid);
-            AddCustomAttributes(token, reference);
-            return token;
         }
     }
 }
