@@ -287,7 +287,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private ParameterDefinition AddPlaceHolderParameter(TypeDefinition placeHolderType, MetadataToken token)
         {
             if (_allPlaceHolderMethods.Count == 0)
-                AddPlaceHolderMethod(placeHolderType, token);
+                InsertOrAppendIfNew(AddPlaceHolderMethod(placeHolderType, token));
 
             int methodIndex = _placeHolderParameterCounter % _allPlaceHolderMethods.Count;
             int parameterIndex = _placeHolderParameterCounter / _allPlaceHolderMethods.Count;
