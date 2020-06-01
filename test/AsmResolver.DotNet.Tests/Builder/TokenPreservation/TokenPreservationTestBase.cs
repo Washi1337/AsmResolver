@@ -44,8 +44,9 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             return ModuleDefinition.FromImage(newImage);
         }
 
-        protected static void AssertSameTokens(ModuleDefinition module, ModuleDefinition newModule,
-            Func<TypeDefinition, IEnumerable<IMemberDefinition>> getMembers, params MetadataToken[] excludeTokens)
+        protected static void AssertSameTokens<TMember>(ModuleDefinition module, ModuleDefinition newModule,
+            Func<TypeDefinition, IEnumerable<TMember>> getMembers, params MetadataToken[] excludeTokens)
+        where TMember : IMetadataMember, INameProvider, IModuleProvider
         {
             Assert.True(module.TopLevelTypes.Count <= newModule.TopLevelTypes.Count);
             foreach (var originalType in module.TopLevelTypes)
@@ -56,7 +57,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 var newMembers = getMembers(newType).ToArray();
                 Assert.True(originalMembers.Length <= newMembers.Length);
                 
-                foreach (IMemberDefinition originalMember in newMembers)
+                foreach (var originalMember in newMembers)
                 {
                     if (originalMember.MetadataToken.Rid == 0 || excludeTokens.Contains(originalMember.MetadataToken))
                         continue;
