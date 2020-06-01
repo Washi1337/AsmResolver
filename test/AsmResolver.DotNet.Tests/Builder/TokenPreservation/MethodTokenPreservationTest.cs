@@ -8,7 +8,8 @@ using Xunit;
 namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 {
     public class MethodTokenPreservationTest : TokenPreservationTestBase
-    {   private static ModuleDefinition CreateSampleMethodDefsModule(int typeCount, int methodsPerType)
+    {  
+        private static ModuleDefinition CreateSampleMethodDefsModule(int typeCount, int methodsPerType)
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
 
