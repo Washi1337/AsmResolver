@@ -30,11 +30,11 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             return result;
         }
 
-        protected static ModuleDefinition RebuildAndReloadModule(ModuleDefinition module, MetadataBuilderFlags metadataBuilderFlags)
+        protected static ModuleDefinition RebuildAndReloadModule(ModuleDefinition module, MetadataBuilderFlags builderFlags)
         {
             var builder = new ManagedPEImageBuilder
             {
-                MetadataBuilderFlags = metadataBuilderFlags
+                DotNetDirectoryFactory = new DotNetDirectoryFactory(builderFlags)
             };
             
             var newImage = builder.CreateImage(module);
