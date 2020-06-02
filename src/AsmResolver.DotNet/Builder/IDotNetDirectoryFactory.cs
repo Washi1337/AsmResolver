@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="module">The module to serialize to a .NET data directory.</param>
         /// <returns>The serialized data directory.</returns>
+        /// <exception cref="MetadataBuilderException">Occurs when the metadata builder encounters an error.</exception>
         IDotNetDirectory CreateDotNetDirectory(ModuleDefinition module);
     }
 }

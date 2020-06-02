@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Builder
         {
             get;
             set;
-        } = MetadataBuilderFlags.None;
+        }
 
         /// <summary>
         /// Gets or sets the method body serializer to use for constructing method bodies.
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Builder
         } = new CilMethodBodySerializer();
 
         /// <inheritdoc />
-        public IDotNetDirectory CreateDotNetDirectory(ModuleDefinition module)
+        public virtual IDotNetDirectory CreateDotNetDirectory(ModuleDefinition module)
         {
             // Find all members in the module.
             var discoveryResult = DiscoverMemberDefinitionsInModule(module);
