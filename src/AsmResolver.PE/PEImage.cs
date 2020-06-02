@@ -162,7 +162,8 @@ namespace AsmResolver.PE
         {
             get;
             set;
-        } = DllCharacteristics.DynamicBase | DllCharacteristics.NoSeh | DllCharacteristics.NxCompat | DllCharacteristics.TerminalServerAware;
+        } = DllCharacteristics.DynamicBase | DllCharacteristics.NoSeh | DllCharacteristics.NxCompat
+            | DllCharacteristics.TerminalServerAware;
 
         /// <inheritdoc />
         public ulong ImageBase
