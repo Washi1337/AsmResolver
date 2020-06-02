@@ -376,18 +376,15 @@ namespace AsmResolver.DotNet.Builder
                 
                 pointerTable.Add(new MethodPointerRow(newToken.Rid), 0);
                 
-                if (method.MethodBody != null)
-                {
-                    var row = definitionTable[newToken.Rid];
-                    definitionTable[newToken.Rid] = new MethodDefinitionRow(
-                        MethodBodySerializer.SerializeMethodBody(this, method),
-                        row.ImplAttributes,
-                        row.Attributes,
-                        row.Name,
-                        row.Signature,
-                        paramList);
-                }
-                
+                var row = definitionTable[newToken.Rid];
+                definitionTable[newToken.Rid] = new MethodDefinitionRow(
+                    MethodBodySerializer.SerializeMethodBody(this, method),
+                    row.ImplAttributes,
+                    row.Attributes,
+                    row.Name,
+                    row.Signature,
+                    paramList);
+            
                 FinalizeParametersInMethod(method, ref paramList, ref paramPtrRequired);
 
                 AddCustomAttributes(newToken, method);
