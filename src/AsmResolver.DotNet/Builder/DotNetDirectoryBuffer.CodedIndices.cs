@@ -1,5 +1,6 @@
 ﻿using System;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -173,6 +174,20 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet));
                 table.Add(row, 0);
             }
+        }
+
+        private MetadataToken AddFieldMarshal(MetadataToken ownerToken, MarshalDescriptor descriptor)
+        {
+            if (descriptor is null)
+                return 0;
+            
+            var table = Metadata.TablesStream.GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasFieldMarshal);
+            
+            var row = new FieldMarshalRow(
+                encoder.EncodeToken(ownerToken),
+                Metadata.BlobStream.GetBlobIndex(this, descriptor));
+            return table.Add(row, 0);
         }
         
     }

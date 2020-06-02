@@ -348,6 +348,7 @@ namespace AsmResolver.DotNet.Builder
                 AddImplementationMap(newToken, field.ImplementationMap);
                 AddFieldRva(newToken, field.FieldRva);
                 AddFieldLayout(newToken, field.FieldOffset);
+                AddFieldMarshal(newToken, field.MarshalDescriptor);
             }
         }
         
@@ -416,6 +417,7 @@ namespace AsmResolver.DotNet.Builder
                 
                 AddCustomAttributes(newToken, parameter);
                 AddConstant(newToken, parameter.Constant);
+                AddFieldMarshal(newToken, parameter.MarshalDescriptor);
             }
 
             paramList += (uint) method.ParameterDefinitions.Count;
