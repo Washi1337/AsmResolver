@@ -87,6 +87,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <inheritdoc />
         protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
         {
+            writer.WriteByte((byte) NativeType);
             writer.WriteSerString(Guid ?? string.Empty);
             writer.WriteSerString(NativeTypeName ?? string.Empty);
             writer.WriteSerString(MarshalType is null ? string.Empty : TypeNameBuilder.GetAssemblyQualifiedName(MarshalType));
