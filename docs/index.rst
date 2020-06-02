@@ -46,3 +46,4 @@ Table of Contents:
    dotnet/importing
    dotnet/managed-method-bodies
    dotnet/cloning
+   dotnet/advanced-pe-image-building.rst
