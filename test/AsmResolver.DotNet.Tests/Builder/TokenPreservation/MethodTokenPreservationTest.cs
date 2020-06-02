@@ -1,7 +1,5 @@
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -16,7 +14,8 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             for (int i = 0; i < typeCount; i++)
             {
                 var dummyType = new TypeDefinition("Namespace", $"Type{i.ToString()}",
-                    TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    TypeAttributes.Public | TypeAttributes.Abstract,
+                    module.CorLibTypeFactory.Object.Type);
 
                 module.TopLevelTypes.Add(dummyType);
                 for (int j = 0; j < methodsPerType; j++)
@@ -29,10 +28,9 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         private static MethodDefinition CreateDummyMethod(ModuleDefinition module, string name)
         {
             var method = new MethodDefinition(name,
-                MethodAttributes.Public | MethodAttributes.Static,
-                MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
-            method.CilMethodBody = new CilMethodBody(method);
-            method.CilMethodBody.Instructions.Add(new CilInstruction(CilOpCodes.Ret));
+                MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual
+                | MethodAttributes.NewSlot,
+                MethodSignature.CreateInstance(module.CorLibTypeFactory.Void));
             return method;
         }
 
