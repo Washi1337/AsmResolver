@@ -282,13 +282,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             var placeHolderMethod = new MethodDefinition(
                 $"PlaceHolderMethod_{token.Rid.ToString()}",
                 MethodPlaceHolderAttributes,
-                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
             
-            placeHolderMethod.CilMethodBody = new CilMethodBody(placeHolderMethod)
-            {
-                Instructions = {new CilInstruction(CilOpCodes.Ret)}
-            };
-
             // Add the method to the type.
             placeHolderType.Methods.Add(placeHolderMethod);
             
