@@ -405,7 +405,7 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetParameterDefinitionToken(parameter);
                 if (newToken == MetadataToken.Zero)
                 {
-                    throw new InvalidOperationException(
+                    throw new MetadataBuilderException(
                         $"An attempt was made to finalize parameter {parameter} in {method}, which was not added to the .NET directory buffer yet.");
                 }
                 
@@ -437,7 +437,7 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetPropertyDefinitionToken(property);
                 if (newToken == MetadataToken.Zero)
                 {
-                    throw new InvalidOperationException(
+                    throw new MetadataBuilderException(
                         $"An attempt was made to finalize property {property}, which was not added to the .NET directory buffer yet.");
                 }
 
@@ -471,7 +471,7 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetEventDefinitionToken(@event);
                 if (newToken == MetadataToken.Zero)
                 {
-                    throw new InvalidOperationException(
+                    throw new MetadataBuilderException(
                         $"An attempt was made to finalize event {@event}, which was not added to the .NET directory buffer yet.");
                 }
                 

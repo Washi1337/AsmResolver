@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using AsmResolver.DotNet.Builder.Discovery;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Code;
@@ -159,8 +158,7 @@ namespace AsmResolver.DotNet.Builder
             // and type reference tokens are still preserved, we need to prioritize these.
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveAssemblyReferenceIndices) != 0)
-                ImportTableIntoTableBuffers<AssemblyReference>(module, TableIndex.AssemblyRef,
-                    buffer.GetAssemblyReferenceToken);
+                ImportTableIntoTableBuffers<AssemblyReference>(module, TableIndex.AssemblyRef, buffer.GetAssemblyReferenceToken);
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveModuleReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<ModuleReference>(module, TableIndex.ModuleRef, buffer.GetModuleReferenceToken);
@@ -176,14 +174,6 @@ namespace AsmResolver.DotNet.Builder
         {
             if (module.DotNetDirectory is null)
                 return;
-            
-            // NOTE: The order of this table importing is crucial.
-            //
-            // Type specs should always be imported prior to other signatures, as type specs reference type sigs that may
-            // be referenced by other metadata members.
-            
-            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
-                ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
             
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStandAloneSignatureIndices) != 0)
                 ImportTableIntoTableBuffers<StandAloneSignature>(module, TableIndex.StandAloneSig, buffer.GetStandAloneSignatureToken);
