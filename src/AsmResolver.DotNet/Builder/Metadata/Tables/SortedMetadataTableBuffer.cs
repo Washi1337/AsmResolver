@@ -64,6 +64,13 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
                 _table.Add(row);
         }
 
+        /// <inheritdoc />
+        public void Clear()
+        {
+            _entries.Clear();
+            _table.Clear();
+        }
+
         private sealed class RowComparer : IComparer<TRow>
         {
             private readonly int _primaryColumn;

@@ -289,7 +289,7 @@ namespace AsmResolver.DotNet
         }
         
         /// <inheritdoc />
-        public ModuleDefinition Module => DeclaringType.Module;
+        public ModuleDefinition Module => DeclaringType?.Module;
 
         /// <summary>
         /// Gets the type that defines the field.

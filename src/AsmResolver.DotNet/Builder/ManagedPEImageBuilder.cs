@@ -1,7 +1,5 @@
-﻿using AsmResolver.DotNet.Builder.Metadata;
-using AsmResolver.DotNet.Code.Cil;
+﻿using System;
 using AsmResolver.PE;
-using AsmResolver.PE.DotNet;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -10,27 +8,48 @@ namespace AsmResolver.DotNet.Builder
     /// </summary>
     public class ManagedPEImageBuilder : IPEImageBuilder
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="ManagedPEImageBuilder"/> class, using the default  implementation
+        /// of the <see cref="IDotNetDirectoryFactory"/>.
+        /// </summary>
+        public ManagedPEImageBuilder()
+            : this(new DotNetDirectoryFactory())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ManagedPEImageBuilder"/> class, and initializes a new
+        /// .NET data directory factory using the provided metadata builder flags.
+        /// </summary>
+        public ManagedPEImageBuilder(MetadataBuilderFlags metadataBuilderFlags)
+            : this(new DotNetDirectoryFactory(metadataBuilderFlags))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ManagedPEImageBuilder"/> class, using the provided
+        /// .NET data directory flags. 
+        /// </summary>
+        public ManagedPEImageBuilder(IDotNetDirectoryFactory factory)
+        {
+            DotNetDirectoryFactory = factory ?? throw new ArgumentNullException(nameof(factory));
+        }
+        
+        /// <summary>
+        /// Gets or sets the factory responsible for constructing the .NET data directory.
+        /// </summary>
+        public IDotNetDirectoryFactory DotNetDirectoryFactory
+        {
+            get;
+            set;
+        }
+        
         /// <inheritdoc />
         public IPEImage CreateImage(ModuleDefinition module)
         {
             var image = new PEImage();
-
-            image.DotNetDirectory = CreateDotNetDirectory(image, module);
-
+            image.DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module);
             return image;
-        }
-
-        private IDotNetDirectory CreateDotNetDirectory(PEImage image, ModuleDefinition module)
-        {
-            var buffer = new DotNetDirectoryBuffer(module, new CilMethodBodySerializer(), new MetadataBuffer());
-            
-            // If module is the manifest module, include the entire assembly.
-            if (module.Assembly?.ManifestModule == module)
-                buffer.AddAssembly(module.Assembly);
-            else
-                buffer.AddModule(module);
-
-            return buffer.CreateDirectory();
         }
     }
 }

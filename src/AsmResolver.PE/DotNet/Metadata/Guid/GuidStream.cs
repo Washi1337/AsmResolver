@@ -29,6 +29,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
     public abstract class GuidStream : MetadataHeap
     {
         /// <summary>
+        /// The size of a single GUID in the GUID stream.
+        /// </summary>
+        public const int GuidSize = 16;
+        
+        /// <summary>
         /// The default name of a GUID stream, as described in the specification provided by ECMA-335.
         /// </summary>
         public const string DefaultName = "#GUID";
