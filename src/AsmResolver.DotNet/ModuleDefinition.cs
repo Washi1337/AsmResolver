@@ -94,7 +94,18 @@ namespace AsmResolver.DotNet
                 throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
             if (peImage.DotNetDirectory.Metadata == null)
                 throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
-            return FromDirectory(peImage.DotNetDirectory, readParameters);
+            
+            // Interpret .NET data directory.
+            var module = FromDirectory(peImage.DotNetDirectory, readParameters);
+            
+            // Copy over PE header fields.
+            module.MachineType = peImage.MachineType;
+            module.FileCharacteristics = peImage.Characteristics;
+            module.PEKind = peImage.PEKind;
+            module.SubSystem = peImage.SubSystem;
+            module.DllCharacteristics = peImage.DllCharacteristics;
+            
+            return module;
         }
 
         /// <summary>
@@ -114,9 +125,12 @@ namespace AsmResolver.DotNet
         {
             var stream = directory.Metadata.GetStream<TablesStream>();
             var moduleTable = stream.GetTable<ModuleDefinitionRow>();
-            var module = new SerializedModuleDefinition(directory, new MetadataToken(TableIndex.Module, 1), moduleTable[0], readParameters);
 
-            return module;
+            return new SerializedModuleDefinition(
+                directory,
+                new MetadataToken(TableIndex.Module, 1),
+                moduleTable[0],
+                readParameters);
         }
 
         private readonly LazyVariable<string> _name;
@@ -380,6 +394,73 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~DotNetDirectoryFlags.Bit32Preferred)
                                 | (value ? DotNetDirectoryFlags.Bit32Preferred : 0);
         }
+
+        /// <summary>
+        /// Gets or sets the machine type that the underlying PE image of the .NET module image is targeting.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the machine type field in the file header of a portable
+        /// executable file.
+        /// </remarks>
+        public MachineType MachineType
+        {
+            get;
+            set;
+        } = MachineType.I386;
+
+        /// <summary>
+        /// Gets or sets the attributes assigned to the underlying executable file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the characteristics field in the file header of a portable
+        /// executable file.
+        /// </remarks>
+        public Characteristics FileCharacteristics
+        {
+            get;
+            set;
+        } = Characteristics.Image | Characteristics.LargeAddressAware;
+        
+        /// <summary>
+        /// Gets or sets the magic optional header signature, determining whether the underlying PE image is a
+        /// PE32 (32-bit) or a PE32+ (64-bit) image.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the magic field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        public OptionalHeaderMagic PEKind
+        {
+            get;
+            set;
+        } = OptionalHeaderMagic.Pe32;
+
+        /// <summary>
+        /// Gets or sets the subsystem to use when running the underlying portable executable (PE) file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the subsystem field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        public SubSystem SubSystem
+        {
+            get;
+            set;
+        } = SubSystem.WindowsCui;
+
+        /// <summary>
+        /// Gets or sets the dynamic linked library characteristics of the underlying portable executable (PE) file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the DLL characteristics field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        public DllCharacteristics DllCharacteristics
+        {
+            get;
+            set;
+        } = DllCharacteristics.DynamicBase | DllCharacteristics.NoSeh | DllCharacteristics.NxCompat
+            | DllCharacteristics.TerminalServerAware;
         
         /// <summary>
         /// Gets a collection of top-level (not nested) types defined in the module. 

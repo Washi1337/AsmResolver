@@ -43,13 +43,16 @@ namespace AsmResolver.DotNet.Builder
             get;
             set;
         }
-        
+
         /// <inheritdoc />
-        public IPEImage CreateImage(ModuleDefinition module)
+        public IPEImage CreateImage(ModuleDefinition module) => new PEImage
         {
-            var image = new PEImage();
-            image.DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module);
-            return image;
-        }
+            MachineType = module.MachineType,
+            PEKind = module.PEKind,
+            Characteristics = module.FileCharacteristics,
+            SubSystem = module.SubSystem,
+            DllCharacteristics = module.DllCharacteristics,
+            DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module)
+        };
     }
 }
