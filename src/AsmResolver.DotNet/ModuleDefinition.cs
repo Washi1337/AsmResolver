@@ -94,7 +94,18 @@ namespace AsmResolver.DotNet
                 throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
             if (peImage.DotNetDirectory.Metadata == null)
                 throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
-            return FromDirectory(peImage.DotNetDirectory, readParameters);
+            
+            // Interpret .NET data directory.
+            var module = FromDirectory(peImage.DotNetDirectory, readParameters);
+            
+            // Copy over PE header fields.
+            module.MachineType = peImage.MachineType;
+            module.FileCharacteristics = peImage.Characteristics;
+            module.PEKind = peImage.PEKind;
+            module.SubSystem = peImage.SubSystem;
+            module.DllCharacteristics = peImage.DllCharacteristics;
+            
+            return module;
         }
 
         /// <summary>
@@ -114,9 +125,12 @@ namespace AsmResolver.DotNet
         {
             var stream = directory.Metadata.GetStream<TablesStream>();
             var moduleTable = stream.GetTable<ModuleDefinitionRow>();
-            var module = new SerializedModuleDefinition(directory, new MetadataToken(TableIndex.Module, 1), moduleTable[0], readParameters);
 
-            return module;
+            return new SerializedModuleDefinition(
+                directory,
+                new MetadataToken(TableIndex.Module, 1),
+                moduleTable[0],
+                readParameters);
         }
 
         private readonly LazyVariable<string> _name;
