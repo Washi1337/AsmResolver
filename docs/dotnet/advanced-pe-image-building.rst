@@ -1,9 +1,9 @@
 Advanced PE Image Building
---------------------------
+==========================
 
 The easiest way to write a .NET module to the disk is by using the ``Write`` method:
 
-..code-block:: csharp
+.. code-block:: csharp
 
     module.Write(@"C:\Path\To\Output\Binary.exe");
 
