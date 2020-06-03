@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures.Types;
@@ -13,9 +11,7 @@ using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Builder;
-using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
@@ -88,50 +84,8 @@ namespace AsmResolver.DotNet
         /// <param name="readParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters)
-        {
-            if (peImage.DotNetDirectory == null)
-                throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
-            if (peImage.DotNetDirectory.Metadata == null)
-                throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
-            
-            // Interpret .NET data directory.
-            var module = FromDirectory(peImage.DotNetDirectory, readParameters);
-            
-            // Copy over PE header fields.
-            module.MachineType = peImage.MachineType;
-            module.FileCharacteristics = peImage.Characteristics;
-            module.PEKind = peImage.PEKind;
-            module.SubSystem = peImage.SubSystem;
-            module.DllCharacteristics = peImage.DllCharacteristics;
-            
-            return module;
-        }
-
-        /// <summary>
-        /// Initializes a .NET module from a .NET metadata directory.
-        /// </summary>
-        /// <param name="directory">The object providing access to the underlying .NET data directory.</param>
-        /// <returns>The module.</returns>
-        public static ModuleDefinition FromDirectory(IDotNetDirectory directory) => FromDirectory(directory, new ModuleReadParameters());
-
-        /// <summary>
-        /// Initializes a .NET module from a .NET metadata directory.
-        /// </summary>
-        /// <param name="directory">The object providing access to the underlying .NET data directory.</param>
-        /// <param name="readParameters">The parameters to use while reading the module.</param>
-        /// <returns>The module.</returns>
-        public static ModuleDefinition FromDirectory(IDotNetDirectory directory, ModuleReadParameters readParameters)
-        {
-            var stream = directory.Metadata.GetStream<TablesStream>();
-            var moduleTable = stream.GetTable<ModuleDefinitionRow>();
-
-            return new SerializedModuleDefinition(
-                directory,
-                new MetadataToken(TableIndex.Module, 1),
-                moduleTable[0],
-                readParameters);
-        }
+        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) => 
+            new SerializedModuleDefinition(peImage, readParameters);
 
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<Guid> _mvid;

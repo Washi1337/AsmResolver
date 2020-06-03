@@ -5,6 +5,7 @@ using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
@@ -48,31 +49,49 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _fieldLayouts;
 
         /// <summary>
-        /// Creates a module definition from a module metadata row.
+        /// Interprets a PE image as a .NET module.
         /// </summary>
-        /// <param name="dotNetDirectory">The object providing access to the underlying .NET data directory.</param>
-        /// <param name="token">The token to initialize the module for.</param>
-        /// <param name="row">The metadata table row to base the module definition on.</param>
+        /// <param name="peImage">The image to interpret as a .NET module.</param>
         /// <param name="readParameters">The parameters to use while reading the module.</param>
-        public SerializedModuleDefinition(IDotNetDirectory dotNetDirectory, MetadataToken token, ModuleDefinitionRow row,
-            ModuleReadParameters readParameters)
-            : base(token)
+        public SerializedModuleDefinition(IPEImage peImage, ModuleReadParameters readParameters)
+            : base(new MetadataToken(TableIndex.Module, 1))
         {
+            if (peImage is null)
+                throw new ArgumentNullException(nameof(peImage));
+            
+            DotNetDirectory = peImage.DotNetDirectory
+                              ?? throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
+            
+            var metadata = peImage.DotNetDirectory.Metadata;
+            if (metadata is null)
+                throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
+
+            var tablesStream = metadata.GetStream<TablesStream>();
+            if (tablesStream is null)
+                throw new BadImageFormatException(".NET metadata directory does not define a tables stream.");
+
+            var moduleTable = tablesStream.GetTable<ModuleDefinitionRow>(TableIndex.Module);
+            if (!moduleTable.TryGetByRid(1, out _row))
+                throw new BadImageFormatException("Module definition table does not contain any rows.");
+            
             // Store parameters in fields.
-            DotNetDirectory = dotNetDirectory;
-            _row = row;
             ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
             
+            // Copy over PE header fields.
+            MachineType = peImage.MachineType;
+            FileCharacteristics = peImage.Characteristics;
+            PEKind = peImage.PEKind;
+            SubSystem = peImage.SubSystem;
+            DllCharacteristics = peImage.DllCharacteristics;
+
             // Copy over "simple" columns.
-            Generation = row.Generation;
-            MetadataToken = token;
+            Generation = _row.Generation;
             Attributes = DotNetDirectory.Flags;
             
             // Initialize member factory.
-            var metadata = dotNetDirectory.Metadata;
             _memberFactory = new CachedSerializedMemberFactory(metadata, this);
             
-            // Find assembly definitino and corlib assembly.
+            // Find assembly definition and corlib assembly.
             Assembly = FindParentAssembly();
             var corLib = FindMostRecentCorLib();
             if (corLib is {})
@@ -89,7 +108,6 @@ namespace AsmResolver.DotNet.Serialized
             MetadataResolver = new DefaultMetadataResolver(assemblyResolver);
 
             // Prepare lazy RID lists.
-            var tablesStream = metadata.GetStream<TablesStream>();
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetFieldRange);
             _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef, 
