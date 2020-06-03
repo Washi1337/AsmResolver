@@ -14,6 +14,7 @@ using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet
 {
@@ -101,6 +102,8 @@ namespace AsmResolver.DotNet
         private IList<FileReference> _fileReferences;
         private IList<ManifestResource> _resources;
         private IList<ExportedType> _exportedTypes;
+        
+        private readonly LazyVariable<IResourceDirectory> _nativeResources;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -114,7 +117,7 @@ namespace AsmResolver.DotNet
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
             _managedEntrypoint = new LazyVariable<IManagedEntrypoint>(GetManagedEntrypoint);
-
+            _nativeResources = new LazyVariable<IResourceDirectory>(GetNativeResources);
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -415,7 +418,17 @@ namespace AsmResolver.DotNet
             set;
         } = DllCharacteristics.DynamicBase | DllCharacteristics.NoSeh | DllCharacteristics.NxCompat
             | DllCharacteristics.TerminalServerAware;
-        
+
+        /// <summary>
+        /// Gets or sets the contents of the native Win32 resources data directory of the underlying
+        /// portable executable (PE) file.
+        /// </summary>
+        public IResourceDirectory NativeResources
+        {
+            get => _nativeResources.Value;
+            set => _nativeResources.Value = value; 
+        }
+
         /// <summary>
         /// Gets a collection of top-level (not nested) types defined in the module. 
         /// </summary>
@@ -798,6 +811,15 @@ namespace AsmResolver.DotNet
             
             return resolver;
         }
+
+        /// <summary>
+        /// Obtains the native win32 resources directory of the underlying PE image (if available).
+        /// </summary>
+        /// <returns>The resources directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="NativeResources"/> property.
+        /// </remarks>
+        protected virtual IResourceDirectory GetNativeResources() => null;
 
         /// <inheritdoc />
         public override string ToString() => Name;
