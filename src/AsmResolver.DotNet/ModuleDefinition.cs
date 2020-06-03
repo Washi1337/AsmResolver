@@ -174,10 +174,9 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// When this property is <c>null</c>, the module is a new module that is not yet assembled.
         /// </remarks>
-        public IDotNetDirectory DotNetDirectory
+        public virtual IDotNetDirectory DotNetDirectory
         {
             get;
-            protected set;
         }
 
         /// <inheritdoc />

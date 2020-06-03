@@ -1,19 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
+using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -47,6 +46,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _fieldRvas;
         private OneToOneRelation<MetadataToken, uint> _fieldMarshals;
         private OneToOneRelation<MetadataToken, uint> _fieldLayouts;
+        private IPEImage _peImage;
 
         /// <summary>
         /// Interprets a PE image as a .NET module.
@@ -56,13 +56,9 @@ namespace AsmResolver.DotNet.Serialized
         public SerializedModuleDefinition(IPEImage peImage, ModuleReadParameters readParameters)
             : base(new MetadataToken(TableIndex.Module, 1))
         {
-            if (peImage is null)
-                throw new ArgumentNullException(nameof(peImage));
+            _peImage = peImage ?? throw new ArgumentNullException(nameof(peImage));
             
-            DotNetDirectory = peImage.DotNetDirectory
-                              ?? throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
-            
-            var metadata = peImage.DotNetDirectory.Metadata;
+            var metadata = peImage.DotNetDirectory?.Metadata;
             if (metadata is null)
                 throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
 
@@ -86,7 +82,7 @@ namespace AsmResolver.DotNet.Serialized
 
             // Copy over "simple" columns.
             Generation = _row.Generation;
-            Attributes = DotNetDirectory.Flags;
+            Attributes = peImage.DotNetDirectory.Flags;
             
             // Initialize member factory.
             _memberFactory = new CachedSerializedMemberFactory(metadata, this);
@@ -119,6 +115,9 @@ namespace AsmResolver.DotNet.Serialized
             _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
         }
+
+        /// <inheritdoc />
+        public override IDotNetDirectory DotNetDirectory => _peImage.DotNetDirectory;
 
         /// <summary>
         /// Gets the reading parameters that are used for reading the contents of the module.
@@ -827,6 +826,9 @@ namespace AsmResolver.DotNet.Serialized
 
             return null;
         }
+
+        /// <inheritdoc />
+        protected override IResourceDirectory GetNativeResources() => _peImage.Resources;
 
         private AssemblyDefinition FindParentAssembly()
         {
