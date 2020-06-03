@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         {
             foreach (string name in Entries)
             {
-                int length = Encoding.Unicode.GetByteCount(name);
+                int length = name.Length;
                 writer.WriteUInt16((ushort) length);
                 writer.WriteBytes(Encoding.Unicode.GetBytes(name), 0, length);
             }
