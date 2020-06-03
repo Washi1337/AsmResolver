@@ -422,7 +422,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the contents of the native Win32 resources data directory of the underlying
         /// portable executable (PE) file.
         /// </summary>
-        public IResourceDirectory NativeResources
+        public IResourceDirectory NativeResourceDirectory
         {
             get => _nativeResources.Value;
             set => _nativeResources.Value = value; 
@@ -816,7 +816,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <returns>The resources directory.</returns>
         /// <remarks>
-        /// This method is called upon initialization of the <see cref="NativeResources"/> property.
+        /// This method is called upon initialization of the <see cref="NativeResourceDirectory"/> property.
         /// </remarks>
         protected virtual IResourceDirectory GetNativeResources() => null;
 
