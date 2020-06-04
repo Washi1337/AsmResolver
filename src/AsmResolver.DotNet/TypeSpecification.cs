@@ -4,7 +4,6 @@ using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet

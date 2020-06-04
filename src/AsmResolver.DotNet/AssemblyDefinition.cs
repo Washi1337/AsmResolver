@@ -6,7 +6,6 @@ using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
-using AsmResolver.Lazy;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet;

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AsmResolver.Lazy
+namespace AsmResolver.Collections
 {
     /// <summary>
     /// Provides a base implementation of a lazy list that delays the initialization of each element in the collection

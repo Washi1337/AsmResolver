@@ -1,5 +1,4 @@
-﻿using AsmResolver.Lazy;
-using AsmResolver.PE.DotNet.Metadata.Tables;
+﻿using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
 {

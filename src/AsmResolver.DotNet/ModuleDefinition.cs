@@ -7,7 +7,6 @@ using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.Lazy;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet;

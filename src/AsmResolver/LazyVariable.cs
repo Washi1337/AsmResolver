@@ -1,7 +1,6 @@
 using System;
-using System.Threading;
 
-namespace AsmResolver.Lazy
+namespace AsmResolver
 {
     /// <summary>
     /// Represents a variable that can be lazily initialized and/or assigned a new value.
