@@ -52,6 +52,7 @@ namespace AsmResolver.PE.Exports.Builder
             foreach (string value in _entries)
             {
                 writer.WriteAsciiString(value);
+                writer.WriteByte(0);
             }
         }
         

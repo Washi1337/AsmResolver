@@ -19,17 +19,15 @@ namespace AsmResolver.PE.Exports.Builder
                 + sizeof(uint) // OrdinalTableRVA
             ;
         
-        private readonly IExportDirectory _exportDirectory;
         private readonly SegmentBuilder _contentsBuilder;
-        
         private readonly AddressTableBuffer _addressTableBuffer;
         private readonly OrdinalNamePointerTableBuffer _ordinalNamePointerTable;
         private readonly NameTableBuffer _nameTableBuffer;
+        
+        private IExportDirectory _exportDirectory;
 
-        public ExportDirectoryBuffer(IExportDirectory exportDirectory)
+        public ExportDirectoryBuffer()
         {
-            _exportDirectory = exportDirectory ?? throw new ArgumentNullException(nameof(exportDirectory));
-            
             // Initialize table buffers.
             _addressTableBuffer = new AddressTableBuffer();
             _nameTableBuffer = new NameTableBuffer();
@@ -41,22 +39,34 @@ namespace AsmResolver.PE.Exports.Builder
                 _ordinalNamePointerTable,
                 _nameTableBuffer
             };
+        }
 
-            // Add data.
+        public bool IsEmpty => _exportDirectory is null;
+
+        public void AddDirectory(IExportDirectory exportDirectory)
+        {
+            if (!IsEmpty)
+                throw new InvalidProgramException("Cannot add a secondary export directory to the buffer.");
+            
+            // Set header.
+            _exportDirectory = exportDirectory;
+            
+            // Add contents.
             _nameTableBuffer.AddName(exportDirectory.Name);
             foreach (var symbol in exportDirectory.Entries)
             {
                 _addressTableBuffer.AddSymbol(symbol);
                 _ordinalNamePointerTable.AddSymbol(symbol);
+                if (symbol.IsByName)
+                    _nameTableBuffer.AddName(symbol.Name);
             }
         }
-
+        
         /// <inheritdoc />
         public override void UpdateOffsets(uint newFileOffset, uint newRva)
         {
             base.UpdateOffsets(newFileOffset, newRva);
-            _ordinalNamePointerTable.UpdateOffsets(newFileOffset, newRva);
-            _nameTableBuffer.UpdateOffsets(newFileOffset, newRva);
+            _contentsBuilder.UpdateOffsets(newFileOffset + ExportDirectorySize, newRva + ExportDirectorySize);
         }
 
         /// <inheritdoc />

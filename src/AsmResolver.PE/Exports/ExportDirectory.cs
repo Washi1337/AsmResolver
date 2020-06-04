@@ -43,7 +43,7 @@ namespace AsmResolver.PE.Exports
         {
             get;
             set;
-        }
+        } = 0xFFFFFFFF;
 
         /// <inheritdoc />
         public ushort MajorVersion
@@ -71,7 +71,7 @@ namespace AsmResolver.PE.Exports
         {
             get;
             set;
-        }
+        } = 1;
 
         /// <inheritdoc />
         public IList<ExportedSymbol> Entries
