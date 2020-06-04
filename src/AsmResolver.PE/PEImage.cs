@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
@@ -108,6 +109,7 @@ namespace AsmResolver.PE
 
 
         private IList<IModuleImportEntry> _imports;
+        private readonly LazyVariable<IExportDirectory> _exports;
         private readonly LazyVariable<IResourceDirectory> _resources;
         private IList<BaseRelocation> _relocations;
         private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
@@ -117,6 +119,7 @@ namespace AsmResolver.PE
         /// </summary>
         public PEImage()
         {
+            _exports = new LazyVariable<IExportDirectory>(GetExports);
             _resources = new LazyVariable<IResourceDirectory>(GetResources);
             _dotNetDirectory = new LazyVariable<IDotNetDirectory>(GetDotNetDirectory);
         }
@@ -183,6 +186,13 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
+        public IExportDirectory Exports
+        {
+            get => _exports.Value;
+            set => _exports.Value = value;
+        }
+
+        /// <inheritdoc />
         public IResourceDirectory Resources
         {
             get => _resources.Value;
@@ -215,6 +225,15 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="Imports"/> property.
         /// </remarks>
         protected virtual IList<IModuleImportEntry> GetImports() => new List<IModuleImportEntry>();
+
+        /// <summary>
+        /// Obtains the list of symbols that were exported from the PE.
+        /// </summary>
+        /// <returns>The exported symbols.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Exports"/> property.
+        /// </remarks>
+        protected virtual IExportDirectory GetExports() => null;
 
         /// <summary>
         /// Obtains the root resource directory in the PE.

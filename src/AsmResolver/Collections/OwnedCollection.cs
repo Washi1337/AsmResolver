@@ -33,7 +33,7 @@ namespace AsmResolver.Collections
             get;
         }
         
-        private void AssertNotNullAndHasNoOwner(TItem item)
+        protected void AssertNotNullAndHasNoOwner(TItem item)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));

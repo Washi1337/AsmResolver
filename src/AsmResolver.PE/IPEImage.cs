@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.Exports;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
 using AsmResolver.PE.Relocations;
@@ -125,6 +126,15 @@ namespace AsmResolver.PE
         IList<IModuleImportEntry> Imports
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets or sets the exports directory in the PE, if available.
+        /// </summary>
+        IExportDirectory Exports
+        {
+            get;
+            set;
         }
 
         /// <summary>

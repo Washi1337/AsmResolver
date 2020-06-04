@@ -6,6 +6,7 @@ using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.Exports.Builder;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
@@ -56,6 +57,7 @@ namespace AsmResolver.PE.DotNet.Builder
             public ManagedPEBuilderContext(IPEImage image)
             {
                 ImportDirectory = new ImportDirectoryBuffer(image.PEKind == OptionalHeaderMagic.Pe32);
+                ExportDirectory = new ExportDirectoryBuffer();
                 DotNetSegment = new DotNetSegmentBuffer(image.DotNetDirectory);
                 ResourceDirectory = new ResourceDirectoryBuffer();
                 RelocationsDirectory = new RelocationsDirectoryBuffer();
@@ -67,6 +69,14 @@ namespace AsmResolver.PE.DotNet.Builder
             /// Gets the buffer that builds up a new import lookup and address directory. 
             /// </summary>
             public ImportDirectoryBuffer ImportDirectory
+            {
+                get;
+            }
+
+            /// <summary>
+            /// Gets the buffer that builds up a new export directory. 
+            /// </summary>
+            public ExportDirectoryBuffer ExportDirectory
             {
                 get;
             }
@@ -165,6 +175,7 @@ namespace AsmResolver.PE.DotNet.Builder
         protected virtual PESection CreateTextSection(IPEImage image, ManagedPEBuilderContext context)
         {
             CreateImportDirectory(image, context);
+            CreateExportDirectory(image, context);
             ProcessRvasInMetadataTables(context);
 
             var contents = new SegmentBuilder();
@@ -175,6 +186,9 @@ namespace AsmResolver.PE.DotNet.Builder
             
             if (context.ImportDirectory.Count > 0)
                 contents.Add(context.ImportDirectory);
+            
+            if (!context.ExportDirectory.IsEmpty)
+                contents.Add(context.ExportDirectory);
             
             if (context.Bootstrapper != null)
                 contents.Add(context.Bootstrapper);
@@ -198,6 +212,12 @@ namespace AsmResolver.PE.DotNet.Builder
                     Members = {new MemberImportEntry(0, entrypointName)}
                 });
             }
+        }
+
+        private static void CreateExportDirectory(IPEImage image, ManagedPEBuilderContext context)
+        {
+            if (image.Exports.Entries.Count > 0)
+                context.ExportDirectory.AddDirectory(image.Exports);
         }
 
         /// <summary>
@@ -241,10 +261,14 @@ namespace AsmResolver.PE.DotNet.Builder
             var relocDirectory = context.RelocationsDirectory;
             var iatDirectory = importDirectory.ImportAddressDirectory;
             var dotNetDirectory = context.DotNetSegment.DotNetDirectory;
+
+            var exportDataDirectory = !context.ExportDirectory.IsEmpty
+                ? new DataDirectory(context.ExportDirectory.Rva, context.ExportDirectory.GetPhysicalSize())
+                : new DataDirectory(0, 0);
             
             return new[]
             {
-                new DataDirectory(0, 0),
+                exportDataDirectory,
                 new DataDirectory(importDirectory.Rva, importDirectory.GetPhysicalSize()),
                 new DataDirectory(resourceDirectory.Rva, resourceDirectory.GetPhysicalSize()),
                 new DataDirectory(0, 0),
