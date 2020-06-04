@@ -6,9 +6,9 @@ using AsmResolver.Lazy;
 namespace AsmResolver.PE.Exports
 {
     /// <summary>
-    /// Represents the data directory containing exported symbols that other images can access through dynamic linking.
+    /// Provides a basic implementation of the <see cref="IExportDirectory"/> interface.
     /// </summary>
-    public class ExportDirectory
+    public class ExportDirectory : IExportDirectory
     {
         private readonly LazyVariable<string> _name;
         private IList<ExportedSymbol> _exports;
@@ -31,58 +31,43 @@ namespace AsmResolver.PE.Exports
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        /// <summary>
-        /// Gets or sets the flags associated to the export directory.
-        /// </summary>
-        /// <remarks>
-        /// This field is reserved and should be zero.
-        /// </remarks>
+        /// <inheritdoc />
         public uint ExportFlags
         {
             get;
             set;
         } = 0;
 
-        /// <summary>
-        /// Gets or sets the time and date that the exports data was created.
-        /// </summary>
+        /// <inheritdoc />
         public uint TimeDateStamp
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the user major version number.
-        /// </summary>
+        /// <inheritdoc />
         public ushort MajorVersion
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the user minor version number.
-        /// </summary>
+        /// <inheritdoc />
         public ushort MinorVersion
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the name of the exports directory.
-        /// </summary>
+        /// <inheritdoc />
         public string Name
         {
             get => _name.Value;
             set => _name.Value = value;
         }
 
-        /// <summary>
-        /// Gets an ordered list of symbols that are exported by the portable executable (PE) image.
-        /// </summary>
-        public IList<ExportedSymbol> Exports
+        /// <inheritdoc />
+        public IList<ExportedSymbol> Entries
         {
             get
             {
@@ -106,7 +91,7 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         /// <returns>The exported symbols..</returns>
         /// <remarks>
-        /// This method is called upon initialization of the <see cref="Exports"/> property.
+        /// This method is called upon initialization of the <see cref="Entries"/> property.
         /// </remarks>
         protected virtual IList<ExportedSymbol> GetExports() => new List<ExportedSymbol>();
     }
