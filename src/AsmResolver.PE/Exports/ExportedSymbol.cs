@@ -17,6 +17,20 @@ namespace AsmResolver.PE.Exports
             Address = address;
         }
 
+        /// <summary>
+        /// Creates a new symbol that is exported by name.
+        /// </summary>
+        /// <param name="address">The reference to the segment representing the symbol.</param>
+        /// <param name="name">The name of the symbol.</param>
+        public ExportedSymbol(ISegmentReference address, string name)
+        {
+            Name = name;
+            Address = address;
+        }
+
+        /// <summary>
+        /// Gets the export directory this symbol was added to (if available).
+        /// </summary>
         public IExportDirectory ParentDirectory
         {
             get;
@@ -41,15 +55,14 @@ namespace AsmResolver.PE.Exports
         public uint Ordinal => Index == -1 ? 0u : (uint) Index + ParentDirectory.BaseOrdinal;
 
         /// <summary>
-        /// Creates a new symbol that is exported by name.
+        /// Gets a value indicating whether the symbol is exported by ordinal number. 
         /// </summary>
-        /// <param name="address">The reference to the segment representing the symbol.</param>
-        /// <param name="name">The name of the symbol.</param>
-        public ExportedSymbol(ISegmentReference address, string name)
-        {
-            Name = name;
-            Address = address;
-        }
+        public bool IsByOrdinal => Name is null;
+        
+        /// <summary>
+        /// Gets a value indicating whether the symbol is exported by name. 
+        /// </summary>
+        public bool IsByName => Name is {};
         
         /// <summary>
         /// Gets or sets the name of the exported symbol.
@@ -73,9 +86,13 @@ namespace AsmResolver.PE.Exports
             set;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
-            return base.ToString();
+            string displayName = Name ?? $"#{Ordinal.ToString()}";
+            return ParentDirectory is null 
+                ? displayName
+                : $"{ParentDirectory.Name}!{displayName}";
         }
     }
 }

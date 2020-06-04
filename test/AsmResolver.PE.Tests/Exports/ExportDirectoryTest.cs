@@ -79,7 +79,13 @@ namespace AsmResolver.PE.Tests.Exports
                 2u,
                 3u,
             }, image.Exports.Entries.Select(e => e.Ordinal));
-            
+        }
+
+        [Fact]
+        public void EmitNewExportDirectory()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            image.Exports = new ExportDirectory("HelloWorld.dll");
         }
     }
 }
