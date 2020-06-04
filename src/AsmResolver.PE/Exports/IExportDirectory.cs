@@ -56,6 +56,15 @@ namespace AsmResolver.PE.Exports
         }
 
         /// <summary>
+        /// Gets or sets the base ordinal of the exports directory.
+        /// </summary>
+        uint BaseOrdinal
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets an ordered list of symbols that are exported by the portable executable (PE) image.
         /// </summary>
         IList<ExportedSymbol> Entries

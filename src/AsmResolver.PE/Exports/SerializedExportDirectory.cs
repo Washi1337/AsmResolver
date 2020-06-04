@@ -11,7 +11,6 @@ namespace AsmResolver.PE.Exports
     {
         private readonly PEFile _peFile;
         private readonly uint _nameRva;
-        private readonly uint _ordinalBase;
         private readonly uint _numberOfFunctions;
         private readonly uint _numberOfNames;
         private readonly uint _addressTableRva;
@@ -34,7 +33,7 @@ namespace AsmResolver.PE.Exports
             MajorVersion = reader.ReadUInt16();
             MinorVersion = reader.ReadUInt16();
             _nameRva = reader.ReadUInt32();
-            _ordinalBase = reader.ReadUInt32();
+            BaseOrdinal = reader.ReadUInt32();
             _numberOfFunctions = reader.ReadUInt32();
             _numberOfNames = reader.ReadUInt32();
             _addressTableRva = reader.ReadUInt32();
@@ -50,7 +49,7 @@ namespace AsmResolver.PE.Exports
         /// <inheritdoc />
         protected override IList<ExportedSymbol> GetExports()
         {
-            var result = new List<ExportedSymbol>();
+            var result = new ExportedSymbolCollection(this);
             
             if (!_peFile.TryCreateReaderAtRva(_addressTableRva, out var addressReader)
                 || !_peFile.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader)

@@ -1,9 +1,11 @@
+using AsmResolver.Collections;
+
 namespace AsmResolver.PE.Exports
 {
     /// <summary>
     /// Represents a single symbol that is exported by a dynamically linked library.
     /// </summary>
-    public class ExportedSymbol
+    public class ExportedSymbol : IOwnedCollectionElement<IExportDirectory>
     {
         /// <summary>
         /// Creates a new symbol that is exported by ordinal.
@@ -14,6 +16,29 @@ namespace AsmResolver.PE.Exports
             Name = null;
             Address = address;
         }
+
+        public IExportDirectory ParentDirectory
+        {
+            get;
+            private set;
+        }
+
+        IExportDirectory IOwnedCollectionElement<IExportDirectory>.Owner
+        {
+            get => ParentDirectory;
+            set => ParentDirectory = value;
+        }
+
+        internal int Index
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets the ordinal of the exported symbol.
+        /// </summary>
+        public uint Ordinal => Index == -1 ? 0u : (uint) Index + ParentDirectory.BaseOrdinal;
 
         /// <summary>
         /// Creates a new symbol that is exported by name.
@@ -46,6 +71,11 @@ namespace AsmResolver.PE.Exports
         {
             get;
             set;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString();
         }
     }
 }

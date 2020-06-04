@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using AsmResolver.Lazy;
+using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Exports
 {
@@ -67,6 +67,13 @@ namespace AsmResolver.PE.Exports
         }
 
         /// <inheritdoc />
+        public uint BaseOrdinal
+        {
+            get;
+            set;
+        }
+
+        /// <inheritdoc />
         public IList<ExportedSymbol> Entries
         {
             get
@@ -93,6 +100,7 @@ namespace AsmResolver.PE.Exports
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Entries"/> property.
         /// </remarks>
-        protected virtual IList<ExportedSymbol> GetExports() => new List<ExportedSymbol>();
+        protected virtual IList<ExportedSymbol> GetExports() =>
+            new OwnedCollection<IExportDirectory, ExportedSymbol>(this);
     }
 }
