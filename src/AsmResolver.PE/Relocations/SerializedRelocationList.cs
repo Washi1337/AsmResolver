@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using AsmResolver.Lazy;
+using AsmResolver.Collections;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 

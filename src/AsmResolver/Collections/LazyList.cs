@@ -20,7 +20,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace AsmResolver.Lazy
+namespace AsmResolver.Collections
 {
     /// <summary>
     /// Provides a base for lists that are lazy initialized.

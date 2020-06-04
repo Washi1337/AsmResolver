@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using AsmResolver.Lazy;
+using AsmResolver.Collections;
 using Xunit;
 
 namespace AsmResolver.Tests

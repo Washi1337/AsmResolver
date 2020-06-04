@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
