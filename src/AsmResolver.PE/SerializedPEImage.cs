@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
@@ -74,6 +75,16 @@ namespace AsmResolver.PE
             return dataDirectory.IsPresentInPE
                 ? (IList<IModuleImportEntry>) new SerializedModuleImportEntryList(PEFile, dataDirectory)
                 : new List<IModuleImportEntry>();
+        }
+
+        /// <inheritdoc />
+        protected override IExportDirectory GetExports()
+        {
+            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ExportDirectoryIndex];
+            if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
+                return null;
+
+            return new SerializedExportDirectory(PEFile, reader);
         }
 
         /// <inheritdoc />

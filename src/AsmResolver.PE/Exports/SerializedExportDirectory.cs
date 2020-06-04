@@ -61,26 +61,24 @@ namespace AsmResolver.PE.Exports
 
             var ordinalNameTable = ReadOrdinalNameTable(namePointerReader, ordinalReader);
 
-            for (int i = 0; i < _numberOfFunctions; i++)
+            for (uint i = 0; i < _numberOfFunctions; i++)
             {
-                ushort currentOrdinal = (ushort) (i + _ordinalBase);
-
                 uint rva = addressReader.ReadUInt32();
-                ordinalNameTable.TryGetValue(currentOrdinal, out string name);
+                ordinalNameTable.TryGetValue(i, out string name);
                 result.Add(new ExportedSymbol(_peFile.GetReferenceToRva(rva), name));
             }
 
             return result;
         }
 
-        private IDictionary<ushort, string> ReadOrdinalNameTable(
+        private IDictionary<uint, string> ReadOrdinalNameTable(
             IBinaryStreamReader namePointerReader, IBinaryStreamReader ordinalReader)
         {
-            var result = new Dictionary<ushort, string>();
+            var result = new Dictionary<uint, string>();
             
             for (int i = 0; i < _numberOfNames; i++)
             {
-                ushort ordinal = ordinalReader.ReadUInt16();
+                uint ordinal = ordinalReader.ReadUInt16();
                 uint nameRva = namePointerReader.ReadUInt32();
 
                 if (_peFile.TryCreateReaderAtRva(nameRva, out var nameReader))
