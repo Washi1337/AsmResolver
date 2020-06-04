@@ -1,4 +1,6 @@
+using System.IO;
 using System.Linq;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Exports;
 using Xunit;
 
@@ -81,11 +83,51 @@ namespace AsmResolver.PE.Tests.Exports
             }, image.Exports.Entries.Select(e => e.Ordinal));
         }
 
+        private static IPEImage RebuildAndReloadManagedPE(IPEImage image)
+        {
+            // Build.
+            using var tempStream = new MemoryStream();
+            var builder = new ManagedPEFileBuilder();
+            var newPeFile = builder.CreateFile(image);
+            newPeFile.Write(new BinaryStreamWriter(tempStream));
+
+            // Reload.
+            var newImage = PEImage.FromBytes(tempStream.ToArray());
+            return newImage;
+        }
+
         [Fact]
-        public void EmitNewExportDirectory()
+        public void PersistentExportLibraryName()
         {
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            image.Exports = new ExportDirectory("HelloWorld.dll");
+            image.Exports = new ExportDirectory("HelloWorld.dll")
+            {
+                Entries = {new ExportedSymbol(new VirtualAddress(0x12345678), "TestExport")}
+            };
+            var newImage = RebuildAndReloadManagedPE(image);
+            Assert.Equal(image.Exports.Name, newImage.Exports.Name);
+        }
+
+        [Fact]
+        public void PersistentExportedSymbol()
+        {
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+            
+            // Prepare mock.
+            var exportDirectory = new ExportDirectory("HelloWorld.dll");
+            var exportedSymbol = new ExportedSymbol(new VirtualAddress(0x12345678), "TestExport");
+            exportDirectory.Entries.Add(exportedSymbol);
+            image.Exports = exportDirectory;
+            
+            // Rebuild.
+            var newImage = RebuildAndReloadManagedPE(image);
+
+            // Verify.
+            Assert.Equal(1, newImage.Exports.Entries.Count);
+            var newExportedSymbol = newImage.Exports.Entries[0];
+            Assert.Equal(exportedSymbol.Name, newExportedSymbol.Name);
+            Assert.Equal(exportedSymbol.Ordinal, newExportedSymbol.Ordinal);
+            Assert.Equal(exportedSymbol.Address.Rva, newExportedSymbol.Address.Rva);
         }
     }
 }
