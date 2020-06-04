@@ -1,4 +1,5 @@
-﻿using AsmResolver.DotNet.Code.Cil;
+﻿using AsmResolver.Collections;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;

@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
