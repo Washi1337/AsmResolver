@@ -18,9 +18,9 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Creates a new symbol that is exported by name.
         /// </summary>
-        /// <param name="name">The name of the symbol.</param>
         /// <param name="address">The reference to the segment representing the symbol.</param>
-        public ExportedSymbol(string name, ISegmentReference address)
+        /// <param name="name">The name of the symbol.</param>
+        public ExportedSymbol(ISegmentReference address, string name)
         {
             Name = name;
             Address = address;
