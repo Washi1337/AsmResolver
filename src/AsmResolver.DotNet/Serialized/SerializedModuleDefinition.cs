@@ -186,7 +186,7 @@ namespace AsmResolver.DotNet.Serialized
             for (int i = 0; i < typeDefTable.Count; i++)
             {
                 uint rid = (uint) i + 1;
-                if (_typeDefTree.GetMemberOwner(rid) == 0)
+                if (_typeDefTree.GetKey(rid) == 0)
                 {
                     var token = new MetadataToken(TableIndex.TypeDef, rid);
                     types.Add(_memberFactory.LookupTypeDefinition(token));
@@ -217,13 +217,13 @@ namespace AsmResolver.DotNet.Serialized
         internal IEnumerable<uint> GetNestedTypeRids(uint enclosingTypeRid)
         {
             EnsureTypeDefinitionTreeInitialized();
-            return _typeDefTree.GetMemberList(enclosingTypeRid);
+            return _typeDefTree.GetValues(enclosingTypeRid);
         }
 
         internal uint GetParentTypeRid(uint nestedTypeRid)
         {
             EnsureTypeDefinitionTreeInitialized();
-            return _typeDefTree.GetMemberOwner(nestedTypeRid);
+            return _typeDefTree.GetKey(nestedTypeRid);
         }
 
         internal MetadataRange GetFieldRange(uint typeRid) => _fieldLists.GetMemberRange(typeRid);
@@ -268,13 +268,13 @@ namespace AsmResolver.DotNet.Serialized
         internal IEnumerable<uint> GetMethodSemantics(MetadataToken owner)
         {
             EnsureMethodSemanticsInitialized();
-            return _semantics.GetMemberList(owner);
+            return _semantics.GetValues(owner);
         }
 
         internal MetadataToken GetMethodSemanticsOwner(uint semanticsRid)
         {
             EnsureMethodSemanticsInitialized();
-            return _semantics.GetMemberOwner(semanticsRid);
+            return _semantics.GetKey(semanticsRid);
         }
 
         internal MetadataToken GetMethodParentSemantics(uint methodRid)
@@ -356,7 +356,7 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetCustomAttributeOwner(uint attributeRid)
         {
             EnsureCustomAttributesInitialized();
-            return _customAttributes.GetMemberOwner(attributeRid);
+            return _customAttributes.GetKey(attributeRid);
         }
 
         internal IList<CustomAttribute> GetCustomAttributeCollection(IHasCustomAttribute owner)
@@ -364,7 +364,7 @@ namespace AsmResolver.DotNet.Serialized
             EnsureCustomAttributesInitialized();
             var result = new OwnedCollection<IHasCustomAttribute, CustomAttribute>(owner);
             
-            foreach (uint rid in _customAttributes.GetMemberList(owner.MetadataToken))
+            foreach (uint rid in _customAttributes.GetValues(owner.MetadataToken))
             {
                 var attribute = (CustomAttribute) LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
                 result.Add(attribute);
@@ -399,7 +399,7 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetSecurityDeclarationOwner(uint attributeRid)
         {
             EnsureCustomAttributesInitialized();
-            return _securityDeclarations.GetMemberOwner(attributeRid);
+            return _securityDeclarations.GetKey(attributeRid);
         }
 
         internal IList<SecurityDeclaration> GetSecurityDeclarationCollection(IHasSecurityDeclaration owner)
@@ -407,7 +407,7 @@ namespace AsmResolver.DotNet.Serialized
             EnsureSecurityDeclarationsInitialized();
             var result = new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(owner);
 
-            foreach (uint rid in _securityDeclarations.GetMemberList(owner.MetadataToken))
+            foreach (uint rid in _securityDeclarations.GetValues(owner.MetadataToken))
             {
                 var attribute = (SecurityDeclaration) LookupMember(new MetadataToken(TableIndex.DeclSecurity, rid));
                 result.Add(attribute);
@@ -442,13 +442,13 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetGenericParameterOwner(uint parameterRid)
         {
             EnsureGenericParametersInitialized();
-            return _genericParameters.GetMemberOwner(parameterRid);
+            return _genericParameters.GetKey(parameterRid);
         }
         
         internal ICollection<uint> GetGenericParameters(MetadataToken ownerToken)
         {
             EnsureGenericParametersInitialized();
-            return _genericParameters.GetMemberList(ownerToken);
+            return _genericParameters.GetValues(ownerToken);
         }
 
         private void EnsureGenericParameterConstrainsInitialized()
@@ -476,13 +476,13 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetGenericParameterConstraintOwner(uint constraintRid)
         {
             EnsureGenericParameterConstrainsInitialized();
-            return _genericParameterConstraints.GetMemberOwner(constraintRid);
+            return _genericParameterConstraints.GetKey(constraintRid);
         }
         
         internal ICollection<uint> GetGenericParameterConstraints(MetadataToken ownerToken)
         {
             EnsureGenericParameterConstrainsInitialized();
-            return _genericParameterConstraints.GetMemberList(ownerToken);
+            return _genericParameterConstraints.GetValues(ownerToken);
         }
 
         private void EnsureInterfacesInitialized()
@@ -510,13 +510,13 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetInterfaceImplementationOwner(uint implementationRid)
         {
             EnsureInterfacesInitialized();
-            return _interfaces.GetMemberOwner(implementationRid);
+            return _interfaces.GetKey(implementationRid);
         }
 
         internal ICollection<uint> GetInterfaceImplementationRids(MetadataToken ownerToken)
         {
             EnsureInterfacesInitialized();
-            return _interfaces.GetMemberList(ownerToken);
+            return _interfaces.GetValues(ownerToken);
         }
 
         private void EnsureMethodImplementationsInitialized()
@@ -544,7 +544,7 @@ namespace AsmResolver.DotNet.Serialized
         internal ICollection<uint> GetMethodImplementationRids(MetadataToken ownerToken)
         {
             EnsureMethodImplementationsInitialized();
-            return _methodImplementations.GetMemberList(ownerToken);
+            return _methodImplementations.GetValues(ownerToken);
         }
 
         private void EnsureClassLayoutsInitialized()
