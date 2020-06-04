@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;

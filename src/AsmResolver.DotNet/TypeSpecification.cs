@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;

@@ -1,4 +1,4 @@
-namespace AsmResolver.DotNet.Collections
+namespace AsmResolver.Collections
 {
     /// <summary>
     /// Represents an element in a collection owned by a single object.

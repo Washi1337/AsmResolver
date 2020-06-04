@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace AsmResolver.DotNet.Collections
+namespace AsmResolver.Collections
 {
-    internal class OneToOneRelation<TKey, TValue>
+    public class OneToOneRelation<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> _keyToValue = new Dictionary<TKey, TValue>();
         private readonly IDictionary<TValue, TKey> _valueToKey = new Dictionary<TValue, TKey>();

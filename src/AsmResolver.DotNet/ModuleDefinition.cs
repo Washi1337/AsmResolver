@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;

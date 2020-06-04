@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using AsmResolver.Lazy;
 
-namespace AsmResolver.DotNet.Collections
+namespace AsmResolver.Collections
 {
     /// <summary>
     /// Represents an indexed collection where each element is owned by some object, and prevents the element from being
@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Collections
     /// <typeparam name="TItem">The type of elements to store.</typeparam>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class OwnedCollection<TOwner, TItem> : LazyList<TItem>
-        where TItem : class, IMetadataMember, IOwnedCollectionElement<TOwner>
+        where TItem : class, IOwnedCollectionElement<TOwner>
         where TOwner : class
     {
         /// <summary>
