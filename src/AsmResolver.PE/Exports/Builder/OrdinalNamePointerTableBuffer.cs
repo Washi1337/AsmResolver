@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace AsmResolver.PE.Exports.Builder
 {
+    /// <summary>
+    /// Provides a mechanism for building up an ordinal and name-pointer table in an export data directory
+    /// of a portable executable file.
+    /// </summary>
     public class OrdinalNamePointerTableBuffer : SegmentBase
     {
         private readonly NameTableBuffer _nameTableBuffer;

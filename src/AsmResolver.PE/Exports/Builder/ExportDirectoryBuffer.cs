@@ -3,9 +3,15 @@ using System.Linq;
 
 namespace AsmResolver.PE.Exports.Builder
 {
+    /// <summary>
+    /// Provides a mechanism for building an export data directory in a portable executable (PE) file.
+    /// </summary>
     public class ExportDirectoryBuffer : SegmentBase
     {
-        public const uint ExportDirectorySize =
+        /// <summary>
+        /// Gets the raw size in bytes of an export directory header.
+        /// </summary>
+        public const uint ExportDirectoryHeaderSize =
                 sizeof(uint) // ExportFlags
                 + sizeof(uint) // TimeDateStamp
                 + sizeof(ushort) // MajorVersion
@@ -20,16 +26,19 @@ namespace AsmResolver.PE.Exports.Builder
             ;
         
         private readonly SegmentBuilder _contentsBuilder;
-        private readonly AddressTableBuffer _addressTableBuffer;
+        private readonly ExportAddressTableBuffer _addressTableBuffer;
         private readonly OrdinalNamePointerTableBuffer _ordinalNamePointerTable;
         private readonly NameTableBuffer _nameTableBuffer;
         
         private IExportDirectory _exportDirectory;
 
+        /// <summary>
+        /// Creates a new empty export directory buffer.
+        /// </summary>
         public ExportDirectoryBuffer()
         {
             // Initialize table buffers.
-            _addressTableBuffer = new AddressTableBuffer();
+            _addressTableBuffer = new ExportAddressTableBuffer();
             _nameTableBuffer = new NameTableBuffer();
             _ordinalNamePointerTable = new OrdinalNamePointerTableBuffer(_nameTableBuffer);
 
@@ -41,8 +50,16 @@ namespace AsmResolver.PE.Exports.Builder
             };
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the export directory buffer is empty or not.
+        /// </summary>
         public bool IsEmpty => _exportDirectory is null;
 
+        /// <summary>
+        /// Adds an export directory and its contents to the buffer.
+        /// </summary>
+        /// <param name="exportDirectory">The export directory to add.</param>
+        /// <exception cref="InvalidProgramException">Occurs when a second directory is added.</exception>
         public void AddDirectory(IExportDirectory exportDirectory)
         {
             if (!IsEmpty)
@@ -66,11 +83,11 @@ namespace AsmResolver.PE.Exports.Builder
         public override void UpdateOffsets(uint newFileOffset, uint newRva)
         {
             base.UpdateOffsets(newFileOffset, newRva);
-            _contentsBuilder.UpdateOffsets(newFileOffset + ExportDirectorySize, newRva + ExportDirectorySize);
+            _contentsBuilder.UpdateOffsets(newFileOffset + ExportDirectoryHeaderSize, newRva + ExportDirectoryHeaderSize);
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => ExportDirectorySize + _contentsBuilder.GetPhysicalSize();
+        public override uint GetPhysicalSize() => ExportDirectoryHeaderSize + _contentsBuilder.GetPhysicalSize();
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)

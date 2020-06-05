@@ -2,7 +2,11 @@ using System.Collections.Generic;
 
 namespace AsmResolver.PE.Exports.Builder
 {
-    public class AddressTableBuffer : SegmentBase
+    /// <summary>
+    /// Provides a mechanism for building up a table of exported addresses in the export data directory of
+    /// a portable executable (PE) file.
+    /// </summary>
+    public class ExportAddressTableBuffer : SegmentBase
     {
         private readonly List<ExportedSymbol> _entries = new List<ExportedSymbol>();
 
