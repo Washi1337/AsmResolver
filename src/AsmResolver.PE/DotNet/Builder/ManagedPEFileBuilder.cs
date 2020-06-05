@@ -216,8 +216,8 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void CreateExportDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
-            if (image.Exports.Entries.Count > 0)
-                context.ExportDirectory.AddDirectory(image.Exports);
+            if (image.Exports is {} exports && exports.Entries.Count > 0)
+                context.ExportDirectory.AddDirectory(exports);
         }
 
         /// <summary>
