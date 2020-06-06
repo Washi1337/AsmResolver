@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
@@ -13,6 +15,254 @@ namespace AsmResolver.DotNet.Code.Cil
     /// </summary>
     public class CilMethodBody : MethodBody, ICilOperandResolver
     {
+         /// <summary>
+        ///     Creates a CIL method body from a dynamic method.
+        /// </summary>
+        /// <param name="method">The method that owns the method body.</param>
+        /// <param name="dynamicMethodObj">The dynamic method.</param>
+        /// <param name="operandResolver">
+        ///     The object instance to use for resolving operands of an instruction in the
+        ///     method body.
+        /// </param>
+        /// <returns>The method body.</returns>
+        public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj,
+            ICilOperandResolver operandResolver = null)
+        {
+            var result = new CilMethodBody(method);
+
+            if (operandResolver is null)
+                operandResolver = result;
+
+          
+            //Get dynamic method
+            if (dynamicMethodObj is Delegate deleg)
+                dynamicMethodObj = deleg.Method;
+
+            if (dynamicMethodObj is null)
+                throw new ArgumentNullException(nameof(dynamicMethodObj));
+
+            if (dynamicMethodObj.GetType().FullName.Contains("RTDynamicMethod"))
+            {
+                dynamicMethodObj = FieldReader.ReadField<object>(dynamicMethodObj, "m_owner");
+            }
+            
+            if (dynamicMethodObj.GetType().ToString().Contains("DynamicMethod"))
+            {
+                var resolver = FieldReader.ReadField<object>(dynamicMethodObj, "m_resolver");
+                if (resolver != null)
+                    dynamicMethodObj = resolver;
+            }
+
+            
+            //Create Resolver if it does not exist.
+            if (dynamicMethodObj.GetType().ToString() != "System.Reflection.Emit.DynamicResolver" &&
+                dynamicMethodObj.GetType().ToString().Contains("DynamicMethod"))
+            {
+                dynamicMethodObj = Activator.CreateInstance(
+                    typeof(OpCode).Module.GetTypes()
+                        .First(t => t.Name == "DynamicResolver"), (BindingFlags)(-1), null,
+                    new object[] {dynamicMethodObj.GetType().GetRuntimeMethods().FirstOrDefault(q=>q.Name == "GetILGenerator").Invoke(dynamicMethodObj,null)}, null);
+            }
+            
+
+            var importer = new ReferenceImporter(method.Module);
+
+            //Get Runtime Fields
+            var code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
+            var maxStack = FieldReader.ReadField<int>(dynamicMethodObj, "m_stackSize");
+            var scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope");
+            var tokenList =
+                FieldReader.ReadField<List<object>>(scope, "m_tokens");
+            var localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature");
+            var ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader");
+            var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions");
+
+            // Read raw instructions.
+            var reader = new ByteArrayReader(code);
+            var disassembler = new CilDisassembler(reader);
+            result.Instructions.AddRange(disassembler.ReadAllInstructions());
+
+            // TODO: Read Locals & ExceptionHandlers.
+
+            //Local Variables
+            
+            var locals = CallingConventionSignature.FromReader(method.Module, new ByteArrayReader(localSig)) as LocalVariablesSignature;
+
+            for (var i = 0; i < locals?.VariableTypes.Count; i++)
+                result.LocalVariables.Add(new CilLocalVariable(locals.VariableTypes[i]));
+
+            //Exception Handlers
+
+            if (ehHeader != null && ehHeader.Length > 4)
+                //Sample needed!
+                throw new NotImplementedException("Exception Handlers From ehHeader Not Supported Yet.");
+            if (ehInfos != null && ehInfos.Count > 0)
+                for (var i = 0; i < ehInfos.Count(); i++)
+                {
+                    //Get ExceptionHandlerInfo Field Values
+                    var endFinally = FieldReader.ReadField<int>(ehInfos[i], "m_endFinally");
+                    var endFinallyLabel = endFinally < 0 ? null : result.Instructions.GetByOffset(endFinally)?.CreateLabel() ?? new CilOffsetLabel(endFinally);
+                    var endTry = FieldReader.ReadField<int>(ehInfos[i], "m_endAddr");
+                    var endTryLabel = result.Instructions.GetByOffset(endTry)?.CreateLabel() ?? new CilOffsetLabel(endTry);
+                    var handlerEnd = FieldReader.ReadField<int[]>(ehInfos[i], "m_catchEndAddr")[i];
+                    var exceptionType = FieldReader.ReadField<Type[]>(ehInfos[i], "m_catchClass")[i];
+                    var handlerStart = FieldReader.ReadField<int[]>(ehInfos[i], "m_catchAddr")[i];
+                    var tryStart = FieldReader.ReadField<int>(ehInfos[i], "m_startAddr");
+                    var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfos[i], "m_type")[i];
+
+                    //Create the handler
+                    var handler = new CilExceptionHandler
+                    {
+                        HandlerType = handlerType,
+                        TryStart = result.Instructions.GetByOffset(tryStart)?.CreateLabel() ?? new CilOffsetLabel(tryStart),
+                        TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
+                        FilterStart = null,
+                        HandlerStart = result.Instructions.GetByOffset(handlerStart)?.CreateLabel() ?? new CilOffsetLabel(handlerStart),
+                        HandlerEnd = result.Instructions.GetByOffset(handlerEnd)?.CreateLabel() ?? new CilOffsetLabel(handlerEnd),
+                        ExceptionType = importer.ImportType(exceptionType)
+                    };
+
+                    result.ExceptionHandlers.Add(handler);
+                }
+
+            // Resolve all operands.
+            foreach (var instruction in result.Instructions)
+                instruction.Operand =
+                    ResolveOperandReflection(result, instruction, operandResolver, tokenList, importer) ??
+                    instruction.Operand;
+            return result;
+        }
+
+        private static object ResolveOperandReflection(CilMethodBody methodBody, CilInstruction instruction,
+            ICilOperandResolver resolver, List<object> Tokens, ReferenceImporter Importer)
+        {
+            switch (instruction.OpCode.OperandType)
+            {
+                case CilOperandType.InlineBrTarget:
+                case CilOperandType.ShortInlineBrTarget:
+                    return new CilInstructionLabel(
+                        methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset));
+
+                case CilOperandType.InlineField:
+                case CilOperandType.InlineMethod:
+                case CilOperandType.InlineSig:
+                case CilOperandType.InlineTok:
+                case CilOperandType.InlineType:
+                    return ReadToken(((MetadataToken) instruction.Operand).ToUInt32(), Tokens, Importer);
+                case CilOperandType.InlineString:
+                    return ReadToken(((MetadataToken) instruction.Operand).ToUInt32(), Tokens, Importer);
+                case CilOperandType.InlineSwitch:
+                    var result = new List<ICilLabel>();
+                    var labels = (IEnumerable<ICilLabel>) instruction.Operand;
+                    foreach (var label in labels)
+                    {
+                        var target = methodBody.Instructions.GetByOffset(label.Offset);
+                        result.Add(target == null ? label : new CilInstructionLabel(target));
+                    }
+
+                    return result;
+
+                case CilOperandType.InlineVar:
+                case CilOperandType.ShortInlineVar:
+                    return resolver.ResolveLocalVariable(Convert.ToInt32(instruction.Operand));
+
+                case CilOperandType.InlineArgument:
+                case CilOperandType.ShortInlineArgument:
+                    return resolver.ResolveParameter(Convert.ToInt32(instruction.Operand));
+
+                case CilOperandType.InlineI:
+                case CilOperandType.InlineI8:
+                case CilOperandType.InlineNone:
+                case CilOperandType.InlineR:
+                case CilOperandType.ShortInlineI:
+                case CilOperandType.ShortInlineR:
+                    return instruction.Operand;
+
+                case CilOperandType.InlinePhi:
+                    throw new NotSupportedException();
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static object ReadToken(uint token, IList<object> Tokens, ReferenceImporter importer)
+        {
+            var rid = token & 0x00FFFFFF;
+            switch (token >> 24)
+            {
+                case 0x02:
+                    var type = Tokens[(int) rid];
+                    if (type is RuntimeTypeHandle)
+                        return importer.ImportType(Type.GetTypeFromHandle((RuntimeTypeHandle) type));
+                    return null;
+                case 0x04:
+                    var field = Tokens[(int) rid];
+                    if (field is null)
+                        return null;
+
+                    if (field is RuntimeFieldHandle)
+                        return importer.ImportField(FieldInfo.GetFieldFromHandle((RuntimeFieldHandle) field));
+
+                    if (field.GetType().ToString() == "System.Reflection.Emit.GenericFieldInfo")
+                    {
+                        var context = FieldReader.ReadField<RuntimeTypeHandle>(field, "m_context");
+                        return importer.ImportField(FieldInfo.GetFieldFromHandle(
+                            FieldReader.ReadField<RuntimeFieldHandle>(field, "m_field"), context));
+                    }
+
+                    return null;
+                case 0x06:
+                case 0x0A:
+                    var obj = Tokens[(int) rid];
+                    if (obj is RuntimeMethodHandle)
+                        return importer.ImportMethod(MethodBase.GetMethodFromHandle((RuntimeMethodHandle) obj));
+                    if (obj.GetType().ToString() == "System.Reflection.Emit.GenericMethodInfo")
+                    {
+                        var context =
+                            FieldReader.ReadField<RuntimeTypeHandle>(obj, "m_context");
+                        var method = MethodBase.GetMethodFromHandle(
+                            FieldReader.ReadField<RuntimeMethodHandle>(obj, "m_method"), context);
+                        return importer.ImportMethod(method);
+                    }
+
+                    if (obj.GetType().ToString() == "System.Reflection.Emit.VarArgMethod")
+                    {
+                        var method = GetVarArgMethod(obj);
+                        if (!(method.GetType().ToString().Contains("DynamicMethod")))
+                            return importer.ImportMethod((MethodInfo)method);
+                        obj = method;
+                    }
+
+                    if (obj.GetType().ToString().Contains("DynamicMethod"))
+                        throw new Exception("DynamicMethod calls another DynamicMethod");
+                    return null;
+                case 0x11:
+                    return CallingConventionSignature.FromReader(importer.TargetModule,
+                        new ByteArrayReader(Tokens[(int) rid] as byte[]));
+                case 0x70:
+                    return Tokens[(int) rid] as string;
+                default:
+                    return null;
+            }
+        }
+
+        private static object GetVarArgMethod(object obj)
+        {
+            if (FieldReader.ExistsField(obj, "m_dynamicMethod"))
+            {
+                // .NET 4.0+
+                var method =
+                    FieldReader.ReadField<MethodInfo>(obj, "m_method");
+                var dynMethod =
+                    FieldReader.ReadField<object>(obj, "m_dynamicMethod");
+                return dynMethod ?? method;
+            }
+
+            // .NET 2.0
+            // This is either a DynamicMethod or a MethodInfo
+            return FieldReader.ReadField<MethodInfo>(obj, "m_method");
+        }
         /// <summary>
         /// Creates a CIL method body from a raw CIL method body. 
         /// </summary>
