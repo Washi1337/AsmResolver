@@ -235,6 +235,11 @@ namespace AsmResolver.DotNet.Cloning
                 clonedDeclaringType.NestedTypes.Add(clonedType);
             }
 
+            // Clone class layout.
+            if (type.ClassLayout is {})
+                clonedType.ClassLayout = new ClassLayout(type.ClassLayout.PackingSize, type.ClassLayout.ClassSize);
+
+            // Clone remaining metadata.
             CloneCustomAttributes(context, type, clonedType);
             CloneGenericParameters(context, type, clonedType);
             CloneSecurityDeclarations(context, type, clonedType);
