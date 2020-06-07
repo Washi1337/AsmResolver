@@ -61,6 +61,7 @@ namespace AsmResolver.DotNet.Cloning
             
             CloneCustomAttributes(context, method, clonedMethod);
             CloneGenericParameters(context, method, clonedMethod);
+            CloneSecurityDeclarations(context, method, clonedMethod);
             
             clonedMethod.ImplementationMap = CloneImplementationMap(context, method.ImplementationMap);
         }

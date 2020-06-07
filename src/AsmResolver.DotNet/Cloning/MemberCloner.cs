@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
+using AsmResolver.DotNet.Signatures.Security;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -236,6 +237,7 @@ namespace AsmResolver.DotNet.Cloning
 
             CloneCustomAttributes(context, type, clonedType);
             CloneGenericParameters(context, type, clonedType);
+            CloneSecurityDeclarations(context, type, clonedType);
         }
 
         private InterfaceImplementation CloneInterfaceImplementation(MemberCloneContext context, InterfaceImplementation implementation)
@@ -367,6 +369,46 @@ namespace AsmResolver.DotNet.Cloning
 
                 _ => throw new ArgumentOutOfRangeException(nameof(marshalDescriptor))
             };
+        }
+
+        private void CloneSecurityDeclarations(
+            MemberCloneContext context,
+            IHasSecurityDeclaration sourceProvider,
+            IHasSecurityDeclaration clonedProvider)
+        {
+            foreach (var declaration in sourceProvider.SecurityDeclarations)
+                clonedProvider.SecurityDeclarations.Add(CloneSecurityDeclaration(context, declaration));
+        }
+
+        private SecurityDeclaration CloneSecurityDeclaration(MemberCloneContext context, SecurityDeclaration declaration)
+        {
+            return new SecurityDeclaration(declaration.Action, ClonePermissionSet(context, declaration.PermissionSet));
+        }
+
+        private PermissionSetSignature ClonePermissionSet(MemberCloneContext context, PermissionSetSignature permissionSet)
+        {
+            var result = new PermissionSetSignature();
+            foreach (var attribute in permissionSet.Attributes)
+                result.Attributes.Add(CloneSecurityAttribute(context, attribute));
+            return result;
+        }
+
+        private SecurityAttribute CloneSecurityAttribute(MemberCloneContext context, SecurityAttribute attribute)
+        {
+            var result = new SecurityAttribute(context.Importer.ImportTypeSignature(attribute.AttributeType));
+
+            foreach (var argument in attribute.NamedArguments)
+            {
+                var newArgument = new CustomAttributeNamedArgument(
+                    argument.MemberType,
+                    argument.MemberName,
+                    context.Importer.ImportTypeSignature(argument.ArgumentType),
+                    CloneCustomAttributeArgument(context, argument.Argument));
+                
+                result.NamedArguments.Add(newArgument);
+            }
+
+            return result;
         }
         
     }
