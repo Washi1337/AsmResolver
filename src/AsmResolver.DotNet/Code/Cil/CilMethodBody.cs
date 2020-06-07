@@ -26,14 +26,17 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </param>
         /// <returns>The method body.</returns>
         public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj,
-            ICilOperandResolver operandResolver = null)
+            ICilOperandResolver operandResolver = null,ReferenceImporter importer = null)
         {
             var result = new CilMethodBody(method);
 
             if (operandResolver is null)
                 operandResolver = result;
 
-          
+            if(importer is null) 
+                importer = new ReferenceImporter(method.Module);
+
+
             //Get dynamic method
             if (dynamicMethodObj is Delegate deleg)
                 dynamicMethodObj = deleg.Method;
@@ -65,7 +68,6 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             
 
-            var importer = new ReferenceImporter(method.Module);
 
             //Get Runtime Fields
             var code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
