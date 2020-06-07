@@ -39,6 +39,7 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedParameterDef = new ParameterDefinition(parameterDef.Sequence, parameterDef.Name, parameterDef.Attributes);
             clonedParameterDef.Constant = CloneConstant(context, parameterDef.Constant);
+            clonedParameterDef.MarshalDescriptor = CloneMarshalDescriptor(context, parameterDef.MarshalDescriptor);
             return clonedParameterDef;
         }
 

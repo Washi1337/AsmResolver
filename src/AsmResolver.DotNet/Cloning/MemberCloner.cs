@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Marshal;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -333,5 +334,40 @@ namespace AsmResolver.DotNet.Cloning
             CloneCustomAttributes(context, constraint, clonedConstraint);
             return clonedConstraint;
         }
+
+        private MarshalDescriptor CloneMarshalDescriptor(MemberCloneContext context, MarshalDescriptor marshalDescriptor)
+        {
+            return marshalDescriptor switch
+            {
+                null => null,
+                
+                ComInterfaceMarshalDescriptor com => new ComInterfaceMarshalDescriptor(com.NativeType),
+
+                CustomMarshalDescriptor custom => new CustomMarshalDescriptor(
+                    custom.Guid, custom.NativeTypeName,
+                    context.Importer.ImportTypeSignature(custom.MarshalType),
+                    custom.Cookie),
+
+                FixedArrayMarshalDescriptor fixedArray => new FixedArrayMarshalDescriptor
+                {
+                    Size = fixedArray.Size,
+                    ArrayElementType = fixedArray.ArrayElementType
+                },
+
+                FixedSysStringMarshalDescriptor fixedSysString => new FixedSysStringMarshalDescriptor(
+                    fixedSysString.Size),
+
+                LPArrayMarshalDescriptor lpArray => new LPArrayMarshalDescriptor(lpArray.ArrayElementType),
+
+                SafeArrayMarshalDescriptor safeArray => new SafeArrayMarshalDescriptor(
+                    safeArray.VariantType, safeArray.VariantTypeFlags,
+                    context.Importer.ImportTypeSignature(safeArray.UserDefinedSubType)),
+
+                SimpleMarshalDescriptor simple => new SimpleMarshalDescriptor(simple.NativeType),
+
+                _ => throw new ArgumentOutOfRangeException(nameof(marshalDescriptor))
+            };
+        }
+        
     }
 }
