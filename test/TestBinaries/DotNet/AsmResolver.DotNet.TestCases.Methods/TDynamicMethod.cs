@@ -8,80 +8,46 @@ namespace AsmResolver.DotNet.TestCases.Methods
     {
         public static DynamicMethod GenerateDynamicMethod()
         {
-            Type[] helloArgs = {typeof(int), typeof(int)};
+            Type[] helloArgs = {typeof(string), typeof(int)};
 
-            DynamicMethod hello = new DynamicMethod("Test",
+            // Create a dynamic method with the name "Hello", a return type
+            // of Integer, and two parameters whose types are specified by
+            // the array helloArgs. Create the method in the module that
+            // defines the String class.
+            DynamicMethod hello = new DynamicMethod("Hello",
                 typeof(int),
                 helloArgs,
-                typeof(TDynamicMethod).Module);
+                typeof(string).Module);
 
-            
-            ILGenerator adderIL = hello.GetILGenerator();
-            Type overflow = typeof(OverflowException);
-            ConstructorInfo exCtorInfo = overflow.GetConstructor(
-                new Type[]
-                    {typeof(string)});
-            MethodInfo exToStrMI = overflow.GetMethod("ToString");
-            MethodInfo writeLineMI = typeof(Console).GetMethod("WriteLine",
-                new Type[]
-                {
-                    typeof(string),
-                    typeof(string)
-                });
+            // Create an array that specifies the parameter types of the
+            // overload of Console.WriteLine to be used in Hello.
+            Type[] writeStringArgs = {typeof(string)};
+            // Get the overload of Console.WriteLine that has one
+            // String parameter.
+            MethodInfo writeString = typeof(Console).GetMethod("WriteLine",
+                writeStringArgs);
 
-            LocalBuilder tmp1 = adderIL.DeclareLocal(typeof(int));
-            LocalBuilder tmp2 = adderIL.DeclareLocal(overflow);
+            // Get an ILGenerator and emit a body for the dynamic method,
+            // using a stream size larger than the IL that will be
+            // emitted.
+            ILGenerator il = hello.GetILGenerator(256);
+            // Load the first argument, which is a string, onto the stack.
+            il.Emit(OpCodes.Ldarg_0);
+            // Call the overload of Console.WriteLine that prints a string.
+            il.EmitCall(OpCodes.Call, writeString, null);
+            // The Hello method returns the value of the second argument;
+            // to do this, load the onto the stack and return.
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Ret);
 
-            Label failed = adderIL.DefineLabel();
-            Label endOfMthd = adderIL.DefineLabel();
-
-            Label exBlock = adderIL.BeginExceptionBlock();
-
-            adderIL.Emit(OpCodes.Ldarg_0);
-            adderIL.Emit(OpCodes.Ldc_I4_S, 100);
-            adderIL.Emit(OpCodes.Bgt_S, failed);
-
-            adderIL.Emit(OpCodes.Ldarg_1);
-            adderIL.Emit(OpCodes.Ldc_I4_S, 100);
-            adderIL.Emit(OpCodes.Bgt_S, failed);
-
-            adderIL.Emit(OpCodes.Ldarg_0);
-            adderIL.Emit(OpCodes.Ldarg_1);
-            adderIL.Emit(OpCodes.Add_Ovf_Un);
-
-            adderIL.Emit(OpCodes.Stloc_S, tmp1);
-            adderIL.Emit(OpCodes.Br_S, endOfMthd);
-
-            adderIL.MarkLabel(failed);
-            adderIL.Emit(OpCodes.Ldstr, "Cannot accept values over 100 for add.");
-            adderIL.Emit(OpCodes.Newobj, exCtorInfo);
-
-
-
-            adderIL.Emit(OpCodes.Stloc_S, tmp2);
-            adderIL.Emit(OpCodes.Ldloc_S, tmp2);
-
-            adderIL.ThrowException(overflow);
-            adderIL.BeginCatchBlock(overflow);
-
-            adderIL.Emit(OpCodes.Stloc_S, tmp2);
-            adderIL.Emit(OpCodes.Ldstr, "Caught {0}");
-
-            adderIL.Emit(OpCodes.Ldloc_S, tmp2);
-            adderIL.EmitCall(OpCodes.Callvirt, exToStrMI, null);
-
-            adderIL.EmitCall(OpCodes.Call, writeLineMI, null);
-
-            adderIL.Emit(OpCodes.Ldc_I4_M1);
-            adderIL.Emit(OpCodes.Stloc_S, tmp1);
-
-
-            adderIL.EndExceptionBlock();
-
-            adderIL.MarkLabel(endOfMthd);
-            adderIL.Emit(OpCodes.Ldloc_S, tmp1);
-            adderIL.Emit(OpCodes.Ret);
+            // Add parameter information to the dynamic method. (This is not
+            // necessary, but can be useful for debugging.) For each parameter,
+            // identified by position, supply the parameter attributes and a
+            // parameter name.
+            hello.DefineParameter(1, ParameterAttributes.In, "message");
+            hello.DefineParameter(2, ParameterAttributes.In, "valueToReturn");
             return hello;
+
         }
     }
 }

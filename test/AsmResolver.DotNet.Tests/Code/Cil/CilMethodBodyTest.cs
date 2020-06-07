@@ -134,6 +134,14 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.NotNull(body);
             
             Assert.NotEmpty(body.Instructions);
+            
+            Assert.Equal(body.Instructions.Select(q=>q.OpCode),new CilOpCode[]
+            {
+                CilOpCodes.Ldarg_0, 
+                CilOpCodes.Call,
+                CilOpCodes.Ldarg_1,
+                CilOpCodes.Ret
+            });
         }
     }
 }

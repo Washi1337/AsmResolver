@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 
-namespace AsmResolver
+namespace AsmResolver.DotNet
 {
-    public class FieldReader
+    internal class FieldReader
     {
         /// <summary>
         /// Finds and gets value of non-public field.
