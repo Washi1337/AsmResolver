@@ -3,19 +3,130 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Code.Cil
 {
     /// <summary>
-    /// Represents a method body of a method defined in a .NET assembly, implemented using the Common Intermediate Language (CIL). 
+    ///     Represents a method body of a method defined in a .NET assembly, implemented using the Common Intermediate Language
+    ///     (CIL).
     /// </summary>
     public class CilMethodBody : MethodBody, ICilOperandResolver
     {
-         /// <summary>
+        /// <summary>
+        ///     Creates a new method body.
+        /// </summary>
+        /// <param name="owner">The method that owns the method body.</param>
+        public CilMethodBody(MethodDefinition owner)
+        {
+            Owner = owner;
+            Instructions = new CilInstructionCollection(this);
+        }
+
+        /// <summary>
+        ///     Gets the method that owns the method body.
+        /// </summary>
+        public MethodDefinition Owner { get; }
+
+        /// <summary>
+        ///     Gets a collection of instructions to be executed in the method.
+        /// </summary>
+        public CilInstructionCollection Instructions { get; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating the maximum amount of values stored onto the stack.
+        /// </summary>
+        public int MaxStack { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether a .NET assembly builder should automatically compute and update the
+        ///     <see cref="MaxStack" /> property according to the contents of the method body.
+        /// </summary>
+        public bool ComputeMaxStackOnBuild { get; set; } = true;
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether all local variables should be initialized to zero by the runtime
+        ///     upon execution of the method body.
+        /// </summary>
+        public bool InitializeLocals { get; set; }
+
+        /// <summary>
+        ///     Gets a value indicating whether the method body is considered fat. That is, it has at least one of the
+        ///     following properties
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <description>The method is larger than 64 bytes.</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The method defines exception handlers.</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The method defines local variables.</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The method needs more than 8 values on the stack.</description>
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        public bool IsFat
+        {
+            get
+            {
+                if (ExceptionHandlers.Count > 0
+                    || LocalVariables.Count > 0
+                    || MaxStack > 8)
+                    return true;
+
+                if (Instructions.Count == 0)
+                    return false;
+
+                var last = Instructions[Instructions.Count - 1];
+                return last.Offset + last.Size > 64;
+            }
+        }
+
+        /// <summary>
+        ///     Gets a collection of local variables defined in the method body.
+        /// </summary>
+        public CilLocalVariableCollection LocalVariables { get; } = new CilLocalVariableCollection();
+
+        /// <summary>
+        ///     Gets a collection of regions protected by exception handlers, finally or faulting clauses defined in the method
+        ///     body.
+        /// </summary>
+        public IList<CilExceptionHandler> ExceptionHandlers { get; } = new List<CilExceptionHandler>();
+
+        /// <inheritdoc />
+        IMetadataMember ICilOperandResolver.ResolveMember(MetadataToken token)
+        {
+            Owner.Module.TryLookupMember(token, out var member);
+            return member;
+        }
+
+        /// <inheritdoc />
+        string ICilOperandResolver.ResolveString(MetadataToken token)
+        {
+            Owner.Module.TryLookupString(token, out var value);
+            return value;
+        }
+
+        /// <inheritdoc />
+        CilLocalVariable ICilOperandResolver.ResolveLocalVariable(int index)
+        {
+            return index >= 0 && index < LocalVariables.Count ? LocalVariables[index] : null;
+        }
+
+        /// <inheritdoc />
+        Parameter ICilOperandResolver.ResolveParameter(int index)
+        {
+            var parameters = Owner.Parameters;
+            return parameters.ContainsSignatureIndex(index) ? parameters.GetBySignatureIndex(index) : null;
+        }
+
+        /// <summary>
         ///     Creates a CIL method body from a dynamic method.
         /// </summary>
         /// <param name="method">The method that owns the method body.</param>
@@ -26,14 +137,16 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </param>
         /// <returns>The method body.</returns>
         public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj,
-            ICilOperandResolver operandResolver = null)
+            ICilOperandResolver operandResolver = null, ReferenceImporter importer = null)
         {
             var result = new CilMethodBody(method);
 
             if (operandResolver is null)
                 operandResolver = result;
 
-          
+            if (importer is null)
+                importer = new ReferenceImporter(method.Module);
+
             //Get dynamic method
             if (dynamicMethodObj is Delegate deleg)
                 dynamicMethodObj = deleg.Method;
@@ -41,11 +154,9 @@ namespace AsmResolver.DotNet.Code.Cil
             if (dynamicMethodObj is null)
                 throw new ArgumentNullException(nameof(dynamicMethodObj));
 
-            if (dynamicMethodObj.GetType().FullName.Contains("RTDynamicMethod"))
-            {
+            if (dynamicMethodObj.GetType().ToString().Contains("RTDynamicMethod"))
                 dynamicMethodObj = FieldReader.ReadField<object>(dynamicMethodObj, "m_owner");
-            }
-            
+
             if (dynamicMethodObj.GetType().ToString().Contains("DynamicMethod"))
             {
                 var resolver = FieldReader.ReadField<object>(dynamicMethodObj, "m_resolver");
@@ -53,19 +164,17 @@ namespace AsmResolver.DotNet.Code.Cil
                     dynamicMethodObj = resolver;
             }
 
-            
             //Create Resolver if it does not exist.
             if (dynamicMethodObj.GetType().ToString() != "System.Reflection.Emit.DynamicResolver" &&
                 dynamicMethodObj.GetType().ToString().Contains("DynamicMethod"))
-            {
                 dynamicMethodObj = Activator.CreateInstance(
                     typeof(OpCode).Module.GetTypes()
-                        .First(t => t.Name == "DynamicResolver"), (BindingFlags)(-1), null,
-                    new object[] {dynamicMethodObj.GetType().GetRuntimeMethods().FirstOrDefault(q=>q.Name == "GetILGenerator").Invoke(dynamicMethodObj,null)}, null);
-            }
-            
-
-            var importer = new ReferenceImporter(method.Module);
+                        .First(t => t.Name == "DynamicResolver"), (BindingFlags) (-1), null,
+                    new[]
+                    {
+                        dynamicMethodObj.GetType().GetRuntimeMethods().First(q => q.Name == "GetILGenerator")
+                            .Invoke(dynamicMethodObj, null)
+                    }, null);
 
             //Get Runtime Fields
             var code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
@@ -85,8 +194,10 @@ namespace AsmResolver.DotNet.Code.Cil
             // TODO: Read Locals & ExceptionHandlers.
 
             //Local Variables
-            
-            var locals = CallingConventionSignature.FromReader(method.Module, new ByteArrayReader(localSig)) as LocalVariablesSignature;
+
+            var locals =
+                CallingConventionSignature.FromReader(method.Module, new ByteArrayReader(localSig)) as
+                    LocalVariablesSignature;
 
             for (var i = 0; i < locals?.VariableTypes.Count; i++)
                 result.LocalVariables.Add(new CilLocalVariable(locals.VariableTypes[i]));
@@ -229,8 +340,8 @@ namespace AsmResolver.DotNet.Code.Cil
                     if (obj.GetType().ToString() == "System.Reflection.Emit.VarArgMethod")
                     {
                         var method = GetVarArgMethod(obj);
-                        if (!(method.GetType().ToString().Contains("DynamicMethod")))
-                            return importer.ImportMethod((MethodInfo)method);
+                        if (!method.GetType().ToString().Contains("DynamicMethod"))
+                            return importer.ImportMethod((MethodInfo) method);
                         obj = method;
                     }
 
@@ -263,13 +374,16 @@ namespace AsmResolver.DotNet.Code.Cil
             // This is either a DynamicMethod or a MethodInfo
             return FieldReader.ReadField<MethodInfo>(obj, "m_method");
         }
+
         /// <summary>
-        /// Creates a CIL method body from a raw CIL method body. 
+        ///     Creates a CIL method body from a raw CIL method body.
         /// </summary>
         /// <param name="method">The method that owns the method body.</param>
         /// <param name="rawBody">The raw method body.</param>
-        /// <param name="operandResolver">The object instance to use for resolving operands of an instruction in the
-        /// method body.</param>
+        /// <param name="operandResolver">
+        ///     The object instance to use for resolving operands of an instruction in the
+        ///     method body.
+        /// </param>
         /// <returns>The method body.</returns>
         public static CilMethodBody FromRawMethodBody(MethodDefinition method, CilRawMethodBody rawBody,
             ICilOperandResolver operandResolver = null)
@@ -302,7 +416,7 @@ namespace AsmResolver.DotNet.Code.Cil
             // Resolve operands.
             foreach (var instruction in result.Instructions)
                 instruction.Operand = ResolveOperand(result, instruction, operandResolver) ?? instruction.Operand;
-            
+
             return result;
         }
 
@@ -368,158 +482,27 @@ namespace AsmResolver.DotNet.Code.Cil
                 && module.TryLookupMember(fatBody.LocalVarSigToken, out var member)
                 && member is StandAloneSignature signature
                 && signature.Signature is LocalVariablesSignature localVariablesSignature)
-            {
                 foreach (var type in localVariablesSignature.VariableTypes)
                     result.LocalVariables.Add(new CilLocalVariable(type));
-            }
         }
 
         private static void ReadExceptionHandlers(CilRawFatMethodBody fatBody, CilMethodBody result)
         {
             foreach (var section in fatBody.ExtraSections)
-            {
                 if (section.IsEHTable)
                 {
                     var reader = new ByteArrayReader(section.Data);
-                    int size = section.IsFat
+                    var size = section.IsFat
                         ? CilExceptionHandler.FatExceptionHandlerSize
                         : CilExceptionHandler.TinyExceptionHandlerSize;
 
                     while (reader.CanRead(size))
                         result.ExceptionHandlers.Add(CilExceptionHandler.FromReader(result, reader, section.IsFat));
                 }
-            }
         }
 
         /// <summary>
-        /// Creates a new method body.
-        /// </summary>
-        /// <param name="owner">The method that owns the method body.</param>
-        public CilMethodBody(MethodDefinition owner)
-        {
-            Owner = owner;
-            Instructions = new CilInstructionCollection(this);
-        }
-
-        /// <summary>
-        /// Gets the method that owns the method body.
-        /// </summary>
-        public MethodDefinition Owner
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets a collection of instructions to be executed in the method.
-        /// </summary>
-        public CilInstructionCollection Instructions
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating the maximum amount of values stored onto the stack.
-        /// </summary>
-        public int MaxStack
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether a .NET assembly builder should automatically compute and update the
-        /// <see cref="MaxStack"/> property according to the contents of the method body. 
-        /// </summary>
-        public bool ComputeMaxStackOnBuild
-        {
-            get;
-            set;
-        } = true;
-
-        /// <summary>
-        /// Gets or sets a value indicating whether all local variables should be initialized to zero by the runtime
-        /// upon execution of the method body.
-        /// </summary>
-        public bool InitializeLocals
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the method body is considered fat. That is, it has at least one of the
-        /// following properties
-        /// <list type="bullet">
-        ///    <item><description>The method is larger than 64 bytes.</description></item>
-        ///    <item><description>The method defines exception handlers.</description></item>
-        ///    <item><description>The method defines local variables.</description></item>
-        ///    <item><description>The method needs more than 8 values on the stack.</description></item>
-        /// </list>
-        /// </summary>
-        public bool IsFat
-        {
-            get
-            {
-                if (ExceptionHandlers.Count > 0
-                    || LocalVariables.Count > 0
-                    || MaxStack > 8)
-                {
-                    return true;
-                }
-
-                if (Instructions.Count == 0)
-                    return false;
-
-                var last = Instructions[Instructions.Count - 1];
-                return last.Offset + last.Size > 64;
-            }
-        }
-
-        /// <summary>
-        /// Gets a collection of local variables defined in the method body.
-        /// </summary>
-        public CilLocalVariableCollection LocalVariables
-        {
-            get;
-        } = new CilLocalVariableCollection();
-
-        /// <summary>
-        /// Gets a collection of regions protected by exception handlers, finally or faulting clauses defined in the method body.
-        /// </summary>
-        public IList<CilExceptionHandler> ExceptionHandlers
-        {
-            get;
-        } = new List<CilExceptionHandler>();
-
-        /// <inheritdoc />
-        IMetadataMember ICilOperandResolver.ResolveMember(MetadataToken token)
-        {
-            Owner.Module.TryLookupMember(token, out var member);
-            return member;
-        }
-
-        /// <inheritdoc />
-        string ICilOperandResolver.ResolveString(MetadataToken token)
-        {
-            Owner.Module.TryLookupString(token, out string value);
-            return value;
-        }
-
-        /// <inheritdoc />
-        CilLocalVariable ICilOperandResolver.ResolveLocalVariable(int index)
-        {
-            return index >= 0 && index < LocalVariables.Count ? LocalVariables[index] : null;
-        }
-
-        /// <inheritdoc />
-        Parameter ICilOperandResolver.ResolveParameter(int index)
-        {
-            var parameters = Owner.Parameters;
-            return parameters.ContainsSignatureIndex(index) ? parameters.GetBySignatureIndex(index) : null;
-        }
-
-        /// <summary>
-        /// Computes the maximum values pushed onto the stack by this method body.
+        ///     Computes the maximum values pushed onto the stack by this method body.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="StackImbalanceException">Occurs when the method body will result in an unbalanced stack.</exception>
@@ -568,8 +551,8 @@ namespace AsmResolver.DotNet.Code.Cil
                     visitedInstructions[currentState.InstructionIndex] = currentState;
 
                     // Compute next stack size.
-                    int popCount = instruction.GetStackPopCount(this);
-                    int nextStackSize = popCount == -1 ? 0 : currentState.StackSize - popCount;
+                    var popCount = instruction.GetStackPopCount(this);
+                    var nextStackSize = popCount == -1 ? 0 : currentState.StackSize - popCount;
                     if (nextStackSize < 0)
                         throw new StackImbalanceException(this, instruction.Offset);
                     nextStackSize += instruction.GetStackPushCount();
@@ -592,12 +575,10 @@ namespace AsmResolver.DotNet.Code.Cil
                                         nextStackSize));
                                     break;
                                 case CilOperandType.InlineSwitch:
-                                    foreach (var target in ((IEnumerable<ICilLabel>) instruction.Operand))
-                                    {
+                                    foreach (var target in (IEnumerable<ICilLabel>) instruction.Operand)
                                         agenda.Push(new StackState(
                                             Instructions.GetIndexByOffset(target.Offset),
                                             nextStackSize));
-                                    }
 
                                     break;
                             }
@@ -627,17 +608,17 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
-        /// Provides information about the state of the stack at a particular point of execution in a method.  
+        ///     Provides information about the state of the stack at a particular point of execution in a method.
         /// </summary>
         private struct StackState
         {
             /// <summary>
-            /// The index of the instruction the state is associated to.
+            ///     The index of the instruction the state is associated to.
             /// </summary>
             public readonly int InstructionIndex;
 
             /// <summary>
-            /// The number of values currently on the stack.
+            ///     The number of values currently on the stack.
             /// </summary>
             public readonly int StackSize;
 
@@ -656,4 +637,3 @@ namespace AsmResolver.DotNet.Code.Cil
         }
     }
 }
-
