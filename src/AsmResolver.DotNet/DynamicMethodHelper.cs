@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet
                 //Sample needed!
                 throw new NotImplementedException("Exception Handlers From ehHeader Not Supported Yet.");
             if (ehInfos != null && ehInfos.Count > 0)
-                for (var i = 0; i < ehInfos.Count(); i++)
+                for (var i = 0; i < ehInfos.Count; i++)
                 {
                     //Get ExceptionHandlerInfo Field Values
                     var endFinally = FieldReader.ReadField<int>(ehInfos[i], "m_endFinally");
@@ -113,15 +114,15 @@ namespace AsmResolver.DotNet
             {
                 case TableIndex.TypeDef:
                     var type = tokens[(int) token.Rid];
-                    if (type is RuntimeTypeHandle)
-                        return importer.ImportType(Type.GetTypeFromHandle((RuntimeTypeHandle) type));
+                    if (type is RuntimeTypeHandle runtimeTypeHandle)
+                        return importer.ImportType(Type.GetTypeFromHandle(runtimeTypeHandle));
                     break;
                 case TableIndex.Field:
                     var field = tokens[(int) token.Rid];
                     if (field is null)
                         return null;
-                    if (field is RuntimeFieldHandle)
-                        return importer.ImportField(FieldInfo.GetFieldFromHandle((RuntimeFieldHandle) field));
+                    if (field is RuntimeFieldHandle runtimeFieldHandle)
+                        return importer.ImportField(FieldInfo.GetFieldFromHandle(runtimeFieldHandle));
 
                     if (field.GetType().FullName == "System.Reflection.Emit.GenericFieldInfo")
                         return importer.ImportField(FieldInfo.GetFieldFromHandle(
@@ -131,8 +132,8 @@ namespace AsmResolver.DotNet
                 case TableIndex.Method:
                 case TableIndex.MemberRef:
                     var obj = tokens[(int) token.Rid];
-                    if (obj is RuntimeMethodHandle)
-                        return importer.ImportMethod(MethodBase.GetMethodFromHandle((RuntimeMethodHandle) obj));
+                    if (obj is RuntimeMethodHandle methodHandle)
+                        return importer.ImportMethod(MethodBase.GetMethodFromHandle(methodHandle));
                     if (obj.GetType().FullName == "System.Reflection.Emit.GenericMethodInfo")
                     {
                         var context =
@@ -152,6 +153,43 @@ namespace AsmResolver.DotNet
                     return tokens[(int) token.Rid] as string;
             }
             return null;
+        }
+
+        public static object ResolveDynamicResolver(object dynamicMethodObj)
+        {
+            //Convert dynamicMethodObj to DynamicResolver
+            if (dynamicMethodObj is Delegate del)
+                dynamicMethodObj = del.Method;
+
+            if (dynamicMethodObj is null)
+                throw new ArgumentNullException(nameof(dynamicMethodObj));
+
+            //We use GetType().FullName just to avoid the System.Reflection.Emit.LightWeight Dll
+            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.RTDynamicMethod")
+                dynamicMethodObj = FieldReader.ReadField<object>(dynamicMethodObj, "m_owner");
+
+            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")
+            {
+                var resolver = FieldReader.ReadField<object>(dynamicMethodObj, "m_resolver");
+                if (resolver != null)
+                    dynamicMethodObj = resolver;
+            }
+            //Create Resolver if it does not exist.
+            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")
+            {
+                var dynamicResolver = typeof(OpCode).Module.GetTypes()
+                    .First(t => t.Name == "DynamicResolver");
+                
+                var ilGenerator = dynamicMethodObj.GetType().GetRuntimeMethods().First(q => q.Name == "GetILGenerator")
+                    .Invoke(dynamicMethodObj, null);
+                
+                //Create instance of dynamicResolver
+                dynamicMethodObj = Activator.CreateInstance(dynamicResolver, (BindingFlags) (-1), null, new[] 
+                {
+                    ilGenerator
+                }, null);
+            }
+            return dynamicMethodObj;
         }
     }
 }

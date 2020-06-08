@@ -2,7 +2,7 @@
 
 namespace AsmResolver.DotNet
 {
-    internal class FieldReader
+    internal static class FieldReader
     {
         /// <summary>
         /// Finds and gets value of non-public field.

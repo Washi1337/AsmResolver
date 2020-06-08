@@ -38,31 +38,8 @@ namespace AsmResolver.DotNet.Code.Cil
             
             importer ??= new ReferenceImporter(method.Module);
             
-            //Convert dynamicMethodObj to DynamicResolver
-            if (dynamicMethodObj is Delegate del)
-                dynamicMethodObj = del.Method;
+            dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
 
-            if (dynamicMethodObj is null)
-                throw new ArgumentNullException(nameof(dynamicMethodObj));
-
-            //We use GetType().FullName just to avoid the System.Reflection.Emit.LightWeight Dll
-            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.RTDynamicMethod")
-                dynamicMethodObj = FieldReader.ReadField<object>(dynamicMethodObj, "m_owner");
-
-            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")
-            {
-                var resolver = FieldReader.ReadField<object>(dynamicMethodObj, "m_resolver");
-                if (resolver != null)
-                    dynamicMethodObj = resolver;
-            }
-            //Create Resolver if it does not exist.
-            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod") 
-                dynamicMethodObj = Activator.CreateInstance(
-                    typeof(OpCode).Module.GetTypes()
-                        .First(t => t.Name == "DynamicResolver"), (BindingFlags)(-1), null, 
-                    new [] {dynamicMethodObj.GetType().GetRuntimeMethods().First(q=>q.Name == "GetILGenerator").Invoke(dynamicMethodObj,null)}, null);
-            
-            
             //Get Runtime Fields
             var code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
             var scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope");
@@ -86,9 +63,12 @@ namespace AsmResolver.DotNet.Code.Cil
             
             // Resolve all operands.
             foreach (var instruction in result.Instructions)
-                instruction.Operand =
-                    result.ResolveOperandReflection(instruction, operandResolver, tokenList, importer) ??
+            {
+                instruction.Operand = 
+                    result.ResolveOperandReflection(instruction, operandResolver, tokenList, importer) ?? 
                     instruction.Operand;
+            }
+
             return result;
         } 
          

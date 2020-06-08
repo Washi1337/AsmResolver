@@ -115,9 +115,15 @@ namespace AsmResolver.DotNet.Signatures.Types
                         4 => new IntPtr(reader.ReadInt32()),
                         _ => new IntPtr(reader.ReadInt64())
                     };
-                    return new TypeDefOrRefSignature(new ReferenceImporter(module).ImportType((Type) typeof(Type)
-                        .GetMethod("GetTypeFromHandleUnsafe", ((BindingFlags) (-1)), null, new[] {typeof(IntPtr)}, null)
-                        ?.Invoke(null, new object[] {address})));
+                    
+                    //Get Internal Method Through Reflection
+                    var GetTypeFromHandleUnsafeReflection = typeof(Type)
+                        .GetMethod("GetTypeFromHandleUnsafe", ((BindingFlags) (-1)), null, new[] {typeof(IntPtr)},
+                            null);
+                    //Invoke It To Get The Value
+                    var Type = (Type)GetTypeFromHandleUnsafeReflection?.Invoke(null, new object[] {address});
+                    //Import it
+                    return new TypeDefOrRefSignature(new ReferenceImporter(module).ImportType((Type)));
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
             }
