@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
+﻿using System.Reflection;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using MethodAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.MethodAttributes;
+
 namespace AsmResolver.DotNet
 {
     /// <summary>
@@ -51,6 +47,8 @@ namespace AsmResolver.DotNet
                 methodBase.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 returnType, parameterTypes);
         }
+        
+        /// <inheritdoc />
         public override ModuleDefinition Module { get; }
         
     }

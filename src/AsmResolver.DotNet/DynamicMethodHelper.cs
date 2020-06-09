@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet
             for (var i = 0; i < locals?.VariableTypes.Count; i++)
                 methodBody.LocalVariables.Add(new CilLocalVariable(locals.VariableTypes[i]));
         }
+        
         public static void ReadReflectionExceptionHandlers(this CilMethodBody methodBody,
             IList<object> ehInfos, byte[] ehHeader, ReferenceImporter importer)
         {
@@ -25,17 +26,17 @@ namespace AsmResolver.DotNet
                 //Sample needed!
                 throw new NotImplementedException("Exception Handlers From ehHeader Not Supported Yet.");
             if (ehInfos != null && ehInfos.Count > 0)
+            {
                 for (var i = 0; i < ehInfos.Count; i++)
                 {
                     //Get ExceptionHandlerInfo Field Values
                     var endFinally = FieldReader.ReadField<int>(ehInfos[i], "m_endFinally");
                     var endFinallyLabel = endFinally < 0
-                        ? null
-                        : methodBody.Instructions.GetByOffset(endFinally)?.CreateLabel() ??
+                        ? null 
+                        : methodBody.Instructions.GetByOffset(endFinally)?.CreateLabel() ?? 
                           new CilOffsetLabel(endFinally);
                     var endTry = FieldReader.ReadField<int>(ehInfos[i], "m_endAddr");
-                    var endTryLabel = methodBody.Instructions.GetByOffset(endTry)?.CreateLabel() ??
-                                      new CilOffsetLabel(endTry);
+                    var endTryLabel = methodBody.Instructions.GetByOffset(endTry)?.CreateLabel() ?? new CilOffsetLabel(endTry);
                     var handlerEnd = FieldReader.ReadField<int[]>(ehInfos[i], "m_catchEndAddr")[i];
                     var exceptionType = FieldReader.ReadField<Type[]>(ehInfos[i], "m_catchClass")[i];
                     var handlerStart = FieldReader.ReadField<int[]>(ehInfos[i], "m_catchAddr")[i];
@@ -46,20 +47,19 @@ namespace AsmResolver.DotNet
                     var handler = new CilExceptionHandler
                     {
                         HandlerType = handlerType,
-                        TryStart = methodBody.Instructions.GetByOffset(tryStart)?.CreateLabel() ??
-                                   new CilOffsetLabel(tryStart),
+                        TryStart = methodBody.Instructions.GetByOffset(tryStart)?.CreateLabel() ?? new CilOffsetLabel(tryStart),
                         TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
                         FilterStart = null,
-                        HandlerStart = methodBody.Instructions.GetByOffset(handlerStart)?.CreateLabel() ??
-                                       new CilOffsetLabel(handlerStart),
-                        HandlerEnd = methodBody.Instructions.GetByOffset(handlerEnd)?.CreateLabel() ??
-                                     new CilOffsetLabel(handlerEnd),
+                        HandlerStart = methodBody.Instructions.GetByOffset(handlerStart)?.CreateLabel() ?? new CilOffsetLabel(handlerStart),
+                        HandlerEnd = methodBody.Instructions.GetByOffset(handlerEnd)?.CreateLabel() ?? new CilOffsetLabel(handlerEnd),
                         ExceptionType = importer.ImportType(exceptionType)
                     };
 
                     methodBody.ExceptionHandlers.Add(handler);
                 }
+            }
         }
+        
         public static object ResolveOperandReflection(this CilMethodBody methodBody, CilInstruction instruction,
             ICilOperandResolver resolver, List<object> Tokens, ReferenceImporter Importer)
         {
