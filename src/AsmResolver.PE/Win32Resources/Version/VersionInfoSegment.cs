@@ -28,7 +28,10 @@ namespace AsmResolver.PE.Win32Resources.Version
                 throw new FormatException($"Input stream does not point to a {VsVersionInfoKey} entry.");
             
             var result = new VersionInfoSegment();
+
+            reader.Align(4);
             result.FixedVersionInfo = FixedVersionInfo.FromReader(reader);
+            
             return result;
         }
 

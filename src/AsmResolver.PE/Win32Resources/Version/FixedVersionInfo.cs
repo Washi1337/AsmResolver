@@ -1,3 +1,5 @@
+using System;
+
 namespace AsmResolver.PE.Win32Resources.Version
 {
     /// <summary>
@@ -6,6 +8,8 @@ namespace AsmResolver.PE.Win32Resources.Version
     /// </summary>
     public class FixedVersionInfo : SegmentBase
     {
+        public const uint Signature = 0xFEEF04BD;
+        
         /// <summary>
         /// Reads a single fixed version info structure from an input stream.
         /// </summary>
@@ -16,6 +20,12 @@ namespace AsmResolver.PE.Win32Resources.Version
             var result = new FixedVersionInfo();
             result.UpdateOffsets(reader.FileOffset, reader.Rva);
 
+            uint signature = reader.ReadUInt32();
+            if (signature != Signature)
+                throw new FormatException($"Input stream does not point to a valid FixedVersionInfo structure.");
+
+            uint structVersion = reader.ReadUInt32();
+            
             result.FileVersion = ReadVersion(reader);
             result.ProductVersion = ReadVersion(reader);
             result.FileFlagsMask = (FileFlags) reader.ReadUInt32();
