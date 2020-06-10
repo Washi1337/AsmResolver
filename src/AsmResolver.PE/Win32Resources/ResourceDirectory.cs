@@ -53,6 +53,15 @@ namespace AsmResolver.PE.Win32Resources
         {
             Id = id;
         }
+
+        /// <summary>
+        /// Creates a new resource directory defined by its resource type. 
+        /// </summary>
+        /// <param name="type">The type.</param>
+        public ResourceDirectory(ResourceType type)
+        {
+            Type = type;
+        }
         
         /// <inheritdoc />
         public string Name
@@ -73,6 +82,13 @@ namespace AsmResolver.PE.Win32Resources
 
         /// <inheritdoc />
         bool IResourceEntry.IsData => false;
+
+        /// <inheritdoc />
+        public ResourceType Type
+        {
+            get => (ResourceType) Id;
+            set => Id = (uint) value;
+        }
 
         /// <inheritdoc />
         public uint Characteristics
