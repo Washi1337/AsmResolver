@@ -25,6 +25,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\AsmResolver.PE\AsmResolver.PE.csproj" />
       <ProjectReference Include="..\AsmResolver\AsmResolver.csproj" />
     </ItemGroup>
 

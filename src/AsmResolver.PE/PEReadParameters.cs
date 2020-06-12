@@ -20,7 +20,7 @@ namespace AsmResolver.PE
         {
             ReferenceResolver = resolver;
             MetadataStreamReader = new DefaultMetadataStreamReader(resolver);
-            Win32ResourceDataReader = new DefaultWin32ResourceDataReader();
+            Win32ResourceDataReader = new DefaultResourceDataReader();
         }
 
         /// <summary>
