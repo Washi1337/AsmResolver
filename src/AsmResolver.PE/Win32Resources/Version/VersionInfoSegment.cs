@@ -37,9 +37,11 @@ namespace AsmResolver.PE.Win32Resources.Version
             result.FixedVersionInfo = FixedVersionInfo.FromReader(reader);
 
             // Read children.
-            reader.Align(4);
             while (reader.FileOffset - start < header.Length)
+            {
+                reader.Align(4);
                 result.AddEntry(ReadNextEntry(reader));
+            }
 
             return result;
         }
@@ -100,7 +102,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <param name="name">The name of the child.</param>
         /// <typeparam name="TEntry">The type of the version table entry to lookup.</typeparam>
         /// <returns>The entry.</returns>
-        public TEntry GetEntry<TEntry>(string name) 
+        public TEntry GetChild<TEntry>(string name) 
             where TEntry : VersionTableEntry
         {
             return this[name] as TEntry;

@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Win32Resources.Version
     /// Represents the organization of data in a file-version resource. It contains a string that describes a
     /// specific aspect of a file, for example, a file's version, its copyright notices, or its trademarks.
     /// </summary>
-    public class StringTableEntry : VersionTableEntry 
+    public class StringTableEntry : VersionTableEntry
     {
         /// <summary>
         /// The name of the string describing the comments assigned to the executable file.
@@ -18,12 +18,12 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// The name of the string describing the name of the company that developed the executable file.
         /// </summary>
         public const string CompanyNameKey = "CompanyName";
-        
+
         /// <summary>
         /// The name of the string describing the executable in such a way that it can be presented to users.
         /// </summary>
         public const string FileDescriptionKey = "FileDescription";
-        
+
         /// <summary>
         /// The name of the string describing the version of the file.
         /// </summary>
@@ -76,10 +76,24 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <returns>The read structure.</returns>
         public static StringTableEntry FromReader(IBinaryStreamReader reader)
         {
+            uint start = reader.FileOffset;
+            
+            // Read header.
             var header = ResourceTableHeader.FromReader(reader);
             reader.Align(4);
+
+            // Read value.
+            var data = new byte[header.ValueLength * sizeof(char)];
+            int count = reader.ReadBytes(data, 0, data.Length);
             
-            return new StringTableEntry(header.Key, reader.ReadUnicodeString());
+            // Exclude zero terminator.
+            count = Math.Max(count - 2, 0);
+            string value = Encoding.Unicode.GetString(data, 0, count);
+            
+            // Skip any unprocessed bytes.
+            reader.FileOffset = start + header.Length;
+
+            return new StringTableEntry(header.Key, value);
         }
 
         /// <summary>

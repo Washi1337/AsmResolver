@@ -26,9 +26,11 @@ namespace AsmResolver.PE.Win32Resources.Version
 
             var result = new StringTable((ushort) (rawKey >> 16), (ushort) (rawKey & 0xFFFF));
             
-            reader.Align(4);
             while (reader.FileOffset - start < header.Length)
+            {
+                reader.Align(4);
                 result.Entries.Add(StringTableEntry.FromReader(reader));
+            }
 
             return result;
         }
