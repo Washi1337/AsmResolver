@@ -69,39 +69,41 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private (string Namespace, IList<string> TypeNames) ParseNamespaceTypeName()
         {
-            string ns = null;
             var names = new List<string>();
-            
-            var nextToken = Expect(TypeNameTerminal.Identifier);
-            
-            switch (_lexer.Peek().Terminal)
-            {
-                case TypeNameTerminal.Dot:
-                    ns = ParseNamespaceSpec(nextToken);
-                    break;
-                case TypeNameTerminal.Plus:
-                    break;
-                default:
-                    names.Add(nextToken.Text);
-                    break;
-            }
 
+            (string ns, string name) = ParseTopLevelTypeName();
+
+            names.Add(name);
             return (ns, names);
         }
 
-        private string ParseNamespaceSpec(TypeNameToken initialToken)
+        private (string Namespace, string Name) ParseTopLevelTypeName()
         {
-            var builder = new StringBuilder();
-            builder.Append(initialToken.Text);
-            
-            while (TryExpect(TypeNameTerminal.Dot).HasValue)
-            {
-                var identifier = Expect(TypeNameTerminal.Identifier);
-                builder.Append('.');
-                builder.Append(identifier.Text);
-            }
+            var namespaceBuilder = new StringBuilder();
 
-            return builder.ToString();
+            string name = null;
+            
+            while (true)
+            {
+                var nextIdentifier = TryExpect(TypeNameTerminal.Identifier);
+                if (!nextIdentifier.HasValue)
+                    break;
+                
+                name = nextIdentifier.Value.Text;
+
+                if (!TryExpect(TypeNameTerminal.Dot).HasValue)
+                    break;
+                
+                if (namespaceBuilder.Length > 0)
+                    namespaceBuilder.Append('.');
+                namespaceBuilder.Append(name);
+            }
+            
+            if (name is null)
+                throw new FormatException("Expected identifier.");
+
+            string ns = namespaceBuilder.Length == 0 ? null : namespaceBuilder.ToString();
+            return (ns, name);
         }
         
 

@@ -22,5 +22,16 @@ namespace AsmResolver.DotNet.Tests
             var type = TypeNameParser.Parse(_module, name);
             Assert.Equal(new TypeReference(_module, null, name).ToTypeSignature(), type, _comparer);
         }
+        
+        [Theory]
+        [InlineData("MyNamespace")]
+        [InlineData("MyNamespace.SubNamespace")]
+        [InlineData("MyNamespace.SubNamespace.SubSubNamespace")]
+        public void SimpleTypeWithNamespaceNoAssembly(string ns)
+        {
+            const string name = "MyType";
+            var type = TypeNameParser.Parse(_module, $"{ns}.{name}");
+            Assert.Equal(new TypeReference(_module, ns, name).ToTypeSignature(), type, _comparer);
+        }
     }
 }
