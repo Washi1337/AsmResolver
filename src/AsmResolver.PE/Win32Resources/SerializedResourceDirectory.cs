@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Win32Resources
 {
@@ -91,15 +93,34 @@ namespace AsmResolver.PE.Win32Resources
         /// <inheritdoc />
         protected override IList<IResourceEntry> GetEntries()
         {
-            if (_namedEntries + _idEntries == 0 // Optimisation + check for invalid resource directory offset. 
-                || _depth >= MaxDepth           // Prevent self loops.
-            )
+            var result = new OwnedCollection<IResourceDirectory, IResourceEntry>(this);
+            
+            // Optimisation, check for invalid resource directory offset, and prevention of self loop:
+            if (_namedEntries + _idEntries == 0 || _depth >= MaxDepth)
+                return result;
+
+            uint baseRva = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex].VirtualAddress;
+
+            // Create entries reader.
+            uint entryListSize = (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
+            var entriesReader = _peFile.CreateReaderAtFileOffset(_entriesOffset, entryListSize);
+
+            for (int i = 0; i < _namedEntries + _idEntries; i++)
             {
-                return new List<IResourceEntry>();
+                var rawEntry = new ResourceDirectoryEntry(_peFile, entriesReader);
+                
+                // Note: Even if creating the directory reader fails, we still want to include the directory entry
+                //       itself. In such a case, we expose the directory as an empty directory. This is why the
+                //       following statement is not used as a condition for an if statement.
+                
+                _peFile.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader);
+                
+                result.Add(rawEntry.IsSubDirectory
+                    ? (IResourceEntry) new SerializedResourceDirectory(_peFile, _dataReader, rawEntry, entryReader, _depth + 1)
+                    : new SerializedResourceData(_peFile, _dataReader, rawEntry, entryReader));
             }
 
-            return new SerializedResourceEntryList(this, _peFile, _dataReader,
-                _entriesOffset, _namedEntries, _idEntries, _depth + 1);
+            return result;
         }
 
     }
