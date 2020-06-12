@@ -29,6 +29,7 @@ namespace AsmResolver.PE.Win32Resources
     public class SerializedResourceEntryList : OwnedCollection<IResourceDirectory, IResourceEntry>
     {
         private readonly PEFile _peFile;
+        private readonly IWin32ResourceDataReader _dataReader;
         private readonly uint _entriesOffset;
         private readonly int _namedEntries;
         private readonly int _idEntries;
@@ -39,18 +40,20 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         /// <param name="owner">The directory owning the list.</param>
         /// <param name="peFile">The PE file containing the resources.</param>
+        /// <param name="dataReader">The instance responsible for reading and interpreting the data.</param>
         /// <param name="entriesOffset">The offset to the entries of the list.</param>
         /// <param name="namedEntries">The number of named entries.</param>
         /// <param name="idEntries">The number of unnamed entries.</param>
         /// <param name="depth">The current depth of the resource directory tree structure.</param>
-        public SerializedResourceEntryList(IResourceDirectory owner, PEFile peFile, uint entriesOffset,
-            int namedEntries, int idEntries, int depth)
+        public SerializedResourceEntryList(IResourceDirectory owner, PEFile peFile, IWin32ResourceDataReader dataReader,
+            uint entriesOffset, int namedEntries, int idEntries, int depth)
             : base(owner)
         {
             _namedEntries = namedEntries;
             _idEntries = idEntries;
             _depth = depth;
             _peFile = peFile;
+            _dataReader = dataReader;
             _entriesOffset = entriesOffset;
         }
 
@@ -69,8 +72,8 @@ namespace AsmResolver.PE.Win32Resources
                 _peFile.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader);
 
                 var entry = rawEntry.IsSubDirectory
-                    ? (IResourceEntry) new SerializedResourceDirectory(_peFile, rawEntry, entryReader, _depth)
-                    : new SerializedResourceData(_peFile, rawEntry, entryReader);
+                    ? (IResourceEntry) new SerializedResourceDirectory(_peFile, _dataReader, rawEntry, entryReader, _depth)
+                    : new SerializedResourceData(_peFile, _dataReader, rawEntry, entryReader);
 
                 Items.Add(entry);
             }
