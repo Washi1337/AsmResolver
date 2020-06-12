@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public override string Key => VarFileInfoKey;
 
         /// <inheritdoc />
-        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
+        protected override VersionTableValueType ValueType => VersionTableValueType.String;
             
         /// <summary>
         /// Gets a collection of tables stored in this VarFileInfo structure, typically containing a list of languages
@@ -50,7 +50,21 @@ namespace AsmResolver.PE.Win32Resources.Version
         } = new List<VarTable>();
 
         /// <inheritdoc />
-        protected override uint GetValueLength() => (uint) Tables.Sum(e => e.GetPhysicalSize());
+        public override uint GetPhysicalSize()
+        {
+            uint size = VersionTableEntryHeader.GetHeaderSize(Key);
+            
+            for (int i = 0; i < Tables.Count; i++)
+            {
+                size = size.Align(4);
+                size += Tables[i].GetPhysicalSize();
+            }
+
+            return size;
+        }
+
+        /// <inheritdoc />
+        protected override uint GetValueLength() => 0;
 
         /// <inheritdoc />
         protected override void WriteValue(IBinaryStreamWriter writer)

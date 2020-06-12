@@ -56,7 +56,7 @@ namespace AsmResolver.PE.Win32Resources
         }
 
         /// <inheritdoc />
-        protected override IReadableSegment GetContents()
+        protected override ISegment GetContents()
         {
             return _peFile.TryCreateReaderAtRva(_contentsRva, _contentsSize, out var reader)
                 ? DataSegment.FromReader(reader)

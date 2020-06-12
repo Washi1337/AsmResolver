@@ -25,7 +25,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets or sets the raw contents of the data entry.
         /// </summary>
-        IReadableSegment Contents
+        ISegment Contents
         {
             get;
             set;

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Win32Resources.Version;
 using Xunit;
 
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
                 .First(d => d.Type == ResourceType.Version);
 
             var data = (IResourceData) ((IResourceDirectory) directory.Entries[0]).Entries[0];
-            return VersionInfoResource.FromReader(data.Contents.CreateReader());
+            return VersionInfoResource.FromReader(((IReadableSegment) data.Contents).CreateReader());
         }
 
         [Fact]
