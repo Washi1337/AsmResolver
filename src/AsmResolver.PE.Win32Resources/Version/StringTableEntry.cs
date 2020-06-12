@@ -79,7 +79,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             uint start = reader.FileOffset;
             
             // Read header.
-            var header = ResourceTableHeader.FromReader(reader);
+            var header = VersionTableEntryHeader.FromReader(reader);
             reader.Align(4);
 
             // Read value.
@@ -114,7 +114,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <inheritdoc />
-        protected override ResourceValueType ValueType => ResourceValueType.String;
+        protected override VersionTableValueType ValueType => VersionTableValueType.String;
 
         /// <summary>
         /// Gets or sets the string value describing a specific aspect of a file.

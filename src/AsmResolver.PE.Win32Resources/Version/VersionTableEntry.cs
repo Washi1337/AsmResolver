@@ -16,7 +16,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <summary>
         /// Gets the value type of the table.
         /// </summary>
-        protected abstract ResourceValueType ValueType
+        protected abstract VersionTableValueType ValueType
         {
             get;
         }
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            return ResourceTableHeader.GetResourceHeaderSize(Key).Align(4)
+            return VersionTableEntryHeader.GetResourceHeaderSize(Key).Align(4)
                    + GetValueLength().Align(4);
         }
 
@@ -32,9 +32,9 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// Creates a new header for the table entry.
         /// </summary>
         /// <returns></returns>
-        protected ResourceTableHeader CreateHeader()
+        protected VersionTableEntryHeader CreateHeader()
         {
-            return new ResourceTableHeader
+            return new VersionTableEntryHeader
             {
                 Length = (ushort) GetPhysicalSize(),
                 ValueLength = (ushort) GetValueLength(),

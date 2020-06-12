@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             uint start = reader.FileOffset;
             
-            var header = ResourceTableHeader.FromReader(reader);
+            var header = VersionTableEntryHeader.FromReader(reader);
             if (header.Key.Length != 8 || !uint.TryParse(header.Key, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint rawKey))
                 throw new FormatException("Invalid string table language identifier or code page.");
 
@@ -68,7 +68,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <inheritdoc />
-        protected override ResourceValueType ValueType => ResourceValueType.Binary;
+        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
 
         /// <summary>
         /// Gets a collection of entries stored in this string table.

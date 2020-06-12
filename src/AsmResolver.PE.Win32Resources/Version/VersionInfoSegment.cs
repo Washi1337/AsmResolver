@@ -26,7 +26,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             uint start = reader.FileOffset;
             
             // Read header.
-            var header = ResourceTableHeader.FromReader(reader);
+            var header = VersionTableEntryHeader.FromReader(reader);
             if (header.Key != VsVersionInfoKey)
                 throw new FormatException($"Input stream does not point to a {VsVersionInfoKey} entry.");
             
@@ -50,7 +50,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             uint start = reader.FileOffset;
             
-            var header = ResourceTableHeader.FromReader(reader);
+            var header = VersionTableEntryHeader.FromReader(reader);
             reader.Align(4);
 
             return header.Key switch
@@ -67,7 +67,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public override string Key => VsVersionInfoKey;
 
         /// <inheritdoc />
-        protected override ResourceValueType ValueType => ResourceValueType.Binary;
+        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
 
         /// <summary>
         /// Gets the fixed version info stored in this version resource.

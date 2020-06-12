@@ -3,7 +3,7 @@ namespace AsmResolver.PE.Win32Resources.Version
     /// <summary>
     /// Provides members describing the value type of a version resource entry. 
     /// </summary>
-    public enum ResourceValueType : ushort
+    public enum VersionTableValueType : ushort
     {
         /// <summary>
         /// Indicates the value is binary.

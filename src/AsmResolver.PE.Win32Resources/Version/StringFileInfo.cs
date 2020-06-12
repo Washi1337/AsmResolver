@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <remarks>
         /// This function assumes the provided header was already consumed.
         /// </remarks>
-        public static StringFileInfo FromReader(uint startOffset, ResourceTableHeader header, IBinaryStreamReader reader)
+        public static StringFileInfo FromReader(uint startOffset, VersionTableEntryHeader header, IBinaryStreamReader reader)
         {
             var result = new StringFileInfo();
 
@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public override string Key => StringFileInfoKey;
 
         /// <inheritdoc />
-        protected override ResourceValueType ValueType => ResourceValueType.Binary;
+        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
             
         /// <summary>
         /// Gets a collection of tables stored in this VarFileInfo structure, typically containing a list of languages

@@ -3,22 +3,22 @@ using System.Text;
 namespace AsmResolver.PE.Win32Resources.Version
 {
     /// <summary>
-    /// Represents the raw resource table header.
+    /// Represents the raw version table entry header.
     /// </summary>
-    public class ResourceTableHeader : SegmentBase
+    public class VersionTableEntryHeader : SegmentBase
     {
         /// <summary>
         /// Reads a single resource table header.
         /// </summary>
         /// <param name="reader">The reader.</param>
         /// <returns>The table header.</returns>
-        public static ResourceTableHeader FromReader(IBinaryStreamReader reader)
+        public static VersionTableEntryHeader FromReader(IBinaryStreamReader reader)
         {
-            return new ResourceTableHeader
+            return new VersionTableEntryHeader
             {
                 Length = reader.ReadUInt16(),
                 ValueLength = reader.ReadUInt16(),
-                Type = (ResourceValueType) reader.ReadUInt16(),
+                Type = (VersionTableValueType) reader.ReadUInt16(),
                 Key = reader.ReadUnicodeString(),
             };
         }
@@ -57,7 +57,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <summary>
         /// Gets or sets a value indicating the value is binary or textual.
         /// </summary>
-        public ResourceValueType Type
+        public VersionTableValueType Type
         {
             get;
             set;

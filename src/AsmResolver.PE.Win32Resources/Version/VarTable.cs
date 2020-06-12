@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </exception>
         public static VarTable FromReader(IBinaryStreamReader reader)
         {
-            var header = ResourceTableHeader.FromReader(reader);
+            var header = VersionTableEntryHeader.FromReader(reader);
             if (header.Key != TranslationKey)
                 throw new FormatException($"Expected a Var structure but got a {header.Key} structure.");
 
@@ -43,7 +43,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public override string Key => TranslationKey;
 
         /// <inheritdoc />
-        protected override ResourceValueType ValueType => ResourceValueType.Binary;
+        protected override VersionTableValueType ValueType => VersionTableValueType.Binary;
         
         /// <summary>
         /// Gets a collection of one or more values that are language and code page identifier pairs. 
