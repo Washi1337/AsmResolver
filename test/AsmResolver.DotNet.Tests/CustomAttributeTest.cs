@@ -157,6 +157,24 @@ namespace AsmResolver.DotNet.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        public void FixedComplexTypeArgument(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedComplexTypeArgument), rebuild);
+            Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Empty(attribute.Signature.NamedArguments);
+
+            var argument = attribute.Signature.FixedArguments[0];
+            var factory = attribute.Constructor.Module.CorLibTypeFactory;
+            
+            var listRef = new TypeReference(factory.CorLibScope, "System.Collections.Generic", "List`1");
+            var instance = new GenericInstanceTypeSignature(listRef, false, new SzArrayTypeSignature(factory.String));
+
+            Assert.Equal(instance, argument.Element.Value as TypeSignature, _comparer);
+        }
+        
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         public void NamedInt32Argument(bool rebuild)
         {
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.NamedInt32Argument), rebuild);

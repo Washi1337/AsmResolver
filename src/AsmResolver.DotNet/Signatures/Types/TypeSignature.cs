@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -166,7 +167,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(ReadFieldOrPropType(parentModule, reader));
                 case ElementType.Enum:
-                    return TypeNameParser.ParseType(parentModule, reader.ReadSerString());
+                    return TypeNameParser.Parse(parentModule, reader.ReadSerString());
                 case ElementType.Type:
                     return new TypeDefOrRefSignature(new TypeReference(parentModule,
                         parentModule.CorLibTypeFactory.CorLibScope, "System", "Type"));

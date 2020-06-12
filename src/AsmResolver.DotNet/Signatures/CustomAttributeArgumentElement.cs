@@ -1,6 +1,7 @@
 using System;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -64,7 +65,7 @@ namespace AsmResolver.DotNet.Signatures
             }
             
             if (valueType.IsTypeOf("System", "Type"))
-                return TypeNameParser.ParseType(parentModule, reader.ReadSerString());
+                return TypeNameParser.Parse(parentModule, reader.ReadSerString());
 
             throw new NotSupportedException($"Unsupported element type {valueType.ElementType}.");
         }

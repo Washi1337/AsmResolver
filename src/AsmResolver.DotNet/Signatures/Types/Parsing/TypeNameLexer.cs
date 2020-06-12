@@ -1,0 +1,109 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
+namespace AsmResolver.DotNet.Signatures.Types.Parsing
+{
+    internal class TypeNameLexer
+    {
+        private static readonly ISet<char> RservedChars = new HashSet<char>("*+=.,`&[]…");
+        
+        private readonly TextReader _reader;
+        private TypeNameToken? _bufferedToken;
+        private StringBuilder _buffer = new StringBuilder();
+
+        public TypeNameLexer(TextReader reader)
+        {
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+        }
+        
+        public TypeNameToken? Peek()
+        {
+            _bufferedToken ??= ReadNextToken();
+            return _bufferedToken.GetValueOrDefault();
+        }
+
+        public TypeNameToken Next()
+        {
+            if (_bufferedToken.HasValue)
+            {
+                var next = _bufferedToken.Value;
+                _bufferedToken = null;
+                return next;
+            }
+
+            return ReadNextToken() ?? throw new EndOfStreamException();
+        }
+        
+        private TypeNameToken? ReadNextToken()
+        {
+            _buffer.Clear();
+            
+            int c = _reader.Peek();
+            if (c == -1)
+                return null;
+
+            char currentChar = (char) c;
+            return currentChar switch
+            {
+                '*' => ReadSymbolToken(TypeNameTerminal.Star),
+                '+' => ReadSymbolToken(TypeNameTerminal.Plus),
+                '=' => ReadSymbolToken(TypeNameTerminal.Equals),
+                '.' => ReadSymbolToken(TypeNameTerminal.Dot),
+                ',' => ReadSymbolToken(TypeNameTerminal.Comma),
+                '`' => ReadSymbolToken(TypeNameTerminal.Tick),
+                '&' => ReadSymbolToken(TypeNameTerminal.Ampersand),
+                '[' => ReadSymbolToken(TypeNameTerminal.OpenBracket),
+                ']' => ReadSymbolToken(TypeNameTerminal.CloseBracket),
+                '…' => ReadSymbolToken(TypeNameTerminal.Ellipsis),
+                _ => char.IsDigit(currentChar) ? ReadNumberToken() : ReadIdentifierToken()
+            };
+        }
+
+        private TypeNameToken ReadNumberToken()
+        {
+            while (true)
+            {
+                int c = _reader.Peek();
+                if (c == -1)
+                    break;
+                
+                char currentChar = (char) c;
+                if (!char.IsDigit(currentChar))
+                    break;
+
+                _reader.Read();
+                _buffer.Append(currentChar);
+            }
+            
+            return new TypeNameToken(TypeNameTerminal.Number, _buffer.ToString());
+        }
+
+        private TypeNameToken ReadIdentifierToken()
+        {           
+            while (true)
+            {
+                int c = _reader.Peek();
+                if (c == -1)
+                    break;
+                
+                char currentChar = (char) c;
+                if (!RservedChars.Contains(currentChar))
+                    break;
+
+                _reader.Read();
+                _buffer.Append(currentChar);
+            }
+            
+            return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString());
+        }
+
+        private TypeNameToken ReadSymbolToken(TypeNameTerminal terminal)
+        {
+            string text = ((char) _reader.Read()).ToString();
+            return new TypeNameToken(terminal, text);
+        }
+        
+    }
+}
