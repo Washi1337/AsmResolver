@@ -92,6 +92,17 @@ namespace AsmResolver.PE.Win32Resources
             set;
         }
 
+        /// <inheritdoc />
+        public bool CanRead => Contents is IReadableSegment;
+
+        /// <inheritdoc />
+        public IBinaryStreamReader CreateReader()
+        {
+            return Contents is IReadableSegment readableSegment
+                ? readableSegment.CreateReader()
+                : throw new InvalidOperationException("Resource file is not readable.");
+        }
+
         /// <summary>
         /// Obtains the contents of the data entry.
         /// </summary>
@@ -99,16 +110,9 @@ namespace AsmResolver.PE.Win32Resources
         /// <remarks>
         /// This method is called upon initializing the value for the <see cref="Contents"/> property.
         /// </remarks>
-        protected virtual ISegment GetContents()
-        {
-            return null;
-        }
+        protected virtual ISegment GetContents() => null;
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"Data ({Name ?? Id.ToString()})";
-        }
-        
+        public override string ToString() => $"Data ({Name ?? Id.ToString()})";
     }
 }

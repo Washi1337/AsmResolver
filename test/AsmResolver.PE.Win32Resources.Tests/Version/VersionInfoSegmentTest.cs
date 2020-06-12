@@ -15,7 +15,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
                 .First(d => d.Type == ResourceType.Version);
 
             var data = (IResourceData) ((IResourceDirectory) directory.Entries[0]).Entries[0];
-            return VersionInfoResource.FromReader(((IReadableSegment) data.Contents).CreateReader());
+            return VersionInfoResource.FromReader(data.CreateReader());
         }
 
         [Fact]
