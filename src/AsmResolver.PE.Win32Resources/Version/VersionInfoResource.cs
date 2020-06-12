@@ -130,14 +130,18 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            uint entriesSize = 0;
+            uint size = VersionTableEntryHeader.GetHeaderSize(Key);
+            size = size.Align(4);
+            size += _fixedVersionInfo.GetPhysicalSize();
+            size = size.Align(4);
+            
             foreach (var entry in _entries)
             {
-                entriesSize = entriesSize.Align(4);
-                entriesSize += entry.Value.GetPhysicalSize();
+                size = size.Align(4);
+                size += entry.Value.GetPhysicalSize();
             }
 
-            return base.GetPhysicalSize() + entriesSize;
+            return size;
         }
 
         /// <inheritdoc />

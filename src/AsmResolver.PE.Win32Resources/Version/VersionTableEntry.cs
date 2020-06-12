@@ -21,13 +21,6 @@ namespace AsmResolver.PE.Win32Resources.Version
             get;
         }
 
-        /// <inheritdoc />
-        public override uint GetPhysicalSize()
-        {
-            return VersionTableEntryHeader.GetHeaderSize(Key).Align(4)
-                   + GetValueLength();
-        }
-
         /// <summary>
         /// Creates a new header for the table entry.
         /// </summary>

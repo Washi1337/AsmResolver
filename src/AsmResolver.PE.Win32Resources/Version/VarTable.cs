@@ -52,7 +52,16 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             get;
         } = new List<uint>();
-        
+
+        /// <inheritdoc />
+        public override uint GetPhysicalSize()
+        {
+            uint size = VersionTableEntryHeader.GetHeaderSize(Key);
+            size = size.Align(4);
+            size += (uint) Values.Count * sizeof(uint);
+            return size;
+        }
+
         /// <inheritdoc />
         protected override uint GetValueLength() => (uint) (Values.Count * sizeof(uint));
 
