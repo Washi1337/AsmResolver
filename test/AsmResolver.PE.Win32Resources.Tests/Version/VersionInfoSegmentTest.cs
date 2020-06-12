@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Win32Resources.Version;
 using Xunit;
 
