@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Tests
         }
         
         [Fact]
-        public void SimpleTypeNoNamespaceNoAssembly()
+        public void SimpleTypeNoNamespace()
         {
             const string name = "MyType";
             var type = TypeNameParser.Parse(_module, name);
@@ -27,11 +27,23 @@ namespace AsmResolver.DotNet.Tests
         [InlineData("MyNamespace")]
         [InlineData("MyNamespace.SubNamespace")]
         [InlineData("MyNamespace.SubNamespace.SubSubNamespace")]
-        public void SimpleTypeWithNamespaceNoAssembly(string ns)
+        public void SimpleTypeWithNamespace(string ns)
         {
             const string name = "MyType";
             var type = TypeNameParser.Parse(_module, $"{ns}.{name}");
             Assert.Equal(new TypeReference(_module, ns, name).ToTypeSignature(), type, _comparer);
+        }
+        
+        [Fact]
+        public void NestedType()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            const string nestedType = "MyNestedType";
+            var expectedTypeRef = new TypeReference(new TypeReference(_module, ns, name), null, nestedType);
+            
+            var type = TypeNameParser.Parse(_module, $"{ns}.{name}+{nestedType}");
+            Assert.Equal(expectedTypeRef.ToTypeSignature(), type, _comparer);
         }
     }
 }

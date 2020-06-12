@@ -64,16 +64,31 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             var scope = TryExpect(TypeNameTerminal.Comma).HasValue
                 ? (IResolutionScope) ParseAssemblyNameSpec()
                 : _module;
-            return new TypeReference(_module, scope, ns, names[0]);
+
+            TypeReference result = null; 
+            for (int i = 0; i < names.Count; i++)
+            {
+                result = result is null
+                    ? new TypeReference(_module, scope, ns, names[i])
+                    : new TypeReference(_module, result, null, names[i]);
+            }
+
+            return result;
         }
 
         private (string Namespace, IList<string> TypeNames) ParseNamespaceTypeName()
         {
             var names = new List<string>();
-
+            
             (string ns, string name) = ParseTopLevelTypeName();
-
             names.Add(name);
+            
+            while (TryExpect(TypeNameTerminal.Plus).HasValue)
+            {
+                var nextIdentifier = Expect(TypeNameTerminal.Identifier);
+                names.Add(nextIdentifier.Text);
+            }
+
             return (ns, names);
         }
 
