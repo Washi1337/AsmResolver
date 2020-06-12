@@ -8,14 +8,14 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
 {
     public class VersionInfoSegmentTest
     {
-        private static VersionInfoSegment FindVersionInfo(IPEImage image)
+        private static VersionInfoResource FindVersionInfo(IPEImage image)
         {
             var directory = image.Resources.Entries
                 .OfType<IResourceDirectory>()
                 .First(d => d.Type == ResourceType.Version);
 
             var data = (IResourceData) ((IResourceDirectory) directory.Entries[0]).Entries[0];
-            return VersionInfoSegment.FromReader(data.Contents.CreateReader());
+            return VersionInfoResource.FromReader(data.Contents.CreateReader());
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         public void PersistentFixedVersionInfo()
         {
             // Prepare mock data.
-            var versionInfo = new VersionInfoSegment();
+            var versionInfo = new VersionInfoResource();
             var fixedVersionInfo = new FixedVersionInfo
             {
                 FileVersion = new System.Version(1, 2, 3, 4),
@@ -51,7 +51,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var newVersionInfo = VersionInfoSegment.FromReader(new ByteArrayReader(tempStream.ToArray()));
+            var newVersionInfo = VersionInfoResource.FromReader(new ByteArrayReader(tempStream.ToArray()));
             var newFixedVersionInfo = newVersionInfo.FixedVersionInfo;
 
             // Verify.
@@ -104,7 +104,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         public void PersistentVarFileInfo()
         {
             // Prepare mock data.
-            var versionInfo = new VersionInfoSegment();
+            var versionInfo = new VersionInfoResource();
             
             var varFileInfo = new VarFileInfo();
             var table = new VarTable();
@@ -119,7 +119,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
             
             // Reload.
-            var newVersionInfo = VersionInfoSegment.FromReader(new ByteArrayReader(tempStream.ToArray()));
+            var newVersionInfo = VersionInfoResource.FromReader(new ByteArrayReader(tempStream.ToArray()));
             
             // Verify.
             var newVarFileInfo = newVersionInfo.GetChild<VarFileInfo>(VarFileInfo.VarFileInfoKey);
@@ -134,7 +134,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         public void PersistentStringFileInfo()
         {
             // Prepare mock data.
-            var versionInfo = new VersionInfoSegment();
+            var versionInfo = new VersionInfoResource();
             
             var stringFileInfo = new StringFileInfo();
             var table = new StringTable(0, 0x4b0);
@@ -151,7 +151,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
             
             // Reload.
-            var newVersionInfo = VersionInfoSegment.FromReader(new ByteArrayReader(tempStream.ToArray()));
+            var newVersionInfo = VersionInfoResource.FromReader(new ByteArrayReader(tempStream.ToArray()));
             
             // Verify.
             var newStringFileInfo = newVersionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);

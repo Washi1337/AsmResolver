@@ -6,7 +6,7 @@ namespace AsmResolver.PE.Win32Resources.Version
     /// <summary>
     /// Represents a native version resource file. 
     /// </summary>
-    public class VersionInfoSegment : VersionTableEntry
+    public class VersionInfoResource : VersionTableEntry
     {
         /// <summary>
         /// The name of the root object of the native version resource file. 
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <exception cref="FormatException">
         /// Occurs when the input stream does not point to a valid version resource.
         /// </exception>
-        public static VersionInfoSegment FromReader(IBinaryStreamReader reader)
+        public static VersionInfoResource FromReader(IBinaryStreamReader reader)
         {
             uint start = reader.FileOffset;
             
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             if (header.Key != VsVersionInfoKey)
                 throw new FormatException($"Input stream does not point to a {VsVersionInfoKey} entry.");
             
-            var result = new VersionInfoSegment();
+            var result = new VersionInfoResource();
 
             // Read fixed version info.
             reader.Align(4);
