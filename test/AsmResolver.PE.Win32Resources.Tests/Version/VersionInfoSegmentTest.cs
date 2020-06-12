@@ -137,11 +137,13 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             var versionInfo = new VersionInfoResource();
             
             var stringFileInfo = new StringFileInfo();
-            var table = new StringTable(0, 0x4b0);
-            table[StringTable.ProductNameKey] = "Sample product";
-            table[StringTable.FileVersionKey] = "1.2.3.4";
-            table[StringTable.ProductVersionKey] = "1.0.0.0";
-            table[StringTable.FileDescriptionKey] = "This is a sample description";
+            var table = new StringTable(0, 0x4b0)
+            {
+                [StringTable.ProductNameKey] = "Sample product",
+                [StringTable.FileVersionKey] = "1.2.3.4",
+                [StringTable.ProductVersionKey] = "1.0.0.0",
+                [StringTable.FileDescriptionKey] = "This is a sample description"
+            };
             stringFileInfo.Tables.Add(table);
 
             versionInfo.AddEntry(stringFileInfo);
@@ -159,8 +161,8 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             Assert.Single(newStringFileInfo.Tables);
             
             var newTable = newStringFileInfo.Tables[0];
-            foreach (var entry in table)
-                Assert.Equal(entry.Value, newTable[entry.Key]);
+            foreach ((string key, string value) in table)
+                Assert.Equal(value, newTable[key]);
         }
 
     }

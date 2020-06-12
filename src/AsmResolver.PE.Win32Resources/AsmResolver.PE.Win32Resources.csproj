@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <Title>AsmResolver.PE.Win32Resources</Title>
-        <Description>Win32 resource models models for the AsmResolver executable file inspection toolsuite.</Description>
+        <Description>Win32 resource models for the AsmResolver executable file inspection toolsuite.</Description>
         <Copyright>Copyright © Washi 2016-2020</Copyright>
         <PackageProjectUrl>https://github.com/Washi1337/AsmResolver</PackageProjectUrl>
         <PackageLicense>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicense>
