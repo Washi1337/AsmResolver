@@ -2,6 +2,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
     internal enum TypeNameTerminal
     {
+        Eof,
         Identifier,
         Number,
         Star,

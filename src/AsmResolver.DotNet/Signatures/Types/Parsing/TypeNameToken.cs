@@ -17,5 +17,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             get;
         }
+
+        public override string ToString() => $"{Text} ({Terminal})";
     }
 }

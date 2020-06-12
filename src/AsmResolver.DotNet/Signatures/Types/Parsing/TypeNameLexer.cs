@@ -10,15 +10,15 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private static readonly ISet<char> RservedChars = new HashSet<char>("*+=.,`&[]…");
         
         private readonly TextReader _reader;
+        private readonly StringBuilder _buffer = new StringBuilder();
         private TypeNameToken? _bufferedToken;
-        private StringBuilder _buffer = new StringBuilder();
 
         public TypeNameLexer(TextReader reader)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
         
-        public TypeNameToken? Peek()
+        public TypeNameToken Peek()
         {
             _bufferedToken ??= ReadNextToken();
             return _bufferedToken.GetValueOrDefault();
@@ -38,6 +38,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         
         private TypeNameToken? ReadNextToken()
         {
+            SkipWhitespaces();
             _buffer.Clear();
             
             int c = _reader.Peek();
@@ -89,7 +90,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     break;
                 
                 char currentChar = (char) c;
-                if (!RservedChars.Contains(currentChar))
+                if (RservedChars.Contains(currentChar))
                     break;
 
                 _reader.Read();
@@ -103,6 +104,17 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             string text = ((char) _reader.Read()).ToString();
             return new TypeNameToken(terminal, text);
+        }
+
+        private void SkipWhitespaces()
+        {
+            while (true)
+            {
+                int c = _reader.Peek();
+                if (c == -1 || !char.IsWhiteSpace((char) c))
+                    break;
+                _reader.Read();
+            }
         }
         
     }
