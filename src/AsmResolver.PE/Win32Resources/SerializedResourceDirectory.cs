@@ -93,7 +93,8 @@ namespace AsmResolver.PE.Win32Resources
                 return new List<IResourceEntry>();
             }
 
-            return new SerializedResourceEntryList(_peFile, _entriesOffset, _namedEntries, _idEntries, _depth + 1);
+            return new SerializedResourceEntryList(this, _peFile, _entriesOffset, _namedEntries, _idEntries,
+                _depth + 1);
         }
 
     }

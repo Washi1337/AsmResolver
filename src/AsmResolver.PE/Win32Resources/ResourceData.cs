@@ -16,6 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
+using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Win32Resources
 {
@@ -58,6 +59,19 @@ namespace AsmResolver.PE.Win32Resources
             Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
+        /// <inheritdoc />
+        public IResourceDirectory ParentDirectory
+        {
+            get;
+            private set;
+        }
+
+        IResourceDirectory IOwnedCollectionElement<IResourceDirectory>.Owner
+        {
+            get => ParentDirectory;
+            set => ParentDirectory = value;
+        }
+        
         /// <inheritdoc />
         public string Name
         {
@@ -114,5 +128,6 @@ namespace AsmResolver.PE.Win32Resources
 
         /// <inheritdoc />
         public override string ToString() => $"Data ({Name ?? Id.ToString()})";
+
     }
 }

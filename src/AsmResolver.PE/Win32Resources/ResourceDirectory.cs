@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Win32Resources
 {
@@ -61,6 +62,19 @@ namespace AsmResolver.PE.Win32Resources
         public ResourceDirectory(ResourceType type)
         {
             Type = type;
+        }
+
+        /// <inheritdoc />
+        public IResourceDirectory ParentDirectory
+        {
+            get;
+            private set;
+        }
+
+        IResourceDirectory IOwnedCollectionElement<IResourceDirectory>.Owner
+        {
+            get => ParentDirectory;
+            set => ParentDirectory = value;
         }
         
         /// <inheritdoc />
@@ -136,16 +150,10 @@ namespace AsmResolver.PE.Win32Resources
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Entries"/> property.
         /// </remarks> 
-        protected virtual IList<IResourceEntry> GetEntries()
-        {
-            return new List<IResourceEntry>();
-        }
+        protected virtual IList<IResourceEntry> GetEntries() => 
+            new OwnedCollection<IResourceDirectory, IResourceEntry>(this);
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"Directory ({Name ?? Id.ToString()})";
-        }
-        
+        public override string ToString() => $"Directory ({Name ?? Id.ToString()})";
     }
 }
