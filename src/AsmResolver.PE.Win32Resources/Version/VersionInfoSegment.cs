@@ -60,7 +60,8 @@ namespace AsmResolver.PE.Win32Resources.Version
                 _ => throw new FormatException($"Invalid or unsupported entry {header.Key}.")
             };
         }
-        
+
+        private FixedVersionInfo _fixedVersionInfo = new FixedVersionInfo();
         private readonly IDictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
 
         /// <inheritdoc />
@@ -74,9 +75,9 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         public FixedVersionInfo FixedVersionInfo
         {
-            get;
-            private set;
-        } = new FixedVersionInfo();
+            get => _fixedVersionInfo;
+            set => _fixedVersionInfo = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         /// <summary>
         /// Gets or sets a version table entry by its name.

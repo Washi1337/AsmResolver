@@ -43,5 +43,10 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// structure should contain a SpecialBuild entry. 
         /// </summary>
         SpecialBuild = 0x20,
+        
+        /// <summary>
+        /// Provides a bitmask for all valid known bits that can be set.
+        /// </summary>
+        ValidBitMask = 0x3F,
     }
 }

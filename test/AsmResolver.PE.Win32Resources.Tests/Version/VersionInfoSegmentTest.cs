@@ -29,6 +29,43 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         }
 
         [Fact]
+        public void PersistentFixedVersionInfo()
+        {
+            // Prepare mock data.
+            var versionInfo = new VersionInfoSegment();
+            var fixedVersionInfo = new FixedVersionInfo
+            {
+                FileVersion = new System.Version(1, 2, 3, 4),
+                ProductVersion = new System.Version(1, 2, 3, 4),
+                FileDate = 0x12345678_9ABCDEF,
+                FileFlags = FileFlags.SpecialBuild,
+                FileFlagsMask = FileFlags.ValidBitMask,
+                FileType = FileType.App,
+                FileOS = FileOS.NT,
+                FileSubType = FileSubType.DriverInstallable,
+            };
+            versionInfo.FixedVersionInfo = fixedVersionInfo;
+
+            // Serialize.
+            var tempStream = new MemoryStream();
+            versionInfo.Write(new BinaryStreamWriter(tempStream));
+
+            // Reload.
+            var newVersionInfo = VersionInfoSegment.FromReader(new ByteArrayReader(tempStream.ToArray()));
+            var newFixedVersionInfo = newVersionInfo.FixedVersionInfo;
+
+            // Verify.
+            Assert.Equal(fixedVersionInfo.FileVersion, newFixedVersionInfo.FileVersion);
+            Assert.Equal(fixedVersionInfo.ProductVersion, newFixedVersionInfo.ProductVersion);
+            Assert.Equal(fixedVersionInfo.FileDate, newFixedVersionInfo.FileDate);
+            Assert.Equal(fixedVersionInfo.FileFlags, newFixedVersionInfo.FileFlags);
+            Assert.Equal(fixedVersionInfo.FileFlagsMask, newFixedVersionInfo.FileFlagsMask);
+            Assert.Equal(fixedVersionInfo.FileType, newFixedVersionInfo.FileType);
+            Assert.Equal(fixedVersionInfo.FileOS, newFixedVersionInfo.FileOS);
+            Assert.Equal(fixedVersionInfo.FileSubType, newFixedVersionInfo.FileSubType);
+        }
+
+        [Fact]
         public void ReadStringFileInfo()
         {
             string path = typeof(PEImage).Assembly.Location;
@@ -64,6 +101,36 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         }
 
         [Fact]
+        public void PersistentVarFileInfo()
+        {
+            // Prepare mock data.
+            var versionInfo = new VersionInfoSegment();
+            
+            var varFileInfo = new VarFileInfo();
+            var table = new VarTable();
+            for (ushort i = 0; i < 10; i++)
+                table.Values.Add(i);
+            varFileInfo.Tables.Add(table);
+
+            versionInfo.AddEntry(varFileInfo);
+            
+            // Serialize.
+            var tempStream = new MemoryStream();
+            versionInfo.Write(new BinaryStreamWriter(tempStream));
+            
+            // Reload.
+            var newVersionInfo = VersionInfoSegment.FromReader(new ByteArrayReader(tempStream.ToArray()));
+            
+            // Verify.
+            var newVarFileInfo = newVersionInfo.GetChild<VarFileInfo>(VarFileInfo.VarFileInfoKey);
+            Assert.NotNull(newVarFileInfo);
+            Assert.Single(newVarFileInfo.Tables);
+            
+            var newTable = newVarFileInfo.Tables[0];
+            Assert.Equal(table.Values, newTable.Values);
+        }
+
+        [Fact]
         public void PersistentStringFileInfo()
         {
             // Prepare mock data.
@@ -77,7 +144,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             table[StringTable.FileDescriptionKey] = "This is a sample description";
             stringFileInfo.Tables.Add(table);
 
-            versionInfo[StringFileInfo.StringFileInfoKey] = stringFileInfo;
+            versionInfo.AddEntry(stringFileInfo);
 
             // Serialize.
             var tempStream = new MemoryStream();
