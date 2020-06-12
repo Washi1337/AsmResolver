@@ -36,29 +36,29 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             var expectedInfo = FileVersionInfo.GetVersionInfo(path);
             var actualInfo = versionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
             
-            foreach (var entry in actualInfo.Tables[0].Entries)
+            foreach ((string key, string value) in actualInfo.Tables[0])
             {
-                string expected = entry.Key switch
+                string expected = key switch
                 {
-                    StringTableEntry.CommentsKey => expectedInfo.Comments,
-                    StringTableEntry.CompanyNameKey => expectedInfo.CompanyName,
-                    StringTableEntry.FileDescriptionKey => expectedInfo.FileDescription,
-                    StringTableEntry.FileVersionKey => expectedInfo.FileVersion,
-                    StringTableEntry.InternalNameKey => expectedInfo.InternalName,
-                    StringTableEntry.LegalCopyrightKey => expectedInfo.LegalCopyright,
-                    StringTableEntry.LegalTrademarksKey => expectedInfo.LegalTrademarks,
-                    StringTableEntry.OriginalFilenameKey => expectedInfo.OriginalFilename,
-                    StringTableEntry.PrivateBuildKey => expectedInfo.PrivateBuild,
-                    StringTableEntry.ProductNameKey => expectedInfo.ProductName,
-                    StringTableEntry.ProductVersionKey => expectedInfo.ProductVersion,
-                    StringTableEntry.SpecialBuildKey => expectedInfo.SpecialBuild,
+                    StringTable.CommentsKey => expectedInfo.Comments,
+                    StringTable.CompanyNameKey => expectedInfo.CompanyName,
+                    StringTable.FileDescriptionKey => expectedInfo.FileDescription,
+                    StringTable.FileVersionKey => expectedInfo.FileVersion,
+                    StringTable.InternalNameKey => expectedInfo.InternalName,
+                    StringTable.LegalCopyrightKey => expectedInfo.LegalCopyright,
+                    StringTable.LegalTrademarksKey => expectedInfo.LegalTrademarks,
+                    StringTable.OriginalFilenameKey => expectedInfo.OriginalFilename,
+                    StringTable.PrivateBuildKey => expectedInfo.PrivateBuild,
+                    StringTable.ProductNameKey => expectedInfo.ProductName,
+                    StringTable.ProductVersionKey => expectedInfo.ProductVersion,
+                    StringTable.SpecialBuildKey => expectedInfo.SpecialBuild,
                     _ => null,
                 };
 
                 if (expected is null)
                     continue;
                 
-                Assert.Equal(expected, entry.Value);
+                Assert.Equal(expected, value);
             }
         }
 

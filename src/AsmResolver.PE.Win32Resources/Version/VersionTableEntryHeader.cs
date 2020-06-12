@@ -28,7 +28,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         /// <param name="key">The key of the entry.</param>
         /// <returns>The number of bytes.</returns>
-        public static uint GetResourceHeaderSize(string key)
+        public static uint GetHeaderSize(string key)
         {
             return (uint) (sizeof(ushort)
                            + sizeof(ushort)
@@ -73,7 +73,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => GetResourceHeaderSize(Key);
+        public override uint GetPhysicalSize() => GetHeaderSize(Key);
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
