@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using AsmResolver.PE.Win32Resources.Version;
 using Xunit;
@@ -60,6 +61,39 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
                 
                 Assert.Equal(expected, value);
             }
+        }
+
+        [Fact]
+        public void PersistentStringFileInfo()
+        {
+            // Prepare mock data.
+            var versionInfo = new VersionInfoSegment();
+            
+            var stringFileInfo = new StringFileInfo();
+            var table = new StringTable(0, 0x4b0);
+            table[StringTable.ProductNameKey] = "Sample product";
+            table[StringTable.FileVersionKey] = "1.2.3.4";
+            table[StringTable.ProductVersionKey] = "1.0.0.0";
+            table[StringTable.FileDescriptionKey] = "This is a sample description";
+            stringFileInfo.Tables.Add(table);
+
+            versionInfo[StringFileInfo.StringFileInfoKey] = stringFileInfo;
+
+            // Serialize.
+            var tempStream = new MemoryStream();
+            versionInfo.Write(new BinaryStreamWriter(tempStream));
+            
+            // Reload.
+            var newVersionInfo = VersionInfoSegment.FromReader(new ByteArrayReader(tempStream.ToArray()));
+            
+            // Verify.
+            var newStringFileInfo = newVersionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
+            Assert.NotNull(newStringFileInfo);
+            Assert.Single(newStringFileInfo.Tables);
+            
+            var newTable = newStringFileInfo.Tables[0];
+            foreach (var entry in table)
+                Assert.Equal(entry.Value, newTable[entry.Key]);
         }
 
     }

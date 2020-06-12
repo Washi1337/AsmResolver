@@ -25,7 +25,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public override uint GetPhysicalSize()
         {
             return VersionTableEntryHeader.GetHeaderSize(Key).Align(4)
-                   + GetValueLength().Align(4);
+                   + GetValueLength();
         }
 
         /// <summary>

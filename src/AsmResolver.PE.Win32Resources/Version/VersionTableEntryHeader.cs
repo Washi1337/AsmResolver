@@ -30,10 +30,12 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <returns>The number of bytes.</returns>
         public static uint GetHeaderSize(string key)
         {
-            return (uint) (sizeof(ushort)
-                           + sizeof(ushort)
-                           + sizeof(ushort)
-                           + Encoding.Unicode.GetByteCount(key) + sizeof(char));
+            return (uint) (
+                sizeof(ushort) // Length
+                + sizeof(ushort) // ValueLength
+                + sizeof(ushort) // Type
+                + Encoding.Unicode.GetByteCount(key) + sizeof(char) // Key
+            );
         }
 
         /// <summary>
@@ -81,11 +83,8 @@ namespace AsmResolver.PE.Win32Resources.Version
             writer.WriteUInt16(Length);
             writer.WriteUInt16(ValueLength);
             writer.WriteUInt16((ushort) Type);
-
-            var buffer = new byte[Encoding.Unicode.GetByteCount(Key) + sizeof(char)];
-            Encoding.Unicode.GetBytes(Key, 0, Key.Length, buffer, 0);
-
-            writer.Align(4);
+            writer.WriteBytes(Encoding.Unicode.GetBytes(Key));
+            writer.WriteUInt16(0);
         }
     }
 }

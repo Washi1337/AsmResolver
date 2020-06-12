@@ -76,18 +76,21 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             get;
             private set;
-        }
+        } = new FixedVersionInfo();
 
         /// <summary>
-        /// Gets a version table entry by its name.
+        /// Gets or sets a version table entry by its name.
         /// </summary>
         /// <param name="name">The name of the child.</param>
         public VersionTableEntry this[string name]
         {
-            get
+            get => _entries[name];
+            set
             {
-                _entries.TryGetValue(name, out var entry);
-                return entry;
+                if (value is null)
+                    _entries.Remove(name);
+                else
+                    _entries[name] = value;
             }
         }
 
@@ -122,6 +125,19 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <c>true</c> if the name existed in the table and was removed successfully, <c>false</c> otherwise.
         /// </returns>
         public bool RemoveEntry(string name) => _entries.Remove(name);
+
+        /// <inheritdoc />
+        public override uint GetPhysicalSize()
+        {
+            uint entriesSize = 0;
+            foreach (var entry in _entries)
+            {
+                entriesSize = entriesSize.Align(4);
+                entriesSize += entry.Value.GetPhysicalSize();
+            }
+
+            return base.GetPhysicalSize() + entriesSize;
+        }
 
         /// <inheritdoc />
         protected override uint GetValueLength() => FixedVersionInfo.GetPhysicalSize();

@@ -13,6 +13,8 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         public const uint Signature = 0xFEEF04BD;
         
+        internal const uint DefaultStructVersion = 0x00010000;
+        
         /// <summary>
         /// Reads a single fixed version info structure from an input stream.
         /// </summary>
@@ -58,7 +60,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             get;
             set;
-        }
+        } = new System.Version();
 
         /// <summary>
         /// Gets or sets the product version number.
@@ -67,7 +69,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             get;
             set;
-        }
+        } = new System.Version();
 
         /// <summary>
         /// Gets or sets the bitmask that specifies the valid bits in <see cref="FileFlags"/>.
@@ -126,7 +128,9 @@ namespace AsmResolver.PE.Win32Resources.Version
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() =>
-            sizeof(ushort) * 4 // FileVersion
+            sizeof(uint) // Signature 
+            + sizeof(uint) // StructVersion
+            + sizeof(ushort) * 4 // FileVersion
             + sizeof(ushort) * 4 // ProductVersion
             + sizeof(uint) // FileFlagsMask
             + sizeof(uint) // FileFlags
@@ -138,6 +142,8 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
+            writer.WriteUInt32(Signature);
+            writer.WriteUInt32(DefaultStructVersion);
             WriteVersion(writer, FileVersion);
             WriteVersion(writer, ProductVersion);
             writer.WriteUInt32((uint) FileFlagsMask);

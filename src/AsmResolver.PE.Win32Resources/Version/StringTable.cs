@@ -231,15 +231,19 @@ namespace AsmResolver.PE.Win32Resources.Version
 
         private static void WriteEntry(IBinaryStreamWriter writer, KeyValuePair<string, string> entry)
         {
-            uint valueSize = CalculateEntryValueSize(entry.Value);
             var header = new VersionTableEntryHeader
             {
-                Length = (ushort) (valueSize + VersionTableEntryHeader.GetHeaderSize(entry.Key)),
-                ValueLength = (ushort) valueSize,
+                Length = (ushort) (VersionTableEntryHeader.GetHeaderSize(entry.Key).Align(4)
+                                   + CalculateEntryValueSize(entry.Value)),
+                ValueLength = (ushort) (entry.Value.Length + 1),
                 Key = entry.Key,
                 Type = VersionTableValueType.String
             };
             header.Write(writer);
+
+            writer.Align(4);
+            writer.WriteBytes(Encoding.Unicode.GetBytes(entry.Value));
+            writer.WriteUInt16(0);
         }
 
         /// <inheritdoc />
