@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace AsmResolver.PE.Win32Resources.Version
 {
@@ -22,18 +23,43 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </exception>
         public static VersionInfoSegment FromReader(IBinaryStreamReader reader)
         {
-            var header = ResourceTableHeader.FromReader(reader);
+            uint start = reader.FileOffset;
             
+            // Read header.
+            var header = ResourceTableHeader.FromReader(reader);
             if (header.Key != VsVersionInfoKey)
                 throw new FormatException($"Input stream does not point to a {VsVersionInfoKey} entry.");
             
             var result = new VersionInfoSegment();
 
+            // Read fixed version info.
             reader.Align(4);
             result.FixedVersionInfo = FixedVersionInfo.FromReader(reader);
-            
+
+            // Read children.
+            reader.Align(4);
+            while (reader.FileOffset - start < header.Length)
+                result.AddEntry(ReadNextEntry(reader));
+
             return result;
         }
+
+        private static VersionTableEntry ReadNextEntry(IBinaryStreamReader reader)
+        {
+            uint start = reader.FileOffset;
+            
+            var header = ResourceTableHeader.FromReader(reader);
+            reader.Align(4);
+
+            return header.Key switch
+            {
+                VarFileInfo.VarFileInfoKey => VarFileInfo.FromReader(start, header, reader),
+                StringFileInfo.StringFileInfoKey => StringFileInfo.FromReader(start, header, reader),
+                _ => throw new FormatException($"Invalid or unsupported entry {header.Key}.")
+            };
+        }
+        
+        private readonly IDictionary<string, VersionTableEntry> _entries = new Dictionary<string, VersionTableEntry>();
 
         /// <inheritdoc />
         public override string Key => VsVersionInfoKey;
@@ -41,9 +67,6 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <inheritdoc />
         protected override ResourceValueType ValueType => ResourceValueType.Binary;
 
-        /// <inheritdoc />
-        protected override ISegment Value => FixedVersionInfo;
-        
         /// <summary>
         /// Gets the fixed version info stored in this version resource.
         /// </summary>
@@ -53,17 +76,62 @@ namespace AsmResolver.PE.Win32Resources.Version
             private set;
         }
 
-        /// <inheritdoc />
-        public override uint GetPhysicalSize()
+        /// <summary>
+        /// Gets a version table entry by its name.
+        /// </summary>
+        /// <param name="name">The name of the child.</param>
+        public VersionTableEntry this[string name]
         {
-            return ResourceTableHeader.GetResourceHeaderSize(VsVersionInfoKey)
-                   + FixedVersionInfo.GetPhysicalSize().Align(4);
+            get
+            {
+                _entries.TryGetValue(name, out var entry);
+                return entry;
+            }
         }
 
-        /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
+        /// <summary>
+        /// Gets a collection of entries stored in the version resource. 
+        /// </summary>
+        public IEnumerable<VersionTableEntry> GetChildren() => _entries.Values;
+
+        /// <summary>
+        /// Gets a version table entry by its name.
+        /// </summary>
+        /// <param name="name">The name of the child.</param>
+        /// <typeparam name="TEntry">The type of the version table entry to lookup.</typeparam>
+        /// <returns>The entry.</returns>
+        public TEntry GetEntry<TEntry>(string name) 
+            where TEntry : VersionTableEntry
         {
-            throw new NotImplementedException();
+            return this[name] as TEntry;
         }
+
+        /// <summary>
+        /// Adds (or overrides the existing entry with the same name) to the version resource. 
+        /// </summary>
+        /// <param name="entry">The entry to add.</param>
+        public void AddEntry(VersionTableEntry entry) => _entries[entry.Key] = entry;
+
+        /// <summary>
+        /// Remove an entry by its name.
+        /// </summary>
+        /// <param name="name">The name of the child to remove..</param>
+        /// <returns>
+        /// <c>true</c> if the name existed in the table and was removed successfully, <c>false</c> otherwise.
+        /// </returns>
+        public bool RemoveEntry(string name) => _entries.Remove(name);
+
+        /// <inheritdoc />
+        protected override uint GetValueLength() => FixedVersionInfo.GetPhysicalSize();
+
+        /// <inheritdoc />
+        protected override void WriteValue(IBinaryStreamWriter writer)
+        {
+            FixedVersionInfo.Write(writer);
+            writer.Align(4);
+            foreach (var entry in _entries.Values)
+                entry.Write(writer);
+        }
+        
     }
 }

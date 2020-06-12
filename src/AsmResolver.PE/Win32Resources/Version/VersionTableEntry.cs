@@ -21,14 +21,13 @@ namespace AsmResolver.PE.Win32Resources.Version
             get;
         }
 
-        /// <summary>
-        /// Gets the value segment.
-        /// </summary>
-        protected abstract ISegment Value
+        /// <inheritdoc />
+        public override uint GetPhysicalSize()
         {
-            get;
+            return ResourceTableHeader.GetResourceHeaderSize(Key).Align(4)
+                   + GetValueLength().Align(4);
         }
-        
+
         /// <summary>
         /// Creates a new header for the table entry.
         /// </summary>
@@ -38,11 +37,31 @@ namespace AsmResolver.PE.Win32Resources.Version
             return new ResourceTableHeader
             {
                 Length = (ushort) GetPhysicalSize(),
-                ValueLength = (ushort) Value.GetPhysicalSize(),
+                ValueLength = (ushort) GetValueLength(),
                 Type = ValueType,
                 Key = Key,
             };
         }
-        
+
+        /// <summary>
+        /// Gets the length of the raw value.
+        /// </summary>
+        /// <returns>The raw value.</returns>
+        protected abstract uint GetValueLength();
+
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            var header = CreateHeader();
+            header.Write(writer);
+            writer.Align(4);
+            WriteValue(writer);
+        }
+
+        /// <summary>
+        /// Writes the value field of the version structure.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        protected abstract void WriteValue(IBinaryStreamWriter writer);
     }
 }

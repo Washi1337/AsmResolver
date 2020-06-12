@@ -8,6 +8,9 @@ namespace AsmResolver.PE.Win32Resources.Version
     /// </summary>
     public class FixedVersionInfo : SegmentBase
     {
+        /// <summary>
+        /// The signature value a FixedVersionInfo structure starts with.
+        /// </summary>
         public const uint Signature = 0xFEEF04BD;
         
         /// <summary>

@@ -28,6 +28,5 @@ namespace AsmResolver.PE.Tests.Win32Resources.Version
             Assert.Equal(new System.Version(1,0,0,0), fixedVersionInfo.FileVersion);
             Assert.Equal(new System.Version(1,0,0,0), fixedVersionInfo.ProductVersion);
         }
-
     }
 }
