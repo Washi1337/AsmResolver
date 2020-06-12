@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using Xunit;
@@ -18,9 +19,9 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void SimpleTypeNoNamespace()
         {
-            const string name = "MyType";
-            var type = TypeNameParser.Parse(_module, name);
-            Assert.Equal(new TypeReference(_module, null, name).ToTypeSignature(), type, _comparer);
+            var expected = new TypeReference(_module, null, "MyType").ToTypeSignature();
+            var actual = TypeNameParser.Parse(_module, expected.Name);
+            Assert.Equal(expected, actual, _comparer);
         }
         
         [Theory]
@@ -29,9 +30,9 @@ namespace AsmResolver.DotNet.Tests
         [InlineData("MyNamespace.SubNamespace.SubSubNamespace")]
         public void SimpleTypeWithNamespace(string ns)
         {
-            const string name = "MyType";
-            var type = TypeNameParser.Parse(_module, $"{ns}.{name}");
-            Assert.Equal(new TypeReference(_module, ns, name).ToTypeSignature(), type, _comparer);
+            var expected = new TypeReference(_module, ns, "MyType").ToTypeSignature();
+            var actual = TypeNameParser.Parse(_module, expected.FullName);
+            Assert.Equal(expected, actual, _comparer);
         }
         
         [Fact]
@@ -40,10 +41,46 @@ namespace AsmResolver.DotNet.Tests
             const string ns = "MyNamespace";
             const string name = "MyType";
             const string nestedType = "MyNestedType";
-            var expectedTypeRef = new TypeReference(new TypeReference(_module, ns, name), null, nestedType);
+            var expected = new TypeReference(
+                    new TypeReference(_module, ns, name),
+                    null,
+                    nestedType)
+                .ToTypeSignature();
             
-            var type = TypeNameParser.Parse(_module, $"{ns}.{name}+{nestedType}");
-            Assert.Equal(expectedTypeRef.ToTypeSignature(), type, _comparer);
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}+{nestedType}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void TypeWithAssemblyName()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            var assemblyRef = new AssemblyReference("MyAssembly", new Version(1, 2, 3, 4));
+            var expected = new TypeReference(assemblyRef, ns, name).ToTypeSignature();
+            
+            
+            var actual = TypeNameParser.Parse(_module, 
+                $"{ns}.{name}, {assemblyRef.FullName}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void TypeWithAssemblyNameWithPublicKey()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            var assemblyRef = new AssemblyReference(
+                "MyAssembly",
+                new Version(1, 2, 3, 4),
+                false,
+                new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
+            
+            var expected = new TypeReference(assemblyRef, ns, name).ToTypeSignature();
+
+            var actual = TypeNameParser.Parse(_module, 
+                $"{ns}.{name}, {assemblyRef.FullName}");
+            Assert.Equal(expected, actual, _comparer);
         }
     }
 }

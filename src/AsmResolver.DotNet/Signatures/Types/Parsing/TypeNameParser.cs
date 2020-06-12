@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -60,6 +61,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private TypeReference ParseTypeName()
         {
+            // Note: This is a slight deviation from grammar (but is equivalent), to make the parsing easier.
+            //       We read all components
             (string ns, var names) = ParseNamespaceTypeName();
             var scope = TryExpect(TypeNameTerminal.Comma).HasValue
                 ? (IResolutionScope) ParseAssemblyNameSpec()
@@ -78,11 +81,21 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private (string Namespace, IList<string> TypeNames) ParseNamespaceTypeName()
         {
-            var names = new List<string>();
+            var names = ParseDottedExpression(TypeNameTerminal.Identifier);
             
-            (string ns, string name) = ParseTopLevelTypeName();
-            names.Add(name);
-            
+            // The namespace is every name concatenated except for the last one.
+            string ns;
+            if (names.Count > 1)
+            {
+                ns = string.Join(".", names.Take(names.Count - 1));
+                names.RemoveRange(0, names.Count - 1);
+            }
+            else
+            {
+                ns = null;
+            }
+
+            // Check if we have any nested identifiers.
             while (TryExpect(TypeNameTerminal.Plus).HasValue)
             {
                 var nextIdentifier = Expect(TypeNameTerminal.Identifier);
@@ -92,41 +105,90 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return (ns, names);
         }
 
-        private (string Namespace, string Name) ParseTopLevelTypeName()
+        private List<string> ParseDottedExpression(params TypeNameTerminal[] terminals)
         {
-            var namespaceBuilder = new StringBuilder();
-
-            string name = null;
+            var result = new List<string>();
             
             while (true)
             {
-                var nextIdentifier = TryExpect(TypeNameTerminal.Identifier);
+                var nextIdentifier = TryExpect(terminals);
                 if (!nextIdentifier.HasValue)
                     break;
-                
-                name = nextIdentifier.Value.Text;
+
+                result.Add(nextIdentifier.Value.Text);
 
                 if (!TryExpect(TypeNameTerminal.Dot).HasValue)
                     break;
-                
-                if (namespaceBuilder.Length > 0)
-                    namespaceBuilder.Append('.');
-                namespaceBuilder.Append(name);
             }
             
-            if (name is null)
-                throw new FormatException("Expected identifier.");
+            if (result.Count == 0)
+                throw new FormatException($"Expected one of {string.Join(", ",terminals)}.");
 
-            string ns = namespaceBuilder.Length == 0 ? null : namespaceBuilder.ToString();
-            return (ns, name);
+            return result;
         }
         
-
         private AssemblyReference ParseAssemblyNameSpec()
         {
-            return null;
-        } 
+            string assemblyName = string.Join(".", ParseDottedExpression(TypeNameTerminal.Identifier));
+            var assemblyRef = new AssemblyReference(assemblyName, new Version());
             
+            while (TryExpect(TypeNameTerminal.Comma).HasValue)
+            {
+                var propertyToken = Expect(TypeNameTerminal.Identifier);
+                Expect(TypeNameTerminal.Equals);
+                switch (propertyToken.Text.ToLowerInvariant())
+                {
+                    case "version":
+                        assemblyRef.Version = ParseVersion();
+                        break;
+                    
+                    case "publickey":
+                        assemblyRef.PublicKeyOrToken = ParseHexBlob();
+                        assemblyRef.HasPublicKey = true;
+                        break;
+                    
+                    case "publickeytoken":
+                        assemblyRef.PublicKeyOrToken = ParseHexBlob();
+                        assemblyRef.HasPublicKey = false;
+                        break;
+                    
+                    case "culture":
+                        assemblyRef.Culture = ParseCulture();
+                        break;
+                    
+                    default:
+                        throw new FormatException($"Unsupported {propertyToken.Text} assembly property.");
+                }
+            }
+
+            return assemblyRef;
+        }
+
+        private Version ParseVersion()
+        {
+            string versionString = string.Join(".", ParseDottedExpression(TypeNameTerminal.Number));
+            return Version.Parse(versionString);
+        }
+
+        private byte[] ParseHexBlob()
+        {
+            var hexString = Expect(TypeNameTerminal.Identifier, TypeNameTerminal.Number).Text;
+            if (hexString == "null")
+                return null;
+            if (hexString.Length % 2 != 0)
+                throw new FormatException("Provided hex string does not have an even length.");
+
+            var result = new byte[hexString.Length / 2];
+            for (int i = 0; i < hexString.Length; i+=2)
+                result[i / 2] = byte.Parse(hexString.Substring(i, 2), NumberStyles.HexNumber);
+            return result;
+        }
+
+        private string ParseCulture()
+        {
+            return Expect(TypeNameTerminal.Identifier).Text;
+        }
+
         private TypeNameToken Expect(params TypeNameTerminal[] terminals)
         {
             return TryExpect(terminals)

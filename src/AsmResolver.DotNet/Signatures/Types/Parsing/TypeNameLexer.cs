@@ -58,12 +58,13 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 '[' => ReadSymbolToken(TypeNameTerminal.OpenBracket),
                 ']' => ReadSymbolToken(TypeNameTerminal.CloseBracket),
                 '…' => ReadSymbolToken(TypeNameTerminal.Ellipsis),
-                _ => char.IsDigit(currentChar) ? ReadNumberToken() : ReadIdentifierToken()
+                _ => char.IsDigit(currentChar) ? ReadNumberOrIdentifierToken() : ReadIdentifierToken()
             };
         }
 
-        private TypeNameToken ReadNumberToken()
+        private TypeNameToken ReadNumberOrIdentifierToken()
         {
+            TypeNameTerminal terminal = TypeNameTerminal.Number;
             while (true)
             {
                 int c = _reader.Peek();
@@ -71,14 +72,16 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     break;
                 
                 char currentChar = (char) c;
-                if (!char.IsDigit(currentChar))
+                if (char.IsWhiteSpace(currentChar) || RservedChars.Contains(currentChar))
                     break;
+                if (!char.IsDigit(currentChar))
+                    terminal = TypeNameTerminal.Identifier;
 
                 _reader.Read();
                 _buffer.Append(currentChar);
             }
             
-            return new TypeNameToken(TypeNameTerminal.Number, _buffer.ToString());
+            return new TypeNameToken(terminal, _buffer.ToString());
         }
 
         private TypeNameToken ReadIdentifierToken()
@@ -90,7 +93,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     break;
                 
                 char currentChar = (char) c;
-                if (RservedChars.Contains(currentChar))
+                if (char.IsWhiteSpace(currentChar) || RservedChars.Contains(currentChar))
                     break;
 
                 _reader.Read();
