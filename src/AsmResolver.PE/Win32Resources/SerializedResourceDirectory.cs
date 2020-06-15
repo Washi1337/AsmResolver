@@ -15,8 +15,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+using System;
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Win32Resources
 {
@@ -37,6 +40,7 @@ namespace AsmResolver.PE.Win32Resources
         public const int MaxDepth = 10;
             
         private readonly PEFile _peFile;
+        private readonly IWin32ResourceDataReader _dataReader;
         private readonly ushort _namedEntries;
         private readonly ushort _idEntries;
         private readonly uint _entriesOffset;
@@ -46,16 +50,19 @@ namespace AsmResolver.PE.Win32Resources
         /// Reads a single resource directory from an input stream.
         /// </summary>
         /// <param name="peFile">The PE file containing the resource.</param>
+        /// <param name="dataReader">The instance responsible for reading and interpreting the data.</param>
         /// <param name="entry">The entry to read. If this value is <c>null</c>, the root directory is assumed.</param>
-        /// <param name="reader">The input stream.</param>
+        /// <param name="directoryReader">The input stream.</param>
         /// <param name="depth">
         /// The current depth of the resource directory tree structure.
         /// If this value exceeds <see cref="MaxDepth"/>, this class will not initialize any entries.
         /// </param>
-        public SerializedResourceDirectory(PEFile peFile, ResourceDirectoryEntry? entry, IBinaryStreamReader reader, 
-            int depth = 0)
+        public SerializedResourceDirectory(PEFile peFile, IWin32ResourceDataReader dataReader,
+            ResourceDirectoryEntry? entry, IBinaryStreamReader directoryReader, int depth = 0)
         {
-            _peFile = peFile;
+            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            _dataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
+
             _depth = depth;
 
             if (entry.HasValue)
@@ -67,33 +74,53 @@ namespace AsmResolver.PE.Win32Resources
                     Id = value.IdOrNameOffset;
             }
 
-            if (reader != null)
+            if (directoryReader != null)
             {
-                Characteristics = reader.ReadUInt32();
-                TimeDateStamp = reader.ReadUInt32();
-                MajorVersion = reader.ReadUInt16();
-                MinorVersion = reader.ReadUInt16();
+                Characteristics = directoryReader.ReadUInt32();
+                TimeDateStamp = directoryReader.ReadUInt32();
+                MajorVersion = directoryReader.ReadUInt16();
+                MinorVersion = directoryReader.ReadUInt16();
 
-                _namedEntries = reader.ReadUInt16();
-                _idEntries = reader.ReadUInt16();
-                _entriesOffset = reader.FileOffset;
+                _namedEntries = directoryReader.ReadUInt16();
+                _idEntries = directoryReader.ReadUInt16();
+                _entriesOffset = directoryReader.FileOffset;
 
-                reader.FileOffset =
-                    (uint) (reader.FileOffset + (_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
+                directoryReader.FileOffset =
+                    (uint) (directoryReader.FileOffset + (_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
             }
         }
 
         /// <inheritdoc />
         protected override IList<IResourceEntry> GetEntries()
         {
-            if (_namedEntries + _idEntries == 0 // Optimisation + check for invalid resource directory offset. 
-                || _depth >= MaxDepth           // Prevent self loops.
-            )
+            var result = new OwnedCollection<IResourceDirectory, IResourceEntry>(this);
+            
+            // Optimisation, check for invalid resource directory offset, and prevention of self loop:
+            if (_namedEntries + _idEntries == 0 || _depth >= MaxDepth)
+                return result;
+
+            uint baseRva = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex].VirtualAddress;
+
+            // Create entries reader.
+            uint entryListSize = (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
+            var entriesReader = _peFile.CreateReaderAtFileOffset(_entriesOffset, entryListSize);
+
+            for (int i = 0; i < _namedEntries + _idEntries; i++)
             {
-                return new List<IResourceEntry>();
+                var rawEntry = new ResourceDirectoryEntry(_peFile, entriesReader);
+                
+                // Note: Even if creating the directory reader fails, we still want to include the directory entry
+                //       itself. In such a case, we expose the directory as an empty directory. This is why the
+                //       following statement is not used as a condition for an if statement.
+                
+                _peFile.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader);
+                
+                result.Add(rawEntry.IsSubDirectory
+                    ? (IResourceEntry) new SerializedResourceDirectory(_peFile, _dataReader, rawEntry, entryReader, _depth + 1)
+                    : new SerializedResourceData(_peFile, _dataReader, rawEntry, entryReader));
             }
 
-            return new SerializedResourceEntryList(_peFile, _entriesOffset, _namedEntries, _idEntries, _depth + 1);
+            return result;
         }
 
     }

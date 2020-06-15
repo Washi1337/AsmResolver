@@ -25,6 +25,14 @@ namespace AsmResolver.PE.Win32Resources
     public interface IResourceDirectory : IResourceEntry
     {
         /// <summary>
+        /// Gets the type of resources stored in the directory.
+        /// </summary>
+        ResourceType Type
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets or sets the flags of the directory.
         /// </summary>
         /// <remarks>

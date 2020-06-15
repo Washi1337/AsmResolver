@@ -243,8 +243,10 @@ namespace AsmResolver.DotNet.Tests
             var newDirectory = (IResourceDirectory) newModule.NativeResourceDirectory.Entries
                 .First(entry => entry.Name == directoryName);
             newDirectory = (IResourceDirectory) newDirectory.Entries[0];
+            
             var newData = (IResourceData) newDirectory.Entries[0];
-            Assert.Equal(entryData, newData.Contents.ToArray());
+            var newContents = (IReadableSegment) newData.Contents;
+            Assert.Equal(entryData, newContents.ToArray());
         }
     }
 }

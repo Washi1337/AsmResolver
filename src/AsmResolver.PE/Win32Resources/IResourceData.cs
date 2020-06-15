@@ -25,7 +25,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Gets or sets the raw contents of the data entry.
         /// </summary>
-        IReadableSegment Contents
+        ISegment Contents
         {
             get;
             set;
@@ -42,5 +42,19 @@ namespace AsmResolver.PE.Win32Resources
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="Contents"/> is readable using a binary stream reader.
+        /// </summary>
+        bool CanRead
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Creates a new binary stream reader that reads the raw contents of the resource file.
+        /// </summary>
+        /// <returns>The reader.</returns>
+        IBinaryStreamReader CreateReader();
     }
 }
