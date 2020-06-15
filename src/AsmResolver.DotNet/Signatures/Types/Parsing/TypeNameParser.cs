@@ -9,6 +9,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
     public class TypeNameParser
     {
+        private static readonly SignatureComparer Comparer = new SignatureComparer();
+        
         // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names
 
         public static TypeSignature Parse(ModuleDefinition module, string canonicalName)
@@ -33,6 +35,25 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             
             if (TryExpect(TypeNameTerminal.Ampersand).HasValue)
                 typeSpec = new ByReferenceTypeSignature(typeSpec);
+            
+            // See if the type full name contains an assembly ref.
+            var scope = TryExpect(TypeNameTerminal.Comma).HasValue
+                ? (IResolutionScope) ParseAssemblyNameSpec()
+                : _module;
+
+            // Ensure corlib type sigs are used.
+            if (Comparer.Equals(scope, _module.CorLibTypeFactory.CorLibScope))
+            {
+                var corlibType = _module.CorLibTypeFactory.FromType(typeSpec);
+                if (corlibType != null)
+                    return corlibType;
+            }
+            
+            // Update scope.
+            var reference = (TypeReference) typeSpec.GetUnderlyingTypeDefOrRef();
+            while (reference.Scope is TypeReference parent)
+                reference = parent;
+            reference.Scope = scope;
 
             return typeSpec;
         }
@@ -139,7 +160,33 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private TypeSignature ParseGenericTypeSpec(TypeSignature typeName)
         {
-            throw new NotImplementedException();
+            var result = new GenericInstanceTypeSignature(typeName.ToTypeDefOrRef(), typeName.IsValueType);
+            result.TypeArguments.Add(ParseGenericTypeArgument(result));
+
+            bool stop = false;
+            while (!stop)
+            {
+                var nextToken = Expect(TypeNameTerminal.CloseBracket, TypeNameTerminal.Comma);
+                switch (nextToken.Terminal)
+                {
+                    case TypeNameTerminal.CloseBracket:
+                        stop = true;
+                        break;
+                    case TypeNameTerminal.Comma:
+                        result.TypeArguments.Add(ParseGenericTypeArgument(result));
+                        break;
+                }
+            }
+
+            return result;
+        }
+
+        private TypeSignature ParseGenericTypeArgument(GenericInstanceTypeSignature genericInstance)
+        {
+            Expect(TypeNameTerminal.OpenBracket);
+            var result = ParseTypeSpec();
+            Expect(TypeNameTerminal.CloseBracket);
+            return result;
         }
 
         private TypeSignature ParseTypeName()
@@ -147,22 +194,19 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             // Note: This is a slight deviation from grammar (but is equivalent), to make the parsing easier.
             //       We read all components
             (string ns, var names) = ParseNamespaceTypeName();
-            var scope = TryExpect(TypeNameTerminal.Comma).HasValue
-                ? (IResolutionScope) ParseAssemblyNameSpec()
-                : _module;
-
+            
             TypeReference result = null; 
             for (int i = 0; i < names.Count; i++)
             {
                 result = result is null
-                    ? new TypeReference(_module, scope, ns, names[i])
+                    ? new TypeReference(_module, _module, ns, names[i])
                     : new TypeReference(_module, result, null, names[i]);
             }
 
             if (result is null)
                 throw new FormatException();
 
-            return _module.CorLibTypeFactory.FromType(result) ?? result.ToTypeSignature();
+            return result.ToTypeSignature();
         }
 
         private (string Namespace, IList<string> TypeNames) ParseNamespaceTypeName()
@@ -240,6 +284,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     
                     case "culture":
                         assemblyRef.Culture = ParseCulture();
+                        if (assemblyRef.Culture.Equals("neutral", StringComparison.OrdinalIgnoreCase))
+                            assemblyRef.Culture = null;
                         break;
                     
                     default:

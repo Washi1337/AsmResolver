@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
         
-        [TestCase(typeof(List<string[]>))]
+        [TestCase(typeof(KeyValuePair<string[], int[]>))]
         public void FixedComplexTypeArgument()
         {
         }

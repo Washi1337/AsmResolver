@@ -164,8 +164,10 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature.FixedArguments[0];
             var factory = attribute.Constructor.Module.CorLibTypeFactory;
             
-            var listRef = new TypeReference(factory.CorLibScope, "System.Collections.Generic", "List`1");
-            var instance = new GenericInstanceTypeSignature(listRef, false, new SzArrayTypeSignature(factory.String));
+            var listRef = new TypeReference(factory.CorLibScope, "System.Collections.Generic", "KeyValuePair`2");
+            var instance = new GenericInstanceTypeSignature(listRef, false,
+                new SzArrayTypeSignature(factory.String),
+                new SzArrayTypeSignature(factory.Int32));
 
             Assert.Equal(instance, argument.Element.Value as TypeSignature, _comparer);
         }

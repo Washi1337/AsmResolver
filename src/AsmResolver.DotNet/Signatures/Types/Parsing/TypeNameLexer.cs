@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
     internal class TypeNameLexer
     {
-        private static readonly ISet<char> RservedChars = new HashSet<char>("*+=.,`&[]…");
+        private static readonly ISet<char> RservedChars = new HashSet<char>("*+=.,&[]…");
         
         private readonly TextReader _reader;
         private readonly StringBuilder _buffer = new StringBuilder();
