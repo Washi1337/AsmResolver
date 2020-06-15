@@ -70,14 +70,70 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private TypeSignature ParseArrayTypeSpec(TypeSignature typeName)
         {
+            var dimensions = new List<ArrayDimension>
+            {
+                ParseArrayDimension()
+            };
+
+            bool stop = false;
+            while (!stop)
+            {
+                var nextToken = Expect(TypeNameTerminal.CloseBracket, TypeNameTerminal.Comma);
+                switch (nextToken.Terminal)
+                {
+                    case TypeNameTerminal.CloseBracket:
+                        stop = true;
+                        break;
+                    case TypeNameTerminal.Comma:
+                        dimensions.Add(ParseArrayDimension());
+                        break;
+                }
+            }
+
+            if (dimensions.Count == 1 && dimensions[0].Size == null && dimensions[0].LowerBound == null)
+                return new SzArrayTypeSignature(typeName);
+
+            var result = new ArrayTypeSignature(typeName);
+            foreach (var dimension in dimensions)
+                result.Dimensions.Add(dimension);
+            return result;
+        }
+
+        private ArrayDimension ParseArrayDimension()
+        {
             switch (_lexer.Peek().Terminal)
             {
                 case TypeNameTerminal.CloseBracket:
-                    _lexer.Next();
-                    return new SzArrayTypeSignature(typeName);
+                case TypeNameTerminal.Comma:
+                    return new ArrayDimension();
+
+                case TypeNameTerminal.Number:
+                    int? size = null;
+                    int? lowerBound = null;
+                    
+                    int firstNumber = int.Parse(_lexer.Next().Text);
+                    var dots = TryExpect(TypeNameTerminal.Ellipsis, TypeNameTerminal.DoubleDot);
+                    if (dots.HasValue)
+                    {
+                        var secondNumberToken = TryExpect(TypeNameTerminal.Number);
+                        if (secondNumberToken.HasValue)
+                        {
+                            int secondNumber = int.Parse(secondNumberToken.Value.Text);
+                            size = secondNumber - firstNumber;
+                            lowerBound = firstNumber;
+                        }
+                        else
+                        {
+                            lowerBound = firstNumber;
+                        }
+                    }
+
+                    return new ArrayDimension(size, lowerBound);
                 
                 default:
-                    throw new NotImplementedException();
+                    // Fail intentionally:
+                    Expect(TypeNameTerminal.CloseBracket, TypeNameTerminal.Comma, TypeNameTerminal.Number);
+                    return new ArrayDimension();
             }
         }
 

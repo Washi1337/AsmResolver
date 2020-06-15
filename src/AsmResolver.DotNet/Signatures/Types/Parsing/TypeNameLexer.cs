@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 '*' => ReadSymbolToken(TypeNameTerminal.Star),
                 '+' => ReadSymbolToken(TypeNameTerminal.Plus),
                 '=' => ReadSymbolToken(TypeNameTerminal.Equals),
-                '.' => ReadSymbolToken(TypeNameTerminal.Dot),
+                '.' => ReadDotToken(),
                 ',' => ReadSymbolToken(TypeNameTerminal.Comma),
                 '&' => ReadSymbolToken(TypeNameTerminal.Ampersand),
                 '[' => ReadSymbolToken(TypeNameTerminal.OpenBracket),
@@ -59,6 +59,21 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 '…' => ReadSymbolToken(TypeNameTerminal.Ellipsis),
                 _ => char.IsDigit(currentChar) ? ReadNumberOrIdentifierToken() : ReadIdentifierToken()
             };
+        }
+
+        private TypeNameToken ReadDotToken()
+        {
+            // Consume first dot.
+            _reader.Read();
+            
+            // See if there's a second one.
+            if (_reader.Peek() == '.')
+            {
+                _reader.Read();
+                return new TypeNameToken(TypeNameTerminal.DoubleDot, "..");
+            }
+
+            return new TypeNameToken(TypeNameTerminal.Dot, ".");
         }
 
         private TypeNameToken ReadNumberOrIdentifierToken()

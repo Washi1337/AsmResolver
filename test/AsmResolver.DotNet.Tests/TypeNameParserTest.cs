@@ -96,5 +96,18 @@ namespace AsmResolver.DotNet.Tests
             var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[]");
             Assert.Equal(expected, actual, _comparer);
         }
+
+        [Fact]
+        public void MultidimensionalArray()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            
+            var elementType = new TypeReference(_module, ns, name).ToTypeSignature();
+            var expected = new ArrayTypeSignature(elementType, 4);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[,,,]");
+            Assert.Equal(expected, actual, _comparer);
+        }
     }
 }

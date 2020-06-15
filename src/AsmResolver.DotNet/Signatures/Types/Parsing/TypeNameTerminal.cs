@@ -9,6 +9,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         Plus,
         Equals,
         Dot,
+        DoubleDot,
         Comma,
         Ampersand, 
         OpenBracket,
