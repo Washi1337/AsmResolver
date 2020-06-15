@@ -1,5 +1,6 @@
 using System;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using Xunit;
 
@@ -80,6 +81,19 @@ namespace AsmResolver.DotNet.Tests
 
             var actual = TypeNameParser.Parse(_module, 
                 $"{ns}.{name}, {assemblyRef.FullName}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void SimpleArrayType()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            
+            var elementType = new TypeReference(_module, ns, name).ToTypeSignature();
+            var expected = new SzArrayTypeSignature(elementType);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[]");
             Assert.Equal(expected, actual, _comparer);
         }
     }

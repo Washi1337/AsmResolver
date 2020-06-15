@@ -53,7 +53,6 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 '=' => ReadSymbolToken(TypeNameTerminal.Equals),
                 '.' => ReadSymbolToken(TypeNameTerminal.Dot),
                 ',' => ReadSymbolToken(TypeNameTerminal.Comma),
-                '`' => ReadSymbolToken(TypeNameTerminal.Tick),
                 '&' => ReadSymbolToken(TypeNameTerminal.Ampersand),
                 '[' => ReadSymbolToken(TypeNameTerminal.OpenBracket),
                 ']' => ReadSymbolToken(TypeNameTerminal.CloseBracket),

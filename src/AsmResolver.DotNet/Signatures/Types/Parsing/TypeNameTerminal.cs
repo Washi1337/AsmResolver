@@ -10,7 +10,6 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         Equals,
         Dot,
         Comma,
-        Tick,
         Ampersand, 
         OpenBracket,
         CloseBracket,

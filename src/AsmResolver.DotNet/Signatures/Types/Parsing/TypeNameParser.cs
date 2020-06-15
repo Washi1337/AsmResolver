@@ -42,21 +42,48 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             var typeName = ParseTypeName();
             return _lexer.Peek().Terminal switch
             {
-                TypeNameTerminal.Tick => ParseGenericTypeSpec(typeName),
                 TypeNameTerminal.Star => ParsePointerTypeSpec(typeName),
+                TypeNameTerminal.OpenBracket => ParseArrayOrGenericTypeSpec(typeName),
                 _ => typeName.ToTypeSignature()
             };
-        }
-
-        private TypeSignature ParseGenericTypeSpec(TypeReference typeSpec)
-        {
-            throw new NotImplementedException();
         }
 
         private TypeSignature ParsePointerTypeSpec(TypeReference typeName)
         {
             Expect(TypeNameTerminal.Star);
             return new PointerTypeSignature(typeName.ToTypeSignature());
+        }
+
+        private TypeSignature ParseArrayOrGenericTypeSpec(TypeReference typeName)
+        {
+            Expect(TypeNameTerminal.OpenBracket);
+
+            switch (_lexer.Peek().Terminal)
+            {
+                case TypeNameTerminal.OpenBracket:
+                    return ParseGenericTypeSpec(typeName);
+                
+                default:
+                    return ParseArrayTypeSpec(typeName);
+            }
+        }
+
+        private TypeSignature ParseArrayTypeSpec(TypeReference typeName)
+        {
+            switch (_lexer.Peek().Terminal)
+            {
+                case TypeNameTerminal.CloseBracket:
+                    _lexer.Next();
+                    return new SzArrayTypeSignature(typeName.ToTypeSignature());
+                
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private TypeSignature ParseGenericTypeSpec(TypeReference typeName)
+        {
+            throw new NotImplementedException();
         }
 
         private TypeReference ParseTypeName()
