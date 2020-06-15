@@ -44,17 +44,17 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             {
                 TypeNameTerminal.Star => ParsePointerTypeSpec(typeName),
                 TypeNameTerminal.OpenBracket => ParseArrayOrGenericTypeSpec(typeName),
-                _ => typeName.ToTypeSignature()
+                _ => typeName
             };
         }
 
-        private TypeSignature ParsePointerTypeSpec(TypeReference typeName)
+        private TypeSignature ParsePointerTypeSpec(TypeSignature typeName)
         {
             Expect(TypeNameTerminal.Star);
-            return new PointerTypeSignature(typeName.ToTypeSignature());
+            return new PointerTypeSignature(typeName);
         }
 
-        private TypeSignature ParseArrayOrGenericTypeSpec(TypeReference typeName)
+        private TypeSignature ParseArrayOrGenericTypeSpec(TypeSignature typeName)
         {
             Expect(TypeNameTerminal.OpenBracket);
 
@@ -68,25 +68,25 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             }
         }
 
-        private TypeSignature ParseArrayTypeSpec(TypeReference typeName)
+        private TypeSignature ParseArrayTypeSpec(TypeSignature typeName)
         {
             switch (_lexer.Peek().Terminal)
             {
                 case TypeNameTerminal.CloseBracket:
                     _lexer.Next();
-                    return new SzArrayTypeSignature(typeName.ToTypeSignature());
+                    return new SzArrayTypeSignature(typeName);
                 
                 default:
                     throw new NotImplementedException();
             }
         }
 
-        private TypeSignature ParseGenericTypeSpec(TypeReference typeName)
+        private TypeSignature ParseGenericTypeSpec(TypeSignature typeName)
         {
             throw new NotImplementedException();
         }
 
-        private TypeReference ParseTypeName()
+        private TypeSignature ParseTypeName()
         {
             // Note: This is a slight deviation from grammar (but is equivalent), to make the parsing easier.
             //       We read all components
@@ -103,7 +103,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     : new TypeReference(_module, result, null, names[i]);
             }
 
-            return result;
+            if (result is null)
+                throw new FormatException();
+
+            return _module.CorLibTypeFactory.FromType(result) ?? result.ToTypeSignature();
         }
 
         private (string Namespace, IList<string> TypeNames) ParseNamespaceTypeName()

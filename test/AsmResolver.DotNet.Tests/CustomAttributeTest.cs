@@ -147,11 +147,9 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature.NamedArguments);
 
             var argument = attribute.Signature.FixedArguments[0];
-            var expected = new TypeReference(
-                attribute.Constructor.Module.CorLibTypeFactory.CorLibScope,
-                "System", "String");
-
-            Assert.Equal(new TypeDefOrRefSignature(expected), argument.Element.Value as TypeSignature, _comparer);
+            Assert.Equal(
+                attribute.Constructor.Module.CorLibTypeFactory.String, 
+                argument.Element.Value as TypeSignature, _comparer);
         }
         
         [Theory]
