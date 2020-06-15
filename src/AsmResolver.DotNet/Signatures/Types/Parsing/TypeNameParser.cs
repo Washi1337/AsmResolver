@@ -3,16 +3,24 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
-    public class TypeNameParser
+    /// <summary>
+    /// Provides a mechanism for parsing a fully assembly qualified name of a type. 
+    /// </summary>
+    public sealed class TypeNameParser
     {
         private static readonly SignatureComparer Comparer = new SignatureComparer();
         
         // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names
-
+        
+        /// <summary>
+        /// Parses a single fully assembly qualified name. 
+        /// </summary>
+        /// <param name="module">The module containing the assembly qualified name.</param>
+        /// <param name="canonicalName">The fully qualified assembly name of the type.</param>
+        /// <returns>The parsed type.</returns>
         public static TypeSignature Parse(ModuleDefinition module, string canonicalName)
         {
             var lexer = new TypeNameLexer(new StringReader(canonicalName));

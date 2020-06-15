@@ -16,12 +16,12 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private readonly TextWriter _writer;
 
-        public TypeNameBuilder(TextWriter writer)
+        private TypeNameBuilder(TextWriter writer)
         {
             _writer = writer ?? throw new ArgumentNullException(nameof(writer));
         }
 
-        public void WriteTypeAssemblyQualifiedName(TypeSignature type)
+        private void WriteTypeAssemblyQualifiedName(TypeSignature type)
         {
             type.AcceptVisitor(this);
             
