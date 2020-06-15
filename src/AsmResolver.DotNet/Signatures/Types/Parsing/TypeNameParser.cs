@@ -31,10 +31,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private TypeSignature ParseTypeSpec()
         {
+            // Parse type signature.
             var typeSpec = ParseSimpleTypeSpec();
-            
-            if (TryExpect(TypeNameTerminal.Ampersand).HasValue)
-                typeSpec = new ByReferenceTypeSignature(typeSpec);
             
             // See if the type full name contains an assembly ref.
             var scope = TryExpect(TypeNameTerminal.Comma).HasValue
@@ -60,13 +58,23 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private TypeSignature ParseSimpleTypeSpec()
         {
+            // Parse type name.
             var typeName = ParseTypeName();
+            
+            // Check for annotations.
             return _lexer.Peek().Terminal switch
             {
+                TypeNameTerminal.Ampersand => ParseByReferenceTypeSpec(typeName),
                 TypeNameTerminal.Star => ParsePointerTypeSpec(typeName),
                 TypeNameTerminal.OpenBracket => ParseArrayOrGenericTypeSpec(typeName),
                 _ => typeName
             };
+        }
+
+        private TypeSignature ParseByReferenceTypeSpec(TypeSignature typeName)
+        {
+            Expect(TypeNameTerminal.Ampersand);
+            return new ByReferenceTypeSignature(typeName);
         }
 
         private TypeSignature ParsePointerTypeSpec(TypeSignature typeName)
