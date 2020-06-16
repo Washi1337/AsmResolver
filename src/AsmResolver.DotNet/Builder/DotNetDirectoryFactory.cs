@@ -130,7 +130,7 @@ namespace AsmResolver.DotNet.Builder
 
         private IMetadataBuffer CreateMetadataBuffer(ModuleDefinition module)
         {
-            var metadataBuffer = new MetadataBuffer();
+            var metadataBuffer = new MetadataBuffer(module.RuntimeVersion);
             
             // Check if there exists a .NET directory to base off the metadata buffer on.
             var originalMetadata = module.DotNetDirectory?.Metadata;
