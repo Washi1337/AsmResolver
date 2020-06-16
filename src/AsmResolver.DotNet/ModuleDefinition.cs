@@ -103,6 +103,7 @@ namespace AsmResolver.DotNet
         private IList<ManifestResource> _resources;
         private IList<ExportedType> _exportedTypes;
         
+        private readonly LazyVariable<string> _runtimeVersion;
         private readonly LazyVariable<IResourceDirectory> _nativeResources;
 
         /// <summary>
@@ -117,6 +118,7 @@ namespace AsmResolver.DotNet
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
             _managedEntrypoint = new LazyVariable<IManagedEntrypoint>(GetManagedEntrypoint);
+            _runtimeVersion = new LazyVariable<string>(GetRuntimeVersion);
             _nativeResources = new LazyVariable<IResourceDirectory>(GetNativeResources);
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
@@ -417,6 +419,15 @@ namespace AsmResolver.DotNet
             set;
         } = DllCharacteristics.DynamicBase | DllCharacteristics.NoSeh | DllCharacteristics.NxCompat
             | DllCharacteristics.TerminalServerAware;
+
+        /// <summary>
+        /// Gets or sets the runtime version string
+        /// </summary>
+        public string RuntimeVersion
+        {
+            get => _runtimeVersion.Value;
+            set => _runtimeVersion.Value = value;
+        }
 
         /// <summary>
         /// Gets or sets the contents of the native Win32 resources data directory of the underlying
@@ -783,6 +794,15 @@ namespace AsmResolver.DotNet
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         AssemblyDescriptor IResolutionScope.GetAssembly() => Assembly;
+
+        /// <summary>
+        /// Obtains the version string of the runtime.
+        /// </summary>
+        /// <returns>The runtime version.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="RuntimeVersion"/> property.
+        /// </remarks>
+        protected virtual string GetRuntimeVersion() => null;
 
         /// <summary>
         /// Obtains the managed entrypoint of this module.
