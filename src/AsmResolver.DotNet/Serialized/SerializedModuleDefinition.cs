@@ -811,6 +811,9 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        protected override string GetRuntimeVersion() => DotNetDirectory.Metadata.VersionString;
+
+        /// <inheritdoc />
         protected override IManagedEntrypoint GetManagedEntrypoint()
         {
             if ((DotNetDirectory.Flags & DotNetDirectoryFlags.ILLibrary) == 0)
