@@ -802,7 +802,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="RuntimeVersion"/> property.
         /// </remarks>
-        protected virtual string GetRuntimeVersion() => null;
+        protected virtual string GetRuntimeVersion() => KnownRuntimeVersions.Clr40;
 
         /// <summary>
         /// Obtains the managed entrypoint of this module.
