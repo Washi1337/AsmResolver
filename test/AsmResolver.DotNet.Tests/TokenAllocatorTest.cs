@@ -9,10 +9,11 @@ namespace AsmResolver.DotNet.Tests
         public void AsigningAvailableTokenShouldSetMetadataToken()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
-            var typeRef = (TypeReference) module.LookupMember(new MetadataToken(TableIndex.TypeRef, 13));
+            var typeRef = new TypeReference(module, "", "");
             var nextToken = module.TokenAllocator.GetNextAvailableToken(TableIndex.TypeRef);
             module.TokenAllocator.AssignNextAvailableToken(typeRef);
 
+            Assert.NotEqual((uint)0,nextToken.Rid);
             Assert.Equal(nextToken, typeRef.MetadataToken);
         }
 
@@ -39,12 +40,13 @@ namespace AsmResolver.DotNet.Tests
         public void NextAvailableTokenShouldChangeAfterAsigning()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
-            var typeRef = (TypeReference)module.LookupMember(new MetadataToken(TableIndex.TypeRef, 13));
+            var typeRef = new TypeReference(module, "", "");
             var nextToken = module.TokenAllocator.GetNextAvailableToken(TableIndex.TypeRef);
             module.TokenAllocator.AssignNextAvailableToken(typeRef);
-            module.TokenAllocator.AssignNextAvailableToken(typeRef);
+            var typeRef2 = new TypeReference(module, "", "");
+            module.TokenAllocator.AssignNextAvailableToken(typeRef2);
 
-            Assert.Equal(nextToken.Rid + 1, typeRef.MetadataToken.Rid);
+            Assert.Equal(nextToken.Rid + 1, typeRef2.MetadataToken.Rid);
         }
     }
 }
