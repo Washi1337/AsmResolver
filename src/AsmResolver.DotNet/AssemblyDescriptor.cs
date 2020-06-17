@@ -15,33 +15,23 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides a base implementation for describing a self-describing .NET assembly hosted by a common language runtime (CLR).
     /// </summary>
-    public abstract class AssemblyDescriptor : IHasCustomAttribute, IFullNameProvider
+    public abstract class AssemblyDescriptor : MetadataMember, IHasCustomAttribute, IFullNameProvider
     {
         private const int PublicKeyTokenLength = 8;
         
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _culture;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
         
         /// <summary>
         /// Initializes a new empty assembly descriptor.
         /// </summary>
         /// <param name="token">The token of the assembly descriptor.</param>
         protected AssemblyDescriptor(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
             _culture = new LazyVariable<string>(GetCulture);
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

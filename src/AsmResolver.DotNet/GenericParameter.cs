@@ -11,6 +11,7 @@ namespace AsmResolver.DotNet
     /// Represents a type parameter that a generic method or type in a .NET module defines.
     /// </summary>
     public class GenericParameter : 
+        MetadataMember,
         INameProvider, 
         IHasCustomAttribute,
         IModuleProvider,
@@ -20,15 +21,14 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<IHasGenericParameters> _owner;
         private IList<GenericParameterConstraint> _constraints;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new empty generic parameter.
         /// </summary>
         /// <param name="token">The token of the generic parameter.</param>
         protected GenericParameter(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
             _owner = new LazyVariable<IHasGenericParameters>(GetOwner);
         }
@@ -54,16 +54,7 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
         }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
-        }
-
+        
         /// <summary>
         /// Gets the member that defines this generic parameter.
         /// </summary>

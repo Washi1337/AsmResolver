@@ -9,20 +9,18 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents an object that associates a method definition to a property or an event.
     /// </summary>
-    public class MethodSemantics : IMetadataMember, IOwnedCollectionElement<IHasSemantics>
+    public class MethodSemantics : MetadataMember, IOwnedCollectionElement<IHasSemantics>
     {
         private readonly LazyVariable<MethodDefinition> _method;
         private readonly LazyVariable<IHasSemantics> _association;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes an empty method semantics object.
         /// </summary>
         /// <param name="token">The metadata token of the semantics object.</param>
         protected MethodSemantics(MetadataToken token)
+            : base(token)
         {
-            _token = token;
-            
             _method = new LazyVariable<MethodDefinition>(GetMethod);
             _association = new LazyVariable<IHasSemantics>(GetAssociation);
         }
@@ -37,15 +35,6 @@ namespace AsmResolver.DotNet
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));
             Attributes = attributes;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

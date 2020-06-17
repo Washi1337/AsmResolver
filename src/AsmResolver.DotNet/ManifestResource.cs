@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet
     /// In this case, it contains also a reference to the file the resource is located in.
     /// </summary>
     public class ManifestResource : 
-        IMetadataMember, 
+        MetadataMember, 
         INameProvider,
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
@@ -28,6 +28,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected ManifestResource(MetadataToken token)
+            : base(token)
         {
             _token = token;
             _name = new LazyVariable<string>(GetName);
@@ -63,15 +64,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             EmbeddedDataSegment = data;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

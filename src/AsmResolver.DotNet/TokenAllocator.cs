@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="member"/> is null</exception>
         /// <exception cref="ArgumentException">Occurs when <paramref name="member"/> is already assigned a <see cref="MetadataToken"/></exception>
         /// <param name="member"></param>
-        public void AssignNextAvailableToken(IMetadataMember member)
+        public void AssignNextAvailableToken(MetadataMember member)
         {
             if (member is null)
                 throw new ArgumentNullException(nameof(member));

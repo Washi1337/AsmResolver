@@ -11,6 +11,7 @@ namespace AsmResolver.DotNet
     /// Represents a reference to an external file that a .NET module depends on.
     /// </summary>
     public class FileReference : 
+        MetadataMember, 
         IImplementation, 
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
@@ -18,15 +19,14 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<byte[]> _hashValue;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes the file reference with a metadata token.
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected FileReference(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
             _hashValue = new LazyVariable<byte[]>(GetHashValue);
         }
@@ -37,18 +37,10 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the file.</param>
         /// <param name="attributes">The attributes associated to the reference.</param>
         public FileReference(string name, FileAttributes attributes)
+            : base(new MetadataToken(TableIndex.File, 0))
         {
             Name = name;
             Attributes = attributes;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

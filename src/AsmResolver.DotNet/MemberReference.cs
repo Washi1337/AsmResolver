@@ -11,22 +11,20 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a method or a field in an (external) .NET assembly.
     /// </summary>
-    public class MemberReference : ICustomAttributeType, IFieldDescriptor
+    public class MemberReference : MetadataMember, ICustomAttributeType, IFieldDescriptor
     {
         private readonly LazyVariable<IMemberRefParent> _parent;
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<CallingConventionSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new member reference.
         /// </summary>
         /// <param name="token">The metadata token of the reference.</param>
         protected MemberReference(MetadataToken token)
+            : base(token)
         {
-            _token = token;
-            
             _parent = new LazyVariable<IMemberRefParent>(GetParent);
             _name = new LazyVariable<string>(GetName);
             _signature = new LazyVariable<CallingConventionSignature>(GetSignature);
@@ -45,15 +43,6 @@ namespace AsmResolver.DotNet
             Parent = parent;
             Name = name;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>
