@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Provides a mechanism to reassign metadata tokens
+    /// Provides a mechanism to assign metadata tokens
     /// </summary>
     public class TokenAllocator
     {

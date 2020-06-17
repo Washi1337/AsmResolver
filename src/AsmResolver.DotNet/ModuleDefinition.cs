@@ -285,6 +285,9 @@ namespace AsmResolver.DotNet
             set;
         }
 
+        /// <summary>
+        /// Gets an object responsible for assigning new <see cref="MetadataToken"/> to members
+        /// </summary>
         public TokenAllocator TokenAllocator
         {
             get
