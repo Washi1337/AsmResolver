@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<IMethodDefOrRef> _method;
         private readonly LazyVariable<GenericInstanceMethodSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Creates a new empty method specification.
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the specification.</param>
         protected MethodSpecification(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _method = new LazyVariable<IMethodDefOrRef>(GetMethod);
             _signature = new LazyVariable<GenericInstanceMethodSignature>(GetSignature);
         }
@@ -40,12 +41,14 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
-        
+
         /// <summary>
         /// Gets or sets the method that was instantiated.
         /// </summary>

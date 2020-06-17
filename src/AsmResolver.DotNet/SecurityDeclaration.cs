@@ -15,14 +15,15 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<IHasSecurityDeclaration> _parent;
         private readonly LazyVariable<PermissionSetSignature> _permissionSet;
-        
+        private MetadataToken _token;
+
         /// <summary>
         /// Initializes the <see cref="SecurityDeclaration"/> with a metadata token.
         /// </summary>
         /// <param name="token">The token.</param>
         protected SecurityDeclaration(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _parent = new LazyVariable<IHasSecurityDeclaration>(GetParent);
             _permissionSet = new LazyVariable<PermissionSetSignature>(GetPermissionSet);
         }
@@ -40,10 +41,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>

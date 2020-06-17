@@ -12,6 +12,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<ModuleReference> _scope;
         private readonly LazyVariable<IMemberForwarded> _memberForwarded;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes the <see cref="ImplementationMap"/> with a metadata token.
@@ -19,7 +20,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the member.</param>
         protected ImplementationMap(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _name = new LazyVariable<string>(GetName);
             _scope = new LazyVariable<ModuleReference>(GetScope);
             _memberForwarded = new LazyVariable<IMemberForwarded>(GetMemberForwarded);
@@ -38,12 +39,14 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
         }
-        
+
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>

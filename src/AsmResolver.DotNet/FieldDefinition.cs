@@ -30,6 +30,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<ImplementationMap> _implementationMap;
         private readonly LazyVariable<ISegment> _fieldRva;
         private readonly LazyVariable<int?> _fieldOffset;
+        private MetadataToken _token;
 
         private IList<CustomAttribute> _customAttributes;
 
@@ -39,7 +40,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the field.</param>
         protected FieldDefinition(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _name = new LazyVariable<string>(GetName);
             _signature = new LazyVariable<FieldSignature>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
@@ -70,10 +71,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <inheritdoc />

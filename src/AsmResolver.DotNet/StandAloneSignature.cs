@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<CallingConventionSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new stand-alone signature.
@@ -25,7 +26,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the stand-alone signature.</param>
         protected StandAloneSignature(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _signature = new LazyVariable<CallingConventionSignature>(GetSignature);
         }
         
@@ -40,10 +41,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>

@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<TypeSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes an empty type specification.
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the type specification.</param>
         protected TypeSpecification(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _signature = new LazyVariable<TypeSignature>(GetSignature);
         }
 
@@ -37,10 +38,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>

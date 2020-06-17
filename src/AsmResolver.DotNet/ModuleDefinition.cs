@@ -102,6 +102,8 @@ namespace AsmResolver.DotNet
         private IList<FileReference> _fileReferences;
         private IList<ManifestResource> _resources;
         private IList<ExportedType> _exportedTypes;
+        private MetadataToken _token;
+        private TokenAllocator _tokenAllocator;
         
         private readonly LazyVariable<string> _runtimeVersion;
         private readonly LazyVariable<IResourceDirectory> _nativeResources;
@@ -112,7 +114,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The metadata token.</param>
         protected ModuleDefinition(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _name = new LazyVariable<string>(GetName);
             _mvid = new LazyVariable<Guid>(GetMvid);
             _encId = new LazyVariable<Guid>(GetEncId);
@@ -182,10 +184,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>
@@ -281,7 +285,20 @@ namespace AsmResolver.DotNet
             get;
             set;
         }
-        
+
+        /// <summary>
+        /// Gets an object responsible for assigning new <see cref="MetadataToken"/> to members
+        /// </summary>
+        public TokenAllocator TokenAllocator
+        {
+            get
+            {
+                if (_tokenAllocator is null)
+                    Interlocked.CompareExchange(ref _tokenAllocator, new TokenAllocator(this), null);
+                return _tokenAllocator;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether the .NET module only contains CIL code or also contains
         /// code targeting other architectures.

@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _namespace;
         private readonly LazyVariable<IResolutionScope> _scope;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new empty type reference.
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the type reference.</param>
         protected TypeReference(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _name = new LazyVariable<string>(GetName);
             _namespace = new LazyVariable<string>(GetNamespace);
             _scope = new LazyVariable<IResolutionScope>(GetScope);
@@ -61,10 +62,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>

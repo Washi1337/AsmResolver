@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<GenericParameter> _owner;
         private readonly LazyVariable<ITypeDefOrRef> _constraint;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes the generic parameter constraint with a metadata token.
@@ -25,7 +26,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The metadata token.</param>
         protected GenericParameterConstraint(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _owner = new LazyVariable<GenericParameter>(GetOwner);
             _constraint = new LazyVariable<ITypeDefOrRef>(GetConstraint);
         }
@@ -41,10 +42,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>
