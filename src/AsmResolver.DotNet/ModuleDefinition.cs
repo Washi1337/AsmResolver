@@ -103,7 +103,9 @@ namespace AsmResolver.DotNet
         private IList<ManifestResource> _resources;
         private IList<ExportedType> _exportedTypes;
         private MetadataToken _token;
-        
+
+        private TokenAllocator _tokenAllocator;
+
         private readonly LazyVariable<IResourceDirectory> _nativeResources;
 
         /// <summary>
@@ -282,7 +284,17 @@ namespace AsmResolver.DotNet
             get;
             set;
         }
-        
+
+        public TokenAllocator TokenAllocator
+        {
+            get
+            {
+                if (_tokenAllocator is null)
+                    Interlocked.CompareExchange(ref _tokenAllocator, new TokenAllocator(this), null);
+                return _tokenAllocator;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether the .NET module only contains CIL code or also contains
         /// code targeting other architectures.
