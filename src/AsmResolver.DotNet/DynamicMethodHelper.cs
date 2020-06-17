@@ -165,7 +165,7 @@ namespace AsmResolver.DotNet
                 throw new ArgumentNullException(nameof(dynamicMethodObj));
 
             //We use GetType().FullName just to avoid the System.Reflection.Emit.LightWeight Dll
-            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.RTDynamicMethod")
+            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod+RTDynamicMethod")
                 dynamicMethodObj = FieldReader.ReadField<object>(dynamicMethodObj, "m_owner");
 
             if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")
