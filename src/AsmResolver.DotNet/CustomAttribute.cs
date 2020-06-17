@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<IHasCustomAttribute> _parent;
         private readonly LazyVariable<ICustomAttributeType> _constructor;
         private readonly LazyVariable<CustomAttributeSignature> _signature;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes an empty custom attribute.
@@ -20,7 +21,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the custom attribute.</param>
         protected CustomAttribute(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _parent = new LazyVariable<IHasCustomAttribute>(GetParent);
             _constructor = new LazyVariable<ICustomAttributeType>(GetConstructor);
             _signature = new LazyVariable<CustomAttributeSignature>(GetSignature);
@@ -39,9 +40,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>

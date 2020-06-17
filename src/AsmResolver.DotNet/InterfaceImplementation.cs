@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<TypeDefinition> _class;
         private readonly LazyVariable<ITypeDefOrRef> _interface;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes the <see cref="InterfaceImplementation"/> object with a metadata token.
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet
         /// <param name="token"></param>
         protected InterfaceImplementation(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _class = new LazyVariable<TypeDefinition>(GetClass);
             _interface = new LazyVariable<ITypeDefOrRef>(GetInterface);
         }
@@ -38,12 +39,14 @@ namespace AsmResolver.DotNet
         {
             Interface = interfaceType;
         }
-        
+
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>

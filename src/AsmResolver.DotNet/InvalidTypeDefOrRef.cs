@@ -47,7 +47,12 @@ namespace AsmResolver.DotNet
             get;
         }
 
-        MetadataToken IMetadataMember.MetadataToken => new MetadataToken(TableIndex.TypeSpec, 0);
+        MetadataToken IMetadataMember.MetadataToken
+        {
+            get => new MetadataToken(TableIndex.TypeSpec, 0);
+            set => throw new InvalidOperationException();
+        }
+        
 
         string INameProvider.Name => $"<<<{Error}>>>".ToUpperInvariant();
         

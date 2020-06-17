@@ -28,6 +28,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<Constant> _constant;
         private readonly LazyVariable<MarshalDescriptor> _marshalDescriptor;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new parameter definition.
@@ -35,7 +36,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the parameter definition.</param>
         protected ParameterDefinition(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _name = new LazyVariable<string>(GetName);
             _method = new LazyVariable<MethodDefinition>(GetMethod);
             _constant = new LazyVariable<Constant>(GetConstant);
@@ -67,10 +68,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <inheritdoc />

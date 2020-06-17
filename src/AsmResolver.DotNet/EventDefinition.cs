@@ -21,6 +21,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<ITypeDefOrRef> _eventType;
         private IList<MethodSemantics> _semantics;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new property definition.
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the property.</param>
         protected EventDefinition(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _name = new LazyVariable<string>(GetName);
             _eventType = new LazyVariable<ITypeDefOrRef>(GetEventType);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
@@ -49,10 +50,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>

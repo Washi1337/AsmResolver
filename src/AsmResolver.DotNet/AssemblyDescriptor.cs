@@ -22,6 +22,7 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _culture;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
         
         /// <summary>
         /// Initializes a new empty assembly descriptor.
@@ -29,16 +30,18 @@ namespace AsmResolver.DotNet
         /// <param name="token">The token of the assembly descriptor.</param>
         protected AssemblyDescriptor(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _name = new LazyVariable<string>(GetName);
             _culture = new LazyVariable<string>(GetCulture);
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
-            protected set;
+            get => _token;
+            set => _token = value;
         }
 
         /// <summary>
@@ -182,6 +185,7 @@ namespace AsmResolver.DotNet
             get => _culture.Value;
             set => _culture.Value = value;
         }
+
 
         /// <summary>
         /// When the application is signed with a strong name, obtains the public key token of the assembly 

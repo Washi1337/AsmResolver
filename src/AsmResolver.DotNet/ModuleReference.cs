@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<string> _name;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes the module reference with a metadata token.
@@ -24,7 +25,7 @@ namespace AsmResolver.DotNet
         /// <param name="token">The metadata token.</param>
         protected ModuleReference(MetadataToken token)
         {
-            MetadataToken = token;
+            _token = token;
             _name = new LazyVariable<string>(GetName);
         }
 
@@ -39,9 +40,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public MetadataToken MetadataToken
+        public MetadataToken MetadataToken => _token;
+
+        MetadataToken IMetadataMember.MetadataToken
         {
-            get;
+            get => _token;
+            set => _token = value;
         }
 
         /// <inheritdoc />
