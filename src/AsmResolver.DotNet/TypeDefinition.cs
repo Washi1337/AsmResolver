@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
     public class TypeDefinition : 
+        MetadataMember,
         ITypeDefOrRef,
         IMemberDefinition,
         IHasGenericParameters,
@@ -40,15 +41,14 @@ namespace AsmResolver.DotNet
         private IList<GenericParameter> _genericParameters;
         private IList<InterfaceImplementation> _interfaces;
         private IList<MethodImplementation> _methodImplementations;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new type definition.
         /// </summary>
         /// <param name="token">The token of the type definition.</param>
         protected TypeDefinition(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _namespace = new LazyVariable<string>(GetNamespace);
             _name = new LazyVariable<string>(GetName);
             _baseType = new LazyVariable<ITypeDefOrRef>(GetBaseType);
@@ -81,15 +81,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             BaseType = baseType;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

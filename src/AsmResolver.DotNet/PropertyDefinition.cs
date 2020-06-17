@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet
     /// Represents a single property in a type definition of a .NET module.
     /// </summary>
     public class PropertyDefinition :
+        MetadataMember,
         IHasSemantics,
         IHasCustomAttribute,
         IHasConstant,
@@ -24,15 +25,14 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<Constant> _constant;
         private IList<MethodSemantics> _semantics;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new property definition.
         /// </summary>
         /// <param name="token">The token of the property.</param>
         protected PropertyDefinition(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
             _signature = new LazyVariable<PropertySignature>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
@@ -51,15 +51,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

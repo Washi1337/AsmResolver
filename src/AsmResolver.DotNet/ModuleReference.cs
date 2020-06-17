@@ -10,6 +10,7 @@ namespace AsmResolver.DotNet
     /// Represents a reference to an external module. This module can be managed or unmanaged.
     /// </summary>
     public class ModuleReference :
+        MetadataMember,
         IResolutionScope,
         IMemberRefParent,
         IHasCustomAttribute,
@@ -17,15 +18,14 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<string> _name;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes the module reference with a metadata token.
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected ModuleReference(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
         }
 
@@ -37,15 +37,6 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.ModuleRef, 0))
         {
             Name = name;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <inheritdoc />

@@ -13,7 +13,6 @@ namespace AsmResolver.DotNet
         MetadataToken MetadataToken
         {
             get;
-            internal set;
         }
     }
 }

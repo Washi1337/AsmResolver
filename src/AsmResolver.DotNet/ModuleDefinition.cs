@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE;
@@ -22,7 +21,11 @@ namespace AsmResolver.DotNet
     /// Represents a single module in a .NET assembly. A module definition is the root object of any .NET module and
     /// defines types, as well as any resources and referenced assemblies. 
     /// </summary>
-    public class ModuleDefinition : IResolutionScope, IHasCustomAttribute, IOwnedCollectionElement<AssemblyDefinition>
+    public class ModuleDefinition :
+        MetadataMember,
+        IResolutionScope,
+        IHasCustomAttribute,
+        IOwnedCollectionElement<AssemblyDefinition>
     {
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -102,7 +105,6 @@ namespace AsmResolver.DotNet
         private IList<FileReference> _fileReferences;
         private IList<ManifestResource> _resources;
         private IList<ExportedType> _exportedTypes;
-        private MetadataToken _token;
         private TokenAllocator _tokenAllocator;
         
         private readonly LazyVariable<string> _runtimeVersion;
@@ -113,8 +115,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected ModuleDefinition(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
             _mvid = new LazyVariable<Guid>(GetMvid);
             _encId = new LazyVariable<Guid>(GetEncId);
@@ -181,15 +183,6 @@ namespace AsmResolver.DotNet
         public virtual IDotNetDirectory DotNetDirectory
         {
             get;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

@@ -14,6 +14,7 @@ namespace AsmResolver.DotNet
     /// Represents a single field in a type definition of a .NET module.
     /// </summary>
     public class FieldDefinition :
+        MetadataMember,
         IMemberDefinition,
         IFieldDescriptor, 
         IHasCustomAttribute, 
@@ -30,7 +31,6 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<ImplementationMap> _implementationMap;
         private readonly LazyVariable<ISegment> _fieldRva;
         private readonly LazyVariable<int?> _fieldOffset;
-        private MetadataToken _token;
 
         private IList<CustomAttribute> _customAttributes;
 
@@ -39,8 +39,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the field.</param>
         protected FieldDefinition(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
             _signature = new LazyVariable<FieldSignature>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
@@ -68,15 +68,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <inheritdoc />

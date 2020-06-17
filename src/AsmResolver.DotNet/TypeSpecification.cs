@@ -11,7 +11,9 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type that allows for assigning metadata tokens to type signatures stored in the blob stream. 
     /// </summary>
-    public class TypeSpecification : ITypeDefOrRef, IHasCustomAttribute
+    public class TypeSpecification : 
+        MetadataMember,
+        ITypeDefOrRef
     {
         private readonly LazyVariable<TypeSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
@@ -22,8 +24,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the type specification.</param>
         protected TypeSpecification(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _signature = new LazyVariable<TypeSignature>(GetSignature);
         }
 
@@ -35,15 +37,6 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.TypeSpec, 0))
         {
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

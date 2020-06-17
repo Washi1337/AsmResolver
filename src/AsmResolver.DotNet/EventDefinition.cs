@@ -12,6 +12,7 @@ namespace AsmResolver.DotNet
     /// Represents a single event in a type definition of a .NET module.
     /// </summary>
     public class EventDefinition : 
+        MetadataMember,
         IHasSemantics,
         IHasCustomAttribute,
         IOwnedCollectionElement<TypeDefinition>
@@ -21,15 +22,14 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<ITypeDefOrRef> _eventType;
         private IList<MethodSemantics> _semantics;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new property definition.
         /// </summary>
         /// <param name="token">The token of the property.</param>
         protected EventDefinition(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _name = new LazyVariable<string>(GetName);
             _eventType = new LazyVariable<ITypeDefOrRef>(GetEventType);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
@@ -47,15 +47,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             EventType = eventType;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

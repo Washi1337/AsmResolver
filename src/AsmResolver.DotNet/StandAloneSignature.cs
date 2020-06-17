@@ -14,19 +14,18 @@ namespace AsmResolver.DotNet
     /// Stand-alone signatures are often used by the runtime for referencing local variable signatures, or serve
     /// as an operand for calli instructions.
     /// </remarks>
-    public class StandAloneSignature : IHasCustomAttribute
+    public class StandAloneSignature : MetadataMember, IHasCustomAttribute
     {
         private readonly LazyVariable<CallingConventionSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes a new stand-alone signature.
         /// </summary>
         /// <param name="token">The token of the stand-alone signature.</param>
         protected StandAloneSignature(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _signature = new LazyVariable<CallingConventionSignature>(GetSignature);
         }
         
@@ -38,15 +37,6 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.StandAloneSig, 0))
         {
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

@@ -7,19 +7,18 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a literal value that is assigned to a field, parameter or property.
     /// </summary>
-    public class Constant : IMetadataMember
+    public class Constant : MetadataMember
     {
         private readonly LazyVariable<IHasConstant> _parent;
         private readonly LazyVariable<DataBlobSignature> _value;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes the constant with a metadata token.
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected Constant(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _parent = new LazyVariable<IHasConstant>(GetParent);
             _value = new LazyVariable<DataBlobSignature>(GetValue);
         }
@@ -34,15 +33,6 @@ namespace AsmResolver.DotNet
         {
             Type = type;
             Value = value;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>

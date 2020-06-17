@@ -8,20 +8,19 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a custom attribute that is associated to a member in a .NET module. 
     /// </summary>
-    public class CustomAttribute : IMetadataMember, IOwnedCollectionElement<IHasCustomAttribute>
+    public class CustomAttribute : MetadataMember, IOwnedCollectionElement<IHasCustomAttribute>
     {
         private readonly LazyVariable<IHasCustomAttribute> _parent;
         private readonly LazyVariable<ICustomAttributeType> _constructor;
         private readonly LazyVariable<CustomAttributeSignature> _signature;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes an empty custom attribute.
         /// </summary>
         /// <param name="token">The token of the custom attribute.</param>
         protected CustomAttribute(MetadataToken token)
+            : base(token)
         {
-            _token = token;
             _parent = new LazyVariable<IHasCustomAttribute>(GetParent);
             _constructor = new LazyVariable<ICustomAttributeType>(GetConstructor);
             _signature = new LazyVariable<CustomAttributeSignature>(GetSignature);
@@ -37,15 +36,6 @@ namespace AsmResolver.DotNet
         {
             Constructor = constructor;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken => _token;
-
-        MetadataToken IMetadataMember.MetadataToken
-        {
-            get => _token;
-            set => _token = value;
         }
 
         /// <summary>
