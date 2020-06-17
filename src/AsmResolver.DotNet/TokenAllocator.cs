@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace AsmResolver.DotNet
 {
+    /// <summary>
+    /// Provides a mechanism to reassign metadata tokens
+    /// </summary>
     public class TokenAllocator
     {
         private readonly Dictionary<TableIndex, MetadataToken> _nextTokens = new Dictionary<TableIndex, MetadataToken>();
@@ -39,17 +42,32 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <summary>
+        /// Obtains next unused <see cref="MetadataToken"/>
+        /// </summary>
+        /// <param name="index">Type of <see cref="MetadataToken"/></param>
+        /// <remarks>This method is pure. That is, it only returns the next available metadata token and does not claim any metadata token</remarks>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when an invalid <see cref="TableIndex"/> is provided</exception>
+        /// <returns>The next unused <see cref="MetadataToken"/></returns>
         public MetadataToken GetNextAvailableToken(TableIndex index)
         {
             if (!_nextTokens.ContainsKey(index))
                 throw new ArgumentOutOfRangeException(nameof(index));
             return _nextTokens[index];
         }
-
+        /// <summary>
+        /// Determines the next metadata token for provided member and asigns it
+        /// </summary>
+        /// <remarks>This method only succeeds when new or copied memeber is provided</remarks>
+        /// <exception cref="ArgumentNullException">Occurs when <paramref name="member"/> is null</exception>
+        /// <exception cref="ArgumentException">Occurs when <paramref name="member"/> is already assigned a <see cref="MetadataToken"/></exception>
+        /// <param name="member"></param>
         public void AssignNextAvailableToken(IMetadataMember member)
         {
             if (member is null)
                 throw new ArgumentNullException(nameof(member));
+            if (member.MetadataToken.Rid != 0)
+                throw new ArgumentException("Only new members can be assigned a new metadata token");
             var index = member.MetadataToken.Table;
             var token = GetNextAvailableToken(index);
             member.MetadataToken = token;
