@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
         /// Creates a new metadata directory buffer that targets runtime version v4.0.30319. 
         /// </summary>
         public MetadataBuffer()
-            : this("v4.0.30319")
+            : this(KnownRuntimeVersions.Clr40)
         {
         }
         
@@ -91,5 +91,6 @@ namespace AsmResolver.DotNet.Builder.Metadata
                 }
             };
         }
+        
     }
 }

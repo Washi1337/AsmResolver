@@ -1,4 +1,5 @@
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures.Types.Parsing;
 
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
@@ -21,7 +22,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
             string cookie = reader.ReadSerString();
             
             return new CustomMarshalDescriptor(guid, nativeTypeName,
-                marshalTypeName is null ? null : TypeNameParser.ParseType(parentModule, marshalTypeName), cookie);
+                marshalTypeName is null ? null : TypeNameParser.Parse(parentModule, marshalTypeName), cookie);
         }
         
         /// <summary>
