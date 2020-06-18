@@ -14,7 +14,7 @@ While this is easy, and would probably work for most .NET module processing, it 
 
 .. code-block:: csharp
 
-    var imageBuilder = new ManagedPEFileBuilder();
+    var imageBuilder = new ManagedPEImageBuilder();
     
     /* Configuration of imageBuilder here... */
 
