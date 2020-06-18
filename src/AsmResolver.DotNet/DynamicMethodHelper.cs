@@ -27,35 +27,42 @@ namespace AsmResolver.DotNet
                 throw new NotImplementedException("Exception Handlers From ehHeader Not Supported Yet.");
             if (ehInfos != null && ehInfos.Count > 0)
             {
-                for (var i = 0; i < ehInfos.Count; i++)
+                foreach(var ehInfo in ehInfos)
                 {
-                    //Get ExceptionHandlerInfo Field Values
-                    var endFinally = FieldReader.ReadField<int>(ehInfos[i], "m_endFinally");
-                    var endFinallyLabel = endFinally < 0
-                        ? null 
-                        : methodBody.Instructions.GetByOffset(endFinally)?.CreateLabel() ?? 
-                          new CilOffsetLabel(endFinally);
-                    var endTry = FieldReader.ReadField<int>(ehInfos[i], "m_endAddr");
-                    var endTryLabel = methodBody.Instructions.GetByOffset(endTry)?.CreateLabel() ?? new CilOffsetLabel(endTry);
-                    var handlerEnd = FieldReader.ReadField<int[]>(ehInfos[i], "m_catchEndAddr")[i];
-                    var exceptionType = FieldReader.ReadField<Type[]>(ehInfos[i], "m_catchClass")[i];
-                    var handlerStart = FieldReader.ReadField<int[]>(ehInfos[i], "m_catchAddr")[i];
-                    var tryStart = FieldReader.ReadField<int>(ehInfos[i], "m_startAddr");
-                    var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfos[i], "m_type")[i];
+                    for (int i = 0; i < FieldReader.ReadField<int>(ehInfo, "m_currentCatch");i++) {
+                        
+                        //Get ExceptionHandlerInfo Field Values
+                        var endFinally = FieldReader.ReadField<int>(ehInfo, "m_endFinally");
+                        var endFinallyLabel = endFinally < 0
+                            ? null
+                            : methodBody.Instructions.GetByOffset(endFinally)?.CreateLabel() ??
+                              new CilOffsetLabel(endFinally);
+                        var endTry = FieldReader.ReadField<int>(ehInfo, "m_endAddr");
+                        var endTryLabel = methodBody.Instructions.GetByOffset(endTry)?.CreateLabel() ??
+                                          new CilOffsetLabel(endTry);
+                        var handlerEnd = FieldReader.ReadField<int[]>(ehInfo, "m_catchEndAddr")[i];
+                        var exceptionType = FieldReader.ReadField<Type[]>(ehInfo, "m_catchClass")[i];
+                        var handlerStart = FieldReader.ReadField<int[]>(ehInfo, "m_catchAddr")[i];
+                        var tryStart = FieldReader.ReadField<int>(ehInfo, "m_startAddr");
+                        var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfo, "m_type")[i];
 
-                    //Create the handler
-                    var handler = new CilExceptionHandler
-                    {
-                        HandlerType = handlerType,
-                        TryStart = methodBody.Instructions.GetByOffset(tryStart)?.CreateLabel() ?? new CilOffsetLabel(tryStart),
-                        TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
-                        FilterStart = null,
-                        HandlerStart = methodBody.Instructions.GetByOffset(handlerStart)?.CreateLabel() ?? new CilOffsetLabel(handlerStart),
-                        HandlerEnd = methodBody.Instructions.GetByOffset(handlerEnd)?.CreateLabel() ?? new CilOffsetLabel(handlerEnd),
-                        ExceptionType = importer.ImportType(exceptionType)
-                    };
+                        //Create the handler
+                        var handler = new CilExceptionHandler
+                        {
+                            HandlerType = handlerType,
+                            TryStart = methodBody.Instructions.GetByOffset(tryStart)?.CreateLabel() ??
+                                       new CilOffsetLabel(tryStart),
+                            TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
+                            FilterStart = null,
+                            HandlerStart = methodBody.Instructions.GetByOffset(handlerStart)?.CreateLabel() ??
+                                           new CilOffsetLabel(handlerStart),
+                            HandlerEnd = methodBody.Instructions.GetByOffset(handlerEnd)?.CreateLabel() ??
+                                         new CilOffsetLabel(handlerEnd),
+                            ExceptionType = exceptionType != null ? importer.ImportType(exceptionType) : null
+                        };
 
-                    methodBody.ExceptionHandlers.Add(handler);
+                        methodBody.ExceptionHandlers.Add(handler);
+                    }
                 }
             }
         }
@@ -126,7 +133,9 @@ namespace AsmResolver.DotNet
 
                     if (field.GetType().FullName == "System.Reflection.Emit.GenericFieldInfo")
                         return importer.ImportField(FieldInfo.GetFieldFromHandle(
-                            FieldReader.ReadField<RuntimeFieldHandle>(field, "m_field"),
+                            FieldReader.TryReadField<RuntimeFieldHandle>(field, "m_field",out var res) ?
+                                res : 
+                                FieldReader.ReadField<RuntimeFieldHandle>(field,"m_fieldHandle"),
                             FieldReader.ReadField<RuntimeTypeHandle>(field, "m_context")));
                     break;
                 case TableIndex.Method:
@@ -139,7 +148,9 @@ namespace AsmResolver.DotNet
                         var context =
                             FieldReader.ReadField<RuntimeTypeHandle>(obj, "m_context");
                         var method = MethodBase.GetMethodFromHandle(
-                            FieldReader.ReadField<RuntimeMethodHandle>(obj, "m_method"), context);
+                            FieldReader.TryReadField<RuntimeMethodHandle>(obj, "m_method",out var res) ?
+                                res : 
+                                FieldReader.ReadField<RuntimeMethodHandle>(obj,"m_methodHandle"), context);
                         return importer.ImportMethod(method);
                     }
 

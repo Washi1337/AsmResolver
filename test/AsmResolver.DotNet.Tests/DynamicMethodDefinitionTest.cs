@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotEmpty(dynamicMethodDefinition.CilMethodBody.Instructions);
             
-            Assert.Equal(dynamicMethodDefinition.CilMethodBody.Instructions.Select(q=>q.OpCode),new CilOpCode[]
+            Assert.Equal(dynamicMethodDefinition.CilMethodBody.Instructions.Select(q=>q.OpCode),new []
             {
                 CilOpCodes.Ldarg_0, 
                 CilOpCodes.Call,
@@ -38,21 +38,21 @@ namespace AsmResolver.DotNet.Tests
         }
         
         [Fact]
-        public void RTDynamicMethod()
+        public void RtDynamicMethod()
         {
             var module = ModuleDefinition.FromFile(typeof(TDynamicMethod).Assembly.Location);
 
             DynamicMethod generateDynamicMethod = TDynamicMethod.GenerateDynamicMethod();
 
-            var RTDynamicMethod = generateDynamicMethod.GetType().GetField("m_dynMethod", (BindingFlags) (-1))?.GetValue(generateDynamicMethod); 
+            var rtDynamicMethod = generateDynamicMethod.GetType().GetField("m_dynMethod", (BindingFlags) (-1))?.GetValue(generateDynamicMethod); 
             
-            var dynamicMethodDefinition = new DynamicMethodDefinition(module, RTDynamicMethod);
+            var dynamicMethodDefinition = new DynamicMethodDefinition(module, rtDynamicMethod);
 
             Assert.NotNull(dynamicMethodDefinition);
 
             Assert.NotEmpty(dynamicMethodDefinition.CilMethodBody.Instructions);
             
-            Assert.Equal(dynamicMethodDefinition.CilMethodBody.Instructions.Select(q=>q.OpCode),new CilOpCode[]
+            Assert.Equal(dynamicMethodDefinition.CilMethodBody.Instructions.Select(q=>q.OpCode),new []
             {
                 CilOpCodes.Ldarg_0, 
                 CilOpCodes.Call,
