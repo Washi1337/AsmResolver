@@ -52,10 +52,22 @@ Opening a .NET module can be done through one of the `FromXXX` methods from the 
     IPEImage peImage = ...
     ModuleDefinition module = ModuleDefinition.FromImage(peImage);
 
+
+Writing a .NET module
+---------------------
+
+Writing a .NET module can be done through one of the `Write` method overloads.
+
 .. code-block:: csharp
 
-    IMetadata metadata = ...
-    ModuleDefinition module = ModuleDefinition.FromMetadata(metadata);
+    module.Write(@"C:\myfile.patched.exe");
+
+.. code-block:: csharp
+
+    Stream stream = ...;
+    module.Write(stream);
+
+For more advanced options to write .NET modules, see Advanced PE Image building.
 
 
 Creating a new .NET assembly
@@ -97,8 +109,14 @@ Opening (multi-module) .NET assemblies can be done in a very similar fashion as 
     IPEImage peImage = ...
     AssemblyDefinition assembly = AssemblyDefinition.FromImage(peImage);
 
+
+Writing a .NET assembly
+-----------------------
+
+Writing a .NET assembly can be done through one of the `Write` method overloads.
+
 .. code-block:: csharp
 
-    IMetadata metadata = ...
-    AssemblyDefinition assembly = AssemblyDefinition.FromMetadata(metadata);
+    assembly.Write(@"C:\myfile.patched.exe");
 
+For more advanced options to write .NET modules, see Advanced PE Image building.
