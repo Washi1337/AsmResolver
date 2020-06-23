@@ -357,7 +357,7 @@ namespace AsmResolver.DotNet
                 ? ImportTypeSignature(info.ReturnType)
                 : TargetModule.CorLibTypeFactory.Void;
 
-            var parameters = method.DeclaringType.IsConstructedGenericType
+            var parameters = (method.DeclaringType != null && method.DeclaringType.IsConstructedGenericType)
                 ? method.Module.ResolveMethod(method.MetadataToken).GetParameters()
                 : method.GetParameters();
 
@@ -429,10 +429,10 @@ namespace AsmResolver.DotNet
             if (field is null)
                 throw new ArgumentNullException(nameof(field));
             
-            if (field.DeclaringType.IsConstructedGenericType)
+            if (field.DeclaringType != null && field.DeclaringType.IsConstructedGenericType)
                 field = field.Module.ResolveField(field.MetadataToken);
 
-            var scope = ImportType(field.DeclaringType);
+            var scope = field.DeclaringType != null ? ImportType(field.DeclaringType) : TargetModule.GetModuleType();
             var signature = new FieldSignature(field.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 ImportTypeSignature(field.FieldType));
             
