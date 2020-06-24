@@ -23,7 +23,7 @@ namespace AsmResolver.PE.Imports
     /// <summary>
     /// Provides an implementation of a module import entry present in a PE file.
     /// </summary>
-    public class SerializedModuleImportEntry : ModuleImportEntry
+    public class SerializedImportedModule : ImportedModule
     {
         /// <summary>
         /// The amount of bytes a single entry uses in the import directory table.
@@ -39,7 +39,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="peFile">The PE file containing the module import.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedModuleImportEntry(PEFile peFile, IBinaryStreamReader reader)
+        public SerializedImportedModule(PEFile peFile, IBinaryStreamReader reader)
         {
             _peFile = peFile;
             _lookupRva = reader.ReadUInt32();
@@ -69,7 +69,7 @@ namespace AsmResolver.PE.Imports
         {
             if (IsEmpty)
                 return new List<MemberImportEntry>();
-            return new SerializedMemberImportEntryList(_peFile, _lookupRva, _addressRva);
+            return new SerializedImportedSymbolList(_peFile, _lookupRva, _addressRva);
         }
 
     }

@@ -23,10 +23,10 @@ using AsmResolver.PE.File;
 namespace AsmResolver.PE.Imports
 {
     /// <summary>
-    /// Provides an implementation of the <see cref="IModuleImportEntry"/> class, which can be instantiated and added
+    /// Provides an implementation of the <see cref="IImportedModule"/> class, which can be instantiated and added
     /// to an existing portable executable image.
     /// </summary>
-    public class ModuleImportEntry : IModuleImportEntry
+    public class ImportedModule : IImportedModule
     {
         /// <summary>
         /// Reads a single module import entry from an input stream.
@@ -34,9 +34,9 @@ namespace AsmResolver.PE.Imports
         /// <param name="peFile">The PE file containing the import entry.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns></returns>
-        public static IModuleImportEntry FromReader(PEFile peFile, IBinaryStreamReader reader)
+        public static IImportedModule FromReader(PEFile peFile, IBinaryStreamReader reader)
         {
-            var entry = new SerializedModuleImportEntry(peFile, reader);
+            var entry = new SerializedImportedModule(peFile, reader);
             return entry.IsEmpty ? null : entry;
         }
         
@@ -45,7 +45,7 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Creates a new empty module import.
         /// </summary>
-        protected ModuleImportEntry()
+        protected ImportedModule()
         {
         }
 
@@ -53,7 +53,7 @@ namespace AsmResolver.PE.Imports
         /// Creates a new module import. 
         /// </summary>
         /// <param name="name">The name of the module to import.</param>
-        public ModuleImportEntry(string name)
+        public ImportedModule(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }

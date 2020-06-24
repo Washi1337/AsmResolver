@@ -207,7 +207,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
                     ? "_CorDllMain"
                     : "_CorExeMain";
-                context.ImportDirectory.AddModule(new ModuleImportEntry("mscoree.dll")
+                context.ImportDirectory.AddModule(new ImportedModule("mscoree.dll")
                 {
                     Members = {new MemberImportEntry(0, entrypointName)}
                 });

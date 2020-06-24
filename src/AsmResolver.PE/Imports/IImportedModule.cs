@@ -23,7 +23,7 @@ namespace AsmResolver.PE.Imports
     /// Represents a single module that was imported into a portable executable as part of the imports data directory.
     /// Each instance represents one entry in the imports directory.
     /// </summary>
-    public interface IModuleImportEntry
+    public interface IImportedModule
     {
         /// <summary>
         /// Gets or sets the name of the module that was imported.

@@ -8,8 +8,8 @@ namespace AsmResolver.PE.Imports.Builder
     /// </summary>
     public class HintNameTableBuffer : SegmentBase
     {
-        private readonly IList<IModuleImportEntry> _modules = new List<IModuleImportEntry>();
-        private readonly IDictionary<IModuleImportEntry, uint> _moduleNameOffsets = new Dictionary<IModuleImportEntry, uint>();
+        private readonly IList<IImportedModule> _modules = new List<IImportedModule>();
+        private readonly IDictionary<IImportedModule, uint> _moduleNameOffsets = new Dictionary<IImportedModule, uint>();
         private readonly IDictionary<MemberImportEntry, uint> _hintNameOffsets = new Dictionary<MemberImportEntry, uint>();
         private uint _length;
 
@@ -41,7 +41,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// Adds the name of the module and the names of all named entries to the hint-name table.
         /// </summary>
         /// <param name="module">The module to add.</param>
-        public void AddModule(IModuleImportEntry module)
+        public void AddModule(IImportedModule module)
         {
             _modules.Add(module);
         }
@@ -55,7 +55,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// This method should only be used after the hint-name table has been relocated to the right location in the
         /// PE file.
         /// </remarks>
-        public uint GetModuleNameRva(IModuleImportEntry module) => Rva + _moduleNameOffsets[module];
+        public uint GetModuleNameRva(IImportedModule module) => Rva + _moduleNameOffsets[module];
         
         /// <summary>
         /// Gets the virtual address to the beginning of the hint-name pair associated to an imported member.
@@ -94,7 +94,7 @@ namespace AsmResolver.PE.Imports.Builder
             writer.Align(2);
         }
 
-        private static void WriteModuleName(IBinaryStreamWriter writer, IModuleImportEntry module)
+        private static void WriteModuleName(IBinaryStreamWriter writer, IImportedModule module)
         {
             writer.WriteAsciiString(module.Name);
             writer.WriteByte(0);

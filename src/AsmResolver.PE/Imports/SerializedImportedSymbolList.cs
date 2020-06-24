@@ -27,7 +27,7 @@ namespace AsmResolver.PE.Imports
     /// Provides an implementation for a lazy-initialized list of member imports that is stored in a PE file.
     /// </summary>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class SerializedMemberImportEntryList : LazyList<MemberImportEntry>
+    public class SerializedImportedSymbolList : LazyList<MemberImportEntry>
     {
         private readonly PEFile _peFile;
         private readonly uint _lookupRva;
@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Imports
         /// <param name="peFile">The PE file containing the member imports.</param>
         /// <param name="lookupRva">The virtual address referencing the start of the lookup table.</param>
         /// <param name="addressRva">The virtual address referencing the start of the address table.</param>
-        public SerializedMemberImportEntryList(PEFile peFile, uint lookupRva, uint addressRva)
+        public SerializedImportedSymbolList(PEFile peFile, uint lookupRva, uint addressRva)
         {
             _is32Bit = peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
             _peFile = peFile;
