@@ -428,14 +428,17 @@ namespace AsmResolver.DotNet
         {
             if (field is null)
                 throw new ArgumentNullException(nameof(field));
-            
+
             if (field.DeclaringType != null && field.DeclaringType.IsConstructedGenericType)
                 field = field.Module.ResolveField(field.MetadataToken);
 
-            var scope = field.DeclaringType != null ? ImportType(field.DeclaringType) : TargetModule.GetModuleType();
+            var scope = field.DeclaringType != null 
+                ? ImportType(field.DeclaringType) 
+                : TargetModule.GetModuleType();
+            
             var signature = new FieldSignature(field.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 ImportTypeSignature(field.FieldType));
-            
+
             return new MemberReference(scope, field.Name, signature);
         }
 

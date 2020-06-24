@@ -132,11 +132,14 @@ namespace AsmResolver.DotNet
                         return importer.ImportField(FieldInfo.GetFieldFromHandle(runtimeFieldHandle));
 
                     if (field.GetType().FullName == "System.Reflection.Emit.GenericFieldInfo")
-                        return importer.ImportField(FieldInfo.GetFieldFromHandle(
-                            FieldReader.TryReadField<RuntimeFieldHandle>(field, "m_field",out var res) ?
-                                res : 
-                                FieldReader.ReadField<RuntimeFieldHandle>(field,"m_fieldHandle"),
-                            FieldReader.ReadField<RuntimeTypeHandle>(field, "m_context")));
+                    {
+                        var result = FieldReader.TryReadField<RuntimeFieldHandle>(field, "m_field", out var mField);
+                        var ctx = FieldReader.ReadField<RuntimeTypeHandle>(field, "m_context");
+                        return importer.ImportField(FieldInfo.GetFieldFromHandle(result
+                            ? mField
+                            : FieldReader.ReadField<RuntimeFieldHandle>(field, "m_fieldHandle"), ctx));
+                    }
+
                     break;
                 case TableIndex.Method:
                 case TableIndex.MemberRef:
@@ -147,10 +150,12 @@ namespace AsmResolver.DotNet
                     {
                         var context =
                             FieldReader.ReadField<RuntimeTypeHandle>(obj, "m_context");
+                        var res = FieldReader.TryReadField<RuntimeMethodHandle>(obj, "m_method", out var m_method);
+                        var m_handle = FieldReader.ReadField<RuntimeMethodHandle>(obj, "m_methodHandle");
                         var method = MethodBase.GetMethodFromHandle(
-                            FieldReader.TryReadField<RuntimeMethodHandle>(obj, "m_method",out var res) ?
-                                res : 
-                                FieldReader.ReadField<RuntimeMethodHandle>(obj,"m_methodHandle"), context);
+                            res
+                                ? m_method
+                                : m_handle, context);
                         return importer.ImportMethod(method);
                     }
 
@@ -160,9 +165,10 @@ namespace AsmResolver.DotNet
                 case TableIndex.StandAloneSig:
                     return CallingConventionSignature.FromReader(importer.TargetModule,
                         new ByteArrayReader(tokens[(int) token.Rid] as byte[]));
-                case (TableIndex)112:
+                case (TableIndex) 112:
                     return tokens[(int) token.Rid] as string;
             }
+
             return null;
         }
 
