@@ -209,7 +209,7 @@ namespace AsmResolver.PE.DotNet.Builder
                     : "_CorExeMain";
                 context.ImportDirectory.AddModule(new ImportedModule("mscoree.dll")
                 {
-                    Members = {new MemberImportEntry(0, entrypointName)}
+                    Symbols = {new ImportedSymbol(0, entrypointName)}
                 });
             }
         }

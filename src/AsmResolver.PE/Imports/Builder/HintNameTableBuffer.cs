@@ -10,7 +10,7 @@ namespace AsmResolver.PE.Imports.Builder
     {
         private readonly IList<IImportedModule> _modules = new List<IImportedModule>();
         private readonly IDictionary<IImportedModule, uint> _moduleNameOffsets = new Dictionary<IImportedModule, uint>();
-        private readonly IDictionary<MemberImportEntry, uint> _hintNameOffsets = new Dictionary<MemberImportEntry, uint>();
+        private readonly IDictionary<ImportedSymbol, uint> _hintNameOffsets = new Dictionary<ImportedSymbol, uint>();
         private uint _length;
 
         /// <inheritdoc />
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Imports.Builder
             uint offset = newFileOffset;
             foreach (var module in _modules)
             {
-                foreach (var entry in module.Members)
+                foreach (var entry in module.Symbols)
                 {
                     if (entry.IsImportByName)
                     {
@@ -66,7 +66,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// This method should only be used after the hint-name table has been relocated to the right location in the
         /// PE file.
         /// </remarks>
-        public uint GetHintNameRva(MemberImportEntry member) => Rva + _hintNameOffsets[member];
+        public uint GetHintNameRva(ImportedSymbol member) => Rva + _hintNameOffsets[member];
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _length;
@@ -76,7 +76,7 @@ namespace AsmResolver.PE.Imports.Builder
         {
             foreach (var module in _modules)
             {
-                foreach (var member in module.Members)
+                foreach (var member in module.Symbols)
                 {
                     if (member.IsImportByName) 
                         WriteHintName(writer, member.Hint, member.Name);

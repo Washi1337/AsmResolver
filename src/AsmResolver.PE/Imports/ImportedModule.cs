@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Imports
             return entry.IsEmpty ? null : entry;
         }
         
-        private IList<MemberImportEntry> _members;
+        private IList<ImportedSymbol> _members;
 
         /// <summary>
         /// Creates a new empty module import.
@@ -80,12 +80,12 @@ namespace AsmResolver.PE.Imports
         }
 
         /// <inheritdoc />
-        public IList<MemberImportEntry> Members
+        public IList<ImportedSymbol> Symbols
         {
             get
             {
                 if (_members is null) 
-                    Interlocked.CompareExchange(ref _members, GetMembers(), null);
+                    Interlocked.CompareExchange(ref _members, GetSymbols(), null);
                 return _members;
             }
         }
@@ -94,18 +94,18 @@ namespace AsmResolver.PE.Imports
         /// Obtains the collection of members that were imported.
         /// </summary>
         /// <remarks>
-        /// This method is called to initialize the value of <see cref="Members" /> property.
+        /// This method is called to initialize the value of <see cref="Symbols" /> property.
         /// </remarks>
         /// <returns>The members list.</returns>
-        protected virtual IList<MemberImportEntry> GetMembers()
+        protected virtual IList<ImportedSymbol> GetSymbols()
         {
-            return new List<MemberImportEntry>();
+            return new List<ImportedSymbol>();
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{Name} ({Members.Count} members)";
+            return $"{Name} ({Symbols.Count} symbols)";
         }
         
     }

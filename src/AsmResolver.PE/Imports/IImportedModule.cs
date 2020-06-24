@@ -58,7 +58,7 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Gets a collection of members from the module that were imported.
         /// </summary>
-        IList<MemberImportEntry> Members
+        IList<ImportedSymbol> Symbols
         {
             get;
         }

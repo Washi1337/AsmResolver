@@ -76,7 +76,7 @@ namespace AsmResolver.PE.Imports.Builder
             if (module == null)
                 throw new ArgumentException($"Module {moduleName} is not imported.", nameof(moduleName));
 
-            var member = module.Members.FirstOrDefault(x => x.Name == memberName);
+            var member = module.Symbols.FirstOrDefault(x => x.Name == memberName);
             if (member == null)
                 throw new ArgumentException($"Member {moduleName}!{memberName} is not imported.", nameof(memberName));
 
@@ -86,7 +86,7 @@ namespace AsmResolver.PE.Imports.Builder
         private void AddLookupTable(IImportedModule module)
         {
             var lookupTable = new ThunkTableBuffer(HintNameTable, Is32Bit);
-            foreach (var member in module.Members)
+            foreach (var member in module.Symbols)
                 lookupTable.AddMember(member);
             _lookupTables.Add(module, lookupTable);
             _lookupTablesLength += lookupTable.GetPhysicalSize();

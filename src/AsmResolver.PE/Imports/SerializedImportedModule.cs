@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using AsmResolver.PE.File;
+using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.Imports
 {
@@ -65,11 +66,59 @@ namespace AsmResolver.PE.Imports
             && _addressRva == 0;
 
         /// <inheritdoc />
-        protected override IList<MemberImportEntry> GetMembers()
+        protected override IList<ImportedSymbol> GetSymbols()
         {
+            var result = new List<ImportedSymbol>();
+            
             if (IsEmpty)
-                return new List<MemberImportEntry>();
-            return new SerializedImportedSymbolList(_peFile, _lookupRva, _addressRva);
+                return result;
+
+            ulong ordinalMask = _peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32
+                ? 0x8000_0000ul
+                : 0x8000_0000_0000_0000ul;
+                
+            var lookupItems = ReadEntries(_lookupRva);
+            var addresses = ReadEntries(_addressRva);
+
+            for (int i = 0; i < lookupItems.Count; i++)
+            {
+                ImportedSymbol entry;
+                
+                ulong lookupItem = lookupItems[i];
+                if ((lookupItem & ordinalMask) != 0)
+                {
+                    entry = new ImportedSymbol((ushort) (lookupItem & 0xFFFF));
+                }
+                else
+                {
+                    uint hintNameRva = (uint) (lookupItem & 0xFFFFFFFF);
+                    var reader = _peFile.CreateReaderAtRva(hintNameRva);
+                    entry = new ImportedSymbol(reader.ReadUInt16(), reader.ReadAsciiString());
+                }
+
+                entry.Address = addresses[i];
+
+                result.Add(entry);
+            }
+
+            return result;
+        }
+        
+        private IList<ulong> ReadEntries(uint rva)
+        {
+            var result = new List<ulong>();
+            var itemReader = _peFile.CreateReaderAtRva(rva);
+            
+            ulong currentItem;
+            while (true)
+            {
+                currentItem = itemReader.ReadNativeInt(_peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32);
+                if (currentItem == 0)
+                    break;
+                result.Add(currentItem);
+            }
+
+            return result;
         }
 
     }

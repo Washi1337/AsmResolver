@@ -8,8 +8,8 @@ namespace AsmResolver.PE.Imports.Builder
     /// </summary>
     public class ThunkTableBuffer : SegmentBase
     {
-        private readonly IList<MemberImportEntry> _members = new List<MemberImportEntry>();
-        private readonly IDictionary<MemberImportEntry, uint> _memberOffsets = new Dictionary<MemberImportEntry, uint>();
+        private readonly IList<ImportedSymbol> _members = new List<ImportedSymbol>();
+        private readonly IDictionary<ImportedSymbol, uint> _memberOffsets = new Dictionary<ImportedSymbol, uint>();
         private readonly HintNameTableBuffer _hintNameTable;
 
         private uint _length;
@@ -43,7 +43,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// Creates a thunk for the specified member, and adds it to the table.
         /// </summary>
         /// <param name="entry">The member to add.</param>
-        public void AddMember(MemberImportEntry entry)
+        public void AddMember(ImportedSymbol entry)
         {
             _memberOffsets.Add(entry, _length - ThunkSize);
             _members.Add(entry);
@@ -59,7 +59,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// This method should only be used after the thunk table has been relocated to the right location in the
         /// PE file.
         /// </remarks>
-        public uint GetMemberThunkRva(MemberImportEntry member) => Rva + _memberOffsets[member];
+        public uint GetMemberThunkRva(ImportedSymbol member) => Rva + _memberOffsets[member];
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _length;
