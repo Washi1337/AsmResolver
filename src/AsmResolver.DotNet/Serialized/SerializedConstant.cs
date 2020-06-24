@@ -46,7 +46,10 @@ namespace AsmResolver.DotNet.Serialized
             var reader = _parentModule.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Value);
-            return DataBlobSignature.FromReader(reader);
+            
+            return reader is null
+                ? null
+                : DataBlobSignature.FromReader(reader);
         }
     }
 }
