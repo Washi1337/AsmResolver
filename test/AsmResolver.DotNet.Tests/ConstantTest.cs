@@ -72,6 +72,34 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(newConstant);
             Assert.Equal(constant.Value.Data, newConstant.Value.Data);
         }
+
+        [Fact]
+        public void ReadInvalidConstantValueShouldNotThrow()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ConstantZeroValueColumn);
+            var constantValue = module
+                .TopLevelTypes.First(t => t.Name == "MyClass")
+                .Fields.First(f => f.Name == "MyIntegerConstant")
+                .Constant.Value;
+            Assert.Null(constantValue);
+        }
+
+        [Fact]
+        public void WriteNullConstantValueShouldNotThrow()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.ConstantZeroValueColumn);
+            
+            var stream = new MemoryStream();
+            module.Write(stream);
+            
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            
+            var constantValue = newModule
+                .TopLevelTypes.First(t => t.Name == "MyClass")
+                .Fields.First(f => f.Name == "MyIntegerConstant")
+                .Constant.Value;
+            Assert.Null(constantValue);
+        }
         
     }
 }
