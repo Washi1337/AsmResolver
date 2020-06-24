@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Imports
     /// <summary>
     /// Represents one member of an external module that was imported into a PE image.
     /// </summary>
-    public class MemberImportEntry
+    public class ImportedSymbol
     {
         private ushort _ordinalOrHint;
         private string _name;
@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Imports
         /// Creates a new import entry that references a member exposed by ordinal.
         /// </summary>
         /// <param name="ordinal">The ordinal of the member to import.</param>
-        public MemberImportEntry(ushort ordinal)
+        public ImportedSymbol(ushort ordinal)
         {
             Ordinal = ordinal;
         }
@@ -41,7 +41,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="hint">The likely index of the export in the export table.</param>
         /// <param name="name">The name of the export.</param>
-        public MemberImportEntry(ushort hint, string name)
+        public ImportedSymbol(ushort hint, string name)
         {
             Hint = hint;
             Name = name ?? throw new ArgumentNullException(nameof(name));

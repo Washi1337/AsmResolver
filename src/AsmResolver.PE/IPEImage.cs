@@ -123,7 +123,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets a collection of modules that were imported into the PE, according to the import data directory.
         /// </summary>
-        IList<IModuleImportEntry> Imports
+        IList<IImportedModule> Imports
         {
             get;
         }

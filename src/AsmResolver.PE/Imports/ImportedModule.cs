@@ -23,10 +23,10 @@ using AsmResolver.PE.File;
 namespace AsmResolver.PE.Imports
 {
     /// <summary>
-    /// Provides an implementation of the <see cref="IModuleImportEntry"/> class, which can be instantiated and added
+    /// Provides an implementation of the <see cref="IImportedModule"/> class, which can be instantiated and added
     /// to an existing portable executable image.
     /// </summary>
-    public class ModuleImportEntry : IModuleImportEntry
+    public class ImportedModule : IImportedModule
     {
         /// <summary>
         /// Reads a single module import entry from an input stream.
@@ -34,18 +34,18 @@ namespace AsmResolver.PE.Imports
         /// <param name="peFile">The PE file containing the import entry.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns></returns>
-        public static IModuleImportEntry FromReader(PEFile peFile, IBinaryStreamReader reader)
+        public static IImportedModule FromReader(PEFile peFile, IBinaryStreamReader reader)
         {
-            var entry = new SerializedModuleImportEntry(peFile, reader);
+            var entry = new SerializedImportedModule(peFile, reader);
             return entry.IsEmpty ? null : entry;
         }
         
-        private IList<MemberImportEntry> _members;
+        private IList<ImportedSymbol> _members;
 
         /// <summary>
         /// Creates a new empty module import.
         /// </summary>
-        protected ModuleImportEntry()
+        protected ImportedModule()
         {
         }
 
@@ -53,7 +53,7 @@ namespace AsmResolver.PE.Imports
         /// Creates a new module import. 
         /// </summary>
         /// <param name="name">The name of the module to import.</param>
-        public ModuleImportEntry(string name)
+        public ImportedModule(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
@@ -80,12 +80,12 @@ namespace AsmResolver.PE.Imports
         }
 
         /// <inheritdoc />
-        public IList<MemberImportEntry> Members
+        public IList<ImportedSymbol> Symbols
         {
             get
             {
                 if (_members is null) 
-                    Interlocked.CompareExchange(ref _members, GetMembers(), null);
+                    Interlocked.CompareExchange(ref _members, GetSymbols(), null);
                 return _members;
             }
         }
@@ -94,18 +94,18 @@ namespace AsmResolver.PE.Imports
         /// Obtains the collection of members that were imported.
         /// </summary>
         /// <remarks>
-        /// This method is called to initialize the value of <see cref="Members" /> property.
+        /// This method is called to initialize the value of <see cref="Symbols" /> property.
         /// </remarks>
         /// <returns>The members list.</returns>
-        protected virtual IList<MemberImportEntry> GetMembers()
+        protected virtual IList<ImportedSymbol> GetSymbols()
         {
-            return new List<MemberImportEntry>();
+            return new List<ImportedSymbol>();
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{Name} ({Members.Count} members)";
+            return $"{Name} ({Symbols.Count} symbols)";
         }
         
     }

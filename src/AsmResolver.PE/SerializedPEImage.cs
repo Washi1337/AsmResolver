@@ -69,12 +69,12 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
-        protected override IList<IModuleImportEntry> GetImports()
+        protected override IList<IImportedModule> GetImports()
         {
             var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
             return dataDirectory.IsPresentInPE
-                ? (IList<IModuleImportEntry>) new SerializedModuleImportEntryList(PEFile, dataDirectory)
-                : new List<IModuleImportEntry>();
+                ? (IList<IImportedModule>) new SerializedImportedModuleList(PEFile, dataDirectory)
+                : new List<IImportedModule>();
         }
 
         /// <inheritdoc />

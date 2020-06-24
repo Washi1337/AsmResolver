@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Imports.Builder
     /// </summary>
     public abstract class ImportDirectoryBufferBase : SegmentBase, IImportAddressProvider
     {
-        private readonly IDictionary<IModuleImportEntry, ThunkTableBuffer> _lookupTables = new Dictionary<IModuleImportEntry, ThunkTableBuffer>();
+        private readonly IDictionary<IImportedModule, ThunkTableBuffer> _lookupTables = new Dictionary<IImportedModule, ThunkTableBuffer>();
         private uint _lookupTablesLength;
 
         /// <summary>
@@ -39,10 +39,10 @@ namespace AsmResolver.PE.Imports.Builder
         /// <summary>
         /// Gets an ordered list of modules that were added to the buffer.
         /// </summary>
-        protected IList<IModuleImportEntry> Modules
+        protected IList<IImportedModule> Modules
         {
             get;
-        } = new List<IModuleImportEntry>();
+        } = new List<IImportedModule>();
 
         /// <summary>
         /// Gets the hint-name table that is used to reference names of modules or members.
@@ -56,7 +56,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// Creates a thunk table for a module and its imported members, and adds it to the buffer. 
         /// </summary>
         /// <param name="module">The module to add.</param>
-        public virtual void AddModule(IModuleImportEntry module)
+        public virtual void AddModule(IImportedModule module)
         {
             Modules.Add(module);
             AddLookupTable(module);
@@ -67,7 +67,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// </summary>
         /// <param name="module">The module to get the associated thunk table for.</param>
         /// <returns>The thunk table.</returns>
-        public ThunkTableBuffer GetModuleThunkTable(IModuleImportEntry module) => _lookupTables[module];
+        public ThunkTableBuffer GetModuleThunkTable(IImportedModule module) => _lookupTables[module];
 
         /// <inheritdoc />
         public uint GetThunkRva(string moduleName, string memberName)
@@ -76,17 +76,17 @@ namespace AsmResolver.PE.Imports.Builder
             if (module == null)
                 throw new ArgumentException($"Module {moduleName} is not imported.", nameof(moduleName));
 
-            var member = module.Members.FirstOrDefault(x => x.Name == memberName);
+            var member = module.Symbols.FirstOrDefault(x => x.Name == memberName);
             if (member == null)
                 throw new ArgumentException($"Member {moduleName}!{memberName} is not imported.", nameof(memberName));
 
             return GetModuleThunkTable(module).GetMemberThunkRva(member);
         }
 
-        private void AddLookupTable(IModuleImportEntry module)
+        private void AddLookupTable(IImportedModule module)
         {
             var lookupTable = new ThunkTableBuffer(HintNameTable, Is32Bit);
-            foreach (var member in module.Members)
+            foreach (var member in module.Symbols)
                 lookupTable.AddMember(member);
             _lookupTables.Add(module, lookupTable);
             _lookupTablesLength += lookupTable.GetPhysicalSize();
