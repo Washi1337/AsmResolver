@@ -54,3 +54,23 @@ If everything is supposed to be preserved as much as possible, then instead of s
 .. warning::
 
     Preserving RIDs within metadata tables might require AsmResolver to make use of the Edit-And-Continue metadata tables (such as the pointer tables). The resulting tables stream could therefore be renamed from ``#~`` to ``#-``, and the file size might increase.
+
+
+Preserving maximum stack depth
+------------------------------
+
+CIL method bodies work with a stack, and the stack has a pre-defined size. This pre-defined size is defined by the ``MaxStack`` property of the ``CilMethodBody`` class. By default, AsmResolver automatically calculates the maximum stack depth of a method body upon writing the module to the disk. However, this is not always desirable.
+
+To override this behaviour, set ``ComputeMaxStackOnBuild`` to ``false`` on all method bodies to exclude in the maximum stack depth calculation.
+
+Alternatively, if you want to force the maximum stack depths should be either preserved or recalculated, it is possible to provide a custom implemenmtation of the ``IMethodBodySerializer``, or configure the ``CilMethodBodySerializer``.
+
+Below an example on how to preserve maximum stack depths for all methods in the assembly:
+
+.. code-block:: csharp
+
+    DotNetDirectoryFactory factory = ...;
+    factory.MethodBodySerializer = new CilMethodBodySerializer
+    {
+        ComputeMaxStackOnBuildOverride = false
+    }
