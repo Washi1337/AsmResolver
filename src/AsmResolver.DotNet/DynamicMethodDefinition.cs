@@ -24,10 +24,10 @@ namespace AsmResolver.DotNet
             var methodBase = FieldReader.ReadField<MethodBase>(dynamicMethodObj, "m_method");
 
             Module = module;
-            CilMethodBody = CilMethodBody.FromDynamicMethod(this,dynamicMethodObj);
             Name = methodBase.Name;
             Attributes = (MethodAttributes)methodBase.Attributes;
             Signature = new ReferenceImporter(module).ImportMethodSignature(ResolveSig(methodBase,module));
+            CilMethodBody = CilMethodBody.FromDynamicMethod(this,dynamicMethodObj);
         }
 
         private MethodSignature ResolveSig(MethodBase methodBase,ModuleDefinition module)
