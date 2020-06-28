@@ -1,22 +1,21 @@
-﻿using AsmResolver.Lazy;
-using AsmResolver.PE.DotNet.Metadata.Tables;
+﻿using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
 {
     /// <summary>
     /// Describes the explicit layout of a type, including its total and packing size. 
     /// </summary>
-    public class ClassLayout : IMetadataMember
+    public class ClassLayout : MetadataMember
     {
         private readonly LazyVariable<TypeDefinition> _parent;
-
+        
         /// <summary>
         /// Initializes the class layout with a metadata token.
         /// </summary>
         /// <param name="token"></param>
         protected ClassLayout(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _parent = new LazyVariable<TypeDefinition>(GetParent);
         }
 
@@ -31,13 +30,6 @@ namespace AsmResolver.DotNet
         {
             PackingSize = packingSize;
             ClassSize = classSize;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>

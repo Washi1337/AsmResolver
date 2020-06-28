@@ -1,4 +1,8 @@
 using System;
+using System.Collections.Generic;
+
+// Disable warnings for unused members. 
+#pragma warning disable 67
 
 namespace AsmResolver.DotNet.TestCases.CustomAttributes
 {
@@ -42,6 +46,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         
         [TestCase(typeof(string))]
         public void FixedTypeArgument()
+        {
+        }
+        
+        [TestCase(typeof(KeyValuePair<string[], int[]>))]
+        public void FixedComplexTypeArgument()
         {
         }
         

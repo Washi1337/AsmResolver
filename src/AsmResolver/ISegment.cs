@@ -42,5 +42,14 @@ namespace AsmResolver
             var padding = (alignment - value % alignment) % alignment;
             return value + padding;
         }
+
+        public static uint GetCompressedSize(this uint value)
+        {
+            if (value < 0x80)
+                return sizeof(byte);
+            if (value < 0x4000)
+                return sizeof(ushort);
+            return sizeof(uint);
+        }
     }
 }

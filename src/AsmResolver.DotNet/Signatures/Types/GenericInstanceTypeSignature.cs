@@ -12,9 +12,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         internal new static GenericInstanceTypeSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader,
             RecursionProtection protection)
         {
-            var elementType = (ElementType) reader.ReadByte();
-            var genericType = ReadTypeDefOrRef(module, reader, protection, true);
-            var signature = new GenericInstanceTypeSignature(genericType, elementType == ElementType.ValueType);
+            var genericType = TypeSignature.FromReader(module, reader, protection);
+            var signature = new GenericInstanceTypeSignature(genericType.ToTypeDefOrRef(), genericType.ElementType == ElementType.ValueType);
 
             if (!reader.TryReadCompressedUInt32(out uint count))
                 return signature;
@@ -115,12 +114,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
         
         /// <inheritdoc />
-        public override TypeSignature InstantiateGenericTypes(GenericContext context)
-        {
-            var result = new GenericInstanceTypeSignature(GenericType, IsValueType);
-            for (int i = 0; i < TypeArguments.Count; i++)
-                result.TypeArguments.Add(TypeArguments[i].InstantiateGenericTypes(context));
-            return result;
-        }
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+            visitor.VisitGenericInstanceType(this);
     }
 }

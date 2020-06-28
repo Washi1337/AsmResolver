@@ -51,6 +51,9 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         }
 
         /// <inheritdoc />
+        public override bool CanRead => true;
+
+        /// <inheritdoc />
         public override IBinaryStreamReader CreateReader() => _contents.CreateReader();
 
         /// <inheritdoc />
@@ -69,6 +72,9 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
                 // Try read length.
                 if (stringsReader.TryReadCompressedUInt32(out uint length))
                 {
+                    if (length == 0)
+                        return string.Empty;
+                    
                     // Read unicode bytes.
                     var data = new byte[length];
                     int actualLength = stringsReader.ReadBytes(data, 0, (int) length);

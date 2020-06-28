@@ -225,6 +225,26 @@ namespace AsmResolver
         }
 
         /// <summary>
+        /// Reads a zero-terminated Unicode string from the stream.
+        /// </summary>
+        /// <param name="reader">The reader to use for reading the data.</param>
+        /// <returns>The string that was read from the stream.</returns>
+        public static string ReadUnicodeString(this IBinaryStreamReader reader)
+        {
+            var builder = new StringBuilder();
+
+            while (true)
+            {
+                char nextChar = (char) reader.ReadUInt16();
+                if (nextChar is '\0')
+                    break;
+                builder.Append(nextChar);
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
         /// Reads an aligned ASCII string from the stream.
         /// </summary>
         /// <param name="reader">The reader to use for reading the data.</param>

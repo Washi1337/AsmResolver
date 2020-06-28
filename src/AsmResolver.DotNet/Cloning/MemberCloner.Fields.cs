@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using AsmResolver.DotNet.Code.Cil;
-using AsmResolver.DotNet.Collections;
-using AsmResolver.PE.DotNet.Cil;
-
 namespace AsmResolver.DotNet.Cloning
 {
     public partial class MemberCloner
@@ -47,6 +41,8 @@ namespace AsmResolver.DotNet.Cloning
             clonedField.ImplementationMap = CloneImplementationMap(context, field.ImplementationMap);
             clonedField.Constant = CloneConstant(context, field.Constant);
             clonedField.FieldRva = FieldRvaCloner.CloneFieldRvaData(field);
+            clonedField.MarshalDescriptor = CloneMarshalDescriptor(context, field.MarshalDescriptor);
+            clonedField.FieldOffset = field.FieldOffset;
         }
 
     }

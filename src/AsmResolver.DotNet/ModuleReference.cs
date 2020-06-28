@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -10,6 +10,7 @@ namespace AsmResolver.DotNet
     /// Represents a reference to an external module. This module can be managed or unmanaged.
     /// </summary>
     public class ModuleReference :
+        MetadataMember,
         IResolutionScope,
         IMemberRefParent,
         IHasCustomAttribute,
@@ -23,8 +24,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected ModuleReference(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
         }
 
@@ -36,12 +37,6 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.ModuleRef, 0))
         {
             Name = name;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
         }
 
         /// <inheritdoc />

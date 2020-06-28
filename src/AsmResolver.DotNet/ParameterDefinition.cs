@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -18,6 +18,7 @@ namespace AsmResolver.DotNet
     /// value.
     /// </remarks>
     public class ParameterDefinition :
+        MetadataMember,
         IHasCustomAttribute,
         IHasConstant,
         IHasFieldMarshal,
@@ -34,8 +35,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the parameter definition.</param>
         protected ParameterDefinition(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _method = new LazyVariable<MethodDefinition>(GetMethod);
             _constant = new LazyVariable<Constant>(GetConstant);
@@ -64,13 +65,6 @@ namespace AsmResolver.DotNet
             Sequence = sequence;
             Name = name;
             Attributes = attributes;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <inheritdoc />

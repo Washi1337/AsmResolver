@@ -1,4 +1,5 @@
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures.Types.Parsing;
 
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
             {
                 string typeName = reader.ReadSerString();
                 if (typeName != null)
-                    result.UserDefinedSubType = TypeNameParser.ParseType(parentModule, typeName);
+                    result.UserDefinedSubType = TypeNameParser.Parse(parentModule, typeName);
             }
 
             return result;

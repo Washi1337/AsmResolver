@@ -185,7 +185,9 @@ namespace AsmResolver
         public static void WriteCompressedUInt32(this IBinaryStreamWriter writer, uint value)
         {
             if (value < 0x80)
-                writer.WriteByte((byte)value);
+            {
+                writer.WriteByte((byte) value);
+            }
             else if (value < 0x4000)
             {
                 writer.WriteByte((byte)(0x80 | value >> 8));

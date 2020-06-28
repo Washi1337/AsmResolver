@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
     public class TypeDefinition : 
+        MetadataMember,
         ITypeDefOrRef,
         IMemberDefinition,
         IHasGenericParameters,
@@ -46,8 +47,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the type definition.</param>
         protected TypeDefinition(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _namespace = new LazyVariable<string>(GetNamespace);
             _name = new LazyVariable<string>(GetName);
             _baseType = new LazyVariable<ITypeDefOrRef>(GetBaseType);
@@ -80,13 +81,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             BaseType = baseType;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>

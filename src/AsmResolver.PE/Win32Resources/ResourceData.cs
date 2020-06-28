@@ -16,7 +16,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
-using AsmResolver.Lazy;
+using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Win32Resources
 {
@@ -25,14 +25,14 @@ namespace AsmResolver.PE.Win32Resources
     /// </summary>
     public class ResourceData : IResourceData
     {
-        private readonly LazyVariable<IReadableSegment> _contents;
+        private readonly LazyVariable<ISegment> _contents;
 
         /// <summary>
         /// Initializes a new resource data entry.
         /// </summary>
         protected ResourceData()
         {
-            _contents = new LazyVariable<IReadableSegment>(GetContents);
+            _contents = new LazyVariable<ISegment>(() => GetContents());
         }
         
         /// <summary>
@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         /// <param name="name">The name of the entry.</param>
         /// <param name="contents">The data to store in the entry.</param>
-        public ResourceData(string name, IReadableSegment contents)
+        public ResourceData(string name, ISegment contents)
             : this()
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -59,6 +59,19 @@ namespace AsmResolver.PE.Win32Resources
             Contents = contents ?? throw new ArgumentNullException(nameof(contents));
         }
 
+        /// <inheritdoc />
+        public IResourceDirectory ParentDirectory
+        {
+            get;
+            private set;
+        }
+
+        IResourceDirectory IOwnedCollectionElement<IResourceDirectory>.Owner
+        {
+            get => ParentDirectory;
+            set => ParentDirectory = value;
+        }
+        
         /// <inheritdoc />
         public string Name
         {
@@ -80,7 +93,7 @@ namespace AsmResolver.PE.Win32Resources
         bool IResourceEntry.IsData => true;
         
         /// <inheritdoc />
-        public IReadableSegment Contents
+        public ISegment Contents
         {
             get => _contents.Value;
             set => _contents.Value = value;
@@ -93,6 +106,17 @@ namespace AsmResolver.PE.Win32Resources
             set;
         }
 
+        /// <inheritdoc />
+        public bool CanRead => Contents is IReadableSegment;
+
+        /// <inheritdoc />
+        public IBinaryStreamReader CreateReader()
+        {
+            return Contents is IReadableSegment readableSegment
+                ? readableSegment.CreateReader()
+                : throw new InvalidOperationException("Resource file is not readable.");
+        }
+
         /// <summary>
         /// Obtains the contents of the data entry.
         /// </summary>
@@ -100,16 +124,10 @@ namespace AsmResolver.PE.Win32Resources
         /// <remarks>
         /// This method is called upon initializing the value for the <see cref="Contents"/> property.
         /// </remarks>
-        protected virtual IReadableSegment GetContents()
-        {
-            return null;
-        }
+        protected virtual ISegment GetContents() => null;
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"Data ({Name ?? Id.ToString()})";
-        }
-        
+        public override string ToString() => $"Data ({Name ?? Id.ToString()})";
+
     }
 }

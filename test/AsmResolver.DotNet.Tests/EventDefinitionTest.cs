@@ -1,9 +1,17 @@
 using System.Linq;
 using AsmResolver.DotNet.TestCases.Events;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
 {
+    public class Test : IMetadataMember
+    {
+        private MetadataToken _metadataToken;
+
+        MetadataToken IMetadataMember.MetadataToken => _metadataToken;
+    }
+    
     public class EventDefinitionTest
     {
         [Fact]

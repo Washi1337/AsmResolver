@@ -1,23 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.Lazy;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Builder;
-using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
-using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
+using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet
 {
@@ -25,7 +21,11 @@ namespace AsmResolver.DotNet
     /// Represents a single module in a .NET assembly. A module definition is the root object of any .NET module and
     /// defines types, as well as any resources and referenced assemblies. 
     /// </summary>
-    public class ModuleDefinition : IResolutionScope, IHasCustomAttribute, IOwnedCollectionElement<AssemblyDefinition>
+    public class ModuleDefinition :
+        MetadataMember,
+        IResolutionScope,
+        IHasCustomAttribute,
+        IOwnedCollectionElement<AssemblyDefinition>
     {
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
@@ -88,36 +88,8 @@ namespace AsmResolver.DotNet
         /// <param name="readParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters)
-        {
-            if (peImage.DotNetDirectory == null)
-                throw new BadImageFormatException("Input PE image does not contain a .NET directory.");
-            if (peImage.DotNetDirectory.Metadata == null)
-                throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
-            return FromDirectory(peImage.DotNetDirectory, readParameters);
-        }
-
-        /// <summary>
-        /// Initializes a .NET module from a .NET metadata directory.
-        /// </summary>
-        /// <param name="directory">The object providing access to the underlying .NET data directory.</param>
-        /// <returns>The module.</returns>
-        public static ModuleDefinition FromDirectory(IDotNetDirectory directory) => FromDirectory(directory, new ModuleReadParameters());
-
-        /// <summary>
-        /// Initializes a .NET module from a .NET metadata directory.
-        /// </summary>
-        /// <param name="directory">The object providing access to the underlying .NET data directory.</param>
-        /// <param name="readParameters">The parameters to use while reading the module.</param>
-        /// <returns>The module.</returns>
-        public static ModuleDefinition FromDirectory(IDotNetDirectory directory, ModuleReadParameters readParameters)
-        {
-            var stream = directory.Metadata.GetStream<TablesStream>();
-            var moduleTable = stream.GetTable<ModuleDefinitionRow>();
-            var module = new SerializedModuleDefinition(directory, new MetadataToken(TableIndex.Module, 1), moduleTable[0], readParameters);
-
-            return module;
-        }
+        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) => 
+            new SerializedModuleDefinition(peImage, readParameters);
 
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<Guid> _mvid;
@@ -133,20 +105,25 @@ namespace AsmResolver.DotNet
         private IList<FileReference> _fileReferences;
         private IList<ManifestResource> _resources;
         private IList<ExportedType> _exportedTypes;
+        private TokenAllocator _tokenAllocator;
+        
+        private readonly LazyVariable<string> _runtimeVersion;
+        private readonly LazyVariable<IResourceDirectory> _nativeResources;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected ModuleDefinition(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _mvid = new LazyVariable<Guid>(GetMvid);
             _encId = new LazyVariable<Guid>(GetEncId);
             _encBaseId = new LazyVariable<Guid>(GetEncBaseId);
             _managedEntrypoint = new LazyVariable<IManagedEntrypoint>(GetManagedEntrypoint);
-
+            _runtimeVersion = new LazyVariable<string>(GetRuntimeVersion);
+            _nativeResources = new LazyVariable<IResourceDirectory>(GetNativeResources);
             Attributes = DotNetDirectoryFlags.ILOnly;
         }
 
@@ -197,11 +174,15 @@ namespace AsmResolver.DotNet
             internal set;
         }
 
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
+        /// <summary>
+        /// Gets the underlying object providing access to the data directory containing .NET metadata (if available).  
+        /// </summary>
+        /// <remarks>
+        /// When this property is <c>null</c>, the module is a new module that is not yet assembled.
+        /// </remarks>
+        public virtual IDotNetDirectory DotNetDirectory
         {
             get;
-            protected set;
         }
 
         /// <summary>
@@ -297,7 +278,20 @@ namespace AsmResolver.DotNet
             get;
             set;
         }
-        
+
+        /// <summary>
+        /// Gets an object responsible for assigning new <see cref="MetadataToken"/> to members
+        /// </summary>
+        public TokenAllocator TokenAllocator
+        {
+            get
+            {
+                if (_tokenAllocator is null)
+                    Interlocked.CompareExchange(ref _tokenAllocator, new TokenAllocator(this), null);
+                return _tokenAllocator;
+            }
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether the .NET module only contains CIL code or also contains
         /// code targeting other architectures.
@@ -368,7 +362,93 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~DotNetDirectoryFlags.Bit32Preferred)
                                 | (value ? DotNetDirectoryFlags.Bit32Preferred : 0);
         }
+
+        /// <summary>
+        /// Gets or sets the machine type that the underlying PE image of the .NET module image is targeting.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the machine type field in the file header of a portable
+        /// executable file.
+        /// </remarks>
+        public MachineType MachineType
+        {
+            get;
+            set;
+        } = MachineType.I386;
+
+        /// <summary>
+        /// Gets or sets the attributes assigned to the underlying executable file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the characteristics field in the file header of a portable
+        /// executable file.
+        /// </remarks>
+        public Characteristics FileCharacteristics
+        {
+            get;
+            set;
+        } = Characteristics.Image | Characteristics.LargeAddressAware;
         
+        /// <summary>
+        /// Gets or sets the magic optional header signature, determining whether the underlying PE image is a
+        /// PE32 (32-bit) or a PE32+ (64-bit) image.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the magic field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        public OptionalHeaderMagic PEKind
+        {
+            get;
+            set;
+        } = OptionalHeaderMagic.Pe32;
+
+        /// <summary>
+        /// Gets or sets the subsystem to use when running the underlying portable executable (PE) file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the subsystem field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        public SubSystem SubSystem
+        {
+            get;
+            set;
+        } = SubSystem.WindowsCui;
+
+        /// <summary>
+        /// Gets or sets the dynamic linked library characteristics of the underlying portable executable (PE) file.
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the DLL characteristics field in the optional header of a portable
+        /// executable file.
+        /// </remarks>
+        public DllCharacteristics DllCharacteristics
+        {
+            get;
+            set;
+        } = DllCharacteristics.DynamicBase | DllCharacteristics.NoSeh | DllCharacteristics.NxCompat
+            | DllCharacteristics.TerminalServerAware;
+
+        /// <summary>
+        /// Gets or sets the runtime version string
+        /// </summary>
+        public string RuntimeVersion
+        {
+            get => _runtimeVersion.Value;
+            set => _runtimeVersion.Value = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the contents of the native Win32 resources data directory of the underlying
+        /// portable executable (PE) file.
+        /// </summary>
+        public IResourceDirectory NativeResourceDirectory
+        {
+            get => _nativeResources.Value;
+            set => _nativeResources.Value = value; 
+        }
+
         /// <summary>
         /// Gets a collection of top-level (not nested) types defined in the module. 
         /// </summary>
@@ -726,6 +806,15 @@ namespace AsmResolver.DotNet
         AssemblyDescriptor IResolutionScope.GetAssembly() => Assembly;
 
         /// <summary>
+        /// Obtains the version string of the runtime.
+        /// </summary>
+        /// <returns>The runtime version.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="RuntimeVersion"/> property.
+        /// </remarks>
+        protected virtual string GetRuntimeVersion() => KnownRuntimeVersions.Clr40;
+
+        /// <summary>
         /// Obtains the managed entrypoint of this module.
         /// </summary>
         /// <returns>The entrypoint.</returns>
@@ -751,6 +840,15 @@ namespace AsmResolver.DotNet
             
             return resolver;
         }
+
+        /// <summary>
+        /// Obtains the native win32 resources directory of the underlying PE image (if available).
+        /// </summary>
+        /// <returns>The resources directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="NativeResourceDirectory"/> property.
+        /// </remarks>
+        protected virtual IResourceDirectory GetNativeResources() => null;
 
         /// <inheritdoc />
         public override string ToString() => Name;

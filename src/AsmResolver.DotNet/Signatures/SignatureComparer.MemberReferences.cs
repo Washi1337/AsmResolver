@@ -1,12 +1,40 @@
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace AsmResolver.DotNet.Signatures
 {
     public partial class SignatureComparer :
+        IEqualityComparer<MemberReference>,
         IEqualityComparer<IMethodDescriptor>,
         IEqualityComparer<IFieldDescriptor>,
         IEqualityComparer<MethodSpecification>
     {
+        /// <inheritdoc />
+        public bool Equals(MemberReference x, MemberReference y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+        
+            if (x.IsMethod)
+                return Equals((IMethodDescriptor) x, y);
+            if (y.IsField)
+                return Equals((IFieldDescriptor) x, y);
+            return false;
+        }
+        
+        /// <inheritdoc />
+        public int GetHashCode(MemberReference obj)
+        {
+            if (obj.IsMethod)
+                return GetHashCode((IMethodDescriptor) obj);
+            if (obj.IsField)
+                return GetHashCode((IFieldDescriptor) obj);
+            throw new ArgumentOutOfRangeException(nameof(obj));
+        }
+        
         /// <inheritdoc />
         public bool Equals(IMethodDescriptor x, IMethodDescriptor y)
         {

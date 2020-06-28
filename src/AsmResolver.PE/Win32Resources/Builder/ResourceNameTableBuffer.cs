@@ -23,10 +23,10 @@ namespace AsmResolver.PE.Win32Resources.Builder
         public override void Write(IBinaryStreamWriter writer)
         {
             foreach (string name in Entries)
-            {
-                int length = Encoding.Unicode.GetByteCount(name);
-                writer.WriteUInt16((ushort) length);
-                writer.WriteBytes(Encoding.Unicode.GetBytes(name), 0, length);
+            {;
+                writer.WriteUInt16((ushort) name.Length);
+                var buffer = Encoding.Unicode.GetBytes(name);
+                writer.WriteBytes(buffer, 0, buffer.Length);
             }
         }
     }

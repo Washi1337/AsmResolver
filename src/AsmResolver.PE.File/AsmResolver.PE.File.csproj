@@ -5,7 +5,7 @@
         <Description>Raw PE file models for the AsmResolver executable file inspection toolsuite.</Description>
         <Copyright>Copyright © Washi 2016-2020</Copyright>
         <PackageProjectUrl>https://github.com/Washi1337/AsmResolver</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicenseUrl>
+        <PackageLicense>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicense>
         <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>exe pe headers sections inspection manipulation assembly disassembly</PackageTags>
@@ -13,6 +13,7 @@
         <Version>4.0.0-alpha.1</Version>
         <TargetFramework>netstandard2.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <NoWarn>1701;1702;NU5105</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

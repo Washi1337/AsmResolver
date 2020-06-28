@@ -58,5 +58,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
 
         /// <inheritdoc />
         public void FlushToTable() => _underlyingBuffer.FlushToTable();
+
+        /// <inheritdoc />
+        public void Clear()
+        {
+            _underlyingBuffer.Clear();
+            _entries.Clear();
+        }
     }
 }

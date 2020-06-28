@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.DotNet.Signatures.Types.Parsing;
 
 namespace AsmResolver.DotNet.Signatures.Security
 {
@@ -18,7 +19,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <returns>The security attribute.</returns>
         public static SecurityAttribute FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
         {
-            var type = TypeNameParser.ParseType(parentModule, reader.ReadSerString());
+            var type = TypeNameParser.Parse(parentModule, reader.ReadSerString());
             var result = new SecurityAttribute(type);
 
             if (!reader.TryReadCompressedUInt32(out uint size))

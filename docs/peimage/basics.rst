@@ -47,7 +47,9 @@ Writing a PE image
 
 Building an image back to a PE file can be done by using one of the classes that implement the ``IPEFileBuilder`` interface. 
 
-**Currently AsmResolver only provides a builder for .NET images.**
+.. note::
+    
+    Currently AsmResolver only provides a builder for .NET images.
 
 Building a .NET image can be done through the ``AsmResolver.PE.DotNet.Builder.ManagedPEBuilder`` class:
 

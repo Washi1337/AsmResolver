@@ -14,6 +14,28 @@ namespace AsmResolver.DotNet.Code.Cil
     /// </summary>
     public class CilMethodBodySerializer : IMethodBodySerializer
     {
+        /// <summary>
+        /// Gets or sets the value of an override switch indicating whether the max stack should always be recalculated
+        /// or should always be preserved.  
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When this property is set to <c>true</c>, the maximum stack depth of all method bodies will be recaculated. 
+        /// </para> 
+        /// <para>
+        /// When this property is set to <c>false</c>, the maximum stack depth of all method bodies will be preserved. 
+        /// </para> 
+        /// <para>
+        /// When this property is set to <c>null</c>, the maximum stack depth will only be recalculated if
+        /// <see cref="CilMethodBody.ComputeMaxStackOnBuild"/> is set to <c>true</c>. 
+        /// </para> 
+        /// </remarks>
+        public bool? ComputeMaxStackOnBuildOverride
+        {
+            get;
+            set;
+        } = null;
+        
         /// <inheritdoc />
         public ISegmentReference SerializeMethodBody(IMetadataTokenProvider provider, MethodDefinition method)
         {
@@ -23,7 +45,7 @@ namespace AsmResolver.DotNet.Code.Cil
             var body = method.CilMethodBody;
             
             // Compute max stack when specified, otherwise just calculate offsets only.
-            if (body.ComputeMaxStackOnBuild)
+            if (ComputeMaxStackOnBuildOverride ?? body.ComputeMaxStackOnBuild)
                 body.MaxStack = body.ComputeMaxStack();
             else
                 body.Instructions.CalculateOffsets();

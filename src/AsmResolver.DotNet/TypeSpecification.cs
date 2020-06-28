@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Types;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -11,18 +11,21 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type that allows for assigning metadata tokens to type signatures stored in the blob stream. 
     /// </summary>
-    public class TypeSpecification : ITypeDefOrRef, IHasCustomAttribute
+    public class TypeSpecification : 
+        MetadataMember,
+        ITypeDefOrRef
     {
         private readonly LazyVariable<TypeSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
+        private MetadataToken _token;
 
         /// <summary>
         /// Initializes an empty type specification.
         /// </summary>
         /// <param name="token">The token of the type specification.</param>
         protected TypeSpecification(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _signature = new LazyVariable<TypeSignature>(GetSignature);
         }
 
@@ -34,13 +37,6 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.TypeSpec, 0))
         {
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>

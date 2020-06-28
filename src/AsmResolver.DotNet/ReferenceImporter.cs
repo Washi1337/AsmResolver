@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides a mechanism for creating references to members defined in external .NET modules.
     /// </summary>
-    public class ReferenceImporter
+    public class ReferenceImporter : ITypeSignatureVisitor<TypeSignature>
     {
         private readonly SignatureComparer _comparer = new SignatureComparer();
 
@@ -180,44 +180,7 @@ namespace AsmResolver.DotNet
             if (type.Module == TargetModule)
                 return type;
 
-            return type switch
-            {
-                CorLibTypeSignature corLibType => TargetModule.CorLibTypeFactory.FromElementType(corLibType.ElementType),
-                BoxedTypeSignature boxedType => new BoxedTypeSignature(ImportTypeSignature(boxedType.BaseType)),
-                ByReferenceTypeSignature byReferenceType => new ByReferenceTypeSignature(ImportTypeSignature(byReferenceType.BaseType)),
-                ArrayTypeSignature arrayType => ImportArrayTypeSignature(arrayType),
-                CustomModifierTypeSignature modifierType => ImportModifierTypeSignature(modifierType),
-                GenericInstanceTypeSignature genericInstance => ImportGenericInstanceTypeSignature(genericInstance),
-                GenericParameterSignature genericParameter => new GenericParameterSignature(TargetModule, genericParameter.ParameterType, genericParameter.Index),
-                PinnedTypeSignature pinnedType => new PinnedTypeSignature(ImportTypeSignature(pinnedType.BaseType)),
-                PointerTypeSignature pointerType => new PointerTypeSignature(ImportTypeSignature(pointerType.BaseType)),
-                SzArrayTypeSignature szArrayType => new SzArrayTypeSignature(ImportTypeSignature(szArrayType.BaseType)),
-                TypeDefOrRefSignature typeDefOrRef =>  new TypeDefOrRefSignature(ImportType(typeDefOrRef.Type), typeDefOrRef.IsValueType),
-                _ => throw new ArgumentOutOfRangeException(nameof(type))
-            };
-        }
-
-        private TypeSignature ImportArrayTypeSignature(ArrayTypeSignature arrayType)
-        {
-            var result = new ArrayTypeSignature(ImportTypeSignature(arrayType.BaseType));
-            foreach (var dimension in arrayType.Dimensions)
-                result.Dimensions.Add(new ArrayDimension(dimension.Size, dimension.LowerBound));
-            return result;
-        }
-
-        private TypeSignature ImportModifierTypeSignature(CustomModifierTypeSignature modifierType)
-        {
-            return new CustomModifierTypeSignature(
-                ImportType(modifierType.ModifierType), modifierType.IsRequired,
-                ImportTypeSignature(modifierType.BaseType));
-        }
-
-        private TypeSignature ImportGenericInstanceTypeSignature(GenericInstanceTypeSignature genericInstance)
-        {
-            var result = new GenericInstanceTypeSignature(ImportType(genericInstance.GenericType), genericInstance.IsValueType);
-            foreach (var argument in genericInstance.TypeArguments)
-                result.TypeArguments.Add(ImportTypeSignature(argument));
-            return result;
+            return type.AcceptVisitor(this);
         }
 
         /// <summary>
@@ -394,7 +357,7 @@ namespace AsmResolver.DotNet
                 ? ImportTypeSignature(info.ReturnType)
                 : TargetModule.CorLibTypeFactory.Void;
 
-            var parameters = method.DeclaringType.IsConstructedGenericType
+            var parameters = (method.DeclaringType != null && method.DeclaringType.IsConstructedGenericType)
                 ? method.Module.ResolveMethod(method.MetadataToken).GetParameters()
                 : method.GetParameters();
 
@@ -465,14 +428,17 @@ namespace AsmResolver.DotNet
         {
             if (field is null)
                 throw new ArgumentNullException(nameof(field));
-            
-            if (field.DeclaringType.IsConstructedGenericType)
+
+            if (field.DeclaringType != null && field.DeclaringType.IsConstructedGenericType)
                 field = field.Module.ResolveField(field.MetadataToken);
 
-            var scope = ImportType(field.DeclaringType);
+            var scope = field.DeclaringType != null 
+                ? ImportType(field.DeclaringType) 
+                : TargetModule.GetModuleType();
+            
             var signature = new FieldSignature(field.IsStatic ? 0 : CallingConventionAttributes.HasThis,
                 ImportTypeSignature(field.FieldType));
-            
+
             return new MemberReference(scope, field.Name, signature);
         }
 
@@ -494,6 +460,73 @@ namespace AsmResolver.DotNet
                 signature.Attributes,
                 ImportTypeSignature(signature.ReturnType), 
                 parameterTypes);
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitArrayType(ArrayTypeSignature signature)
+        {
+            var result = new ArrayTypeSignature(signature.BaseType.AcceptVisitor(this));
+            foreach (var dimension in signature.Dimensions)
+                result.Dimensions.Add(new ArrayDimension(dimension.Size, dimension.LowerBound));
+            return result;
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitBoxedType(BoxedTypeSignature signature)
+        {
+            return new BoxedTypeSignature(signature.BaseType.AcceptVisitor(this));
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitByReferenceType(ByReferenceTypeSignature signature)
+        {
+            return new ByReferenceTypeSignature(signature.BaseType.AcceptVisitor(this));
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitCorLibType(CorLibTypeSignature signature)
+        {
+            return TargetModule.CorLibTypeFactory.FromElementType(signature.ElementType);
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitCustomModifierType(CustomModifierTypeSignature signature)
+        {
+            return new CustomModifierTypeSignature(ImportType(signature.ModifierType), signature.IsRequired,
+                signature.BaseType.AcceptVisitor(this));
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitGenericInstanceType(GenericInstanceTypeSignature signature)
+        {
+            var result = new GenericInstanceTypeSignature(ImportType(signature.GenericType), signature.IsValueType);
+            foreach (var argument in signature.TypeArguments)
+                result.TypeArguments.Add(argument.AcceptVisitor(this));
+            return result;
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitGenericParameter(GenericParameterSignature signature)
+        {
+            return new GenericParameterSignature(TargetModule, signature.ParameterType, signature.Index);
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitPinnedType(PinnedTypeSignature signature)
+        {
+            return new PinnedTypeSignature(signature.BaseType.AcceptVisitor(this));
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitPointerType(PointerTypeSignature signature)
+        {
+            return new PointerTypeSignature(signature.BaseType.AcceptVisitor(this));
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitSentinelType(SentinelTypeSignature signature)
+        {
+            return new SentinelTypeSignature();
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitSzArrayType(SzArrayTypeSignature signature)
+        {
+            return new SzArrayTypeSignature(signature.BaseType.AcceptVisitor(this));
+        }
+
+        TypeSignature ITypeSignatureVisitor<TypeSignature>.VisitTypeDefOrRef(TypeDefOrRefSignature signature)
+        {
+            return new TypeDefOrRefSignature(ImportType(signature.Type), signature.IsValueType);
         }
     }
 }

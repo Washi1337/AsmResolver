@@ -1,4 +1,6 @@
 using System;
+using System.Reflection;
+using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -54,24 +56,26 @@ namespace AsmResolver.DotNet.Signatures.Types
                 case ElementType.TypedByRef:
                 case ElementType.Object:
                     return module.CorLibTypeFactory.FromElementType(elementType);
-                
+
                 case ElementType.ValueType:
                     return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection, false), true);
-                
+
                 case ElementType.Class:
                     return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection, false), false);
-                
+
                 case ElementType.Ptr:
                     return new PointerTypeSignature(FromReader(module, reader, protection));
-                
+
                 case ElementType.ByRef:
                     return new ByReferenceTypeSignature(FromReader(module, reader, protection));
 
                 case ElementType.Var:
-                    return new GenericParameterSignature(module, GenericParameterType.Type, (int) reader.ReadCompressedUInt32());
-                
+                    return new GenericParameterSignature(module, GenericParameterType.Type,
+                        (int) reader.ReadCompressedUInt32());
+
                 case ElementType.MVar:
-                    return new GenericParameterSignature(module, GenericParameterType.Method, (int) reader.ReadCompressedUInt32());
+                    return new GenericParameterSignature(module, GenericParameterType.Method,
+                        (int) reader.ReadCompressedUInt32());
 
                 case ElementType.Array:
                     return ArrayTypeSignature.FromReader(module, reader, protection);
@@ -87,25 +91,40 @@ namespace AsmResolver.DotNet.Signatures.Types
 
                 case ElementType.CModReqD:
                     return new CustomModifierTypeSignature(
-                        ReadTypeDefOrRef(module, reader, protection, true), 
+                        ReadTypeDefOrRef(module, reader, protection, true),
                         true,
                         FromReader(module, reader, protection));
-                    
+
                 case ElementType.CModOpt:
                     return new CustomModifierTypeSignature(
-                        ReadTypeDefOrRef(module, reader, protection, true), 
+                        ReadTypeDefOrRef(module, reader, protection, true),
                         false,
                         FromReader(module, reader, protection));
-                
+
                 case ElementType.Sentinel:
                     return new SentinelTypeSignature();
-                
+
                 case ElementType.Pinned:
                     return new PinnedTypeSignature(FromReader(module, reader, protection));
-                
+
                 case ElementType.Boxed:
                     return new BoxedTypeSignature(FromReader(module, reader, protection));
-                
+
+                case ElementType.Internal:
+                    IntPtr address = IntPtr.Size switch
+                    {
+                        4 => new IntPtr(reader.ReadInt32()),
+                        _ => new IntPtr(reader.ReadInt64())
+                    };
+                    
+                    //Get Internal Method Through Reflection
+                    var GetTypeFromHandleUnsafeReflection = typeof(Type)
+                        .GetMethod("GetTypeFromHandleUnsafe", ((BindingFlags) (-1)), null, new[] {typeof(IntPtr)},
+                            null);
+                    //Invoke It To Get The Value
+                    var Type = (Type)GetTypeFromHandleUnsafeReflection?.Invoke(null, new object[] {address});
+                    //Import it
+                    return new TypeDefOrRefSignature(new ReferenceImporter(module).ImportType((Type)));
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
             }
@@ -166,7 +185,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 case ElementType.SzArray:
                     return new SzArrayTypeSignature(ReadFieldOrPropType(parentModule, reader));
                 case ElementType.Enum:
-                    return TypeNameParser.ParseType(parentModule, reader.ReadSerString());
+                    return TypeNameParser.Parse(parentModule, reader.ReadSerString());
                 case ElementType.Type:
                     return new TypeDefOrRefSignature(new TypeReference(parentModule,
                         parentModule.CorLibTypeFactory.CorLibScope, "System", "Type"));
@@ -294,7 +313,19 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// When the type signature does not contain any generic parameter, this method might return the current
         /// instance of the type signature.
         /// </remarks>
-        public abstract TypeSignature InstantiateGenericTypes(GenericContext context);
+        public TypeSignature InstantiateGenericTypes(GenericContext context)
+        {
+            var activator = new GenericTypeActivator(context);
+            return AcceptVisitor(activator);
+        }
+
+        /// <summary>
+        /// Visit the current type signature using the provided visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor to accept.</param>
+        /// <typeparam name="TResult">The type of result the visitor produces.</typeparam>
+        /// <returns>The result the visitor produced after visiting this type signature.</returns>
+        public abstract TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor);
 
         /// <inheritdoc />
         public override string ToString() => FullName;

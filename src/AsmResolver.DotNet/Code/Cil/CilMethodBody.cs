@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
@@ -13,6 +15,65 @@ namespace AsmResolver.DotNet.Code.Cil
     /// </summary>
     public class CilMethodBody : MethodBody, ICilOperandResolver
     {
+         /// <summary>
+        ///     Creates a CIL method body from a dynamic method.
+        /// </summary>
+        /// <param name="method">The method that owns the method body.</param>
+        /// <param name="dynamicMethodObj">The Dynamic Method/Delegate/DynamicResolver.</param>
+        /// <param name="operandResolver">
+        ///     The object instance to use for resolving operands of an instruction in the
+        ///     method body.
+        /// </param>
+        /// <param name="importer">
+        ///     The object instance to use for importing operands of an instruction in the
+        ///     method body.
+        /// </param>
+        /// <returns>The method body.</returns>
+        public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj,
+            ICilOperandResolver operandResolver = null,ReferenceImporter importer = null)
+        {
+            var result = new CilMethodBody(method);
+
+            operandResolver ??= result;
+            
+            importer ??= new ReferenceImporter(method.Module);
+            
+            dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
+
+            //Get Runtime Fields
+            var code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
+            var scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope");
+            var tokenList = FieldReader.ReadField<List<object>>(scope, "m_tokens");
+            var localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature");
+            var ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader");
+            var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions");
+
+            // Read raw instructions.
+            var reader = new ByteArrayReader(code);
+            var disassembler = new CilDisassembler(reader);
+            result.Instructions.AddRange(disassembler.ReadAllInstructions());
+
+            //Local Variables
+            
+            result.ReadLocalVariables(method,localSig);
+
+            //Exception Handlers
+
+            result.ReadReflectionExceptionHandlers(ehInfos, ehHeader, importer);
+            
+            // Resolve all operands.
+            foreach (var instruction in result.Instructions)
+            {
+                instruction.Operand = 
+                    result.ResolveOperandReflection(instruction, operandResolver, tokenList, importer) ?? 
+                    instruction.Operand;
+            }
+
+            return result;
+        } 
+         
+
+        
         /// <summary>
         /// Creates a CIL method body from a raw CIL method body. 
         /// </summary>

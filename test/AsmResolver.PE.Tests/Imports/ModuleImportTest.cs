@@ -12,8 +12,8 @@ namespace AsmResolver.PE.Tests.Imports
             
             Assert.Single(peImage.Imports);
             Assert.Equal("mscoree.dll", peImage.Imports[0].Name);
-            Assert.Single(peImage.Imports[0].Members);
-            Assert.Equal("_CorExeMain", peImage.Imports[0].Members[0].Name);
+            Assert.Single(peImage.Imports[0].Symbols);
+            Assert.Equal("_CorExeMain", peImage.Imports[0].Symbols[0].Name);
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace AsmResolver.PE.Tests.Imports
             
             var module = peImage.Imports.First(m => m.Name == "ucrtbased.dll");
             Assert.NotNull(module);
-            Assert.Contains("__stdio_common_vsprintf_s", module.Members.Select(m => m.Name));
+            Assert.Contains("__stdio_common_vsprintf_s", module.Symbols.Select(m => m.Name));
         }
         
     }
