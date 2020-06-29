@@ -73,5 +73,8 @@ namespace AsmResolver.DotNet.Tests.Memory
         
         [Fact]
         public void NestedStruct2() => VerifySize<TestStructs.NestedStruct2>();
+        
+        [Fact]
+        public void NestedStructInNestedStruct() => VerifySize<TestStructs.NestedStructInNestedStruct>();
     }
 }

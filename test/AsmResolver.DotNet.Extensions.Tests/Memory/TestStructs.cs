@@ -45,5 +45,12 @@ namespace AsmResolver.DotNet.Tests.Memory
             public MultipleFieldsSequentialStructDefaultPack Field1;
             public byte Field2;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct NestedStructInNestedStruct
+        {
+            public NestedStruct1 Field1;
+            public byte Field2;
+        }
     }
 }

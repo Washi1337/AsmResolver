@@ -117,12 +117,19 @@ namespace AsmResolver.DotNet.Memory
 
         public TypeMemoryLayout VisitTypeDefinition(TypeDefinition type)
         {
+            return type.IsValueType 
+                ? VisitValueTypeDefinition(type)
+                : VisitReferenceType();
+        }
+
+        private TypeMemoryLayout VisitValueTypeDefinition(TypeDefinition type)
+        {
             _currentFieldOffset = _currentFieldOffset.Align(_alignment);
 
             var result = type.IsExplicitLayout
                 ? InferExplicitLayout(type)
                 : InferSequentialLayout(type);
- 
+
             if (type.ClassLayout is {} layout)
                 result.Size = Math.Max(layout.ClassSize, result.Size);
 
