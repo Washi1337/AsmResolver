@@ -138,7 +138,7 @@ namespace AsmResolver.DotNet
                 return _securityDeclarations;
             }
         }
-        
+
         /// <summary>
         /// Gets or sets the public key of the assembly to use for verification of a signature.
         /// </summary>
@@ -247,9 +247,9 @@ namespace AsmResolver.DotNet
         /// Rebuilds the manifest module and writes it to the stream specified. 
         /// </summary>
         /// <param name="stream">The output stream of the manifest module file.</param>
-        public void Write(Stream stream)
+        public void WriteManifest(Stream stream)
         {
-            Write(stream, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
+            WriteManifest(stream, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
         }
 
         /// <summary>
@@ -257,9 +257,9 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="stream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
-        public void Write(Stream stream, IPEImageBuilder imageBuilder)
+        public void WriteManifest(Stream stream, IPEImageBuilder imageBuilder)
         {
-            Write(stream, imageBuilder, new ManagedPEFileBuilder());
+            WriteManifest(stream, imageBuilder, new ManagedPEFileBuilder());
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace AsmResolver.DotNet
         /// <param name="stream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
-        public void Write(Stream stream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
+        public void WriteManifest(Stream stream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
             ManifestModule.Write(stream, imageBuilder, fileBuilder);
         }
