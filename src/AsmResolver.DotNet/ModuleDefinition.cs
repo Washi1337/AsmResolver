@@ -649,7 +649,7 @@ namespace AsmResolver.DotNet
         /// import new type references into the module. This method only serves as a way to easily get all the type 
         /// references that were imported during the last compilation or assembly process.  
         /// </remarks>
-        public IEnumerable<TypeReference> GetImportedTypeReferences() => Enumerable.Empty<TypeReference>();
+        public virtual IEnumerable<TypeReference> GetImportedTypeReferences() => Enumerable.Empty<TypeReference>();
         
         /// <summary>
         /// Obtains a list of member references that were imported into the module.
@@ -660,7 +660,7 @@ namespace AsmResolver.DotNet
         /// import new member references into the module. This method only serves as a way to easily get all the member 
         /// references that were imported during the last compilation or assembly process.  
         /// </remarks>
-        public IEnumerable<TypeReference> GetImportedMemberReferences() => Enumerable.Empty<TypeReference>();
+        public virtual IEnumerable<MemberReference> GetImportedMemberReferences() => Enumerable.Empty<MemberReference>();
 
         /// <summary>
         /// Enumerates all types (including nested types) defined in the module.
