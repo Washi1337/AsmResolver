@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Win32Resources.Version
     /// <summary>
     /// Represents a native version resource file. 
     /// </summary>
-    public class VersionInfoResource : VersionTableEntry
+    public class VersionInfoResource : VersionTableEntry, IWin32Resource
     {
         /// <summary>
         /// The name of the root object of the native version resource file. 
@@ -21,9 +21,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
         public static VersionInfoResource FromDirectory(IResourceDirectory rootDirectory)
         {
-            var versionDirectory = rootDirectory.Entries
-                .OfType<IResourceDirectory>()
-                .FirstOrDefault(e => e.Type == ResourceType.Version);
+            var versionDirectory = (IResourceDirectory) rootDirectory.Entries[IndexOfVersionResourceDirectory(rootDirectory)];
 
             var categoryDirectory = versionDirectory
                 ?.Entries
@@ -35,9 +33,14 @@ namespace AsmResolver.PE.Win32Resources.Version
                 .OfType<IResourceData>()
                 .FirstOrDefault();
 
-            return dataEntry != null 
-                ? FromReader(dataEntry.CreateReader())
-                : null;
+            if (dataEntry is null)
+                return null;
+            
+            if (dataEntry.CanRead)
+                return FromReader(dataEntry.CreateReader());
+            if (dataEntry.Contents is VersionInfoResource resource)
+                return resource;
+            throw new ArgumentException("Version resource data is not readable.");
         }
         
         /// <summary>
@@ -181,6 +184,47 @@ namespace AsmResolver.PE.Win32Resources.Version
             writer.Align(4);
             foreach (var entry in _entries.Values)
                 entry.Write(writer);
+        }
+
+        /// <inheritdoc />
+        public void WriteToDirectory(IResourceDirectory rootDirectory)
+        {
+            // Find and remove old version directory.
+            int index = IndexOfVersionResourceDirectory(rootDirectory);
+            
+            if (index == -1)
+                index = rootDirectory.Entries.Count;
+            else
+                rootDirectory.Entries.RemoveAt(index);
+
+            // Construct new directory.
+            var newVersionDirectory = new ResourceDirectory(ResourceType.Version)
+            {
+                Entries =
+                {
+                    new ResourceDirectory(1)
+                    {
+                        Entries = {new ResourceData(0u, this)}
+                    }
+                }
+            };
+            
+            // Insert.
+            rootDirectory.Entries.Insert(index, newVersionDirectory);
+        }
+
+        private static int IndexOfVersionResourceDirectory(IResourceDirectory rootDirectory)
+        {
+            for (int i = 0; i < rootDirectory.Entries.Count; i++)
+            {
+                if (rootDirectory.Entries[i] is IResourceDirectory directory
+                    && directory.Type == ResourceType.Version)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
         
     }

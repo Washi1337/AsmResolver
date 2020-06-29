@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using AsmResolver.PE.File;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Win32Resources.Version;
 using Xunit;
 
@@ -158,6 +157,29 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             var newTable = newStringFileInfo.Tables[0];
             foreach ((string key, string value) in table)
                 Assert.Equal(value, newTable[key]);
+        }
+
+        [Fact]
+        public void PersistentVersionResource()
+        {
+            // Load dummy
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+
+            // Update version info.
+            var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
+            versionInfo.FixedVersionInfo.ProductVersion = new System.Version(1, 2, 3, 4);
+            versionInfo.WriteToDirectory(image.Resources);
+
+            // Rebuild
+            using var stream = new MemoryStream();
+            new ManagedPEFileBuilder().CreateFile(image).Write(new BinaryStreamWriter(stream));
+            
+            // Reload version info.
+            var newImage = PEImage.FromBytes(stream.ToArray());
+            var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources);
+            
+            // Verify.
+            Assert.Equal(versionInfo.FixedVersionInfo.ProductVersion, newVersionInfo.FixedVersionInfo.ProductVersion);
         }
 
     }
