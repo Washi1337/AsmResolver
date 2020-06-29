@@ -7,6 +7,10 @@ namespace AsmResolver.DotNet.Memory
     /// </summary>
     public class TypeMemoryLayout
     {
+        internal TypeMemoryLayout()
+        {
+        }
+        
         /// <summary>
         /// Creates a new instance of the <see cref="TypeMemoryLayout"/> class.
         /// </summary>
@@ -14,17 +18,17 @@ namespace AsmResolver.DotNet.Memory
         public TypeMemoryLayout(uint size)
         {
             Size = size;
-            Fields = new Dictionary<FieldDefinition, FieldLayout>();
         }
         
         public uint Size
         {
             get;
+            internal set;
         }
 
         public IDictionary<FieldDefinition, FieldLayout> Fields
         {
             get;
-        }
+        } = new Dictionary<FieldDefinition, FieldLayout>();
     }
 }

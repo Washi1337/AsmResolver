@@ -10,5 +10,12 @@ namespace AsmResolver.DotNet.Memory
             var layoutDetector = new TypeMemoryLayoutDetector(is32Bit, alignment);
             return type.AcceptVisitor(layoutDetector);
         }
+        
+        public static TypeMemoryLayout GetImpliedMemoryLayout(this TypeDefinition type, bool is32Bit)
+        {
+            var alignment = TypeAlignmentDetector.GetTypeAlignment(type, is32Bit);
+            var layoutDetector = new TypeMemoryLayoutDetector(is32Bit, alignment);
+            return layoutDetector.VisitTypeDefinition(type);
+        }
     }
 }

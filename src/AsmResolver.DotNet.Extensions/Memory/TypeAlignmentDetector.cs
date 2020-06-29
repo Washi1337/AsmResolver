@@ -31,10 +31,10 @@ namespace AsmResolver.DotNet.Memory
             return detector.VisitTypeReference(type);
         }
         
-        public static uint GetTypeAlignment(TypeDefinition type, GenericContext genericContext, bool is32Bit)
+        public static uint GetTypeAlignment(TypeDefinition type, bool is32Bit)
         {
             // TODO: cache intermediate results of largest fields.
-            var detector = new TypeAlignmentDetector(genericContext, is32Bit);
+            var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
 
             uint alignment = detector.VisitTypeDefinition(type);
 

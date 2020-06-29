@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Memory
         /// <param name="field">The field that was laid out.</param>
         /// <param name="offset">The offset of the field.</param>
         /// <param name="contentsLayout">The layout of the contents of the field.</param>
-        public FieldLayout(FieldDefinition field, int offset, TypeMemoryLayout contentsLayout)
+        public FieldLayout(FieldDefinition field, uint offset, TypeMemoryLayout contentsLayout)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
             Offset = offset;
@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Memory
         /// <summary>
         /// Gets the implied offset of the field.
         /// </summary>
-        public int Offset
+        public uint Offset
         {
             get;
         }

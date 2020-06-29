@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SingleFieldStruct
+        public struct SingleFieldSequentialStruct
         {
             public int IntField;
         }

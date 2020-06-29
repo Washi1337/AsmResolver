@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Memory;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -9,12 +10,17 @@ namespace AsmResolver.DotNet.Tests.Memory
     public class TypeMemoryLayoutDetectorTest : IClassFixture<CurrentModuleFixture>
     {
         private readonly ModuleDefinition _module;
-        
+
         public TypeMemoryLayoutDetectorTest(CurrentModuleFixture fixture)
         {
             _module = fixture.Module;
         }
-        
+
+        private TypeDefinition FindTestType(Type type)
+        {
+            return (TypeDefinition) _module.LookupMember(type.MetadataToken);
+        }
+
         [Theory]
         [InlineData(ElementType.I1, sizeof(sbyte))]
         [InlineData(ElementType.I4, sizeof(int))]
@@ -25,7 +31,7 @@ namespace AsmResolver.DotNet.Tests.Memory
             var layout = type.GetImpliedMemoryLayout(false);
             Assert.Equal(expectedSize, layout.Size);
         }
-        
+
         [Theory]
         [InlineData(ElementType.String)]
         [InlineData(ElementType.Object)]
@@ -38,6 +44,22 @@ namespace AsmResolver.DotNet.Tests.Memory
             Assert.Equal(4u, layout32.Size);
             var layout64 = type.GetImpliedMemoryLayout(false);
             Assert.Equal(8u, layout64.Size);
+        }
+
+        [Fact]
+        public void EmptyStruct()
+        {
+            var type = FindTestType(typeof(TestStructs.EmptyStruct));
+            var layout = type.GetImpliedMemoryLayout(false);
+            Assert.Equal((uint) Unsafe.SizeOf<TestStructs.EmptyStruct>(), layout.Size);
+        }
+
+        [Fact]
+        public void SingleFieldSequentialStruct()
+        {
+            var type = FindTestType(typeof(TestStructs.SingleFieldSequentialStruct));
+            var layout = type.GetImpliedMemoryLayout(false);
+            Assert.Equal((uint) Unsafe.SizeOf<TestStructs.SingleFieldSequentialStruct>(), layout.Size);
         }
     }
 }
