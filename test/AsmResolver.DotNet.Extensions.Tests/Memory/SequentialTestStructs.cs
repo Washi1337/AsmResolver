@@ -93,5 +93,22 @@ namespace AsmResolver.DotNet.Tests.Memory
             public NestedStructWithEnclosingPack1 Field1;
             public byte Field2;
         }
+
+        [StructLayout(LayoutKind.Sequential, Size = 400)]
+        public struct ExplicitlySizedEmptyStruct
+        {
+        }
+
+        [StructLayout(LayoutKind.Sequential, Size = 400)]
+        public struct ExplicitlySizedSingleField
+        {
+            public int IntField;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Size = 2)]
+        public struct ExplicitlySizedSmallerExplicitSizeThanActualSize
+        {
+            public int IntField;
+        }
     }
 }

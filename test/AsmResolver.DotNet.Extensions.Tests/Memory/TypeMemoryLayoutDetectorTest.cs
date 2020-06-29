@@ -96,5 +96,15 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void ThreeLevelsNestingSequentialStructPack1() => 
             VerifySize<TestStructs.ThreeLevelsNestingSequentialWithNestedStructPack1>();
+        
+        [Fact]
+        public void ExplicitlySizedEmptyStruct() => VerifySize<TestStructs.ExplicitlySizedEmptyStruct>();
+        
+        [Fact]
+        public void ExplicitlySizedSingleField() => VerifySize<TestStructs.ExplicitlySizedSingleField>();
+        
+        [Fact]
+        public void ExplicitlySizedSmallerExplicitSizeThanActualSize() =>
+            VerifySize<TestStructs.ExplicitlySizedSmallerExplicitSizeThanActualSize>();
     }
 }

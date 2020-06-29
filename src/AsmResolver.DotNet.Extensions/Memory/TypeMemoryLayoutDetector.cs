@@ -123,7 +123,7 @@ namespace AsmResolver.DotNet.Memory
         {
             uint alignment = TypeAlignmentDetector.GetTypeAlignment(type, Is32Bit);
             
-            _currentFieldOffset = _currentFieldOffset.Align(alignment);
+             _currentFieldOffset = _currentFieldOffset.Align(alignment);
 
             // Infer raw layout.
             var result = type.IsExplicitLayout

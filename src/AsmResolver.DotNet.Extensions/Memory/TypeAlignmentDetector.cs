@@ -134,7 +134,9 @@ namespace AsmResolver.DotNet.Memory
                 uint packingSize = layout.PackingSize == 0
                     ? PointerSize
                     : layout.PackingSize;
-                return packingSize;
+                
+                if (layout.ClassSize == 0 || packingSize <= layout.ClassSize)
+                    return packingSize;
             }
             
             uint largestFieldSize = 0;
