@@ -46,20 +46,22 @@ namespace AsmResolver.DotNet.Tests.Memory
             Assert.Equal(8u, layout64.Size);
         }
 
-        [Fact]
-        public void EmptyStruct()
+        private void VerifySize<T>()
         {
-            var type = FindTestType(typeof(TestStructs.EmptyStruct));
+            var type = FindTestType(typeof(T));
             var layout = type.GetImpliedMemoryLayout(false);
-            Assert.Equal((uint) Unsafe.SizeOf<TestStructs.EmptyStruct>(), layout.Size);
+            Assert.Equal((uint) Unsafe.SizeOf<T>(), layout.Size);
         }
 
         [Fact]
-        public void SingleFieldSequentialStruct()
-        {
-            var type = FindTestType(typeof(TestStructs.SingleFieldSequentialStruct));
-            var layout = type.GetImpliedMemoryLayout(false);
-            Assert.Equal((uint) Unsafe.SizeOf<TestStructs.SingleFieldSequentialStruct>(), layout.Size);
-        }
+        public void EmptyStruct() => VerifySize<TestStructs.EmptyStruct>();
+
+        [Fact]
+        public void SingleFieldSequentialStructDefaultPack() =>
+            VerifySize<TestStructs.SingleFieldSequentialStructDefaultPack>();
+
+        [Fact]
+        public void MultipleFieldsSequentialStructDefaultPack() =>
+            VerifySize<TestStructs.MultipleFieldsSequentialStructDefaultPack>();
     }
 }

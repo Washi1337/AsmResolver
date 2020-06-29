@@ -13,9 +13,16 @@ namespace AsmResolver.DotNet.Tests.Memory
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct SingleFieldSequentialStruct
+        public struct SingleFieldSequentialStructDefaultPack
         {
             public int IntField;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MultipleFieldsSequentialStructDefaultPack
+        {
+            public int IntField;
+            public long LongField;
         }
     }
 }
