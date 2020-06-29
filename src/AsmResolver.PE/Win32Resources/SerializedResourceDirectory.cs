@@ -40,7 +40,6 @@ namespace AsmResolver.PE.Win32Resources
         public const int MaxDepth = 10;
             
         private readonly PEFile _peFile;
-        private readonly IWin32ResourceDataReader _dataReader;
         private readonly ushort _namedEntries;
         private readonly ushort _idEntries;
         private readonly uint _entriesOffset;
@@ -50,18 +49,16 @@ namespace AsmResolver.PE.Win32Resources
         /// Reads a single resource directory from an input stream.
         /// </summary>
         /// <param name="peFile">The PE file containing the resource.</param>
-        /// <param name="dataReader">The instance responsible for reading and interpreting the data.</param>
         /// <param name="entry">The entry to read. If this value is <c>null</c>, the root directory is assumed.</param>
         /// <param name="directoryReader">The input stream.</param>
         /// <param name="depth">
         /// The current depth of the resource directory tree structure.
         /// If this value exceeds <see cref="MaxDepth"/>, this class will not initialize any entries.
         /// </param>
-        public SerializedResourceDirectory(PEFile peFile, IWin32ResourceDataReader dataReader,
-            ResourceDirectoryEntry? entry, IBinaryStreamReader directoryReader, int depth = 0)
+        public SerializedResourceDirectory(PEFile peFile, ResourceDirectoryEntry? entry, 
+            IBinaryStreamReader directoryReader, int depth = 0)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _dataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
 
             _depth = depth;
 
@@ -116,8 +113,8 @@ namespace AsmResolver.PE.Win32Resources
                 _peFile.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader);
                 
                 result.Add(rawEntry.IsSubDirectory
-                    ? (IResourceEntry) new SerializedResourceDirectory(_peFile, _dataReader, rawEntry, entryReader, _depth + 1)
-                    : new SerializedResourceData(_peFile, _dataReader, rawEntry, entryReader));
+                    ? (IResourceEntry) new SerializedResourceDirectory(_peFile,  rawEntry, entryReader, _depth + 1)
+                    : new SerializedResourceData(_peFile, rawEntry, entryReader));
             }
 
             return result;

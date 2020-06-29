@@ -20,7 +20,6 @@ namespace AsmResolver.PE
         {
             ReferenceResolver = resolver;
             MetadataStreamReader = new DefaultMetadataStreamReader(resolver);
-            Win32ResourceDataReader = new DefaultResourceDataReader();
         }
 
         /// <summary>
@@ -35,15 +34,6 @@ namespace AsmResolver.PE
         /// Gets or sets the object responsible for reading metadata streams in the .NET data directory.
         /// </summary>
         public IMetadataStreamReader MetadataStreamReader
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the object responsible for reading and interpreting Win32 resource data entries.
-        /// </summary>
-        public IWin32ResourceDataReader Win32ResourceDataReader
         {
             get;
             set;

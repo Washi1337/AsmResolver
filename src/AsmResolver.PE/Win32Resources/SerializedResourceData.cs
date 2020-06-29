@@ -32,7 +32,6 @@ namespace AsmResolver.PE.Win32Resources
         public const uint ResourceDataEntrySize = 4 * sizeof(uint);
         
         private readonly PEFile _peFile;
-        private readonly IWin32ResourceDataReader _dataReader;
         private readonly uint _contentsRva;
         private readonly uint _contentsSize;
 
@@ -43,11 +42,9 @@ namespace AsmResolver.PE.Win32Resources
         /// <param name="dataReader">The instance responsible for reading and interpreting the data.</param>
         /// <param name="entry">The entry to read.</param>
         /// <param name="entryReader">The input stream to read the data from.</param>
-        public SerializedResourceData(PEFile peFile, IWin32ResourceDataReader dataReader,
-            ResourceDirectoryEntry entry, IBinaryStreamReader entryReader)
+        public SerializedResourceData(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader entryReader)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _dataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
 
             if (entry.IsByName)
                 Name = entry.Name;
@@ -63,7 +60,7 @@ namespace AsmResolver.PE.Win32Resources
         protected override ISegment GetContents()
         {
             return _peFile.TryCreateReaderAtRva(_contentsRva, _contentsSize, out var reader)
-                ? _dataReader.ReadResourceData(this, reader)
+                ? DataSegment.FromReader(reader)
                 : null;
         }
         
