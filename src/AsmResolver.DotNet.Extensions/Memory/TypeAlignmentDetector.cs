@@ -33,22 +33,8 @@ namespace AsmResolver.DotNet.Memory
         
         public static uint GetTypeAlignment(TypeDefinition type, bool is32Bit)
         {
-            // TODO: cache intermediate results of largest fields.
             var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
-
-            uint alignment = detector.VisitTypeDefinition(type);
-
-            // Check if the type has metadata regarding type layout.
-            if (type.ClassLayout is {} layout)
-            {
-                // If packing size == 0, fields are aligned by the size of a pointer.
-                uint packingSize = layout.PackingSize == 0
-                    ? detector.PointerSize
-                    : layout.PackingSize;
-                alignment = Math.Min(packingSize, alignment);
-            }
-
-            return alignment;
+            return detector.VisitTypeDefinition(type);
         }
         
         private GenericContext _currentGenericContext;
@@ -141,11 +127,19 @@ namespace AsmResolver.DotNet.Memory
 
         public uint VisitTypeDefinition(TypeDefinition type)
         {
+            // Check if the type has metadata regarding type layout.
+            if (type.ClassLayout is {} layout)
+            {
+                // If packing size == 0, fields are aligned by the size of a pointer.
+                uint packingSize = layout.PackingSize == 0
+                    ? PointerSize
+                    : layout.PackingSize;
+                return packingSize;
+            }
+            
             uint largestFieldSize = 0;
-
             for (int i = 0; i < type.Fields.Count; i++)
                 largestFieldSize = Math.Max(largestFieldSize, type.Fields[i].Signature.FieldType.AcceptVisitor(this));
-
             return largestFieldSize;
         }
         

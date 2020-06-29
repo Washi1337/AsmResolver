@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         private void VerifySize<T>()
         {
             var type = FindTestType(typeof(T));
-            var layout = type.GetImpliedMemoryLayout(false);
+            var layout = type.GetImpliedMemoryLayout(IntPtr.Size == 4);
             Assert.Equal((uint) Unsafe.SizeOf<T>(), layout.Size);
         }
 
@@ -88,5 +88,13 @@ namespace AsmResolver.DotNet.Tests.Memory
         
         [Fact]
         public void NestedStructInNestedStruct() => VerifySize<TestStructs.NestedStructInNestedStruct>();
+        
+        [Fact]
+        public void ThreeLevelsNestingSequentialStructDefaultPack() => 
+            VerifySize<TestStructs.ThreeLevelsNestingSequentialStructDefaultPack>();
+        
+        [Fact]
+        public void ThreeLevelsNestingSequentialStructPack1() => 
+            VerifySize<TestStructs.ThreeLevelsNestingSequentialWithNestedStructPack1>();
     }
 }

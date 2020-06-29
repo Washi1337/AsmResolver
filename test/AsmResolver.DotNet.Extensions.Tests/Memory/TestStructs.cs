@@ -79,5 +79,19 @@ namespace AsmResolver.DotNet.Tests.Memory
             public NestedStruct1 Field1;
             public byte Field2;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ThreeLevelsNestingSequentialStructDefaultPack
+        {
+            public NestedStructInNestedStruct Field1;
+            public byte Field2;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ThreeLevelsNestingSequentialWithNestedStructPack1
+        {
+            public NestedStructWithEnclosingPack1 Field1;
+            public byte Field2;
+        }
     }
 }
