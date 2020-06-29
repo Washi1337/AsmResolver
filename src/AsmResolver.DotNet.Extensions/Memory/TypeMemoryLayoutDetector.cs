@@ -8,21 +8,18 @@ namespace AsmResolver.DotNet.Memory
 {
     public class TypeMemoryLayoutDetector : ITypeSignatureVisitor<TypeMemoryLayout>
     {
-        private readonly uint _alignment;
-        
         private GenericContext _currentGenericContext;
         private uint _currentFieldOffset;
 
-        public TypeMemoryLayoutDetector(bool is32Bit, uint alignment)
-            : this(new GenericContext(), is32Bit, alignment)
+        public TypeMemoryLayoutDetector(bool is32Bit)
+            : this(new GenericContext(), is32Bit)
         {
         }
         
-        public TypeMemoryLayoutDetector(GenericContext currentGenericContext, bool is32Bit, uint alignment)
+        public TypeMemoryLayoutDetector(GenericContext currentGenericContext, bool is32Bit)
         {
             _currentGenericContext = currentGenericContext;
             Is32Bit = is32Bit;
-            _alignment = alignment;
         }
         
         public bool Is32Bit
@@ -124,19 +121,26 @@ namespace AsmResolver.DotNet.Memory
 
         private TypeMemoryLayout VisitValueTypeDefinition(TypeDefinition type)
         {
-            _currentFieldOffset = _currentFieldOffset.Align(_alignment);
+            uint alignment = TypeAlignmentDetector.GetTypeAlignment(type, Is32Bit);
+            
+            _currentFieldOffset = _currentFieldOffset.Align(alignment);
 
+            // Infer raw layout.
             var result = type.IsExplicitLayout
-                ? InferExplicitLayout(type)
-                : InferSequentialLayout(type);
+                ? InferExplicitLayout(type, alignment)
+                : InferSequentialLayout(type, alignment);
 
+            // Check if a size was specified in metadata..
             if (type.ClassLayout is {} layout)
                 result.Size = Math.Max(layout.ClassSize, result.Size);
 
+            // Types have at least one byte in size.
+            result.Size = Math.Max(1, result.Size);
+            
             return result;
         }
 
-        private TypeMemoryLayout InferSequentialLayout(TypeDefinition type)
+        private TypeMemoryLayout InferSequentialLayout(TypeDefinition type, uint alignment)
         {
             uint startOffset = _currentFieldOffset;
             var result = new TypeMemoryLayout();
@@ -144,19 +148,19 @@ namespace AsmResolver.DotNet.Memory
             // Iterate all fields.
             foreach (var field in type.Fields)
             {
-                _currentFieldOffset = _currentFieldOffset.Align(_alignment);
+                _currentFieldOffset = _currentFieldOffset.Align(alignment);
                 uint fieldOffset = _currentFieldOffset;
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 result.Fields[field] = new FieldLayout(field, fieldOffset, contentsLayout);
             }
 
             // Compute raw size of entire type.
-            result.Size = (_currentFieldOffset - startOffset).Align(_alignment);
+            result.Size = (_currentFieldOffset - startOffset).Align(alignment);
             
             return result;
         }
 
-        private TypeMemoryLayout InferExplicitLayout(TypeDefinition type)
+        private TypeMemoryLayout InferExplicitLayout(TypeDefinition type, uint alignment)
         {
             throw new NotImplementedException();
         }

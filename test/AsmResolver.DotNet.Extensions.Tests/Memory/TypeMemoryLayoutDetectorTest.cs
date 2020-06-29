@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Memory;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -59,10 +58,17 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void SingleFieldSequentialStructDefaultPack() =>
             VerifySize<TestStructs.SingleFieldSequentialStructDefaultPack>();
+        [Fact]
+        public void SingleFieldSequentialStructPack1() =>
+            VerifySize<TestStructs.SingleFieldSequentialStructPack1>();
 
         [Fact]
         public void MultipleFieldsSequentialStructDefaultPack() =>
             VerifySize<TestStructs.MultipleFieldsSequentialStructDefaultPack>();
+        
+        [Fact]
+        public void MultipleFieldsSequentialStructPack1() =>
+            VerifySize<TestStructs.MultipleFieldsSequentialStructPack1>();
         
         [Fact]
         public void LargeAndSmallFieldSequentialDefaultPack() =>
@@ -73,6 +79,12 @@ namespace AsmResolver.DotNet.Tests.Memory
         
         [Fact]
         public void NestedStruct2() => VerifySize<TestStructs.NestedStruct2>();
+        
+        [Fact]
+        public void NestedStructWithEnclosingPack1() => VerifySize<TestStructs.NestedStructWithEnclosingPack1>();
+        
+        [Fact]
+        public void NestedStructWithNestedPack1() => VerifySize<TestStructs.NestedStructWithNestedPack1>();
         
         [Fact]
         public void NestedStructInNestedStruct() => VerifySize<TestStructs.NestedStructInNestedStruct>();

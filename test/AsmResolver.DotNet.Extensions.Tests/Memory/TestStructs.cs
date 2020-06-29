@@ -18,8 +18,21 @@ namespace AsmResolver.DotNet.Tests.Memory
             public int IntField;
         }
 
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct SingleFieldSequentialStructPack1
+        {
+            public int IntField;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         public struct MultipleFieldsSequentialStructDefaultPack
+        {
+            public int IntField;
+            public long LongField;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct MultipleFieldsSequentialStructPack1
         {
             public int IntField;
             public long LongField;
@@ -43,6 +56,20 @@ namespace AsmResolver.DotNet.Tests.Memory
         public struct NestedStruct2
         {
             public MultipleFieldsSequentialStructDefaultPack Field1;
+            public byte Field2;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct NestedStructWithEnclosingPack1
+        {
+            public MultipleFieldsSequentialStructDefaultPack Field1;
+            public byte Field2;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct NestedStructWithNestedPack1
+        {
+            public MultipleFieldsSequentialStructPack1 Field1;
             public byte Field2;
         }
 
