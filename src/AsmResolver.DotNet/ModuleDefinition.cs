@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
@@ -638,6 +639,28 @@ namespace AsmResolver.DotNet
         /// </exception>
         public virtual IndexEncoder GetIndexEncoder(CodedIndex codedIndex) =>
             throw new InvalidOperationException("Cannot get an index encoder from a non-serialized module.");
+
+        /// <summary>
+        /// Obtains a list of type references that were imported into the module.
+        /// </summary>
+        /// <returns>The type references.</returns>
+        /// <remarks>
+        /// The return value of this method does not update when the <see cref="ReferenceImporter"/> class is used to
+        /// import new type references into the module. This method only serves as a way to easily get all the type 
+        /// references that were imported during the last compilation or assembly process.  
+        /// </remarks>
+        public IEnumerable<TypeReference> GetImportedTypeReferences() => Enumerable.Empty<TypeReference>();
+        
+        /// <summary>
+        /// Obtains a list of member references that were imported into the module.
+        /// </summary>
+        /// <returns>The type references.</returns>
+        /// <remarks>
+        /// The return value of this method does not update when the <see cref="ReferenceImporter"/> class is used to
+        /// import new member references into the module. This method only serves as a way to easily get all the member 
+        /// references that were imported during the last compilation or assembly process.  
+        /// </remarks>
+        public IEnumerable<TypeReference> GetImportedMemberReferences() => Enumerable.Empty<TypeReference>();
 
         /// <summary>
         /// Enumerates all types (including nested types) defined in the module.
