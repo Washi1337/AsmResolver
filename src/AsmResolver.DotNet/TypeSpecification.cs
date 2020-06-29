@@ -17,7 +17,6 @@ namespace AsmResolver.DotNet
     {
         private readonly LazyVariable<TypeSignature> _signature;
         private IList<CustomAttribute> _customAttributes;
-        private MetadataToken _token;
 
         /// <summary>
         /// Initializes an empty type specification.
