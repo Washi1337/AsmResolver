@@ -162,7 +162,35 @@ namespace AsmResolver.DotNet.Memory
 
         private TypeMemoryLayout InferExplicitLayout(TypeDefinition type, uint alignment)
         {
-            throw new NotImplementedException();
+            uint startOffset = _currentFieldOffset;
+            var result = new TypeMemoryLayout();
+
+            uint largestOffset = startOffset;
+            
+            // Iterate all fields.
+            foreach (var field in type.Fields)
+            {
+                if (!field.FieldOffset.HasValue)
+                {
+                    throw new ArgumentException(string.Format(
+                        "{0} ({1}) is defined in a type with explicit layout, but does not have a field offset assigned.",
+                        field.FullName,
+                        field.MetadataToken.ToString()));
+                }
+
+                _currentFieldOffset = (uint) field.FieldOffset.Value;
+                
+                uint fieldOffset = _currentFieldOffset;
+                var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
+                result.Fields[field] = new FieldLayout(field, fieldOffset, contentsLayout);
+
+                largestOffset = Math.Max(largestOffset, _currentFieldOffset);
+            }
+
+            // Compute raw size of entire type.
+            result.Size = (_currentFieldOffset - startOffset).Align(alignment);
+            
+            return result;
         }
     }
 }

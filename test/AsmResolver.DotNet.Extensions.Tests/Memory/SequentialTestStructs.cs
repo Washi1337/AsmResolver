@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace AsmResolver.DotNet.Tests.Memory
 {
-    public static class TestStructs
+    public static class SequentialTestStructs
     {
         [StructLayout(LayoutKind.Sequential)]
         public struct EmptyStruct
