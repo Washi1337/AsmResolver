@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using AsmResolver.PE.File;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Win32Resources.Version;
 using Xunit;
 
@@ -9,25 +8,12 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
 {
     public class VersionInfoSegmentTest
     {
-        private static VersionInfoResource FindVersionInfo(IPEImage image)
-        {
-            var directory = image.Resources.Entries
-                .OfType<IResourceDirectory>()
-                .First(d => d.Type == ResourceType.Version);
-
-            var data = (IResourceData) ((IResourceDirectory) directory.Entries[0]).Entries[0];
-            return (VersionInfoResource) data.Contents;
-        }
-
         [Fact]
         public void ReadFixedVersion()
         {
-            var peFile = PEFile.FromBytes(Properties.Resources.HelloWorld);
-            var versionInfo = FindVersionInfo(PEImage.FromFile(peFile, new PEReadParameters(peFile)
-            {
-                Win32ResourceDataReader = new AdvancedResourceDataReader()
-            }));
-            
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+
+            var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
             var fixedVersionInfo = versionInfo.FixedVersionInfo;
             
             Assert.Equal(new System.Version(1,0,0,0), fixedVersionInfo.FileVersion);
@@ -76,11 +62,8 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         {
             string path = typeof(PEImage).Assembly.Location;
 
-            var peFile = PEFile.FromFile(path);
-            var versionInfo = FindVersionInfo(PEImage.FromFile(peFile, new PEReadParameters(peFile)
-            {
-                Win32ResourceDataReader = new AdvancedResourceDataReader()
-            }));
+            var image = PEImage.FromFile(path);
+            var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
                 
             var expectedInfo = FileVersionInfo.GetVersionInfo(path);
             var actualInfo = versionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
@@ -174,6 +157,29 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             var newTable = newStringFileInfo.Tables[0];
             foreach ((string key, string value) in table)
                 Assert.Equal(value, newTable[key]);
+        }
+
+        [Fact]
+        public void PersistentVersionResource()
+        {
+            // Load dummy
+            var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
+
+            // Update version info.
+            var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
+            versionInfo.FixedVersionInfo.ProductVersion = new System.Version(1, 2, 3, 4);
+            versionInfo.WriteToDirectory(image.Resources);
+
+            // Rebuild
+            using var stream = new MemoryStream();
+            new ManagedPEFileBuilder().CreateFile(image).Write(new BinaryStreamWriter(stream));
+            
+            // Reload version info.
+            var newImage = PEImage.FromBytes(stream.ToArray());
+            var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources);
+            
+            // Verify.
+            Assert.Equal(versionInfo.FixedVersionInfo.ProductVersion, newVersionInfo.FixedVersionInfo.ProductVersion);
         }
 
     }

@@ -52,7 +52,7 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         /// <param name="id">The identifier.</param>
         /// <param name="contents">The data to store in the entry.</param>
-        public ResourceData(uint id, IReadableSegment contents)
+        public ResourceData(uint id, ISegment contents)
             : this()
         {
             Id = id;
