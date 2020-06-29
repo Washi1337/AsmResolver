@@ -89,25 +89,25 @@ namespace AsmResolver.DotNet
         /// <param name="readParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) => 
+        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) =>
             new SerializedModuleDefinition(peImage, readParameters);
 
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<Guid> _mvid;
         private readonly LazyVariable<Guid> _encId;
         private readonly LazyVariable<Guid> _encBaseId;
-        
+
         private IList<TypeDefinition> _topLevelTypes;
         private IList<AssemblyReference> _assemblyReferences;
         private IList<CustomAttribute> _customAttributes;
-        
+
         private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
         private IList<ModuleReference> _moduleReferences;
         private IList<FileReference> _fileReferences;
         private IList<ManifestResource> _resources;
         private IList<ExportedType> _exportedTypes;
         private TokenAllocator _tokenAllocator;
-        
+
         private readonly LazyVariable<string> _runtimeVersion;
         private readonly LazyVariable<IResourceDirectory> _nativeResources;
 
@@ -136,11 +136,11 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
-            
+
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
-            AssemblyReferences.Add((AssemblyReference) CorLibTypeFactory.CorLibScope);
+            AssemblyReferences.Add((AssemblyReference)CorLibTypeFactory.CorLibScope);
             MetadataResolver = new DefaultMetadataResolver(new NetFrameworkAssemblyResolver());
-            
+
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
 
@@ -153,16 +153,16 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.Module, 0))
         {
             Name = name;
-            
+
             var importer = new ReferenceImporter(this);
-            corLib = (AssemblyReference) importer.ImportScope(corLib);
-            
+            corLib = (AssemblyReference)importer.ImportScope(corLib);
+
             CorLibTypeFactory = new CorLibTypeFactory(corLib);
             AssemblyReferences.Add(corLib);
 
             var resolver = CreateAssemblyResolver(corLib);
             MetadataResolver = new DefaultMetadataResolver(resolver);
-            
+
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
 
@@ -389,7 +389,7 @@ namespace AsmResolver.DotNet
             get;
             set;
         } = Characteristics.Image | Characteristics.LargeAddressAware;
-        
+
         /// <summary>
         /// Gets or sets the magic optional header signature, determining whether the underlying PE image is a
         /// PE32 (32-bit) or a PE32+ (64-bit) image.
@@ -447,7 +447,7 @@ namespace AsmResolver.DotNet
         public IResourceDirectory NativeResourceDirectory
         {
             get => _nativeResources.Value;
-            set => _nativeResources.Value = value; 
+            set => _nativeResources.Value = value;
         }
 
         /// <summary>
@@ -576,7 +576,7 @@ namespace AsmResolver.DotNet
             get => _managedEntrypoint.Value;
             set => _managedEntrypoint.Value = value;
         }
-        
+
         /// <summary>
         /// Looks up a member by its metadata token.
         /// </summary>
@@ -681,7 +681,7 @@ namespace AsmResolver.DotNet
                     agenda.Enqueue(nestedType);
             }
         }
-  
+
         /// <summary>
         /// Gets the module static constructor of this metadata image. That is, the first method that is executed
         /// upon loading the .NET module. 
@@ -716,7 +716,7 @@ namespace AsmResolver.DotNet
                 var moduleType = new TypeDefinition(null, "<Module>", 0);
                 TopLevelTypes.Insert(0, moduleType);
             }
-            
+
             return TopLevelTypes[0];
         }
 
@@ -783,7 +783,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ModuleReferences"/> property.
         /// </remarks>
-        protected virtual IList<ModuleReference> GetModuleReferences() => 
+        protected virtual IList<ModuleReference> GetModuleReferences() =>
             new OwnedCollection<ModuleDefinition, ModuleReference>(this);
 
         /// <summary>
@@ -805,7 +805,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ManifestResource> GetResources() =>
             new OwnedCollection<ModuleDefinition, ManifestResource>(this);
-        
+
         /// <summary>
         /// Obtains the list of types that are redirected to another external module. 
         /// </summary>
@@ -813,7 +813,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="ExportedTypes"/> property.
         /// </remarks>
-        protected virtual IList<ExportedType> GetExportedTypes() => 
+        protected virtual IList<ExportedType> GetExportedTypes() =>
             new OwnedCollection<ModuleDefinition, ExportedType>(this);
 
         /// <summary>
@@ -852,15 +852,15 @@ namespace AsmResolver.DotNet
         /// <param name="corLib">The corlib reference.</param>
         /// <param name="workingDirectory">The working directory to search</param>
         /// <returns>The resolver.</returns>
-        protected static IAssemblyResolver CreateAssemblyResolver(IResolutionScope corLib, string workingDirectory=null)
+        protected static IAssemblyResolver CreateAssemblyResolver(IResolutionScope corLib, string workingDirectory = null)
         {
             var resolver = corLib.Name == "mscorlib"
-                ? (AssemblyResolverBase) new NetFrameworkAssemblyResolver()
+                ? (AssemblyResolverBase)new NetFrameworkAssemblyResolver()
                 : new NetCoreAssemblyResolver();
 
             if (!string.IsNullOrEmpty(workingDirectory))
                 resolver.SearchDirectories.Add(workingDirectory);
-            
+
             return resolver;
         }
 
@@ -880,14 +880,14 @@ namespace AsmResolver.DotNet
         /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
-        public void Write(string filePath) => 
+        public void Write(string filePath) =>
             Write(filePath, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
-        public void Write(Stream outputStream) => 
+        public void Write(Stream outputStream) =>
             Write(outputStream, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
         /// <summary>
@@ -895,7 +895,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
-        public void Write(string filePath, IPEImageBuilder imageBuilder) => 
+        public void Write(string filePath, IPEImageBuilder imageBuilder) =>
             Write(filePath, imageBuilder, new ManagedPEFileBuilder());
 
         /// <summary>
@@ -903,7 +903,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
-        public void Write(Stream outputStream, IPEImageBuilder imageBuilder) => 
+        public void Write(Stream outputStream, IPEImageBuilder imageBuilder) =>
             Write(outputStream, imageBuilder, new ManagedPEFileBuilder());
 
         /// <summary>
@@ -942,5 +942,18 @@ namespace AsmResolver.DotNet
             var file = fileBuilder.CreateFile(image);
             file.Write(writer);
         }
+
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
+        /// /// </summary>
+        /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
+        public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder());
+
+        /// <summary>
+        /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
+        /// </summary>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <returns>IPEImage built by the specified IPEImageBuilder</returns>
+        public IPEImage ToPEImage(IPEImageBuilder imageBuilder) => imageBuilder.CreateImage(this);
     }
-}
+ }
