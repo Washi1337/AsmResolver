@@ -131,7 +131,7 @@ public namespace N {
 
 ### Embedded statement bracing
 
-Arms of an `if` statement should always be wrapped using braces, except when __all__ arms only consist of one line of code. In such a case, the embedded statement should be on a new line, indented.
+Arms of an `if` statement should always be wrapped using braces. The only place when it is acceptable to exclude braces is when __all__ arms only consist of one line of code. In such a case, the embedded statement should be on a new line, indented.
 
 Do:
 ```csharp
@@ -167,7 +167,7 @@ else
 }
 ```
 
-For loops, both including and excluding braces is acceptable, even if the embedded statement only spans one line. When braces are excluded, always place the embedded statement on a new indented line.
+For loops, both including and excluding braces is acceptable, even if the embedded statement only spans one line. Similar to `if` statements, when braces are excluded, always place the embedded statement on a new indented line.
 
 ```csharp
 foreach (var x in collection)
@@ -209,20 +209,26 @@ Do:
 ```csharp
 public IList<MethodDefinition> Methods
 {
-    get { ... }
+    get;
 }
 
-public IEnumerable<TypeDefinition> GetAllTypes() { ... }
+public IEnumerable<TypeDefinition> GetAllTypes() 
+{ 
+    // ... 
+}
 ```
 
 Don't:
 ```csharp
 public List<MethodDefinition> Methods
 {
-    get { ... }
+    get;
 }
 
-public List<TypeDefinition> GetAllTypes() { ... }
+public List<TypeDefinition> GetAllTypes()
+{ 
+    // ... 
+}
 ```
 
 For non-public members, using the more specific type is acceptable.
@@ -275,9 +281,9 @@ for (int i = 0; i < items.Count; i++)
 Don't:
 ```csharp
 IList<T> items = ...;
-for (int i = 0; i < items.Count; i++)
+foreach (var item in items) // IList<T>.GetEnumerator() returns a heap allocated enumerator
 {
-    // Use items[i]
+    // Use item
 }
 ```
 
