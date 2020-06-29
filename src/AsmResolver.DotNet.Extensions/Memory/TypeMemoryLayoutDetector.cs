@@ -31,19 +31,22 @@ namespace AsmResolver.DotNet.Memory
         }
 
         public uint PointerSize => Is32Bit ? 4u : 8u;
+
+        private TypeMemoryLayout VisitReferenceType()
+        {
+            _currentFieldOffset += PointerSize;
+            return new TypeMemoryLayout(PointerSize);
+        }
         
-        public TypeMemoryLayout VisitArrayType(ArrayTypeSignature signature) => 
-            new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitArrayType(ArrayTypeSignature signature)=> VisitReferenceType();
 
-        public TypeMemoryLayout VisitBoxedType(BoxedTypeSignature signature) => 
-            new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitBoxedType(BoxedTypeSignature signature)=> VisitReferenceType();
 
-        public TypeMemoryLayout VisitByReferenceType(ByReferenceTypeSignature signature) =>
-            new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitByReferenceType(ByReferenceTypeSignature signature)=> VisitReferenceType();
 
         public TypeMemoryLayout VisitCorLibType(CorLibTypeSignature signature)
         {
-            return new TypeMemoryLayout(signature.ElementType switch
+            uint elementSize = signature.ElementType switch
             {
                 ElementType.Boolean => sizeof(bool),
                 ElementType.Char => sizeof(char) ,
@@ -62,7 +65,10 @@ namespace AsmResolver.DotNet.Memory
                 ElementType.U => PointerSize,
                 ElementType.Object => PointerSize,
                 _ => throw new ArgumentOutOfRangeException(nameof(signature))
-            });
+            };
+
+            _currentFieldOffset += elementSize;
+            return new TypeMemoryLayout(elementSize);
         }
 
         public TypeMemoryLayout VisitCustomModifierType(CustomModifierTypeSignature signature) => 
@@ -84,17 +90,14 @@ namespace AsmResolver.DotNet.Memory
         public TypeMemoryLayout VisitGenericParameter(GenericParameterSignature signature) => 
             _currentGenericContext.GetTypeArgument(signature).AcceptVisitor(this);
 
-        public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature) => 
-            signature.BaseType.AcceptVisitor(this);
+        public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature) => VisitReferenceType();
 
-        public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature) => 
-            new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature) => VisitReferenceType();
 
         public TypeMemoryLayout VisitSentinelType(SentinelTypeSignature signature) =>
             throw new ArgumentException("Sentinel types do not have a size.");
 
-        public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature) => 
-            new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature) => VisitReferenceType();
 
         public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature) => 
             VisitTypeDefOrRef(signature.Type);
@@ -135,13 +138,13 @@ namespace AsmResolver.DotNet.Memory
             foreach (var field in type.Fields)
             {
                 _currentFieldOffset = _currentFieldOffset.Align(_alignment);
+                uint fieldOffset = _currentFieldOffset;
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
-                result.Fields[field] = new FieldLayout(field, _currentFieldOffset, contentsLayout);
-                _currentFieldOffset += contentsLayout.Size;
+                result.Fields[field] = new FieldLayout(field, fieldOffset, contentsLayout);
             }
 
             // Compute raw size of entire type.
-            result.Size = _currentFieldOffset - startOffset;
+            result.Size = (_currentFieldOffset - startOffset).Align(_alignment);
             
             return result;
         }

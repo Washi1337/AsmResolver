@@ -24,5 +24,26 @@ namespace AsmResolver.DotNet.Tests.Memory
             public int IntField;
             public long LongField;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct LargeAndSmallFieldSequentialDefaultPack
+        {
+            public long LongField;
+            public byte ByteField;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct NestedStruct1
+        {
+            public SingleFieldSequentialStructDefaultPack Field1;
+            public byte Field2;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct NestedStruct2
+        {
+            public MultipleFieldsSequentialStructDefaultPack Field1;
+            public byte Field2;
+        }
     }
 }

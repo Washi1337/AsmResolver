@@ -63,5 +63,15 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void MultipleFieldsSequentialStructDefaultPack() =>
             VerifySize<TestStructs.MultipleFieldsSequentialStructDefaultPack>();
+        
+        [Fact]
+        public void LargeAndSmallFieldSequentialDefaultPack() =>
+            VerifySize<TestStructs.LargeAndSmallFieldSequentialDefaultPack>();
+        
+        [Fact]
+        public void NestedStruct1() => VerifySize<TestStructs.NestedStruct1>();
+        
+        [Fact]
+        public void NestedStruct2() => VerifySize<TestStructs.NestedStruct2>();
     }
 }
