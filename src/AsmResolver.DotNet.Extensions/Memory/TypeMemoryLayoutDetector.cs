@@ -9,7 +9,13 @@ namespace AsmResolver.DotNet.Memory
     public class TypeMemoryLayoutDetector : ITypeSignatureVisitor<TypeMemoryLayout>
     {
         private GenericContext _currentGenericContext;
+        private uint _currentFieldOffset;
 
+        public TypeMemoryLayoutDetector(bool is32Bit)
+            : this(new GenericContext(), is32Bit)
+        {
+        }
+        
         public TypeMemoryLayoutDetector(GenericContext currentGenericContext, bool is32Bit)
         {
             _currentGenericContext = currentGenericContext;
@@ -21,7 +27,7 @@ namespace AsmResolver.DotNet.Memory
             get;
         }
 
-        public int PointerSize => Is32Bit ? 4 : 8;
+        public uint PointerSize => Is32Bit ? 4u : 8u;
         
         public TypeMemoryLayout VisitArrayType(ArrayTypeSignature signature) => 
             new TypeMemoryLayout(PointerSize);
@@ -105,7 +111,29 @@ namespace AsmResolver.DotNet.Memory
 
         public TypeMemoryLayout VisitTypeDefinition(TypeDefinition type)
         {
+            uint alignment = GetTypeAlignment(type);
+            
             throw new NotImplementedException();
+        }
+
+        private uint GetTypeAlignment(TypeDefinition type)
+        {
+            // TODO: cache intermediate results of largest fields.
+            var detector = new LargestFieldDetector(_currentGenericContext, Is32Bit);
+
+            uint alignment = detector.VisitTypeDefinition(type);
+
+            // Check if the type has metadata regarding type layout.
+            if (type.ClassLayout is {} layout)
+            {
+                // If packing size == 0, fields are aligned by the size of a pointer.
+                uint packingSize = layout.PackingSize == 0
+                    ? PointerSize
+                    : layout.PackingSize;
+                alignment = Math.Min(packingSize, alignment);
+            }
+
+            return alignment;
         }
     }
 }

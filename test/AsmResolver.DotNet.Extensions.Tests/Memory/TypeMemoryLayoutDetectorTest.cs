@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         [InlineData(ElementType.I1, sizeof(sbyte))]
         [InlineData(ElementType.I4, sizeof(int))]
         [InlineData(ElementType.I8, sizeof(long))]
-        public void ValueTypedCorLibTypeShouldReturnElementSize(ElementType elementType, int expectedSize)
+        public void ValueTypedCorLibTypeShouldReturnElementSize(ElementType elementType, uint expectedSize)
         {
             var type = _module.CorLibTypeFactory.FromElementType(elementType);
             var layout = type.AcceptVisitor(_detector);
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         {
             var type = _module.CorLibTypeFactory.FromElementType(elementType);
             var layout = type.AcceptVisitor(_detector);
-            Assert.Equal(IntPtr.Size, layout.Size);
+            Assert.Equal((uint) IntPtr.Size, layout.Size);
         }
     }
 }

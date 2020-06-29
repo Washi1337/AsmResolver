@@ -11,13 +11,13 @@ namespace AsmResolver.DotNet.Memory
         /// Creates a new instance of the <see cref="TypeMemoryLayout"/> class.
         /// </summary>
         /// <param name="size">The size of the type.</param>
-        public TypeMemoryLayout(int size)
+        public TypeMemoryLayout(uint size)
         {
             Size = size;
             Fields = new Dictionary<FieldDefinition, FieldLayout>();
         }
         
-        public int Size
+        public uint Size
         {
             get;
         }
