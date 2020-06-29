@@ -24,6 +24,10 @@ Documentation
 -------------
 Check out the [wiki](https://asmresolver.readthedocs.org/) for guides and information on how to use the library!
 
+Contributing
+------------
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 Found a bug or have questions?
 ------------------------------
 Please use the [issue tracker](https://github.com/Washi1337/AsmResolver/issues). Try to be as descriptive as possible.
