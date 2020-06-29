@@ -282,7 +282,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     return false;
 
                 var last = Instructions[Instructions.Count - 1];
-                return last.Offset + last.Size > 64;
+                return last.Offset + last.Size >= 64;
             }
         }
 
