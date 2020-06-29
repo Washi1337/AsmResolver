@@ -6,11 +6,54 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Memory
 {
-    internal class LargestFieldDetector : ITypeSignatureVisitor<uint>
+    internal class TypeAlignmentDetector : ITypeSignatureVisitor<uint>
     {
+        public static uint GetTypeAlignment(ITypeDescriptor type, bool is32Bit)
+        {
+            return type switch
+            {
+                TypeSignature signature => GetTypeAlignment(signature, is32Bit),
+                TypeReference reference => GetTypeAlignment(reference, is32Bit),
+                TypeDefinition definition => GetTypeAlignment(definition, is32Bit),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        public static uint GetTypeAlignment(TypeSignature type, bool is32Bit)
+        {
+            var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
+            return type.AcceptVisitor(detector);
+        }
+
+        public static uint GetTypeAlignment(TypeReference type, bool is32Bit)
+        {
+            var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
+            return detector.VisitTypeReference(type);
+        }
+        
+        public static uint GetTypeAlignment(TypeDefinition type, GenericContext genericContext, bool is32Bit)
+        {
+            // TODO: cache intermediate results of largest fields.
+            var detector = new TypeAlignmentDetector(genericContext, is32Bit);
+
+            uint alignment = detector.VisitTypeDefinition(type);
+
+            // Check if the type has metadata regarding type layout.
+            if (type.ClassLayout is {} layout)
+            {
+                // If packing size == 0, fields are aligned by the size of a pointer.
+                uint packingSize = layout.PackingSize == 0
+                    ? detector.PointerSize
+                    : layout.PackingSize;
+                alignment = Math.Min(packingSize, alignment);
+            }
+
+            return alignment;
+        }
+        
         private GenericContext _currentGenericContext;
 
-        public LargestFieldDetector(GenericContext currentGenericContext, bool is32Bit)
+        public TypeAlignmentDetector(GenericContext currentGenericContext, bool is32Bit)
         {
             _currentGenericContext = currentGenericContext;
             Is32Bit = is32Bit;

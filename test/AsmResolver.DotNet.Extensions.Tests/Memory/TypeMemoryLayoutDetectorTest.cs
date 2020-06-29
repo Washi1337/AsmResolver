@@ -9,12 +9,10 @@ namespace AsmResolver.DotNet.Tests.Memory
     public class TypeMemoryLayoutDetectorTest : IClassFixture<CurrentModuleFixture>
     {
         private readonly ModuleDefinition _module;
-        private readonly TypeMemoryLayoutDetector _detector;
         
         public TypeMemoryLayoutDetectorTest(CurrentModuleFixture fixture)
         {
             _module = fixture.Module;
-            _detector = new TypeMemoryLayoutDetector(new GenericContext(), IntPtr.Size == 4);
         }
         
         [Theory]
@@ -24,7 +22,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         public void ValueTypedCorLibTypeShouldReturnElementSize(ElementType elementType, uint expectedSize)
         {
             var type = _module.CorLibTypeFactory.FromElementType(elementType);
-            var layout = type.AcceptVisitor(_detector);
+            var layout = type.GetImpliedMemoryLayout(false);
             Assert.Equal(expectedSize, layout.Size);
         }
         
@@ -36,8 +34,10 @@ namespace AsmResolver.DotNet.Tests.Memory
         public void ReferenceTypedCorLibTypeShouldReturnElementSize(ElementType elementType)
         {
             var type = _module.CorLibTypeFactory.FromElementType(elementType);
-            var layout = type.AcceptVisitor(_detector);
-            Assert.Equal((uint) IntPtr.Size, layout.Size);
+            var layout32 = type.GetImpliedMemoryLayout(true);
+            Assert.Equal(4u, layout32.Size);
+            var layout64 = type.GetImpliedMemoryLayout(false);
+            Assert.Equal(8u, layout64.Size);
         }
     }
 }
