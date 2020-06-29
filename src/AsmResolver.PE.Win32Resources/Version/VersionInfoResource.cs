@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.PE.Win32Resources.Version
 {
@@ -12,6 +13,32 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// The name of the root object of the native version resource file. 
         /// </summary>
         public const string VsVersionInfoKey = "VS_VERSION_INFO";
+
+        /// <summary>
+        /// Obtains the version info resource from the provided root win32 resources directory.
+        /// </summary>
+        /// <param name="rootDirectory">The root resources directory to extract the version info from.</param>
+        /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
+        public static VersionInfoResource FromDirectory(IResourceDirectory rootDirectory)
+        {
+            var versionDirectory = rootDirectory.Entries
+                .OfType<IResourceDirectory>()
+                .FirstOrDefault(e => e.Type == ResourceType.Version);
+
+            var categoryDirectory = versionDirectory
+                ?.Entries
+                .OfType<IResourceDirectory>()
+                .FirstOrDefault();
+            
+            var dataEntry = categoryDirectory
+                ?.Entries
+                .OfType<IResourceData>()
+                .FirstOrDefault();
+
+            return dataEntry != null 
+                ? FromReader(dataEntry.CreateReader())
+                : null;
+        }
         
         /// <summary>
         /// Reads a version resource from an input stream.
