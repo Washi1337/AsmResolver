@@ -121,28 +121,32 @@ namespace AsmResolver.DotNet.Memory
 
         private TypeMemoryLayout VisitValueTypeDefinition(TypeDefinition type)
         {
+            uint startOffset = _currentFieldOffset;
             uint alignment = TypeAlignmentDetector.GetTypeAlignment(type, Is32Bit);
             
              _currentFieldOffset = _currentFieldOffset.Align(alignment);
-
+             
             // Infer raw layout.
             var result = type.IsExplicitLayout
-                ? InferExplicitLayout(type, alignment)
+                ? InferExplicitLayout(type)
                 : InferSequentialLayout(type, alignment);
 
+            // Compute raw size of entire type.
+            result.Size = (_currentFieldOffset - startOffset).Align(alignment);
+            
             // Check if a size was specified in metadata..
             if (type.ClassLayout is {} layout)
                 result.Size = Math.Max(layout.ClassSize, result.Size);
 
             // Types have at least one byte in size.
             result.Size = Math.Max(1, result.Size);
+            _currentFieldOffset = startOffset + result.Size;
             
             return result;
         }
 
         private TypeMemoryLayout InferSequentialLayout(TypeDefinition type, uint alignment)
         {
-            uint startOffset = _currentFieldOffset;
             var result = new TypeMemoryLayout();
 
             // Iterate all fields.
@@ -153,14 +157,11 @@ namespace AsmResolver.DotNet.Memory
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 result.Fields[field] = new FieldLayout(field, fieldOffset, contentsLayout);
             }
-
-            // Compute raw size of entire type.
-            result.Size = (_currentFieldOffset - startOffset).Align(alignment);
             
             return result;
         }
 
-        private TypeMemoryLayout InferExplicitLayout(TypeDefinition type, uint alignment)
+        private TypeMemoryLayout InferExplicitLayout(TypeDefinition type)
         {
             uint startOffset = _currentFieldOffset;
             var result = new TypeMemoryLayout();
@@ -170,6 +171,7 @@ namespace AsmResolver.DotNet.Memory
             // Iterate all fields.
             foreach (var field in type.Fields)
             {
+                // All fields in an explicitly laid out structure need to have a field offset assigned.
                 if (!field.FieldOffset.HasValue)
                 {
                     throw new ArgumentException(string.Format(
@@ -178,7 +180,7 @@ namespace AsmResolver.DotNet.Memory
                         field.MetadataToken.ToString()));
                 }
 
-                _currentFieldOffset = (uint) field.FieldOffset.Value;
+                _currentFieldOffset = (uint) (startOffset + field.FieldOffset.Value);
                 
                 uint fieldOffset = _currentFieldOffset;
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
@@ -187,9 +189,7 @@ namespace AsmResolver.DotNet.Memory
                 largestOffset = Math.Max(largestOffset, _currentFieldOffset);
             }
 
-            // Compute raw size of entire type.
-            result.Size = (_currentFieldOffset - startOffset).Align(alignment);
-            
+            _currentFieldOffset = largestOffset;
             return result;
         }
     }

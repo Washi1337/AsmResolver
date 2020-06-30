@@ -110,5 +110,19 @@ namespace AsmResolver.DotNet.Tests.Memory
         {
             public int IntField;
         }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 16)]
+        public struct StructWithPrimitiveFieldSmallerThanPack
+        {
+            public int Field1;
+            public long Field2;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 16)]
+        public struct StructWithStructFieldSmallerThanPack
+        {
+            public SingleFieldSequentialStructDefaultPack Field1;
+            public long Field2;
+        }
     }
 }

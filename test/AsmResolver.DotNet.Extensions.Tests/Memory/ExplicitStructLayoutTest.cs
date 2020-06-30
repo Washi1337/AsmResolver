@@ -39,6 +39,10 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void NestedStructInNestedStructOverlapping() => 
             VerifySize<ExplicitTestStructs.NestedStructInNestedStructOverlapping>();
+        
+        [Fact]
+        public void TwoExplicitStructs() => 
+            VerifySize<ExplicitTestStructs.TwoExplicitStructs>();
 
     }
 }

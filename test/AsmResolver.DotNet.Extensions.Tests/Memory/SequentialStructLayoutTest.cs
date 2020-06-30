@@ -92,5 +92,13 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void ExplicitlySizedSmallerExplicitSizeThanActualSize() =>
             VerifySize<SequentialTestStructs.ExplicitlySizedSmallerExplicitSizeThanActualSize>();
+        
+        [Fact]
+        public void StructWithPrimitiveFieldSmallerThanPack() =>
+            VerifySize<SequentialTestStructs.StructWithPrimitiveFieldSmallerThanPack>();
+        
+        [Fact]
+        public void StructWithStructFieldSmallerThanPack() =>
+            VerifySize<SequentialTestStructs.StructWithStructFieldSmallerThanPack>();
     }
 }

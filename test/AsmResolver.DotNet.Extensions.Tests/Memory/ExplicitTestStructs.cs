@@ -72,5 +72,18 @@ namespace AsmResolver.DotNet.Tests.Memory
             [FieldOffset(0)]
             public byte Field2;
         }
+        
+        [StructLayout(LayoutKind.Explicit)]
+        public struct TwoExplicitStructs
+        {
+            [FieldOffset(0)]
+            public MultipleFieldsStructDefaultPackImplicitSize Field1;
+            
+            [FieldOffset(20)]
+            public MultipleFieldsStructDefaultPackImplicitSize Field2;
+
+            [FieldOffset(40)]
+            public byte Field3;
+        }
     }
 }
