@@ -628,10 +628,10 @@ namespace AsmResolver.DotNet
         public TypeReference ToTypeReference()
         {
             var scope = DeclaringType is null
-                ? (IResolutionScope) new AssemblyReference(Module.Assembly)
+                ? (IResolutionScope) Module
                 : DeclaringType.ToTypeReference();
             
-            return new TypeReference(scope, Namespace, Name);
+            return new TypeReference(Module, scope, Namespace, Name);
         }
 
         private IResolutionScope GetDeclaringScope()
