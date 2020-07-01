@@ -16,9 +16,9 @@ namespace AsmResolver.DotNet.Cloning
         /// <param name="clonedMembers">The cloned members.</param>
         public MemberCloneResult(IDictionary<IMemberDescriptor, IMemberDescriptor> clonedMembers)
         {
-            ClonedMembers = new List<IMemberDescriptor>(this.clonedMembers.Values);
-            OriginalMembers = new List<IMemberDescriptor>(this.clonedMembers.Keys);
             this.clonedMembers = clonedMembers;
+            ClonedMembers = new List<IMemberDescriptor>(clonedMembers.Values);
+            OriginalMembers = new List<IMemberDescriptor>(clonedMembers.Keys);
         }
 
         /// <summary>
