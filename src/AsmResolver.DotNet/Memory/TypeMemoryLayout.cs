@@ -92,6 +92,7 @@ namespace AsmResolver.DotNet.Memory
         {
             path = new List<FieldMemoryLayout>();
 
+            var lastExactOffsetMatch = default(FieldMemoryLayout);
             var currentLayout = this;
 
             bool stop = false;
@@ -101,16 +102,16 @@ namespace AsmResolver.DotNet.Memory
                 
                 foreach (var entry in currentLayout.GetOrderedFields())
                 {
-                    if (offset >= entry.Offset)
-                    {
-                        // We're past any potential candidate.
-                        if (offset >= entry.Offset + entry.ContentsLayout.Size)
-                        {
-                            currentLayout = null;
-                            break;
-                        }
+                    if (offset < entry.Offset)
+                        continue;
 
+                    if (offset < entry.Offset + entry.ContentsLayout.Size)
+                    {
                         // We found the field that contains the offset. Dive into this field.
+                            
+                        if (entry.Offset == offset)
+                            lastExactOffsetMatch = entry;
+                        
                         path.Add(entry);
                         currentLayout = entry.ContentsLayout;
                         offset -= entry.Offset;
@@ -121,7 +122,7 @@ namespace AsmResolver.DotNet.Memory
                 }
             }
 
-            return path[path.Count - 1].Offset == offset;
+            return path.Count > 0 && path[path.Count - 1] == lastExactOffsetMatch;
         } 
     }
 }
