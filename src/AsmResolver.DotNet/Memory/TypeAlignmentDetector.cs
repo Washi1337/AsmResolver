@@ -116,6 +116,8 @@ namespace AsmResolver.DotNet.Memory
             uint largestFieldSize = 1;
             for (int i = 0; i < type.Fields.Count; i++)
                 largestFieldSize = Math.Max(largestFieldSize, type.Fields[i].Signature.FieldType.AcceptVisitor(this));
+
+            uint alignment = largestFieldSize;
             
             // Check if the type has metadata regarding type layout.
             if (type.ClassLayout is {} layout)
@@ -126,11 +128,11 @@ namespace AsmResolver.DotNet.Memory
                     : layout.PackingSize;
 
                 if (layout.ClassSize == 0 || packingSize <= layout.ClassSize)
-                    return Math.Min(largestFieldSize, packingSize);
+                    alignment = Math.Min(alignment, packingSize);
             }
 
             _traversedTypes.Pop();
-            return largestFieldSize;
+            return alignment;
         }
 
     }
