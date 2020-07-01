@@ -140,7 +140,7 @@ namespace AsmResolver.DotNet.Memory
             {
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 offset = offset.Align(Math.Min(contentsLayout.Size, alignment));
-                result.Fields[field] = new FieldLayout(field, offset, contentsLayout);
+                result.Fields[field] = new FieldMemoryLayout(field, offset, contentsLayout);
                 offset += contentsLayout.Size;
             }
 
@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet.Memory
                 uint offset = (uint) field.FieldOffset.Value;
 
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
-                result.Fields[field] = new FieldLayout(field, offset, contentsLayout);
+                result.Fields[field] = new FieldMemoryLayout(field, offset, contentsLayout);
 
                 largestOffset = Math.Max(largestOffset, offset + contentsLayout.Size);
             }

@@ -5,15 +5,15 @@ namespace AsmResolver.DotNet.Memory
     /// <summary>
     /// Provides information about the layout of a single field in a type.
     /// </summary>
-    public class FieldLayout
+    public class FieldMemoryLayout
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="FieldLayout"/> class.
+        /// Creates a new instance of the <see cref="FieldMemoryLayout"/> class.
         /// </summary>
         /// <param name="field">The field that was laid out.</param>
         /// <param name="offset">The offset of the field.</param>
         /// <param name="contentsLayout">The layout of the contents of the field.</param>
-        public FieldLayout(FieldDefinition field, uint offset, TypeMemoryLayout contentsLayout)
+        public FieldMemoryLayout(FieldDefinition field, uint offset, TypeMemoryLayout contentsLayout)
         {
             Field = field ?? throw new ArgumentNullException(nameof(field));
             Offset = offset;
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Memory
         }
 
         /// <summary>
-        /// Gets the implied offset of the field.
+        /// Gets the implied offset of the field, relative to the start of the enclosing structure.
         /// </summary>
         public uint Offset
         {

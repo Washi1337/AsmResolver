@@ -20,15 +20,16 @@ namespace AsmResolver.DotNet.Memory
             Size = size;
         }
         
+        
         public uint Size
         {
             get;
             internal set;
         }
 
-        public IDictionary<FieldDefinition, FieldLayout> Fields
+        public IDictionary<FieldDefinition, FieldMemoryLayout> Fields
         {
             get;
-        } = new Dictionary<FieldDefinition, FieldLayout>();
+        } = new Dictionary<FieldDefinition, FieldMemoryLayout>();
     }
 }
