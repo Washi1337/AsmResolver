@@ -154,8 +154,9 @@ namespace AsmResolver.DotNet.Memory
             if (_traversedTypes.Contains(type))
                 throw new CyclicStructureException();
             _traversedTypes.Push(type);
-            
-            uint alignment = TypeAlignmentDetector.GetTypeAlignment(type, Is32Bit);
+
+            var alignmentDetector = new TypeAlignmentDetector(_currentGenericContext, Is32Bit);
+            uint alignment = alignmentDetector.VisitTypeDefinition(type);
             
             // Infer raw layout.
             var result = type.IsExplicitLayout

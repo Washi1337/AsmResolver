@@ -9,12 +9,6 @@ namespace AsmResolver.DotNet.Memory
 {
     internal class TypeAlignmentDetector : ITypeSignatureVisitor<uint>
     {
-        public static uint GetTypeAlignment(TypeDefinition type, bool is32Bit)
-        {
-            var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
-            return detector.VisitTypeDefinition(type);
-        }
-        
         private readonly Stack<TypeDefinition> _traversedTypes = new Stack<TypeDefinition>();
         private GenericContext _currentGenericContext;
 
