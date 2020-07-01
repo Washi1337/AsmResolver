@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet
@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a method or a field in an (external) .NET assembly.
     /// </summary>
-    public class MemberReference : ICustomAttributeType, IFieldDescriptor
+    public class MemberReference : MetadataMember, ICustomAttributeType, IFieldDescriptor
     {
         private readonly LazyVariable<IMemberRefParent> _parent;
         private readonly LazyVariable<string> _name;
@@ -23,9 +23,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The metadata token of the reference.</param>
         protected MemberReference(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
-            
             _parent = new LazyVariable<IMemberRefParent>(GetParent);
             _name = new LazyVariable<string>(GetName);
             _signature = new LazyVariable<CallingConventionSignature>(GetSignature);
@@ -44,13 +43,6 @@ namespace AsmResolver.DotNet
             Parent = parent;
             Name = name;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>

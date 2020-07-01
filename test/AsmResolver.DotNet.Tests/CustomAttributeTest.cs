@@ -147,11 +147,29 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature.NamedArguments);
 
             var argument = attribute.Signature.FixedArguments[0];
-            var expected = new TypeReference(
-                attribute.Constructor.Module.CorLibTypeFactory.CorLibScope,
-                "System", "String");
+            Assert.Equal(
+                attribute.Constructor.Module.CorLibTypeFactory.String, 
+                argument.Element.Value as TypeSignature, _comparer);
+        }
+        
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FixedComplexTypeArgument(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedComplexTypeArgument), rebuild);
+            Assert.Single(attribute.Signature.FixedArguments);
+            Assert.Empty(attribute.Signature.NamedArguments);
 
-            Assert.Equal(new TypeDefOrRefSignature(expected), argument.Element.Value as TypeSignature, _comparer);
+            var argument = attribute.Signature.FixedArguments[0];
+            var factory = attribute.Constructor.Module.CorLibTypeFactory;
+            
+            var listRef = new TypeReference(factory.CorLibScope, "System.Collections.Generic", "KeyValuePair`2");
+            var instance = new GenericInstanceTypeSignature(listRef, false,
+                new SzArrayTypeSignature(factory.String),
+                new SzArrayTypeSignature(factory.Int32));
+
+            Assert.Equal(instance, argument.Element.Value as TypeSignature, _comparer);
         }
         
         [Theory]

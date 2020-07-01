@@ -20,6 +20,11 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// Submits all rows to the underlying table stream.
         /// </summary>
         void FlushToTable();
+
+        /// <summary>
+        /// Clears the table buffer.
+        /// </summary>
+        void Clear();
     }
 
     /// <summary>

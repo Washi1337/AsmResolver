@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -11,6 +11,7 @@ namespace AsmResolver.DotNet
     /// Represents a reference to an external file that a .NET module depends on.
     /// </summary>
     public class FileReference : 
+        MetadataMember, 
         IImplementation, 
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
@@ -24,8 +25,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected FileReference(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _hashValue = new LazyVariable<byte[]>(GetHashValue);
         }
@@ -36,16 +37,10 @@ namespace AsmResolver.DotNet
         /// <param name="name">The name of the file.</param>
         /// <param name="attributes">The attributes associated to the reference.</param>
         public FileReference(string name, FileAttributes attributes)
+            : base(new MetadataToken(TableIndex.File, 0))
         {
             Name = name;
             Attributes = attributes;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>

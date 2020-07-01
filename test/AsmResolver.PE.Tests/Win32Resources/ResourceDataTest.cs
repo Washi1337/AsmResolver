@@ -19,8 +19,10 @@ namespace AsmResolver.PE.Tests.Win32Resources
             {
                 1, 2, 3, 4
             };
+            
             var data = new ResourceData(1, new DataSegment(rawData));
-            Assert.Equal(rawData, data.Contents.CreateReader().ReadToEnd());
+            var readableContents = (IReadableSegment) data.Contents;
+            Assert.Equal(rawData, readableContents.CreateReader().ReadToEnd());
         }
     }
 }

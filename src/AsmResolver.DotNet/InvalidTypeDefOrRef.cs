@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet
     /// Represents an invalid reference to a type. This class cannot be instantiated by itself nor overridden, and is
     /// only used to identify faulty or malicious structures in the .NET metadata. 
     /// </summary>
-    public sealed class InvalidTypeDefOrRef : ITypeDefOrRef
+    public sealed class InvalidTypeDefOrRef : MetadataMember, ITypeDefOrRef
     {
         private static readonly IDictionary<InvalidTypeSignatureError, InvalidTypeDefOrRef> Instances =
             new Dictionary<InvalidTypeSignatureError, InvalidTypeDefOrRef>();
@@ -33,8 +33,9 @@ namespace AsmResolver.DotNet
 
             return instance;
         }
-        
+
         private InvalidTypeDefOrRef(InvalidTypeSignatureError error)
+            : base(new MetadataToken(TableIndex.TypeRef, 0))
         {
             Error = error;
         }
@@ -46,8 +47,6 @@ namespace AsmResolver.DotNet
         {
             get;
         }
-
-        MetadataToken IMetadataMember.MetadataToken => new MetadataToken(TableIndex.TypeSpec, 0);
 
         string INameProvider.Name => $"<<<{Error}>>>".ToUpperInvariant();
         

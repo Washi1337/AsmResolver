@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using AsmResolver.DotNet.Signatures;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
+using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.DotNet.Serialized
 {
@@ -46,33 +47,48 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _fieldRvas;
         private OneToOneRelation<MetadataToken, uint> _fieldMarshals;
         private OneToOneRelation<MetadataToken, uint> _fieldLayouts;
+        private IPEImage _peImage;
 
         /// <summary>
-        /// Creates a module definition from a module metadata row.
+        /// Interprets a PE image as a .NET module.
         /// </summary>
-        /// <param name="dotNetDirectory">The object providing access to the underlying .NET data directory.</param>
-        /// <param name="token">The token to initialize the module for.</param>
-        /// <param name="row">The metadata table row to base the module definition on.</param>
+        /// <param name="peImage">The image to interpret as a .NET module.</param>
         /// <param name="readParameters">The parameters to use while reading the module.</param>
-        public SerializedModuleDefinition(IDotNetDirectory dotNetDirectory, MetadataToken token, ModuleDefinitionRow row,
-            ModuleReadParameters readParameters)
-            : base(token)
+        public SerializedModuleDefinition(IPEImage peImage, ModuleReadParameters readParameters)
+            : base(new MetadataToken(TableIndex.Module, 1))
         {
+            _peImage = peImage ?? throw new ArgumentNullException(nameof(peImage));
+            
+            var metadata = peImage.DotNetDirectory?.Metadata;
+            if (metadata is null)
+                throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
+
+            var tablesStream = metadata.GetStream<TablesStream>();
+            if (tablesStream is null)
+                throw new BadImageFormatException(".NET metadata directory does not define a tables stream.");
+
+            var moduleTable = tablesStream.GetTable<ModuleDefinitionRow>(TableIndex.Module);
+            if (!moduleTable.TryGetByRid(1, out _row))
+                throw new BadImageFormatException("Module definition table does not contain any rows.");
+            
             // Store parameters in fields.
-            DotNetDirectory = dotNetDirectory;
-            _row = row;
             ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
             
+            // Copy over PE header fields.
+            MachineType = peImage.MachineType;
+            FileCharacteristics = peImage.Characteristics;
+            PEKind = peImage.PEKind;
+            SubSystem = peImage.SubSystem;
+            DllCharacteristics = peImage.DllCharacteristics;
+
             // Copy over "simple" columns.
-            Generation = row.Generation;
-            MetadataToken = token;
-            Attributes = DotNetDirectory.Flags;
+            Generation = _row.Generation;
+            Attributes = peImage.DotNetDirectory.Flags;
             
             // Initialize member factory.
-            var metadata = dotNetDirectory.Metadata;
             _memberFactory = new CachedSerializedMemberFactory(metadata, this);
             
-            // Find assembly definitino and corlib assembly.
+            // Find assembly definition and corlib assembly.
             Assembly = FindParentAssembly();
             var corLib = FindMostRecentCorLib();
             if (corLib is {})
@@ -89,7 +105,6 @@ namespace AsmResolver.DotNet.Serialized
             MetadataResolver = new DefaultMetadataResolver(assemblyResolver);
 
             // Prepare lazy RID lists.
-            var tablesStream = metadata.GetStream<TablesStream>();
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetFieldRange);
             _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef, 
@@ -102,13 +117,8 @@ namespace AsmResolver.DotNet.Serialized
                 (_, map) => map.Parent, tablesStream.GetEventRange);
         }
 
-        /// <summary>
-        /// Gets the underlying object providing access to the data directory containing .NET metadata.  
-        /// </summary>
-        public IDotNetDirectory DotNetDirectory
-        {
-            get;
-        }
+        /// <inheritdoc />
+        public override IDotNetDirectory DotNetDirectory => _peImage.DotNetDirectory;
 
         /// <summary>
         /// Gets the reading parameters that are used for reading the contents of the module.
@@ -146,6 +156,40 @@ namespace AsmResolver.DotNet.Serialized
             DotNetDirectory.Metadata.GetStream<TablesStream>().GetIndexEncoder(codedIndex);
 
         /// <inheritdoc />
+        public override IEnumerable<TypeReference> GetImportedTypeReferences()
+        {
+            var table = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable(TableIndex.TypeRef);
+
+            for (uint rid = 1; rid <= table.Count; rid++)
+            {
+                if (TryLookupMember(new MetadataToken(TableIndex.TypeRef, rid), out var member)
+                    && member is TypeReference reference)
+                {
+                    yield return reference;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<MemberReference> GetImportedMemberReferences()
+        {
+            var table = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable(TableIndex.MemberRef);
+
+            for (uint rid = 1; rid <= table.Count; rid++)
+            {
+                if (TryLookupMember(new MetadataToken(TableIndex.MemberRef, rid), out var member)
+                    && member is MemberReference reference)
+                {
+                    yield return reference;
+                }
+            }
+        }
+
+        /// <inheritdoc />
         protected override string GetName() 
             => DotNetDirectory.Metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
 
@@ -176,7 +220,7 @@ namespace AsmResolver.DotNet.Serialized
             for (int i = 0; i < typeDefTable.Count; i++)
             {
                 uint rid = (uint) i + 1;
-                if (_typeDefTree.GetMemberOwner(rid) == 0)
+                if (_typeDefTree.GetKey(rid) == 0)
                 {
                     var token = new MetadataToken(TableIndex.TypeDef, rid);
                     types.Add(_memberFactory.LookupTypeDefinition(token));
@@ -207,13 +251,13 @@ namespace AsmResolver.DotNet.Serialized
         internal IEnumerable<uint> GetNestedTypeRids(uint enclosingTypeRid)
         {
             EnsureTypeDefinitionTreeInitialized();
-            return _typeDefTree.GetMemberList(enclosingTypeRid);
+            return _typeDefTree.GetValues(enclosingTypeRid);
         }
 
         internal uint GetParentTypeRid(uint nestedTypeRid)
         {
             EnsureTypeDefinitionTreeInitialized();
-            return _typeDefTree.GetMemberOwner(nestedTypeRid);
+            return _typeDefTree.GetKey(nestedTypeRid);
         }
 
         internal MetadataRange GetFieldRange(uint typeRid) => _fieldLists.GetMemberRange(typeRid);
@@ -258,13 +302,13 @@ namespace AsmResolver.DotNet.Serialized
         internal IEnumerable<uint> GetMethodSemantics(MetadataToken owner)
         {
             EnsureMethodSemanticsInitialized();
-            return _semantics.GetMemberList(owner);
+            return _semantics.GetValues(owner);
         }
 
         internal MetadataToken GetMethodSemanticsOwner(uint semanticsRid)
         {
             EnsureMethodSemanticsInitialized();
-            return _semantics.GetMemberOwner(semanticsRid);
+            return _semantics.GetKey(semanticsRid);
         }
 
         internal MetadataToken GetMethodParentSemantics(uint methodRid)
@@ -346,7 +390,7 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetCustomAttributeOwner(uint attributeRid)
         {
             EnsureCustomAttributesInitialized();
-            return _customAttributes.GetMemberOwner(attributeRid);
+            return _customAttributes.GetKey(attributeRid);
         }
 
         internal IList<CustomAttribute> GetCustomAttributeCollection(IHasCustomAttribute owner)
@@ -354,7 +398,7 @@ namespace AsmResolver.DotNet.Serialized
             EnsureCustomAttributesInitialized();
             var result = new OwnedCollection<IHasCustomAttribute, CustomAttribute>(owner);
             
-            foreach (uint rid in _customAttributes.GetMemberList(owner.MetadataToken))
+            foreach (uint rid in _customAttributes.GetValues(owner.MetadataToken))
             {
                 var attribute = (CustomAttribute) LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
                 result.Add(attribute);
@@ -389,7 +433,7 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetSecurityDeclarationOwner(uint attributeRid)
         {
             EnsureCustomAttributesInitialized();
-            return _securityDeclarations.GetMemberOwner(attributeRid);
+            return _securityDeclarations.GetKey(attributeRid);
         }
 
         internal IList<SecurityDeclaration> GetSecurityDeclarationCollection(IHasSecurityDeclaration owner)
@@ -397,7 +441,7 @@ namespace AsmResolver.DotNet.Serialized
             EnsureSecurityDeclarationsInitialized();
             var result = new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(owner);
 
-            foreach (uint rid in _securityDeclarations.GetMemberList(owner.MetadataToken))
+            foreach (uint rid in _securityDeclarations.GetValues(owner.MetadataToken))
             {
                 var attribute = (SecurityDeclaration) LookupMember(new MetadataToken(TableIndex.DeclSecurity, rid));
                 result.Add(attribute);
@@ -432,13 +476,13 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetGenericParameterOwner(uint parameterRid)
         {
             EnsureGenericParametersInitialized();
-            return _genericParameters.GetMemberOwner(parameterRid);
+            return _genericParameters.GetKey(parameterRid);
         }
         
         internal ICollection<uint> GetGenericParameters(MetadataToken ownerToken)
         {
             EnsureGenericParametersInitialized();
-            return _genericParameters.GetMemberList(ownerToken);
+            return _genericParameters.GetValues(ownerToken);
         }
 
         private void EnsureGenericParameterConstrainsInitialized()
@@ -466,13 +510,13 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetGenericParameterConstraintOwner(uint constraintRid)
         {
             EnsureGenericParameterConstrainsInitialized();
-            return _genericParameterConstraints.GetMemberOwner(constraintRid);
+            return _genericParameterConstraints.GetKey(constraintRid);
         }
         
         internal ICollection<uint> GetGenericParameterConstraints(MetadataToken ownerToken)
         {
             EnsureGenericParameterConstrainsInitialized();
-            return _genericParameterConstraints.GetMemberList(ownerToken);
+            return _genericParameterConstraints.GetValues(ownerToken);
         }
 
         private void EnsureInterfacesInitialized()
@@ -500,13 +544,13 @@ namespace AsmResolver.DotNet.Serialized
         internal MetadataToken GetInterfaceImplementationOwner(uint implementationRid)
         {
             EnsureInterfacesInitialized();
-            return _interfaces.GetMemberOwner(implementationRid);
+            return _interfaces.GetKey(implementationRid);
         }
 
         internal ICollection<uint> GetInterfaceImplementationRids(MetadataToken ownerToken)
         {
             EnsureInterfacesInitialized();
-            return _interfaces.GetMemberList(ownerToken);
+            return _interfaces.GetValues(ownerToken);
         }
 
         private void EnsureMethodImplementationsInitialized()
@@ -534,7 +578,7 @@ namespace AsmResolver.DotNet.Serialized
         internal ICollection<uint> GetMethodImplementationRids(MetadataToken ownerToken)
         {
             EnsureMethodImplementationsInitialized();
-            return _methodImplementations.GetMemberList(ownerToken);
+            return _methodImplementations.GetValues(ownerToken);
         }
 
         private void EnsureClassLayoutsInitialized()
@@ -801,6 +845,9 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
+        protected override string GetRuntimeVersion() => DotNetDirectory.Metadata.VersionString;
+
+        /// <inheritdoc />
         protected override IManagedEntrypoint GetManagedEntrypoint()
         {
             if ((DotNetDirectory.Flags & DotNetDirectoryFlags.ILLibrary) == 0)
@@ -817,6 +864,9 @@ namespace AsmResolver.DotNet.Serialized
 
             return null;
         }
+
+        /// <inheritdoc />
+        protected override IResourceDirectory GetNativeResources() => _peImage.Resources;
 
         private AssemblyDefinition FindParentAssembly()
         {

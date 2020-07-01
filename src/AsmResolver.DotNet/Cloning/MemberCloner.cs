@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Marshal;
+using AsmResolver.DotNet.Signatures.Security;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -233,8 +235,14 @@ namespace AsmResolver.DotNet.Cloning
                 clonedDeclaringType.NestedTypes.Add(clonedType);
             }
 
+            // Clone class layout.
+            if (type.ClassLayout is {})
+                clonedType.ClassLayout = new ClassLayout(type.ClassLayout.PackingSize, type.ClassLayout.ClassSize);
+
+            // Clone remaining metadata.
             CloneCustomAttributes(context, type, clonedType);
             CloneGenericParameters(context, type, clonedType);
+            CloneSecurityDeclarations(context, type, clonedType);
         }
 
         private InterfaceImplementation CloneInterfaceImplementation(MemberCloneContext context, InterfaceImplementation implementation)
@@ -333,5 +341,80 @@ namespace AsmResolver.DotNet.Cloning
             CloneCustomAttributes(context, constraint, clonedConstraint);
             return clonedConstraint;
         }
+
+        private MarshalDescriptor CloneMarshalDescriptor(MemberCloneContext context, MarshalDescriptor marshalDescriptor)
+        {
+            return marshalDescriptor switch
+            {
+                null => null,
+                
+                ComInterfaceMarshalDescriptor com => new ComInterfaceMarshalDescriptor(com.NativeType),
+
+                CustomMarshalDescriptor custom => new CustomMarshalDescriptor(
+                    custom.Guid, custom.NativeTypeName,
+                    context.Importer.ImportTypeSignature(custom.MarshalType),
+                    custom.Cookie),
+
+                FixedArrayMarshalDescriptor fixedArray => new FixedArrayMarshalDescriptor
+                {
+                    Size = fixedArray.Size,
+                    ArrayElementType = fixedArray.ArrayElementType
+                },
+
+                FixedSysStringMarshalDescriptor fixedSysString => new FixedSysStringMarshalDescriptor(
+                    fixedSysString.Size),
+
+                LPArrayMarshalDescriptor lpArray => new LPArrayMarshalDescriptor(lpArray.ArrayElementType),
+
+                SafeArrayMarshalDescriptor safeArray => new SafeArrayMarshalDescriptor(
+                    safeArray.VariantType, safeArray.VariantTypeFlags,
+                    context.Importer.ImportTypeSignature(safeArray.UserDefinedSubType)),
+
+                SimpleMarshalDescriptor simple => new SimpleMarshalDescriptor(simple.NativeType),
+
+                _ => throw new ArgumentOutOfRangeException(nameof(marshalDescriptor))
+            };
+        }
+
+        private void CloneSecurityDeclarations(
+            MemberCloneContext context,
+            IHasSecurityDeclaration sourceProvider,
+            IHasSecurityDeclaration clonedProvider)
+        {
+            foreach (var declaration in sourceProvider.SecurityDeclarations)
+                clonedProvider.SecurityDeclarations.Add(CloneSecurityDeclaration(context, declaration));
+        }
+
+        private SecurityDeclaration CloneSecurityDeclaration(MemberCloneContext context, SecurityDeclaration declaration)
+        {
+            return new SecurityDeclaration(declaration.Action, ClonePermissionSet(context, declaration.PermissionSet));
+        }
+
+        private PermissionSetSignature ClonePermissionSet(MemberCloneContext context, PermissionSetSignature permissionSet)
+        {
+            var result = new PermissionSetSignature();
+            foreach (var attribute in permissionSet.Attributes)
+                result.Attributes.Add(CloneSecurityAttribute(context, attribute));
+            return result;
+        }
+
+        private SecurityAttribute CloneSecurityAttribute(MemberCloneContext context, SecurityAttribute attribute)
+        {
+            var result = new SecurityAttribute(context.Importer.ImportTypeSignature(attribute.AttributeType));
+
+            foreach (var argument in attribute.NamedArguments)
+            {
+                var newArgument = new CustomAttributeNamedArgument(
+                    argument.MemberType,
+                    argument.MemberName,
+                    context.Importer.ImportTypeSignature(argument.ArgumentType),
+                    CloneCustomAttributeArgument(context, argument.Argument));
+                
+                result.NamedArguments.Add(newArgument);
+            }
+
+            return result;
+        }
+        
     }
 }

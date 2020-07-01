@@ -16,7 +16,7 @@ Below is an example of a program that lists all members imported by a given ``IP
     {
         Console.WriteLine("Module: " + module.Name);
 
-        foreach (var member in module.Members)
+        foreach (var member in module.Symbols)
         {
             if (member.IsImportByName)
                 Console.WriteLine("\t- " + member.Name);

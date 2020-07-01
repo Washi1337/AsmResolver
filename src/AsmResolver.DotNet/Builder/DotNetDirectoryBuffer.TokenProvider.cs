@@ -1,4 +1,5 @@
-﻿using AsmResolver.DotNet.Code.Cil;
+﻿using AsmResolver.Collections;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -8,11 +9,14 @@ namespace AsmResolver.DotNet.Builder
     public partial class DotNetDirectoryBuffer : IMetadataTokenProvider
     {
         private readonly OneToOneRelation<TypeDefinition, MetadataToken> _typeDefTokens = new OneToOneRelation<TypeDefinition, MetadataToken>();
-        private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
         private readonly OneToOneRelation<FieldDefinition, MetadataToken> _fieldTokens = new OneToOneRelation<FieldDefinition, MetadataToken>();
-
+        private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
+        private readonly OneToOneRelation<ParameterDefinition, MetadataToken> _parameterTokens = new OneToOneRelation<ParameterDefinition, MetadataToken>();
+        private readonly OneToOneRelation<PropertyDefinition, MetadataToken> _propertyTokens = new OneToOneRelation<PropertyDefinition, MetadataToken>();
+        private readonly OneToOneRelation<EventDefinition, MetadataToken> _eventTokens = new OneToOneRelation<EventDefinition, MetadataToken>();
+        
         /// <inheritdoc />
-        uint IMetadataTokenProvider.GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
+        public uint GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
 
         /// <inheritdoc />
         public MetadataToken GetTypeReferenceToken(TypeReference type)
@@ -52,6 +56,40 @@ namespace AsmResolver.DotNet.Builder
         {
             AssertIsImported(method);
             return _methodTokens.GetValue(method);
+        }
+
+        /// <summary>
+        /// Gets the newly assigned metadata token of a parameter definition stored in a tables stream or tables
+        /// stream buffer. 
+        /// </summary>
+        /// <param name="parameter">The reference to the parameter to add.</param>
+        /// <returns>The metadata token of the added parameter definition.</returns>
+        public MetadataToken GetParameterDefinitionToken(ParameterDefinition parameter)
+        {
+            AssertIsImported(parameter);
+            return _parameterTokens.GetValue(parameter);
+        }
+
+        /// <summary>
+        /// Gets the newly assigned metadata token of a property definition stored in a tables stream or tables stream buffer. 
+        /// </summary>
+        /// <param name="property">The reference to the property to add.</param>
+        /// <returns>The metadata token of the added property definition.</returns>
+        public MetadataToken GetPropertyDefinitionToken(PropertyDefinition property)
+        {
+            AssertIsImported(property);
+            return _propertyTokens.GetValue(property);
+        }
+
+        /// <summary>
+        /// Gets the newly assigned metadata token of an event definition stored in a tables stream or tables stream buffer. 
+        /// </summary>
+        /// <param name="event">The reference to the event to add.</param>
+        /// <returns>The metadata token of the added event definition.</returns>
+        public MetadataToken GetEventDefinitionToken(EventDefinition @event)
+        {
+            AssertIsImported(@event);
+            return _eventTokens.GetValue(@event);
         }
 
         /// <inheritdoc />
@@ -101,6 +139,23 @@ namespace AsmResolver.DotNet.Builder
 
             var token = table.Add(row, assembly.MetadataToken.Rid);
             AddCustomAttributes(token, assembly);
+            return token;
+        }
+        
+        /// <summary>
+        /// Adds a single module reference to the buffer.
+        /// </summary>
+        /// <param name="reference">The reference to add.</param>
+        /// <returns>The new metadata token assigned to the module reference.</returns>
+        public MetadataToken GetModuleReferenceToken(ModuleReference reference)
+        {
+            AssertIsImported(reference);
+            
+            var table = Metadata.TablesStream.GetTable<ModuleReferenceRow>(TableIndex.ModuleRef);
+
+            var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
+            var token = table.Add(row, reference.MetadataToken.Rid);
+            AddCustomAttributes(token, reference);
             return token;
         }
 

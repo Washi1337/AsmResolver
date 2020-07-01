@@ -42,6 +42,16 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         }
 
         /// <summary>
+        /// Imports the contents of a user strings stream and indexes all present strings.
+        /// </summary>
+        /// <param name="stream">The stream to import.</param>
+        public void ImportStream(UserStringsStream stream)
+        {
+            MetadataStreamBufferHelper.CloneBlobHeap(stream, _writer, (index, newIndex) =>
+                _strings[stream.GetStringByIndex(index)] = newIndex);
+        }
+
+        /// <summary>
         /// Appends raw data to the stream.
         /// </summary>
         /// <param name="data">The data to append.</param>
@@ -56,7 +66,28 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
             _writer.WriteBytes(data, 0, data.Length);
             return offset;
         }
-        
+
+        private uint AppendString(string value)
+        {
+            uint offset = (uint) _rawStream.Length;
+
+            if (string.IsNullOrEmpty(value))
+            {
+                _writer.WriteByte(0);
+                return offset;
+            }
+            
+            int byteCount = Encoding.Unicode.GetByteCount(value) + 1;
+            _writer.WriteCompressedUInt32((uint) byteCount);
+
+            var rawData = new byte[byteCount];
+            Encoding.Unicode.GetBytes(value, 0, value.Length, rawData, 0);
+            rawData[byteCount - 1] = GetTerminatorByte(value);
+
+            AppendRawData(rawData);
+            return offset;
+        }
+
         /// <summary>
         /// Gets the index to the provided user-string. If the string is not present in the buffer, it will be appended to
         /// the end of the stream.
@@ -70,16 +101,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
 
             if (!_strings.TryGetValue(value, out uint offset))
             {
-                offset = (uint) _rawStream.Length;
-
-                int byteCount = Encoding.Unicode.GetByteCount(value) + 1;
-                _writer.WriteCompressedUInt32((uint) byteCount);
-                
-                var rawData = new byte[byteCount];
-                Encoding.Unicode.GetBytes(value, 0, value.Length, rawData, 0);
-                rawData[byteCount - 1] = GetTerminatorByte(value);
-                
-                AppendRawData(rawData);
+                offset = AppendString(value);
                 _strings.Add(value, offset);
             }
             

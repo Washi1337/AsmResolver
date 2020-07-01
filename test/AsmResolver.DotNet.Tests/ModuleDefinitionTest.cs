@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.Win32Resources;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -210,6 +212,41 @@ namespace AsmResolver.DotNet.Tests
             var cctor = module.GetOrCreateModuleConstructor();
             var cctor2 = module.GetOrCreateModuleConstructor();
             Assert.Same(cctor, cctor2);
+        }
+
+        [Fact]
+        public void PersistentResources()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            
+            // Add new directory.
+            const string directoryName = "Test";
+            var entryData = new byte[] {0, 1, 2, 3, 4};
+            var directory = new ResourceDirectory(directoryName)
+            {
+                Entries =
+                {
+                    new ResourceDirectory(1)
+                    {
+                        Entries = {new ResourceData(1234, new DataSegment(entryData))}
+                    }
+                }
+            };
+            module.NativeResourceDirectory.Entries.Add(directory);
+
+            // Write and rebuild.
+            using var stream = new MemoryStream();
+            module.Write(stream);
+            var newModule = ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
+
+            // Assert contents.
+            var newDirectory = (IResourceDirectory) newModule.NativeResourceDirectory.Entries
+                .First(entry => entry.Name == directoryName);
+            newDirectory = (IResourceDirectory) newDirectory.Entries[0];
+            
+            var newData = (IResourceData) newDirectory.Entries[0];
+            var newContents = (IReadableSegment) newData.Contents;
+            Assert.Equal(entryData, newContents.ToArray());
         }
     }
 }

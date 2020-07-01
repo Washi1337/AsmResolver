@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet
     /// Represents a single method in a type definition of a .NET module.
     /// </summary>
     public class MethodDefinition :
+        MetadataMember,
         IMemberDefinition,
         IOwnedCollectionElement<TypeDefinition>,
         IMemberRefParent, 
@@ -41,8 +42,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the method</param>
         protected MethodDefinition(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name  =new LazyVariable<string>(GetName);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
             _signature = new LazyVariable<MethodSignature>(GetSignature);
@@ -68,13 +69,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <inheritdoc />
@@ -471,7 +465,7 @@ namespace AsmResolver.DotNet
         }
         
         /// <inheritdoc />
-        public ModuleDefinition Module => DeclaringType?.Module;
+        public virtual ModuleDefinition Module => DeclaringType?.Module;
 
         /// <summary>
         /// Gets the type that defines the method.

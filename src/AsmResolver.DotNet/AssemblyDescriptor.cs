@@ -5,8 +5,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
-using AsmResolver.Lazy;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides a base implementation for describing a self-describing .NET assembly hosted by a common language runtime (CLR).
     /// </summary>
-    public abstract class AssemblyDescriptor : IHasCustomAttribute, IFullNameProvider
+    public abstract class AssemblyDescriptor : MetadataMember, IHasCustomAttribute, IFullNameProvider
     {
         private const int PublicKeyTokenLength = 8;
         
@@ -28,17 +28,10 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the assembly descriptor.</param>
         protected AssemblyDescriptor(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _culture = new LazyVariable<string>(GetCulture);
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>
@@ -182,6 +175,7 @@ namespace AsmResolver.DotNet
             get => _culture.Value;
             set => _culture.Value = value;
         }
+
 
         /// <summary>
         /// When the application is signed with a strong name, obtains the public key token of the assembly 

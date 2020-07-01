@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             {
                 for (int i = 0; i < EncTables.Length; i++)
                 {
-                    if (_tableBuffers[i].Count > 0)
+                    if (_tableBuffers[(int) EncTables[i]].Count > 0)
                         return true;
                 }
 
@@ -125,6 +125,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         {
             foreach (var tableBuffer in _tableBuffers)
                 tableBuffer.FlushToTable();
+            _tablesStream.Name = Name;
             return _tablesStream;
         }
 

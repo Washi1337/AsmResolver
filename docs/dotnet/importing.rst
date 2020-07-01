@@ -1,5 +1,5 @@
-References Importing
-====================
+Reference Importing
+===================
 
 .NET modules use entries in the TypeRef or MemberRef tables to reference types or members from external assemblies. Importing references into the current module therefore form a key role when creating new- or modifying existing .NET modules. When a member is not imported into the current module, a ``MemberNotImportedException`` will be thrown when you are trying to create a PE image or write the module to the disk.
 

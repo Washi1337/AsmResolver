@@ -30,6 +30,7 @@ Table of Contents:
    peimage/index
    peimage/basics
    peimage/imports
+   peimage/exports
    peimage/win32resources
    peimage/dotnet
 
@@ -46,3 +47,4 @@ Table of Contents:
    dotnet/importing
    dotnet/managed-method-bodies
    dotnet/cloning
+   dotnet/advanced-pe-image-building.rst

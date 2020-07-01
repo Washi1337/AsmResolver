@@ -1,5 +1,6 @@
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.File;
+using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
 {
