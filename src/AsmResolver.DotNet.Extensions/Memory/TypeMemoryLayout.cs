@@ -20,13 +20,18 @@ namespace AsmResolver.DotNet.Memory
             Size = size;
         }
         
-        
+        /// <summary>
+        /// Gets the total number of bytes this structure requires.
+        /// </summary>
         public uint Size
         {
             get;
             internal set;
         }
 
+        /// <summary>
+        /// Gets a dictionary of field definitions defined in the type for which the memory layout was determined.
+        /// </summary>
         public IDictionary<FieldDefinition, FieldMemoryLayout> Fields
         {
             get;

@@ -6,34 +6,57 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Memory
 {
+    /// <summary>
+    /// Provides an implementation of a type visitor that walks a type signature or definition and determines its
+    /// memory layout.
+    /// </summary>
     public class TypeMemoryLayoutDetector : ITypeSignatureVisitor<TypeMemoryLayout>
     {
         private GenericContext _currentGenericContext;
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="TypeMemoryLayoutDetector"/>.
+        /// </summary>
+        /// <param name="is32Bit">Determines whether memory addresses are 32 bit or 64 bit wide.</param>
         public TypeMemoryLayoutDetector(bool is32Bit)
             : this(new GenericContext(), is32Bit)
         {
         }
-        
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="TypeMemoryLayoutDetector"/>.
+        /// </summary>
+        /// <param name="currentGenericContext">The current generic context to use.</param>
+        /// <param name="is32Bit">Determines whether memory addresses are 32 bit or 64 bit wide.</param>
         public TypeMemoryLayoutDetector(GenericContext currentGenericContext, bool is32Bit)
         {
             _currentGenericContext = currentGenericContext;
             Is32Bit = is32Bit;
         }
         
+        /// <summary>
+        /// Gets a value indicating whether memory addresses are 32 bit or 64 bit wide.
+        /// </summary>
         public bool Is32Bit
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the number of bytes a single pointer field requires.
+        /// </summary>
         public uint PointerSize => Is32Bit ? 4u : 8u;
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitArrayType(ArrayTypeSignature signature)=> new TypeMemoryLayout(PointerSize);
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitBoxedType(BoxedTypeSignature signature)=> new TypeMemoryLayout(PointerSize);
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitByReferenceType(ByReferenceTypeSignature signature)=> new TypeMemoryLayout(PointerSize);
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitCorLibType(CorLibTypeSignature signature)
         {
             uint elementSize = signature.ElementType switch
@@ -60,9 +83,11 @@ namespace AsmResolver.DotNet.Memory
             return new TypeMemoryLayout(elementSize);
         }
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitCustomModifierType(CustomModifierTypeSignature signature) => 
             signature.BaseType.AcceptVisitor(this);
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitGenericInstanceType(GenericInstanceTypeSignature signature)
         {
             // Enter new generic context.
@@ -76,21 +101,32 @@ namespace AsmResolver.DotNet.Memory
             return result;
         }
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitGenericParameter(GenericParameterSignature signature) => 
             _currentGenericContext.GetTypeArgument(signature).AcceptVisitor(this);
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature) => new TypeMemoryLayout(PointerSize);
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature) => new TypeMemoryLayout(PointerSize);
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitSentinelType(SentinelTypeSignature signature) =>
             throw new ArgumentException("Sentinel types do not have a size.");
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature) => new TypeMemoryLayout(PointerSize);
 
+        /// <inheritdoc />
         public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature) => 
             VisitTypeDefOrRef(signature.Type);
 
+        /// <summary>
+        /// Visits an instance of a <see cref="ITypeDefOrRef"/> class.
+        /// </summary>
+        /// <param name="type">The type to visit.</param>
+        /// <returns>The implied memory layout.</returns>
         public TypeMemoryLayout VisitTypeDefOrRef(ITypeDefOrRef type)
         {
             return type.MetadataToken.Table switch
@@ -104,7 +140,7 @@ namespace AsmResolver.DotNet.Memory
         private TypeMemoryLayout VisitTypeReference(TypeReference type) => 
             VisitTypeDefinition(type.Resolve());
 
-        public TypeMemoryLayout VisitTypeDefinition(TypeDefinition type)
+        private TypeMemoryLayout VisitTypeDefinition(TypeDefinition type)
         {
             return type.IsValueType 
                 ? VisitValueTypeDefinition(type)

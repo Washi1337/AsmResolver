@@ -8,17 +8,6 @@ namespace AsmResolver.DotNet.Memory
 {
     internal class TypeAlignmentDetector : ITypeSignatureVisitor<uint>
     {
-        public static uint GetTypeAlignment(ITypeDescriptor type, bool is32Bit)
-        {
-            return type switch
-            {
-                TypeSignature signature => GetTypeAlignment(signature, is32Bit),
-                TypeReference reference => GetTypeAlignment(reference, is32Bit),
-                TypeDefinition definition => GetTypeAlignment(definition, is32Bit),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        }
-
         public static uint GetTypeAlignment(TypeSignature type, bool is32Bit)
         {
             var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
