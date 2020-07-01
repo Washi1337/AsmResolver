@@ -10,20 +10,16 @@ namespace AsmResolver.DotNet.Memory
     internal class TypeAlignmentDetector : ITypeSignatureVisitor<uint>
     {
         private readonly Stack<TypeDefinition> _traversedTypes = new Stack<TypeDefinition>();
+        private readonly bool _is32Bit;
         private GenericContext _currentGenericContext;
 
         public TypeAlignmentDetector(GenericContext currentGenericContext, bool is32Bit)
         {
             _currentGenericContext = currentGenericContext;
-            Is32Bit = is32Bit;
-        }
-        
-        public bool Is32Bit
-        {
-            get;
+            _is32Bit = is32Bit;
         }
 
-        public uint PointerSize => Is32Bit ? 4u : 8u;
+        private uint PointerSize => _is32Bit ? 4u : 8u;
 
         public uint VisitArrayType(ArrayTypeSignature signature) => PointerSize;
 
@@ -103,9 +99,19 @@ namespace AsmResolver.DotNet.Memory
             if (!type.IsValueType)
                 return PointerSize;
             
+            // Check if we are dealing with an illegal cyclic dependency.
             if (_traversedTypes.Contains(type))
                 throw new CyclicStructureException();
+            
+            // Enter type.
             _traversedTypes.Push(type);
+            
+            // Reference:
+            // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute.pack?view=netcore-3.1#remarks
+            
+            // The alignment within a type is determined by the largest field in the structure, or by the packing size
+            // column in the class layout metadata of the type definition (in C# when the StructLayout attribute is
+            // provided with the Pack property assigned a non-zero value).
             
             uint largestFieldSize = 1;
             for (int i = 0; i < type.Fields.Count; i++)
@@ -121,11 +127,14 @@ namespace AsmResolver.DotNet.Memory
                     ? PointerSize
                     : layout.PackingSize;
 
+                // Packing size cannot exceed class size. 
                 if (layout.ClassSize == 0 || packingSize <= layout.ClassSize)
                     alignment = Math.Min(alignment, packingSize);
             }
 
+            // Leave type.
             _traversedTypes.Pop();
+            
             return alignment;
         }
 

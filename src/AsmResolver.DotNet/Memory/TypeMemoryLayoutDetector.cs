@@ -157,8 +157,11 @@ namespace AsmResolver.DotNet.Memory
 
         private TypeMemoryLayout VisitValueTypeDefinition(TypeDefinition type)
         {
+            // Sanity check: Make sure we do not end up in an infinite loop.
             if (_traversedTypes.Contains(type))
                 throw new CyclicStructureException();
+            
+            // Enter type.
             _traversedTypes.Push(type);
 
             var alignmentDetector = new TypeAlignmentDetector(_currentGenericContext, Is32Bit);
@@ -168,28 +171,40 @@ namespace AsmResolver.DotNet.Memory
             var result = type.IsExplicitLayout
                 ? InferExplicitLayout(type, alignment)
                 : InferSequentialLayout(type, alignment);
-            
-            // Check if a size was specified in metadata..
-            if (type.ClassLayout is {} layout)
-                result.Size = Math.Max(layout.ClassSize, result.Size);
 
             // Types have at least one byte in size.
             result.Size = Math.Max(1, result.Size);
+            
+            // Check if a size was overridden in metadata, and only respect it if it is actually larger than the 
+            // computed size of the type.
+            if (type.ClassLayout is {} layout)
+                result.Size = Math.Max(layout.ClassSize, result.Size);
 
+            // Leave type.
             _traversedTypes.Pop();
+            
             return result;
         }
 
         private TypeMemoryLayout InferSequentialLayout(TypeDefinition type, uint alignment)
         {
-            uint offset = 0;
             var result = new TypeMemoryLayout(type);
-
-            // Iterate all fields.
+            
+            // Maintain a current offset, and increase it after every field.
+            uint offset = 0;
+            
             foreach (var field in type.Fields)
             {
+                // Determine field memory layout.
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
+                
+                // Fields are aligned to the alignment of the type, unless the field is smaller. In such a case, the
+                // field is aligned to its own field size.
+                
+                // Reference:
+                // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute.pack?view=netcore-3.1#remarks
                 offset = offset.Align(Math.Min(contentsLayout.Size, alignment));
+                
                 result[field] = new FieldMemoryLayout(field, offset, contentsLayout);
                 offset += contentsLayout.Size;
             }
@@ -202,6 +217,7 @@ namespace AsmResolver.DotNet.Memory
         {
             var result = new TypeMemoryLayout(type);
 
+            // Implicit type size is determined byt the field with the highest offset + its size.
             uint largestOffset = 0;
             
             // Iterate all fields.
@@ -217,7 +233,6 @@ namespace AsmResolver.DotNet.Memory
                 }
 
                 uint offset = (uint) field.FieldOffset.Value;
-
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 result[field] = new FieldMemoryLayout(field, offset, contentsLayout);
 
