@@ -106,6 +106,9 @@ namespace AsmResolver.DotNet.Memory
 
         public uint VisitTypeDefinition(TypeDefinition type)
         {
+            if (!type.IsValueType)
+                return PointerSize;
+            
             if (_traversedTypes.Contains(type))
                 throw new CyclicStructureException();
             _traversedTypes.Push(type);
