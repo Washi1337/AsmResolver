@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -12,6 +13,7 @@ namespace AsmResolver.DotNet.Memory
     /// </summary>
     public class TypeMemoryLayoutDetector : ITypeSignatureVisitor<TypeMemoryLayout>
     {
+        private readonly Stack<TypeDefinition> _traversedTypes = new Stack<TypeDefinition>();
         private GenericContext _currentGenericContext;
 
         /// <summary>
@@ -149,6 +151,10 @@ namespace AsmResolver.DotNet.Memory
 
         private TypeMemoryLayout VisitValueTypeDefinition(TypeDefinition type)
         {
+            if (_traversedTypes.Contains(type))
+                throw new CyclicStructureException();
+            _traversedTypes.Push(type);
+            
             uint alignment = TypeAlignmentDetector.GetTypeAlignment(type, Is32Bit);
             
             // Infer raw layout.
@@ -162,7 +168,8 @@ namespace AsmResolver.DotNet.Memory
 
             // Types have at least one byte in size.
             result.Size = Math.Max(1, result.Size);
-            
+
+            _traversedTypes.Pop();
             return result;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -8,24 +9,13 @@ namespace AsmResolver.DotNet.Memory
 {
     internal class TypeAlignmentDetector : ITypeSignatureVisitor<uint>
     {
-        public static uint GetTypeAlignment(TypeSignature type, bool is32Bit)
-        {
-            var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
-            return type.AcceptVisitor(detector);
-        }
-
-        public static uint GetTypeAlignment(TypeReference type, bool is32Bit)
-        {
-            var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
-            return detector.VisitTypeReference(type);
-        }
-        
         public static uint GetTypeAlignment(TypeDefinition type, bool is32Bit)
         {
             var detector = new TypeAlignmentDetector(new GenericContext(), is32Bit);
             return detector.VisitTypeDefinition(type);
         }
         
+        private readonly Stack<TypeDefinition> _traversedTypes = new Stack<TypeDefinition>();
         private GenericContext _currentGenericContext;
 
         public TypeAlignmentDetector(GenericContext currentGenericContext, bool is32Bit)
@@ -116,6 +106,10 @@ namespace AsmResolver.DotNet.Memory
 
         public uint VisitTypeDefinition(TypeDefinition type)
         {
+            if (_traversedTypes.Contains(type))
+                throw new CyclicStructureException();
+            _traversedTypes.Push(type);
+            
             uint largestFieldSize = 1;
             for (int i = 0; i < type.Fields.Count; i++)
                 largestFieldSize = Math.Max(largestFieldSize, type.Fields[i].Signature.FieldType.AcceptVisitor(this));
@@ -132,6 +126,7 @@ namespace AsmResolver.DotNet.Memory
                     return Math.Min(largestFieldSize, packingSize);
             }
 
+            _traversedTypes.Pop();
             return largestFieldSize;
         }
 
