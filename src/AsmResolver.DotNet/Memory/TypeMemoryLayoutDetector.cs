@@ -50,13 +50,16 @@ namespace AsmResolver.DotNet.Memory
         public uint PointerSize => Is32Bit ? 4u : 8u;
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitArrayType(ArrayTypeSignature signature)=> new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitArrayType(ArrayTypeSignature signature) =>
+            new TypeMemoryLayout(signature, PointerSize);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitBoxedType(BoxedTypeSignature signature)=> new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitBoxedType(BoxedTypeSignature signature) =>
+            new TypeMemoryLayout(signature, PointerSize);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitByReferenceType(ByReferenceTypeSignature signature)=> new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitByReferenceType(ByReferenceTypeSignature signature) => 
+            new TypeMemoryLayout(signature, PointerSize);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitCorLibType(CorLibTypeSignature signature)
@@ -82,7 +85,7 @@ namespace AsmResolver.DotNet.Memory
                 _ => throw new ArgumentOutOfRangeException(nameof(signature))
             };
 
-            return new TypeMemoryLayout(elementSize);
+            return new TypeMemoryLayout(signature, elementSize);
         }
 
         /// <inheritdoc />
@@ -108,17 +111,20 @@ namespace AsmResolver.DotNet.Memory
             _currentGenericContext.GetTypeArgument(signature).AcceptVisitor(this);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature) => new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature) => 
+            new TypeMemoryLayout(signature, PointerSize);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature) => new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature) => 
+            new TypeMemoryLayout(signature, PointerSize);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitSentinelType(SentinelTypeSignature signature) =>
             throw new ArgumentException("Sentinel types do not have a size.");
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature) => new TypeMemoryLayout(PointerSize);
+        public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature) => 
+            new TypeMemoryLayout(signature, PointerSize);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature) => 
@@ -146,7 +152,7 @@ namespace AsmResolver.DotNet.Memory
         {
             return type.IsValueType 
                 ? VisitValueTypeDefinition(type)
-                : new TypeMemoryLayout(PointerSize);
+                : new TypeMemoryLayout(type, PointerSize);
         }
 
         private TypeMemoryLayout VisitValueTypeDefinition(TypeDefinition type)
@@ -177,14 +183,14 @@ namespace AsmResolver.DotNet.Memory
         private TypeMemoryLayout InferSequentialLayout(TypeDefinition type, uint alignment)
         {
             uint offset = 0;
-            var result = new TypeMemoryLayout();
+            var result = new TypeMemoryLayout(type);
 
             // Iterate all fields.
             foreach (var field in type.Fields)
             {
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
                 offset = offset.Align(Math.Min(contentsLayout.Size, alignment));
-                result.Fields[field] = new FieldMemoryLayout(field, offset, contentsLayout);
+                result[field] = new FieldMemoryLayout(field, offset, contentsLayout);
                 offset += contentsLayout.Size;
             }
 
@@ -194,7 +200,7 @@ namespace AsmResolver.DotNet.Memory
 
         private TypeMemoryLayout InferExplicitLayout(TypeDefinition type, uint alignment)
         {
-            var result = new TypeMemoryLayout();
+            var result = new TypeMemoryLayout(type);
 
             uint largestOffset = 0;
             
@@ -213,7 +219,7 @@ namespace AsmResolver.DotNet.Memory
                 uint offset = (uint) field.FieldOffset.Value;
 
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
-                result.Fields[field] = new FieldMemoryLayout(field, offset, contentsLayout);
+                result[field] = new FieldMemoryLayout(field, offset, contentsLayout);
 
                 largestOffset = Math.Max(largestOffset, offset + contentsLayout.Size);
             }
