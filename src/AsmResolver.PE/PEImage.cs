@@ -108,7 +108,7 @@ namespace AsmResolver.PE
         private static PEReadParameters CreateDefaultReadParameters(PEFile peFile) => new PEReadParameters(peFile);
 
 
-        private IList<IModuleImportEntry> _imports;
+        private IList<IImportedModule> _imports;
         private readonly LazyVariable<IExportDirectory> _exports;
         private readonly LazyVariable<IResourceDirectory> _resources;
         private IList<BaseRelocation> _relocations;
@@ -175,7 +175,7 @@ namespace AsmResolver.PE
         } = 0x00400000;
 
         /// <inheritdoc />
-        public IList<IModuleImportEntry> Imports
+        public IList<IImportedModule> Imports
         {
             get
             {
@@ -224,7 +224,7 @@ namespace AsmResolver.PE
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Imports"/> property.
         /// </remarks>
-        protected virtual IList<IModuleImportEntry> GetImports() => new List<IModuleImportEntry>();
+        protected virtual IList<IImportedModule> GetImports() => new List<IImportedModule>();
 
         /// <summary>
         /// Obtains the list of symbols that were exported from the PE.

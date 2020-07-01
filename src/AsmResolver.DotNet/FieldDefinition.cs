@@ -14,6 +14,7 @@ namespace AsmResolver.DotNet
     /// Represents a single field in a type definition of a .NET module.
     /// </summary>
     public class FieldDefinition :
+        MetadataMember,
         IMemberDefinition,
         IFieldDescriptor, 
         IHasCustomAttribute, 
@@ -38,8 +39,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the field.</param>
         protected FieldDefinition(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _signature = new LazyVariable<FieldSignature>(GetSignature);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
@@ -67,13 +68,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <inheritdoc />

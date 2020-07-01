@@ -18,7 +18,7 @@ The following example is a program that dumps the resources tree from a single P
     {
         // Open the PE image.
         string filePath = args[0].Replace("\"", "");
-        var peImage = PEImageBase.FromFile(filePath);
+        var peImage = PEImage.FromFile(filePath);
 
         // Dump the resources.
         PrintResourceDirectory(peImage.Resources);

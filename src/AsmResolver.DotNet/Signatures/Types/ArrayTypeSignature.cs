@@ -72,6 +72,21 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
         }
 
+        /// <summary>
+        /// Creates a new array type signature with the provided dimensions count.
+        /// </summary>
+        /// <param name="baseType">The element type.</param>
+        /// <param name="dimensionCount">The number of dimensions.</param>
+        public ArrayTypeSignature(TypeSignature baseType, int dimensionCount)
+            : base(baseType)
+        {
+            if (dimensionCount < 0)
+                throw new ArgumentException("Number of dimensions cannot be negative.");
+            
+            for (int i = 0; i < dimensionCount;i++)
+                Dimensions.Add(new ArrayDimension());
+        }
+
         /// <inheritdoc />
         public override ElementType ElementType => ElementType.Array;
 

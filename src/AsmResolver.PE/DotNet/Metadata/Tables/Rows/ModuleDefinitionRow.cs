@@ -127,9 +127,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         {
             writer.WriteUInt16(Generation);
             writer.WriteIndex(Name, (IndexSize) layout.Columns[1].Size);
-            writer.WriteIndex(Mvid, (IndexSize) layout.Columns[1].Size);
-            writer.WriteIndex(EncId, (IndexSize) layout.Columns[1].Size);
-            writer.WriteIndex(EncBaseId, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(Mvid, (IndexSize) layout.Columns[2].Size);
+            writer.WriteIndex(EncId, (IndexSize) layout.Columns[3].Size);
+            writer.WriteIndex(EncBaseId, (IndexSize) layout.Columns[4].Size);
         }
 
         /// <inheritdoc />

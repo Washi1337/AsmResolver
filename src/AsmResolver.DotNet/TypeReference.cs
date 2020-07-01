@@ -11,7 +11,10 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a type defined in a .NET assembly.
     /// </summary>
-    public class TypeReference : ITypeDefOrRef, IResolutionScope
+    public class TypeReference : 
+        MetadataMember,
+        ITypeDefOrRef,
+        IResolutionScope
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _namespace;
@@ -23,8 +26,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the type reference.</param>
         protected TypeReference(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _namespace = new LazyVariable<string>(GetNamespace);
             _scope = new LazyVariable<IResolutionScope>(GetScope);
@@ -58,13 +61,6 @@ namespace AsmResolver.DotNet
             Module = module;
             Namespace = ns;
             Name = name;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>

@@ -156,6 +156,40 @@ namespace AsmResolver.DotNet.Serialized
             DotNetDirectory.Metadata.GetStream<TablesStream>().GetIndexEncoder(codedIndex);
 
         /// <inheritdoc />
+        public override IEnumerable<TypeReference> GetImportedTypeReferences()
+        {
+            var table = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable(TableIndex.TypeRef);
+
+            for (uint rid = 1; rid <= table.Count; rid++)
+            {
+                if (TryLookupMember(new MetadataToken(TableIndex.TypeRef, rid), out var member)
+                    && member is TypeReference reference)
+                {
+                    yield return reference;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public override IEnumerable<MemberReference> GetImportedMemberReferences()
+        {
+            var table = DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable(TableIndex.MemberRef);
+
+            for (uint rid = 1; rid <= table.Count; rid++)
+            {
+                if (TryLookupMember(new MetadataToken(TableIndex.MemberRef, rid), out var member)
+                    && member is MemberReference reference)
+                {
+                    yield return reference;
+                }
+            }
+        }
+
+        /// <inheritdoc />
         protected override string GetName() 
             => DotNetDirectory.Metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
 
@@ -809,6 +843,9 @@ namespace AsmResolver.DotNet.Serialized
             
             return result;
         }
+
+        /// <inheritdoc />
+        protected override string GetRuntimeVersion() => DotNetDirectory.Metadata.VersionString;
 
         /// <inheritdoc />
         protected override IManagedEntrypoint GetManagedEntrypoint()

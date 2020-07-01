@@ -10,6 +10,7 @@ namespace AsmResolver.DotNet
     /// Represents extra metadata added to a type indicating the type is implementing a particular interface.
     /// </summary>
     public class InterfaceImplementation :
+        MetadataMember,
         IModuleProvider,
         IOwnedCollectionElement<TypeDefinition>,
         IHasCustomAttribute
@@ -23,8 +24,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token"></param>
         protected InterfaceImplementation(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _class = new LazyVariable<TypeDefinition>(GetClass);
             _interface = new LazyVariable<ITypeDefOrRef>(GetInterface);
         }
@@ -37,13 +38,6 @@ namespace AsmResolver.DotNet
             : this(new MetadataToken(TableIndex.InterfaceImpl, 0))
         {
             Interface = interfaceType;
-        }
-        
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>

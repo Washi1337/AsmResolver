@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet
     /// Represents a mapping that maps a method or field defined in a .NET module to an unmanaged function or
     /// global field defined in an external module through Platform Invoke (P/Invoke).
     /// </summary>
-    public class ImplementationMap : IMetadataMember, IFullNameProvider
+    public class ImplementationMap : MetadataMember, IFullNameProvider
     {
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<ModuleReference> _scope;
@@ -18,8 +18,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the member.</param>
         protected ImplementationMap(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _scope = new LazyVariable<ModuleReference>(GetScope);
             _memberForwarded = new LazyVariable<IMemberForwarded>(GetMemberForwarded);
@@ -37,13 +37,6 @@ namespace AsmResolver.DotNet
             Scope = scope;
             Name = name;
             Attributes = attributes;
-        }
-        
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>

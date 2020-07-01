@@ -27,35 +27,42 @@ namespace AsmResolver.DotNet
                 throw new NotImplementedException("Exception Handlers From ehHeader Not Supported Yet.");
             if (ehInfos != null && ehInfos.Count > 0)
             {
-                for (var i = 0; i < ehInfos.Count; i++)
+                foreach(var ehInfo in ehInfos)
                 {
-                    //Get ExceptionHandlerInfo Field Values
-                    var endFinally = FieldReader.ReadField<int>(ehInfos[i], "m_endFinally");
-                    var endFinallyLabel = endFinally < 0
-                        ? null 
-                        : methodBody.Instructions.GetByOffset(endFinally)?.CreateLabel() ?? 
-                          new CilOffsetLabel(endFinally);
-                    var endTry = FieldReader.ReadField<int>(ehInfos[i], "m_endAddr");
-                    var endTryLabel = methodBody.Instructions.GetByOffset(endTry)?.CreateLabel() ?? new CilOffsetLabel(endTry);
-                    var handlerEnd = FieldReader.ReadField<int[]>(ehInfos[i], "m_catchEndAddr")[i];
-                    var exceptionType = FieldReader.ReadField<Type[]>(ehInfos[i], "m_catchClass")[i];
-                    var handlerStart = FieldReader.ReadField<int[]>(ehInfos[i], "m_catchAddr")[i];
-                    var tryStart = FieldReader.ReadField<int>(ehInfos[i], "m_startAddr");
-                    var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfos[i], "m_type")[i];
+                    for (int i = 0; i < FieldReader.ReadField<int>(ehInfo, "m_currentCatch");i++) {
+                        
+                        //Get ExceptionHandlerInfo Field Values
+                        var endFinally = FieldReader.ReadField<int>(ehInfo, "m_endFinally");
+                        var endFinallyLabel = endFinally < 0
+                            ? null
+                            : methodBody.Instructions.GetByOffset(endFinally)?.CreateLabel() ??
+                              new CilOffsetLabel(endFinally);
+                        var endTry = FieldReader.ReadField<int>(ehInfo, "m_endAddr");
+                        var endTryLabel = methodBody.Instructions.GetByOffset(endTry)?.CreateLabel() ??
+                                          new CilOffsetLabel(endTry);
+                        var handlerEnd = FieldReader.ReadField<int[]>(ehInfo, "m_catchEndAddr")[i];
+                        var exceptionType = FieldReader.ReadField<Type[]>(ehInfo, "m_catchClass")[i];
+                        var handlerStart = FieldReader.ReadField<int[]>(ehInfo, "m_catchAddr")[i];
+                        var tryStart = FieldReader.ReadField<int>(ehInfo, "m_startAddr");
+                        var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfo, "m_type")[i];
 
-                    //Create the handler
-                    var handler = new CilExceptionHandler
-                    {
-                        HandlerType = handlerType,
-                        TryStart = methodBody.Instructions.GetByOffset(tryStart)?.CreateLabel() ?? new CilOffsetLabel(tryStart),
-                        TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
-                        FilterStart = null,
-                        HandlerStart = methodBody.Instructions.GetByOffset(handlerStart)?.CreateLabel() ?? new CilOffsetLabel(handlerStart),
-                        HandlerEnd = methodBody.Instructions.GetByOffset(handlerEnd)?.CreateLabel() ?? new CilOffsetLabel(handlerEnd),
-                        ExceptionType = importer.ImportType(exceptionType)
-                    };
+                        //Create the handler
+                        var handler = new CilExceptionHandler
+                        {
+                            HandlerType = handlerType,
+                            TryStart = methodBody.Instructions.GetByOffset(tryStart)?.CreateLabel() ??
+                                       new CilOffsetLabel(tryStart),
+                            TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
+                            FilterStart = null,
+                            HandlerStart = methodBody.Instructions.GetByOffset(handlerStart)?.CreateLabel() ??
+                                           new CilOffsetLabel(handlerStart),
+                            HandlerEnd = methodBody.Instructions.GetByOffset(handlerEnd)?.CreateLabel() ??
+                                         new CilOffsetLabel(handlerEnd),
+                            ExceptionType = exceptionType != null ? importer.ImportType(exceptionType) : null
+                        };
 
-                    methodBody.ExceptionHandlers.Add(handler);
+                        methodBody.ExceptionHandlers.Add(handler);
+                    }
                 }
             }
         }
@@ -125,9 +132,14 @@ namespace AsmResolver.DotNet
                         return importer.ImportField(FieldInfo.GetFieldFromHandle(runtimeFieldHandle));
 
                     if (field.GetType().FullName == "System.Reflection.Emit.GenericFieldInfo")
-                        return importer.ImportField(FieldInfo.GetFieldFromHandle(
-                            FieldReader.ReadField<RuntimeFieldHandle>(field, "m_field"),
-                            FieldReader.ReadField<RuntimeTypeHandle>(field, "m_context")));
+                    {
+                        var result = FieldReader.TryReadField<RuntimeFieldHandle>(field, "m_field", out var mField);
+                        var ctx = FieldReader.ReadField<RuntimeTypeHandle>(field, "m_context");
+                        return importer.ImportField(FieldInfo.GetFieldFromHandle(result
+                            ? mField
+                            : FieldReader.ReadField<RuntimeFieldHandle>(field, "m_fieldHandle"), ctx));
+                    }
+
                     break;
                 case TableIndex.Method:
                 case TableIndex.MemberRef:
@@ -138,8 +150,12 @@ namespace AsmResolver.DotNet
                     {
                         var context =
                             FieldReader.ReadField<RuntimeTypeHandle>(obj, "m_context");
+                        var res = FieldReader.TryReadField<RuntimeMethodHandle>(obj, "m_method", out var m_method);
+                        var m_handle = FieldReader.ReadField<RuntimeMethodHandle>(obj, "m_methodHandle");
                         var method = MethodBase.GetMethodFromHandle(
-                            FieldReader.ReadField<RuntimeMethodHandle>(obj, "m_method"), context);
+                            res
+                                ? m_method
+                                : m_handle, context);
                         return importer.ImportMethod(method);
                     }
 
@@ -149,9 +165,10 @@ namespace AsmResolver.DotNet
                 case TableIndex.StandAloneSig:
                     return CallingConventionSignature.FromReader(importer.TargetModule,
                         new ByteArrayReader(tokens[(int) token.Rid] as byte[]));
-                case (TableIndex)112:
+                case (TableIndex) 112:
                     return tokens[(int) token.Rid] as string;
             }
+
             return null;
         }
 
@@ -165,7 +182,7 @@ namespace AsmResolver.DotNet
                 throw new ArgumentNullException(nameof(dynamicMethodObj));
 
             //We use GetType().FullName just to avoid the System.Reflection.Emit.LightWeight Dll
-            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.RTDynamicMethod")
+            if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod+RTDynamicMethod")
                 dynamicMethodObj = FieldReader.ReadField<object>(dynamicMethodObj, "m_owner");
 
             if (dynamicMethodObj.GetType().FullName == "System.Reflection.Emit.DynamicMethod")

@@ -17,6 +17,7 @@ namespace AsmResolver.DotNet
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
     public class TypeDefinition : 
+        MetadataMember,
         ITypeDefOrRef,
         IMemberDefinition,
         IHasGenericParameters,
@@ -46,8 +47,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the type definition.</param>
         protected TypeDefinition(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _namespace = new LazyVariable<string>(GetNamespace);
             _name = new LazyVariable<string>(GetName);
             _baseType = new LazyVariable<ITypeDefOrRef>(GetBaseType);
@@ -80,13 +81,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             BaseType = baseType;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <summary>
@@ -634,10 +628,10 @@ namespace AsmResolver.DotNet
         public TypeReference ToTypeReference()
         {
             var scope = DeclaringType is null
-                ? (IResolutionScope) new AssemblyReference(Module.Assembly)
+                ? (IResolutionScope) Module
                 : DeclaringType.ToTypeReference();
             
-            return new TypeReference(scope, Namespace, Name);
+            return new TypeReference(Module, scope, Namespace, Name);
         }
 
         private IResolutionScope GetDeclaringScope()

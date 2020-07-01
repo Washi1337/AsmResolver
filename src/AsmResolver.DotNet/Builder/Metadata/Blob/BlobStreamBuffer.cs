@@ -104,6 +104,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         /// <returns>The index of the signature.</returns>
         public uint GetBlobIndex(ITypeCodedIndexProvider provider, BlobSignature signature)
         {
+            if (signature is null)
+                return 0u;
+            
             // Serialize blob.
             using var stream = new MemoryStream();
             var writer = new BinaryStreamWriter(stream);

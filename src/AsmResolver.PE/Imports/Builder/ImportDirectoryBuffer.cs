@@ -26,12 +26,12 @@ namespace AsmResolver.PE.Imports.Builder
         }
 
         /// <inheritdoc />
-        public override void AddModule(IModuleImportEntry module)
+        public override void AddModule(IImportedModule module)
         {
             if (_entriesLength == 0)
-                _entriesLength = SerializedModuleImportEntry.ModuleImportSize;
+                _entriesLength = SerializedImportedModule.ModuleImportSize;
             
-            _entriesLength += SerializedModuleImportEntry.ModuleImportSize;
+            _entriesLength += SerializedImportedModule.ModuleImportSize;
             
             ImportAddressDirectory.AddModule(module);
             base.AddModule(module);
@@ -77,7 +77,7 @@ namespace AsmResolver.PE.Imports.Builder
             WriteModuleImportEntry(writer, 0, 0, 0, 0, 0);
         }
 
-        private void WriteModuleImportEntry(IBinaryStreamWriter writer, IModuleImportEntry module)
+        private void WriteModuleImportEntry(IBinaryStreamWriter writer, IImportedModule module)
         {
             WriteModuleImportEntry(writer, 
                 GetModuleThunkTable(module).Rva, 

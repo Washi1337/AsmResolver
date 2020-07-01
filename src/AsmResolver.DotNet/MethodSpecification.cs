@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a reference to a generic method that is instantiated with type arguments.
     /// </summary>
-    public class MethodSpecification : IMethodDescriptor, IHasCustomAttribute
+    public class MethodSpecification : MetadataMember, IMethodDescriptor, IHasCustomAttribute
     {
         private readonly LazyVariable<IMethodDefOrRef> _method;
         private readonly LazyVariable<GenericInstanceMethodSignature> _signature;
@@ -21,8 +21,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the specification.</param>
         protected MethodSpecification(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _method = new LazyVariable<IMethodDefOrRef>(GetMethod);
             _signature = new LazyVariable<GenericInstanceMethodSignature>(GetSignature);
         }
@@ -37,13 +37,6 @@ namespace AsmResolver.DotNet
         {
             Method = method;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
         
         /// <summary>

@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet
     /// Represents an assembly of self-describing modules of an executable file hosted by a common language runtime (CLR).
     /// </summary>
     public class AssemblyDefinition : AssemblyDescriptor, IHasSecurityDeclaration
-    { 
+    {
         /// <summary>
         /// Reads a .NET assembly from the provided input buffer.
         /// </summary>
@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet
         public static AssemblyDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) =>
             ModuleDefinition.FromImage(peImage, readParameters).Assembly
             ?? throw new BadImageFormatException("The provided PE image does not contain an assembly manifest.");
-        
+
         private IList<ModuleDefinition> _modules;
         private IList<SecurityDeclaration> _securityDeclarations;
         private readonly LazyVariable<byte[]> _publicKey;
@@ -126,7 +126,7 @@ namespace AsmResolver.DotNet
                     Interlocked.CompareExchange(ref _modules, GetModules(), null);
                 return _modules;
             }
-        } 
+        }
 
         /// <inheritdoc />
         public IList<SecurityDeclaration> SecurityDeclarations
@@ -138,7 +138,7 @@ namespace AsmResolver.DotNet
                 return _securityDeclarations;
             }
         }
-        
+
         /// <summary>
         /// Gets or sets the public key of the assembly to use for verification of a signature.
         /// </summary>
@@ -166,7 +166,7 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<ModuleDefinition> GetModules()
             => new OwnedCollection<AssemblyDefinition, ModuleDefinition>(this);
-        
+
         /// <summary>
         /// Obtains the list of security declarations assigned to the member.
         /// </summary>
@@ -174,9 +174,9 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="SecurityDeclarations"/> property.
         /// </remarks>
-        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() => 
+        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() =>
             new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
-        
+
         /// <summary>
         /// Obtains the public key of the assembly definition.
         /// </summary>
@@ -232,7 +232,7 @@ namespace AsmResolver.DotNet
             string directory = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(directory))
                 throw new DirectoryNotFoundException();
-            
+
             foreach (var module in Modules)
             {
                 string modulePath = module == ManifestModule
@@ -241,6 +241,36 @@ namespace AsmResolver.DotNet
 
                 module.Write(modulePath, imageBuilder, fileBuilder);
             }
+        }
+
+        /// <summary>
+        /// Rebuilds the manifest module and writes it to the stream specified. 
+        /// </summary>
+        /// <param name="stream">The output stream of the manifest module file.</param>
+        public void WriteManifest(Stream stream)
+        {
+            WriteManifest(stream, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
+        }
+
+        /// <summary>
+        /// Rebuilds the manifest module and writes it to the stream specified. 
+        /// </summary>
+        /// <param name="stream">The output stream of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        public void WriteManifest(Stream stream, IPEImageBuilder imageBuilder)
+        {
+            WriteManifest(stream, imageBuilder, new ManagedPEFileBuilder());
+        }
+
+        /// <summary>
+        /// Rebuilds the manifest module and writes it to the stream specified. 
+        /// </summary>
+        /// <param name="stream">The output stream of the manifest module file.</param>
+        /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
+        public void WriteManifest(Stream stream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
+        {
+            ManifestModule.Write(stream, imageBuilder, fileBuilder);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet
     /// Represents a type definition that was exported to another external .NET module.
     /// </summary>
     public class ExportedType :
+        MetadataMember,
         IImplementation,
         ITypeDescriptor,
         IHasCustomAttribute,
@@ -28,8 +29,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The metadata token.</param>
         protected ExportedType(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name = new LazyVariable<string>(GetName);
             _namespace = new LazyVariable<string>(GetNamespace);
             _implementation = new LazyVariable<IImplementation>(GetImplementation);
@@ -47,12 +48,6 @@ namespace AsmResolver.DotNet
             Implementation = implementation;
             Namespace = ns;
             Name = name;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
         }
 
         /// <summary>

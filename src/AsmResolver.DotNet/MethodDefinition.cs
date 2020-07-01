@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet
     /// Represents a single method in a type definition of a .NET module.
     /// </summary>
     public class MethodDefinition :
+        MetadataMember,
         IMemberDefinition,
         IOwnedCollectionElement<TypeDefinition>,
         IMemberRefParent, 
@@ -41,8 +42,8 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="token">The token of the method</param>
         protected MethodDefinition(MetadataToken token)
+            : base(token)
         {
-            MetadataToken = token;
             _name  =new LazyVariable<string>(GetName);
             _declaringType = new LazyVariable<TypeDefinition>(GetDeclaringType);
             _signature = new LazyVariable<MethodSignature>(GetSignature);
@@ -68,13 +69,6 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
             Signature = signature;
-        }
-
-        /// <inheritdoc />
-        public MetadataToken MetadataToken
-        {
-            get;
-            protected set;
         }
 
         /// <inheritdoc />
