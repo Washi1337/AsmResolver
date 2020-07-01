@@ -248,5 +248,12 @@ namespace AsmResolver.DotNet.Tests
             var newContents = (IReadableSegment) newData.Contents;
             Assert.Equal(entryData, newContents.ToArray());
         }
+
+        [Fact]
+        public void Test()
+        {
+            var module = ModuleDefinition.FromFile("/home/washi/Desktop/Crack-me_c.exe");
+            module.Write("/home/washi/Desktop/Crack-me_c.edit.exe");
+        }
     }
 }
