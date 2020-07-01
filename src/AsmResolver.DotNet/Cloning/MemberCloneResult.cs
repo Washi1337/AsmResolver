@@ -14,9 +14,10 @@ namespace AsmResolver.DotNet.Cloning
         /// Creates a new instance of the <see cref="MemberCloneResult"/> class.
         /// </summary>
         /// <param name="clonedMembers">The cloned members.</param>
+        /// <exception cref="ArgumentNullException">Occurs when <paramref name="clonedMembers"/> is null.</exception>
         public MemberCloneResult(IDictionary<IMemberDescriptor, IMemberDescriptor> clonedMembers)
         {
-            this.clonedMembers = clonedMembers;
+            this.clonedMembers = clonedMembers ?? throw new ArgumentNullException(nameof(clonedMembers));
             ClonedMembers = new List<IMemberDescriptor>(clonedMembers.Values);
             OriginalMembers = new List<IMemberDescriptor>(clonedMembers.Keys);
         }
@@ -36,6 +37,13 @@ namespace AsmResolver.DotNet.Cloning
         {
             get;
         }
+
+        /// <summary>
+        /// Verifies if the <paramref name="originalMember"/> is cloned by the <see cref="MemberCloner"/>.
+        /// </summary>
+        /// <param name="originalMember">The original <see cref="IMemberDescriptor"/></param>
+        /// <returns><c>true</c> if the provided member was cloned, <c>false</c> otherwise.</returns>
+        public bool ContainsClonedMember(IMemberDescriptor originalMember) => clonedMembers.ContainsKey(originalMember);
 
         /// <summary>
         /// Gets the cloned <see cref="IMemberDescriptor"/> by its original <see cref="IMemberDescriptor"/>.
