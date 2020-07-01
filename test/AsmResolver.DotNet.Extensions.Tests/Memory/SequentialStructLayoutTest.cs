@@ -100,5 +100,13 @@ namespace AsmResolver.DotNet.Tests.Memory
         [Fact]
         public void StructWithStructFieldSmallerThanPack() =>
             VerifySize<SequentialTestStructs.StructWithStructFieldSmallerThanPack>();
+        
+        [Fact]
+        public void PackLargerThanLargestField() =>
+            VerifySize<SequentialTestStructs.PackLargerThanLargestField>();
+        
+        [Fact]
+        public void PackLargerThanLargestFieldWithImplicitAlignment() =>
+            VerifySize<SequentialTestStructs.PackLargerThanLargestFieldWithImplicitAlignment>();
     }
 }

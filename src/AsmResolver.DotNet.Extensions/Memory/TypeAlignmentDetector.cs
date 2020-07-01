@@ -51,8 +51,8 @@ namespace AsmResolver.DotNet.Memory
         }
 
         public uint PointerSize => Is32Bit ? 4u : 8u;
-        
-         public uint VisitArrayType(ArrayTypeSignature signature) => PointerSize;
+
+        public uint VisitArrayType(ArrayTypeSignature signature) => PointerSize;
 
         public uint VisitBoxedType(BoxedTypeSignature signature) => PointerSize;
 
@@ -127,6 +127,10 @@ namespace AsmResolver.DotNet.Memory
 
         public uint VisitTypeDefinition(TypeDefinition type)
         {
+            uint largestFieldSize = 1;
+            for (int i = 0; i < type.Fields.Count; i++)
+                largestFieldSize = Math.Max(largestFieldSize, type.Fields[i].Signature.FieldType.AcceptVisitor(this));
+            
             // Check if the type has metadata regarding type layout.
             if (type.ClassLayout is {} layout)
             {
@@ -134,16 +138,13 @@ namespace AsmResolver.DotNet.Memory
                 uint packingSize = layout.PackingSize == 0
                     ? PointerSize
                     : layout.PackingSize;
-                
+
                 if (layout.ClassSize == 0 || packingSize <= layout.ClassSize)
-                    return packingSize;
+                    return Math.Min(largestFieldSize, packingSize);
             }
-            
-            uint largestFieldSize = 0;
-            for (int i = 0; i < type.Fields.Count; i++)
-                largestFieldSize = Math.Max(largestFieldSize, type.Fields[i].Signature.FieldType.AcceptVisitor(this));
+
             return largestFieldSize;
         }
-        
+
     }
 }

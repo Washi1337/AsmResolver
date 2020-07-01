@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+// ReSharper disable All
 
 namespace AsmResolver.DotNet.Tests.Memory
 {

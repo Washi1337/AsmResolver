@@ -124,5 +124,32 @@ namespace AsmResolver.DotNet.Tests.Memory
             public SingleFieldSequentialStructDefaultPack Field1;
             public long Field2;
         }
+
+        [StructLayout(LayoutKind.Sequential, Size = 133)]
+        public struct FixedSizeStruct133
+        {
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 16)]
+        public struct PackLargerThanLargestField
+        {
+            public FixedSizeStruct133 Field1;
+            
+            public FixedSizeStruct133 Field2;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Size = 133)]
+        public struct FixedSizeStruct133WithField
+        {
+            public int Field1;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 16)]
+        public struct PackLargerThanLargestFieldWithImplicitAlignment
+        {
+            public FixedSizeStruct133WithField Field1;
+            
+            public FixedSizeStruct133WithField Field2;
+        }
     }
 }

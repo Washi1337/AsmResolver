@@ -23,5 +23,8 @@ namespace AsmResolver.DotNet.Tests.Memory
         
         [Fact]
         public void ExtremeStruct3() => VerifySize<MixedTestStructs.ExtremeStruct3>();
+        
+        [Fact]
+        public void ExtremeStruct5() => VerifySize<MixedTestStructs.ExtremeStruct5>();
     }
 }
