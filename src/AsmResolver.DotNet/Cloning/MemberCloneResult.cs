@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Cloning
             _clonedMembers = clonedMembers ?? throw new ArgumentNullException(nameof(clonedMembers));
             ClonedMembers = new List<IMemberDescriptor>(clonedMembers.Values);
             OriginalMembers = new List<IMemberDescriptor>(clonedMembers.Keys);
-            _topLevelTypes = clonedMembers.OfType<TypeDefinition>().Where(type => !type.IsNested).ToList();
+            _topLevelTypes = clonedMembers.Values.OfType<TypeDefinition>().Where(type => !type.IsNested).ToList();
         }
 
         /// <summary>

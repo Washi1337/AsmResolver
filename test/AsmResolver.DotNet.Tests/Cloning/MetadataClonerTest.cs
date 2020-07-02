@@ -44,9 +44,15 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Include(originalTypeDef)
                 .Clone();
 
-            return result.ClonedMembers
+            var clonedType =  result.ClonedMembers
                 .OfType<TypeDefinition>()
                 .First();
+
+            Assert.True(result.ContainsClonedMember(originalTypeDef));
+            Assert.Equal(clonedType, result.GetClonedMember(originalTypeDef));
+            Assert.Equal(clonedType, result.GetClonedTopLevelTypes().First());
+
+            return clonedType;
         }
         
         private static MethodDefinition CloneMethod(MethodBase methodBase, out MethodDefinition originalMethodDef)
@@ -60,7 +66,12 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Include(originalMethodDef)
                 .Clone();
 
+
             var clonedMethod = (MethodDefinition) result.ClonedMembers.First();
+
+            Assert.True(result.ContainsClonedMember(originalMethodDef));
+            Assert.Equal(clonedMethod, result.GetClonedMember(originalMethodDef));
+
             return clonedMethod;
         }
         
@@ -78,6 +89,10 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Clone();
 
             var clonedField = (FieldDefinition) result.ClonedMembers.First();
+
+            Assert.True(result.ContainsClonedMember(originalFieldDef));
+            Assert.Equal(clonedField, result.GetClonedMember(originalFieldDef));
+
             return clonedField;
         }
 
@@ -91,7 +106,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Include(sourceModule.TopLevelTypes.First(t => t.Name == "Program"))
                 .Clone();
 
-            foreach (var type in result.ClonedMembers.OfType<TypeDefinition>())
+            foreach (var type in result.GetClonedTopLevelTypes())
                 targetModule.TopLevelTypes.Add(type);
 
             targetModule.ManagedEntrypointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
