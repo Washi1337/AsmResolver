@@ -54,11 +54,11 @@ namespace AsmResolver.DotNet.Cloning
         /// <param name="originalMember">Original <see cref="IMemberDescriptor"/></param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="originalMember"/> is not a member of <see cref="OriginalMembers"/></exception>
         /// <returns>Cloned <see cref="IMemberDescriptor"/></returns>
-        public IMemberDescriptor GetClonedMember(IMemberDescriptor originalMember)
+        public T GetClonedMember<T>(T originalMember) where T : IMemberDescriptor
         {
             if (!_clonedMembers.ContainsKey(originalMember))
                 throw new ArgumentOutOfRangeException(nameof(originalMember));
-            return _clonedMembers[originalMember];
+            return (T)_clonedMembers[originalMember];
         }
 
         /// <summary>
