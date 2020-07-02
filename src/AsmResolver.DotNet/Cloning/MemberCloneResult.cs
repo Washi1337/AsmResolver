@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -8,7 +9,8 @@ namespace AsmResolver.DotNet.Cloning
     /// </summary>
     public class MemberCloneResult
     {
-        private readonly IDictionary<IMemberDescriptor, IMemberDescriptor> clonedMembers;
+        private readonly IDictionary<IMemberDescriptor, IMemberDescriptor> _clonedMembers;
+        private readonly IList<TypeDefinition> _topLevelTypes;
 
         /// <summary>
         /// Creates a new instance of the <see cref="MemberCloneResult"/> class.
@@ -17,9 +19,10 @@ namespace AsmResolver.DotNet.Cloning
         /// <exception cref="ArgumentNullException">Occurs when <paramref name="clonedMembers"/> is null.</exception>
         public MemberCloneResult(IDictionary<IMemberDescriptor, IMemberDescriptor> clonedMembers)
         {
-            this.clonedMembers = clonedMembers ?? throw new ArgumentNullException(nameof(clonedMembers));
+            _clonedMembers = clonedMembers ?? throw new ArgumentNullException(nameof(clonedMembers));
             ClonedMembers = new List<IMemberDescriptor>(clonedMembers.Values);
             OriginalMembers = new List<IMemberDescriptor>(clonedMembers.Keys);
+            _topLevelTypes = clonedMembers.OfType<TypeDefinition>().Where(type => !type.IsNested).ToList();
         }
 
         /// <summary>
@@ -43,7 +46,7 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="originalMember">The original <see cref="IMemberDescriptor"/></param>
         /// <returns><c>true</c> if the provided member was cloned, <c>false</c> otherwise.</returns>
-        public bool ContainsClonedMember(IMemberDescriptor originalMember) => clonedMembers.ContainsKey(originalMember);
+        public bool ContainsClonedMember(IMemberDescriptor originalMember) => _clonedMembers.ContainsKey(originalMember);
 
         /// <summary>
         /// Gets the cloned <see cref="IMemberDescriptor"/> by its original <see cref="IMemberDescriptor"/>.
@@ -53,9 +56,18 @@ namespace AsmResolver.DotNet.Cloning
         /// <returns>Cloned <see cref="IMemberDescriptor"/></returns>
         public IMemberDescriptor GetClonedMember(IMemberDescriptor originalMember)
         {
-            if (!clonedMembers.ContainsKey(originalMember))
+            if (!_clonedMembers.ContainsKey(originalMember))
                 throw new ArgumentOutOfRangeException(nameof(originalMember));
-            return clonedMembers[originalMember];
+            return _clonedMembers[originalMember];
+        }
+
+        /// <summary>
+        /// Gets all cloned members of type <see cref="TypeDefinition"/> that are not nested.
+        /// </summary>
+        /// <returns>List of the top level <see cref="TypeDefinition"/></returns>
+        public IList<TypeDefinition> GetClonedTopLevelTypes()
+        {
+            return _topLevelTypes;
         }
     }
 }
