@@ -51,12 +51,12 @@ Building an image back to a PE file can be done by using one of the classes that
     
     Currently AsmResolver only provides a builder for .NET images.
 
-Building a .NET image can be done through the ``AsmResolver.PE.DotNet.Builder.ManagedPEBuilder`` class:
+Building a .NET image can be done through the ``AsmResolver.PE.DotNet.Builder.ManagedPEFileBuilder`` class:
 
 .. code-block:: csharp
 
-    var builder = new ManagedPEBuilder();
-    var newPEFile = builder.ConstructPEFile(image);
+    var builder = new ManagedPEFileBuilder();
+    var newPEFile = builder.CreateFile(image);
 
 Once a ``PEFile`` instance has been generated from the image, you can use it to write the executable to an output stream (such as a file on the disk or a memory stream).
 
