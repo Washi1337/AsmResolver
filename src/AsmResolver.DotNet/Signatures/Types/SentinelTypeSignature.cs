@@ -12,10 +12,6 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </remarks>
     public class SentinelTypeSignature : TypeSignature
     {
-        internal SentinelTypeSignature()
-        {
-        }
-        
         /// <inheritdoc />
         public override ElementType ElementType => ElementType.Sentinel;
 
