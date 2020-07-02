@@ -102,11 +102,26 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var sourceModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var targetModule = PrepareTempModule();
 
+            var programType = sourceModule.TopLevelTypes.First(t => t.Name == "Program");
+            var nestedType = new TypeDefinition("", "Nested", PE.DotNet.Metadata.Tables.Rows.TypeAttributes.NestedPublic);
+            programType.NestedTypes.Add(nestedType);
+
+            var notNestedType = new TypeDefinition("", "NotNested", PE.DotNet.Metadata.Tables.Rows.TypeAttributes.Public);
+            sourceModule.TopLevelTypes.Add(notNestedType);
+
             var result = new MemberCloner(targetModule)
-                .Include(sourceModule.TopLevelTypes.First(t => t.Name == "Program"))
+                .Include(programType,notNestedType)
                 .Clone();
 
-            foreach (var type in result.GetClonedTopLevelTypes())
+            var topLevelCloned = result.GetClonedTopLevelTypes();
+
+            Assert.True(result.OriginalMembers.Contains(nestedType));
+            Assert.True(result.ClonedMembers.Contains(result.GetClonedMember(nestedType)));
+            Assert.False(topLevelCloned.Contains(result.GetClonedMember(nestedType)));
+            Assert.True(topLevelCloned.Contains(result.GetClonedMember(notNestedType)));
+            Assert.True(topLevelCloned.Contains(result.GetClonedMember(programType)));
+
+            foreach (var type in topLevelCloned)
                 targetModule.TopLevelTypes.Add(type);
 
             targetModule.ManagedEntrypointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
