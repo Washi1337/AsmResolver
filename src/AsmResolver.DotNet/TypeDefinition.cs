@@ -590,6 +590,56 @@ namespace AsmResolver.DotNet
             set => _classLayout.Value = value;
         }
 
+        /// <summary>
+        /// Determines whether the type inherits from a particular type
+        /// </summary>
+        /// <param name="fullName">The full name of the type</param>
+        /// <returns>Whether the current <see cref="TypeDefinition"/> inherits the type</returns>
+        public bool InheritsFrom(string fullName)
+        {
+            var type = this;
+            do
+            {
+                if (type.FullName == fullName)
+                    return true;
+
+                var current = type;
+                type = type.BaseType?.Resolve();
+
+                // This prevents an issue where the base type is the same as itself
+                // ... so basically a cyclic dependency
+                if (current == type)
+                    return false;
+            } while (type is {});
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the type implements a particular interface
+        /// </summary>
+        /// <param name="fullName">The full name of the interface</param>
+        /// <returns>Whether the type implements the interface</returns>
+        public bool Implements(string fullName)
+        {
+            var type = this;
+            do
+            {
+                if (type.Interfaces.Any(@interface => @interface.Interface.FullName == fullName))
+                    return true;
+
+                var current = type;
+                type = type.BaseType?.Resolve();
+
+                // This prevents an issue where the base type is the same as itself
+                // ... so basically a cyclic dependency
+                if (current == type)
+                    return false;
+            } while (type is {});
+
+            return false;
+        }
+
         ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
         /// <inheritdoc />
