@@ -113,15 +113,13 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Include(programType,notNestedType)
                 .Clone();
 
-            var topLevelCloned = result.ClonedTopLevelTypes;
+            Assert.Contains(nestedType,result.OriginalMembers);
+            Assert.Contains(result.GetClonedMember(nestedType), result.ClonedMembers);
+            Assert.DoesNotContain(result.GetClonedMember(nestedType), result.ClonedTopLevelTypes);
+            Assert.Contains(result.GetClonedMember(notNestedType), result.ClonedTopLevelTypes);
+            Assert.Contains(result.GetClonedMember(programType), result.ClonedTopLevelTypes);
 
-            Assert.True(result.OriginalMembers.Contains(nestedType));
-            Assert.True(result.ClonedMembers.Contains(result.GetClonedMember(nestedType)));
-            Assert.False(topLevelCloned.Contains(result.GetClonedMember(nestedType)));
-            Assert.True(topLevelCloned.Contains(result.GetClonedMember(notNestedType)));
-            Assert.True(topLevelCloned.Contains(result.GetClonedMember(programType)));
-
-            foreach (var type in topLevelCloned)
+            foreach (var type in result.ClonedTopLevelTypes)
                 targetModule.TopLevelTypes.Add(type);
 
             targetModule.ManagedEntrypointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
