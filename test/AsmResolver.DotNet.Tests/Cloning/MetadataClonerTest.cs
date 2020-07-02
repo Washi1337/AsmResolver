@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
 
             Assert.True(result.ContainsClonedMember(originalTypeDef));
             Assert.Equal(clonedType, result.GetClonedMember(originalTypeDef));
-            Assert.Equal(clonedType, result.GetClonedTopLevelTypes().First());
+            Assert.Equal(clonedType, result.ClonedTopLevelTypes.First());
 
             return clonedType;
         }
@@ -113,7 +113,7 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Include(programType,notNestedType)
                 .Clone();
 
-            var topLevelCloned = result.GetClonedTopLevelTypes();
+            var topLevelCloned = result.ClonedTopLevelTypes;
 
             Assert.True(result.OriginalMembers.Contains(nestedType));
             Assert.True(result.ClonedMembers.Contains(result.GetClonedMember(nestedType)));

@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Cloning
     public class MemberCloneResult
     {
         private readonly IDictionary<IMemberDescriptor, IMemberDescriptor> _clonedMembers;
-        private readonly IList<TypeDefinition> _topLevelTypes;
+        private readonly ICollection<TypeDefinition> _topLevelTypes;
 
         /// <summary>
         /// Creates a new instance of the <see cref="MemberCloneResult"/> class.
@@ -20,26 +20,27 @@ namespace AsmResolver.DotNet.Cloning
         public MemberCloneResult(IDictionary<IMemberDescriptor, IMemberDescriptor> clonedMembers)
         {
             _clonedMembers = clonedMembers ?? throw new ArgumentNullException(nameof(clonedMembers));
-            ClonedMembers = new List<IMemberDescriptor>(clonedMembers.Values);
-            OriginalMembers = new List<IMemberDescriptor>(clonedMembers.Keys);
-            _topLevelTypes = clonedMembers.Values.OfType<TypeDefinition>().Where(type => !type.IsNested).ToList();
+            _topLevelTypes = clonedMembers.Values
+                .OfType<TypeDefinition>()
+                .Where(type => !type.IsNested)
+                .ToList()
+                .AsReadOnly();
         }
 
         /// <summary>
         /// Gets a collection of all cloned members.
         /// </summary>
-        public ICollection<IMemberDescriptor> ClonedMembers
-        {
-            get;
-        }
+        public ICollection<IMemberDescriptor> ClonedMembers => _clonedMembers.Values;
 
         /// <summary>
         /// Gets a collection of all original members.
         /// </summary>
-        public ICollection<IMemberDescriptor> OriginalMembers
-        {
-            get;
-        }
+        public ICollection<IMemberDescriptor> OriginalMembers => _clonedMembers.Keys;
+
+        /// <summary>
+        /// Gets a collection of all cloned members of type <see cref="TypeDefinition"/> that are not nested.
+        /// </summary>
+        public ICollection<TypeDefinition> ClonedTopLevelTypes => _topLevelTypes;
 
         /// <summary>
         /// Verifies if the <paramref name="originalMember"/> is cloned by the <see cref="MemberCloner"/>.
@@ -59,15 +60,6 @@ namespace AsmResolver.DotNet.Cloning
             if (!_clonedMembers.ContainsKey(originalMember))
                 throw new ArgumentOutOfRangeException(nameof(originalMember));
             return (T)_clonedMembers[originalMember];
-        }
-
-        /// <summary>
-        /// Gets all cloned members of type <see cref="TypeDefinition"/> that are not nested.
-        /// </summary>
-        /// <returns>List of the top level <see cref="TypeDefinition"/></returns>
-        public IList<TypeDefinition> GetClonedTopLevelTypes()
-        {
-            return _topLevelTypes;
         }
     }
 }
