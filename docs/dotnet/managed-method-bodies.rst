@@ -141,7 +141,7 @@ Finding instructions by offset
 
 Instructions stored in a method body are indexed not by offset, but by order of occurrence. If it is required to find an instruction by offset, it is possible to use the ``Instructions.GetByOffset(int)`` method, which performs a binary search (O(log(n))) and is faster than a linear search (O(n)) such as a for loop or using a construction like ``.First(i => i.Offset == offset)`` provided by ``System.Linq``. 
 
-For ``GetByOffset`` to work, it is required that all offsets in the instruction collection are up to date. Recalculating all offsets within an instructino collection can be done through ``Instructions.CalculateOffsets()``.
+For ``GetByOffset`` to work, it is required that all offsets in the instruction collection are up to date. Recalculating all offsets within an instruction collection can be done through ``Instructions.CalculateOffsets()``.
 
 .. code-block:: csharp
 
