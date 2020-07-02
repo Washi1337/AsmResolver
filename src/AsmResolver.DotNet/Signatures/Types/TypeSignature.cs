@@ -218,6 +218,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 
                 case ElementType.Object:
                     writer.WriteByte((byte) ElementType.Boxed);
+                    
                     break;
                 
                 case ElementType.SzArray:

@@ -58,6 +58,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void FixedMultipleArguments()
         {
         }
+
+        [TestCase((object) 2448)]
+        public void FixedBoxedIntArgument()
+        {
+        }
         
         [TestCase(IntValue = 2)]
         public void NamedInt32Argument()

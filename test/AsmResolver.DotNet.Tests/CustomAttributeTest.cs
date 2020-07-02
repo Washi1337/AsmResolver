@@ -242,5 +242,16 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.True(setMethod.IsCompilerGenerated());
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BoxedIntFixedArgument(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedBoxedIntArgument), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+            Assert.Equal(2448, argument.Element.Value);
+        }
+
     }
 }
