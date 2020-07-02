@@ -349,9 +349,19 @@ namespace AsmResolver.DotNet.Code.Cil
             agenda.Push(new StackState(0, 0));
             foreach (var handler in ExceptionHandlers)
             {
+                // Determine stack size at the start of the handler block.
+                int stackDelta = handler.HandlerType switch
+                {
+                    CilExceptionHandlerType.Exception => 1,
+                    CilExceptionHandlerType.Filter => 1,
+                    CilExceptionHandlerType.Finally => 0,
+                    CilExceptionHandlerType.Fault => 0,
+                    _ => throw new ArgumentOutOfRangeException(nameof(handler.HandlerType))
+                };
+                
                 agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.TryStart.Offset), 0));
-                agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.HandlerStart.Offset),
-                    handler.HandlerType == CilExceptionHandlerType.Finally ? 0 : 1));
+                agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.HandlerStart.Offset), stackDelta));
+                
                 if (handler.FilterStart != null)
                     agenda.Push(new StackState(Instructions.GetIndexByOffset(handler.FilterStart.Offset), 1));
             }
