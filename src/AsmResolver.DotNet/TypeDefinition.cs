@@ -604,7 +604,7 @@ namespace AsmResolver.DotNet
                     return true;
 
                 var current = type;
-                type = type.BaseType.Resolve();
+                type = type.BaseType?.Resolve();
 
                 // This prevents an issue where the base type is the same as itself
                 // ... so basically a cyclic dependency
@@ -629,7 +629,7 @@ namespace AsmResolver.DotNet
                     return true;
 
                 var current = type;
-                type = type.BaseType.Resolve();
+                type = type.BaseType?.Resolve();
 
                 // This prevents an issue where the base type is the same as itself
                 // ... so basically a cyclic dependency
