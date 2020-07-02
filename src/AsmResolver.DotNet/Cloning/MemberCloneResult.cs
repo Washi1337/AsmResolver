@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Cloning
         /// <returns>Cloned <see cref="IMemberDescriptor"/></returns>
         public IMemberDescriptor GetClonedMember(IMemberDescriptor originalMember)
         {
-            if (clonedMembers.ContainsKey(originalMember))
+            if (!clonedMembers.ContainsKey(originalMember))
                 throw new ArgumentOutOfRangeException(nameof(originalMember));
             return clonedMembers[originalMember];
         }
