@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override GenericParameter GetOwner()
         {
-            var token = _parentModule.GetGenericParameterConstraintOwner(_row.Owner);
+            var token = _parentModule.GetGenericParameterConstraintOwner(MetadataToken.Rid);
             return _parentModule.TryLookupMember(token, out var member)
                 ? member as GenericParameter
                 : null;

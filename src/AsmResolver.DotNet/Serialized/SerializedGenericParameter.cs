@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<GenericParameterConstraint> GetConstraints()
         {
             var result = new OwnedCollection<GenericParameter, GenericParameterConstraint>(this);
-            
+
             foreach (uint rid in _parentModule.GetGenericParameterConstraints(MetadataToken))
             {
                 var constraintToken = new MetadataToken(TableIndex.GenericParamConstraint, rid);
