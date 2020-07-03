@@ -36,6 +36,14 @@ namespace AsmResolver.DotNet.Tests
             var assemblyRef = new AssemblyReference(assemblyDef);
 
             Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef), _comparer);
+
+            resolver.ClearCache();
+            resolver.AddToCache(assemblyRef, assemblyDef);
+            Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef));
+
+            resolver.RemoveFromCache(assemblyRef);
+            Assert.NotEqual(assemblyDef, resolver.Resolve(assemblyRef));
+
         }
     }
 }

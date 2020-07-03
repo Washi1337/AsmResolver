@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Signatures;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,6 +16,9 @@ namespace AsmResolver.DotNet
 
         private readonly IDictionary<AssemblyDescriptor, AssemblyDefinition> _cache 
             = new Dictionary<AssemblyDescriptor, AssemblyDefinition>();
+
+        private static readonly SignatureComparer _signatureComparer 
+            = new SignatureComparer() { IgnoreAssemblyVersionNumbers = false};
 
         /// <summary>
         /// Gets a collection of custom search directories that are probed upon resolving a reference
@@ -35,6 +40,33 @@ namespace AsmResolver.DotNet
                 _cache.Add(assembly, assemblyDef);
 
             return assemblyDef;
+        }
+
+        /// <inheritdoc />
+        public void AddToCache(AssemblyDescriptor descriptor, AssemblyDefinition definition)
+        {
+            if (_cache.ContainsKey(descriptor))
+                throw new ArgumentException($"The cache already contains an entry of assembly {descriptor.FullName}.", nameof(descriptor));
+
+            if(!_signatureComparer.Equals(descriptor, definition))
+                throw new ArgumentException("Assembly descriptor and definition do not refer to the same assembly.");
+
+            _cache.Add(descriptor, definition);
+        }  
+
+        /// <inheritdoc />
+        public void RemoveFromCache(AssemblyDescriptor descriptor)
+        {
+            if (!_cache.ContainsKey(descriptor))
+                throw new ArgumentOutOfRangeException(nameof(descriptor));
+
+            _cache.Remove(descriptor);
+        }
+
+        /// <inheritdoc />
+        public void ClearCache()
+        {
+            _cache.Clear(); 
         }
 
         /// <summary>
