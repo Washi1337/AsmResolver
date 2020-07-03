@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet.Cloning
             CreateMemberStubs(context);
             DeepCopyMembers(context);
 
-            return new MemberCloneResult(context.ClonedMembers.Values);
+            return new MemberCloneResult(context.ClonedMembers);
         }
 
         private void CreateMemberStubs(MemberCloneContext context)

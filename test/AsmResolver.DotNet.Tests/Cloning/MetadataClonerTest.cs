@@ -44,9 +44,15 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Include(originalTypeDef)
                 .Clone();
 
-            return result.ClonedMembers
+            var clonedType =  result.ClonedMembers
                 .OfType<TypeDefinition>()
                 .First();
+
+            Assert.True(result.ContainsClonedMember(originalTypeDef));
+            Assert.Equal(clonedType, result.GetClonedMember(originalTypeDef));
+            Assert.Equal(clonedType, result.ClonedTopLevelTypes.First());
+
+            return clonedType;
         }
         
         private static MethodDefinition CloneMethod(MethodBase methodBase, out MethodDefinition originalMethodDef)
@@ -60,7 +66,12 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Include(originalMethodDef)
                 .Clone();
 
+
             var clonedMethod = (MethodDefinition) result.ClonedMembers.First();
+
+            Assert.True(result.ContainsClonedMember(originalMethodDef));
+            Assert.Equal(clonedMethod, result.GetClonedMember(originalMethodDef));
+
             return clonedMethod;
         }
         
@@ -78,6 +89,10 @@ namespace AsmResolver.DotNet.Tests.Cloning
                 .Clone();
 
             var clonedField = (FieldDefinition) result.ClonedMembers.First();
+
+            Assert.True(result.ContainsClonedMember(originalFieldDef));
+            Assert.Equal(clonedField, result.GetClonedMember(originalFieldDef));
+
             return clonedField;
         }
 
@@ -87,11 +102,24 @@ namespace AsmResolver.DotNet.Tests.Cloning
             var sourceModule = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var targetModule = PrepareTempModule();
 
+            var programType = sourceModule.TopLevelTypes.First(t => t.Name == "Program");
+            var nestedType = new TypeDefinition("", "Nested", PE.DotNet.Metadata.Tables.Rows.TypeAttributes.NestedPublic);
+            programType.NestedTypes.Add(nestedType);
+
+            var notNestedType = new TypeDefinition("", "NotNested", PE.DotNet.Metadata.Tables.Rows.TypeAttributes.Public);
+            sourceModule.TopLevelTypes.Add(notNestedType);
+
             var result = new MemberCloner(targetModule)
-                .Include(sourceModule.TopLevelTypes.First(t => t.Name == "Program"))
+                .Include(programType,notNestedType)
                 .Clone();
 
-            foreach (var type in result.ClonedMembers.OfType<TypeDefinition>())
+            Assert.Contains(nestedType,result.OriginalMembers);
+            Assert.Contains(result.GetClonedMember(nestedType), result.ClonedMembers);
+            Assert.DoesNotContain(result.GetClonedMember(nestedType), result.ClonedTopLevelTypes);
+            Assert.Contains(result.GetClonedMember(notNestedType), result.ClonedTopLevelTypes);
+            Assert.Contains(result.GetClonedMember(programType), result.ClonedTopLevelTypes);
+
+            foreach (var type in result.ClonedTopLevelTypes)
                 targetModule.TopLevelTypes.Add(type);
 
             targetModule.ManagedEntrypointMethod = (MethodDefinition) result.ClonedMembers.First(m => m.Name == "Main");
