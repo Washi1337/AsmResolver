@@ -55,19 +55,13 @@ namespace AsmResolver.DotNet
         }  
 
         /// <inheritdoc />
-        public void RemoveFromCache(AssemblyDescriptor descriptor)
-        {
-            if (!_cache.ContainsKey(descriptor))
-                throw new ArgumentOutOfRangeException(nameof(descriptor));
-
-            _cache.Remove(descriptor);
-        }
+        public bool RemoveFromCache(AssemblyDescriptor descriptor) => _cache.Remove(descriptor);
 
         /// <inheritdoc />
-        public void ClearCache()
-        {
-            _cache.Clear(); 
-        }
+        public bool HasCached(AssemblyDescriptor descriptor) => _cache.ContainsKey(descriptor);
+
+        /// <inheritdoc />
+        public void ClearCache() => _cache.Clear();
 
         /// <summary>
         /// Resolves a new unseen reference to an assembly.
