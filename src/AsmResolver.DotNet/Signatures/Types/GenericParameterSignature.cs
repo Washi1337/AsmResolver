@@ -37,8 +37,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         public override ElementType ElementType => ParameterType switch
         {
-            GenericParameterType.Type => ElementType.MVar,
-            GenericParameterType.Method => ElementType.Var,
+            GenericParameterType.Type => ElementType.Var,
+            GenericParameterType.Method => ElementType.MVar,
             _ => throw new ArgumentOutOfRangeException()
         };
 
