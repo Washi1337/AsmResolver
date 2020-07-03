@@ -46,18 +46,21 @@ namespace AsmResolver.DotNet
         public void AddToCache(AssemblyDescriptor descriptor, AssemblyDefinition definition)
         {
             if (_cache.ContainsKey(descriptor))
-                throw new ArgumentException($"The cache already contains an entry of assembly {descriptor.FullName}.",nameof(descriptor));
+                throw new ArgumentException($"The cache already contains an entry of assembly {descriptor.FullName}.", nameof(descriptor));
+
             if(!_signatureComparer.Equals(descriptor, definition))
                 throw new ArgumentException("Assembly descriptor and definition do not refer to the same assembly.");
+
             _cache.Add(descriptor, definition);
         }  
 
         /// <inheritdoc />
-        public void RemoveFromCache(AssemblyDescriptor assembly)
+        public void RemoveFromCache(AssemblyDescriptor descriptor)
         {
-            if (!_cache.ContainsKey(assembly))
-                throw new ArgumentOutOfRangeException(nameof(assembly));
-            _cache.Remove(assembly);
+            if (!_cache.ContainsKey(descriptor))
+                throw new ArgumentOutOfRangeException(nameof(descriptor));
+
+            _cache.Remove(descriptor);
         }
 
         /// <inheritdoc />

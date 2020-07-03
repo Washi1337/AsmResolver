@@ -12,10 +12,22 @@ namespace AsmResolver.DotNet
         /// <returns>The resolved assembly, or <c>null</c> if the resolution failed.</returns>
         AssemblyDefinition Resolve(AssemblyDescriptor assembly);
 
-        void AddToCache(AssemblyDescriptor assembly, AssemblyDefinition definition);
+        /// <summary>
+        /// Adds the assembly to the cache.
+        /// </summary>
+        /// <param name="descriptor">The reference to the assembly.</param>
+        /// <param name="definition">The assembly.</param>
+        void AddToCache(AssemblyDescriptor descriptor, AssemblyDefinition definition);
 
-        void RemoveFromCache(AssemblyDescriptor assembly);
+        /// <summary>
+        /// Removees the assembly from the cache.
+        /// </summary>
+        /// <param name="descriptor">The reference to the assembly.</param>
+        void RemoveFromCache(AssemblyDescriptor descriptor);
 
+        /// <summary>
+        /// Clears the cache.
+        /// </summary>
         void ClearCache();
     }
 }
