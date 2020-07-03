@@ -167,15 +167,13 @@ namespace AsmResolver.DotNet.Cloning
                     break;
 
                 case CilOperandType.InlineSig:
-                    clonedInstruction.Operand = instruction.Operand switch
-                    {
-                        FieldSignature signature => context.Importer.ImportFieldSignature(signature),
-                        GenericInstanceMethodSignature _ => throw new NotImplementedException(),
-                        LocalVariablesSignature _ => throw new NotImplementedException(),
-                        MethodSignature signature => context.Importer.ImportMethodSignature(signature),
-                        PropertySignature signature => context.Importer.ImportPropertySignature(signature),
-                        _ =>  throw new NotImplementedException()
-                    };
+                    if (instruction.Operand is StandAloneSignature standalone
+                        && standalone.Signature is MethodSignature methodSignature)
+                        instruction.Operand =
+                            new StandAloneSignature(
+                                context.Importer.ImportMethodSignature(methodSignature));
+                    else
+                        throw new NotImplementedException();
                     break;
                 case CilOperandType.InlineTok:
                     clonedInstruction.Operand = CloneInlineTokOperand(context, instruction);
