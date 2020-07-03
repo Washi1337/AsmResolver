@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Cloning
@@ -166,8 +167,16 @@ namespace AsmResolver.DotNet.Cloning
                     break;
 
                 case CilOperandType.InlineSig:
-                    throw new NotImplementedException();
-
+                    clonedInstruction.Operand = instruction.Operand switch
+                    {
+                        FieldSignature signature => context.Importer.ImportFieldSignature(signature),
+                        GenericInstanceMethodSignature _ => throw new NotImplementedException(),
+                        LocalVariablesSignature _ => throw new NotImplementedException(),
+                        MethodSignature signature => context.Importer.ImportMethodSignature(signature),
+                        PropertySignature signature => context.Importer.ImportPropertySignature(signature),
+                        _ =>  throw new NotImplementedException()
+                    };
+                    break;
                 case CilOperandType.InlineTok:
                     clonedInstruction.Operand = CloneInlineTokOperand(context, instruction);
                     break;
