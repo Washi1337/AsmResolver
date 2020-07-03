@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet
         void AddToCache(AssemblyDescriptor descriptor, AssemblyDefinition definition);
 
         /// <summary>
-        /// Removees the assembly from the cache.
+        /// Removes the assembly from the cache.
         /// </summary>
         /// <param name="descriptor">The reference to the assembly.</param>
         void RemoveFromCache(AssemblyDescriptor descriptor);
