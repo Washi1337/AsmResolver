@@ -116,9 +116,21 @@ Injecting the cloned members
 
 After cloning, we obtain a ``MemberCloneResult``, which contains a register of all members cloned by the member cloner.
 
+- ``OriginalMembers``: The collection containing all original members.
+- ``ClonedMembers``: The collection containing all cloned members.
+- ``ClonedTopLevelTypes``: A subset of ``ClonedMembers``, containing all cloned top-level types.
+
+Original members can be mapped to their cloned counterpart, using the ``GetClonedMember`` method:
+
 .. code-block:: csharp
 
-    var clonedTypes = result.ClonedMembers.OfType<TypeDefinition>();
+    var clonedRectangleType = result.GetClonedMember(rectangleType);
+
+Alternatively, we can get all cloned top-level types.
+
+.. code-block:: csharp
+
+    var clonedTypes = result.ClonedTopLevelTypes;
 
 It is important to note that the ``MemberCloner`` class itself does not inject any of the cloned members. To inject the cloned types, we can for instance add them to the ``ModuleDefinition.TopLevelTypes`` collection:
 

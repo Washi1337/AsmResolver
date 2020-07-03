@@ -9,22 +9,22 @@ namespace AsmResolver.DotNet.Code.Cil
         /// Indicates the protected region defines a standard exception handler block that catches any exception from
         /// a specific exception type. 
         /// </summary>
-        Exception,
+        Exception = 0,
         
         /// <summary>
         /// Indicates the protected region defines an exception handler that catches any exception that passes a filter.
         /// </summary>
-        Filter,
+        Filter = 1,
         
         /// <summary>
         /// Indicates the protected region defines a block of code that is always finalized by a finally clause.
         /// </summary>
-        Finally,
+        Finally = 2,
         
         /// <summary>
         /// Indicates the protected region defines a block of code that is finalized by a fault clause if there
         /// occurred an exception.
         /// </summary>
-        Fault
+        Fault = 4
     }
 }

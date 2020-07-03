@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var stream = new MemoryStream();
             type.Module.Write(stream);
-            
+
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             return newModule.TopLevelTypes.FirstOrDefault(t => t.FullName == type.FullName);
         }
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Tests
             foreach (var type in module.TopLevelTypes)
                 Assert.Same(module, type.Module);
         }
-        
+
         [Fact]
         public void ReadName()
         {
@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Tests
         public void NameIsPersistentAfterRebuild()
         {
             const string newName = "SomeType";
-            
+
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var type = module.TopLevelTypes.First(t => t.Name == "Program");
             type.Name = newName;
@@ -72,7 +72,7 @@ namespace AsmResolver.DotNet.Tests
         public void NonNullNamespaceIsPersistentAfterRebuild()
         {
             const string newNameSpace = "SomeNamespace";
-            
+
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var type = module.TopLevelTypes.First(t => t.Name == "Program");
             type.Namespace = newNameSpace;
@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet.Tests
                 nameof(TopLevelClass2.Nested4.Nested4Nested1),
                 nameof(TopLevelClass2.Nested4.Nested4Nested2)
             }, nested4.NestedTypes.Select(t => t.Name));
-            
+
             Assert.Same(class1, nested1.DeclaringType);
             Assert.Same(class1, nested2.DeclaringType);
             Assert.Same(class2, nested3.DeclaringType);
@@ -191,7 +191,7 @@ namespace AsmResolver.DotNet.Tests
             var type = module.TopLevelTypes.First(t => t.Name == nameof(SingleField));
             Assert.Equal(new[]
             {
-                nameof(SingleField.IntField), 
+                nameof(SingleField.IntField),
             }, type.Fields.Select(p => p.Name));
         }
 
@@ -242,7 +242,7 @@ namespace AsmResolver.DotNet.Tests
             var newType = RebuildAndLookup(type);
             Assert.Empty(newType.Methods);
         }
-        
+
         [Fact]
         public void ReadSingleMethod()
         {
@@ -304,7 +304,7 @@ namespace AsmResolver.DotNet.Tests
             var newType = RebuildAndLookup(type);
             Assert.Empty(newType.Properties);
         }
-        
+
         [Fact]
         public void ReadSingleProperty()
         {
@@ -369,7 +369,7 @@ namespace AsmResolver.DotNet.Tests
             var newType = RebuildAndLookup(type);
             Assert.Empty(newType.Events);
         }
-        
+
         [Fact]
         public void ReadSingleEvent()
         {
@@ -427,7 +427,7 @@ namespace AsmResolver.DotNet.Tests
             var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
             Assert.Single(type.CustomAttributes);
         }
-        
+
         [Fact]
         public void ReadGenericParameters()
         {
@@ -456,7 +456,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new HashSet<string>(new[]
             {
                 nameof(IInterface1), nameof(IInterface2),
-            }), new HashSet<string>(newType.Interfaces.Select(i => i.Interface.Name)));   
+            }), new HashSet<string>(newType.Interfaces.Select(i => i.Interface.Name)));
         }
 
         [Fact]
@@ -483,7 +483,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var module = ModuleDefinition.FromFile(typeof(ExplicitSizeStruct).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(ExplicitSizeStruct));
-            
+
             Assert.NotNull(type.ClassLayout);
             Assert.Equal(100u, type.ClassLayout.ClassSize);
         }
@@ -494,11 +494,31 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(ExplicitSizeStruct).Assembly.Location);
             var type = module.TopLevelTypes.First(t => t.Name == nameof(ExplicitSizeStruct));
             var newType = RebuildAndLookup(type);
-            
+
             Assert.NotNull(newType.ClassLayout);
             Assert.Equal(100u, newType.ClassLayout.ClassSize);
         }
-        
-        
+
+        [Fact]
+        public void InheritanceMultipleLevels()
+        {
+            var module = ModuleDefinition.FromFile(typeof(DerivedDerivedClass).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedDerivedClass));
+
+            Assert.True(type.InheritsFrom(typeof(AbstractClass).FullName));
+            Assert.False(type.InheritsFrom(typeof(Class).FullName));
+        }
+
+        [Fact]
+        public void InterfaceImplementedFromInheritanceHierarchy()
+        {
+            var module = ModuleDefinition.FromFile(typeof(DerivedInterfaceImplementations).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(DerivedInterfaceImplementations));
+
+            Assert.True(type.Implements(typeof(IInterface1).FullName));
+            Assert.True(type.Implements(typeof(IInterface2).FullName));
+            Assert.True(type.Implements(typeof(IInterface3).FullName));
+            Assert.False(type.Implements(typeof(IInterface4).FullName));
+        }
     }
 }

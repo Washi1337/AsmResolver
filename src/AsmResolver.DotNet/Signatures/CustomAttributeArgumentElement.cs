@@ -154,7 +154,11 @@ namespace AsmResolver.DotNet.Signatures
                     writer.WriteSerString(value as string);
                     break;
                 case ElementType.Object:
-                    throw new NotImplementedException();
+                    var valueType = value.GetType();
+                    var innerTypeSig = argumentType.Module.CorLibTypeFactory.FromName(valueType.Namespace, valueType.Name);
+                    TypeSignature.WriteFieldOrPropType(writer, innerTypeSig);
+                    WriteValue(writer, innerTypeSig, provider, value);
+                    break;
                     
                 case ElementType.Class:
                 case ElementType.Enum:
