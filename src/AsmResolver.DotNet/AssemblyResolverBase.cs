@@ -1,3 +1,4 @@
+using AsmResolver.DotNet.Signatures;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +16,9 @@ namespace AsmResolver.DotNet
 
         private readonly IDictionary<AssemblyDescriptor, AssemblyDefinition> _cache 
             = new Dictionary<AssemblyDescriptor, AssemblyDefinition>();
+
+        private static readonly SignatureComparer _signatureComparer 
+            = new SignatureComparer() { IgnoreAssemblyVersionNumbers = false};
 
         /// <summary>
         /// Gets a collection of custom search directories that are probed upon resolving a reference
@@ -38,14 +42,28 @@ namespace AsmResolver.DotNet
             return assemblyDef;
         }
 
+        /// <inheritdoc />
+        public void AddToCache(AssemblyDescriptor descriptor, AssemblyDefinition definition)
+        {
+            if (_cache.ContainsKey(descriptor))
+                throw new ArgumentException($"The cache already contains an entry of assembly {descriptor.FullName}.",nameof(descriptor));
+            if(!_signatureComparer.Equals(descriptor, definition))
+                throw new ArgumentException("Assembly descriptor and definition do not refer to the same assembly.");
+            _cache.Add(descriptor, definition);
+        }  
 
         /// <inheritdoc />
-        public void Cache(AssemblyDescriptor reference, AssemblyDefinition assembly)
+        public void RemoveFromCache(AssemblyDescriptor assembly)
         {
-            if (_cache.ContainsKey(reference))
-                throw new ArgumentException(nameof(reference));
-            //TODO: check if reference is matching to assembly
-            _cache.Add(reference, assembly);
+            if (!_cache.ContainsKey(assembly))
+                throw new ArgumentOutOfRangeException(nameof(assembly));
+            _cache.Remove(assembly);
+        }
+
+        /// <inheritdoc />
+        public void ClearCache()
+        {
+            _cache.Clear(); 
         }
 
         /// <summary>
