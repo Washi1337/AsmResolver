@@ -74,9 +74,7 @@ namespace AsmResolver.DotNet.Builder
 
             // All types defs and refs are added to the buffer at this point. We can therefore safely start adding
             // TypeSpecs if they need to be preserved: 
-            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
-                ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec,
-                    buffer.GetTypeSpecificationToken);
+            ImportTypeAndMemberReferences(module, buffer);
 
             // Define all members in the added types.
             buffer.DefineFields(discoveryResult.Fields);
@@ -176,11 +174,17 @@ namespace AsmResolver.DotNet.Builder
 
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<TypeReference>(module, TableIndex.TypeRef, buffer.GetTypeReferenceToken);
-            
+        }
+
+        private void ImportTypeAndMemberReferences(ModuleDefinition module, DotNetDirectoryBuffer buffer)
+        {
+            if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveTypeSpecificationIndices) != 0)
+                ImportTableIntoTableBuffers<TypeSpecification>(module, TableIndex.TypeSpec, buffer.GetTypeSpecificationToken);
+
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMemberReferenceIndices) != 0)
                 ImportTableIntoTableBuffers<MemberReference>(module, TableIndex.MemberRef, buffer.GetMemberReferenceToken);
         }
-        
+
         private void ImportRemainingTablesIntoTableBuffersIfSpecified(ModuleDefinition module, DotNetDirectoryBuffer buffer)
         {
             if (module.DotNetDirectory is null)

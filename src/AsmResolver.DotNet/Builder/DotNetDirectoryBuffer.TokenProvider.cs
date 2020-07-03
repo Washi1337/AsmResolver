@@ -162,6 +162,10 @@ namespace AsmResolver.DotNet.Builder
         /// <inheritdoc />
         public MetadataToken GetTypeSpecificationToken(TypeSpecification type)
         {
+            if (type.MetadataToken == 0x1B000001)
+            {
+                
+            }
             AssertIsImported(type);
             
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
