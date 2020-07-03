@@ -249,7 +249,5 @@ namespace AsmResolver.DotNet.Tests
             var newContents = (IReadableSegment) newData.Contents;
             Assert.Equal(entryData, newContents.ToArray());
         }
-
-        
     }
 }

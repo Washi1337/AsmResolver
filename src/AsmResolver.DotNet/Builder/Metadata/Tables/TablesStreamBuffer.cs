@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
                 Distinct<ExportedTypeRow>(TableIndex.ExportedType),
                 Distinct<ManifestResourceRow>(TableIndex.ManifestResource),
                 Sorted<NestedClassRow>(TableIndex.NestedClass, 0),
-                Sorted<GenericParameterRow>(TableIndex.GenericParam, 2),
+                Sorted<GenericParameterRow>(TableIndex.GenericParam, 2, 0),
                 Distinct<MethodSpecificationRow>(TableIndex.MethodSpec),
                 Sorted<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint, 0),
             };
