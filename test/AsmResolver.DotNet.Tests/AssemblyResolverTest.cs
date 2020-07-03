@@ -38,7 +38,10 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef), _comparer);
 
             resolver.ClearCache();
+            Assert.False(resolver.HasCached(assemblyRef));
+            
             resolver.AddToCache(assemblyRef, assemblyDef);
+            Assert.True(resolver.HasCached(assemblyRef));
             Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef));
 
             resolver.RemoveFromCache(assemblyRef);
