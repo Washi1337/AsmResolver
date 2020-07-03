@@ -316,6 +316,42 @@ namespace AsmResolver.DotNet
             return result;
         }
 
+
+        /// <summary>
+        /// Imports the provided generic instance method signature into the module.
+        /// </summary>
+        /// <param name="signature">The method signature to import.</param>
+        /// <returns>The imported signature.</returns>
+        public virtual GenericInstanceMethodSignature ImportGenericInstanceMethodSignature(GenericInstanceMethodSignature signature)
+        {
+            if (signature is null)
+                throw new ArgumentNullException(nameof(signature));
+
+            var typeArguments = new TypeSignature[signature.TypeArguments.Count];
+            for (int i = 0; i < typeArguments.Length; i++)
+                typeArguments[i] = ImportTypeSignature(signature.TypeArguments[i]);
+
+            var result = new GenericInstanceMethodSignature(signature.Attributes, typeArguments);
+            return result;
+        }
+
+        /// <summary>
+        /// Imports the provided local variables signature into the module.
+        /// </summary>
+        /// <param name="signature">The method signature to import.</param>
+        /// <returns>The imported signature.</returns>
+        public virtual LocalVariablesSignature ImportLocalVariablesSignature(LocalVariablesSignature signature)
+        {
+            if (signature is null)
+                throw new ArgumentNullException(nameof(signature));
+            var variableTypes = new TypeSignature[signature.VariableTypes.Count];
+            for (int i = 0; i < variableTypes.Length; i++)
+                variableTypes[i] = ImportTypeSignature(signature.VariableTypes[i]);
+
+            var result = new LocalVariablesSignature(variableTypes);
+            return result;
+        }
+
         /// <summary>
         /// Imports a reference to a generic method instantiation into the module.
         /// </summary>

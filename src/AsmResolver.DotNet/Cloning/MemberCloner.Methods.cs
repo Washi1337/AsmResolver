@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Cloning
@@ -158,32 +159,42 @@ namespace AsmResolver.DotNet.Cloning
                     break;
 
                 case CilOperandType.InlineField:
-                    clonedInstruction.Operand = context.Importer.ImportField((IFieldDescriptor) instruction.Operand);
+                    clonedInstruction.Operand = context.Importer.ImportField((IFieldDescriptor)instruction.Operand);
                     break;
 
                 case CilOperandType.InlineMethod:
-                    clonedInstruction.Operand = context.Importer.ImportMethod((IMethodDescriptor) instruction.Operand);
+                    clonedInstruction.Operand = context.Importer.ImportMethod((IMethodDescriptor)instruction.Operand);
                     break;
 
                 case CilOperandType.InlineSig:
-                    throw new NotImplementedException();
-
+                    if (instruction.Operand is StandAloneSignature standalone)
+                    {
+                        instruction.Operand = new StandAloneSignature(standalone.Signature switch
+                        {
+                            MethodSignature signature => context.Importer.ImportMethodSignature(signature),
+                            GenericInstanceMethodSignature signature => context.Importer.ImportGenericInstanceMethodSignature(signature),
+                            _ => throw new NotImplementedException()
+                        });
+                    }
+                    else
+                        throw new NotImplementedException();
+                    break;
                 case CilOperandType.InlineTok:
                     clonedInstruction.Operand = CloneInlineTokOperand(context, instruction);
                     break;
 
                 case CilOperandType.InlineType:
-                    clonedInstruction.Operand = context.Importer.ImportType((ITypeDefOrRef) instruction.Operand);
+                    clonedInstruction.Operand = context.Importer.ImportType((ITypeDefOrRef)instruction.Operand);
                     break;
 
                 case CilOperandType.InlineVar:
                 case CilOperandType.ShortInlineVar:
-                    clonedInstruction.Operand = clonedBody.LocalVariables[((CilLocalVariable) instruction.Operand).Index];
+                    clonedInstruction.Operand = clonedBody.LocalVariables[((CilLocalVariable)instruction.Operand).Index];
                     break;
 
                 case CilOperandType.InlineArgument:
                 case CilOperandType.ShortInlineArgument:
-                    clonedInstruction.Operand = clonedBody.Owner.Parameters[((Parameter) instruction.Operand).Index];
+                    clonedInstruction.Operand = clonedBody.Owner.Parameters[((Parameter)instruction.Operand).Index];
                     break;
 
                 default:
