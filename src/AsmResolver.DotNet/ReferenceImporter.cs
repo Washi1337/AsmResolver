@@ -340,7 +340,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="signature">The method signature to import.</param>
         /// <returns>The imported signature.</returns>
-        public virtual GenericInstanceMethodSignature ImportGenericInstanceMethodSignature(LocalVariablesSignature signature)
+        public virtual LocalVariablesSignature ImportLocalVariablesSignature(LocalVariablesSignature signature)
         {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
@@ -348,7 +348,7 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < variableTypes.Length; i++)
                 variableTypes[i] = ImportTypeSignature(signature.VariableTypes[i]);
 
-            var result = new GenericInstanceMethodSignature(signature.Attributes, variableTypes);
+            var result = new LocalVariablesSignature(variableTypes);
             return result;
         }
 
