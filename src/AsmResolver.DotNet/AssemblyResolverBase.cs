@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,16 @@ namespace AsmResolver.DotNet
                 _cache.Add(assembly, assemblyDef);
 
             return assemblyDef;
+        }
+
+
+        /// <inheritdoc />
+        public void Cache(AssemblyDescriptor reference, AssemblyDefinition assembly)
+        {
+            if (_cache.ContainsKey(reference))
+                throw new ArgumentException(nameof(reference));
+            //TODO: check if reference is matching to assembly
+            _cache.Add(reference, assembly);
         }
 
         /// <summary>
