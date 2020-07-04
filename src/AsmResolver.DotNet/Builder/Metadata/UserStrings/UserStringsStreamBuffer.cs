@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         {
             uint offset = (uint) _rawStream.Length;
 
-            if (string.IsNullOrEmpty(value))
+            if (value is null)
             {
                 _writer.WriteByte(0);
                 return offset;
@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         /// <returns>The index of the user-string.</returns>
         public uint GetStringIndex(string value)
         {
-            if (string.IsNullOrEmpty(value))
+            if (value is null)
                 return 0;
 
             if (!_strings.TryGetValue(value, out uint offset))
