@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             return operand switch
             {
-                Parameter parameter => parameter.Index,
+                Parameter parameter => parameter.MethodSignatureIndex,
                 byte raw => raw,
                 ushort raw => raw,
                 _ => throw new NotSupportedException("Unsupported argument operand.")
