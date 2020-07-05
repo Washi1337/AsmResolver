@@ -309,7 +309,10 @@ namespace AsmResolver.DotNet.Cloning
         private Constant CloneConstant(MemberCloneContext context, Constant constant)
         {
             return constant != null
-                ? new Constant(constant.Type, new DataBlobSignature(constant.Value.Data))
+                ? new Constant(constant.Type, 
+                    constant.Value is null 
+                    ? null
+                    : new DataBlobSignature(constant.Value.Data))
                 : null;
         }
 
