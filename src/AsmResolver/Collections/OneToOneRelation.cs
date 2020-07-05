@@ -52,5 +52,9 @@ namespace AsmResolver.Collections
             _valueToKey.TryGetValue(value, out var key);
             return key;
         }
+
+        public IEnumerable<TKey> GetKeys() => _keyToValue.Keys;
+
+        public IEnumerable<TValue> GetValues() => _valueToKey.Keys;
     }
 }

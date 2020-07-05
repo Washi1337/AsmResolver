@@ -1,4 +1,5 @@
-﻿using AsmResolver.Collections;
+﻿using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -32,7 +33,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(type.Name),
                 Metadata.StringsStream.GetStringIndex(type.Namespace));
 
-            var token = table.Add(row, type.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, type);
             return token;
         }
@@ -103,7 +104,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(member.Name),
                 Metadata.BlobStream.GetBlobIndex(this, member.Signature));
             
-            var token = table.Add(row, member.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, member);
             return token;
         }
@@ -115,7 +116,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new StandAloneSignatureRow(
                 Metadata.BlobStream.GetBlobIndex(this, signature.Signature));
             
-            var token = table.Add(row, signature.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, signature);
             return token;
         }
@@ -137,7 +138,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Culture),
                 Metadata.BlobStream.GetBlobIndex(assembly.HashValue));
 
-            var token = table.Add(row, assembly.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, assembly);
             return token;
         }
@@ -154,7 +155,7 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetTable<ModuleReferenceRow>(TableIndex.ModuleRef);
 
             var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
-            var token = table.Add(row, reference.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, reference);
             return token;
         }
@@ -167,7 +168,7 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
             var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature));
             
-            var token = table.Add(row, type.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, type);
             return token;
         }
@@ -180,7 +181,7 @@ namespace AsmResolver.DotNet.Builder
                 AddMethodDefOrRef(method.Method),
                 Metadata.BlobStream.GetBlobIndex(this, method.Signature));
             
-            var token = table.Add(row, method.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, method);
             return token;
         }

@@ -72,12 +72,16 @@ namespace AsmResolver.DotNet.Builder
         /// <returns></returns>
         public IDotNetDirectory CreateDirectory()
         {
-            var directory = new DotNetDirectory();
-            directory.Metadata = Metadata.CreateMetadata();
-            directory.DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null;
-            directory.Entrypoint = GetEntrypoint();
-            directory.Flags = Module.Attributes;
-            return directory;
+            FinalizeInterfaces();
+            FinalizeGenericParameters();
+
+            return new DotNetDirectory
+            {
+                Metadata = Metadata.CreateMetadata(),
+                DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null,
+                Entrypoint = GetEntrypoint(),
+                Flags = Module.Attributes
+            };
         }
 
         private uint GetEntrypoint()
@@ -100,25 +104,6 @@ namespace AsmResolver.DotNet.Builder
 
             return entrypointToken.ToUInt32();
         }
-
-        private void AddCustomAttributes(MetadataToken ownerToken, IHasCustomAttribute provider)
-        {
-            foreach (var attribute in provider.CustomAttributes)
-                AddCustomAttribute(ownerToken, attribute);
-        }
-
-        private void AddCustomAttribute(MetadataToken ownerToken, CustomAttribute attribute)
-        {
-            var table = Metadata.TablesStream.GetTable<CustomAttributeRow>(TableIndex.CustomAttribute);
-
-            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
-            var row = new CustomAttributeRow(
-                encoder.EncodeToken(ownerToken),
-                AddCustomAttributeType(attribute.Constructor),
-                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature));
-
-            table.Add(row, attribute.MetadataToken.Rid);
-        }
         
         private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)
         {
@@ -126,9 +111,9 @@ namespace AsmResolver.DotNet.Builder
                 AddMethodSemantics(ownerToken, semantics);
         }
 
-        private MetadataToken AddMethodSemantics(MetadataToken ownerToken, MethodSemantics semantics)
+        private void AddMethodSemantics(MetadataToken ownerToken, MethodSemantics semantics)
         {
-            var table = Metadata.TablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
+            var table = Metadata.TablesStream.GetSortedTable<MethodSemantics, MethodSemanticsRow>(TableIndex.MethodSemantics);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
 
             var row = new MethodSemanticsRow(
@@ -137,36 +122,46 @@ namespace AsmResolver.DotNet.Builder
                 encoder.EncodeToken(ownerToken)
             );
 
-            var token = table.Add(row, semantics.MetadataToken.Rid);
-            return token;
+            table.Add(semantics, row);
         }
 
-        private void AddInterfaces(MetadataToken ownerToken, IEnumerable<InterfaceImplementation> interfaces)
+        private void DefineInterfaces(MetadataToken ownerToken, IEnumerable<InterfaceImplementation> interfaces)
         {
-            var table = Metadata.TablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
+            var table = Metadata.TablesStream.GetSortedTable<InterfaceImplementation, InterfaceImplementationRow>(TableIndex.InterfaceImpl);
 
             foreach (var implementation in interfaces)
             {
                 var row = new InterfaceImplementationRow(ownerToken.Rid, GetTypeDefOrRefIndex(implementation.Interface));
-                var token = table.Add(row, 0);
-                AddCustomAttributes(token, implementation);
+                table.Add(implementation, row);
             }
         }
 
-        private void AddGenericParameters(MetadataToken ownerToken, IHasGenericParameters provider)
+        private void FinalizeInterfaces()
         {
-            foreach (var parameter in provider.GenericParameters)
-                AddGenericParameter(ownerToken, parameter);
+            var table = Metadata.TablesStream.GetSortedTable<InterfaceImplementation, InterfaceImplementationRow>(TableIndex.InterfaceImpl);
+            table.Sort();
+
+            foreach (var member in table.GetMembers())
+            {
+                var newToken = table.GetNewToken(member);
+                AddCustomAttributes(newToken, member);
+            }
         }
 
-        private MetadataToken AddGenericParameter(MetadataToken ownerToken, GenericParameter parameter)
+        private void DefineGenericParameters(MetadataToken ownerToken, IHasGenericParameters provider)
+        {
+            foreach (var parameter in provider.GenericParameters)
+                DefineGenericParameter(ownerToken, parameter);
+        }
+
+        private void DefineGenericParameter(MetadataToken ownerToken, GenericParameter parameter)
         {
             if (parameter is null)
-                return 0;
+                return;
 
             AssertIsImported(parameter);
 
-            var table = Metadata.TablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
+            var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
             
             var row = new GenericParameterRow(
@@ -175,41 +170,49 @@ namespace AsmResolver.DotNet.Builder
                 encoder.EncodeToken(ownerToken),
                 Metadata.StringsStream.GetStringIndex(parameter.Name));
 
-            var token = table.Add(row, parameter.MetadataToken.Rid);
-            
-            AddCustomAttributes(token, parameter);
-
-            foreach (var constraint in parameter.Constraints)
-                AddGenericParameterConstraint(token, constraint);
-            
-            return token;
+            table.Add(parameter, row);
         }
 
-        private MetadataToken AddGenericParameterConstraint(MetadataToken ownerToken,
+        private void FinalizeGenericParameters()
+        {
+            var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
+            table.Sort();
+            
+            foreach (var member in table.GetMembers())
+            {
+                var token = table.GetNewToken(member);
+                AddCustomAttributes(token, member);
+
+                foreach (var constraint in member.Constraints)
+                    AddGenericParameterConstraint(token, constraint);
+            }
+        }
+        
+        private void AddGenericParameterConstraint(MetadataToken ownerToken,
             GenericParameterConstraint constraint)
         {
             if (constraint is null)
-                return 0;
+                return;
             
             var table = Metadata.TablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
             
-            var row = new GenericParameterConstraintRow(ownerToken.Rid, GetTypeDefOrRefIndex(constraint.Constraint));
+            var row = new GenericParameterConstraintRow(
+                ownerToken.Rid, 
+                GetTypeDefOrRefIndex(constraint.Constraint));
 
-            var token = table.Add(row, constraint.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, constraint);
-            
-            return token;
         }
 
-        private MetadataToken AddClassLayout(MetadataToken ownerToken, ClassLayout layout)
+        private void AddClassLayout(MetadataToken ownerToken, ClassLayout layout)
         {
             if (layout is null)
-                return MetadataToken.Zero;
+                return;
             
-            var table = Metadata.TablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
+            var table = Metadata.TablesStream.GetSortedTable<ClassLayout, ClassLayoutRow>(TableIndex.ClassLayout);
 
             var row = new ClassLayoutRow(layout.PackingSize, layout.ClassSize, ownerToken.Rid);
-            return table.Add(row, layout.MetadataToken.Rid);
+            table.Add(layout, row);
         }
     }
 }

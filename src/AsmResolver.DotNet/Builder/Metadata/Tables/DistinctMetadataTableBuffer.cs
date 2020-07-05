@@ -45,17 +45,17 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public MetadataToken Add(in TRow row, uint originalRid)
+        public MetadataToken Add(in TRow row)
         {
             if (!_entries.TryGetValue(row, out var token))
             {
-                token = _underlyingBuffer.Add(in row, originalRid);
+                token = _underlyingBuffer.Add(in row);
                 _entries.Add(row, token);
             }
 
             return token;
         }
-
+        
         /// <inheritdoc />
         public void FlushToTable() => _underlyingBuffer.FlushToTable();
 

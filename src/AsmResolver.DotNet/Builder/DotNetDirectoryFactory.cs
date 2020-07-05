@@ -89,7 +89,7 @@ namespace AsmResolver.DotNet.Builder
 
             // Finalize member definitions.
             buffer.FinalizeTypes();
-
+            
             // If module is the manifest module, include the assembly definition.
             if (module.Assembly?.ManifestModule == module)
                 buffer.DefineAssembly(module.Assembly);

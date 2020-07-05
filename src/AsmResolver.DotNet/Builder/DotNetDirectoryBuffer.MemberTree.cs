@@ -31,7 +31,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Name),
                 Metadata.StringsStream.GetStringIndex(assembly.Culture));
 
-            var token = table.Add(row, assembly.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, assembly);
             AddSecurityDeclarations(token, assembly);
         }
@@ -58,7 +58,7 @@ namespace AsmResolver.DotNet.Builder
                 guidStream.GetGuidIndex(module.EncId),
                 guidStream.GetGuidIndex(module.EncBaseId));
             
-            var token = table.Add(row, module.MetadataToken.Rid);
+            var token = table.Add(row);
             _moduleDefTokens[module] = token;
         }
 
@@ -106,7 +106,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(resource.Name),
                 AddImplementation(resource.Implementation));
 
-            var token = table.Add(row, resource.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, resource);
             return token;
         }
@@ -121,7 +121,7 @@ namespace AsmResolver.DotNet.Builder
         public void DefineTypes(IEnumerable<TypeDefinition> types)
         {
             var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
-            var nestedClassTable = Metadata.TablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
+            var nestedClassTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, NestedClassRow>(TableIndex.NestedClass);
             
             foreach (var type in types)
             {
@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet.Builder
                     0,
                     0);
 
-                var token = typeDefTable.Add(row, type.MetadataToken.Rid);
+                var token = typeDefTable.Add(row);
                 _typeDefTokens.Add(type, token);
 
                 if (type.IsNested)
@@ -150,7 +150,7 @@ namespace AsmResolver.DotNet.Builder
                         token.Rid,
                         enclosingTypeToken.Rid);
                     
-                    nestedClassTable.Add(nestedClassRow, 0);
+                    nestedClassTable.Add(type, nestedClassRow);
                 }
             }
         }
@@ -170,7 +170,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.StringsStream.GetStringIndex(field.Name),
                     Metadata.BlobStream.GetBlobIndex(this, field.Signature));
 
-                var token = table.Add(row, field.MetadataToken.Rid);
+                var token = table.Add(row);
                 _fieldTokens.Add(field, token);
             }
         }
@@ -193,7 +193,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.BlobStream.GetBlobIndex(this, method.Signature),
                     0);
 
-                var token = table.Add(row, method.MetadataToken.Rid);
+                var token = table.Add(row);
                 _methodTokens.Add(method, token);
             }
         }
@@ -213,7 +213,7 @@ namespace AsmResolver.DotNet.Builder
                     parameter.Sequence,
                     Metadata.StringsStream.GetStringIndex(parameter.Name));
 
-                var token = table.Add(row, parameter.MetadataToken.Rid);
+                var token = table.Add(row);
                 _parameterTokens.Add(parameter, token);
             }
         }
@@ -233,7 +233,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.StringsStream.GetStringIndex(property.Name),
                     Metadata.BlobStream.GetBlobIndex(this, property.Signature));
                 
-                var token = table.Add(row, property.MetadataToken.Rid);
+                var token = table.Add(row);
                 _propertyTokens.Add(property, token);
             }
         }
@@ -253,7 +253,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.StringsStream.GetStringIndex(@event.Name),
                     GetTypeDefOrRefIndex(@event.EventType));
                 
-                var token = table.Add(row, @event.MetadataToken.Rid);
+                var token = table.Add(row);
                 _eventTokens.Add(@event, token);
             }
         }
@@ -304,9 +304,9 @@ namespace AsmResolver.DotNet.Builder
                 // Add remaining metadata:
                 AddCustomAttributes(typeToken, type);
                 AddSecurityDeclarations(typeToken, type);
-                AddInterfaces(typeToken, type.Interfaces);
+                DefineInterfaces(typeToken, type.Interfaces);
                 AddMethodImplementations(typeToken, type.MethodImplementations);
-                AddGenericParameters(typeToken, type);
+                DefineGenericParameters(typeToken, type);
                 AddClassLayout(typeToken, type.ClassLayout);
             }
             
@@ -341,14 +341,14 @@ namespace AsmResolver.DotNet.Builder
                 if (newToken.Rid != pointerTable.Count + 1)
                     fieldPtrRequired = true;
                 
-                pointerTable.Add(new FieldPointerRow(newToken.Rid), 0);
+                pointerTable.Add(new FieldPointerRow(newToken.Rid));
 
                 AddCustomAttributes(newToken, field);
                 AddConstant(newToken, field.Constant);
                 AddImplementationMap(newToken, field.ImplementationMap);
-                AddFieldRva(newToken, field.FieldRva);
-                AddFieldLayout(newToken, field.FieldOffset);
-                AddFieldMarshal(newToken, field.MarshalDescriptor);
+                AddFieldRva(newToken, field);
+                AddFieldLayout(newToken, field);
+                AddFieldMarshal(newToken, field);
             }
         }
         
@@ -375,7 +375,7 @@ namespace AsmResolver.DotNet.Builder
                 if (newToken.Rid != pointerTable.Count + 1)
                     methodPtrRequired = true;
                 
-                pointerTable.Add(new MethodPointerRow(newToken.Rid), 0);
+                pointerTable.Add(new MethodPointerRow(newToken.Rid));
                 
                 var row = definitionTable[newToken.Rid];
                 definitionTable[newToken.Rid] = new MethodDefinitionRow(
@@ -391,7 +391,7 @@ namespace AsmResolver.DotNet.Builder
                 AddCustomAttributes(newToken, method);
                 AddSecurityDeclarations(newToken, method);
                 AddImplementationMap(newToken, method.ImplementationMap);
-                AddGenericParameters(newToken, method);
+                DefineGenericParameters(newToken, method);
             }
         }
 
@@ -413,11 +413,11 @@ namespace AsmResolver.DotNet.Builder
                 if (newToken.Rid != pointerTable.Count + 1)
                     paramPtrRequired = true;
                 
-                pointerTable.Add(new ParameterPointerRow(newToken.Rid), 0);
+                pointerTable.Add(new ParameterPointerRow(newToken.Rid));
                 
                 AddCustomAttributes(newToken, parameter);
                 AddConstant(newToken, parameter.Constant);
-                AddFieldMarshal(newToken, parameter.MarshalDescriptor);
+                AddFieldMarshal(newToken, parameter);
             }
 
             paramList += (uint) method.ParameterDefinitions.Count;
@@ -429,7 +429,7 @@ namespace AsmResolver.DotNet.Builder
             if (type.Properties.Count == 0)
                 return;
             
-            var mapTable = Metadata.TablesStream.GetTable<PropertyMapRow>(TableIndex.PropertyMap);
+            var mapTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, PropertyMapRow>(TableIndex.PropertyMap);
             var pointerTable = Metadata.TablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr);
 
             for (int i = 0; i < type.Properties.Count; i++)
@@ -446,7 +446,7 @@ namespace AsmResolver.DotNet.Builder
                 if (newToken.Rid != pointerTable.Count + 1)
                     propertyPtrRequired = true;
                 
-                pointerTable.Add(new PropertyPointerRow(newToken.Rid), 0);
+                pointerTable.Add(new PropertyPointerRow(newToken.Rid));
                 
                 AddCustomAttributes(newToken, property);
                 AddMethodSemantics(newToken, property);
@@ -454,7 +454,7 @@ namespace AsmResolver.DotNet.Builder
             }
 
             var row = new PropertyMapRow(typeRid, propertyList);
-            mapTable.Add(row, 0);
+            mapTable.Add(type, row);
             propertyList += (uint) type.Properties.Count;
         }
 
@@ -463,7 +463,7 @@ namespace AsmResolver.DotNet.Builder
             if (type.Events.Count == 0)
                 return;
             
-            var mapTable = Metadata.TablesStream.GetTable<EventMapRow>(TableIndex.EventMap);
+            var mapTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, EventMapRow>(TableIndex.EventMap);
             var pointerTable = Metadata.TablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr);
             
             for (int i = 0; i < type.Events.Count; i++)
@@ -480,20 +480,20 @@ namespace AsmResolver.DotNet.Builder
                 if (newToken.Rid != pointerTable.Count + 1)
                     eventPtrRequired = true;
                 
-                pointerTable.Add(new EventPointerRow(newToken.Rid), 0);
+                pointerTable.Add(new EventPointerRow(newToken.Rid));
                 
                 AddCustomAttributes(newToken, @event);
                 AddMethodSemantics(newToken, @event);
             }
             
             var row = new EventMapRow(typeRid, eventList);
-            mapTable.Add(row, 0);
+            mapTable.Add(type, row);
             eventList += (uint) type.Events.Count;
         }
 
         private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
         {
-            var table = Metadata.TablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
+            var table = Metadata.TablesStream.GetSortedTable<MethodImplementation, MethodImplementationRow>(TableIndex.MethodImpl);
 
             foreach (var implementation in methodImplementations)
             {
@@ -502,36 +502,36 @@ namespace AsmResolver.DotNet.Builder
                     AddMethodDefOrRef(implementation.Body),
                     AddMethodDefOrRef(implementation.Declaration));
 
-                table.Add(row, 0);
+                table.Add(implementation, row);
             }
         }
 
-        private void AddFieldRva(MetadataToken ownerToken, ISegment fieldRva)
+        private void AddFieldRva(MetadataToken ownerToken, FieldDefinition field)
         {
-            if (fieldRva is null)
+            if (field.FieldRva is null)
                 return;
             
-            var table = Metadata.TablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
+            var table = Metadata.TablesStream.GetSortedTable<FieldDefinition, FieldRvaRow>(TableIndex.FieldRva);
             
             var row = new FieldRvaRow(
-                new SegmentReference(fieldRva), 
+                new SegmentReference(field.FieldRva), 
                 ownerToken.Rid);
 
-            table.Add(row, 0);
+            table.Add(field, row);
         }
 
-        private void AddFieldLayout(MetadataToken ownerToken, int? fieldOffset)
+        private void AddFieldLayout(MetadataToken ownerToken, FieldDefinition field)
         {
-            if (fieldOffset is null)
+            if (!field.FieldOffset.HasValue)
                 return;
             
-            var table = Metadata.TablesStream.GetTable<FieldLayoutRow>(TableIndex.FieldLayout);
+            var table = Metadata.TablesStream.GetSortedTable<FieldDefinition, FieldLayoutRow>(TableIndex.FieldLayout);
             
             var row = new FieldLayoutRow(
-                (uint) fieldOffset.Value, 
+                (uint) field.FieldOffset.Value, 
                 ownerToken.Rid);
 
-            table.Add(row, 0);
+            table.Add(field, row);
         }
 
         private MetadataToken AddExportedType(ExportedType exportedType)
@@ -545,7 +545,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(exportedType.Namespace),
                 AddImplementation(exportedType.Implementation));
 
-            var token = table.Add(row, exportedType.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, exportedType);
             return token;
         }
@@ -559,7 +559,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(fileReference.Name),
                 Metadata.BlobStream.GetBlobIndex(fileReference.HashValue));
 
-            var token = table.Add(row, fileReference.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, fileReference);
             return token;
         }

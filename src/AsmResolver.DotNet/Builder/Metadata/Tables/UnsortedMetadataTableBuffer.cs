@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public virtual MetadataToken Add(in TRow row, uint originalRid)
+        public virtual MetadataToken Add(in TRow row)
         {
             _entries.Add(row);
             return new MetadataToken(_table.TableIndex, (uint) _entries.Count);
