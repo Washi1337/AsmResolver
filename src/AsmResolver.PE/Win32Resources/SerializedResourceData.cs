@@ -39,7 +39,6 @@ namespace AsmResolver.PE.Win32Resources
         /// Reads a resource data entry from the provided input stream.
         /// </summary>
         /// <param name="peFile">The PE file containing the resource.</param>
-        /// <param name="dataReader">The instance responsible for reading and interpreting the data.</param>
         /// <param name="entry">The entry to read.</param>
         /// <param name="entryReader">The input stream to read the data from.</param>
         public SerializedResourceData(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader entryReader)
