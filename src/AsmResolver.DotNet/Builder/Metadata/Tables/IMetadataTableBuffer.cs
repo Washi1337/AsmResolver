@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AsmResolver.PE.DotNet.Metadata.Tables;
+﻿using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Builder.Metadata.Tables
@@ -52,26 +51,4 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// <returns>The metadata token that this row was assigned to.</returns>
         MetadataToken Add(in TRow row);
     }
-
-    /// <summary>
-    /// Provides members for constructing a new metadata table.
-    /// </summary>
-    /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
-    public interface ISortedMetadataTableBuffer<TKey, TRow> : IMetadataTableBuffer
-        where TRow : struct, IMetadataRow
-    {
-        /// <summary>
-        /// Adds a row to the metadata table.
-        /// </summary>
-        /// <param name="row">The row to add.</param>
-        void Add(TKey originalMember, in TRow row);
-
-        IEnumerable<TKey> GetMembers();
-
-        MetadataToken GetNewToken(TKey member);
-
-        void Sort();
-
-    }
-
 }

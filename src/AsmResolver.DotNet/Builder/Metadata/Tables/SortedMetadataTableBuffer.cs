@@ -9,6 +9,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
     /// <summary>
     /// Represents a metadata stream buffer that sorts all added rows by one or two primary columns.
     /// </summary>
+    /// <typeparam name="TKey">The type of members that are assigned new metadata rows.</typeparam>
     /// <typeparam name="TRow">The type of rows to store.</typeparam>
     public class SortedMetadataTableBuffer<TKey, TRow> : ISortedMetadataTableBuffer<TKey, TRow> 
         where TRow : struct, IMetadataRow 
@@ -50,6 +51,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             _entries.Add((originalKey, row));
         }
 
+        /// <inheritdoc />
         public IEnumerable<TKey> GetMembers() => _entries.Select(entry => entry.Key);
 
         /// <inheritdoc />
