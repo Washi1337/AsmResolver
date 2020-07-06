@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -125,6 +124,9 @@ namespace AsmResolver.DotNet.Builder
             
             foreach (var type in types)
             {
+                // At this point, we might not have added all type defs/refs/specs yet, so we cannot determine
+                // the extends column, nor determine the field and method lists of this type.
+                
                 var row = new TypeDefinitionRow(
                     type.Attributes,
                     Metadata.StringsStream.GetStringIndex(type.Name),
@@ -185,6 +187,9 @@ namespace AsmResolver.DotNet.Builder
 
             foreach (var method in methods)
             {
+                // At this point, we might not have added all type defs/refs/specs yet, so we must delay the 
+                // serialization of the method body, as well as determining the parameter list.
+                
                 var row = new MethodDefinitionRow(
                     null,
                     method.ImplAttributes,
@@ -298,6 +303,7 @@ namespace AsmResolver.DotNet.Builder
                 FinalizePropertiesInType(type, rid, ref propertyList, ref propertyPtrRequired);
                 FinalizeEventsInType(type, rid, ref eventList, ref eventPtrRequired);
                 
+                // Move to next ember lists.
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
 
@@ -338,9 +344,11 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize field {field}, which was not added to the .NET directory buffer yet.");
                 }
                 
+                // Add field pointer row, making sure the RID is preserved.
+                // We only really need the field pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     fieldPtrRequired = true;
-                
                 pointerTable.Add(new FieldPointerRow(newToken.Rid));
 
                 AddCustomAttributes(newToken, field);
@@ -372,11 +380,14 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize method {method}, which was not added to the .NET directory buffer yet.");
                 }
                 
+                // Add method pointer row, making sure the RID is preserved.
+                // We only really need the method pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     methodPtrRequired = true;
-                
                 pointerTable.Add(new MethodPointerRow(newToken.Rid));
                 
+                // Serialize method body and update column.
                 var row = definitionTable[newToken.Rid];
                 definitionTable[newToken.Rid] = new MethodDefinitionRow(
                     MethodBodySerializer.SerializeMethodBody(this, method),
@@ -386,8 +397,10 @@ namespace AsmResolver.DotNet.Builder
                     row.Signature,
                     paramList);
             
+                // Finalize parameters.
                 FinalizeParametersInMethod(method, ref paramList, ref paramPtrRequired);
 
+                // Add remaining metadata.
                 AddCustomAttributes(newToken, method);
                 AddSecurityDeclarations(newToken, method);
                 AddImplementationMap(newToken, method.ImplementationMap);
@@ -410,11 +423,14 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize parameter {parameter} in {method}, which was not added to the .NET directory buffer yet.");
                 }
                 
+                // Add parameter pointer row, making sure the RID is preserved.
+                // We only really need the parameter pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     paramPtrRequired = true;
-                
                 pointerTable.Add(new ParameterPointerRow(newToken.Rid));
                 
+                // Add remaining metadata.
                 AddCustomAttributes(newToken, parameter);
                 AddConstant(newToken, parameter.Constant);
                 AddFieldMarshal(newToken, parameter);
@@ -426,6 +442,7 @@ namespace AsmResolver.DotNet.Builder
         private void FinalizePropertiesInType(TypeDefinition type, uint typeRid, ref uint propertyList,
             ref bool propertyPtrRequired)
         {
+            // Don't emit property map rows when the type does not define any properties.
             if (type.Properties.Count == 0)
                 return;
             
@@ -443,16 +460,20 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize property {property}, which was not added to the .NET directory buffer yet.");
                 }
 
+                // Add property pointer row, making sure the RID is preserved.
+                // We only really need the property pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     propertyPtrRequired = true;
-                
                 pointerTable.Add(new PropertyPointerRow(newToken.Rid));
                 
+                // Add remaining metadata.
                 AddCustomAttributes(newToken, property);
                 AddMethodSemantics(newToken, property);
                 AddConstant(newToken, property.Constant);
             }
 
+            // Map the type to the property list.
             var row = new PropertyMapRow(typeRid, propertyList);
             mapTable.Add(type, row);
             propertyList += (uint) type.Properties.Count;
@@ -460,6 +481,7 @@ namespace AsmResolver.DotNet.Builder
 
         private void FinalizeEventsInType(TypeDefinition type, uint typeRid, ref uint eventList, ref bool eventPtrRequired)
         {
+            // Don't emit event map rows when the type does not define any properties.
             if (type.Events.Count == 0)
                 return;
             
@@ -477,26 +499,31 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize event {@event}, which was not added to the .NET directory buffer yet.");
                 }
                 
+                // Add event pointer row, making sure the RID is preserved.
+                // We only really need the event pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     eventPtrRequired = true;
-                
                 pointerTable.Add(new EventPointerRow(newToken.Rid));
                 
+                // Add remaining metadata.
                 AddCustomAttributes(newToken, @event);
                 AddMethodSemantics(newToken, @event);
             }
             
+            // Map the type to the event list.
             var row = new EventMapRow(typeRid, eventList);
             mapTable.Add(type, row);
             eventList += (uint) type.Events.Count;
         }
 
-        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
+        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> implementations)
         {
             var table = Metadata.TablesStream.GetSortedTable<MethodImplementation, MethodImplementationRow>(TableIndex.MethodImpl);
 
-            foreach (var implementation in methodImplementations)
+            for (int i = 0; i < implementations.Count; i++)
             {
+                var implementation = implementations[i];
                 var row = new MethodImplementationRow(
                     typeToken.Rid,
                     AddMethodDefOrRef(implementation.Body),
@@ -508,6 +535,7 @@ namespace AsmResolver.DotNet.Builder
 
         private void AddFieldRva(MetadataToken ownerToken, FieldDefinition field)
         {
+            // Don't emit any field rva rows if no initial data was specified.
             if (field.FieldRva is null)
                 return;
             
@@ -522,6 +550,7 @@ namespace AsmResolver.DotNet.Builder
 
         private void AddFieldLayout(MetadataToken ownerToken, FieldDefinition field)
         {
+            // Don't emit any field offset rows if no initial data was specified.
             if (!field.FieldOffset.HasValue)
                 return;
             

@@ -72,9 +72,13 @@ namespace AsmResolver.DotNet.Builder
         /// <returns></returns>
         public IDotNetDirectory CreateDirectory()
         {
+            // At this point, the interfaces and generic parameters tables are not sorted yet, so we were not able
+            // to add any custom attributes and/or generic parameter constraint rows to the metadata table buffers.
+            // Since we're finalizing the .NET directory, we can safely do this now:
             FinalizeInterfaces();
             FinalizeGenericParameters();
 
+            // Create new .NET directory.
             return new DotNetDirectory
             {
                 Metadata = Metadata.CreateMetadata(),
@@ -131,16 +135,21 @@ namespace AsmResolver.DotNet.Builder
 
             foreach (var implementation in interfaces)
             {
-                var row = new InterfaceImplementationRow(ownerToken.Rid, GetTypeDefOrRefIndex(implementation.Interface));
+                var row = new InterfaceImplementationRow(
+                    ownerToken.Rid, 
+                    GetTypeDefOrRefIndex(implementation.Interface));
+                
                 table.Add(implementation, row);
             }
         }
 
         private void FinalizeInterfaces()
         {
+            // Make sure the RIDs of all interface implementation rows are determined.
             var table = Metadata.TablesStream.GetSortedTable<InterfaceImplementation, InterfaceImplementationRow>(TableIndex.InterfaceImpl);
             table.Sort();
 
+            // Add missing custom attributes.
             foreach (var member in table.GetMembers())
             {
                 var newToken = table.GetNewToken(member);
@@ -175,9 +184,12 @@ namespace AsmResolver.DotNet.Builder
 
         private void FinalizeGenericParameters()
         {
+            // Make sure the RIDs of all generic parameter rows are determined, so that we can assign
+            // custom attributes and generic parameter constraints to it.
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             table.Sort();
             
+            // Add missing CAs and generic parameters.
             foreach (var member in table.GetMembers())
             {
                 var token = table.GetNewToken(member);
