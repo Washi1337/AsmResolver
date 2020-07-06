@@ -1,0 +1,87 @@
+using System;
+using System.Collections.Generic;
+
+// Disable warnings for unused members. 
+#pragma warning disable 67
+
+namespace AsmResolver.DotNet.TestCases.CustomAttributes
+{
+    [TestCase]
+    public class CustomAttributesTestClass
+    {
+        [TestCase]
+        public event EventHandler TestEvent;
+        
+        [TestCase]
+        public int TestField;
+        
+        [TestCase]
+        public void TestMethod([TestCase] int testParameter)
+        {
+        }
+
+        [TestCase]
+        public int TestProperty
+        {
+            [TestCase]
+            get;
+            [TestCase]
+            set;
+        }
+
+        [TestCase(1)]
+        public void FixedInt32Argument()
+        {
+        }
+        
+        [TestCase("String fixed arg")]
+        public void FixedStringArgument()
+        {
+        }
+        
+        [TestCase(TestEnum.Value3)]
+        public void FixedEnumArgument()
+        {
+        }
+        
+        [TestCase(typeof(string))]
+        public void FixedTypeArgument()
+        {
+        }
+        
+        [TestCase(typeof(KeyValuePair<string[], int[]>))]
+        public void FixedComplexTypeArgument()
+        {
+        }
+        
+        [TestCase(2, "Fixed arg", TestEnum.Value3)]
+        public void FixedMultipleArguments()
+        {
+        }
+
+        [TestCase((object) 2448)]
+        public void FixedBoxedIntArgument()
+        {
+        }
+        
+        [TestCase(IntValue = 2)]
+        public void NamedInt32Argument()
+        {
+        }
+        
+        [TestCase(StringValue = "String named arg")]
+        public void NamedStringArgument()
+        {
+        }
+        
+        [TestCase(EnumValue = TestEnum.Value2)]
+        public void NamedEnumArgument()
+        {
+        }
+        
+        [TestCase(TypeValue = typeof(int))]
+        public void NamedTypeArgument()
+        {
+        }
+    }
+}

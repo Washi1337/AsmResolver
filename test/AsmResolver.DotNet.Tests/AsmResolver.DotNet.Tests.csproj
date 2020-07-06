@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+
+        <IsPackable>false</IsPackable>
+
+        <LangVersion>8</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
+        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
+      <ProjectReference Include="..\AsmResolver.Tests\AsmResolver.Tests.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.CustomAttributes\AsmResolver.DotNet.TestCases.CustomAttributes.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Events\AsmResolver.DotNet.TestCases.Events.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Fields\AsmResolver.DotNet.TestCases.Fields.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Generics\AsmResolver.DotNet.TestCases.Generics.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.NestedClasses\AsmResolver.DotNet.TestCases.NestedClasses.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Properties\AsmResolver.DotNet.TestCases.Properties.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Resources\AsmResolver.DotNet.TestCases.Resources.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Types\AsmResolver.DotNet.TestCases.Types.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Resources\Manifest.exe">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Resources\MyModel.netmodule">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+</Project>

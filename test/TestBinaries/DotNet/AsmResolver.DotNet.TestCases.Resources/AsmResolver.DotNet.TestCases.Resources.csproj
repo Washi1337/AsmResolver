@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>8</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\EmbeddedResource2" />
+      <None Remove="Resources\LoremIpsum" />
+      <EmbeddedResource Include="Resources\EmbeddedResource1" />
+    </ItemGroup>
+
+</Project>
