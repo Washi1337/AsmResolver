@@ -10,7 +10,7 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>exe pe dotnet cil inspection manipulation assembly disassembly</PackageTags>
         <LangVersion>8</LangVersion>
-        <Version>4.0.0-alpha.1</Version>
+        <Version>4.0.0-beta.1</Version>
         <TargetFramework>netstandard2.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
