@@ -101,8 +101,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public void Write(IBinaryStreamWriter writer, TableLayout layout)
         {
             writer.WriteUInt16((ushort) Attributes);
-            writer.WriteIndex(Name, (IndexSize) layout.Columns[0].Size);
-            writer.WriteIndex(EventType, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(Name, (IndexSize) layout.Columns[1].Size);
+            writer.WriteIndex(EventType, (IndexSize) layout.Columns[2].Size);
         }
 
         /// <summary>
