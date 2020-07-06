@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -9,13 +9,16 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
     /// <summary>
     /// Represents a metadata stream buffer that sorts all added rows by one or two primary columns.
     /// </summary>
+    /// <typeparam name="TKey">The type of members that are assigned new metadata rows.</typeparam>
     /// <typeparam name="TRow">The type of rows to store.</typeparam>
-    public class SortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow> 
-        where TRow : struct, IMetadataRow
+    public class SortedMetadataTableBuffer<TKey, TRow> : ISortedMetadataTableBuffer<TKey, TRow> 
+        where TRow : struct, IMetadataRow 
     {
-        private readonly List<TRow> _entries = new List<TRow>();
+        private readonly List<(TKey Key, TRow Row)> _entries = new List<(TKey, TRow)>();
+        private readonly IDictionary<TKey, MetadataToken> _newTokens = new Dictionary<TKey, MetadataToken>();
+        
         private readonly MetadataTable<TRow> _table;
-        private readonly IComparer<TRow> _comparer;
+        private readonly EntryComparer _comparer;
         
         /// <summary>
         /// Creates a new metadata stream buffer that is sorted by a single primary column.
@@ -36,32 +39,43 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         public SortedMetadataTableBuffer(MetadataTable<TRow> table, int primaryColumn, int secondaryColumn)
         {
             _table = table ?? throw new ArgumentNullException(nameof(table));
-            _comparer = new RowComparer(primaryColumn, secondaryColumn);
+            _comparer = new EntryComparer(primaryColumn, secondaryColumn);
         }
 
         /// <inheritdoc />
         public int Count => _entries.Count;
 
         /// <inheritdoc />
-        public TRow this[uint rid]
+        public void Add(TKey originalKey, in TRow row)
         {
-            get => _entries[(int) (rid - 1)];
-            set => _entries[(int) (rid - 1)] = value;
+            _entries.Add((originalKey, row));
         }
 
         /// <inheritdoc />
-        public MetadataToken Add(in TRow row, uint originalRid)
+        public IEnumerable<TKey> GetMembers() => _entries.Select(entry => entry.Key);
+
+        /// <inheritdoc />
+        public void Sort()
         {
-            _entries.Add(row);
-            return new MetadataToken(_table.TableIndex, (uint) _entries.Count);
+            _entries.Sort(_comparer);
+            
+            for (uint rid =1 ; rid <= _entries.Count;rid++)
+            {
+                var (member, _) = _entries[(int) (rid - 1)];
+                _newTokens[member] = new MetadataToken(_table.TableIndex, rid);
+            }
         }
+
+        /// <inheritdoc />
+        public MetadataToken GetNewToken(TKey member) => _newTokens[member];
 
         /// <inheritdoc />
         public void FlushToTable()
         {
-            _entries.Sort(_comparer);
+            Sort();
+            _table.Clear();
             foreach (var row in _entries)
-                _table.Add(row);
+                _table.Add(row.Row);
         }
 
         /// <inheritdoc />
@@ -71,22 +85,22 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             _table.Clear();
         }
 
-        private sealed class RowComparer : IComparer<TRow>
+        private sealed class EntryComparer : IComparer<(TKey Key, TRow Row)>
         {
             private readonly int _primaryColumn;
             private readonly int _secondaryColumn;
 
-            public RowComparer(int primaryColumn, int secondaryColumn)
+            public EntryComparer(int primaryColumn, int secondaryColumn)
             {
                 _primaryColumn = primaryColumn;
                 _secondaryColumn = secondaryColumn;
             }
             
-            public int Compare(TRow x, TRow y)
+            public int Compare((TKey Key, TRow Row) x, (TKey Key, TRow Row) y)
             {
-                int result = x[_primaryColumn].CompareTo(y[_primaryColumn]);
+                int result = x.Row[_primaryColumn].CompareTo(y.Row[_primaryColumn]);
                 if (result == 0)
-                    result = x[_secondaryColumn].CompareTo(y[_secondaryColumn]);
+                    result = x.Row[_secondaryColumn].CompareTo(y.Row[_secondaryColumn]);
                 return result;
             }
         }

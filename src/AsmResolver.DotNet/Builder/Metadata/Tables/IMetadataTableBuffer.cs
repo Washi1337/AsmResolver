@@ -48,12 +48,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         /// Adds a row to the metadata table.
         /// </summary>
         /// <param name="row">The row to add.</param>
-        /// <param name="originalRid">The original identifier of the row (RID).</param>
         /// <returns>The metadata token that this row was assigned to.</returns>
-        /// <remarks>
-        /// For some metadata table buffers, the metadata token that the row was assigned to might not be definitive. Sorted
-        /// metadata table buffers will reorder the table once all rows have been added to the buffer.
-        /// </remarks>
-        MetadataToken Add(in TRow row, uint originalRid);
+        MetadataToken Add(in TRow row);
     }
 }

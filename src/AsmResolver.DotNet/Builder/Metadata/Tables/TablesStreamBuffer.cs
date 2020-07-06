@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Builder.Metadata;
+using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -36,27 +38,27 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
                 Unsorted<MethodDefinitionRow>(TableIndex.Method),
                 Unsorted<ParameterPointerRow>(TableIndex.ParamPtr),
                 Unsorted<ParameterDefinitionRow>(TableIndex.Param),
-                Sorted<InterfaceImplementationRow>(TableIndex.InterfaceImpl, 0),
+                Sorted<InterfaceImplementation, InterfaceImplementationRow>(TableIndex.InterfaceImpl, 0),
                 Distinct<MemberReferenceRow>(TableIndex.MemberRef),
-                Sorted<ConstantRow>(TableIndex.Constant, 2),
-                Sorted<CustomAttributeRow>(TableIndex.CustomAttribute, 0),
-                Sorted<FieldMarshalRow>(TableIndex.FieldMarshal, 0),
-                Sorted<SecurityDeclarationRow>(TableIndex.DeclSecurity, 1),
-                Sorted<ClassLayoutRow>(TableIndex.ClassLayout, 2),
-                Sorted<FieldLayoutRow>(TableIndex.FieldLayout, 1),
+                Sorted<Constant, ConstantRow>(TableIndex.Constant, 2),
+                Sorted<CustomAttribute, CustomAttributeRow>(TableIndex.CustomAttribute, 0),
+                Sorted<IHasFieldMarshal, FieldMarshalRow>(TableIndex.FieldMarshal, 0),
+                Sorted<SecurityDeclaration, SecurityDeclarationRow>(TableIndex.DeclSecurity, 1),
+                Sorted<ClassLayout, ClassLayoutRow>(TableIndex.ClassLayout, 2),
+                Sorted<FieldDefinition, FieldLayoutRow>(TableIndex.FieldLayout, 1),
                 Distinct<StandAloneSignatureRow>(TableIndex.StandAloneSig),
-                Sorted<EventMapRow>(TableIndex.EventMap, 0, 1),
+                Sorted<TypeDefinition, EventMapRow>(TableIndex.EventMap, 0, 1),
                 Unsorted<EventPointerRow>(TableIndex.EventPtr),
                 Unsorted<EventDefinitionRow>(TableIndex.Event),
-                Sorted<PropertyMapRow>(TableIndex.PropertyMap, 0, 1),
+                Sorted<TypeDefinition, PropertyMapRow>(TableIndex.PropertyMap, 0, 1),
                 Unsorted<PropertyPointerRow>(TableIndex.PropertyPtr),
                 Unsorted<PropertyDefinitionRow>(TableIndex.Property),
-                Sorted<MethodSemanticsRow>(TableIndex.MethodSemantics, 2),
-                Sorted<MethodImplementationRow>(TableIndex.MethodImpl, 0),
+                Sorted<MethodSemantics, MethodSemanticsRow>(TableIndex.MethodSemantics, 2),
+                Sorted<MethodImplementation, MethodImplementationRow>(TableIndex.MethodImpl, 0),
                 Distinct<ModuleReferenceRow>(TableIndex.ModuleRef),
                 Distinct<TypeSpecificationRow>(TableIndex.TypeSpec),
-                Sorted<ImplementationMapRow>(TableIndex.ImplMap, 1),
-                Sorted<FieldRvaRow>(TableIndex.FieldRva, 1),
+                Sorted<ImplementationMap, ImplementationMapRow>(TableIndex.ImplMap, 1),
+                Sorted<FieldDefinition, FieldRvaRow>(TableIndex.FieldRva, 1),
                 Unsorted<EncLogRow>(TableIndex.EncLog),
                 Unsorted<EncMapRow>(TableIndex.EncMap),
                 Unsorted<AssemblyDefinitionRow>(TableIndex.Assembly),
@@ -68,10 +70,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
                 Distinct<FileReferenceRow>(TableIndex.File),
                 Distinct<ExportedTypeRow>(TableIndex.ExportedType),
                 Distinct<ManifestResourceRow>(TableIndex.ManifestResource),
-                Sorted<NestedClassRow>(TableIndex.NestedClass, 0),
-                Sorted<GenericParameterRow>(TableIndex.GenericParam, 2, 0),
+                Sorted<TypeDefinition, NestedClassRow>(TableIndex.NestedClass, 0),
+                Sorted<GenericParameter, GenericParameterRow>(TableIndex.GenericParam, 2, 0),
                 Distinct<MethodSpecificationRow>(TableIndex.MethodSpec),
-                Sorted<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint, 0),
+                Distinct<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint),
             };
         }
 
@@ -105,6 +107,19 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             where TRow : struct, IMetadataRow
         {
             return (IMetadataTableBuffer<TRow>) _tableBuffers[(int) table];
+        }
+
+        /// <summary>
+        /// Gets a table buffer by its table index.
+        /// </summary>
+        /// <param name="table">The index of the table to get.</param>
+        /// <typeparam name="TKey">The type of members that are assigned new metadata rows.</typeparam>
+        /// <typeparam name="TRow">The type of rows the table stores.</typeparam>
+        /// <returns>The metadata table.</returns>
+        public ISortedMetadataTableBuffer<TKey, TRow> GetSortedTable<TKey, TRow>(TableIndex table)
+            where TRow : struct, IMetadataRow
+        {
+            return (ISortedMetadataTableBuffer<TKey, TRow>) _tableBuffers[(int) table];
         }
 
         /// <summary>
@@ -144,18 +159,18 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             return new DistinctMetadataTableBuffer<TRow>(Unsorted<TRow>(table));
         }
 
-        private IMetadataTableBuffer<TRow> Sorted<TRow>(TableIndex table, int primaryColumn)
+        private ISortedMetadataTableBuffer<TKey, TRow> Sorted<TKey, TRow>(TableIndex table, int primaryColumn)
             where TRow : struct, IMetadataRow
         {
-            return new SortedMetadataTableBuffer<TRow>(
+            return new SortedMetadataTableBuffer<TKey, TRow>(
                 (MetadataTable<TRow>) _tablesStream.GetTable(table), 
                 primaryColumn);
         }
 
-        private IMetadataTableBuffer<TRow> Sorted<TRow>(TableIndex table, int primaryColumn, int secondaryColumn)
-            where TRow : struct, IMetadataRow
+        private ISortedMetadataTableBuffer<TKey, TRow> Sorted<TKey, TRow>(TableIndex table, int primaryColumn, int secondaryColumn)
+            where TRow : struct, IMetadataRow 
         {
-            return new SortedMetadataTableBuffer<TRow>(
+            return new SortedMetadataTableBuffer<TKey, TRow>(
                 (MetadataTable<TRow>) _tablesStream.GetTable(table), 
                 primaryColumn,
                 secondaryColumn);

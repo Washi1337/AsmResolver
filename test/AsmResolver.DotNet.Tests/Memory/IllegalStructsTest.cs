@@ -1,6 +1,9 @@
 using AsmResolver.DotNet.Memory;
 using Xunit;
 
+// Ignore unused field warnings.
+#pragma warning disable 649
+
 namespace AsmResolver.DotNet.Tests.Memory
 {
     public class AdditionalTest

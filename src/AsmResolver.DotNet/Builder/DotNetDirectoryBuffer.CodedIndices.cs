@@ -1,6 +1,5 @@
 ﻿using System;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -8,6 +7,25 @@ namespace AsmResolver.DotNet.Builder
 {
     public partial class DotNetDirectoryBuffer : ITypeCodedIndexProvider
     {
+        private void AddCustomAttributes(MetadataToken ownerToken, IHasCustomAttribute provider)
+        {
+            foreach (var attribute in provider.CustomAttributes)
+                AddCustomAttribute(ownerToken, attribute);
+        }
+
+        private void AddCustomAttribute(MetadataToken ownerToken, CustomAttribute attribute)
+        {
+            var table = Metadata.TablesStream.GetSortedTable<CustomAttribute, CustomAttributeRow>(TableIndex.CustomAttribute);
+
+            var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
+            var row = new CustomAttributeRow(
+                encoder.EncodeToken(ownerToken),
+                AddCustomAttributeType(attribute.Constructor),
+                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature));
+
+            table.Add(attribute, row);
+        }
+        
         private uint AddResolutionScope(IResolutionScope scope)
         {
             if (scope is null)
@@ -110,12 +128,12 @@ namespace AsmResolver.DotNet.Builder
                 .EncodeToken(token);
         }
 
-        private MetadataToken AddConstant(MetadataToken ownerToken, Constant constant)
+        private void AddConstant(MetadataToken ownerToken, Constant constant)
         {
             if (constant is null)
-                return 0;
+                return;
 
-            var table = Metadata.TablesStream.GetTable<ConstantRow>(TableIndex.Constant);
+            var table = Metadata.TablesStream.GetSortedTable<Constant, ConstantRow>(TableIndex.Constant);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasConstant);
 
             var row = new ConstantRow(
@@ -123,15 +141,15 @@ namespace AsmResolver.DotNet.Builder
                 encoder.EncodeToken(ownerToken),
                 Metadata.BlobStream.GetBlobIndex(this, constant.Value));
 
-            return table.Add(row, constant.MetadataToken.Rid);
+            table.Add(constant, row);
         }
 
-        private MetadataToken AddImplementationMap(MetadataToken ownerToken, ImplementationMap implementationMap)
+        private void AddImplementationMap(MetadataToken ownerToken, ImplementationMap implementationMap)
         {
             if (implementationMap is null)
-                return 0;
+                return;
             
-            var table = Metadata.TablesStream.GetTable<ImplementationMapRow>(TableIndex.ImplMap);
+            var table = Metadata.TablesStream.GetSortedTable<ImplementationMap, ImplementationMapRow>(TableIndex.ImplMap);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.MemberForwarded);
 
             var row = new ImplementationMapRow(
@@ -140,7 +158,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(implementationMap.Name),
                 GetModuleReferenceToken(implementationMap.Scope).Rid);
 
-            return table.Add(row, implementationMap.MetadataToken.Rid);
+            table.Add(implementationMap, row);
         }
 
         private uint AddImplementation(IImplementation implementation)
@@ -163,7 +181,7 @@ namespace AsmResolver.DotNet.Builder
 
         private void AddSecurityDeclarations(MetadataToken ownerToken, IHasSecurityDeclaration provider)
         {
-            var table = Metadata.TablesStream.GetTable<SecurityDeclarationRow>(TableIndex.DeclSecurity);
+            var table = Metadata.TablesStream.GetSortedTable<SecurityDeclaration, SecurityDeclarationRow>(TableIndex.DeclSecurity);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
             
             foreach (var declaration in provider.SecurityDeclarations)
@@ -172,22 +190,22 @@ namespace AsmResolver.DotNet.Builder
                     declaration.Action,
                     encoder.EncodeToken(ownerToken), 
                     Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet));
-                table.Add(row, 0);
+                table.Add(declaration, row);
             }
         }
 
-        private MetadataToken AddFieldMarshal(MetadataToken ownerToken, MarshalDescriptor descriptor)
+        private void AddFieldMarshal(MetadataToken ownerToken, IHasFieldMarshal owner)
         {
-            if (descriptor is null)
-                return 0;
+            if (owner.MarshalDescriptor is null)
+                return;
             
-            var table = Metadata.TablesStream.GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
+            var table = Metadata.TablesStream.GetSortedTable<IHasFieldMarshal, FieldMarshalRow>(TableIndex.FieldMarshal);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasFieldMarshal);
             
             var row = new FieldMarshalRow(
                 encoder.EncodeToken(ownerToken),
-                Metadata.BlobStream.GetBlobIndex(this, descriptor));
-            return table.Add(row, 0);
+                Metadata.BlobStream.GetBlobIndex(this, owner.MarshalDescriptor));
+            table.Add(owner, row);
         }
         
     }

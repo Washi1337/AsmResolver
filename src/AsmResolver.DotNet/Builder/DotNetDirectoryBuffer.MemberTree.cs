@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -31,7 +30,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Name),
                 Metadata.StringsStream.GetStringIndex(assembly.Culture));
 
-            var token = table.Add(row, assembly.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, assembly);
             AddSecurityDeclarations(token, assembly);
         }
@@ -58,7 +57,7 @@ namespace AsmResolver.DotNet.Builder
                 guidStream.GetGuidIndex(module.EncId),
                 guidStream.GetGuidIndex(module.EncBaseId));
             
-            var token = table.Add(row, module.MetadataToken.Rid);
+            var token = table.Add(row);
             _moduleDefTokens[module] = token;
         }
 
@@ -106,7 +105,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(resource.Name),
                 AddImplementation(resource.Implementation));
 
-            var token = table.Add(row, resource.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, resource);
             return token;
         }
@@ -121,10 +120,13 @@ namespace AsmResolver.DotNet.Builder
         public void DefineTypes(IEnumerable<TypeDefinition> types)
         {
             var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
-            var nestedClassTable = Metadata.TablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
+            var nestedClassTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, NestedClassRow>(TableIndex.NestedClass);
             
             foreach (var type in types)
             {
+                // At this point, we might not have added all type defs/refs/specs yet, so we cannot determine
+                // the extends column, nor determine the field and method lists of this type.
+                
                 var row = new TypeDefinitionRow(
                     type.Attributes,
                     Metadata.StringsStream.GetStringIndex(type.Name),
@@ -133,7 +135,7 @@ namespace AsmResolver.DotNet.Builder
                     0,
                     0);
 
-                var token = typeDefTable.Add(row, type.MetadataToken.Rid);
+                var token = typeDefTable.Add(row);
                 _typeDefTokens.Add(type, token);
 
                 if (type.IsNested)
@@ -150,7 +152,7 @@ namespace AsmResolver.DotNet.Builder
                         token.Rid,
                         enclosingTypeToken.Rid);
                     
-                    nestedClassTable.Add(nestedClassRow, 0);
+                    nestedClassTable.Add(type, nestedClassRow);
                 }
             }
         }
@@ -170,7 +172,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.StringsStream.GetStringIndex(field.Name),
                     Metadata.BlobStream.GetBlobIndex(this, field.Signature));
 
-                var token = table.Add(row, field.MetadataToken.Rid);
+                var token = table.Add(row);
                 _fieldTokens.Add(field, token);
             }
         }
@@ -185,6 +187,9 @@ namespace AsmResolver.DotNet.Builder
 
             foreach (var method in methods)
             {
+                // At this point, we might not have added all type defs/refs/specs yet, so we must delay the 
+                // serialization of the method body, as well as determining the parameter list.
+                
                 var row = new MethodDefinitionRow(
                     null,
                     method.ImplAttributes,
@@ -193,7 +198,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.BlobStream.GetBlobIndex(this, method.Signature),
                     0);
 
-                var token = table.Add(row, method.MetadataToken.Rid);
+                var token = table.Add(row);
                 _methodTokens.Add(method, token);
             }
         }
@@ -213,7 +218,7 @@ namespace AsmResolver.DotNet.Builder
                     parameter.Sequence,
                     Metadata.StringsStream.GetStringIndex(parameter.Name));
 
-                var token = table.Add(row, parameter.MetadataToken.Rid);
+                var token = table.Add(row);
                 _parameterTokens.Add(parameter, token);
             }
         }
@@ -233,7 +238,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.StringsStream.GetStringIndex(property.Name),
                     Metadata.BlobStream.GetBlobIndex(this, property.Signature));
                 
-                var token = table.Add(row, property.MetadataToken.Rid);
+                var token = table.Add(row);
                 _propertyTokens.Add(property, token);
             }
         }
@@ -253,7 +258,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.StringsStream.GetStringIndex(@event.Name),
                     GetTypeDefOrRefIndex(@event.EventType));
                 
-                var token = table.Add(row, @event.MetadataToken.Rid);
+                var token = table.Add(row);
                 _eventTokens.Add(@event, token);
             }
         }
@@ -298,15 +303,16 @@ namespace AsmResolver.DotNet.Builder
                 FinalizePropertiesInType(type, rid, ref propertyList, ref propertyPtrRequired);
                 FinalizeEventsInType(type, rid, ref eventList, ref eventPtrRequired);
                 
+                // Move to next ember lists.
                 fieldList += (uint) type.Fields.Count;
                 methodList += (uint) type.Methods.Count;
 
                 // Add remaining metadata:
                 AddCustomAttributes(typeToken, type);
                 AddSecurityDeclarations(typeToken, type);
-                AddInterfaces(typeToken, type.Interfaces);
+                DefineInterfaces(typeToken, type.Interfaces);
                 AddMethodImplementations(typeToken, type.MethodImplementations);
-                AddGenericParameters(typeToken, type);
+                DefineGenericParameters(typeToken, type);
                 AddClassLayout(typeToken, type.ClassLayout);
             }
             
@@ -338,17 +344,19 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize field {field}, which was not added to the .NET directory buffer yet.");
                 }
                 
+                // Add field pointer row, making sure the RID is preserved.
+                // We only really need the field pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     fieldPtrRequired = true;
-                
-                pointerTable.Add(new FieldPointerRow(newToken.Rid), 0);
+                pointerTable.Add(new FieldPointerRow(newToken.Rid));
 
                 AddCustomAttributes(newToken, field);
                 AddConstant(newToken, field.Constant);
                 AddImplementationMap(newToken, field.ImplementationMap);
-                AddFieldRva(newToken, field.FieldRva);
-                AddFieldLayout(newToken, field.FieldOffset);
-                AddFieldMarshal(newToken, field.MarshalDescriptor);
+                AddFieldRva(newToken, field);
+                AddFieldLayout(newToken, field);
+                AddFieldMarshal(newToken, field);
             }
         }
         
@@ -372,11 +380,14 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize method {method}, which was not added to the .NET directory buffer yet.");
                 }
                 
+                // Add method pointer row, making sure the RID is preserved.
+                // We only really need the method pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     methodPtrRequired = true;
+                pointerTable.Add(new MethodPointerRow(newToken.Rid));
                 
-                pointerTable.Add(new MethodPointerRow(newToken.Rid), 0);
-                
+                // Serialize method body and update column.
                 var row = definitionTable[newToken.Rid];
                 definitionTable[newToken.Rid] = new MethodDefinitionRow(
                     MethodBodySerializer.SerializeMethodBody(this, method),
@@ -386,12 +397,14 @@ namespace AsmResolver.DotNet.Builder
                     row.Signature,
                     paramList);
             
+                // Finalize parameters.
                 FinalizeParametersInMethod(method, ref paramList, ref paramPtrRequired);
 
+                // Add remaining metadata.
                 AddCustomAttributes(newToken, method);
                 AddSecurityDeclarations(newToken, method);
                 AddImplementationMap(newToken, method.ImplementationMap);
-                AddGenericParameters(newToken, method);
+                DefineGenericParameters(newToken, method);
             }
         }
 
@@ -410,14 +423,17 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize parameter {parameter} in {method}, which was not added to the .NET directory buffer yet.");
                 }
                 
+                // Add parameter pointer row, making sure the RID is preserved.
+                // We only really need the parameter pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     paramPtrRequired = true;
+                pointerTable.Add(new ParameterPointerRow(newToken.Rid));
                 
-                pointerTable.Add(new ParameterPointerRow(newToken.Rid), 0);
-                
+                // Add remaining metadata.
                 AddCustomAttributes(newToken, parameter);
                 AddConstant(newToken, parameter.Constant);
-                AddFieldMarshal(newToken, parameter.MarshalDescriptor);
+                AddFieldMarshal(newToken, parameter);
             }
 
             paramList += (uint) method.ParameterDefinitions.Count;
@@ -426,10 +442,11 @@ namespace AsmResolver.DotNet.Builder
         private void FinalizePropertiesInType(TypeDefinition type, uint typeRid, ref uint propertyList,
             ref bool propertyPtrRequired)
         {
+            // Don't emit property map rows when the type does not define any properties.
             if (type.Properties.Count == 0)
                 return;
             
-            var mapTable = Metadata.TablesStream.GetTable<PropertyMapRow>(TableIndex.PropertyMap);
+            var mapTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, PropertyMapRow>(TableIndex.PropertyMap);
             var pointerTable = Metadata.TablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr);
 
             for (int i = 0; i < type.Properties.Count; i++)
@@ -443,27 +460,32 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize property {property}, which was not added to the .NET directory buffer yet.");
                 }
 
+                // Add property pointer row, making sure the RID is preserved.
+                // We only really need the property pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     propertyPtrRequired = true;
+                pointerTable.Add(new PropertyPointerRow(newToken.Rid));
                 
-                pointerTable.Add(new PropertyPointerRow(newToken.Rid), 0);
-                
+                // Add remaining metadata.
                 AddCustomAttributes(newToken, property);
                 AddMethodSemantics(newToken, property);
                 AddConstant(newToken, property.Constant);
             }
 
+            // Map the type to the property list.
             var row = new PropertyMapRow(typeRid, propertyList);
-            mapTable.Add(row, 0);
+            mapTable.Add(type, row);
             propertyList += (uint) type.Properties.Count;
         }
 
         private void FinalizeEventsInType(TypeDefinition type, uint typeRid, ref uint eventList, ref bool eventPtrRequired)
         {
+            // Don't emit event map rows when the type does not define any properties.
             if (type.Events.Count == 0)
                 return;
             
-            var mapTable = Metadata.TablesStream.GetTable<EventMapRow>(TableIndex.EventMap);
+            var mapTable = Metadata.TablesStream.GetSortedTable<TypeDefinition, EventMapRow>(TableIndex.EventMap);
             var pointerTable = Metadata.TablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr);
             
             for (int i = 0; i < type.Events.Count; i++)
@@ -477,61 +499,68 @@ namespace AsmResolver.DotNet.Builder
                         $"An attempt was made to finalize event {@event}, which was not added to the .NET directory buffer yet.");
                 }
                 
+                // Add event pointer row, making sure the RID is preserved.
+                // We only really need the event pointer table if the next RID is not the RID that we would expect
+                // from a normal sequential layout of the table.
                 if (newToken.Rid != pointerTable.Count + 1)
                     eventPtrRequired = true;
+                pointerTable.Add(new EventPointerRow(newToken.Rid));
                 
-                pointerTable.Add(new EventPointerRow(newToken.Rid), 0);
-                
+                // Add remaining metadata.
                 AddCustomAttributes(newToken, @event);
                 AddMethodSemantics(newToken, @event);
             }
             
+            // Map the type to the event list.
             var row = new EventMapRow(typeRid, eventList);
-            mapTable.Add(row, 0);
+            mapTable.Add(type, row);
             eventList += (uint) type.Events.Count;
         }
 
-        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> methodImplementations)
+        private void AddMethodImplementations(MetadataToken typeToken, IList<MethodImplementation> implementations)
         {
-            var table = Metadata.TablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
+            var table = Metadata.TablesStream.GetSortedTable<MethodImplementation, MethodImplementationRow>(TableIndex.MethodImpl);
 
-            foreach (var implementation in methodImplementations)
+            for (int i = 0; i < implementations.Count; i++)
             {
+                var implementation = implementations[i];
                 var row = new MethodImplementationRow(
                     typeToken.Rid,
                     AddMethodDefOrRef(implementation.Body),
                     AddMethodDefOrRef(implementation.Declaration));
 
-                table.Add(row, 0);
+                table.Add(implementation, row);
             }
         }
 
-        private void AddFieldRva(MetadataToken ownerToken, ISegment fieldRva)
+        private void AddFieldRva(MetadataToken ownerToken, FieldDefinition field)
         {
-            if (fieldRva is null)
+            // Don't emit any field rva rows if no initial data was specified.
+            if (field.FieldRva is null)
                 return;
             
-            var table = Metadata.TablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
+            var table = Metadata.TablesStream.GetSortedTable<FieldDefinition, FieldRvaRow>(TableIndex.FieldRva);
             
             var row = new FieldRvaRow(
-                new SegmentReference(fieldRva), 
+                new SegmentReference(field.FieldRva), 
                 ownerToken.Rid);
 
-            table.Add(row, 0);
+            table.Add(field, row);
         }
 
-        private void AddFieldLayout(MetadataToken ownerToken, int? fieldOffset)
+        private void AddFieldLayout(MetadataToken ownerToken, FieldDefinition field)
         {
-            if (fieldOffset is null)
+            // Don't emit any field offset rows if no initial data was specified.
+            if (!field.FieldOffset.HasValue)
                 return;
             
-            var table = Metadata.TablesStream.GetTable<FieldLayoutRow>(TableIndex.FieldLayout);
+            var table = Metadata.TablesStream.GetSortedTable<FieldDefinition, FieldLayoutRow>(TableIndex.FieldLayout);
             
             var row = new FieldLayoutRow(
-                (uint) fieldOffset.Value, 
+                (uint) field.FieldOffset.Value, 
                 ownerToken.Rid);
 
-            table.Add(row, 0);
+            table.Add(field, row);
         }
 
         private MetadataToken AddExportedType(ExportedType exportedType)
@@ -545,7 +574,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(exportedType.Namespace),
                 AddImplementation(exportedType.Implementation));
 
-            var token = table.Add(row, exportedType.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, exportedType);
             return token;
         }
@@ -559,7 +588,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(fileReference.Name),
                 Metadata.BlobStream.GetBlobIndex(fileReference.HashValue));
 
-            var token = table.Add(row, fileReference.MetadataToken.Rid);
+            var token = table.Add(row);
             AddCustomAttributes(token, fileReference);
             return token;
         }
