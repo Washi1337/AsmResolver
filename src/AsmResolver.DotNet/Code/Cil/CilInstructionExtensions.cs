@@ -210,7 +210,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="parameters">The parameters defined in the enclosing method body.</param>
         /// <returns>The parameter.</returns>
         /// <exception cref="ArgumentException">Occurs when the instruction is not using a variant of the ldarg or starg opcodes.</exception>
-        public static Parameter GetParameter(this CilInstruction instruction, IReadOnlyList<Parameter> parameters)
+        public static Parameter GetParameter(this CilInstruction instruction, ParameterCollection parameters)
         {
             switch (instruction.OpCode.Code)
             {
@@ -223,16 +223,16 @@ namespace AsmResolver.DotNet.Code.Cil
                     return (Parameter) instruction.Operand;
                 
                 case CilCode.Ldarg_0:
-                    return parameters[0];
+                    return parameters.GetBySignatureIndex(0);
                     
                 case CilCode.Ldarg_1:
-                    return parameters[1];
+                    return parameters.GetBySignatureIndex(1);
                     
                 case CilCode.Ldarg_2:
-                    return parameters[2];
+                    return parameters.GetBySignatureIndex(2);
                     
                 case CilCode.Ldarg_3:
-                    return parameters[3];
+                    return parameters.GetBySignatureIndex(3);
                 
                 default:
                     throw new ArgumentException("Instruction is not a ldarg or starg instruction.");
