@@ -115,7 +115,11 @@ namespace AsmResolver.DotNet.Memory
             
             uint largestFieldSize = 1;
             for (int i = 0; i < type.Fields.Count; i++)
-                largestFieldSize = Math.Max(largestFieldSize, type.Fields[i].Signature.FieldType.AcceptVisitor(this));
+            {
+                var field = type.Fields[i];
+                if (!field.IsStatic)
+                    largestFieldSize = Math.Max(largestFieldSize, field.Signature.FieldType.AcceptVisitor(this));
+            }
 
             uint alignment = largestFieldSize;
             
