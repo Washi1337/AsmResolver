@@ -192,19 +192,23 @@ namespace AsmResolver.DotNet.Memory
             
             // Maintain a current offset, and increase it after every field.
             uint offset = 0;
-            
-            foreach (var field in type.Fields)
+
+            for (int i = 0; i < type.Fields.Count; i++)
             {
+                var field = type.Fields[i];
+                if (field.IsStatic)
+                    continue;
+                
                 // Determine field memory layout.
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
-                
+
                 // Fields are aligned to the alignment of the type, unless the field is smaller. In such a case, the
                 // field is aligned to its own field size.
-                
+
                 // Reference:
                 // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute.pack?view=netcore-3.1#remarks
                 offset = offset.Align(Math.Min(contentsLayout.Size, alignment));
-                
+
                 result[field] = new FieldMemoryLayout(field, offset, contentsLayout);
                 offset += contentsLayout.Size;
             }
@@ -221,8 +225,12 @@ namespace AsmResolver.DotNet.Memory
             uint largestOffset = 0;
             
             // Iterate all fields.
-            foreach (var field in type.Fields)
+            for (int i = 0; i < type.Fields.Count; i++)
             {
+                var field = type.Fields[i];
+                if (field.IsStatic)
+                    continue;
+                
                 // All fields in an explicitly laid out structure need to have a field offset assigned.
                 if (!field.FieldOffset.HasValue)
                 {

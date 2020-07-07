@@ -6,7 +6,7 @@ AsmResolver
 AsmResolver is a PE inspection library allowing .NET programmers to read, modify and write executable files. This includes .NET as well as native native images. The library exposes high-level representations of the PE, while still allowing the user to access low-level structures.
 
 
-AsmResolver is released under the LGPLv3 license.
+AsmResolver is released under the MIT license.
 
 Binaries
 -----------
