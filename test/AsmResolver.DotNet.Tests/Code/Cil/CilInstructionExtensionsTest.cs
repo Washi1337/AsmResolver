@@ -159,5 +159,35 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var instruction = new CilInstruction(CilOpCodes.Calli, member.Signature);
             Assert.Equal(1, instruction.GetStackPushCount());
         }
+        
+        [Fact]
+        public void CalliMethodWithoutParametersShouldPopOne()
+        {
+            var method = new MethodDefinition("Method", MethodAttributes.Static,
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
+            method.CilMethodBody = new CilMethodBody(method);
+            
+            var type = new TypeReference(_module, null, "SomeType");
+            var member = new MemberReference(type, "SomeMethod",
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void));
+            
+            var instruction = new CilInstruction(CilOpCodes.Calli,member.Signature);
+            Assert.Equal(1, instruction.GetStackPopCount(method.CilMethodBody));
+        }
+        
+        [Fact]
+        public void CalliMethodWithParametersShouldPopTwo()
+        {
+            var method = new MethodDefinition("Method", MethodAttributes.Static,
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Int32));
+            method.CilMethodBody = new CilMethodBody(method);
+            
+            var type = new TypeReference(_module, null, "SomeType");
+            var member = new MemberReference(type, "SomeMethod",
+                MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void,_module.CorLibTypeFactory.Int32));
+            
+            var instruction = new CilInstruction(CilOpCodes.Calli,member.Signature);
+            Assert.Equal(2, instruction.GetStackPopCount(method.CilMethodBody));
+        }
     }
 }
