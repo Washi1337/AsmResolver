@@ -137,5 +137,27 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var instruction = new CilInstruction(CilOpCodes.Newobj, member);
             Assert.Equal(1, instruction.GetStackPushCount());
         }
+        
+        [Fact]
+        public void CalliVoidMethodShouldPushZeroElement()
+        {
+            var type = new TypeReference(_module, null, "SomeType");
+            var member = new MemberReference(type, "SomeMethod",
+                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
+            
+            var instruction = new CilInstruction(CilOpCodes.Calli, member.Signature);
+            Assert.Equal(0, instruction.GetStackPushCount());
+        }
+        
+        [Fact]
+        public void CalliNonVoidMethodShouldPushOneElement()
+        {
+            var type = new TypeReference(_module, null, "SomeType");
+            var member = new MemberReference(type, "SomeMethod",
+                MethodSignature.CreateInstance(_module.CorLibTypeFactory.Int32));
+            
+            var instruction = new CilInstruction(CilOpCodes.Calli, member.Signature);
+            Assert.Equal(1, instruction.GetStackPushCount());
+        }
     }
 }

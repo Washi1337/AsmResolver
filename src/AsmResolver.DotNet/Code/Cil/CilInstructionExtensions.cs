@@ -149,6 +149,7 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 IMethodDescriptor method => method.Signature,
                 StandAloneSignature standAloneSig => standAloneSig.Signature as MethodSignature,
+                MethodSignature methodSig => methodSig,
                 _ => null
             };
 
