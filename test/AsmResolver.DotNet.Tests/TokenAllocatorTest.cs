@@ -1,4 +1,7 @@
+using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -37,7 +40,7 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [Fact]
-        public void NextAvailableTokenShouldChangeAfterAsigning()
+        public void NextAvailableTokenShouldChangeAfterAssigning()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var typeRef = new TypeReference(module, "", "");
@@ -47,6 +50,30 @@ namespace AsmResolver.DotNet.Tests
             module.TokenAllocator.AssignNextAvailableToken(typeRef2);
 
             Assert.Equal(nextToken.Rid + 1, typeRef2.MetadataToken.Rid);
+        }
+
+        [Fact]
+        public void AddMethodWithParameters()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+
+            var type = new TypeDefinition(null, "IInterface", TypeAttributes.Interface | TypeAttributes.Abstract);
+            
+            var method = new MethodDefinition("Method",
+                MethodAttributes.Public | MethodAttributes.Abstract | MethodAttributes.Virtual
+                | MethodAttributes.NewSlot, MethodSignature.CreateInstance(module.CorLibTypeFactory.Void,
+                    module.CorLibTypeFactory.Int32,
+                    module.CorLibTypeFactory.Int32));
+            type.Methods.Add(method);
+            module.TopLevelTypes.Add(type);
+
+            module.TokenAllocator.AssignNextAvailableToken(method);
+            foreach (var definition in method.ParameterDefinitions)
+                module.TokenAllocator.AssignNextAvailableToken(definition);
+
+            module.Write("/home/washi/Desktop/output.exe", new ManagedPEImageBuilder(
+                MetadataBuilderFlags.PreserveMethodDefinitionIndices
+                | MetadataBuilderFlags.PreserveParameterDefinitionIndices));
         }
     }
 }

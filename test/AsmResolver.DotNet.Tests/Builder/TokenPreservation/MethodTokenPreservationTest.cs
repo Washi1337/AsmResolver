@@ -103,6 +103,5 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             AssertSameTokens(module, newModule, m => m.Methods, method.MetadataToken);
         }
-        
     }
 }

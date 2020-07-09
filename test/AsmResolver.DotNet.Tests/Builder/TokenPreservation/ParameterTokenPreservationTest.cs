@@ -169,6 +169,26 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 
             AssertSameParameterTokens(module, newModule);
         }
-        
+
+        [Fact]
+        public void PreserveMethodAndParametersAfterRemovingMethod()
+        {
+            var module = CreateSampleParameterDefsModule(1, 1, 5);
+
+            var parameters = module
+                .TopLevelTypes.Last()
+                .Methods[0]
+                .ParameterDefinitions;
+                
+            const int swapIndex = 3;
+            var parameter = parameters[swapIndex];
+            parameters.RemoveAt(swapIndex);
+            parameters.Insert(swapIndex + 1, parameter);
+
+            var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveParameterDefinitionIndices
+                                                           | MetadataBuilderFlags.PreserveMethodDefinitionIndices);
+
+            AssertSameParameterTokens(module, newModule);
+        }
     }
 }
