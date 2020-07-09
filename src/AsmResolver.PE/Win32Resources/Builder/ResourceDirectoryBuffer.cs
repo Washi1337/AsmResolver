@@ -97,7 +97,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         {
             var data = (IResourceData) entry;
             DataEntryTable.AddEntry(data);
-            DataTable.Add(data.Contents);
+            DataTable.Add(data.Contents, 4);
         }
 
         /// <inheritdoc />
