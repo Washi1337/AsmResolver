@@ -195,13 +195,19 @@ namespace AsmResolver.DotNet.Builder.Discovery
             
             if (IsNewMember(memberList, member))
             {
-                if (memberType == TableIndex.TypeDef)
-                {
-                    
-                }
                 var freeRids = _freeRids[memberType];
-                
-                if (member.MetadataToken.Rid != 0)
+
+                var mask = member.MetadataToken.Table switch
+                {
+                    TableIndex.TypeDef => MemberDiscoveryFlags.PreserveTypeOrder,
+                    TableIndex.Field => MemberDiscoveryFlags.PreserveFieldOrder,
+                    TableIndex.Method => MemberDiscoveryFlags.PreserveMethodOrder,
+                    TableIndex.Param => MemberDiscoveryFlags.PreserveParameterOrder,
+                    TableIndex.Property => MemberDiscoveryFlags.PreservePropertyOrder,
+                    TableIndex.Event => MemberDiscoveryFlags.PreserveEventOrder,
+                    _ => throw new ArgumentOutOfRangeException(nameof(member))
+                };
+                if (member.MetadataToken.Rid != 0 && (_flags & mask) == mask)
                 {
                     // Member is a new member but assigned a RID.
                     // Ensure enough rows are allocated, so that we can insert it in the right place.
@@ -216,7 +222,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                     if (slot is {})
                     {
                         throw new ArgumentException(
-                            $"{slot} and {member} are assigned the same metadata token {slot.MetadataToken}.");
+                            $"{slot} and {member} are assigned the same RID {member.MetadataToken.Rid}.");
                     }
 
                     memberList[(int) member.MetadataToken.Rid - 1] = member;
@@ -347,9 +353,15 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // valid .NET module.
             if (parameterSequence > 0)
                 method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
-
+            
+#if DEBUG
+            string parameterName = method.ParameterDefinitions.Count == 0 ? null : $"placeholder{method.ParameterDefinitions.Count}";
+#else
+            const string parameterName = null;
+#endif 
+                
             // Create and add the placeholder parameter.
-            var parameter = new ParameterDefinition((ushort) parameterSequence, null, 0);
+            var parameter = new ParameterDefinition((ushort) parameterSequence, parameterName, 0);
             method.ParameterDefinitions.Add(parameter);
             
             // Move to next method.
