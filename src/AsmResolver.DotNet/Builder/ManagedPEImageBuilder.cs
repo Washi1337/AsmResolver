@@ -1,5 +1,6 @@
 ﻿using System;
 using AsmResolver.PE;
+using AsmResolver.PE.DotNet.StrongName;
 
 namespace AsmResolver.DotNet.Builder
 {

@@ -53,6 +53,14 @@ namespace AsmResolver.PE.DotNet.StrongName
             return result;
         }
 
+        internal byte[] CopyReversed(byte[] data)
+        {
+            var result = new byte[data.Length];
+            for (int i = 0; i < data.Length; i++)
+                result[result.Length - i - 1] = data[i];
+            return result;
+        }
+
         /// <summary>
         /// Creates a new empty public key.
         /// </summary>
@@ -72,7 +80,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <param name="parameters">The RSA parameters to import.</param>
         public StrongNamePublicKey(in RSAParameters parameters)
         {
-            Modulus = parameters.Modulus;
+            Modulus = CopyReversed(parameters.Modulus);
             uint exponent = 0;
             for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)
                 exponent |= (uint) (parameters.Exponent[i] << (8 * i));
@@ -123,7 +131,11 @@ namespace AsmResolver.PE.DotNet.StrongName
             writer.WriteUInt32((uint) SignatureAlgorithm);
             writer.WriteUInt32((uint) hashAlgorithm);
             writer.WriteUInt32((uint) (0x14 + Modulus.Length));
-            Write(writer);
+            writer.WriteUInt32((uint) RsaPublicKeyMagic.Rsa1);
+            writer.WriteUInt32((uint) BitLength);
+            writer.WriteUInt32(PublicExponent);
+            writer.WriteBytes(Modulus);
+            
             return tempStream.ToArray();
         }
 

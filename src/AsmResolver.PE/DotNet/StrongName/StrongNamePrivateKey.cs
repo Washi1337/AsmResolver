@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 
 namespace AsmResolver.PE.DotNet.StrongName
@@ -63,6 +64,14 @@ namespace AsmResolver.PE.DotNet.StrongName
             reader.ReadBytes(result.InverseQ, 0, result.InverseQ.Length);
             reader.ReadBytes(result.PrivateExponent, 0, result.PrivateExponent.Length);
 
+            Array.Reverse(result.Modulus);
+            Array.Reverse(result.P);
+            Array.Reverse(result.Q);
+            Array.Reverse(result.DP);
+            Array.Reverse(result.DQ);
+            Array.Reverse(result.InverseQ);
+            Array.Reverse(result.PrivateExponent);
+            
             return result;
         }
 
@@ -162,24 +171,27 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <inheritdoc />
         public override RSAParameters ToRsaParameters()
         {
-            var exponentBytes = new[]
+            var exponentBytes = new List<byte>(sizeof(uint))
             {
                 (byte) (PublicExponent & 0xFF),
                 (byte) ((PublicExponent >> 8) & 0xFF),
                 (byte) ((PublicExponent >> 16) & 0xFF),
-                (byte) ((PublicExponent >> 32) & 0xFF),
+                (byte) ((PublicExponent >> 24) & 0xFF),
             };
             
+            for (int i = exponentBytes.Count - 1; i >= 0 && exponentBytes[i] == 0; i--)
+                exponentBytes.RemoveAt(i);
+
             return new RSAParameters
             {
                 Modulus = Modulus,
-                Exponent = exponentBytes,
+                Exponent = exponentBytes.ToArray(),
                 P = P,
                 Q = Q,
                 DP = DP,
                 DQ = DQ,
+                D = PrivateExponent,
                 InverseQ = InverseQ,
-                D =  PrivateExponent,
             };
         }
 
