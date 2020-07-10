@@ -116,5 +116,8 @@ namespace AsmResolver
             start = Start;
             end = End;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"[{Start:X8}, {End:X8})";
     }
 }
