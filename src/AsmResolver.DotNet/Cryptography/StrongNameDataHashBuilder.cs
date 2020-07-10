@@ -4,7 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.PE.DotNet.StrongName
+namespace AsmResolver.DotNet.Cryptography
 {
     internal class StrongNameDataHashBuilder
     {
