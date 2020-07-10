@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Security.Cryptography;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.StrongName
 {
@@ -31,11 +34,11 @@ namespace AsmResolver.PE.DotNet.StrongName
         public static StrongNamePublicKey FromReader(IBinaryStreamReader reader)
         {
             // Read BLOBHEADER
-            ReadBlobHeader(reader, StrongNameKeyStructureType.PublicKeyBlob, 2, AlgorithmIdentifier.RsaSign);
+            ReadBlobHeader(reader, StrongNameKeyStructureType.PublicKeyBlob, 2, SignatureAlgorithm.RsaSign);
             
             // Read RSAPUBKEY
-            if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa2)
-                throw new FormatException("Input stream does not contain a valid RSA private key header magic.");
+            if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa1)
+                throw new FormatException("Input stream does not contain a valid RSA public key header magic.");
             
             uint bitLength = reader.ReadUInt32();
 
@@ -49,6 +52,32 @@ namespace AsmResolver.PE.DotNet.StrongName
 
             return result;
         }
+
+        /// <summary>
+        /// Creates a new empty public key.
+        /// </summary>
+        public StrongNamePublicKey()
+        {
+        }
+
+        public StrongNamePublicKey(byte[] modulus, uint publicExponent)
+        {
+            Modulus = modulus ?? throw new ArgumentNullException(nameof(modulus));
+            PublicExponent = publicExponent;
+        }
+        
+        /// <summary>
+        /// Imports a public key from an instance of <see cref="RSAParameters"/>.
+        /// </summary>
+        /// <param name="parameters">The RSA parameters to import.</param>
+        public StrongNamePublicKey(in RSAParameters parameters)
+        {
+            Modulus = parameters.Modulus;
+            uint exponent = 0;
+            for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)
+                exponent |= (uint) (parameters.Exponent[i] << (8 * i));
+            PublicExponent = exponent;
+        }
         
         /// <inheritdoc />
         public override StrongNameKeyStructureType Type => StrongNameKeyStructureType.PublicKeyBlob;
@@ -57,7 +86,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         public override byte Version => 2;
 
         /// <inheritdoc />
-        public override AlgorithmIdentifier Algorithm => AlgorithmIdentifier.RsaSign;
+        public override SignatureAlgorithm SignatureAlgorithm => SignatureAlgorithm.RsaSign;
 
         /// <summary>
         /// Gets the magic header number defining the type of RSA public key structure.
@@ -85,6 +114,30 @@ namespace AsmResolver.PE.DotNet.StrongName
         {
             get;
             set;
+        }
+
+        public byte[] CreatePublicKeyBlob(AssemblyHashAlgorithm hashAlgorithm)
+        {
+            using var tempStream = new MemoryStream();
+            var writer = new BinaryStreamWriter(tempStream);
+            writer.WriteUInt32((uint) SignatureAlgorithm);
+            writer.WriteUInt32((uint) hashAlgorithm);
+            writer.WriteUInt32((uint) (0x14 + Modulus.Length));
+            Write(writer);
+            return tempStream.ToArray();
+        }
+
+        /// <summary>
+        /// Translates the strong name parameters to an instance of <see cref="RSAParameters"/>.
+        /// </summary>
+        /// <returns>The converted RSA parameters.</returns>
+        public virtual RSAParameters ToRsaParameters()
+        {
+            return new RSAParameters
+            {
+                Modulus = Modulus,
+                Exponent = BitConverter.GetBytes(PublicExponent)
+            };
         }
         
         /// <inheritdoc />

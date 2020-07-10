@@ -6,7 +6,7 @@ namespace AsmResolver.PE.DotNet.StrongName
     /// <summary>
     /// Provides members for identifying cryptographic algorithms supported by AsmResolver. 
     /// </summary>
-    public enum AlgorithmIdentifier : uint
+    public enum SignatureAlgorithm : uint
     {
         /// <summary>
         /// RSA public key signature algorithm. This algorithm is supported by the Microsoft Base Cryptographic Provider.

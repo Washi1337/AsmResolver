@@ -1,6 +1,10 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Cryptography;
+using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE.DotNet.StrongName;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -93,16 +97,15 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void PublicKeyIsPersistentAfterRebuild()
         {
-            var newKey = new byte[]
-            {
-                1, 2, 3, 4
-            };
+            using var rsa = RSA.Create();
+            var rsaParameters = rsa.ExportParameters(true);
+            var snk = new StrongNamePrivateKey(rsaParameters);
             
             var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
-            assemblyDef.PublicKey = newKey;
+            assemblyDef.PublicKey = snk.CreatePublicKeyBlob(assemblyDef.HashAlgorithm);
             
             var rebuilt = Rebuild(assemblyDef);
-            Assert.Equal(newKey, rebuilt.PublicKey);
+            Assert.Equal(assemblyDef.PublicKey, rebuilt.PublicKey);
         }
     }
 }

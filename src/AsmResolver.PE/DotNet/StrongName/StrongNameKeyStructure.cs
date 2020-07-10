@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         protected static void ReadBlobHeader(IBinaryStreamReader reader,
             StrongNameKeyStructureType expectedType, 
             byte expectedVersion, 
-            AlgorithmIdentifier expectedAlgorithm)
+            SignatureAlgorithm expectedAlgorithm)
         {
             // Read RSAPUBKEY
             if ((StrongNameKeyStructureType) reader.ReadByte() != expectedType)
@@ -30,7 +30,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             if (reader.ReadByte() != expectedVersion)
                 throw new NotSupportedException("Invalid or unsupported public/private key pair structure version number.");
             reader.ReadUInt16();
-            if ((AlgorithmIdentifier) reader.ReadUInt32() != expectedAlgorithm)
+            if ((SignatureAlgorithm) reader.ReadUInt32() != expectedAlgorithm)
                 throw new NotSupportedException("Invalid or unsupported public key algorithm.");
         }
 
@@ -54,7 +54,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <summary>
         /// Gets the algorithm used.
         /// </summary>
-        public abstract AlgorithmIdentifier Algorithm
+        public abstract SignatureAlgorithm SignatureAlgorithm
         {
             get;
         }
@@ -65,7 +65,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             return sizeof(StrongNameKeyStructureType) // bType
                    + sizeof(byte) // bVersion
                    + sizeof(ushort) // reserved
-                   + sizeof(AlgorithmIdentifier) // aiKeyAlg
+                   + sizeof(SignatureAlgorithm) // aiKeyAlg
                 ;
         }
 
@@ -75,7 +75,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             writer.WriteByte((byte) Type);
             writer.WriteByte(Version);
             writer.WriteUInt16(0);
-            writer.WriteUInt32((uint) Algorithm);
+            writer.WriteUInt32((uint) SignatureAlgorithm);
         }
     }
 }

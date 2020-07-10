@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
-using System.Security.Cryptography;
 using AsmResolver.PE;
-using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.StrongName;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
@@ -11,26 +9,11 @@ namespace AsmResolver.DotNet.Cryptography
 {
     public class StrongNameSigner
     {
-        private readonly RSA _cryptoService;
+        private readonly StrongNamePrivateKey _privateKey;
 
-        public StrongNameSigner(string snkFile)
-            : this(System.IO.File.ReadAllBytes(snkFile))
+        public StrongNameSigner(StrongNamePrivateKey privateKey)
         {
-        }
-
-        public StrongNameSigner(byte[] snkData)
-        {
-            if (snkData == null)
-                throw new ArgumentNullException(nameof(snkData));
-            
-            var rsa = new RSACryptoServiceProvider();
-            rsa.ImportCspBlob(snkData);
-            _cryptoService = rsa;
-        }
-        
-        public StrongNameSigner(RSA cryptoService)
-        {
-            _cryptoService = cryptoService ?? throw new ArgumentNullException(nameof(cryptoService));
+            _privateKey = privateKey ?? throw new ArgumentNullException(nameof(privateKey));
         }
 
         private byte[] GetHashToSign(
@@ -39,7 +22,6 @@ namespace AsmResolver.DotNet.Cryptography
             IPEImage image,
             AssemblyHashAlgorithm hashAlgorithm)
         {
-            
             var hashBuilder = new StrongNameDataHashBuilder(rawContents, hashAlgorithm);
 
             // Zero checksum in optional header.
@@ -75,5 +57,6 @@ namespace AsmResolver.DotNet.Cryptography
             
             return hashBuilder.ComputeHash();
         }
+        
     }
 }

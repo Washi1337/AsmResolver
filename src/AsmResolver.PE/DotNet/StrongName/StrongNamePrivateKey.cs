@@ -1,4 +1,5 @@
 using System;
+using System.Security.Cryptography;
 
 namespace AsmResolver.PE.DotNet.StrongName
 {
@@ -30,7 +31,7 @@ namespace AsmResolver.PE.DotNet.StrongName
         public new static StrongNamePrivateKey FromReader(IBinaryStreamReader reader)
         {
             // Read BLOBHEADER
-            ReadBlobHeader(reader, StrongNameKeyStructureType.PrivateKeyBlob, 2, AlgorithmIdentifier.RsaSign);
+            ReadBlobHeader(reader, StrongNameKeyStructureType.PrivateKeyBlob, 2, SignatureAlgorithm.RsaSign);
 
             // Read RSAPUBKEY
             if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa2)
@@ -64,6 +65,35 @@ namespace AsmResolver.PE.DotNet.StrongName
 
             return result;
         }
+
+        /// <summary>
+        /// Creates a new empty public/private key pair.
+        /// </summary>
+        public StrongNamePrivateKey()
+        {
+        }
+        
+        /// <summary>
+        /// Imports a public/private key pair from an instance of <see cref="RSAParameters"/>.
+        /// </summary>
+        /// <param name="parameters">The RSA parameters to import.</param>
+        public StrongNamePrivateKey(in RSAParameters parameters)
+        {
+            Modulus = parameters.Modulus;
+            P = parameters.P;
+            Q = parameters.Q;
+            DP = parameters.DP;
+            DQ = parameters.DQ;
+
+            uint exponent = 0;
+            for (int i = 0; i < Math.Min(sizeof(uint), parameters.Exponent.Length); i++)
+                exponent |= (uint) (parameters.Exponent[i] << (8 * i));
+
+            PublicExponent = exponent;
+            InverseQ = parameters.InverseQ;
+            PrivateExponent = parameters.D;
+        }
+
         /// <inheritdoc />
         public override StrongNameKeyStructureType Type => StrongNameKeyStructureType.PrivateKeyBlob;
 
@@ -125,6 +155,32 @@ namespace AsmResolver.PE.DotNet.StrongName
         {
             get;
             set;
+        }
+
+        public StrongNamePublicKey ToPublicKey() => new StrongNamePublicKey(Modulus, PublicExponent);
+
+        /// <inheritdoc />
+        public override RSAParameters ToRsaParameters()
+        {
+            var exponentBytes = new[]
+            {
+                (byte) (PublicExponent & 0xFF),
+                (byte) ((PublicExponent >> 8) & 0xFF),
+                (byte) ((PublicExponent >> 16) & 0xFF),
+                (byte) ((PublicExponent >> 32) & 0xFF),
+            };
+            
+            return new RSAParameters
+            {
+                Modulus = Modulus,
+                Exponent = exponentBytes,
+                P = P,
+                Q = Q,
+                DP = DP,
+                DQ = DQ,
+                InverseQ = InverseQ,
+                D =  PrivateExponent,
+            };
         }
 
         /// <inheritdoc />
