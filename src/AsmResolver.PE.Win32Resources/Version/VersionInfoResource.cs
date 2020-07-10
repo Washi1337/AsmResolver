@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
         public static VersionInfoResource FromDirectory(IResourceDirectory rootDirectory)
         {
-            var versionDirectory = (IResourceDirectory) rootDirectory.Entries[IndexOfVersionResourceDirectory(rootDirectory)];
+            var versionDirectory = (IResourceDirectory) rootDirectory.Entries[ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Version)];
 
             var categoryDirectory = versionDirectory
                 ?.Entries
@@ -190,7 +190,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public void WriteToDirectory(IResourceDirectory rootDirectory)
         {
             // Find and remove old version directory.
-            int index = IndexOfVersionResourceDirectory(rootDirectory);
+            int index = ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Version);
             
             if (index == -1)
                 index = rootDirectory.Entries.Count;
@@ -212,20 +212,5 @@ namespace AsmResolver.PE.Win32Resources.Version
             // Insert.
             rootDirectory.Entries.Insert(index, newVersionDirectory);
         }
-
-        private static int IndexOfVersionResourceDirectory(IResourceDirectory rootDirectory)
-        {
-            for (int i = 0; i < rootDirectory.Entries.Count; i++)
-            {
-                if (rootDirectory.Entries[i] is IResourceDirectory directory
-                    && directory.Type == ResourceType.Version)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-        
     }
 }
