@@ -1,3 +1,5 @@
+using System;
+
 namespace AsmResolver.PE.DotNet.StrongName
 {
     // Reference
@@ -9,6 +11,45 @@ namespace AsmResolver.PE.DotNet.StrongName
     /// </summary>
     public class StrongNamePublicKey : StrongNameKeyStructure
     {
+        /// <summary>
+        /// Reads a private key from an input file.
+        /// </summary>
+        /// <param name="path">The path to the strong-name key file.</param>
+        /// <returns>The private key.</returns>
+        /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
+        /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
+        public static StrongNamePublicKey FromFile(string path) => 
+            FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
+
+        /// <summary>
+        /// Reads a private key from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The private key.</returns>
+        /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
+        /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
+        public static StrongNamePublicKey FromReader(IBinaryStreamReader reader)
+        {
+            // Read BLOBHEADER
+            ReadBlobHeader(reader, StrongNameKeyStructureType.PublicKeyBlob, 2, AlgorithmIdentifier.RsaSign);
+            
+            // Read RSAPUBKEY
+            if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa2)
+                throw new FormatException("Input stream does not contain a valid RSA private key header magic.");
+            
+            uint bitLength = reader.ReadUInt32();
+
+            var result = new StrongNamePublicKey
+            {
+                PublicExponent = reader.ReadUInt32(),
+                Modulus = new byte[bitLength / 8]
+            };
+            
+            reader.ReadBytes(result.Modulus, 0, result.Modulus.Length);
+
+            return result;
+        }
+        
         /// <inheritdoc />
         public override StrongNameKeyStructureType Type => StrongNameKeyStructureType.PublicKeyBlob;
 

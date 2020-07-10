@@ -1,14 +1,69 @@
+using System;
+
 namespace AsmResolver.PE.DotNet.StrongName
 {
     // Reference:
     // https://docs.microsoft.com/en-us/windows/win32/seccrypto/rsa-schannel-key-blobs
-    //
     
     /// <summary>
     /// Represents a public/private key pair in the RSA crypto system.
     /// </summary>
     public class StrongNamePrivateKey : StrongNamePublicKey
     {
+        /// <summary>
+        /// Reads a private key from an input file.
+        /// </summary>
+        /// <param name="path">The path to the strong-name key file.</param>
+        /// <returns>The private key.</returns>
+        /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
+        /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
+        public new static StrongNamePrivateKey FromFile(string path) => 
+            FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
+
+        /// <summary>
+        /// Reads a private key from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The private key.</returns>
+        /// <exception cref="FormatException">Occurs when the input stream is not in the correct format.</exception>
+        /// <exception cref="NotSupportedException">Occurs when an invalid or unsupported algorithm is specified.</exception>
+        public new static StrongNamePrivateKey FromReader(IBinaryStreamReader reader)
+        {
+            // Read BLOBHEADER
+            ReadBlobHeader(reader, StrongNameKeyStructureType.PrivateKeyBlob, 2, AlgorithmIdentifier.RsaSign);
+
+            // Read RSAPUBKEY
+            if ((RsaPublicKeyMagic) reader.ReadUInt32() != RsaPublicKeyMagic.Rsa2)
+                throw new FormatException("Input stream does not contain a valid RSA private key header magic.");
+            
+            uint bitLength = reader.ReadUInt32();
+            uint length8 = bitLength / 8;
+            uint length16 = bitLength / 16;
+
+            var result = new StrongNamePrivateKey
+            {
+                PublicExponent = reader.ReadUInt32(),
+                Modulus = new byte[length8],
+                P = new byte[length16],
+                Q = new byte[length16],
+                DP = new byte[length16],
+                DQ = new byte[length16],
+                InverseQ = new byte[length16],
+                PrivateExponent = new byte[length8]
+            };
+            
+            reader.ReadBytes(result.Modulus, 0, result.Modulus.Length);
+
+            // Read private data.
+            reader.ReadBytes(result.P, 0, result.P.Length);
+            reader.ReadBytes(result.Q, 0, result.Q.Length);
+            reader.ReadBytes(result.DP, 0, result.DP.Length);
+            reader.ReadBytes(result.DQ, 0, result.DQ.Length);
+            reader.ReadBytes(result.InverseQ, 0, result.InverseQ.Length);
+            reader.ReadBytes(result.PrivateExponent, 0, result.PrivateExponent.Length);
+
+            return result;
+        }
         /// <inheritdoc />
         public override StrongNameKeyStructureType Type => StrongNameKeyStructureType.PrivateKeyBlob;
 
