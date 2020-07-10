@@ -1,21 +1,33 @@
 namespace AsmResolver.PE.DotNet.StrongName
 {
+    /// <summary>
+    /// Provides a base for strong name key structures.
+    /// </summary>
     public abstract class StrongNameKeyStructure : SegmentBase
     {
         // Reference:
         // https://docs.microsoft.com/en-us/windows/win32/api/wincrypt/ns-wincrypt-publickeystruc
         
+        /// <summary>
+        /// Gets the type of structure that is encoded.
+        /// </summary>
         public abstract StrongNameKeyStructureType Type
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the version number of the structure.
+        /// </summary>
         public abstract byte Version
         {
             get;
         }
 
-        public AlgorithmIdentifier Algorithm
+        /// <summary>
+        /// Gets the algorithm used.
+        /// </summary>
+        public abstract AlgorithmIdentifier Algorithm
         {
             get;
         }

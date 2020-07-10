@@ -3,6 +3,9 @@ namespace AsmResolver.PE.DotNet.StrongName
     // Reference
     // https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id
     
+    /// <summary>
+    /// Provides members for identifying cryptographic algorithms supported by AsmResolver. 
+    /// </summary>
     public enum AlgorithmIdentifier : uint
     {
         /// <summary>

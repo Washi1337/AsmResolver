@@ -4,6 +4,9 @@ namespace AsmResolver.PE.DotNet.StrongName
     // https://docs.microsoft.com/en-us/windows/win32/seccrypto/rsa-schannel-key-blobs
     //
     
+    /// <summary>
+    /// Represents a public/private key pair in the RSA crypto system.
+    /// </summary>
     public class StrongNamePrivateKey : StrongNamePublicKey
     {
         /// <inheritdoc />
@@ -15,36 +18,54 @@ namespace AsmResolver.PE.DotNet.StrongName
         /// <inheritdoc />
         public override RsaPublicKeyMagic Magic => RsaPublicKeyMagic.Rsa2;
 
+        /// <summary>
+        /// Gets or sets the first prime number used in the RSA crypto system.
+        /// </summary>
         public byte[] P
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the second prime number used in the RSA crypto system.
+        /// </summary>
         public byte[] Q
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the first exponent (equal to d mod (p-1)) used in the RSA crypto system.
+        /// </summary>
         public byte[] DP
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the second exponent (equal to d mod (q-1)) used in the RSA crypto system.
+        /// </summary>
         public byte[] DQ
         {
             get;
             set;
         }
 
-        public byte[] Coefficient
+        /// <summary>
+        /// Gets or sets the coefficient which is equal to the modular inverse of q mod p, used in the RSA crypto system.
+        /// </summary>
+        public byte[] InverseQ
         {
             get;
             set;
         }
         
+        /// <summary>
+        /// Gets or sets the private exponent used in the RSA crypto system.
+        /// </summary>
         public byte[] PrivateExponent
         {
             get;
@@ -74,7 +95,7 @@ namespace AsmResolver.PE.DotNet.StrongName
             writer.WriteBytes(Q);
             writer.WriteBytes(DP);
             writer.WriteBytes(DQ);
-            writer.WriteBytes(Coefficient);
+            writer.WriteBytes(InverseQ);
             writer.WriteBytes(PrivateExponent);
         }
     }
