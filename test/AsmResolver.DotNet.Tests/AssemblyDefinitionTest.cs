@@ -1,11 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Cryptography;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.StrongName;
-using AsmResolver.Tests.Runners;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
