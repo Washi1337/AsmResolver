@@ -8,6 +8,9 @@ namespace AsmResolver.PE.File.Headers
     /// </summary>
     public class OptionalHeader : ISegment
     {
+        public const uint OptionalHeader32SizeExcludingDataDirectories = 0x60;
+        public const uint OptionalHeader64SizeExcludingDataDirectories = 0x70;
+
         public const int DefaultNumberOfRvasAndSizes = 16;
         
         public const int ExportDirectoryIndex = 0;

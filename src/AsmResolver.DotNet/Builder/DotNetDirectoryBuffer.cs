@@ -5,6 +5,7 @@ using AsmResolver.DotNet.Code;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.StrongName;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -20,7 +21,10 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="module">The module for which this .NET directory is built.</param>
         /// <param name="methodBodySerializer">The method body serializer to use for constructing method bodies.</param>
         /// <param name="metadata">The metadata builder </param>
-        public DotNetDirectoryBuffer(ModuleDefinition module, IMethodBodySerializer methodBodySerializer, IMetadataBuffer metadata)
+        public DotNetDirectoryBuffer(
+            ModuleDefinition module,
+            IMethodBodySerializer methodBodySerializer,
+            IMetadataBuffer metadata)
         {
             Module = module;
             MethodBodySerializer = methodBodySerializer;

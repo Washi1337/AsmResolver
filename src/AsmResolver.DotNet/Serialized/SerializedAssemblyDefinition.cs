@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Collections;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Blob;
@@ -49,13 +50,28 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _dotNetDirectory.Metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
+        protected override string GetName()
+        {
+            return _dotNetDirectory.Metadata
+                .GetStream<StringsStream>()
+                ?.GetStringByIndex(_row.Name);
+        }
 
         /// <inheritdoc />
-        protected override string GetCulture() => _dotNetDirectory.Metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Culture);
+        protected override string GetCulture()
+        {
+            return _dotNetDirectory.Metadata
+                .GetStream<StringsStream>()
+                ?.GetStringByIndex(_row.Culture);
+        }
 
         /// <inheritdoc />
-        protected override byte[] GetPublicKey() => _dotNetDirectory.Metadata.GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKey);
+        protected override byte[] GetPublicKey()
+        {
+            return _dotNetDirectory.Metadata
+                .GetStream<BlobStream>()
+                ?.GetBlobByIndex(_row.PublicKey);
+        }
 
         /// <inheritdoc />
         protected override IList<ModuleDefinition> GetModules()

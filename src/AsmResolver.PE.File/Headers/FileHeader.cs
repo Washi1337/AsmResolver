@@ -5,6 +5,10 @@ namespace AsmResolver.PE.File.Headers
     /// </summary>
     public class FileHeader : ISegment
     {
+        public const int FileHeaderSize = 2 * sizeof (ushort) +
+                                          3 * sizeof (uint) +
+                                          2 * sizeof (ushort);
+
         public static FileHeader FromReader(IBinaryStreamReader reader)
         {
             return new FileHeader
@@ -106,12 +110,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        public uint GetPhysicalSize()
-        {
-            return 2 * sizeof (ushort) +
-                   3 * sizeof (uint) +
-                   2 * sizeof (ushort);
-        }
+        public uint GetPhysicalSize() => FileHeaderSize;
 
         /// <inheritdoc />
         public uint GetVirtualSize() => GetPhysicalSize();
