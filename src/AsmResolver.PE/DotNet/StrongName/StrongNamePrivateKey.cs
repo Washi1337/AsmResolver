@@ -166,8 +166,6 @@ namespace AsmResolver.PE.DotNet.StrongName
             set;
         }
 
-        public StrongNamePublicKey ToPublicKey() => new StrongNamePublicKey(Modulus, PublicExponent);
-
         /// <inheritdoc />
         public override RSAParameters ToRsaParameters()
         {

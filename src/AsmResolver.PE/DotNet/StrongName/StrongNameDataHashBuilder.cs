@@ -4,7 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.DotNet.Cryptography
+namespace AsmResolver.PE.DotNet.StrongName
 {
     internal class StrongNameDataHashBuilder
     {
@@ -14,11 +14,15 @@ namespace AsmResolver.DotNet.Cryptography
         private readonly List<OffsetRange> _includedRanges = new List<OffsetRange>();
         private readonly List<OffsetRange> _zeroRanges = new List<OffsetRange>();
 
-        public StrongNameDataHashBuilder(byte[] rawData, AssemblyHashAlgorithm hashAlgorithm)
+        public StrongNameDataHashBuilder(byte[] fileContents, AssemblyHashAlgorithm hashAlgorithm)
         {
-            _rawStream = new MemoryStream(rawData ?? throw new ArgumentNullException(nameof(rawData)));
+            _rawStream = new MemoryStream(fileContents ?? throw new ArgumentNullException(nameof(fileContents)));
             _hashAlgorithm = hashAlgorithm;
-            _includedRanges.Add((0, (uint) rawData.Length));
+        }
+
+        public void IncludeRange(OffsetRange range)
+        {
+            _includedRanges.Add(range);
         }
 
         public void ExcludeRange(OffsetRange range)
@@ -39,6 +43,7 @@ namespace AsmResolver.DotNet.Cryptography
                 {
                     _includedRanges[i] = left;
                     _includedRanges.Insert(i + 1, right);
+                    i++;
                 }
             }
         }

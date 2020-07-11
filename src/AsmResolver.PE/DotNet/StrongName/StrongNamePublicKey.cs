@@ -68,6 +68,11 @@ namespace AsmResolver.PE.DotNet.StrongName
         {
         }
 
+        /// <summary>
+        /// Creates a new strong name public key.
+        /// </summary>
+        /// <param name="modulus">The modulus to use in the RSA crypto system.</param>
+        /// <param name="publicExponent">The public exponent to use in the RSA crypto system.</param>
         public StrongNamePublicKey(byte[] modulus, uint publicExponent)
         {
             Modulus = modulus ?? throw new ArgumentNullException(nameof(modulus));
@@ -124,6 +129,11 @@ namespace AsmResolver.PE.DotNet.StrongName
             set;
         }
 
+        /// <summary>
+        /// Prepares a blob signature containing the full public key of an assembly.  
+        /// </summary>
+        /// <param name="hashAlgorithm">The hash algorithm that is used to hash the PE file.</param>
+        /// <returns>The blob signature.</returns>
         public byte[] CreatePublicKeyBlob(AssemblyHashAlgorithm hashAlgorithm)
         {
             using var tempStream = new MemoryStream();
@@ -131,11 +141,14 @@ namespace AsmResolver.PE.DotNet.StrongName
             writer.WriteUInt32((uint) SignatureAlgorithm);
             writer.WriteUInt32((uint) hashAlgorithm);
             writer.WriteUInt32((uint) (0x14 + Modulus.Length));
+            writer.WriteByte((byte) StrongNameKeyStructureType.PublicKeyBlob);
+            writer.WriteByte(2);
+            writer.WriteUInt16(0);
+            writer.WriteUInt32((uint) SignatureAlgorithm);
             writer.WriteUInt32((uint) RsaPublicKeyMagic.Rsa1);
             writer.WriteUInt32((uint) BitLength);
             writer.WriteUInt32(PublicExponent);
-            writer.WriteBytes(Modulus);
-            
+            writer.WriteBytes(CopyReversed(Modulus));
             return tempStream.ToArray();
         }
 

@@ -85,9 +85,15 @@ namespace AsmResolver
         /// </summary>
         /// <param name="other">The other range.</param>
         /// <returns><c>true</c> if the range intersects, <c>false</c> otherwise.</returns>
-        public OffsetRange Intersect(OffsetRange other) => new OffsetRange(
-            Math.Max(Start, other.Start),
-            Math.Min(End, other.End));
+        public OffsetRange Intersect(OffsetRange other)
+        {
+            if (!Intersects(other))
+                return new OffsetRange(0, 0);
+            
+            return new OffsetRange(
+                Math.Max(Start, other.Start),
+                Math.Min(End, other.End));
+        }
 
         /// <summary>
         /// Determines the resulting ranges after excluding the provided range.
