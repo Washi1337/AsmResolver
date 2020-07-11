@@ -74,3 +74,29 @@ Below an example on how to preserve maximum stack depths for all methods in the 
     {
         ComputeMaxStackOnBuildOverride = false
     }
+    
+Strong name signing
+-------------------
+
+Assemblies can be signed with a strong-name signature. Open a strong name private key from a file:
+
+.. code-block:: csharp
+    
+    var snk = StrongNamePrivateKey.FromFile(@"C:\Path\To\keyfile.snk");
+    
+Prepare the image builder to delay-sign the PE image:
+ 
+.. code-block:: csharp
+    
+    DotNetDirectoryFactory factory = ...;
+    factory.StrongNamePrivateKey = snk;
+    
+After writing the module to an output stream, use the ``StrongNameSigner`` class to sign the image.
+
+.. code-block:: csharp
+
+    using Stream outputStream = ...
+    module.Write(outputStream, factory);
+    
+    var signer = new StrongNameSigner(snk);
+    signer.SignImage(outputStream, module.Assembly.HashAlgorithm);

@@ -67,3 +67,27 @@ Once a ``PEFile`` instance has been generated from the image, you can use it to 
         var writer = new BinaryStreamWriter(stream);
         newPEFile.Write(writer);
     }
+    
+Strong name signing
+-------------------
+
+If the PE image is a .NET image, it can be signed with a strong-name. Open a strong name private key from a file:
+                                                                     
+.. code-block:: csharp
+ 
+    var snk = StrongNamePrivateKey.FromFile(@"C:\Path\To\keyfile.snk");
+
+Make sure that the strong name directory is present and has the correct size. 
+
+.. code-block:: csharp
+
+    image.DotNetDirectory.StrongName = new DataSegment(new byte[snk.Modulus.Length]);
+    
+After writing the PE image to an output stream, use the ``StrongNameSigner`` class to sign the image.
+
+.. code-block:: csharp
+
+    using Stream outputStream = ...
+    
+    var signer = new StrongNameSigner(snk);
+    signer.SignImage(outputStream, module.Assembly.HashAlgorithm);
