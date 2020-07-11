@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Security.Cryptography;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File;
@@ -27,26 +28,22 @@ namespace AsmResolver.PE.DotNet.StrongName
         {
             get;
         }
-
-        /// <summary>
-        /// Delay signs the PE-image.
-        /// </summary>
-        /// <param name="image">The image to sign.</param>
-        public void PrepareImageForSigning(IPEImage image)
-        {
-            image.DotNetDirectory.StrongName = new DataSegment(new byte[PrivateKey.BitLength / 8]);
-        }
-
+        
         /// <summary>
         /// Finalizes a delay-signed PE image. 
         /// </summary>
-        /// <param name="rawContents">The raw contents of the delay signed image.</param>
+        /// <param name="imageStream">The stream containing the image to sign.</param>
         /// <param name="hashAlgorithm">The hashing algorithm to use.</param>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET image.</exception>
         /// <exception cref="ArgumentException">Occurs when the image does not contain a strong name directory of the right size.</exception>
-        public void SignImage(byte[] rawContents, AssemblyHashAlgorithm hashAlgorithm)
+        public void SignImage(Stream imageStream, AssemblyHashAlgorithm hashAlgorithm)
         {
-            var file = PEFile.FromBytes(rawContents);
+            imageStream.Position = 0;
+            using var streamCopy = new MemoryStream();
+            imageStream.CopyTo(streamCopy);
+            streamCopy.Position = 0;
+            
+            var file = PEFile.FromBytes(streamCopy.ToArray());
             var image = PEImage.FromFile(file);
             
             // Check existence of .NET metadata.
@@ -65,22 +62,23 @@ namespace AsmResolver.PE.DotNet.StrongName
             }
 
             // Compute hash of pseudo PE file.
-            var hash = GetHashToSign(rawContents, file, image, hashAlgorithm);
+            var hash = GetHashToSign(streamCopy, file, image, hashAlgorithm);
 
             // Compute strong name signature.
             var signature = ComputeSignature(hashAlgorithm, hash);
 
             // Copy strong name signature into target PE.
-            Buffer.BlockCopy(signature, 0, rawContents, (int) strongNameDirectory.FileOffset, signature.Length);
+            imageStream.Position = strongNameDirectory.FileOffset;
+            imageStream.Write(signature, 0, signature.Length);
         }
 
         private byte[] GetHashToSign(
-            byte[] rawContents,
+            Stream imageStream,
             PEFile file, 
             IPEImage image,
             AssemblyHashAlgorithm hashAlgorithm)
         {
-            var hashBuilder = new StrongNameDataHashBuilder(rawContents, hashAlgorithm);
+            var hashBuilder = new StrongNameDataHashBuilder(imageStream, hashAlgorithm);
             
             // Include DOS, NT and section headers in the hash.
             hashBuilder.IncludeRange(new OffsetRange(0,
@@ -140,8 +138,9 @@ namespace AsmResolver.PE.DotNet.StrongName
             formatter.SetHashAlgorithm(hashAlgorithm.ToString().ToUpperInvariant());
             var signature = formatter.CreateSignature(hash);
             Array.Reverse(signature);
-            
+
             return signature;
         }
+
     }
 }

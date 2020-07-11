@@ -8,15 +8,15 @@ namespace AsmResolver.PE.DotNet.StrongName
 {
     internal class StrongNameDataHashBuilder
     {
-        private readonly MemoryStream _rawStream;
+        private readonly Stream _imageStream;
         private readonly AssemblyHashAlgorithm _hashAlgorithm;
 
         private readonly List<OffsetRange> _includedRanges = new List<OffsetRange>();
         private readonly List<OffsetRange> _zeroRanges = new List<OffsetRange>();
 
-        public StrongNameDataHashBuilder(byte[] fileContents, AssemblyHashAlgorithm hashAlgorithm)
+        public StrongNameDataHashBuilder(Stream imageStream, AssemblyHashAlgorithm hashAlgorithm)
         {
-            _rawStream = new MemoryStream(fileContents ?? throw new ArgumentNullException(nameof(fileContents)));
+            _imageStream = imageStream ?? throw new ArgumentNullException(nameof(imageStream));
             _hashAlgorithm = hashAlgorithm;
         }
 
@@ -69,15 +69,15 @@ namespace AsmResolver.PE.DotNet.StrongName
 
             foreach (var range in _includedRanges)
             {
-                _rawStream.Position = range.Start;
-                while (_rawStream.Position < range.End)
+                _imageStream.Position = range.Start;
+                while (_imageStream.Position < range.End)
                 {
-                    int chunkLength = Math.Min(buffer.Length, (int) (range.End - _rawStream.Position));
+                    int chunkLength = Math.Min(buffer.Length, (int) (range.End - _imageStream.Position));
                     var currentRange = new OffsetRange(
-                        (uint) _rawStream.Position,
-                        (uint) (_rawStream.Position + chunkLength));
+                        (uint) _imageStream.Position,
+                        (uint) (_imageStream.Position + chunkLength));
                     
-                    _rawStream.Read(buffer, 0, chunkLength);
+                    _imageStream.Read(buffer, 0, chunkLength);
                     
                     ZeroRangesIfApplicable(buffer, currentRange);
                     algorithm.TransformBlock(buffer, 0, chunkLength, buffer, 0);

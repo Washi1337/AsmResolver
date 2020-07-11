@@ -107,7 +107,13 @@ namespace AsmResolver.DotNet.Builder
             // Finalize module.
             buffer.FinalizeModule(module);
 
-            return buffer.CreateDirectory();
+            var result = buffer.CreateDirectory();
+            
+            // Delay sign when necessary.
+            if (StrongNamePrivateKey is {})
+                result.StrongName = new DataSegment(new byte[StrongNamePrivateKey.Modulus.Length]);
+            
+            return result;
         }
 
         private MemberDiscoveryResult DiscoverMemberDefinitionsInModule(ModuleDefinition module)
