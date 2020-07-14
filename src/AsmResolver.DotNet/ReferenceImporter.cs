@@ -192,9 +192,14 @@ namespace AsmResolver.DotNet
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
+            
             var importedTypeSig = ImportTypeSignature(type);
-            if (importedTypeSig is TypeDefOrRefSignature typeDefOrRef)
-                return typeDefOrRef.Type;
+            if (importedTypeSig is TypeDefOrRefSignature
+                || importedTypeSig is CorLibTypeSignature)
+            {
+                return importedTypeSig.GetUnderlyingTypeDefOrRef();
+            }
+            
             return new TypeSpecification(importedTypeSig);
         }
 
