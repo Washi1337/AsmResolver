@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -36,7 +35,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             {
                 DotNetDirectoryFactory = new DotNetDirectoryFactory(builderFlags)
             };
-            
+
             var newImage = builder.CreateImage(module);
             return ModuleDefinition.FromImage(newImage);
         }

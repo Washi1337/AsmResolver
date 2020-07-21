@@ -68,14 +68,14 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private readonly TypeReference _eventHandlerTypeRef;
         private readonly TypeSignature _eventHandlerTypeSig;
 
-        private readonly IDictionary<TableIndex, Queue<uint>> _freeRids= new Dictionary<TableIndex, Queue<uint>>
+        private readonly IDictionary<TableIndex, IList<uint>> _freeRids= new Dictionary<TableIndex, IList<uint>>
         {
-            [TableIndex.TypeDef] = new Queue<uint>(),
-            [TableIndex.Field] = new Queue<uint>(),
-            [TableIndex.Method] = new Queue<uint>(),
-            [TableIndex.Param] = new Queue<uint>(),
-            [TableIndex.Property] = new Queue<uint>(),
-            [TableIndex.Event] = new Queue<uint>(),
+            [TableIndex.TypeDef] = new List<uint>(),
+            [TableIndex.Field] = new List<uint>(),
+            [TableIndex.Method] = new List<uint>(),
+            [TableIndex.Param] = new List<uint>(),
+            [TableIndex.Property] = new List<uint>(),
+            [TableIndex.Event] = new List<uint>(),
         };
 
         private MemberDiscoverer(ModuleDefinition module, MemberDiscoveryFlags flags)
@@ -148,7 +148,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 else
                 {
                     // Member was removed from the module, mark current RID available.
-                    _freeRids[tableIndex].Enqueue(rid);
+                    _freeRids[tableIndex].Add(rid);
                     resultingList.Add(default);
                 }
             }
@@ -195,12 +195,52 @@ namespace AsmResolver.DotNet.Builder.Discovery
             
             if (IsNewMember(memberList, member))
             {
-                // Check if there is any free RID available to use.
                 var freeRids = _freeRids[memberType];
-                if (freeRids.Count > 0)
-                    memberList[(int) (freeRids.Dequeue() - 1)] = member;
+
+                var mask = member.MetadataToken.Table switch
+                {
+                    TableIndex.TypeDef => MemberDiscoveryFlags.PreserveTypeOrder,
+                    TableIndex.Field => MemberDiscoveryFlags.PreserveFieldOrder,
+                    TableIndex.Method => MemberDiscoveryFlags.PreserveMethodOrder,
+                    TableIndex.Param => MemberDiscoveryFlags.PreserveParameterOrder,
+                    TableIndex.Property => MemberDiscoveryFlags.PreservePropertyOrder,
+                    TableIndex.Event => MemberDiscoveryFlags.PreserveEventOrder,
+                    _ => throw new ArgumentOutOfRangeException(nameof(member))
+                };
+                if (member.MetadataToken.Rid != 0 && (_flags & mask) == mask)
+                {
+                    // Member is a new member but assigned a RID.
+                    // Ensure enough rows are allocated, so that we can insert it in the right place.
+                    while (memberList.Count < member.MetadataToken.Rid)
+                    {
+                        memberList.Add(null);
+                        freeRids.Add((uint) memberList.Count);
+                    }
+
+                    // Check if the slot is available.
+                    var slot = memberList[(int) member.MetadataToken.Rid - 1];
+                    if (slot is {})
+                    {
+                        throw new ArgumentException(
+                            $"{slot} and {member} are assigned the same RID {member.MetadataToken.Rid}.");
+                    }
+
+                    memberList[(int) member.MetadataToken.Rid - 1] = member;
+                    freeRids.Remove(member.MetadataToken.Rid);
+                    
+                }
+                else if (freeRids.Count > 0)
+                {
+                    // Use any free RID if it is available.
+                    uint nextFreeRid = freeRids[0];
+                    freeRids.RemoveAt(0);
+                    memberList[(int) (nextFreeRid - 1)] = member;
+                }
                 else
+                {
+                    // Fallback method: Just append to the end of the table.
                     memberList.Add(member);
+                }
             }
         }
 
@@ -232,7 +272,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             else
             {
                 // There's at least one type RID free. Stuff free type slots and remember the first stuffed type.
-                uint placeHolderTypeRid = _freeRids[TableIndex.TypeDef].Peek();
+                uint placeHolderTypeRid = _freeRids[TableIndex.TypeDef][0];
                 StuffFreeMemberSlots<TypeDefinition>(null, TableIndex.TypeDef,
                     (_, token) => new PlaceHolderTypeDefinition(_module, placeHolderNamespace, token));
                 placeHolderType = _result.Types[(int) placeHolderTypeRid - 1];
@@ -257,7 +297,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             while (freeRids.Count > 0)
             {
                 // Stuff free RID with a place holder member.
-                uint rid = freeRids.Dequeue();
+                uint rid = freeRids[0];
+                freeRids.RemoveAt(0);
                 var token = new MetadataToken(tableIndex, rid);
                 members[(int) (rid - 1)] = createPlaceHolder(placeHolderType, token);
             }
@@ -312,9 +353,15 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // valid .NET module.
             if (parameterSequence > 0)
                 method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
-
+            
+#if DEBUG
+            string parameterName = method.ParameterDefinitions.Count == 0 ? null : $"placeholder{method.ParameterDefinitions.Count}";
+#else
+            const string parameterName = null;
+#endif 
+                
             // Create and add the placeholder parameter.
-            var parameter = new ParameterDefinition((ushort) parameterSequence, null, 0);
+            var parameter = new ParameterDefinition((ushort) parameterSequence, parameterName, 0);
             method.ParameterDefinitions.Add(parameter);
             
             // Move to next method.

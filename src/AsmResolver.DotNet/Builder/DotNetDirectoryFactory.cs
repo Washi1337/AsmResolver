@@ -9,6 +9,7 @@ using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.UserStrings;
+using AsmResolver.PE.DotNet.StrongName;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -55,6 +56,15 @@ namespace AsmResolver.DotNet.Builder
             set;
         } = new CilMethodBodySerializer();
 
+        /// <summary>
+        /// Gets or sets the strong-name private key to use for signing the module.
+        /// </summary>
+        public StrongNamePrivateKey StrongNamePrivateKey
+        {
+            get;
+            set;
+        }
+
         /// <inheritdoc />
         public virtual IDotNetDirectory CreateDotNetDirectory(ModuleDefinition module)
         {
@@ -97,7 +107,13 @@ namespace AsmResolver.DotNet.Builder
             // Finalize module.
             buffer.FinalizeModule(module);
 
-            return buffer.CreateDirectory();
+            var result = buffer.CreateDirectory();
+            
+            // Delay sign when necessary.
+            if (StrongNamePrivateKey is {})
+                result.StrongName = new DataSegment(new byte[StrongNamePrivateKey.Modulus.Length]);
+            
+            return result;
         }
 
         private MemberDiscoveryResult DiscoverMemberDefinitionsInModule(ModuleDefinition module)

@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         /// <summary>
         /// Gets a list of types that are discovered during the traversal of the module.
         /// </summary>
-        public IList<TypeDefinition> Types
+        public List<TypeDefinition> Types
         {
             get;
         } = new List<TypeDefinition>();

@@ -3,6 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFrameworks>net40;netcoreapp2.1</TargetFrameworks>
+        <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
