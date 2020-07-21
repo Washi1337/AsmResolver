@@ -4,7 +4,7 @@
       - master
   
   image: Visual Studio 2019
-  version: 4.0.0-beta-build.{build}
+  version: 4.0.0-beta-master-build.{build}
   configuration: Release
 
   skip_commits:
@@ -33,7 +33,7 @@
       - development
   
   image: Visual Studio 2019
-  version: 4.0.1-beta-build.{build}
+  version: 4.0.0-beta-dev-build.{build}
   configuration: Release
 
   skip_commits:
