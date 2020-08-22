@@ -46,10 +46,22 @@ namespace AsmResolver.DotNet.Code.Cil
             
             // Compute max stack when specified, otherwise just calculate offsets only.
             if (ComputeMaxStackOnBuildOverride ?? body.ComputeMaxStackOnBuild)
-                body.MaxStack = body.ComputeMaxStack();
+            {
+                try
+                {
+                    body.MaxStack = body.ComputeMaxStack();
+                }
+                catch (Exception ex)
+                {
+                    context.DiagnosticBag.RegisterException(ex);
+                    body.Instructions.CalculateOffsets();
+                }
+            }
             else
+            {
                 body.Instructions.CalculateOffsets();
-            
+            }
+
             // Serialize CIL stream.
             var code = BuildRawCodeStream(context, body);
             

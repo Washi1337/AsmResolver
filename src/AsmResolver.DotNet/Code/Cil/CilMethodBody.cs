@@ -54,11 +54,9 @@ namespace AsmResolver.DotNet.Code.Cil
             result.Instructions.AddRange(disassembler.ReadAllInstructions());
 
             //Local Variables
-            
             result.ReadLocalVariables(method,localSig);
 
             //Exception Handlers
-
             result.ReadReflectionExceptionHandlers(ehInfos, ehHeader, importer);
             
             // Resolve all operands.
@@ -72,8 +70,6 @@ namespace AsmResolver.DotNet.Code.Cil
             return result;
         } 
          
-
-        
         /// <summary>
         /// Creates a CIL method body from a raw CIL method body. 
         /// </summary>
@@ -342,7 +338,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
             Instructions.CalculateOffsets();
 
-            var visitedInstructions = new Dictionary<int, StackState>();
+            var recordedStackSizes = new int?[Instructions.Count]; 
             var agenda = new Stack<StackState>();
 
             // Add entrypoints to agenda.
@@ -377,16 +373,17 @@ namespace AsmResolver.DotNet.Code.Cil
 
                 var instruction = Instructions[currentState.InstructionIndex];
 
-                if (visitedInstructions.TryGetValue(currentState.InstructionIndex, out var visitedState))
+                var recordedStackSize = recordedStackSizes[currentState.InstructionIndex];
+                if (recordedStackSize.HasValue)
                 {
                     // Check if previously visited state is consistent with current observation.
-                    if (visitedState.StackSize != currentState.StackSize)
+                    if (recordedStackSize.Value != currentState.StackSize)
                         throw new StackImbalanceException(this, instruction.Offset);
                 }
                 else
                 {
                     // Mark instruction as visited and store current state.
-                    visitedInstructions[currentState.InstructionIndex] = currentState;
+                    recordedStackSizes[currentState.InstructionIndex] = currentState.StackSize;
 
                     // Compute next stack size.
                     int popCount = instruction.GetStackPopCount(this);
@@ -399,44 +396,52 @@ namespace AsmResolver.DotNet.Code.Cil
                     switch (instruction.OpCode.FlowControl)
                     {
                         case CilFlowControl.Branch:
+                            // Schedule branch target.
                             agenda.Push(new StackState(
                                 Instructions.GetIndexByOffset(((ICilLabel) instruction.Operand).Offset),
                                 nextStackSize));
                             break;
-                        case CilFlowControl.ConditionalBranch:
-                            switch (instruction.OpCode.OperandType)
+                        
+                        case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
+                            // Schedule all switch targets for processing.
+                            foreach (var target in (IEnumerable<ICilLabel>) instruction.Operand)
                             {
-                                case CilOperandType.InlineBrTarget:
-                                case CilOperandType.ShortInlineBrTarget:
-                                    agenda.Push(new StackState(
-                                        Instructions.GetIndexByOffset(((ICilLabel) instruction.Operand).Offset),
-                                        nextStackSize));
-                                    break;
-                                case CilOperandType.InlineSwitch:
-                                    foreach (var target in ((IEnumerable<ICilLabel>) instruction.Operand))
-                                    {
-                                        agenda.Push(new StackState(
-                                            Instructions.GetIndexByOffset(target.Offset),
-                                            nextStackSize));
-                                    }
-
-                                    break;
+                                agenda.Push(new StackState(
+                                    Instructions.GetIndexByOffset(target.Offset),
+                                    nextStackSize));
                             }
 
+                            // Schedule default case (= fallthrough instruction).
                             agenda.Push(new StackState(
                                 currentState.InstructionIndex + 1,
                                 nextStackSize));
                             break;
+                            
+                        case CilFlowControl.ConditionalBranch:
+                            // Schedule branch target.
+                            agenda.Push(new StackState(
+                                Instructions.GetIndexByOffset(((ICilLabel) instruction.Operand).Offset),
+                                nextStackSize));
+
+                            // Schedule fallthrough instruction.
+                            agenda.Push(new StackState(
+                                currentState.InstructionIndex + 1,
+                                nextStackSize));
+                            break;
+                        
                         case CilFlowControl.Call:
                         case CilFlowControl.Break:
                         case CilFlowControl.Meta:
                         case CilFlowControl.Phi:
                         case CilFlowControl.Next:
+                            // Schedule fallthrough instruction.
                             agenda.Push(new StackState(
                                 currentState.InstructionIndex + 1,
                                 nextStackSize));
                             break;
+                        
                         case CilFlowControl.Return:
+                            // Verify final stack size is correct.
                             if (nextStackSize != 0)
                                 throw new StackImbalanceException(this, instruction.Offset);
                             break;
@@ -444,7 +449,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 }
             }
 
-            return visitedInstructions.Max(x => x.Value.StackSize);
+            return recordedStackSizes.Max(x => x.GetValueOrDefault());
         }
 
         /// <summary>
