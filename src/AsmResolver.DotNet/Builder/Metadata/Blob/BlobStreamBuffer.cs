@@ -101,6 +101,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         /// </summary>
         /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
         /// <param name="signature">The signature to lookup or add.</param>
+        /// <param name="diagnosticBag">The bag used to collect diagnostic information.</param>
         /// <returns>The index of the signature.</returns>
         public uint GetBlobIndex(ITypeCodedIndexProvider provider, BlobSignature signature, DiagnosticBag diagnosticBag)
         {

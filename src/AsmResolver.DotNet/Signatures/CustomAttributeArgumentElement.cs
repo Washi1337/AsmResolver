@@ -96,6 +96,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the named argument to the provided output stream.
         /// </summary>
+        /// <param name="context">The writer context to write the data to.</param>
         /// <param name="argumentType">The type of the argument.</param>
         public void Write(BlobWriterContext context, TypeSignature argumentType)
         {
