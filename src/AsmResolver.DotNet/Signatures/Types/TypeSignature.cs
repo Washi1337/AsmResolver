@@ -170,9 +170,9 @@ namespace AsmResolver.DotNet.Signatures.Types
             return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
         } 
         
-        internal static void WriteTypeDefOrRef(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider, ITypeDefOrRef type)
+        internal static void WriteTypeDefOrRef(BlobWriterContext context, ITypeDefOrRef type)
         {
-            writer.WriteCompressedUInt32(provider.GetTypeDefOrRefIndex(type));
+            context.Writer.WriteCompressedUInt32(context.IndexProvider.GetTypeDefOrRefIndex(type));
         }
         
         internal static TypeSignature ReadFieldOrPropType(ModuleDefinition parentModule, IBinaryStreamReader reader)

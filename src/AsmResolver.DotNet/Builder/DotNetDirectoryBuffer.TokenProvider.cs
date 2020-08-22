@@ -105,7 +105,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new MemberReferenceRow(
                 AddMemberRefParent(member.Parent),
                 Metadata.StringsStream.GetStringIndex(member.Name),
-                Metadata.BlobStream.GetBlobIndex(this, member.Signature));
+                Metadata.BlobStream.GetBlobIndex(this, member.Signature, DiagnosticBag));
             
             var token = table.Add(row);
             AddCustomAttributes(token, member);
@@ -117,7 +117,7 @@ namespace AsmResolver.DotNet.Builder
         {
             var table = Metadata.TablesStream.GetTable<StandAloneSignatureRow>(TableIndex.StandAloneSig);
             var row = new StandAloneSignatureRow(
-                Metadata.BlobStream.GetBlobIndex(this, signature.Signature));
+                Metadata.BlobStream.GetBlobIndex(this, signature.Signature, DiagnosticBag));
             
             var token = table.Add(row);
             AddCustomAttributes(token, signature);
@@ -172,7 +172,7 @@ namespace AsmResolver.DotNet.Builder
                 return MetadataToken.Zero;
             
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
-            var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature));
+            var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature, DiagnosticBag));
             
             var token = table.Add(row);
             AddCustomAttributes(token, type);
@@ -185,7 +185,7 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetTable<MethodSpecificationRow>(TableIndex.MethodSpec);
             var row = new MethodSpecificationRow(
                 AddMethodDefOrRef(method.Method),
-                Metadata.BlobStream.GetBlobIndex(this, method.Signature));
+                Metadata.BlobStream.GetBlobIndex(this, method.Signature, DiagnosticBag));
             
             var token = table.Add(row);
             AddCustomAttributes(token, method);

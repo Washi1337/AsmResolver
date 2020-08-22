@@ -174,7 +174,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new FieldDefinitionRow(
                     field.Attributes,
                     Metadata.StringsStream.GetStringIndex(field.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, field.Signature));
+                    Metadata.BlobStream.GetBlobIndex(this, field.Signature, DiagnosticBag));
 
                 var token = table.Add(row);
                 _fieldTokens.Add(field, token);
@@ -199,7 +199,7 @@ namespace AsmResolver.DotNet.Builder
                     method.ImplAttributes,
                     method.Attributes,
                     Metadata.StringsStream.GetStringIndex(method.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, method.Signature),
+                    Metadata.BlobStream.GetBlobIndex(this, method.Signature, DiagnosticBag),
                     0);
 
                 var token = table.Add(row);
@@ -240,7 +240,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new PropertyDefinitionRow(
                     property.Attributes,
                     Metadata.StringsStream.GetStringIndex(property.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, property.Signature));
+                    Metadata.BlobStream.GetBlobIndex(this, property.Signature, DiagnosticBag));
                 
                 var token = table.Add(row);
                 _propertyTokens.Add(property, token);

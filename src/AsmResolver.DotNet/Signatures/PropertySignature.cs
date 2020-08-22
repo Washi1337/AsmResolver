@@ -113,10 +113,10 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobWriterContext context)
         {
-            writer.WriteByte((byte) Attributes);
-            WriteParametersAndReturnType(writer, provider);
+            context.Writer.WriteByte((byte) Attributes);
+            WriteParametersAndReturnType(context);
         }
 
         /// <inheritdoc />

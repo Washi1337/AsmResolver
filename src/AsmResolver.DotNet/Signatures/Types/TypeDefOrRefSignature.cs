@@ -71,10 +71,11 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitTypeDefOrRef(this);
         
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobWriterContext context)
         {
+            var writer = context.Writer;
             writer.WriteByte((byte) ElementType);
-            writer.WriteCompressedUInt32(provider.GetTypeDefOrRefIndex(Type));
+            WriteTypeDefOrRef(context, Type);
         }
     }
 }

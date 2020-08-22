@@ -68,11 +68,11 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitCustomModifierType(this);
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobWriterContext context)
         {
-            writer.WriteByte((byte) ElementType);
-            WriteTypeDefOrRef(writer, provider, ModifierType);
-            BaseType.Write(writer, provider);
+            context.Writer.WriteByte((byte) ElementType);
+            WriteTypeDefOrRef(context, ModifierType);
+            BaseType.Write(context);
 
         }
     }

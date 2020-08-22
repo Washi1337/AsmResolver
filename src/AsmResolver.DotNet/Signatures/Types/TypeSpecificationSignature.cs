@@ -38,10 +38,10 @@ namespace AsmResolver.DotNet.Signatures.Types
             BaseType.GetUnderlyingTypeDefOrRef();
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobWriterContext context)
         {
-            writer.WriteByte((byte) ElementType);
-            BaseType.Write(writer, provider);
+            context.Writer.WriteByte((byte) ElementType);
+            BaseType.Write(context);
         }
     }
 }

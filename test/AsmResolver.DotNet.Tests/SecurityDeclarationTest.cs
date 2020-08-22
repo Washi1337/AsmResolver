@@ -13,6 +13,9 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromFile(typeof(SecurityAttributes).Assembly.Location);
             if (rebuild)
             {
+                using var fs = File.Create("/home/washi/Desktop/lol.bin");
+                module.Write(fs);
+                
                 var stream = new MemoryStream();
                 module.Write(stream);
                 module = ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));

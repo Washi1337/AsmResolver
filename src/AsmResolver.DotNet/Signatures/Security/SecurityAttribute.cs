@@ -66,10 +66,10 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <summary>
         /// Writes the security attribute to the provided output stream.
         /// </summary>
-        /// <param name="writer">The output blob stream.</param>
-        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
-        public void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        public void Write(BlobWriterContext context)
         {
+            var writer = context.Writer;
+            
             writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(AttributeType));
 
             if (NamedArguments.Count == 0)
@@ -80,11 +80,14 @@ namespace AsmResolver.DotNet.Signatures.Security
             else
             {
                 using var subBlob = new MemoryStream();
-                var subWriter = new BinaryStreamWriter(subBlob);
+                var subContext = new BlobWriterContext(
+                    new BinaryStreamWriter(subBlob), 
+                    context.IndexProvider,
+                    context.DiagnosticBag);
 
-                subWriter.WriteCompressedUInt32((uint) NamedArguments.Count);
+                subContext.Writer.WriteCompressedUInt32((uint) NamedArguments.Count);
                 foreach (var argument in NamedArguments)
-                    argument.Write(subWriter, provider);
+                    argument.Write(subContext);
 
                 writer.WriteCompressedUInt32((uint) subBlob.Length);
                 writer.WriteBytes(subBlob.ToArray());

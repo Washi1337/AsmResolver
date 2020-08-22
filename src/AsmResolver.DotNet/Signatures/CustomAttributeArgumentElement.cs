@@ -96,16 +96,16 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the named argument to the provided output stream.
         /// </summary>
-        /// <param name="writer">The output stream.</param>
         /// <param name="argumentType">The type of the argument.</param>
-        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
-        public void Write(IBinaryStreamWriter writer, TypeSignature argumentType, ITypeCodedIndexProvider provider)
+        public void Write(BlobWriterContext context, TypeSignature argumentType)
         {
-            WriteValue(writer, argumentType, provider, Value);
+            WriteValue(context, argumentType, Value);
         }
 
-        private void WriteValue(IBinaryStreamWriter writer, TypeSignature argumentType, ITypeCodedIndexProvider provider, object value)
+        private void WriteValue(BlobWriterContext context, TypeSignature argumentType, object value)
         {
+            var writer = context.Writer;
+            
             if (argumentType.IsTypeOf("System", "Type"))
             {
                 writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName((TypeSignature) value));
@@ -157,7 +157,7 @@ namespace AsmResolver.DotNet.Signatures
                     var valueType = value.GetType();
                     var innerTypeSig = argumentType.Module.CorLibTypeFactory.FromName(valueType.Namespace, valueType.Name);
                     TypeSignature.WriteFieldOrPropType(writer, innerTypeSig);
-                    WriteValue(writer, innerTypeSig, provider, value);
+                    WriteValue(context, innerTypeSig, value);
                     break;
                     
                 case ElementType.Class:
@@ -165,7 +165,7 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.ValueType:
                     var enumTypeDef = argumentType.Resolve();
                     if (enumTypeDef != null && enumTypeDef.IsEnum)
-                        WriteValue(writer, enumTypeDef.GetEnumUnderlyingType(), provider, Value);
+                        WriteValue(context, enumTypeDef.GetEnumUnderlyingType(), Value);
                     else
                         throw new NotImplementedException();
                     break;

@@ -168,13 +168,15 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitArrayType(this);
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobWriterContext context)
         {
             if (!Validate())
                 throw new InvalidOperationException();
 
+            var writer = context.Writer;
+
             writer.WriteByte((byte) ElementType);
-            BaseType.Write(writer, provider);
+            BaseType.Write(context);
             writer.WriteCompressedUInt32((uint) Dimensions.Count);
 
             // Sized dimensions.

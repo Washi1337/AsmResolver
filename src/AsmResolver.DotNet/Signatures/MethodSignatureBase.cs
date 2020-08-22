@@ -105,22 +105,20 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the parameter and return types in the signature to the provided output stream.
         /// </summary>
-        /// <param name="writer">The output stream.</param>
-        /// <param name="provider">The object to use for looking up type tokens.</param>
-        protected void WriteParametersAndReturnType(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected void WriteParametersAndReturnType(BlobWriterContext context)
         {
-            writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
+            context.Writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
             
-            ReturnType.Write(writer, provider);
+            ReturnType.Write(context);
             
             foreach (var type in ParameterTypes)
-                type.Write(writer, provider);
+                type.Write(context);
 
             if (IncludeSentinel)
             {
-                writer.WriteByte((byte) ElementType.Sentinel);
+                context.Writer.WriteByte((byte) ElementType.Sentinel);
                 foreach (var sentinelType in SentinelParameterTypes)
-                    sentinelType.Write(writer, provider);
+                    sentinelType.Write(context);
             }
         }
 

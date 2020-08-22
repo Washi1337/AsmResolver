@@ -1,4 +1,3 @@
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Signatures
@@ -80,10 +79,10 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobWriterContext context)
         {
-            writer.WriteByte((byte) Attributes);
-            FieldType.Write(writer, provider);
+            context.Writer.WriteByte((byte) Attributes);
+            FieldType.Write(context);
         }
     }
 }

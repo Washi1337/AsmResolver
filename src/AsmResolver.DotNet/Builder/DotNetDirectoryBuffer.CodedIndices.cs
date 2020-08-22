@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new CustomAttributeRow(
                 encoder.EncodeToken(ownerToken),
                 AddCustomAttributeType(attribute.Constructor),
-                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature));
+                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature, DiagnosticBag));
 
             table.Add(attribute, row);
         }
@@ -129,7 +129,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new ConstantRow(
                 constant.Type,
                 encoder.EncodeToken(ownerToken),
-                Metadata.BlobStream.GetBlobIndex(this, constant.Value));
+                Metadata.BlobStream.GetBlobIndex(this, constant.Value, DiagnosticBag));
 
             table.Add(constant, row);
         }
@@ -179,7 +179,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new SecurityDeclarationRow(
                     declaration.Action,
                     encoder.EncodeToken(ownerToken), 
-                    Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet));
+                    Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet, DiagnosticBag));
                 table.Add(declaration, row);
             }
         }
@@ -194,7 +194,7 @@ namespace AsmResolver.DotNet.Builder
             
             var row = new FieldMarshalRow(
                 encoder.EncodeToken(ownerToken),
-                Metadata.BlobStream.GetBlobIndex(this, owner.MarshalDescriptor));
+                Metadata.BlobStream.GetBlobIndex(this, owner.MarshalDescriptor, DiagnosticBag));
             table.Add(owner, row);
         }
         

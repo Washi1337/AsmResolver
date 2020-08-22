@@ -78,13 +78,15 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobWriterContext context)
         {
+            var writer = context.Writer;
+            
             writer.WriteByte((byte) Attributes);
             writer.WriteCompressedUInt32((uint) VariableTypes.Count);
             
             foreach (var type in VariableTypes)
-                type.Write(writer, provider);
+                type.Write(context);
         }
     }
 }

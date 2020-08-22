@@ -103,14 +103,17 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => GenericType;
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobWriterContext context)
         {
+            var writer = context.Writer;
+            
             writer.WriteByte((byte) ElementType);
             writer.WriteByte((byte) (IsValueType ? ElementType.ValueType : ElementType.Class));
-            TypeSignature.WriteTypeDefOrRef(writer, provider, GenericType);
+            WriteTypeDefOrRef(context, GenericType);
             writer.WriteCompressedUInt32((uint) TypeArguments.Count);
+            
             for (int i = 0; i < TypeArguments.Count; i++)
-                TypeArguments[i].Write(writer, provider);
+                TypeArguments[i].Write(context);
         }
         
         /// <inheritdoc />
