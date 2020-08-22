@@ -6,7 +6,7 @@ namespace AsmResolver.PE.File.Headers
     /// <remarks>
     /// This structure does not contain the actual contents of the data directory.
     /// </remarks>
-    public class DataDirectory : IWritable
+    public readonly struct DataDirectory : IWritable
     {
         /// <summary>
         /// Indicates the size of a single data directory header.
@@ -35,21 +35,19 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the relative virtual address (RVA) of the directory.
+        /// Gets the relative virtual address (RVA) of the directory.
         /// </summary>
         public uint VirtualAddress
         {
             get;
-            set;
         }
 
         /// <summary>
-        /// Gets or sets the size of the directory.
+        /// Gets the size of the directory.
         /// </summary>
         public uint Size
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -67,11 +65,21 @@ namespace AsmResolver.PE.File.Headers
             writer.WriteUInt32(Size);
         }
 
+        /// <summary>
+        /// Deconstructs the data directory into a 2-tuple.
+        /// </summary>
+        /// <param name="virtualAddress">The virtual address.</param>
+        /// <param name="size">The size.</param>
+        public void Deconstruct(out uint virtualAddress, out uint size)
+        {
+            virtualAddress = VirtualAddress;
+            size = Size;
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {
             return $"RVA: 0x{VirtualAddress:X8}, Size: 0x{Size:X8}";
         }
-        
     }
 }
