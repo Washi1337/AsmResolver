@@ -88,5 +88,8 @@ namespace AsmResolver.DotNet.Signatures
             foreach (var type in VariableTypes)
                 type.Write(context);
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"({string.Join(", ", VariableTypes)})";
     }
 }
