@@ -69,8 +69,19 @@ namespace AsmResolver.DotNet.Signatures.Security
         public void Write(BlobWriterContext context)
         {
             var writer = context.Writer;
-            
-            writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName(AttributeType));
+
+            string attributeTypeString;
+            if (AttributeType is null)
+            {
+                context.DiagnosticBag.RegisterException(new NullReferenceException(
+                    "Attribute type of security attribute is null."));
+                attributeTypeString = null;
+            }
+            else
+            {
+                attributeTypeString = TypeNameBuilder.GetAssemblyQualifiedName(AttributeType);
+            }
+            writer.WriteSerString(attributeTypeString);
 
             if (NamedArguments.Count == 0)
             {
