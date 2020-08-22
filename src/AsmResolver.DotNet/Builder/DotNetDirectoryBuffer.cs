@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Builder.Resources;
 using AsmResolver.DotNet.Code;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using AsmResolver.PE.DotNet.StrongName;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -21,14 +21,17 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="module">The module for which this .NET directory is built.</param>
         /// <param name="methodBodySerializer">The method body serializer to use for constructing method bodies.</param>
         /// <param name="metadata">The metadata builder </param>
+        /// <param name="diagnosticBag">The bag that collects all diagnostic information during the building process.</param>
         public DotNetDirectoryBuffer(
             ModuleDefinition module,
             IMethodBodySerializer methodBodySerializer,
-            IMetadataBuffer metadata)
+            IMetadataBuffer metadata,
+            DiagnosticBag diagnosticBag)
         {
-            Module = module;
-            MethodBodySerializer = methodBodySerializer;
-            Metadata = metadata;
+            Module = module ?? throw new ArgumentNullException(nameof(module));
+            MethodBodySerializer = methodBodySerializer ?? throw new ArgumentNullException(nameof(methodBodySerializer));
+            Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
             Resources = new DotNetResourcesDirectoryBuffer();
         }
         
@@ -52,6 +55,14 @@ namespace AsmResolver.DotNet.Builder
         /// Gets the metadata directory buffer, containing the metadata stream buffers.
         /// </summary>
         public IMetadataBuffer Metadata
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the bag that collects all diagnostic information during the building process.
+        /// </summary>
+        public DiagnosticBag DiagnosticBag
         {
             get;
         }

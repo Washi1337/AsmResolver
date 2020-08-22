@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet.Builder
                     Characteristics = module.FileCharacteristics,
                     SubSystem = module.SubSystem,
                     DllCharacteristics = module.DllCharacteristics,
-                    DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module),
+                    DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module, context.DiagnosticBag),
                     Resources = module.NativeResourceDirectory,
                 };
             }

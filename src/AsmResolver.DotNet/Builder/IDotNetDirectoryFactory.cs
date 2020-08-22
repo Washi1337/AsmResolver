@@ -12,8 +12,9 @@ namespace AsmResolver.DotNet.Builder
         /// Constructs a .NET data directory based on the provided .NET module.
         /// </summary>
         /// <param name="module">The module to serialize to a .NET data directory.</param>
+        /// <param name="diagnosticBag"></param>
         /// <returns>The serialized data directory.</returns>
         /// <exception cref="MetadataBuilderException">Occurs when the metadata builder encounters an error.</exception>
-        IDotNetDirectory CreateDotNetDirectory(ModuleDefinition module);
+        IDotNetDirectory CreateDotNetDirectory(ModuleDefinition module, DiagnosticBag diagnosticBag);
     }
 }
