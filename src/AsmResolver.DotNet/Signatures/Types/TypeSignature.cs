@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -12,6 +11,8 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     public abstract class TypeSignature : ExtendableBlobSignature, ITypeDescriptor
     {
+        internal const string NullTypeToString = "<<???>>";
+        
         /// <summary>
         /// Reads a type signature from a blob reader.
         /// </summary>
@@ -182,10 +183,15 @@ namespace AsmResolver.DotNet.Signatures.Types
             uint index = 0;
 
             if (type is null)
-                context.DiagnosticBag.RegisterException(
-                    new InvalidBlobSignatureException(this, new NullReferenceException($"{propertyName} is null.")));
+            {
+                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                    $"{ElementType} blob signature {this.SafeToString()} is invalid or incomplete.",
+                    new NullReferenceException($"{propertyName} is null.")));
+            }
             else
+            {
                 index = context.IndexProvider.GetTypeDefOrRefIndex(type);
+            }
 
             context.Writer.WriteCompressedUInt32(index);
         }
@@ -344,6 +350,11 @@ namespace AsmResolver.DotNet.Signatures.Types
         public abstract TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor);
 
         /// <inheritdoc />
-        public override string ToString() => FullName;
+        public override string ToString()
+        {
+            return string.IsNullOrEmpty(FullName)
+                ? $"<<<{ElementType}>>>"
+                : Name;
+        }
     }
 }

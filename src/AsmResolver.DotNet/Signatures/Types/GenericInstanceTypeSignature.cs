@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             get
             {
                 string genericArgString = string.Join(", ", TypeArguments);
-                return $"{GenericType.Name}<{genericArgString}>";
+                return $"{GenericType?.Name ?? NullTypeToString}<{genericArgString}>";
             }
         }
 

@@ -57,7 +57,10 @@ namespace AsmResolver.DotNet.Signatures.Types
             get
             {
                 string modifierString = IsRequired ? "modreq(" : "modopt(";
-                return $"{BaseType.Name} {modifierString}{ModifierType.FullName})";
+
+                string baseType = BaseType?.Name ?? NullTypeToString;
+                string modifier = ModifierType?.FullName ?? NullTypeToString;
+                return $"{baseType} {modifierString}{modifier})";
             }
         }
 
