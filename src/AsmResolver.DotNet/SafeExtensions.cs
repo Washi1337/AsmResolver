@@ -1,6 +1,6 @@
 using System;
 
-namespace AsmResolver.DotNet.Builder
+namespace AsmResolver.DotNet
 {
     internal static class SafeExtensions
     {
@@ -16,6 +16,21 @@ namespace AsmResolver.DotNet.Builder
             catch (Exception)
             {
                 return $"0x{self.MetadataToken}";
+            }
+        }
+        
+        public static string SafeToString(this object self)
+        {
+            if (self is null)
+                return "null";
+            
+            try
+            {
+                return self.ToString();
+            }
+            catch (Exception)
+            {
+                return self.GetType().ToString();
             }
         }
     }
