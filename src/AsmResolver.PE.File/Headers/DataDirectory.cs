@@ -6,7 +6,7 @@ namespace AsmResolver.PE.File.Headers
     /// <remarks>
     /// This structure does not contain the actual contents of the data directory.
     /// </remarks>
-    public class DataDirectory : IWritable
+    public readonly struct DataDirectory : IWritable
     {
         /// <summary>
         /// Indicates the size of a single data directory header.
@@ -35,21 +35,19 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the relative virtual address (RVA) of the directory.
+        /// Gets the relative virtual address (RVA) of the directory.
         /// </summary>
         public uint VirtualAddress
         {
             get;
-            set;
         }
 
         /// <summary>
-        /// Gets or sets the size of the directory.
+        /// Gets the size of the directory.
         /// </summary>
         public uint Size
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -72,6 +70,5 @@ namespace AsmResolver.PE.File.Headers
         {
             return $"RVA: 0x{VirtualAddress:X8}, Size: 0x{Size:X8}";
         }
-        
     }
 }

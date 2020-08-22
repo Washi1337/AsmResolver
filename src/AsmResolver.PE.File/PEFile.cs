@@ -433,24 +433,27 @@ namespace AsmResolver.PE.File
                 var dataDirectory = dataDirectoryEntries[j];
                 if (dataDirectory.IsPresentInPE)
                 {
-                    uint oldRvaDir = dataDirectory.VirtualAddress;
+                    uint virtualAddress = dataDirectory.VirtualAddress;
                     for(int i = 0; i < oldHeaders.Count; i++)
                     {
                         var header = oldHeaders[i];
-                        /* Locate section containing image directory. */
-                        if (header.VirtualAddress <= oldRvaDir && header.VirtualAddress + header.SizeOfRawData > oldRvaDir)
+                        
+                        // Locate section containing image directory. 
+                        if (header.VirtualAddress <= virtualAddress && header.VirtualAddress + header.SizeOfRawData > virtualAddress)
                         {
-                            /* Calculate the delta between the new section.rva and the old one */
+                            // Calculate the delta between the new section.rva and the old one.
                             if (Sections[i].Rva >= header.VirtualAddress)
                             {
                                 uint sectionRvaDelta = Sections[i].Rva - header.VirtualAddress;
-                                dataDirectory.VirtualAddress += sectionRvaDelta;
+                                virtualAddress += sectionRvaDelta;
                             }
                             else
                             {
                                 uint sectionRvaDelta = header.VirtualAddress - Sections[i].Rva;
-                                dataDirectory.VirtualAddress -= sectionRvaDelta;
+                                virtualAddress -= sectionRvaDelta;
                             }
+
+                            dataDirectoryEntries[j] = new DataDirectory(virtualAddress, dataDirectory.Size);
                             break;
                         }
                     }
