@@ -65,6 +65,17 @@ namespace AsmResolver.PE.File.Headers
             writer.WriteUInt32(Size);
         }
 
+        /// <summary>
+        /// Deconstructs the data directory into a 2-tuple.
+        /// </summary>
+        /// <param name="virtualAddress">The virtual address.</param>
+        /// <param name="size">The size.</param>
+        public void Deconstruct(out uint virtualAddress, out uint size)
+        {
+            virtualAddress = VirtualAddress;
+            size = Size;
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {
