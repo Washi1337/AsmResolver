@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
@@ -108,9 +109,18 @@ namespace AsmResolver.DotNet.Signatures
         protected void WriteParametersAndReturnType(BlobWriterContext context)
         {
             context.Writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
-            
-            ReturnType.Write(context);
-            
+
+            if (ReturnType is null)
+            {
+                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                    new NullReferenceException("Return type is null.")));
+                context.Writer.WriteByte((byte) ElementType.Object);   
+            }
+            else
+            {
+                ReturnType.Write(context);
+            }
+
             foreach (var type in ParameterTypes)
                 type.Write(context);
 

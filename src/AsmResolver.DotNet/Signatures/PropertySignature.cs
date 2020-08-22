@@ -127,7 +127,10 @@ namespace AsmResolver.DotNet.Signatures
                 ? $"[{string.Join(", ", ParameterTypes)}]"
                 : string.Empty;
             
-            return $"{prefix}{ReturnType} *{parameterTypesString}";
+            return string.Format("{0}{1} *{2}",
+                prefix,
+                ReturnType.FullName ?? TypeSignature.NullTypeToString,
+                parameterTypesString);
         }
     }
 }
