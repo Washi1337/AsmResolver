@@ -926,8 +926,7 @@ namespace AsmResolver.DotNet
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(Stream outputStream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            var writer = new BinaryStreamWriter(outputStream);
-            Write(writer, imageBuilder, fileBuilder);
+            Write(new BinaryStreamWriter(outputStream), imageBuilder, fileBuilder);
         }
 
         /// <summary>
@@ -938,9 +937,9 @@ namespace AsmResolver.DotNet
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
         public void Write(IBinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            var image = imageBuilder.CreateImage(this);
-            var file = fileBuilder.CreateFile(image);
-            file.Write(writer);
+            fileBuilder
+                .CreateFile(ToPEImage(imageBuilder))
+                .Write(writer);
         }
 
         /// <summary>
@@ -954,6 +953,17 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <returns>IPEImage built by the specified IPEImageBuilder</returns>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder) => imageBuilder.CreateImage(this);
+        public IPEImage ToPEImage(IPEImageBuilder imageBuilder)
+        {
+            var result = imageBuilder.CreateImage(this);
+            if (result.DiagnosticBag.IsFatal)
+            {
+                throw new AggregateException(
+                    "Construction of the PE image failed with one or more errors.",
+                    result.DiagnosticBag.Exceptions);
+            }
+
+            return result.ConstructedImage;
+        }
     }
  }

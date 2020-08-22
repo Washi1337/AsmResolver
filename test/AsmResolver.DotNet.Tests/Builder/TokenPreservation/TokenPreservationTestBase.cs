@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 DotNetDirectoryFactory = new DotNetDirectoryFactory(builderFlags)
             };
 
-            var newImage = builder.CreateImage(module);
+            var newImage = builder.CreateImage(module).ConstructedImage;
             return ModuleDefinition.FromImage(newImage);
         }
 
