@@ -75,10 +75,15 @@ namespace AsmResolver.DotNet.Builder
             get;
         }
 
-        private void AssertIsImported(IModuleProvider member)
+        private bool AssertIsImported(IModuleProvider member)
         {
             if (member.Module != Module)
-                throw new MemberNotImportedException((IMetadataMember) member);
+            {
+                DiagnosticBag.RegisterException(new MemberNotImportedException((IMetadataMember) member));
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -181,10 +186,8 @@ namespace AsmResolver.DotNet.Builder
 
         private void DefineGenericParameter(MetadataToken ownerToken, GenericParameter parameter)
         {
-            if (parameter is null)
+            if (parameter is null || !AssertIsImported(parameter))
                 return;
-
-            AssertIsImported(parameter);
 
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
