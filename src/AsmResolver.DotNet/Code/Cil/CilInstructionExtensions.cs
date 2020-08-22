@@ -20,10 +20,13 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <returns>The number of values popped from the stack.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the instruction's operation code provides an
         /// invalid stack behaviour.</exception>
-        public static int GetStackPopCount(this CilInstruction instruction, CilMethodBody parent) =>
-            GetStackPopCount(instruction,
-                parent == null || parent.Owner.Signature.ReturnType.IsTypeOf("System", "Void"));
-        
+        public static int GetStackPopCount(this CilInstruction instruction, CilMethodBody parent)
+        {
+            return GetStackPopCount(instruction,
+                parent == null
+                || (parent.Owner.Signature.ReturnType?.IsTypeOf("System", "Void")).GetValueOrDefault());
+        }
+
         /// <summary>
         /// Determines the number of values that are popped from the stack by this instruction.
         /// </summary>

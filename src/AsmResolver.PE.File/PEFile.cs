@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AsmResolver.PE.File.Headers;
 
@@ -457,6 +458,22 @@ namespace AsmResolver.PE.File
                 }
             }
         }
+
+        /// <summary>
+        /// Writes the PE file to a file on the disk.
+        /// </summary>
+        /// <param name="filePath">The path of the file.</param>
+        public void Write(string filePath)
+        {
+            using var stream = System.IO.File.Create(filePath);
+            Write(stream);
+        }
+
+        /// <summary>
+        /// Writes the PE file to the provided output stream.
+        /// </summary>
+        /// <param name="stream">The output stream to write to.</param>
+        public void Write(Stream stream) => Write(new BinaryStreamWriter(stream));
         
         /// <summary>
         /// Writes the PE file to the provided output stream.

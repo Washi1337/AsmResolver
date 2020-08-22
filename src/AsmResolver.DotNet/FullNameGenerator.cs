@@ -19,9 +19,11 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetFieldFullName(string name, ITypeDescriptor declaringType, FieldSignature signature)
         {
+            string fieldTypeString = signature.FieldType?.FullName ?? TypeSignature.NullTypeToString;
+            
             return declaringType == null
-                ? $"{signature.FieldType} {name}"
-                : $"{signature.FieldType} {declaringType}::{name}";
+                ? $"{fieldTypeString} {name}"
+                : $"{fieldTypeString} {declaringType}::{name}";
         }
 
         /// <summary>
@@ -34,10 +36,12 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetMethodFullName(string name, ITypeDescriptor declaringType, MethodSignature signature)
         {
+            string returnTypeString = signature.ReturnType?.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);
+            
             return declaringType is null
-                ? $"{signature.ReturnType} {name}({parameterTypesString})"
-                : $"{signature.ReturnType} {declaringType}::{name}({parameterTypesString})";
+                ? $"{returnTypeString} {name}({parameterTypesString})"
+                : $"{returnTypeString} {declaringType}::{name}({parameterTypesString})";
         }
 
         /// <summary>
@@ -52,12 +56,13 @@ namespace AsmResolver.DotNet
         public static string GetMethodFullName(string name, ITypeDescriptor declaringType, MethodSignature signature,
             IEnumerable<TypeSignature> typeArguments)
         {
+            string returnTypeString = signature.ReturnType?.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);
             string typeArgumentsString = string.Join(", ", typeArguments);
             
             return declaringType is null
-                ? $"{signature.ReturnType} {name}<{typeArgumentsString}>({parameterTypesString})"
-                : $"{signature.ReturnType} {declaringType}::{name}<{typeArgumentsString}>({parameterTypesString})";
+                ? $"{returnTypeString} {name}<{typeArgumentsString}>({parameterTypesString})"
+                : $"{returnTypeString} {declaringType}::{name}<{typeArgumentsString}>({parameterTypesString})";
         }
 
         /// <summary>
@@ -70,13 +75,14 @@ namespace AsmResolver.DotNet
         /// <returns>The full name</returns>
         public static string GetPropertyFullName(string name, ITypeDescriptor declaringType, PropertySignature signature)
         {
+            string propertyTypeString = signature.ReturnType.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = signature.ParameterTypes.Count > 0
                 ? $"[{GetParameterTypesString(signature)}]"
                 : string.Empty;
-            
+
             return declaringType is null
-                ? $"{signature.ReturnType} {name}{parameterTypesString}"
-                : $"{signature.ReturnType} {declaringType}::{name}{parameterTypesString}";
+                ? $"{propertyTypeString} {name}{parameterTypesString}"
+                : $"{propertyTypeString} {declaringType}::{name}{parameterTypesString}";
         }
 
         /// <summary>
@@ -96,9 +102,9 @@ namespace AsmResolver.DotNet
         
         private static string GetParameterTypesString(MethodSignatureBase signature)
         {
-            string parameterTypesString = string.Join(", ", signature.ParameterTypes)
-                                          + (signature.IsSentinel ? ", ..." : string.Empty);
-            return parameterTypesString;
+            return string.Format("{0}{1}", 
+                string.Join(", ", signature.ParameterTypes), 
+                signature.IsSentinel ? ", ..." : string.Empty);
         }
 
         /// <summary>
@@ -108,15 +114,14 @@ namespace AsmResolver.DotNet
         /// <returns>The full name.</returns>
         public static string GetTypeFullName(this ITypeDescriptor type)
         {
-            string prefix;
             if (type.DeclaringType != null)
-                prefix = type.DeclaringType.FullName + "+";
-            else if (type.Namespace != null)
-                prefix = type.Namespace + ".";
-            else
-                prefix = null;
-
-            return prefix + type.Name;
+                return $"{type.DeclaringType.FullName}+{type.Name}";
+            
+            if (type.Namespace != null)
+                return $"{type.Namespace}.{type.Name}";
+            
+            return type.Name;
         }
+        
     }
 }
