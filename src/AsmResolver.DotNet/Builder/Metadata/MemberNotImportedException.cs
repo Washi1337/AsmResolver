@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
         /// </summary>
         /// <param name="member">The member that was not imported.</param>
         public MemberNotImportedException(IMetadataMember member)
-            : base($"Member {member} was not imported into the module.")
+            : base($"Member {member.SafeToString()} was not imported into the module.")
         {
             Member = member;
         }
