@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             var writer = context.Writer;
             writer.WriteByte((byte) ElementType);
-            WriteTypeDefOrRef(context, Type);
+            WriteTypeDefOrRef(context, Type, "Underlying type");
         }
     }
 }

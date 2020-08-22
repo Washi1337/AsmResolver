@@ -176,7 +176,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             var writer = context.Writer;
 
             writer.WriteByte((byte) ElementType);
-            BaseType.Write(context);
+            WriteBaseType(context);
             writer.WriteCompressedUInt32((uint) Dimensions.Count);
 
             // Sized dimensions.

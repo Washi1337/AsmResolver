@@ -1,3 +1,6 @@
+using System;
+using AsmResolver.DotNet.Builder;
+
 namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
@@ -41,7 +44,21 @@ namespace AsmResolver.DotNet.Signatures.Types
         protected override void WriteContents(BlobWriterContext context)
         {
             context.Writer.WriteByte((byte) ElementType);
-            BaseType.Write(context);
+            WriteBaseType(context);
+        }
+
+        protected void WriteBaseType(BlobWriterContext context)
+        {
+            if (BaseType is null)
+            {
+                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(
+                    this, new NullReferenceException("Base type is null.")));
+                context.Writer.WriteByte((byte) PE.DotNet.Metadata.Tables.Rows.ElementType.Object);
+            }
+            else
+            {
+                BaseType.Write(context);
+            }
         }
     }
 }

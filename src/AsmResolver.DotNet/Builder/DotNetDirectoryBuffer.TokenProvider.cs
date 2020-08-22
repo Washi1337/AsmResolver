@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Builder
             
             var table = Metadata.TablesStream.GetTable<TypeReferenceRow>(TableIndex.TypeRef);
             var row = new TypeReferenceRow(
-                AddResolutionScope( type.Scope),
+                AddResolutionScope(type.Scope),
                 Metadata.StringsStream.GetStringIndex(type.Name),
                 Metadata.StringsStream.GetStringIndex(type.Namespace));
 

@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -71,9 +72,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         protected override void WriteContents(BlobWriterContext context)
         {
             context.Writer.WriteByte((byte) ElementType);
-            WriteTypeDefOrRef(context, ModifierType);
-            BaseType.Write(context);
-
+            WriteTypeDefOrRef(context, ModifierType, "Modifier type");
+            WriteBaseType(context);
         }
     }
 }
