@@ -117,7 +117,8 @@ namespace AsmResolver.DotNet.Builder
                     break;
                 
                 case TableIndex.File:
-                    //todo:
+                    DiagnosticBag.Exceptions.Add(
+                        new NotImplementedException("Managed entrypoints defined in a sub module is not support."));
                     break;
             }
 

@@ -35,5 +35,25 @@ namespace AsmResolver
         /// Marks the process to have failed.
         /// </summary>
         public void MarkAsFatal() => IsFatal = true;
+
+        /// <summary>
+        /// Registers an error in the diagnostic bag.
+        /// </summary>
+        /// <param name="exception">The error.</param>
+        public void RegisterException(Exception exception)
+        {
+            Exceptions.Add(exception);
+        }
+        
+        /// <summary>
+        /// Registers an error in the diagnostic bag, and returns a default value for the provided type.
+        /// </summary>
+        /// <param name="exception">The error.</param>
+        /// <typeparam name="T">The type of value to return.</typeparam>
+        public T RegisterExceptionAndReturnDefault<T>(Exception exception)
+        {
+            Exceptions.Add(exception);
+            return default;
+        }
     }
 }
