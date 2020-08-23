@@ -70,13 +70,26 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             var typeName = ParseTypeName();
             
             // Check for annotations.
-            return _lexer.Peek().Terminal switch
+            while (true)
             {
-                TypeNameTerminal.Ampersand => ParseByReferenceTypeSpec(typeName),
-                TypeNameTerminal.Star => ParsePointerTypeSpec(typeName),
-                TypeNameTerminal.OpenBracket => ParseArrayOrGenericTypeSpec(typeName),
-                _ => typeName
-            };
+                switch (_lexer.Peek().Terminal)
+                {
+                    case TypeNameTerminal.Ampersand:
+                        typeName = ParseByReferenceTypeSpec(typeName);
+                        break;
+                    
+                    case TypeNameTerminal.Star:
+                        typeName = ParsePointerTypeSpec(typeName);
+                        break;
+                    
+                    case TypeNameTerminal.OpenBracket:
+                        typeName = ParseArrayOrGenericTypeSpec(typeName);
+                        break;
+                    
+                    default:
+                        return typeName;
+                }
+            }
         }
 
         private TypeSignature ParseByReferenceTypeSpec(TypeSignature typeName)
