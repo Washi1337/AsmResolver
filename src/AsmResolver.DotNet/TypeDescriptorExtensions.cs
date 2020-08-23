@@ -46,5 +46,32 @@ namespace AsmResolver.DotNet
         /// <returns>The constructed array type signature.</returns>
         public static ArrayTypeSignature MakeArrayType(this ITypeDescriptor type, params ArrayDimension[] dimensions) => 
             new ArrayTypeSignature(type.ToTypeSignature(), dimensions);
+
+        /// <summary>
+        /// Constructs a new by-reference type signature with the provided type descriptor as element type.
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <returns>The constructed by-reference type signature.</returns>
+        public static ByReferenceTypeSignature MakeByReferenceType(this ITypeDescriptor type) =>
+            new ByReferenceTypeSignature(type.ToTypeSignature());
+
+        /// <summary>
+        /// Constructs a new pinned type signature with the provided type descriptor as element type.
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <returns>The constructed by-reference type signature.</returns>
+        public static PinnedTypeSignature MakePinnedType(this ITypeDescriptor type) =>
+            new PinnedTypeSignature(type.ToTypeSignature());
+
+        /// <summary>
+        /// Constructs a new pointer type signature with the provided type descriptor as element type.
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <returns>The constructed by-reference type signature.</returns>
+        public static PointerTypeSignature MakePointerType(this ITypeDescriptor type) =>
+            new PointerTypeSignature(type.ToTypeSignature());
     }
 }
