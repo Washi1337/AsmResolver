@@ -253,5 +253,43 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(2448, argument.Element.Value);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GenericTypeArgument(bool rebuild)
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/92
+            
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.GenericType), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            var module = attribute.Constructor.Module;
+            var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
+            var expected = new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object);
+            
+            Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
+            Assert.Equal(expected, (TypeSignature) argument.Element.Value, _comparer);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ArrayGenericTypeArgument(bool rebuild)
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/92
+            
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.GenericTypeArray), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            var module = attribute.Constructor.Module;
+            var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
+            var expected = new SzArrayTypeSignature(
+                new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object)
+            );
+
+            Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
+            Assert.Equal(expected, (TypeSignature) argument.Element.Value, _comparer);
+        }
+        
     }
 }
