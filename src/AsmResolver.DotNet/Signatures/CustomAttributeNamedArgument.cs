@@ -93,7 +93,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the named argument to the provided output stream.
         /// </summary>
-        public void Write(BlobWriterContext context)
+        public void Write(BlobSerializationContext context)
         {
             var writer = context.Writer;
             

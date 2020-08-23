@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             BaseType.GetUnderlyingTypeDefOrRef();
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobWriterContext context)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             context.Writer.WriteByte((byte) ElementType);
             WriteBaseType(context);
@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Writes <see cref="BaseType"/> to the output stream.
         /// </summary>
         /// <param name="context">The output stream.</param>
-        protected void WriteBaseType(BlobWriterContext context)
+        protected void WriteBaseType(BlobSerializationContext context)
         {
             if (BaseType is null)
             {

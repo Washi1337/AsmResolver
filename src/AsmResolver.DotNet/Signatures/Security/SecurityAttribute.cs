@@ -66,7 +66,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <summary>
         /// Writes the security attribute to the provided output stream.
         /// </summary>
-        public void Write(BlobWriterContext context)
+        public void Write(BlobSerializationContext context)
         {
             var writer = context.Writer;
 
@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet.Signatures.Security
             else
             {
                 using var subBlob = new MemoryStream();
-                var subContext = new BlobWriterContext(
+                var subContext = new BlobSerializationContext(
                     new BinaryStreamWriter(subBlob), 
                     context.IndexProvider,
                     context.DiagnosticBag);

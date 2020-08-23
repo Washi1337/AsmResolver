@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         } = new List<SecurityAttribute>();
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobWriterContext context)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
             

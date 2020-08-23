@@ -168,7 +168,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitArrayType(this);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobWriterContext context)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             if (!Validate())
                 throw new InvalidOperationException();

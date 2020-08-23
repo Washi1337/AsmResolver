@@ -67,6 +67,6 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override void Write(BlobWriterContext context) => context.Writer.WriteBytes(Data);
+        public override void Write(BlobSerializationContext context) => context.Writer.WriteBytes(Data);
     }
 }

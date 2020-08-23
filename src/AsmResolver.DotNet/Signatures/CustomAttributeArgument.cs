@@ -108,7 +108,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the fixed argument to the provided output stream.
         /// </summary>
-        public void Write(BlobWriterContext context)
+        public void Write(BlobSerializationContext context)
         {
             if (ArgumentType is SzArrayTypeSignature szArrayType)
                 WriteArray(szArrayType, context);
@@ -116,12 +116,12 @@ namespace AsmResolver.DotNet.Signatures
                 WriteSimple(context);
         }
 
-        private void WriteSimple(BlobWriterContext context)
+        private void WriteSimple(BlobSerializationContext context)
         {
             Element.Write(context, ArgumentType);
         }
 
-        private void WriteArray(SzArrayTypeSignature szArrayType, BlobWriterContext context)
+        private void WriteArray(SzArrayTypeSignature szArrayType, BlobSerializationContext context)
         {
             throw new NotImplementedException();
         }

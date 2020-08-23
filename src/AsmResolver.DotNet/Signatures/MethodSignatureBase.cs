@@ -106,7 +106,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the parameter and return types in the signature to the provided output stream.
         /// </summary>
-        protected void WriteParametersAndReturnType(BlobWriterContext context)
+        protected void WriteParametersAndReturnType(BlobSerializationContext context)
         {
             context.Writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
 

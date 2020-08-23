@@ -72,7 +72,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitCustomModifierType(this);
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobWriterContext context)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             context.Writer.WriteByte((byte) ElementType);
             WriteTypeDefOrRef(context, ModifierType, "Modifier type");

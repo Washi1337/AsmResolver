@@ -8,6 +8,6 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Serializes the blob to an output stream.
         /// </summary>
-        public abstract void Write(BlobWriterContext context);
+        public abstract void Write(BlobSerializationContext context);
     }
 }

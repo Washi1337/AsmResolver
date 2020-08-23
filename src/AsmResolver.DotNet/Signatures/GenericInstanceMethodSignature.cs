@@ -81,7 +81,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobWriterContext context)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
             writer.WriteByte((byte) Attributes);

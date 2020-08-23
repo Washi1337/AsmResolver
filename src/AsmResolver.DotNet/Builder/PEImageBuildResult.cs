@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="image">The constructed image, or <c>null</c> if the construction failed.</param>
         /// <param name="diagnosticBag">The diagnostics that were collected during the construction of the image.</param>
-        public PEImageBuildResult(PEImage image, DiagnosticBag diagnosticBag)
+        public PEImageBuildResult(IPEImage image, DiagnosticBag diagnosticBag)
         {
             ConstructedImage = image;
             DiagnosticBag = diagnosticBag;

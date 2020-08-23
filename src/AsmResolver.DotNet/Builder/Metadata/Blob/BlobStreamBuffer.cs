@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
             // Serialize blob.
             using var stream = new MemoryStream();
             var writer = new BinaryStreamWriter(stream);
-            signature.Write(new BlobWriterContext(writer, provider, diagnosticBag));
+            signature.Write(new BlobSerializationContext(writer, provider, diagnosticBag));
             
             return GetBlobIndex(stream.ToArray());
         }

@@ -98,12 +98,12 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="context">The writer context to write the data to.</param>
         /// <param name="argumentType">The type of the argument.</param>
-        public void Write(BlobWriterContext context, TypeSignature argumentType)
+        public void Write(BlobSerializationContext context, TypeSignature argumentType)
         {
             WriteValue(context, argumentType, Value);
         }
 
-        private void WriteValue(BlobWriterContext context, TypeSignature argumentType, object value)
+        private void WriteValue(BlobSerializationContext context, TypeSignature argumentType, object value)
         {
             var writer = context.Writer;
             

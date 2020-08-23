@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitTypeDefOrRef(this);
         
         /// <inheritdoc />
-        protected override void WriteContents(BlobWriterContext context)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
             writer.WriteByte((byte) ElementType);

@@ -178,7 +178,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="context">The output stream.</param>
         /// <param name="type">The type to write.</param>
         /// <param name="propertyName">The property name that was written.</param>
-        protected void WriteTypeDefOrRef(BlobWriterContext context, ITypeDefOrRef type, string propertyName)
+        protected void WriteTypeDefOrRef(BlobSerializationContext context, ITypeDefOrRef type, string propertyName)
         {
             uint index = 0;
 

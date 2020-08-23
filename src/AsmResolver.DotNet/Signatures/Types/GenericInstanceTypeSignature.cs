@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => GenericType;
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobWriterContext context)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
             

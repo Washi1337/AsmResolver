@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Signatures
         }
         
         /// <inheritdoc />
-        public sealed override void Write(BlobWriterContext context)
+        public sealed override void Write(BlobSerializationContext context)
         {
             WriteContents(context);
             if (ExtraData != null)
@@ -25,6 +25,6 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Serializes the blob (without extra data) to an output stream.
         /// </summary>
-        protected abstract void WriteContents(BlobWriterContext context);
+        protected abstract void WriteContents(BlobSerializationContext context);
     }
 }
