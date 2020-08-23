@@ -290,6 +290,21 @@ namespace AsmResolver.DotNet.Tests
             Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
             Assert.Equal(expected, (TypeSignature) argument.Element.Value, _comparer);
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TypePassedOnAsObject(bool rebuild)
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/92
+            
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.TypePassedAsObject), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            var module = attribute.Constructor.Module;
+            Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
+            Assert.Equal(module.CorLibTypeFactory.Object, (TypeSignature) argument.Element.Value, _comparer);
+        }
         
     }
 }

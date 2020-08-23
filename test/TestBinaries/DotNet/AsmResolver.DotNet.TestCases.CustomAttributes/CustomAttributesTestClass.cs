@@ -93,5 +93,10 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void GenericTypeArray()
         {
         }
+        
+        [TestCase((object) typeof(object))]
+        public void TypePassedAsObject()
+        {
+        }
     }
 }
