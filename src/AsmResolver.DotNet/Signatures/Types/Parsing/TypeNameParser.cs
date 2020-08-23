@@ -264,13 +264,13 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return (ns, names);
         }
 
-        private List<string> ParseDottedExpression(params TypeNameTerminal[] terminals)
+        private List<string> ParseDottedExpression(TypeNameTerminal terminal)
         {
             var result = new List<string>();
             
             while (true)
             {
-                var nextIdentifier = TryExpect(terminals);
+                var nextIdentifier = TryExpect(terminal);
                 if (!nextIdentifier.HasValue)
                     break;
 
@@ -281,7 +281,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             }
             
             if (result.Count == 0)
-                throw new FormatException($"Expected one of {string.Join(", ",terminals)}.");
+                throw new FormatException($"Expected {string.Join(", ",terminal)}.");
 
             return result;
         }
@@ -350,6 +350,23 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return Expect(TypeNameTerminal.Identifier).Text;
         }
 
+        private TypeNameToken Expect(TypeNameTerminal terminal)
+        {
+            return TryExpect(terminal)
+                   ?? throw new FormatException($"Expected {terminal}.");
+        }
+
+        private TypeNameToken? TryExpect(TypeNameTerminal terminal)
+        {
+            var token = _lexer.Peek();
+            
+            if (terminal != token.Terminal)
+                return null;
+            
+            _lexer.Next();
+            return token;
+        }
+        
         private TypeNameToken Expect(params TypeNameTerminal[] terminals)
         {
             return TryExpect(terminals)
