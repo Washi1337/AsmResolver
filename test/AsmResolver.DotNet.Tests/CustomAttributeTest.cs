@@ -294,16 +294,30 @@ namespace AsmResolver.DotNet.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        public void IntPassedOnAsObject(bool rebuild)
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/92
+            
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.Int32PassedAsObject), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            Assert.IsAssignableFrom<int>(argument.Element.Value);
+            Assert.Equal(123, (int) argument.Element.Value);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         public void TypePassedOnAsObject(bool rebuild)
         {
             // https://github.com/Washi1337/AsmResolver/issues/92
             
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.TypePassedAsObject), rebuild);
-            var argument = attribute.Signature.FixedArguments[0];
+             var argument = attribute.Signature.FixedArguments[0];
 
             var module = attribute.Constructor.Module;
             Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
-            Assert.Equal(module.CorLibTypeFactory.Object, (TypeSignature) argument.Element.Value, _comparer);
+            Assert.Equal(module.CorLibTypeFactory.Int32, (TypeSignature) argument.Element.Value, _comparer);
         }
         
     }

@@ -94,7 +94,12 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         {
         }
         
-        [TestCase((object) typeof(object))]
+        [TestCase((object) 123)]
+        public void Int32PassedAsObject()
+        {
+        }
+        
+        [TestCase((object) typeof(int))]
         public void TypePassedAsObject()
         {
         }
