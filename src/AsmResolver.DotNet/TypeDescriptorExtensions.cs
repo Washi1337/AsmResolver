@@ -1,3 +1,5 @@
+using AsmResolver.DotNet.Signatures.Types;
+
 namespace AsmResolver.DotNet
 {
     /// <summary>
@@ -16,5 +18,33 @@ namespace AsmResolver.DotNet
         public static bool IsTypeOf(this ITypeDescriptor type, string ns, string name) =>
             type.Name == name && type.Namespace == ns;
 
+        /// <summary>
+        /// Constructs a new single-dimension, zero based array signature with the provided type descriptor
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <returns>The constructed array type signature.</returns>
+        public static SzArrayTypeSignature MakeSzArrayType(this ITypeDescriptor type) => 
+            new SzArrayTypeSignature(type.ToTypeSignature());
+
+        /// <summary>
+        /// Constructs a new single-dimension, zero based array signature with the provided type descriptor
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <param name="dimensionCount">The number of dimensions in the array.</param>
+        /// <returns>The constructed array type signature.</returns>
+        public static ArrayTypeSignature MakeArrayType(this ITypeDescriptor type, int dimensionCount) => 
+            new ArrayTypeSignature(type.ToTypeSignature(), dimensionCount);
+
+        /// <summary>
+        /// Constructs a new single-dimension, zero based array signature with the provided type descriptor
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <param name="dimensions">The dimensions of the array.</param>
+        /// <returns>The constructed array type signature.</returns>
+        public static ArrayTypeSignature MakeArrayType(this ITypeDescriptor type, params ArrayDimension[] dimensions) => 
+            new ArrayTypeSignature(type.ToTypeSignature(), dimensions);
     }
 }
