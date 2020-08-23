@@ -70,6 +70,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public ArrayTypeSignature(TypeSignature baseType)
             : base(baseType)
         {
+            Dimensions = new List<ArrayDimension>(0);
         }
 
         /// <summary>
@@ -82,9 +83,21 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             if (dimensionCount < 0)
                 throw new ArgumentException("Number of dimensions cannot be negative.");
-            
+
+            Dimensions = new List<ArrayDimension>(dimensionCount);
             for (int i = 0; i < dimensionCount;i++)
                 Dimensions.Add(new ArrayDimension());
+        }
+
+        /// <summary>
+        /// Creates a new array type signature with the provided dimensions count.
+        /// </summary>
+        /// <param name="baseType">The element type.</param>
+        /// <param name="dimensionCount">The number of dimensions.</param>
+        public ArrayTypeSignature(TypeSignature baseType, params ArrayDimension[] dimensions)
+            : base(baseType)
+        {
+            Dimensions = new List<ArrayDimension>(dimensions);
         }
 
         /// <inheritdoc />
@@ -102,7 +115,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public IList<ArrayDimension> Dimensions
         {
             get;
-        } = new List<ArrayDimension>();
+        }
 
         private string GetDimensionsString()
         {
