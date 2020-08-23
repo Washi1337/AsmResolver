@@ -87,5 +87,18 @@ namespace AsmResolver.DotNet
         {
             return new CustomModifierTypeSignature(modifierType, isRequired, type.ToTypeSignature());
         }
+
+        /// <summary>
+        /// Constructs a new pointer type signature with the provided type descriptor as element type.
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <param name="typeArguments">The arguments to instantiate the type with.</param>
+        /// <returns>The constructed by-reference type signature.</returns>
+        public static GenericInstanceTypeSignature MakeGenericInstanceType(
+            this ITypeDescriptor type, params TypeSignature[] typeArguments)
+        {
+            return new GenericInstanceTypeSignature(type.ToTypeDefOrRef(), type.IsValueType, typeArguments);
+        }
     }
 }
