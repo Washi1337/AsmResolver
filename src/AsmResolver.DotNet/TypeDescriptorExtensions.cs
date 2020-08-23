@@ -73,5 +73,19 @@ namespace AsmResolver.DotNet
         /// <returns>The constructed by-reference type signature.</returns>
         public static PointerTypeSignature MakePointerType(this ITypeDescriptor type) =>
             new PointerTypeSignature(type.ToTypeSignature());
+
+        /// <summary>
+        /// Constructs a new pointer type signature with the provided type descriptor as element type.
+        /// as element type.
+        /// </summary>
+        /// <param name="type">The element type.</param>
+        /// <param name="modifierType">The modifier type to add.</param>
+        /// <param name="isRequired">Indicates whether the modifier is required or optional.</param>
+        /// <returns>The constructed by-reference type signature.</returns>
+        public static CustomModifierTypeSignature MakeModifierType(
+            this ITypeDescriptor type, ITypeDefOrRef modifierType, bool isRequired)
+        {
+            return new CustomModifierTypeSignature(modifierType, isRequired, type.ToTypeSignature());
+        }
     }
 }
