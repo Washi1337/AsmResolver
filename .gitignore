@@ -1,3 +1,5 @@
+.vscode/
+
 *.nupkg
 *.VC.opendb
 *.VC.db

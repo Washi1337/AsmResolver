@@ -83,5 +83,15 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void NamedTypeArgument()
         {
         }
+        
+        [TestCase(typeof(TestGenericType<object>))]
+        public void GenericType()
+        {
+        }
+        
+        [TestCase(typeof(TestGenericType<object>[]))]
+        public void GenericTypeArray()
+        {
+        }
     }
 }
