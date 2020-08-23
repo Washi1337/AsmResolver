@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type (a class, interface or structure) defined in a .NET module.
     /// </summary>
-    public class TypeDefinition : 
+    public class TypeDefinition :
         MetadataMember,
         ITypeDefOrRef,
         IMemberDefinition,
@@ -139,7 +139,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// Updating the value of this property does not automatically make the type nested in another type.
-        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// Similarly, adding this type to another enclosing type will not automatically update this property.
         /// </remarks>
         public bool IsNestedPublic
         {
@@ -153,7 +153,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// Updating the value of this property does not automatically make the type nested in another type.
-        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// Similarly, adding this type to another enclosing type will not automatically update this property.
         /// </remarks>
         public bool IsNestedPrivate
         {
@@ -167,7 +167,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// Updating the value of this property does not automatically make the type nested in another type.
-        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// Similarly, adding this type to another enclosing type will not automatically update this property.
         /// </remarks>
         public bool IsNestedFamily
         {
@@ -181,7 +181,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// Updating the value of this property does not automatically make the type nested in another type.
-        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// Similarly, adding this type to another enclosing type will not automatically update this property.
         /// </remarks>
         public bool IsNestedAssembly
         {
@@ -195,7 +195,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// Updating the value of this property does not automatically make the type nested in another type.
-        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// Similarly, adding this type to another enclosing type will not automatically update this property.
         /// </remarks>
         public bool IsNestedFamilyAndAssembly
         {
@@ -209,7 +209,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// Updating the value of this property does not automatically make the type nested in another type.
-        /// Similarly, adding this type to another enclosing type will not automatically update this property. 
+        /// Similarly, adding this type to another enclosing type will not automatically update this property.
         /// </remarks>
         public bool IsNestedFamilyOrAssembly
         {
@@ -247,7 +247,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.LayoutMask)
                                 | (value ? TypeAttributes.ExplicitLayout : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the type is a class.
         /// </summary>
@@ -256,8 +256,7 @@ namespace AsmResolver.DotNet
             get => (Attributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.Class;
             set => Attributes = value ? Attributes & ~TypeAttributes.ClassSemanticsMask : Attributes;
         }
-        
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the type is an interface.
         /// </summary>
@@ -267,7 +266,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.ClassSemanticsMask)
                                 | (value ? TypeAttributes.Interface : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the type is defined abstract and should be extended before
         /// an object can be instantiated.
@@ -278,7 +277,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.Abstract)
                                 | (value ? TypeAttributes.Abstract : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the type is defined sealed and cannot be extended by a sub class.
         /// </summary>
@@ -288,7 +287,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.Sealed)
                                 | (value ? TypeAttributes.Sealed : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the type has a special name.
         /// </summary>
@@ -298,7 +297,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.SpecialName)
                                 | (value ? TypeAttributes.SpecialName : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the runtime should check the encoding of the name.
         /// </summary>
@@ -308,7 +307,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.Forwarder)
                                 | (value ? TypeAttributes.Forwarder : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the type is imported.
         /// </summary>
@@ -318,7 +317,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.Import)
                                 | (value ? TypeAttributes.Import : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the type is serializable.
         /// </summary>
@@ -328,7 +327,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.Serializable)
                                 | (value ? TypeAttributes.Serializable : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether LPTSTR string instances are interpreted as ANSI strings.
         /// </summary>
@@ -337,7 +336,7 @@ namespace AsmResolver.DotNet
             get => (Attributes & TypeAttributes.StringFormatMask) == TypeAttributes.AnsiClass;
             set => Attributes = value ? Attributes & ~TypeAttributes.StringFormatMask : Attributes;
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether LPTSTR string instances are interpreted as Unicode strings.
         /// </summary>
@@ -347,7 +346,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.StringFormatMask)
                                 | (value ? TypeAttributes.UnicodeClass : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether LPTSTR string instances are interpreted automatically by the runtime.
         /// </summary>
@@ -357,7 +356,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.StringFormatMask)
                                 | (value ? TypeAttributes.AutoClass : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether LPTSTR string instances are interpreted using a non-standard encoding.
         /// </summary>
@@ -367,7 +366,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.StringFormatMask)
                                 | (value ? TypeAttributes.CustomFormatClass : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating the runtime should initialize the class before any time before the first
         /// static field access.
@@ -378,7 +377,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.BeforeFieldInit)
                                 | (value ? TypeAttributes.BeforeFieldInit : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating the type is an exported type and forwards the definition to another module.
         /// </summary>
@@ -388,7 +387,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.Forwarder)
                                 | (value ? TypeAttributes.Forwarder : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating the type has additional security attributes associated to it.
         /// </summary>
@@ -398,9 +397,9 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~TypeAttributes.HasSecurity)
                                 | (value ? TypeAttributes.HasSecurity : 0);
         }
-        
+
         /// <summary>
-        /// Gets or sets the super class that this type extends. 
+        /// Gets or sets the super class that this type extends.
         /// </summary>
         public ITypeDefOrRef BaseType
         {
@@ -439,7 +438,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets a value indicating whether the type is enclosed by another type. 
+        /// Gets a value indicating whether the type is enclosed by another type.
         /// </summary>
         public bool IsNested => DeclaringType != null;
 
@@ -456,16 +455,31 @@ namespace AsmResolver.DotNet
             }
         }
 
-
         IResolutionScope ITypeDescriptor.Scope => GetDeclaringScope();
 
         /// <inheritdoc />
-        public bool IsValueType => BaseType is {} && (BaseType.IsTypeOf("System", "ValueType") || IsEnum);
+        public bool IsValueType => BaseType is {} && (BaseType.IsTypeOf("System", nameof(ValueType)) || IsEnum);
 
         /// <summary>
         /// Gets a value indicating whether the type defines an enumeration of discrete values.
         /// </summary>
-        public bool IsEnum => BaseType?.IsTypeOf("System", "Enum") ?? false;
+        public bool IsEnum => BaseType?.IsTypeOf("System", nameof(Enum)) ?? false;
+
+        /// <summary>
+        /// Gets a value indicating whether the type describes a delegate referring to a method.
+        /// </summary>
+        public bool IsDelegate
+        {
+            get
+            {
+                var baseType = BaseType;
+                if (baseType is null)
+                    return false;
+
+                return baseType.IsTypeOf("System", nameof(Delegate))
+                    || baseType.IsTypeOf("System", nameof(MulticastDelegate));
+            }
+        }
 
         /// <summary>
         /// Gets a collection of fields defined in the type.
@@ -579,10 +593,10 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets an override to the layout of a class, indicating its total and packing size. 
+        /// Gets or sets an override to the layout of a class, indicating its total and packing size.
         /// </summary>
         /// <remarks>
-        /// When this property is set to <c>null</c>, the runtime decides the layout of the class. 
+        /// When this property is set to <c>null</c>, the runtime decides the layout of the class.
         /// </remarks>
         public ClassLayout ClassLayout
         {
@@ -643,14 +657,14 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
         /// <inheritdoc />
-        public TypeSignature ToTypeSignature() => 
+        public TypeSignature ToTypeSignature() =>
             new TypeDefOrRefSignature(this, IsValueType);
 
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)
         {
             // TODO: Check types of the same family.
-            
+
             if (this == type)
                 return true;
 
@@ -661,7 +675,7 @@ namespace AsmResolver.DotNet
             {
                 if (!DeclaringType.IsAccessibleFromType(type))
                     return false;
-                
+
                 return IsNestedPublic
                        || isInSameAssembly && IsNestedAssembly
                        || DeclaringType == type;
@@ -672,7 +686,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Creates a new type reference to this type definition. 
+        /// Creates a new type reference to this type definition.
         /// </summary>
         /// <returns>The type reference.</returns>
         public TypeReference ToTypeReference()
@@ -680,7 +694,7 @@ namespace AsmResolver.DotNet
             var scope = DeclaringType is null
                 ? (IResolutionScope) Module
                 : DeclaringType.ToTypeReference();
-            
+
             return new TypeReference(Module, scope, Namespace, Name);
         }
 
@@ -693,7 +707,7 @@ namespace AsmResolver.DotNet
         }
 
         TypeDefinition ITypeDescriptor.Resolve() => this;
-        
+
         IMemberDefinition IMemberDescriptor.Resolve() => this;
 
         /// <summary>
@@ -717,7 +731,7 @@ namespace AsmResolver.DotNet
 
             return null;
         }
-        
+
         /// <summary>
         /// Gets the static constructor that is executed when the CLR loads this type.
         /// </summary>
@@ -758,8 +772,8 @@ namespace AsmResolver.DotNet
                     throw new ArgumentNullException(nameof(module));
 
                 cctor = new MethodDefinition(".cctor",
-                    MethodAttributes.Private 
-                    | MethodAttributes.Static 
+                    MethodAttributes.Private
+                    | MethodAttributes.Static
                     | MethodAttributes.SpecialName
                     | MethodAttributes.RuntimeSpecialName,
                     MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
@@ -772,7 +786,7 @@ namespace AsmResolver.DotNet
 
             return cctor;
         }
-        
+
         /// <summary>
         /// Obtains the namespace of the type definition.
         /// </summary>
@@ -877,7 +891,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="SecurityDeclarations"/> property.
         /// </remarks>
-        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() => 
+        protected virtual IList<SecurityDeclaration> GetSecurityDeclarations() =>
             new OwnedCollection<IHasSecurityDeclaration, SecurityDeclaration>(this);
 
         /// <summary>
@@ -907,9 +921,9 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="MethodImplementations"/> property.
         /// </remarks>
-        protected virtual IList<MethodImplementation> GetMethodImplementations() => 
+        protected virtual IList<MethodImplementation> GetMethodImplementations() =>
             new List<MethodImplementation>();
-        
+
         /// <summary>
         /// Obtains the class layout of this type.
         /// </summary>
@@ -918,7 +932,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="ClassLayout"/> property.
         /// </remarks>
         protected virtual ClassLayout GetClassLayout() => null;
-        
+
         /// <inheritdoc />
         public override string ToString() => FullName;
     }
