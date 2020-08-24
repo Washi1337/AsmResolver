@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
@@ -97,6 +97,22 @@ namespace AsmResolver.PE
                 return null;
             
             return new SerializedDotNetDirectory(PEFile, reader, ReadParameters.MetadataStreamReader);
+        }
+
+        /// <inheritdoc />
+        protected override IList<DebugDataEntry> GetDebugData()
+        {
+            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.DebugDirectoryIndex];
+            
+            var result = new List<DebugDataEntry>();
+            if (dataDirectory.IsPresentInPE && PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
+            {
+                uint count = dataDirectory.Size / DebugDataEntry.DebugDataEntryHeaderSize;
+                for (int i = 0; i < count; i++)
+                    result.Add(new SerializedDebugDataEntry(reader, ReadParameters.DebugDataReader));
+            }
+            
+            return result;
         }
     }
 }
