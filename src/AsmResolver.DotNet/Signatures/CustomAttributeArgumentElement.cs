@@ -154,8 +154,20 @@ namespace AsmResolver.DotNet.Signatures
                     writer.WriteSerString(value as string);
                     break;
                 case ElementType.Object:
-                    var valueType = value.GetType();
-                    var innerTypeSig = argumentType.Module.CorLibTypeFactory.FromName(valueType.Namespace, valueType.Name);
+                    TypeSignature innerTypeSig;
+                    
+                    if (value is TypeSignature)
+                    {
+                        innerTypeSig = new TypeDefOrRefSignature(
+                            new TypeReference(argumentType.Module.CorLibTypeFactory.CorLibScope, "System", "Type"));
+                    }
+                    else
+                    {
+                        var valueType = value.GetType();
+                        innerTypeSig = argumentType.Module.CorLibTypeFactory
+                            .FromName(valueType.Namespace, valueType.Name);
+                    }
+
                     TypeSignature.WriteFieldOrPropType(writer, innerTypeSig);
                     WriteValue(writer, innerTypeSig, provider, value);
                     break;
