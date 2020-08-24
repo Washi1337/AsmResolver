@@ -68,6 +68,26 @@ namespace AsmResolver.PE.Debug
         ClsId = 11,
         
         /// <summary>
+        /// Indicates additional Visual C++ debug information.
+        /// </summary>
+        VcFeature = 12,
+        
+        /// <summary>
+        /// Indicates Profile Guided Optimization data.
+        /// </summary>
+        Pogo = 13,
+        
+        /// <summary>
+        /// Indicates Look into Incremental Link Time Code Generation (ILTCG) data. 
+        /// </summary>
+        Iltcg = 14,
+        
+        /// <summary>
+        /// Reserved.
+        /// </summary>
+        Mpx = 15,
+        
+        /// <summary>
         /// Indicates PE determinism or reproducibility.
         /// </summary>
         Repro = 16,
