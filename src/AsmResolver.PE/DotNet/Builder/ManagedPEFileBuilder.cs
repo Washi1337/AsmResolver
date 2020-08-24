@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.PE.Builder;
+using AsmResolver.PE.Debug.Builder;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -62,6 +63,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 ResourceDirectory = new ResourceDirectoryBuffer();
                 RelocationsDirectory = new RelocationsDirectoryBuffer();
                 FieldRvaDataReader = new FieldRvaDataReader();
+                DebugDirectory= new DebugDirectoryBuffer();
                 Bootstrapper = CreateBootstrapper(image);
             }
 
@@ -77,6 +79,14 @@ namespace AsmResolver.PE.DotNet.Builder
             /// Gets the buffer that builds up a new export directory. 
             /// </summary>
             public ExportDirectoryBuffer ExportDirectory
+            {
+                get;
+            }
+
+            /// <summary>
+            /// Gets the buffer that builds up a new debug directory.
+            /// </summary>
+            public DebugDirectoryBuffer DebugDirectory
             {
                 get;
             }
@@ -176,6 +186,7 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             CreateImportDirectory(image, context);
             CreateExportDirectory(image, context);
+            CreateDebugDirectory(image, context);
             ProcessRvasInMetadataTables(context);
 
             var contents = new SegmentBuilder();
@@ -189,7 +200,13 @@ namespace AsmResolver.PE.DotNet.Builder
             
             if (!context.ExportDirectory.IsEmpty)
                 contents.Add(context.ExportDirectory);
-            
+
+            if (!context.DebugDirectory.IsEmpty)
+            {
+                contents.Add(context.DebugDirectory);
+                contents.Add(context.DebugDirectory.ContentsTable);
+            }
+
             if (context.Bootstrapper != null)
                 contents.Add(context.Bootstrapper);
 
@@ -218,6 +235,12 @@ namespace AsmResolver.PE.DotNet.Builder
         {
             if (image.Exports is {} exports && exports.Entries.Count > 0)
                 context.ExportDirectory.AddDirectory(exports);
+        }
+
+        private static void CreateDebugDirectory(IPEImage image, ManagedPEBuilderContext context)
+        {
+            foreach (var entry in image.DebugData)
+                context.DebugDirectory.AddEntry(entry);
         }
 
         /// <summary>
@@ -265,6 +288,9 @@ namespace AsmResolver.PE.DotNet.Builder
             var exportDataDirectory = !context.ExportDirectory.IsEmpty
                 ? new DataDirectory(context.ExportDirectory.Rva, context.ExportDirectory.GetPhysicalSize())
                 : new DataDirectory(0, 0);
+            var debugDataDirectory = !context.DebugDirectory.IsEmpty
+                ? new DataDirectory(context.DebugDirectory.Rva, context.DebugDirectory.GetPhysicalSize())
+                : new DataDirectory(0, 0);
             
             return new[]
             {
@@ -274,7 +300,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 new DataDirectory(0, 0),
                 new DataDirectory(0, 0),
                 new DataDirectory(relocDirectory.Rva, relocDirectory.GetPhysicalSize()),
-                new DataDirectory(0, 0), // TODO: debug directory
+                debugDataDirectory,
                 new DataDirectory(0, 0),
                 new DataDirectory(0, 0),
                 new DataDirectory(0, 0),

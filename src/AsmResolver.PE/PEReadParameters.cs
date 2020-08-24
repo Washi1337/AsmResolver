@@ -1,6 +1,6 @@
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.File;
-using AsmResolver.PE.Win32Resources;
 
 namespace AsmResolver.PE
 {
@@ -20,6 +20,7 @@ namespace AsmResolver.PE
         {
             ReferenceResolver = resolver;
             MetadataStreamReader = new DefaultMetadataStreamReader(resolver);
+            DebugDataReader = new DefaultDebugDataReader(resolver);
         }
 
         /// <summary>
@@ -34,6 +35,15 @@ namespace AsmResolver.PE
         /// Gets or sets the object responsible for reading metadata streams in the .NET data directory.
         /// </summary>
         public IMetadataStreamReader MetadataStreamReader
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the object responsible for reading debug data streams in the debug data directory.
+        /// </summary>
+        public IDebugDataReader DebugDataReader
         {
             get;
             set;

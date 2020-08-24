@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
@@ -96,6 +97,7 @@ namespace AsmResolver.PE
         private readonly LazyVariable<IResourceDirectory> _resources;
         private IList<BaseRelocation> _relocations;
         private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
+        private IList<DebugDataEntry> _debugData;
 
         /// <summary>
         /// Initializes a new PE image.
@@ -200,6 +202,17 @@ namespace AsmResolver.PE
             set => _dotNetDirectory.Value = value;
         }
 
+        /// <inheritdoc />
+        public IList<DebugDataEntry> DebugData
+        {
+            get
+            {
+                if (_debugData is null)
+                    Interlocked.CompareExchange(ref _debugData, GetDebugData(), null);
+                return _debugData;
+            }
+        }
+
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.
         /// </summary>
@@ -244,5 +257,14 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="DotNetDirectory"/> property.
         /// </remarks>
         protected virtual IDotNetDirectory GetDotNetDirectory() => null;
+
+        /// <summary>
+        /// Obtains the debug data entries in the PE. 
+        /// </summary>
+        /// <returns>The debug data entries.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DebugData"/> property.
+        /// </remarks>
+        protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
     }
 }
