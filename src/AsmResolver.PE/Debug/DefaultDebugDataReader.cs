@@ -1,6 +1,3 @@
-using System;
-using AsmResolver.PE.File;
-
 namespace AsmResolver.PE.Debug
 {
     /// <summary>
@@ -8,23 +5,27 @@ namespace AsmResolver.PE.Debug
     /// </summary>
     public class DefaultDebugDataReader : IDebugDataReader
     {
-        private readonly PEFile _peFile;
+        private readonly ISegmentReferenceResolver _resolver;
 
         /// <summary>
         /// Creates a new instance of the <see cref="DefaultDebugDataReader"/> class.
         /// </summary>
-        /// <param name="peFile">The PE file to read from.</param>
-        public DefaultDebugDataReader(PEFile peFile)
+        /// <param name="resolver">The reference resolver to use to read from.</param>
+        public DefaultDebugDataReader(ISegmentReferenceResolver resolver)
         {
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            _resolver = resolver;
         }
 
         /// <inheritdoc />
         public IDebugDataSegment ReadDebugData(DebugDataType type, uint rva, uint size)
         {
-            if (!_peFile.TryCreateReaderAtRva(rva, size, out var reader))
+            var reference = _resolver.GetReferenceToRva(rva);
+            if (reference is null || !reference.CanRead)
                 return null;
 
+            var reader = reference.CreateReader();
+            reader.ChangeSize(size);
+            
             return new CustomDebugDataSegment(type, DataSegment.FromReader(reader));
         }
     }

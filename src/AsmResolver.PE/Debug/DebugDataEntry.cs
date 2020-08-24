@@ -5,6 +5,20 @@ namespace AsmResolver.PE.Debug
     /// </summary>
     public class DebugDataEntry : SegmentBase
     {
+        /// <summary>
+        /// Gets the static size of a single debug data entry header.
+        /// </summary>
+        public const uint DebugDataEntryHeaderSize =
+                sizeof(uint) // Characteristics
+                + sizeof(uint) // TimeDateStamp
+                + sizeof(ushort) // MajorVersion
+                + sizeof(ushort) // MinorVersion
+                + sizeof(DebugDataType) // Type
+                + sizeof(uint) // SizeOfData
+                + sizeof(uint) // AddressOfRawData
+                + sizeof(uint) // PointerToRawData
+            ;
+
         private readonly LazyVariable<IDebugDataSegment> _contents;
 
         /// <summary>
@@ -80,18 +94,8 @@ namespace AsmResolver.PE.Debug
         protected virtual IDebugDataSegment GetContents() => null;
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize()
-        {
-            return sizeof(uint)            // Characteristics
-                   + sizeof(uint)          // TimeDateStamp
-                   + sizeof(ushort)        // MajorVersion
-                   + sizeof(ushort)        // MinorVersion
-                   + sizeof(DebugDataType) // Type
-                   + sizeof(uint)          // SizeOfData
-                   + sizeof(uint)          // AddressOfRawData
-                   + sizeof(uint);         // PointerToRawData
-        }
-
+        public override uint GetPhysicalSize() => DebugDataEntryHeaderSize;
+        
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
