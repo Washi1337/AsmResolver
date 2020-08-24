@@ -53,7 +53,8 @@ local.properties
 *.sln.docstates
 
 # Build results
-[Dd]ebug/
+[Dd]ebug/*
+!src/AsmResolver.PE/Debug/
 [Rr]elease/
 x64/
 build/
