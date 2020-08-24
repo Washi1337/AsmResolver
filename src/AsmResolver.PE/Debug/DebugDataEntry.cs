@@ -104,6 +104,7 @@ namespace AsmResolver.PE.Debug
             writer.WriteUInt16(MajorVersion);
             writer.WriteUInt16(MinorVersion);
             writer.WriteUInt32((uint) (Contents?.Type ?? 0));
+            writer.WriteUInt32(Contents?.GetPhysicalSize() ?? 0);
             writer.WriteUInt32(Contents?.Rva ?? 0);
             writer.WriteUInt32(Contents?.FileOffset ?? 0);
         }
