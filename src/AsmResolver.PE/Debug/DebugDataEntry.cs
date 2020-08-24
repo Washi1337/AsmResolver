@@ -3,27 +3,25 @@ namespace AsmResolver.PE.Debug
     /// <summary>
     /// Represents a single entry in the debug data directory.
     /// </summary>
-    public class DebugDataEntry
+    public class DebugDataEntry : SegmentBase
     {
-        private readonly LazyVariable<ISegment> _contents;
+        private readonly LazyVariable<IDebugDataSegment> _contents;
 
         /// <summary>
         /// Initializes an empty <see cref="DebugDataEntry"/> instance.
         /// </summary>
         protected DebugDataEntry()
         {
-            _contents = new LazyVariable<ISegment>(GetContents);
+            _contents = new LazyVariable<IDebugDataSegment>(GetContents);
         }
 
         /// <summary>
         /// Creates a new instance of the <see cref="DebugDataEntry"/> class.
         /// </summary>
-        /// <param name="type">The type of data to store.</param>
         /// <param name="contents">The contents.</param>
-        public DebugDataEntry(DebugDataType type, ISegment contents)
+        public DebugDataEntry(IDebugDataSegment contents)
             : this()
         {
-            Type = type;
             Contents = contents;
         }
 
@@ -62,20 +60,11 @@ namespace AsmResolver.PE.Debug
             get;
             set;
         }
-
-        /// <summary>
-        /// Gets or sets the format of debugging information stored in <see cref="Contents"/>.
-        /// </summary>
-        public DebugDataType Type
-        {
-            get;
-            set;
-        }
-
+        
         /// <summary>
         /// Gets or sets the raw contents of the debug data entry.
         /// </summary>
-        public ISegment Contents
+        public IDebugDataSegment Contents
         {
             get => _contents.Value;
             set => _contents.Value = value;
@@ -88,6 +77,31 @@ namespace AsmResolver.PE.Debug
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Contents"/> property.
         /// </remarks>
-        protected virtual ISegment GetContents() => null;
+        protected virtual IDebugDataSegment GetContents() => null;
+
+        /// <inheritdoc />
+        public override uint GetPhysicalSize()
+        {
+            return sizeof(uint)            // Characteristics
+                   + sizeof(uint)          // TimeDateStamp
+                   + sizeof(ushort)        // MajorVersion
+                   + sizeof(ushort)        // MinorVersion
+                   + sizeof(DebugDataType) // Type
+                   + sizeof(uint)          // SizeOfData
+                   + sizeof(uint)          // AddressOfRawData
+                   + sizeof(uint);         // PointerToRawData
+        }
+
+        /// <inheritdoc />
+        public override void Write(IBinaryStreamWriter writer)
+        {
+            writer.WriteUInt32(Characteristics);
+            writer.WriteUInt32(TimeDateStamp);
+            writer.WriteUInt16(MajorVersion);
+            writer.WriteUInt16(MinorVersion);
+            writer.WriteUInt32((uint) Contents.Type);
+            writer.WriteUInt32(Contents.Rva);
+            writer.WriteUInt32(Contents.FileOffset);
+        }
     }
 }
