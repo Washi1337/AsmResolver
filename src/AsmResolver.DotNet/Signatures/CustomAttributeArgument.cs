@@ -108,25 +108,22 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the fixed argument to the provided output stream.
         /// </summary>
-        /// <param name="writer">The output stream.</param>
-        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
-        public void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        public void Write(BlobSerializationContext context)
         {
             if (ArgumentType is SzArrayTypeSignature szArrayType)
-                WriteArray(szArrayType, writer, provider);
+                WriteArray(szArrayType, context);
             else
-                WriteSimple(writer, provider);
+                WriteSimple(context);
         }
 
-        private void WriteSimple(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        private void WriteSimple(BlobSerializationContext context)
         {
-            Element.Write(writer, ArgumentType, provider);
+            Element.Write(context, ArgumentType);
         }
 
-        private void WriteArray(SzArrayTypeSignature szArrayType, IBinaryStreamWriter writer,
-            ITypeCodedIndexProvider provider)
+        private void WriteArray(SzArrayTypeSignature szArrayType, BlobSerializationContext context)
         {
-            
+            throw new NotImplementedException();
         }
     }
 }

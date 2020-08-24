@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => ElementType.Pinned;
 
         /// <inheritdoc />
-        public override string Name => BaseType.Name;
+        public override string Name => BaseType?.Name ?? NullTypeToString;
 
         /// <inheritdoc />
         public override bool IsValueType => BaseType.IsValueType;

@@ -880,6 +880,7 @@ namespace AsmResolver.DotNet
         /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(string filePath) =>
             Write(filePath, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
@@ -887,6 +888,7 @@ namespace AsmResolver.DotNet
         /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(Stream outputStream) =>
             Write(outputStream, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
@@ -895,6 +897,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(string filePath, IPEImageBuilder imageBuilder) =>
             Write(filePath, imageBuilder, new ManagedPEFileBuilder());
 
@@ -903,6 +906,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(Stream outputStream, IPEImageBuilder imageBuilder) =>
             Write(outputStream, imageBuilder, new ManagedPEFileBuilder());
 
@@ -912,6 +916,7 @@ namespace AsmResolver.DotNet
         /// <param name="filePath">The output path of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(string filePath, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
             using var fs = File.Create(filePath);
@@ -924,10 +929,10 @@ namespace AsmResolver.DotNet
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(Stream outputStream, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            var writer = new BinaryStreamWriter(outputStream);
-            Write(writer, imageBuilder, fileBuilder);
+            Write(new BinaryStreamWriter(outputStream), imageBuilder, fileBuilder);
         }
 
         /// <summary>
@@ -936,17 +941,19 @@ namespace AsmResolver.DotNet
         /// <param name="writer">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <param name="fileBuilder">The engine to use for reconstructing a PE file.</param>
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public void Write(IBinaryStreamWriter writer, IPEImageBuilder imageBuilder, IPEFileBuilder fileBuilder)
         {
-            var image = imageBuilder.CreateImage(this);
-            var file = fileBuilder.CreateFile(image);
-            file.Write(writer);
+            fileBuilder
+                .CreateFile(ToPEImage(imageBuilder))
+                .Write(writer);
         }
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
         /// /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder());
 
         /// <summary>
@@ -954,6 +961,18 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
         /// <returns>IPEImage built by the specified IPEImageBuilder</returns>
-        public IPEImage ToPEImage(IPEImageBuilder imageBuilder) => imageBuilder.CreateImage(this);
+        /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
+        public IPEImage ToPEImage(IPEImageBuilder imageBuilder)
+        {
+            var result = imageBuilder.CreateImage(this);
+            if (result.DiagnosticBag.HasErrors)
+            {
+                throw new AggregateException(
+                    "Construction of the PE image failed with one or more errors.",
+                    result.DiagnosticBag.Exceptions);
+            }
+
+            return result.ConstructedImage;
+        }
     }
  }

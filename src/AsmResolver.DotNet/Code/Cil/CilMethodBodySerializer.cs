@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Code.Cil
         } = null;
         
         /// <inheritdoc />
-        public ISegmentReference SerializeMethodBody(IMetadataTokenProvider provider, MethodDefinition method)
+        public ISegmentReference SerializeMethodBody(MethodBodySerializationContext context, MethodDefinition method)
         {
             if (method.CilMethodBody == null)
                 return SegmentReference.Null;
@@ -46,16 +46,28 @@ namespace AsmResolver.DotNet.Code.Cil
             
             // Compute max stack when specified, otherwise just calculate offsets only.
             if (ComputeMaxStackOnBuildOverride ?? body.ComputeMaxStackOnBuild)
-                body.MaxStack = body.ComputeMaxStack();
+            {
+                try
+                {
+                    body.MaxStack = body.ComputeMaxStack();
+                }
+                catch (Exception ex)
+                {
+                    context.DiagnosticBag.RegisterException(ex);
+                    body.Instructions.CalculateOffsets();
+                }
+            }
             else
+            {
                 body.Instructions.CalculateOffsets();
-            
+            }
+
             // Serialize CIL stream.
-            var code = BuildRawCodeStream(provider, body);
+            var code = BuildRawCodeStream(context, body);
             
             // Build method body.
             var rawBody = body.IsFat 
-                ? BuildFatMethodBody(provider, body, code) 
+                ? BuildFatMethodBody(context, body, code) 
                 : BuildTinyMethodBody(code);
 
             return new SegmentReference(rawBody);
@@ -64,7 +76,7 @@ namespace AsmResolver.DotNet.Code.Cil
         private static CilRawMethodBody BuildTinyMethodBody(byte[] code) => 
             new CilRawTinyMethodBody(code);
 
-        private CilRawMethodBody BuildFatMethodBody(IMetadataTokenProvider provider, CilMethodBody body, byte[] code)
+        private CilRawMethodBody BuildFatMethodBody(MethodBodySerializationContext context, CilMethodBody body, byte[] code)
         {
             // Serialize local variables.
             MetadataToken token;
@@ -76,7 +88,7 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 var localVarSig = new LocalVariablesSignature(body.LocalVariables.Select(v => v.VariableType));
                 var standAloneSig = new StandAloneSignature(localVarSig);
-                token = provider.GetStandAloneSignatureToken(standAloneSig);
+                token = context.TokenProvider.GetStandAloneSignatureToken(standAloneSig);
             }
 
             var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, code);
@@ -92,7 +104,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 if (needsFatFormat)
                     attributes |= CilExtraSectionAttributes.FatFormat;
 
-                var rawSectionData = SerializeExceptionHandlers(provider, body.ExceptionHandlers, needsFatFormat);
+                var rawSectionData = SerializeExceptionHandlers(context, body.ExceptionHandlers, needsFatFormat);
                 var section = new CilExtraSection(attributes, rawSectionData);
                 fatBody.ExtraSections.Add(section);
             }
@@ -100,18 +112,18 @@ namespace AsmResolver.DotNet.Code.Cil
             return fatBody;
         }
 
-        private static byte[] BuildRawCodeStream(IMetadataTokenProvider provider, CilMethodBody body)
+        private static byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
         {
             using var codeStream = new MemoryStream();
             
             var writer = new BinaryStreamWriter(codeStream);
-            var assembler = new CilAssembler(writer, new CilOperandBuilder(provider));
+            var assembler = new CilAssembler(writer, new CilOperandBuilder(context.TokenProvider, context.DiagnosticBag));
             assembler.WriteInstructions(body.Instructions);
             
             return codeStream.ToArray();
         }
 
-        private byte[] SerializeExceptionHandlers(IMetadataTokenProvider provider, IList<CilExceptionHandler> exceptionHandlers, bool needsFatFormat)
+        private byte[] SerializeExceptionHandlers(MethodBodySerializationContext context, IList<CilExceptionHandler> exceptionHandlers, bool needsFatFormat)
         {
             using var sectionStream = new MemoryStream();
             var writer = new BinaryStreamWriter(sectionStream);
@@ -119,13 +131,13 @@ namespace AsmResolver.DotNet.Code.Cil
             for (int i = 0; i < exceptionHandlers.Count; i++)
             {
                 var handler = exceptionHandlers[i];
-                WriteExceptionHandler(provider, writer, handler, needsFatFormat);
+                WriteExceptionHandler(context, writer, handler, needsFatFormat);
             }
 
             return sectionStream.ToArray();
         }
 
-        private void WriteExceptionHandler(IMetadataTokenProvider provider, IBinaryStreamWriter writer, CilExceptionHandler handler, bool useFatFormat)
+        private void WriteExceptionHandler(MethodBodySerializationContext context, IBinaryStreamWriter writer, CilExceptionHandler handler, bool useFatFormat)
         {
             if (handler.IsFat && !useFatFormat)
                 throw new InvalidOperationException("Can only serialize fat exception handlers in fat format.");
@@ -153,12 +165,16 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 case CilExceptionHandlerType.Exception:
                 {
+                    var provider = context.TokenProvider;
+
                     var token = handler.ExceptionType switch
                     {
                         TypeReference typeReference => provider.GetTypeReferenceToken(typeReference),
                         TypeDefinition typeDefinition => provider.GetTypeDefinitionToken(typeDefinition),
                         TypeSpecification typeSpecification => provider.GetTypeSpecificationToken(typeSpecification),
-                        _ => throw new ArgumentOutOfRangeException()
+                        _ => context.DiagnosticBag.RegisterExceptionAndReturnDefault<MetadataToken>(
+                            new ArgumentOutOfRangeException(
+                                $"Invalid or unsupported exception type ({handler.ExceptionType.SafeToString()})"))
                     };
                     writer.WriteUInt32(token.ToUInt32());
                     break;
@@ -174,7 +190,9 @@ namespace AsmResolver.DotNet.Code.Cil
                     break;
                 
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    context.DiagnosticBag.RegisterException(new ArgumentOutOfRangeException(
+                            $"Invalid or unsupported handler type ({handler.HandlerType.SafeToString()}"));
+                    break;
             }
         }
     }

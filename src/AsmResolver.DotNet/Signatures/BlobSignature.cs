@@ -1,5 +1,3 @@
-using AsmResolver.DotNet.Builder;
-
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
@@ -10,8 +8,6 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Serializes the blob to an output stream.
         /// </summary>
-        /// <param name="writer">The output stream.</param>
-        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
-        public abstract void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider);
+        public abstract void Write(BlobSerializationContext context);
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
@@ -105,22 +106,29 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the parameter and return types in the signature to the provided output stream.
         /// </summary>
-        /// <param name="writer">The output stream.</param>
-        /// <param name="provider">The object to use for looking up type tokens.</param>
-        protected void WriteParametersAndReturnType(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected void WriteParametersAndReturnType(BlobSerializationContext context)
         {
-            writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
-            
-            ReturnType.Write(writer, provider);
-            
+            context.Writer.WriteCompressedUInt32((uint) ParameterTypes.Count);
+
+            if (ReturnType is null)
+            {
+                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                    new NullReferenceException("Return type is null.")));
+                context.Writer.WriteByte((byte) ElementType.Object);   
+            }
+            else
+            {
+                ReturnType.Write(context);
+            }
+
             foreach (var type in ParameterTypes)
-                type.Write(writer, provider);
+                type.Write(context);
 
             if (IncludeSentinel)
             {
-                writer.WriteByte((byte) ElementType.Sentinel);
+                context.Writer.WriteByte((byte) ElementType.Sentinel);
                 foreach (var sentinelType in SentinelParameterTypes)
-                    sentinelType.Write(writer, provider);
+                    sentinelType.Write(context);
             }
         }
 

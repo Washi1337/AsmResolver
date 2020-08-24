@@ -37,12 +37,15 @@ namespace AsmResolver.DotNet.Signatures.Security
         } = new List<SecurityAttribute>();
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
+            var writer = context.Writer;
+            
             writer.WriteByte((byte) '.');
             writer.WriteCompressedUInt32((uint) Attributes.Count);
+            
             for (int i = 0; i < Attributes.Count; i++)
-                Attributes[i].Write(writer, provider);
+                Attributes[i].Write(context);
         }
     }
 }

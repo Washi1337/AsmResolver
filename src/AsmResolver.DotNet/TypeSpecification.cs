@@ -48,28 +48,28 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        public string Name => Signature.Name;
+        public string Name => Signature?.Name ?? TypeSignature.NullTypeToString;
 
         /// <inheritdoc />
-        public string Namespace => Signature.Namespace;
+        public string Namespace => Signature?.Namespace;
         
         /// <inheritdoc />
-        public string FullName => Signature.FullName;
+        public string FullName => this.GetTypeFullName();
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Signature.Module;
+        public ModuleDefinition Module => Signature?.Module;
 
         /// <inheritdoc />
-        public IResolutionScope Scope => Signature.Scope;
+        public IResolutionScope Scope => Signature?.Scope;
 
         /// <inheritdoc />
-        public ITypeDefOrRef DeclaringType => Signature.DeclaringType as ITypeDefOrRef;
+        public ITypeDefOrRef DeclaringType => Signature?.DeclaringType as ITypeDefOrRef;
 
         /// <inheritdoc />
         ITypeDescriptor IMemberDescriptor.DeclaringType => DeclaringType;
 
         /// <inheritdoc />
-        public bool IsValueType => Signature.IsValueType;
+        public bool IsValueType => Signature?.IsValueType ?? false;
 
         /// <inheritdoc />
         public IList<CustomAttribute> CustomAttributes

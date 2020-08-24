@@ -85,8 +85,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => null;
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
+            var writer = context.Writer;
             writer.WriteByte((byte) ElementType);
             writer.WriteCompressedUInt32((uint) Index);
         }

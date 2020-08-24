@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
@@ -125,14 +126,16 @@ namespace AsmResolver.DotNet.Signatures
         }
         
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
+            var writer = context.Writer;
+            
             writer.WriteByte((byte) Attributes);
 
             if (IsGeneric)
                 writer.WriteCompressedUInt32((uint) GenericParameterCount);
 
-            WriteParametersAndReturnType(writer, provider);
+            WriteParametersAndReturnType(context);
         }
 
         /// <inheritdoc />
@@ -144,7 +147,11 @@ namespace AsmResolver.DotNet.Signatures
                 : string.Empty;
             string parameterTypesString = string.Join(", ", ParameterTypes) + (IsSentinel ? ", ..." : string.Empty);
             
-            return $"{prefix}{ReturnType} *{genericsString}({parameterTypesString})";
+            return string.Format("{0}{1} *{2}({3})", 
+                prefix, 
+                ReturnType?.FullName ?? TypeSignature.NullTypeToString,
+                genericsString, 
+                parameterTypesString);
         }
     }
 }

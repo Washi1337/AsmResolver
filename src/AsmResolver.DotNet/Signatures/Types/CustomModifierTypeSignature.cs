@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures.Types
@@ -56,7 +57,10 @@ namespace AsmResolver.DotNet.Signatures.Types
             get
             {
                 string modifierString = IsRequired ? "modreq(" : "modopt(";
-                return $"{BaseType.Name} {modifierString}{ModifierType.FullName})";
+
+                string baseType = BaseType?.Name ?? NullTypeToString;
+                string modifier = ModifierType?.FullName ?? NullTypeToString;
+                return $"{baseType} {modifierString}{modifier})";
             }
         }
 
@@ -68,12 +72,11 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitCustomModifierType(this);
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
-            writer.WriteByte((byte) ElementType);
-            WriteTypeDefOrRef(writer, provider, ModifierType);
-            BaseType.Write(writer, provider);
-
+            context.Writer.WriteByte((byte) ElementType);
+            WriteTypeDefOrRef(context, ModifierType, "Modifier type");
+            WriteBaseType(context);
         }
     }
 }

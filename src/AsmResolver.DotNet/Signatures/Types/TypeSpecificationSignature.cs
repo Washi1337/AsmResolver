@@ -1,3 +1,6 @@
+using System;
+using AsmResolver.DotNet.Builder;
+
 namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
@@ -24,10 +27,10 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Namespace => BaseType.Namespace;
+        public override string Namespace => BaseType?.Namespace;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => BaseType.Scope;
+        public override IResolutionScope Scope => BaseType?.Scope;
 
         /// <inheritdoc />
         public override TypeDefinition Resolve() => 
@@ -38,10 +41,30 @@ namespace AsmResolver.DotNet.Signatures.Types
             BaseType.GetUnderlyingTypeDefOrRef();
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
-            writer.WriteByte((byte) ElementType);
-            BaseType.Write(writer, provider);
+            context.Writer.WriteByte((byte) ElementType);
+            WriteBaseType(context);
         }
+
+        /// <summary>
+        /// Writes <see cref="BaseType"/> to the output stream.
+        /// </summary>
+        /// <param name="context">The output stream.</param>
+        protected void WriteBaseType(BlobSerializationContext context)
+        {
+            if (BaseType is null)
+            {
+                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                    $"{ElementType} blob signature {this.SafeToString()} is invalid or incomplete.",
+                    new NullReferenceException("Base type is null.")));
+                context.Writer.WriteByte((byte) PE.DotNet.Metadata.Tables.Rows.ElementType.Object);
+            }
+            else
+            {
+                BaseType.Write(context);
+            }
+        }
+        
     }
 }

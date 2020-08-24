@@ -1,5 +1,3 @@
-using AsmResolver.DotNet.Builder;
-
 namespace AsmResolver.DotNet.Signatures
 {
     /// <summary>
@@ -17,18 +15,16 @@ namespace AsmResolver.DotNet.Signatures
         }
         
         /// <inheritdoc />
-        public sealed override void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        public sealed override void Write(BlobSerializationContext context)
         {
-            WriteContents(writer, provider);
+            WriteContents(context);
             if (ExtraData != null)
-                writer.WriteBytes(ExtraData);
+                context.Writer.WriteBytes(ExtraData);
         }
 
         /// <summary>
         /// Serializes the blob (without extra data) to an output stream.
         /// </summary>
-        /// <param name="writer">The output stream.</param>
-        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
-        protected abstract void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider);
+        protected abstract void WriteContents(BlobSerializationContext context);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using AsmResolver.PE;
-using AsmResolver.PE.DotNet.StrongName;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -46,15 +45,31 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public IPEImage CreateImage(ModuleDefinition module) => new PEImage
+        public PEImageBuildResult CreateImage(ModuleDefinition module)
         {
-            MachineType = module.MachineType,
-            PEKind = module.PEKind,
-            Characteristics = module.FileCharacteristics,
-            SubSystem = module.SubSystem,
-            DllCharacteristics = module.DllCharacteristics,
-            DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module),
-            Resources = module.NativeResourceDirectory,
-        };
+            var context = new PEImageBuildContext();
+
+            PEImage image = null;
+            try
+            {
+                image = new PEImage
+                {
+                    MachineType = module.MachineType,
+                    PEKind = module.PEKind,
+                    Characteristics = module.FileCharacteristics,
+                    SubSystem = module.SubSystem,
+                    DllCharacteristics = module.DllCharacteristics,
+                    DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module, context.DiagnosticBag),
+                    Resources = module.NativeResourceDirectory,
+                };
+            }
+            catch (Exception ex)
+            {
+                context.DiagnosticBag.Exceptions.Add(ex);
+                context.DiagnosticBag.MarkAsFatal();
+            }
+
+            return new PEImageBuildResult(image, context.DiagnosticBag);
+        }
     }
 }

@@ -11,6 +11,8 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     public abstract class TypeSignature : ExtendableBlobSignature, ITypeDescriptor
     {
+        internal const string NullTypeToString = "<<???>>";
+        
         /// <summary>
         /// Reads a type signature from a blob reader.
         /// </summary>
@@ -169,10 +171,29 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
         } 
-        
-        internal static void WriteTypeDefOrRef(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider, ITypeDefOrRef type)
+
+        /// <summary>
+        /// Writes a TypeDefOrRef coded index to the output stream. 
+        /// </summary>
+        /// <param name="context">The output stream.</param>
+        /// <param name="type">The type to write.</param>
+        /// <param name="propertyName">The property name that was written.</param>
+        protected void WriteTypeDefOrRef(BlobSerializationContext context, ITypeDefOrRef type, string propertyName)
         {
-            writer.WriteCompressedUInt32(provider.GetTypeDefOrRefIndex(type));
+            uint index = 0;
+
+            if (type is null)
+            {
+                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
+                    $"{ElementType} blob signature {this.SafeToString()} is invalid or incomplete.",
+                    new NullReferenceException($"{propertyName} is null.")));
+            }
+            else
+            {
+                index = context.IndexProvider.GetTypeDefOrRefIndex(type);
+            }
+
+            context.Writer.WriteCompressedUInt32(index);
         }
         
         internal static TypeSignature ReadFieldOrPropType(ModuleDefinition parentModule, IBinaryStreamReader reader)
@@ -329,6 +350,11 @@ namespace AsmResolver.DotNet.Signatures.Types
         public abstract TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor);
 
         /// <inheritdoc />
-        public override string ToString() => FullName;
+        public override string ToString()
+        {
+            return string.IsNullOrEmpty(FullName)
+                ? $"<<<{ElementType}>>>"
+                : Name;
+        }
     }
 }

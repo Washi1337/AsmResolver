@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => IsValueType ? ElementType.ValueType : ElementType.Class;
 
         /// <inheritdoc />
-        public override string Name => Type?.Name;
+        public override string Name => Type?.Name ?? NullTypeToString;
 
         /// <inheritdoc />
         public override string Namespace => Type?.Namespace;
@@ -71,10 +71,11 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitTypeDefOrRef(this);
         
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
+            var writer = context.Writer;
             writer.WriteByte((byte) ElementType);
-            writer.WriteCompressedUInt32(provider.GetTypeDefOrRefIndex(Type));
+            WriteTypeDefOrRef(context, Type, "Underlying type");
         }
     }
 }

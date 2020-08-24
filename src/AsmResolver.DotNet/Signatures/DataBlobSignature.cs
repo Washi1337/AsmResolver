@@ -67,9 +67,6 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
-        {
-            writer.WriteBytes(Data);
-        }
+        public override void Write(BlobSerializationContext context) => context.Writer.WriteBytes(Data);
     }
 }

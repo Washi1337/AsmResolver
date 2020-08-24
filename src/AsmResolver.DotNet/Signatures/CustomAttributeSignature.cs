@@ -96,16 +96,16 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
-            writer.WriteUInt16(CustomAttributeSignaturePrologue);
+            context.Writer.WriteUInt16(CustomAttributeSignaturePrologue);
             
             for (int i = 0; i < FixedArguments.Count; i++)
-                FixedArguments[i].Write(writer, provider);
+                FixedArguments[i].Write(context);
 
-            writer.WriteUInt16((ushort) NamedArguments.Count);
+            context.Writer.WriteUInt16((ushort) NamedArguments.Count);
             for (int i = 0; i < NamedArguments.Count; i++)
-                NamedArguments[i].Write(writer, provider);
+                NamedArguments[i].Write(context);
         }
     }
 }

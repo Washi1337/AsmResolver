@@ -104,7 +104,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ElementType ElementType => ElementType.Array;
 
         /// <inheritdoc />
-        public override string Name => BaseType.Name + GetDimensionsString();
+        public override string Name => (BaseType?.Name ?? NullTypeToString) + GetDimensionsString();
 
         /// <inheritdoc />
         public override bool IsValueType => false;
@@ -181,13 +181,15 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitArrayType(this);
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             if (!Validate())
                 throw new InvalidOperationException();
 
+            var writer = context.Writer;
+
             writer.WriteByte((byte) ElementType);
-            BaseType.Write(writer, provider);
+            WriteBaseType(context);
             writer.WriteCompressedUInt32((uint) Dimensions.Count);
 
             // Sized dimensions.
