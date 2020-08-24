@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File.Headers;
@@ -145,6 +146,10 @@ namespace AsmResolver.PE
             get;
             set;
         }
-        
+
+        IList<DebugDataEntry> DebugData
+        {
+            get;
+        }
     }
 }
