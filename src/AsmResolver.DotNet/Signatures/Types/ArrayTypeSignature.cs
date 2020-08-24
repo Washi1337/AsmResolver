@@ -93,7 +93,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Creates a new array type signature with the provided dimensions count.
         /// </summary>
         /// <param name="baseType">The element type.</param>
-        /// <param name="dimensionCount">The number of dimensions.</param>
+        /// <param name="dimensions">The dimensions.</param>
         public ArrayTypeSignature(TypeSignature baseType, params ArrayDimension[] dimensions)
             : base(baseType)
         {

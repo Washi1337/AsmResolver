@@ -13,6 +13,9 @@ namespace AsmResolver.PE.Debug.Builder
         /// </summary>
         public ISegment ContentsTable => _streamsTable;
 
+        /// <summary>
+        /// Gets a value indicating whether the buffer has no entries added to it. 
+        /// </summary>
         public bool IsEmpty => _headers.Count == 0;
 
         /// <summary>

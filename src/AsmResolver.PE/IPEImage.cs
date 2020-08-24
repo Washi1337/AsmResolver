@@ -147,6 +147,9 @@ namespace AsmResolver.PE
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of data entries stored in the debug data directory of the PE image (if available).
+        /// </summary>
         IList<DebugDataEntry> DebugData
         {
             get;
