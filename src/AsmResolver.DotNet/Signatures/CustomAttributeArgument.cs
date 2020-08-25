@@ -123,7 +123,19 @@ namespace AsmResolver.DotNet.Signatures
 
         private void WriteArray(SzArrayTypeSignature szArrayType, BlobSerializationContext context)
         {
-            throw new NotImplementedException();
+            var writer = context.Writer;
+            
+            if (IsNullArray)
+            {
+                writer.WriteUInt32(uint.MaxValue);
+                return;
+            }
+            
+            var elementType = szArrayType.BaseType;
+            
+            writer.WriteUInt32((uint) Elements.Count);
+            for (int i = 0; i < Elements.Count; i++)
+                Elements[i].Write(context, elementType);
         }
     }
 }
