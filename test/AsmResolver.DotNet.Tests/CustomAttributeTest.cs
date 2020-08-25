@@ -313,11 +313,48 @@ namespace AsmResolver.DotNet.Tests
             // https://github.com/Washi1337/AsmResolver/issues/92
             
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.TypePassedAsObject), rebuild);
-             var argument = attribute.Signature.FixedArguments[0];
+            var argument = attribute.Signature.FixedArguments[0];
 
             var module = attribute.Constructor.Module;
             Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
             Assert.Equal(module.CorLibTypeFactory.Int32, (TypeSignature) argument.Element.Value, _comparer);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FixedInt32NullArray(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayNullArgument), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            Assert.True(argument.IsNullArray);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FixedInt32EmptyArray(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayEmptyArgument), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            Assert.False(argument.IsNullArray);
+            Assert.Empty(argument.Elements);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FixedInt32Array(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayArgument), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            Assert.Equal(new[]
+            {
+                1, 2, 3, 4
+            }, argument.Elements.Select(e => (int) e.Value));
         }
         
     }

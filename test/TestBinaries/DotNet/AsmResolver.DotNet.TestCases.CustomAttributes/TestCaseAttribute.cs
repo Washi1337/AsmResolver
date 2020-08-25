@@ -29,6 +29,11 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
             TypeValue = typeValue;
         }
 
+        public TestCaseAttribute(int[] arrayValue)
+        {
+            ArrayValue = arrayValue;
+        }
+
         public TestCaseAttribute(int intValue, string stringValue, TestEnum enumValue)
         {
             IntValue = intValue;
@@ -66,6 +71,12 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         }
 
         public object ObjectValue
+        {
+            get;
+            set;
+        }
+
+        public int[] ArrayValue
         {
             get;
             set;

@@ -103,5 +103,21 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void TypePassedAsObject()
         {
         }
+
+        [TestCase(new int[] {1, 2, 3, 4})]
+        public void FixedInt32ArrayArgument()
+        {
+        }
+
+        [TestCase(default(int[]))]
+        public void FixedInt32ArrayNullArgument()
+        {
+        }
+
+        [TestCase(new int[0])]
+        public void FixedInt32ArrayEmptyArgument()
+        {
+        }
+        
     }
 }
