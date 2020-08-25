@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
@@ -480,6 +481,13 @@ namespace AsmResolver.DotNet
                     || baseType.IsTypeOf("System", nameof(MulticastDelegate));
             }
         }
+
+        /// <summary>
+        /// Determines whether the type is marked as read-only.
+        /// </summary>
+        public bool IsReadOnly =>
+            IsValueType
+            && this.HasCustomAttribute("System.Runtime.CompilerServices", nameof(ReadOnlyAttribute));
 
         /// <summary>
         /// Gets a collection of fields defined in the type.
