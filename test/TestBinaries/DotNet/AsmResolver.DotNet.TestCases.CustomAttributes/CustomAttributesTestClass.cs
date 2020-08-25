@@ -133,6 +133,6 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void FixedInt32ArrayAsObjectEmptyArgument()
         {
         }
-        
+
     }
 }

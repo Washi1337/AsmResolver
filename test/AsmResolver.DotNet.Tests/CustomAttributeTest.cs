@@ -108,7 +108,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature.NamedArguments);
 
             var argument = attribute.Signature.FixedArguments[0];
-            Assert.Equal(1, argument.Element.Value);
+            Assert.Equal(1, argument.Element);
         }
 
         [Theory]
@@ -121,7 +121,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature.NamedArguments);
 
             var argument = attribute.Signature.FixedArguments[0];
-            Assert.Equal("String fixed arg", argument.Element.Value);
+            Assert.Equal("String fixed arg", argument.Element);
         }
 
         [Theory]
@@ -134,7 +134,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Empty(attribute.Signature.NamedArguments);
 
             var argument = attribute.Signature.FixedArguments[0];
-            Assert.Equal((int) TestEnum.Value3, argument.Element.Value);
+            Assert.Equal((int) TestEnum.Value3, argument.Element);
         }
         
         [Theory]
@@ -149,7 +149,7 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature.FixedArguments[0];
             Assert.Equal(
                 attribute.Constructor.Module.CorLibTypeFactory.String, 
-                argument.Element.Value as TypeSignature, _comparer);
+                argument.Element as TypeSignature, _comparer);
         }
         
         [Theory]
@@ -169,7 +169,7 @@ namespace AsmResolver.DotNet.Tests
                 new SzArrayTypeSignature(factory.String),
                 new SzArrayTypeSignature(factory.Int32));
 
-            Assert.Equal(instance, argument.Element.Value as TypeSignature, _comparer);
+            Assert.Equal(instance, argument.Element as TypeSignature, _comparer);
         }
         
         [Theory]
@@ -183,7 +183,7 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.IntValue), argument.MemberName);
-            Assert.Equal(2, argument.Argument.Element.Value);
+            Assert.Equal(2, argument.Argument.Element);
         }
 
         [Theory]
@@ -197,7 +197,7 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.StringValue), argument.MemberName);
-            Assert.Equal("String named arg", argument.Argument.Element.Value);
+            Assert.Equal("String named arg", argument.Argument.Element);
         }
 
         [Theory]
@@ -211,7 +211,7 @@ namespace AsmResolver.DotNet.Tests
 
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.EnumValue), argument.MemberName);
-            Assert.Equal((int) TestEnum.Value2, argument.Argument.Element.Value);
+            Assert.Equal((int) TestEnum.Value2, argument.Argument.Element);
         }
 
         [Theory]
@@ -229,7 +229,7 @@ namespace AsmResolver.DotNet.Tests
             
             var argument = attribute.Signature.NamedArguments[0];
             Assert.Equal(nameof(TestCaseAttribute.TypeValue), argument.MemberName);
-            Assert.Equal(expected, (ITypeDescriptor) argument.Argument.Element.Value, _comparer);
+            Assert.Equal(expected, (ITypeDescriptor) argument.Argument.Element, _comparer);
         }
 
         [Fact]
@@ -250,7 +250,7 @@ namespace AsmResolver.DotNet.Tests
         {
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedBoxedIntArgument), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
-            Assert.Equal(2448, argument.Element.Value);
+            Assert.Equal(2448, argument.Element);
         }
 
         [Theory]
@@ -267,8 +267,8 @@ namespace AsmResolver.DotNet.Tests
             var nestedClass = (TypeDefinition) module.LookupMember(typeof(TestGenericType<>).MetadataToken);
             var expected = new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object);
             
-            Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
-            Assert.Equal(expected, (TypeSignature) argument.Element.Value, _comparer);
+            Assert.IsAssignableFrom<TypeSignature>(argument.Element);
+            Assert.Equal(expected, (TypeSignature) argument.Element, _comparer);
         }
 
         [Theory]
@@ -287,8 +287,8 @@ namespace AsmResolver.DotNet.Tests
                 new GenericInstanceTypeSignature(nestedClass, false, module.CorLibTypeFactory.Object)
             );
 
-            Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
-            Assert.Equal(expected, (TypeSignature) argument.Element.Value, _comparer);
+            Assert.IsAssignableFrom<TypeSignature>(argument.Element);
+            Assert.Equal(expected, (TypeSignature) argument.Element, _comparer);
         }
 
         [Theory]
@@ -301,8 +301,8 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.Int32PassedAsObject), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
-            Assert.IsAssignableFrom<int>(argument.Element.Value);
-            Assert.Equal(123, (int) argument.Element.Value);
+            Assert.IsAssignableFrom<int>(argument.Element);
+            Assert.Equal(123, (int) argument.Element);
         }
 
         [Theory]
@@ -316,8 +316,8 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature.FixedArguments[0];
 
             var module = attribute.Constructor.Module;
-            Assert.IsAssignableFrom<TypeSignature>(argument.Element.Value);
-            Assert.Equal(module.CorLibTypeFactory.Int32, (TypeSignature) argument.Element.Value, _comparer);
+            Assert.IsAssignableFrom<TypeSignature>(argument.Element);
+            Assert.Equal(module.CorLibTypeFactory.Int32, (TypeSignature) argument.Element, _comparer);
         }
 
         [Theory]
@@ -354,7 +354,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new[]
             {
                 1, 2, 3, 4
-            }, argument.Elements.Select(e => (int) e.Value));
+            }, argument.Elements.Cast<int>());
         }
 
         [Theory]
@@ -365,7 +365,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectNullArgument), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
-            Assert.True(argument.IsNullArray);
+            Assert.Null(argument.Element);
         }
 
         [Theory]
@@ -391,7 +391,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Equal(new[]
             {
                 1, 2, 3, 4
-            }, argument.Elements.Select(e => (int) e.Value));
+            }, argument.Elements.Cast<int>());
         }
         
     }
