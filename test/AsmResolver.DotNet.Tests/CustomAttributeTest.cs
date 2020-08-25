@@ -356,6 +356,43 @@ namespace AsmResolver.DotNet.Tests
                 1, 2, 3, 4
             }, argument.Elements.Select(e => (int) e.Value));
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FixedInt32ArrayNullAsObject(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectNullArgument), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            Assert.True(argument.IsNullArray);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FixedInt32EmptyArrayAsObject(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectEmptyArgument), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            Assert.False(argument.IsNullArray);
+            Assert.Empty(argument.Elements);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FixedInt32ArrayAsObject(bool rebuild)
+        {
+            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectArgument), rebuild);
+            var argument = attribute.Signature.FixedArguments[0];
+
+            Assert.Equal(new[]
+            {
+                1, 2, 3, 4
+            }, argument.Elements.Select(e => (int) e.Value));
+        }
         
     }
 }

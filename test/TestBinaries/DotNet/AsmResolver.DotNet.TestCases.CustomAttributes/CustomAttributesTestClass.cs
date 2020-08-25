@@ -118,6 +118,21 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void FixedInt32ArrayEmptyArgument()
         {
         }
+
+        [TestCase((object) new int[] {1, 2, 3, 4})]
+        public void FixedInt32ArrayAsObjectArgument()
+        {
+        }
+
+        [TestCase((object) default(int[]))]
+        public void FixedInt32ArrayAsObjectNullArgument()
+        {
+        }
+
+        [TestCase((object) new int[0])]
+        public void FixedInt32ArrayAsObjectEmptyArgument()
+        {
+        }
         
     }
 }
