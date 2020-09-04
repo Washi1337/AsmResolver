@@ -17,14 +17,11 @@ namespace AsmResolver.DotNet.Signatures
 
         public void WriteArgument(CustomAttributeArgument argument)
         {
-            if (argument.ArgumentType.ElementType != ElementType.SzArray)
-            {
-                WriteElement(argument.ArgumentType, argument.Element);
-            }
+            var argumentType = argument.ArgumentType;
+            if (argumentType.ElementType != ElementType.SzArray)
+                WriteElement(argumentType, argument.Element);
             else
-            {
-                WriteArrayElement((SzArrayTypeSignature) argument.ArgumentType, argument.Elements, argument.IsNullArray);
-            }
+                WriteArrayElement((SzArrayTypeSignature) argumentType, argument.Elements, argument.IsNullArray);
         }
 
         private void WriteArrayElement(SzArrayTypeSignature szArrayType, IList<object> elements, bool isNullArray)
@@ -109,7 +106,8 @@ namespace AsmResolver.DotNet.Signatures
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        throw new NotSupportedException(
+                            $"Object elements in a custom attribute signature should be either 'null' or an instance of {nameof(BoxedArgument)}.");
                     }
                     
                     TypeSignature.WriteFieldOrPropType(writer, innerTypeSig);

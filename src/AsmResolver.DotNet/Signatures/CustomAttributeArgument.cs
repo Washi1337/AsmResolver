@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Signatures
         }
         
         /// <summary>
-        /// Creates a new custom attribute argument. 
+        /// Creates a new empty custom attribute argument. 
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
         public CustomAttributeArgument(TypeSignature argumentType)
@@ -38,11 +38,12 @@ namespace AsmResolver.DotNet.Signatures
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
             Elements = new List<object>();
         }
-        
+
         /// <summary>
         /// Creates a new custom attribute argument. 
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
+        /// <param name="value">The value of the argument.</param>
         public CustomAttributeArgument(TypeSignature argumentType, object value)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
@@ -50,19 +51,21 @@ namespace AsmResolver.DotNet.Signatures
         }
         
         /// <summary>
-        /// Creates a new custom attribute argument. 
+        /// Creates a new custom attribute array argument. 
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
+        /// <param name="elements">The value making up the elements of the array argument.</param>
         public CustomAttributeArgument(TypeSignature argumentType, IEnumerable<object> elements)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
             Elements = new List<object>(elements);
         }
-        
+
         /// <summary>
-        /// Creates a new custom attribute argument. 
+        /// Creates a new custom attribute array argument. 
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
+        /// <param name="elements">The value making up the elements of the array argument.</param>
         public CustomAttributeArgument(TypeSignature argumentType, params object[] elements)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
