@@ -301,8 +301,8 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.Int32PassedAsObject), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
-            Assert.IsAssignableFrom<int>(argument.Element);
-            Assert.Equal(123, (int) argument.Element);
+            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            Assert.Equal(123, ((BoxedArgument) argument.Element).Value);
         }
 
         [Theory]
@@ -316,8 +316,8 @@ namespace AsmResolver.DotNet.Tests
             var argument = attribute.Signature.FixedArguments[0];
 
             var module = attribute.Constructor.Module;
-            Assert.IsAssignableFrom<TypeSignature>(argument.Element);
-            Assert.Equal(module.CorLibTypeFactory.Int32, (TypeSignature) argument.Element, _comparer);
+            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            Assert.Equal(module.CorLibTypeFactory.Int32, (ITypeDescriptor) ((BoxedArgument) argument.Element).Value, _comparer);
         }
 
         [Theory]

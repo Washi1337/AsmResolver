@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -91,7 +92,12 @@ namespace AsmResolver.DotNet.Signatures
                     break;
 
                 case ElementType.Object:
-                    ReadValue(TypeSignature.ReadFieldOrPropType(_parentModule, _reader));
+                    var reader = new CustomAttributeArgumentReader(_parentModule, _reader);
+                    var type = TypeSignature.ReadFieldOrPropType(_parentModule, _reader);
+                    reader.ReadValue(type);
+                    Elements.Add(new BoxedArgument(type, type.ElementType == ElementType.SzArray
+                        ? reader.Elements.ToArray()
+                        : reader.Elements[0]));
                     break;
 
                 case ElementType.SzArray:

@@ -115,33 +115,9 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         public void Write(BlobSerializationContext context)
         {
-            if (ArgumentType is SzArrayTypeSignature szArrayType)
-                WriteArray(szArrayType, context);
-            else
-                WriteSimple(context);
-        }
-
-        private void WriteSimple(BlobSerializationContext context)
-        {
             throw new NotImplementedException();
-        }
-
-        private void WriteArray(SzArrayTypeSignature szArrayType, BlobSerializationContext context)
-        {
-            throw new NotImplementedException();
-            // var writer = context.Writer;
-            //
-            // if (IsNullArray)
-            // {
-            //     writer.WriteUInt32(uint.MaxValue);
-            //     return;
-            // }
-            //
-            // var elementType = szArrayType.BaseType;
-            //
-            // writer.WriteUInt32((uint) Elements.Count);
-            // for (int i = 0; i < Elements.Count; i++)
-            //     Elements[i].Write(context, elementType);
+            // var writer = new CustomAttributeArgumentWriter(context);
+            // writer.WriteElements(ArgumentType, Elements, IsNullArray);
         }
     }
 }
