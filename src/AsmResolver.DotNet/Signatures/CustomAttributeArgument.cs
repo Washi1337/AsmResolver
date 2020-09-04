@@ -115,9 +115,8 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         public void Write(BlobSerializationContext context)
         {
-            throw new NotImplementedException();
-            // var writer = new CustomAttributeArgumentWriter(context);
-            // writer.WriteElements(ArgumentType, Elements, IsNullArray);
+            var writer = new CustomAttributeArgumentWriter(context);
+            writer.WriteArgument(this);
         }
     }
 }

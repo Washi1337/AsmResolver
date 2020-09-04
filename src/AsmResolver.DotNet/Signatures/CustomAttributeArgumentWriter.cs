@@ -15,105 +15,112 @@ namespace AsmResolver.DotNet.Signatures
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public void WriteElements(TypeSignature argumentType, TypeSignature elementsType, IList<object> elements, bool isNullArray)
+        public void WriteArgument(CustomAttributeArgument argument)
+        {
+            if (argument.ArgumentType.ElementType != ElementType.SzArray)
+            {
+                WriteElement(argument.ArgumentType, argument.Element);
+            }
+            else
+            {
+                WriteArrayElement((SzArrayTypeSignature) argument.ArgumentType, argument.Elements, argument.IsNullArray);
+            }
+        }
+
+        private void WriteArrayElement(SzArrayTypeSignature szArrayType, IList<object> elements, bool isNullArray)
         {
             var writer = _context.Writer;
-            
-            if (elementsType.IsTypeOf("System", "Type"))
+            if (isNullArray)
             {
-                writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName((TypeSignature) elements[0]));
+                writer.WriteUInt32(uint.MaxValue);
                 return;
             }
 
-            switch (elementsType.ElementType)
+            var elementType = szArrayType.BaseType;
+
+            writer.WriteUInt32((uint) elements.Count);
+            for (int i = 0; i < elements.Count; i++)
+                WriteElement(elementType, elements[i]);
+        }
+
+        private void WriteElement(TypeSignature argumentType, object element)
+        {
+            var writer = _context.Writer;
+            
+            if (argumentType.IsTypeOf("System", "Type"))
+            {
+                writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName((TypeSignature) element));
+                return;
+            }
+
+            switch (argumentType.ElementType)
             {
                 case ElementType.Boolean:
-                    writer.WriteByte((byte) ((bool) elements[0] ? 1 : 0));
+                    writer.WriteByte((byte) ((bool) element ? 1 : 0));
                     break;
                 case ElementType.Char:
-                    writer.WriteUInt16((char) elements[0]);
+                    writer.WriteUInt16((char) element);
                     break;
                 case ElementType.I1:
-                    writer.WriteSByte((sbyte) elements[0]);
+                    writer.WriteSByte((sbyte) element);
                     break;
                 case ElementType.U1:
-                    writer.WriteByte((byte) elements[0]);
+                    writer.WriteByte((byte) element);
                     break;
                 case ElementType.I2:
-                    writer.WriteInt16((short) elements[0]);
+                    writer.WriteInt16((short) element);
                     break;
                 case ElementType.U2:
-                    writer.WriteUInt16((ushort) elements[0]);
+                    writer.WriteUInt16((ushort) element);
                     break;
                 case ElementType.I4:
-                    writer.WriteInt32((int) elements[0]);
+                    writer.WriteInt32((int) element);
                     break;
                 case ElementType.U4:
-                    writer.WriteUInt32((uint) elements[0]);
+                    writer.WriteUInt32((uint) element);
                     break;
                 case ElementType.I8:
-                    writer.WriteInt64((long) elements[0]);
+                    writer.WriteInt64((long) element);
                     break;
                 case ElementType.U8:
-                    writer.WriteUInt64((ulong) elements[0]);
+                    writer.WriteUInt64((ulong) element);
                     break;
                 case ElementType.R4:
-                    writer.WriteSingle((float) elements[0]);
+                    writer.WriteSingle((float) element);
                     break;
                 case ElementType.R8:
-                    writer.WriteDouble((double) elements[0]);
+                    writer.WriteDouble((double) element);
                     break;
                 case ElementType.String:
-                    writer.WriteSerString(elements[0] as string);
+                    writer.WriteSerString(element as string);
                     break;
                 case ElementType.Object:
                     TypeSignature innerTypeSig;
+                    object value = null;
 
-                    if (isNullArray)
+                    if (element is null)
                     {
                         innerTypeSig = argumentType.Module.CorLibTypeFactory.String;
                     }
-                    else if (elements.Count > 0)
+                    else if (element is BoxedArgument boxedArgument)
                     {
-                        if (elements[0] is TypeSignature _)
-                        {
-                            innerTypeSig = new TypeDefOrRefSignature(
-                                new TypeReference(argumentType.Module.CorLibTypeFactory.CorLibScope, "System", "Type"));
-                        }
-                        else if (elements[0] is null)
-                        {
-                            innerTypeSig = argumentType.Module.CorLibTypeFactory.String;
-                        }
-                        else
-                        {
-                            var valueType = elements[0].GetType();
-                            innerTypeSig = argumentType.Module.CorLibTypeFactory
-                                .FromName(valueType.Namespace, valueType.Name);
-                        }
+                        innerTypeSig = boxedArgument.Type;
+                        value = boxedArgument.Value;
                     }
                     else
                     {
-                        throw new NotSupportedException(
-                            $"Expected the custom attribute argument of type {argumentType} to have at least one element.");
+                        throw new NotSupportedException();
                     }
-
+                    
                     TypeSignature.WriteFieldOrPropType(writer, innerTypeSig);
-                    WriteElements(argumentType, innerTypeSig, elements, isNullArray);
+                    WriteElement(innerTypeSig, value);
                     break;
                 
                 case ElementType.SzArray:
-                    if (isNullArray)
-                    {
-                        writer.WriteUInt32(uint.MaxValue);
-                        return;
-                    }
-
-                    var szArrayType = (SzArrayTypeSignature) argumentType;
-                    var elementType = szArrayType.BaseType;
-                    
-                    writer.WriteUInt32((uint) elements.Count);
-                    for (int i = 0; i < elements.Count; i++)
-                        WriteElements(argumentType, elementType, new[] {elements[i]}, false);
+                    WriteArrayElement(
+                        (SzArrayTypeSignature) argumentType,
+                        element as IList<object> ?? new object[0],
+                        element == null);
                     break;
                     
                 case ElementType.Class:
@@ -121,7 +128,7 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.ValueType:
                     var enumTypeDef = argumentType.Resolve();
                     if (enumTypeDef != null && enumTypeDef.IsEnum)
-                        WriteElements(argumentType, enumTypeDef.GetEnumUnderlyingType(), elements, isNullArray);
+                        WriteElement(enumTypeDef.GetEnumUnderlyingType(), element);
                     else
                         throw new NotImplementedException();
                     break;

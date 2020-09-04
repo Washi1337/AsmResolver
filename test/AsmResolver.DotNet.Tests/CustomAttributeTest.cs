@@ -246,16 +246,6 @@ namespace AsmResolver.DotNet.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void BoxedIntFixedArgument(bool rebuild)
-        {
-            var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedBoxedIntArgument), rebuild);
-            var argument = attribute.Signature.FixedArguments[0];
-            Assert.Equal(2448, argument.Element);
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
         public void GenericTypeArgument(bool rebuild)
         {
             // https://github.com/Washi1337/AsmResolver/issues/92
@@ -365,7 +355,9 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectNullArgument), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
-            Assert.Null(argument.Element);
+            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            var boxedArgument = (BoxedArgument) argument.Element;
+            Assert.Null(boxedArgument.Value);
         }
 
         [Theory]
@@ -376,8 +368,9 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectEmptyArgument), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
-            Assert.False(argument.IsNullArray);
-            Assert.Empty(argument.Elements);
+            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            var boxedArgument = (BoxedArgument) argument.Element;
+            Assert.Equal(new object[0], boxedArgument.Value);
         }
 
         [Theory]
@@ -388,10 +381,12 @@ namespace AsmResolver.DotNet.Tests
             var attribute = GetCustomAttributeTestCase(nameof(CustomAttributesTestClass.FixedInt32ArrayAsObjectArgument), rebuild);
             var argument = attribute.Signature.FixedArguments[0];
 
+            Assert.IsAssignableFrom<BoxedArgument>(argument.Element);
+            var boxedArgument = (BoxedArgument) argument.Element;
             Assert.Equal(new[]
             {
                 1, 2, 3, 4
-            }, argument.Elements.Cast<int>());
+            }, boxedArgument.Value);
         }
         
     }
