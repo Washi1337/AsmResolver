@@ -293,9 +293,9 @@ namespace AsmResolver.DotNet.Cloning
             clonedArgument.IsNullArray = argument.IsNullArray;
             
             // Copy all elements.
-            foreach (var element in argument.Elements)
-                clonedArgument.Elements.Add(new CustomAttributeArgumentElement(element.Value));
-            
+            for (int i = 0; i < argument.Elements.Count; i++)
+                clonedArgument.Elements.Add(argument.Elements[i]);
+
             return clonedArgument;
         }
 
