@@ -116,13 +116,22 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
-                    var enumTypeDef = _parentModule.MetadataResolver.ResolveType(valueType);
-                    if (enumTypeDef == null || !enumTypeDef.IsEnum)
-                        throw new NotSupportedException($"Unsupported element type {enumTypeDef}.");
+                    // Value is an enum, resolve it and get underlying type.
+                    // If that fails, most enums are int32s, assume that is the case in an attempt to recover.
                     
-                    ReadValue(enumTypeDef.GetEnumUnderlyingType());
+                    var enumTypeDef = _parentModule.MetadataResolver.ResolveType(valueType);
+                    
+                    TypeSignature underlyingType;
+                    if (enumTypeDef is null) 
+                        underlyingType = _parentModule.CorLibTypeFactory.Int32;
+                    else if (enumTypeDef.IsEnum)
+                        underlyingType = enumTypeDef.GetEnumUnderlyingType() ?? _parentModule.CorLibTypeFactory.Int32;
+                    else
+                        throw new NotSupportedException($"Type {valueType} is not an enum.");
+
+                    ReadValue(underlyingType);
                     break;
-                
+
                 default:
                     throw new NotSupportedException($"Unsupported element type {valueType.ElementType}.");
             }
