@@ -106,8 +106,9 @@ namespace AsmResolver.DotNet.Signatures
                     }
                     else
                     {
-                        throw new NotSupportedException(
-                            $"Object elements in a custom attribute signature should be either 'null' or an instance of {nameof(BoxedArgument)}.");
+                        _context.DiagnosticBag.RegisterException(new NotSupportedException(
+                            $"Object elements in a custom attribute signature should be either 'null' or an instance of {nameof(BoxedArgument)}."));
+                        return;
                     }
                     
                     TypeSignature.WriteFieldOrPropType(writer, innerTypeSig);
@@ -126,14 +127,26 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.ValueType:
                     var enumTypeDef = argumentType.Resolve();
                     if (enumTypeDef != null && enumTypeDef.IsEnum)
+                    {
                         WriteElement(enumTypeDef.GetEnumUnderlyingType(), element);
+                    }
                     else
-                        throw new NotImplementedException();
+                    {
+                        UnsupportedArgumentType(argumentType);
+                    }
+                    
                     break;
                 
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    UnsupportedArgumentType(argumentType);
+                    break;
             }
+        }
+
+        private void UnsupportedArgumentType(TypeSignature argumentType)
+        {
+            _context.DiagnosticBag.RegisterException(
+                new NotSupportedException($"Invalid or unsupported argument type {argumentType.FullName}."));
         }
     }
 }
