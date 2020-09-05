@@ -22,10 +22,10 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         public const int MaxDepth = 10;
             
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
         private readonly ushort _namedEntries;
         private readonly ushort _idEntries;
-        private readonly uint _entriesOffset;
+        private readonly uint _entriesRva;
         private readonly int _depth;
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Win32Resources
         /// The current depth of the resource directory tree structure.
         /// If this value exceeds <see cref="MaxDepth"/>, this class will not initialize any entries.
         /// </param>
-        public SerializedResourceDirectory(PEFile peFile, ResourceDirectoryEntry? entry, 
+        public SerializedResourceDirectory(IPEFile peFile, ResourceDirectoryEntry? entry, 
             IBinaryStreamReader directoryReader, int depth = 0)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
@@ -63,7 +63,7 @@ namespace AsmResolver.PE.Win32Resources
 
                 _namedEntries = directoryReader.ReadUInt16();
                 _idEntries = directoryReader.ReadUInt16();
-                _entriesOffset = directoryReader.FileOffset;
+                _entriesRva = directoryReader.Rva;
 
                 directoryReader.FileOffset =
                     (uint) (directoryReader.FileOffset + (_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
@@ -83,7 +83,7 @@ namespace AsmResolver.PE.Win32Resources
 
             // Create entries reader.
             uint entryListSize = (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
-            var entriesReader = _peFile.CreateReaderAtFileOffset(_entriesOffset, entryListSize);
+            var entriesReader = _peFile.CreateReaderAtRva(_entriesRva, entryListSize);
 
             for (int i = 0; i < _namedEntries + _idEntries; i++)
             {

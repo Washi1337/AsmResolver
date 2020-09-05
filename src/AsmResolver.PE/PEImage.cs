@@ -77,7 +77,7 @@ namespace AsmResolver.PE
         /// <param name="peFile">The PE file object.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(PEFile peFile) => FromFile(peFile, CreateDefaultReadParameters(peFile));
+        public static IPEImage FromFile(IPEFile peFile) => FromFile(peFile, CreateDefaultReadParameters(peFile));
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -86,10 +86,10 @@ namespace AsmResolver.PE
         /// <param name="readParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(PEFile peFile, PEReadParameters readParameters) =>
+        public static IPEImage FromFile(IPEFile peFile, PEReadParameters readParameters) =>
             new SerializedPEImage(peFile, readParameters);
 
-        private static PEReadParameters CreateDefaultReadParameters(PEFile peFile) => new PEReadParameters(peFile);
+        private static PEReadParameters CreateDefaultReadParameters(IPEFile peFile) => new PEReadParameters(peFile);
 
 
         private IList<IImportedModule> _imports;

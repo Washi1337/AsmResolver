@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Exports
     /// </summary>
     public class SerializedExportDirectory : ExportDirectory
     {
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
         private readonly uint _nameRva;
         private readonly uint _numberOfFunctions;
         private readonly uint _numberOfNames;
@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Exports
         /// </summary>
         /// <param name="peFile">The PE file containing the export directory.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedExportDirectory(PEFile peFile, IBinaryStreamReader reader)
+        public SerializedExportDirectory(IPEFile peFile, IBinaryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));

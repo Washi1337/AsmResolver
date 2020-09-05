@@ -14,7 +14,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         public const uint ModuleImportSize = 5 * sizeof(uint);
         
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
         
@@ -23,7 +23,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="peFile">The PE file containing the module import.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedImportedModule(PEFile peFile, IBinaryStreamReader reader)
+        public SerializedImportedModule(IPEFile peFile, IBinaryStreamReader reader)
         {
             _peFile = peFile;
             _lookupRva = reader.ReadUInt32();
