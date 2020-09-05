@@ -1,12 +1,18 @@
 using System;
+using System.Collections.Generic;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {
     public class SerializedPEFile : PEFile
     {
+        private readonly IList<SectionHeader> _sectionHeaders;
+        private readonly IBinaryStreamReader _reader;
+
         public SerializedPEFile(IBinaryStreamReader reader)
         {
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            
             // DOS header.
             DosHeader = DosHeader.FromReader(reader);
             reader.FileOffset = DosHeader.NextHeaderOffset;
@@ -19,23 +25,34 @@ namespace AsmResolver.PE.File
             FileHeader = FileHeader.FromReader(reader);
             OptionalHeader = OptionalHeader.FromReader(reader);
 
-            // Section headers.
+            // Read section headers.
             reader.FileOffset = OptionalHeader.FileOffset + FileHeader.SizeOfOptionalHeader;
+            _sectionHeaders = new List<SectionHeader>(FileHeader.NumberOfSections);
             for (int i = 0; i < FileHeader.NumberOfSections; i++)
-            {
-                var header = SectionHeader.FromReader(reader);
-                
-                var contentsReader = reader.Fork(header.PointerToRawData, header.SizeOfRawData);
-                var contents = DataSegment.FromReader(contentsReader);
-                contents.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
+                _sectionHeaders.Add(SectionHeader.FromReader(reader));
 
-                Sections.Add(new PESection(header, new VirtualSegment(contents, header.VirtualSize)));
-            }
-            
             // Data between section headers and sections.
             int extraSectionDataLength = (int) (OptionalHeader.SizeOfHeaders - reader.FileOffset);
             if (extraSectionDataLength != 0)
                 ExtraSectionData = DataSegment.FromReader(reader, extraSectionDataLength);
         }
+
+        /// <inheritdoc />
+        protected override IList<PESection> GetSections()
+        {
+            var result = new PESectionCollection(this);
+            
+            for (int i = 0; i < _sectionHeaders.Count; i++)
+            {
+                var header = _sectionHeaders[i];
+                
+                var contents = DataSegment.FromReader(_reader, (int) header.SizeOfRawData);
+                contents.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
+                result.Add(new PESection(header, new VirtualSegment(contents, header.VirtualSize)));
+            }
+
+            return result;
+        }
+
     }
 }

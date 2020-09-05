@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -13,7 +14,7 @@ namespace AsmResolver.PE.File
     public class PEFile : IPEFile
     {
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
-        
+
         /// <summary>
         /// Reads a PE file from the disk.
         /// </summary>
@@ -38,6 +39,9 @@ namespace AsmResolver.PE.File
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEFile FromReader(IBinaryStreamReader reader) => new SerializedPEFile(reader);
 
+        private readonly LazyVariable<ISegment> _extraSectionData;
+        private IList<PESection> _sections;
+
         public PEFile()
             : this(new DosHeader(), new FileHeader(), new OptionalHeader())
         {
@@ -48,7 +52,7 @@ namespace AsmResolver.PE.File
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
-            Sections = new PESectionCollection(this);
+            _extraSectionData = new LazyVariable<ISegment>(GetExtraSectionData);
         }
 
         /// <inheritdoc />
@@ -75,16 +79,21 @@ namespace AsmResolver.PE.File
         /// <inheritdoc />
         public IList<PESection> Sections
         {
-            get;
+            get
+            {
+                if (_sections is null)
+                    Interlocked.CompareExchange(ref _sections, GetSections(), null);
+                return _sections;
+            }
         }
 
         /// <summary>
         /// Gets or sets the padding data in between the last section header and the first section.
         /// </summary>
-        public IReadableSegment ExtraSectionData
+        public ISegment ExtraSectionData
         {
-            get;
-            set;
+            get => _extraSectionData.Value;
+            set => _extraSectionData.Value = value;
         }
 
         /// <inheritdoc />
@@ -405,5 +414,9 @@ namespace AsmResolver.PE.File
                 writer.Align(OptionalHeader.FileAlignment);
             }
         }
+
+        protected virtual IList<PESection> GetSections() => new PESectionCollection(this);
+
+        protected virtual ISegment GetExtraSectionData() => null;
     }
 }
