@@ -83,7 +83,8 @@ namespace AsmResolver.PE.Win32Resources
 
             // Create entries reader.
             uint entryListSize = (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
-            var entriesReader = _peFile.CreateReaderAtRva(_entriesRva, entryListSize);
+            if (!_peFile.TryCreateReaderAtRva(_entriesRva, entryListSize, out var entriesReader))
+                return result;
 
             for (int i = 0; i < _namedEntries + _idEntries; i++)
             {
