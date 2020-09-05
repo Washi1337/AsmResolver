@@ -23,11 +23,11 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <remarks>
         /// This function assumes the provided header was already consumed.
         /// </remarks>
-        public static VarFileInfo FromReader(uint startOffset, VersionTableEntryHeader header, IBinaryStreamReader reader)
+        public static VarFileInfo FromReader(ulong startOffset, VersionTableEntryHeader header, IBinaryStreamReader reader)
         {
             var result = new VarFileInfo();
 
-            while (reader.FileOffset - startOffset < header.Length)
+            while (reader.Offset - startOffset < header.Length)
                 result.Tables.Add(VarTable.FromReader(reader));
             
             return result;

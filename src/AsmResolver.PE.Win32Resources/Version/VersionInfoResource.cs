@@ -53,7 +53,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </exception>
         public static VersionInfoResource FromReader(IBinaryStreamReader reader)
         {
-            uint start = reader.FileOffset;
+            ulong start = reader.Offset;
             
             // Read header.
             var header = VersionTableEntryHeader.FromReader(reader);
@@ -67,7 +67,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             result.FixedVersionInfo = FixedVersionInfo.FromReader(reader);
 
             // Read children.
-            while (reader.FileOffset - start < header.Length)
+            while (reader.Offset - start < header.Length)
             {
                 reader.Align(4);
                 result.AddEntry(ReadNextEntry(reader));
@@ -78,7 +78,7 @@ namespace AsmResolver.PE.Win32Resources.Version
 
         private static VersionTableEntry ReadNextEntry(IBinaryStreamReader reader)
         {
-            uint start = reader.FileOffset;
+            ulong start = reader.Offset;
             
             var header = VersionTableEntryHeader.FromReader(reader);
             reader.Align(4);

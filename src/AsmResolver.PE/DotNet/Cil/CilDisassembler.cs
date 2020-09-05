@@ -35,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public IList<CilInstruction> ReadAllInstructions()
         {
             var instructions = new List<CilInstruction>();
-            while (Reader.FileOffset < Reader.StartPosition + Reader.Length)
+            while (Reader.Offset < Reader.StartOffset + Reader.Length)
                 instructions.Add(ReadInstruction());
             return instructions;
         }
@@ -46,13 +46,13 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The instruction.</returns>
         public CilInstruction ReadInstruction()
         {
-            uint start = Reader.FileOffset;
+            ulong start = Reader.Offset;
             
             var code = ReadOpCode();
             var operand = ReadOperand(code.OperandType);
             var result =  new CilInstruction(_currentOffset, code, operand);
 
-            _currentOffset += (int) (Reader.FileOffset - start);
+            _currentOffset += (int) (Reader.Offset - start);
             
             return result;
         }
@@ -71,13 +71,13 @@ namespace AsmResolver.PE.DotNet.Cil
             {
                 CilOperandType.InlineNone => (object) null,
                 CilOperandType.ShortInlineI => Reader.ReadSByte(),
-                CilOperandType.ShortInlineBrTarget => new CilOffsetLabel((int) (Reader.ReadSByte() + (Reader.FileOffset - Reader.StartPosition))),
+                CilOperandType.ShortInlineBrTarget => new CilOffsetLabel(Reader.ReadSByte() + (int) (Reader.Offset - Reader.StartOffset)),
                 CilOperandType.ShortInlineVar => Reader.ReadByte(),
                 CilOperandType.ShortInlineArgument => Reader.ReadByte(),
                 CilOperandType.InlineVar => Reader.ReadUInt16(),
                 CilOperandType.InlineArgument => Reader.ReadUInt16(),
                 CilOperandType.InlineI => Reader.ReadInt32(),
-                CilOperandType.InlineBrTarget => new CilOffsetLabel((int) (Reader.ReadInt32() + (Reader.FileOffset - Reader.StartPosition))),
+                CilOperandType.InlineBrTarget => new CilOffsetLabel(Reader.ReadInt32() + (int) (Reader.Offset - Reader.StartOffset)),
                 CilOperandType.ShortInlineR => Reader.ReadSingle(),
                 CilOperandType.InlineI8 => Reader.ReadInt64(),
                 CilOperandType.InlineR => Reader.ReadDouble(),
@@ -96,7 +96,7 @@ namespace AsmResolver.PE.DotNet.Cil
         private IList<ICilLabel> ReadSwitchTable()
         {
             int count = Reader.ReadInt32();
-            int nextOffset = (int) (Reader.FileOffset + count * sizeof(int));
+            int nextOffset = (int) Reader.Offset + count * sizeof(int);
             
             var offsets = new List<ICilLabel>(count);
             for (int i = 0; i < count; i++)

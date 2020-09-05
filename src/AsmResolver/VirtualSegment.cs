@@ -32,7 +32,7 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public uint FileOffset => PhysicalContents.FileOffset;
+        public ulong Offset => PhysicalContents.Offset;
 
         /// <inheritdoc />
         public uint Rva => PhysicalContents.Rva;
@@ -46,7 +46,7 @@ namespace AsmResolver
         public bool IsReadable => PhysicalContents is IReadableSegment;
         
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva) =>
+        public void UpdateOffsets(ulong newFileOffset, uint newRva) =>
             PhysicalContents.UpdateOffsets(newFileOffset, newRva);
 
         /// <inheritdoc />
@@ -56,7 +56,7 @@ namespace AsmResolver
         public uint GetVirtualSize() => VirtualSize;
         
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader(uint fileOffset, uint size)
+        public IBinaryStreamReader CreateReader(ulong fileOffset, uint size)
         {
             return PhysicalContents is IReadableSegment readableSegment
                 ? readableSegment.CreateReader(fileOffset, size)

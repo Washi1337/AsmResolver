@@ -15,7 +15,7 @@ namespace AsmResolver
         /// <returns>The data segment containing the remaining data.</returns>
         public static DataSegment FromReader(IBinaryStreamReader reader)
         {
-            return FromReader(reader, (int) (reader.StartPosition + reader.Length - reader.FileOffset));
+            return FromReader(reader, (int) (reader.StartOffset + reader.Length - reader.Offset));
         }
         
         /// <summary>
@@ -26,7 +26,7 @@ namespace AsmResolver
         /// <returns>The read data segment.</returns>
         public static DataSegment FromReader(IBinaryStreamReader reader, int count)
         {
-            uint position = reader.FileOffset;
+            ulong position = reader.Offset;
             uint rva = reader.Rva;
             
             var buffer = new byte[count];
@@ -34,7 +34,7 @@ namespace AsmResolver
             
             return new DataSegment(buffer)
             {
-                FileOffset = position,
+                Offset = position,
                 Rva = rva
             };
         }
@@ -66,18 +66,18 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader(uint fileOffset, uint size)
+        public IBinaryStreamReader CreateReader(ulong fileOffset, uint size)
         {
-            if (fileOffset < FileOffset || fileOffset > FileOffset + Data.Length)
+            if (fileOffset < Offset || fileOffset > Offset + (ulong) Data.Length)
                 throw new ArgumentOutOfRangeException(nameof(fileOffset));
-            if (fileOffset + size > FileOffset + Data.Length)
+            if (fileOffset + size > Offset + (ulong) Data.Length)
                 throw new EndOfStreamException();
 
             return new ByteArrayReader(Data,
-                (int) (fileOffset - FileOffset),
+                (uint) (fileOffset - Offset),
                 size,
                 fileOffset,
-                fileOffset - FileOffset + Rva);
+                (uint) (fileOffset - Offset + Rva));
         }
         
     }

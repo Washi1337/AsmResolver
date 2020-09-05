@@ -42,7 +42,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             for (int i = 0; i < _numberOfStreams; i++)
             {
                 var header = headers[i];
-                var streamReader = _metadataReader.Fork(_metadataReader.FileOffset + header.Offset, headers[i].Size);
+                var streamReader = _metadataReader.Fork(_metadataReader.Offset + header.Offset, headers[i].Size);
                 Items.Add(_metadataStreamReader.ReadStream(header, streamReader));
             }
         }

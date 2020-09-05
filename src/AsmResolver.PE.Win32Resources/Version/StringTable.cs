@@ -79,7 +79,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <returns>The read structure.</returns>
         public static StringTable FromReader(IBinaryStreamReader reader)
         {
-            uint start = reader.FileOffset;
+            ulong start = reader.Offset;
             
             // Read header.
             var header = VersionTableEntryHeader.FromReader(reader);
@@ -89,7 +89,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             var result = new StringTable((ushort) (rawKey >> 16), (ushort) (rawKey & 0xFFFF));
             
             // Read entries.
-            while (reader.FileOffset - start < header.Length)
+            while (reader.Offset - start < header.Length)
             {
                 reader.Align(4);
                 var entry = ReadEntry(reader);
@@ -101,7 +101,7 @@ namespace AsmResolver.PE.Win32Resources.Version
 
         private static KeyValuePair<string, string> ReadEntry(IBinaryStreamReader reader)
         {
-            uint start = reader.FileOffset;
+            ulong start = reader.Offset;
             
             // Read header.
             var header = VersionTableEntryHeader.FromReader(reader);
@@ -116,7 +116,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             string value = Encoding.Unicode.GetString(data, 0, count);
             
             // Skip any unprocessed bytes.
-            reader.FileOffset = start + header.Length;
+            reader.Offset = start + header.Length;
 
             return new KeyValuePair<string, string>(header.Key, value);
         }

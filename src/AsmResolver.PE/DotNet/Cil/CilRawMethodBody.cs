@@ -17,7 +17,7 @@ namespace AsmResolver.PE.DotNet.Cil
         public static CilRawMethodBody FromReader(IBinaryStreamReader reader)
         {
             var flag = (CilMethodBodyAttributes) reader.ReadByte();
-            reader.FileOffset--;
+            reader.Offset--;
 
             if ((flag & CilMethodBodyAttributes.Fat) == CilMethodBodyAttributes.Fat)
                 return CilRawFatMethodBody.FromReader(reader);

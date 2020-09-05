@@ -40,7 +40,7 @@ namespace AsmResolver.PE.Imports.Builder
         }
 
         /// <inheritdoc />
-        public override void UpdateOffsets(uint newFileOffset, uint newRva)
+        public override void UpdateOffsets(ulong newFileOffset, uint newRva)
         {
             base.UpdateOffsets(newFileOffset, newRva);
 

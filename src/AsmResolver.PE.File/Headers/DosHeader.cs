@@ -5,7 +5,7 @@ namespace AsmResolver.PE.File.Headers
     /// <summary>
     /// Represents the DOS header (also known as the MZ header) in the portable executable (PE) file format.
     /// </summary>
-    public class DosHeader : ISegment
+    public class DosHeader : SegmentBase
     {
         public const ushort ValidPEMagic = 0x5A4D;
         public const int MinimalDosHeaderLength = 0x40;
@@ -41,13 +41,13 @@ namespace AsmResolver.PE.File.Headers
             if (magic != ValidPEMagic)
                 throw new BadImageFormatException();
 
-            reader.FileOffset += NextHeaderFieldOffset - 2;
+            reader.Offset += NextHeaderFieldOffset - 2;
             uint nextHeaderOffset = reader.ReadUInt32();
 
             if (nextHeaderOffset != DefaultNewHeaderOffset)
                 Array.Resize(ref stub, (int) nextHeaderOffset);
 
-            reader.FileOffset -= NextHeaderFieldOffset + 4;
+            reader.Offset -= NextHeaderFieldOffset + 4;
             reader.ReadBytes(stub, 0, stub.Length);
 
             return new DosHeader(stub)
@@ -86,31 +86,10 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        uint IOffsetProvider.FileOffset => 0;
+        public override uint GetPhysicalSize() => (uint) _stub.Length;
 
         /// <inheritdoc />
-        uint IOffsetProvider.Rva => 0;
-
-        /// <inheritdoc />
-        bool IOffsetProvider.CanUpdateOffsets => false;
-
-        /// <inheritdoc />
-        void IOffsetProvider.UpdateOffsets(uint newFileOffset, uint newRva) => throw new NotSupportedException();
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize()
-        {
-            return (uint) _stub.Length;
-        }
-
-        /// <inheritdoc />
-        public uint GetVirtualSize()
-        {
-            return (uint) _stub.Length;
-        }
-
-        /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public override void Write(IBinaryStreamWriter writer)
         {
             writer.WriteBytes(_stub, 0, NextHeaderFieldOffset);
             writer.WriteUInt32(NextHeaderOffset);

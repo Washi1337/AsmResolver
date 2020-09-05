@@ -100,11 +100,11 @@ namespace AsmResolver.PE.File
         public ISegmentReference GetReferenceToRva(uint rva) => new PESegmentReference(this, rva);
 
         /// <inheritdoc />
-        public uint FileOffsetToRva(uint fileOffset) => 
+        public uint FileOffsetToRva(ulong fileOffset) => 
             GetSectionContainingOffset(fileOffset).FileOffsetToRva(fileOffset);
 
         /// <inheritdoc />
-        public uint RvaToFileOffset(uint rva) => GetSectionContainingRva(rva).RvaToFileOffset(rva);
+        public ulong RvaToFileOffset(uint rva) => GetSectionContainingRva(rva).RvaToFileOffset(rva);
 
         /// <summary>
         /// Finds the section containing the provided file offset.
@@ -112,7 +112,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset.</param>
         /// <returns>The section containing the file offset.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the file offset does not fall within any of the sections.</exception>
-        public PESection GetSectionContainingOffset(uint fileOffset)
+        public PESection GetSectionContainingOffset(ulong fileOffset)
         {
             if (!TryGetSectionContainingOffset(fileOffset, out var section))
                 throw new ArgumentOutOfRangeException(nameof(fileOffset));
@@ -125,7 +125,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset.</param>
         /// <param name="section">The section that was found.</param>
         /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
-        public bool TryGetSectionContainingOffset(uint fileOffset, out PESection section)
+        public bool TryGetSectionContainingOffset(ulong fileOffset, out PESection section)
         {
             section = Sections.FirstOrDefault(s => s.ContainsFileOffset(fileOffset));
             return section != null;
@@ -150,7 +150,7 @@ namespace AsmResolver.PE.File
         public IBinaryStreamReader CreateDataDirectoryReader(DataDirectory dataDirectory)
         {
             var section = GetSectionContainingRva(dataDirectory.VirtualAddress);
-            uint fileOffset = section.RvaToFileOffset(dataDirectory.VirtualAddress);
+            ulong fileOffset = section.RvaToFileOffset(dataDirectory.VirtualAddress);
             return section.CreateReader(fileOffset, dataDirectory.Size);
         }
 
@@ -159,7 +159,7 @@ namespace AsmResolver.PE.File
         {
             if (TryGetSectionContainingRva(dataDirectory.VirtualAddress, out var section))
             {
-                uint fileOffset = section.RvaToFileOffset(dataDirectory.VirtualAddress);
+                ulong fileOffset = section.RvaToFileOffset(dataDirectory.VirtualAddress);
                 reader = section.CreateReader(fileOffset, dataDirectory.Size);
                 return true;
             }
@@ -284,13 +284,13 @@ namespace AsmResolver.PE.File
                 DosHeader.NextHeaderOffset + 4, 
                 DosHeader.NextHeaderOffset + 4);
             OptionalHeader.UpdateOffsets(
-                FileHeader.FileOffset + FileHeader.GetPhysicalSize(),
-                FileHeader.FileOffset + FileHeader.GetVirtualSize());
+                FileHeader.Offset + FileHeader.GetPhysicalSize(),
+                FileHeader.Rva + FileHeader.GetVirtualSize());
 
             FileHeader.SizeOfOptionalHeader = (ushort) OptionalHeader.GetPhysicalSize();
-            OptionalHeader.SizeOfHeaders = (OptionalHeader.FileOffset
-                                            + FileHeader.SizeOfOptionalHeader
-                                            + SectionHeader.SectionHeaderSize * (uint) Sections.Count)
+            OptionalHeader.SizeOfHeaders = (uint) (OptionalHeader.Offset
+                                                   + FileHeader.SizeOfOptionalHeader
+                                                   + SectionHeader.SectionHeaderSize * (uint) Sections.Count)
                 .Align(OptionalHeader.FileAlignment);
             
             AlignSections();
@@ -310,8 +310,8 @@ namespace AsmResolver.PE.File
             {
                 var section = Sections[i];
 
-                uint fileOffset = i > 0
-                    ? Sections[i - 1].FileOffset + Sections[i - 1].GetPhysicalSize()
+                ulong fileOffset = i > 0
+                    ? Sections[i - 1].Offset + Sections[i - 1].GetPhysicalSize()
                     : OptionalHeader.SizeOfHeaders;
                 uint rva = i > 0
                     ? Sections[i - 1].Rva + Sections[i - 1].GetVirtualSize()
@@ -390,14 +390,14 @@ namespace AsmResolver.PE.File
             DosHeader.Write(writer);
             
             // NT headers
-            writer.FileOffset = DosHeader.NextHeaderOffset;
+            writer.Offset = DosHeader.NextHeaderOffset;
             
             writer.WriteUInt32(ValidPESignature);
             FileHeader.Write(writer);
             OptionalHeader.Write(writer);
 
             // Section headers.
-            writer.FileOffset = OptionalHeader.FileOffset + FileHeader.SizeOfOptionalHeader;
+            writer.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;
             foreach (var section in Sections) 
                 section.CreateHeader().Write(writer);
 
@@ -406,10 +406,10 @@ namespace AsmResolver.PE.File
 
             // Sections.
             
-            writer.FileOffset = OptionalHeader.SizeOfHeaders;
+            writer.Offset = OptionalHeader.SizeOfHeaders;
             foreach (var section in Sections)
             {
-                writer.FileOffset = section.FileOffset;
+                writer.Offset = section.Offset;
                 section.Contents.Write(writer);
                 writer.Align(OptionalHeader.FileAlignment);
             }

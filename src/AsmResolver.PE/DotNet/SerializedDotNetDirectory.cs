@@ -36,7 +36,7 @@ namespace AsmResolver.PE.DotNet
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
             _metadataStreamReader = metadataStreamReader;
 
-            FileOffset = reader.FileOffset;
+            Offset = reader.Offset;
 
             uint cb = reader.ReadUInt32();
             MajorRuntimeVersion = reader.ReadUInt16();

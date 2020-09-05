@@ -9,7 +9,7 @@ namespace AsmResolver
     /// </summary>
     public class SegmentBuilder : ISegment, IEnumerable<ISegment>
     {
-        private readonly IList<AlignedSegment> _items = new List<AlignedSegment>();
+        private readonly List<AlignedSegment> _items = new List<AlignedSegment>();
         private uint _physicalSize;
         private uint _virtualSize;
         
@@ -19,7 +19,7 @@ namespace AsmResolver
         public int Count => _items.Count;
 
         /// <inheritdoc />
-        public uint FileOffset
+        public ulong Offset
         {
             get;
             private set;
@@ -43,16 +43,16 @@ namespace AsmResolver
         }
         
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
+        public void UpdateOffsets(ulong newFileOffset, uint newRva)
         {
-            FileOffset = newFileOffset;
+            Offset = newFileOffset;
             Rva = newRva;
             _physicalSize = 0;
             _virtualSize = 0;
             
             foreach (var item in _items)
             {
-                uint physicalPadding = newFileOffset.Align(item.Alignment) - newFileOffset;
+                uint physicalPadding = (uint) (newFileOffset.Align(item.Alignment) - newFileOffset);
                 uint virtualPadding = newRva.Align(item.Alignment) - newRva;
                 
                 newFileOffset += physicalPadding;
@@ -71,25 +71,19 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public uint GetPhysicalSize()
-        {
-            return _physicalSize;
-        }
+        public uint GetPhysicalSize() => _physicalSize;
 
         /// <inheritdoc />
-        public uint GetVirtualSize()
-        {
-            return _virtualSize;
-        }
+        public uint GetVirtualSize() => _virtualSize;
 
         /// <inheritdoc />
         public void Write(IBinaryStreamWriter writer)
         {
-            uint start = writer.FileOffset;
+            ulong start = writer.Offset;
             for (int i = 0; i < _items.Count; i++)
             {
                 var current = _items[i];
-                writer.FileOffset = current.Segment.FileOffset - FileOffset + start;
+                writer.Offset = current.Segment.Offset - Offset + start;
                 current.Segment.Write(writer);
             }
         }

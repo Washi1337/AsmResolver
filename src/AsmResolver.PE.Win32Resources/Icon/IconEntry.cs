@@ -23,7 +23,7 @@
         {
             var result = new IconEntry
             {
-                FileOffset = reader.FileOffset,
+                Offset = reader.Offset,
                 Rva = reader.Rva,
                 RawIcon = new byte[reader.Length]
             };

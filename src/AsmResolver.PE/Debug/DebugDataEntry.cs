@@ -106,7 +106,7 @@ namespace AsmResolver.PE.Debug
             writer.WriteUInt32((uint) (Contents?.Type ?? 0));
             writer.WriteUInt32(Contents?.GetPhysicalSize() ?? 0);
             writer.WriteUInt32(Contents?.Rva ?? 0);
-            writer.WriteUInt32(Contents?.FileOffset ?? 0);
+            writer.WriteUInt32((uint) (Contents?.Offset ?? 0));
         }
     }
 }

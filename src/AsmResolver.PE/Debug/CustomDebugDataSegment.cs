@@ -35,7 +35,7 @@ namespace AsmResolver.PE.Debug
         }
 
         /// <inheritdoc />
-        public uint FileOffset => Contents?.FileOffset ?? 0;
+        public ulong Offset => Contents?.Offset ?? 0;
 
         /// <inheritdoc />
         public uint Rva => Contents?.Rva ?? 0;
@@ -44,7 +44,7 @@ namespace AsmResolver.PE.Debug
         public bool CanUpdateOffsets => Contents?.CanUpdateOffsets ?? false;
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
+        public void UpdateOffsets(ulong newFileOffset, uint newRva)
         {
             if (Contents != null)
                 Contents.UpdateOffsets(newFileOffset, newRva);

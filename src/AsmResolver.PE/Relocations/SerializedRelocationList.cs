@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Relocations
             if (!_peFile.TryCreateDataDirectoryReader(_relocDirectory, out var reader))
                 return;
 
-            while (reader.FileOffset < reader.StartPosition + reader.Length) 
+            while (reader.Offset < reader.StartOffset + reader.Length) 
                 ReadBlock(reader);
         }
 

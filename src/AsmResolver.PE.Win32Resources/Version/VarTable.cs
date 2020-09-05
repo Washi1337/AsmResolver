@@ -32,8 +32,8 @@ namespace AsmResolver.PE.Win32Resources.Version
             
             var result = new VarTable();
             
-            uint start = reader.FileOffset;
-            while (reader.FileOffset - start < header.ValueLength)
+            ulong start = reader.Offset;
+            while (reader.Offset - start < header.ValueLength)
                 result.Values.Add(reader.ReadUInt32());
 
             return result;

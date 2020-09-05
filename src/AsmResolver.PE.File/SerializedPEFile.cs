@@ -15,7 +15,7 @@ namespace AsmResolver.PE.File
             
             // DOS header.
             DosHeader = DosHeader.FromReader(reader);
-            reader.FileOffset = DosHeader.NextHeaderOffset;
+            reader.Offset = DosHeader.NextHeaderOffset;
 
             uint signature = reader.ReadUInt32();
             if (signature != ValidPESignature)
@@ -26,13 +26,13 @@ namespace AsmResolver.PE.File
             OptionalHeader = OptionalHeader.FromReader(reader);
 
             // Read section headers.
-            reader.FileOffset = OptionalHeader.FileOffset + FileHeader.SizeOfOptionalHeader;
+            reader.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;
             _sectionHeaders = new List<SectionHeader>(FileHeader.NumberOfSections);
             for (int i = 0; i < FileHeader.NumberOfSections; i++)
                 _sectionHeaders.Add(SectionHeader.FromReader(reader));
 
             // Data between section headers and sections.
-            int extraSectionDataLength = (int) (OptionalHeader.SizeOfHeaders - reader.FileOffset);
+            int extraSectionDataLength = (int) (OptionalHeader.SizeOfHeaders - reader.Offset);
             if (extraSectionDataLength != 0)
                 ExtraSectionData = DataSegment.FromReader(reader, extraSectionDataLength);
         }

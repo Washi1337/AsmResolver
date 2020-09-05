@@ -6,7 +6,7 @@ namespace AsmResolver.PE.File.Headers
     /// <summary>
     /// Represents a 32-bit or 64-bit optional header in a portable executable (PE) file.
     /// </summary>
-    public class OptionalHeader : ISegment
+    public class OptionalHeader : SegmentBase
     {
         public const uint OptionalHeader32SizeExcludingDataDirectories = 0x60;
         public const uint OptionalHeader64SizeExcludingDataDirectories = 0x70;
@@ -34,7 +34,8 @@ namespace AsmResolver.PE.File.Headers
         {
             var header = new OptionalHeader
             {
-                FileOffset = reader.FileOffset,
+                Offset = reader.Offset,
+                Rva = reader.Rva,
                 Magic = (OptionalHeaderMagic)reader.ReadUInt16(),
                 MajorLinkerVersion = reader.ReadByte(),
                 MinorLinkerVersion = reader.ReadByte(),
@@ -100,19 +101,6 @@ namespace AsmResolver.PE.File.Headers
 
             return header;
         }
-
-        /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        uint IOffsetProvider.Rva => FileOffset;
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
 
         /// <summary>
         /// Gets or sets the magic optional header signature, determining whether the image is a PE32 (32-bit) or a PE32+ (64-bit) image.
@@ -394,28 +382,16 @@ namespace AsmResolver.PE.File.Headers
         } = new List<DataDirectory>();
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-        }
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize()
+        public override uint GetPhysicalSize()
         {
             // TODO: make configurable?
             return Magic == OptionalHeaderMagic.Pe32 ? 0xE0u : 0xF0u;
         }
 
         /// <inheritdoc />
-        public uint GetVirtualSize()
+        public override void Write(IBinaryStreamWriter writer)
         {
-            return GetPhysicalSize();
-        }
-
-        /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
-        {
-            uint start = writer.FileOffset;
+            ulong start = writer.Offset;
 
             writer.WriteUInt16((ushort)Magic);
             writer.WriteByte(MajorLinkerVersion);
@@ -475,7 +451,7 @@ namespace AsmResolver.PE.File.Headers
             foreach (var directory in DataDirectories)
                 directory.Write(writer);
 
-            writer.WriteZeroes((int) (GetPhysicalSize() - (writer.FileOffset - start)));
+            writer.WriteZeroes((int) (GetPhysicalSize() - (writer.Offset - start)));
         }
         
     }

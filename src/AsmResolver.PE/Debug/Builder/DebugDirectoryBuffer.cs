@@ -30,7 +30,7 @@ namespace AsmResolver.PE.Debug.Builder
         }
 
         /// <inheritdoc />
-        public uint FileOffset => _headers.FileOffset;
+        public ulong Offset => _headers.Offset;
 
         /// <inheritdoc />
         public uint Rva => _headers.Rva;
@@ -39,7 +39,7 @@ namespace AsmResolver.PE.Debug.Builder
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva) => _headers.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newFileOffset, uint newRva) => _headers.UpdateOffsets(newFileOffset, newRva);
 
         /// <inheritdoc />
         public uint GetPhysicalSize() => _headers.GetPhysicalSize();

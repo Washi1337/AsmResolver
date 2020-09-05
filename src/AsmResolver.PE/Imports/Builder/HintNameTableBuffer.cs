@@ -14,27 +14,27 @@ namespace AsmResolver.PE.Imports.Builder
         private uint _length;
 
         /// <inheritdoc />
-        public override void UpdateOffsets(uint newFileOffset, uint newRva)
+        public override void UpdateOffsets(ulong newFileOffset, uint newRva)
         {
             base.UpdateOffsets(newFileOffset, newRva);
 
-            uint offset = newFileOffset;
+            ulong offset = newFileOffset;
             foreach (var module in _modules)
             {
                 foreach (var entry in module.Symbols)
                 {
                     if (entry.IsImportByName)
                     {
-                        _hintNameOffsets[entry] = offset - newFileOffset;
+                        _hintNameOffsets[entry] = (uint) (offset - newFileOffset);
                         offset += (uint) (sizeof(ushort) + Encoding.ASCII.GetByteCount(entry.Name) + 1);
                         offset = offset.Align(2);
                     }
                 }
-                _moduleNameOffsets[module] = offset - newFileOffset;
+                _moduleNameOffsets[module] = (uint) (offset - newFileOffset);
                 offset += (uint) Encoding.ASCII.GetByteCount(module.Name) + 1;
             }
 
-            _length = offset - newFileOffset;
+            _length = (uint) (offset - newFileOffset);
         }
 
         /// <summary>

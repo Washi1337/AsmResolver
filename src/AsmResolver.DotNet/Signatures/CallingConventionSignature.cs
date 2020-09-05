@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Signatures
             RecursionProtection protection)
         {
             byte flag = reader.ReadByte();
-            reader.FileOffset--;
+            reader.Offset--;
 
             switch ((CallingConventionAttributes) flag & SignatureTypeMask)
             {
