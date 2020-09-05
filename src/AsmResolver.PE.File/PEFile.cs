@@ -92,41 +92,32 @@ namespace AsmResolver.PE.File
             Sections = new PESectionCollection(this);
         }
 
-        /// <summary>
-        /// Gets or sets the DOS header of the PE file.
-        /// </summary>
+        /// <inheritdoc />
         public DosHeader DosHeader
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the COFF file header of the portable executable (PE) file.
-        /// </summary>
+        /// <inheritdoc />
         public FileHeader FileHeader
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Gets or sets the optional header of the portable executable (PE) file.
-        /// </summary>
+        /// <inheritdoc />
         public OptionalHeader OptionalHeader
         {
             get;
             set;
         }
 
-        /// <summary>
-        /// Gets a collection of sections present in the portable executable (PE) file.
-        /// </summary>
+        /// <inheritdoc />
         public IList<PESection> Sections
         {
             get;
         }
-
 
         /// <summary>
         /// Gets or sets the padding data in between the last section header and the first section.
@@ -172,12 +163,7 @@ namespace AsmResolver.PE.File
             return section != null;
         }
 
-        /// <summary>
-        /// Finds the section containing the provided virtual address.
-        /// </summary>
-        /// <param name="rva">The virtual address.</param>
-        /// <returns>The section containing the virtual address.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Occurs when the virtual address does not fall within any of the sections.</exception>
+        /// <inheritdoc />
         public PESection GetSectionContainingRva(uint rva)
         {
             if (!TryGetSectionContainingRva(rva, out var section))
@@ -185,23 +171,14 @@ namespace AsmResolver.PE.File
             return section;
         }
 
-        /// <summary>
-        /// Attempts to find the section containing the provided virtual address.
-        /// </summary>
-        /// <param name="rva">The virtual address.</param>
-        /// <param name="section">The section that was found.</param>
-        /// <returns><c>true</c> if the section was found, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool TryGetSectionContainingRva(uint rva, out PESection section)
         {
             section = Sections.FirstOrDefault(s => s.ContainsRva(rva));
             return section != null;
         }
 
-        /// <summary>
-        /// Obtains a reader that spans the provided data directory.
-        /// </summary>
-        /// <param name="dataDirectory">The data directory to read.</param>
-        /// <returns>The reader.</returns>
+        /// <inheritdoc />
         public IBinaryStreamReader CreateDataDirectoryReader(DataDirectory dataDirectory)
         {
             var section = GetSectionContainingRva(dataDirectory.VirtualAddress);
@@ -209,12 +186,7 @@ namespace AsmResolver.PE.File
             return section.CreateReader(fileOffset, dataDirectory.Size);
         }
 
-        /// <summary>
-        /// Attempts to create a reader that spans the provided data directory.
-        /// </summary>
-        /// <param name="dataDirectory">The data directory to read.</param>
-        /// <param name="reader">The reader that was created.</param>
-        /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool TryCreateDataDirectoryReader(DataDirectory dataDirectory, out IBinaryStreamReader reader)
         {
             if (TryGetSectionContainingRva(dataDirectory.VirtualAddress, out var section))
@@ -228,23 +200,14 @@ namespace AsmResolver.PE.File
             return false;
         }
 
-        /// <summary>
-        /// Creates a new reader at the provided file offset.
-        /// </summary>
-        /// <param name="fileOffset">The file offset to start reading at.</param>
-        /// <returns>The reader.</returns>
+        /// <inheritdoc />
         public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset)
         {
             var section = GetSectionContainingOffset(fileOffset);
             return section.CreateReader(fileOffset);
         }
         
-        /// <summary>
-        /// Attempts to create a new reader at the provided file offset.
-        /// </summary>
-        /// <param name="fileOffset">The file offset to start reading at.</param>
-        /// <param name="reader">The reader that was created.</param>
-        /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool TryCreateReaderAtFileOffset(uint fileOffset, out IBinaryStreamReader reader)
         {
             if (TryGetSectionContainingOffset(fileOffset, out var section))
@@ -257,25 +220,14 @@ namespace AsmResolver.PE.File
             return false;
         }
 
-        /// <summary>
-        /// Creates a new reader of a chunk of data at the provided file offset.
-        /// </summary>
-        /// <param name="fileOffset">The file offset to start reading at.</param>
-        /// <param name="size">The number of bytes in the chunk.</param>
-        /// <returns>The reader.</returns>
+        /// <inheritdoc />
         public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size)
         {
             var section = GetSectionContainingOffset(fileOffset);
             return section.CreateReader(fileOffset, size);
         } 
         
-        /// <summary>
-        /// Attempts to create a new reader of a chunk of data at the provided file offset.
-        /// </summary>
-        /// <param name="fileOffset">The file offset to start reading at.</param>
-        /// <param name="size">The number of bytes in the chunk.</param>
-        /// <param name="reader">The reader that was created.</param>
-        /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out IBinaryStreamReader reader)
         {
             if (TryGetSectionContainingOffset(fileOffset, out var section))
@@ -288,23 +240,14 @@ namespace AsmResolver.PE.File
             return false;
         }
 
-        /// <summary>
-        /// Creates a new reader at the provided virtual address.
-        /// </summary>
-        /// <param name="rva">The virtual address to start reading at.</param>
-        /// <returns>The reader.</returns>
+        /// <inheritdoc />
         public IBinaryStreamReader CreateReaderAtRva(uint rva)
         {
             var section = GetSectionContainingRva(rva);
             return section.CreateReader(section.RvaToFileOffset(rva));
         }
 
-        /// <summary>
-        /// Attempts to create a new reader at the provided virtual address.
-        /// </summary>
-        /// <param name="rva">The virtual address to start reading at.</param>
-        /// <param name="reader">The reader that was created.</param>
-        /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool TryCreateReaderAtRva(uint rva, out IBinaryStreamReader reader)
         {
             if (TryGetSectionContainingRva(rva, out var section))
@@ -317,25 +260,14 @@ namespace AsmResolver.PE.File
             return false;
         }
 
-        /// <summary>
-        /// Creates a new reader of a chunk of data at the provided virtual address.
-        /// </summary>
-        /// <param name="rva">The virtual address to start reading at.</param>
-        /// <param name="size">The number of bytes in the chunk.</param>
-        /// <returns>The reader.</returns>
+        /// <inheritdoc />
         public IBinaryStreamReader CreateReaderAtRva(uint rva, uint size)
         {
             var section = GetSectionContainingRva(rva);
             return section.CreateReader(section.RvaToFileOffset(rva), size);
         }
 
-        /// <summary>
-        /// Attempts to create a new reader of a chunk of data at the provided virtual address.
-        /// </summary>
-        /// <param name="rva">The virtual address to start reading at.</param>
-        /// <param name="size">The number of bytes in the chunk.</param>
-        /// <param name="reader">The reader that was created.</param>
-        /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
+        /// <inheritdoc />
         public bool TryCreateReaderAtRva(uint rva, uint size, out IBinaryStreamReader reader)
         {
             if (TryGetSectionContainingRva(rva, out var section))

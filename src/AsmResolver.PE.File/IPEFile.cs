@@ -42,15 +42,6 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Gets or sets the padding data in between the last section header and the first section.
-        /// </summary>
-        IReadableSegment ExtraSectionData
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Finds the section containing the provided virtual address.
         /// </summary>
         /// <param name="rva">The virtual address.</param>
@@ -112,5 +103,37 @@ namespace AsmResolver.PE.File
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
         bool TryCreateReaderAtRva(uint rva, uint size, out IBinaryStreamReader reader);
+        
+        /// <summary>
+        /// Creates a new reader at the provided file offset.
+        /// </summary>
+        /// <param name="fileOffset">The file offset to start reading at.</param>
+        /// <returns>The reader.</returns>
+        IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset);
+
+        /// <summary>
+        /// Attempts to create a new reader at the provided file offset.
+        /// </summary>
+        /// <param name="fileOffset">The file offset to start reading at.</param>
+        /// <param name="reader">The reader that was created.</param>
+        /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
+        public bool TryCreateReaderAtFileOffset(uint fileOffset, out IBinaryStreamReader reader);
+
+        /// <summary>
+        /// Creates a new reader of a chunk of data at the provided file offset.
+        /// </summary>
+        /// <param name="fileOffset">The file offset to start reading at.</param>
+        /// <param name="size">The number of bytes in the chunk.</param>
+        /// <returns>The reader.</returns>
+        public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size);
+
+        /// <summary>
+        /// Attempts to create a new reader of a chunk of data at the provided file offset.
+        /// </summary>
+        /// <param name="fileOffset">The file offset to start reading at.</param>
+        /// <param name="size">The number of bytes in the chunk.</param>
+        /// <param name="reader">The reader that was created.</param>
+        /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
+        public bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out IBinaryStreamReader reader);
     }
 }
