@@ -42,6 +42,9 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IResolutionScope GetScope()
         {
+            if (_row.ResolutionScope == 0)
+                return _parentModule;
+            
             var tablesStream = _parentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
             var decoder = tablesStream.GetIndexEncoder(CodedIndex.ResolutionScope);
             var token = decoder.DecodeIndex(_row.ResolutionScope);
