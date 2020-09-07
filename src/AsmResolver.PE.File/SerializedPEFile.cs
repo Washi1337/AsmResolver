@@ -4,15 +4,24 @@ using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {
+    /// <summary>
+    /// Provides an implementation of a PE image that gets its data from an input stream.
+    /// </summary>
     public class SerializedPEFile : PEFile
     {
         private readonly IList<SectionHeader> _sectionHeaders;
         private readonly IBinaryStreamReader _reader;
 
-        public SerializedPEFile(IBinaryStreamReader reader, PEMappingMode mappingMode)
+        /// <summary>
+        /// Reads a PE file from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
+        /// <exception cref="BadImageFormatException">Occurs when the input stream is malformed.</exception>
+        public SerializedPEFile(IBinaryStreamReader reader, PEMappingMode mode)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
-            MappingMode = mappingMode;
+            MappingMode = mode;
 
             // DOS header.
             DosHeader = DosHeader.FromReader(reader);

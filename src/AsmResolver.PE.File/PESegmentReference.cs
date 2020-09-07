@@ -2,11 +2,19 @@ using System;
 
 namespace AsmResolver.PE.File
 {
+    /// <summary>
+    /// Represents a reference to a segment of a PE file.
+    /// </summary>
     public readonly struct PESegmentReference : ISegmentReference
     {
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
 
-        public PESegmentReference(PEFile peFile, uint rva)
+        /// <summary>
+        /// Creates a new PE reference.
+        /// </summary>
+        /// <param name="peFile">The underlying PE file.</param>
+        /// <param name="rva">The virtual address of the segment.</param>
+        public PESegmentReference(IPEFile peFile, uint rva)
         {
             _peFile = peFile;
             Rva = rva;
