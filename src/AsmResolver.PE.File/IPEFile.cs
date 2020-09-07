@@ -15,7 +15,6 @@ namespace AsmResolver.PE.File
         DosHeader DosHeader
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -24,7 +23,6 @@ namespace AsmResolver.PE.File
         FileHeader FileHeader
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -33,7 +31,6 @@ namespace AsmResolver.PE.File
         OptionalHeader OptionalHeader
         {
             get;
-            set;
         }
 
         /// <summary>
