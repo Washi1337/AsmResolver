@@ -12,6 +12,11 @@ namespace AsmResolver
         private readonly void* _basePointer;
         private byte* _pointer;
 
+        public UnmanagedStreamReader(void* pointer)
+            : this(pointer, pointer, uint.MaxValue)
+        {
+        }
+
         public UnmanagedStreamReader(void* basePointer, void* pointer, uint length)
         {
             _basePointer = basePointer;

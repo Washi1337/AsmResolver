@@ -50,8 +50,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         {
             if (index == 0 || index >= _contents.GetPhysicalSize()) 
                 return null;
-            
-            var blobReader = _contents.CreateReader((uint) (_contents.Offset + index));
+
+            var blobReader = _contents.CreateReader(_contents.Offset + index);
             if (blobReader.TryReadCompressedUInt32(out uint length))
             {
                 uint headerSize = (uint) (blobReader.Offset - blobReader.StartOffset);
