@@ -66,6 +66,7 @@ namespace AsmResolver.PE.File
                 _reader.Offset = offset;
                 
                 var contents = DataSegment.FromReader(_reader, (int) size);
+                contents.UpdateOffsets(offset, header.VirtualAddress);
                 result.Add(new PESection(header, new VirtualSegment(contents, header.VirtualSize)));
             }
 
