@@ -17,6 +17,13 @@ namespace AsmResolver.PE
     /// </summary>
     public class PEImage : IPEImage
     {
+        private IList<IImportedModule> _imports;
+        private readonly LazyVariable<IExportDirectory> _exports;
+        private readonly LazyVariable<IResourceDirectory> _resources;
+        private IList<BaseRelocation> _relocations;
+        private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
+        private IList<DebugDataEntry> _debugData;
+        
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
         /// </summary>
@@ -57,19 +64,24 @@ namespace AsmResolver.PE
         /// Opens a PE image from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
+        /// <param name="mode">Indicates the input PE is in its mapped or unmapped form.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader) => FromFile(PEFile.FromReader(reader));
+        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
+        {
+            return FromFile(PEFile.FromReader(reader, mode));
+        }
 
         /// <summary>
         /// Opens a PE image from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
+        /// <param name="mode">Indicates the input PE is in its mapped or unmapped form.</param>
         /// <param name="readParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader, PEReadParameters readParameters) => 
-            FromFile(PEFile.FromReader(reader), readParameters);
+        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode, PEReadParameters readParameters) => 
+            FromFile(PEFile.FromReader(reader, mode), readParameters);
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -90,14 +102,6 @@ namespace AsmResolver.PE
             new SerializedPEImage(peFile, readParameters);
 
         private static PEReadParameters CreateDefaultReadParameters(IPEFile peFile) => new PEReadParameters(peFile);
-
-
-        private IList<IImportedModule> _imports;
-        private readonly LazyVariable<IExportDirectory> _exports;
-        private readonly LazyVariable<IResourceDirectory> _resources;
-        private IList<BaseRelocation> _relocations;
-        private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
-        private IList<DebugDataEntry> _debugData;
 
         /// <summary>
         /// Initializes a new PE image.
