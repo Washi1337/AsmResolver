@@ -62,6 +62,7 @@ namespace AsmResolver.PE.File
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
             _extraSectionData = new LazyVariable<ISegment>(GetExtraSectionData);
+            MappingMode = PEMappingMode.Unmapped;
         }
 
         /// <inheritdoc />
@@ -94,6 +95,13 @@ namespace AsmResolver.PE.File
                     Interlocked.CompareExchange(ref _sections, GetSections(), null);
                 return _sections;
             }
+        }
+
+        /// <inheritdoc />
+        public PEMappingMode MappingMode
+        {
+            get;
+            protected set;
         }
 
         /// <summary>

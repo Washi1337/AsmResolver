@@ -42,6 +42,16 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
+        /// Gets a value indicating the mapping mode of the PE file. If the PE file is in its mapped form,
+        /// then every offset of all segments in the PE file will be equal to the physical memory address.
+        /// If the file is in its unmapped form, the offsets will be equal to the file offset. 
+        /// </summary>
+        PEMappingMode MappingMode
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Finds the section containing the provided virtual address.
         /// </summary>
         /// <param name="rva">The virtual address.</param>

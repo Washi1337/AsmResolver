@@ -8,12 +8,11 @@ namespace AsmResolver.PE.File
     {
         private readonly IList<SectionHeader> _sectionHeaders;
         private readonly IBinaryStreamReader _reader;
-        private readonly PEMappingMode _mappingMode;
 
         public SerializedPEFile(IBinaryStreamReader reader, PEMappingMode mappingMode)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
-            _mappingMode = mappingMode;
+            MappingMode = mappingMode;
 
             // DOS header.
             DosHeader = DosHeader.FromReader(reader);
@@ -48,7 +47,7 @@ namespace AsmResolver.PE.File
             {
                 var header = _sectionHeaders[i];
 
-                (ulong offset, uint size) = _mappingMode switch
+                (ulong offset, uint size) = MappingMode switch
                 {
                     PEMappingMode.Unmapped => (header.PointerToRawData, header.SizeOfRawData),
                     PEMappingMode.Mapped => (_reader.StartOffset + header.VirtualAddress, header.VirtualSize),
