@@ -8,6 +8,9 @@ namespace AsmResolver.PE.File.Headers
     /// </summary>
     public class SectionHeader : SegmentBase, IOffsetConverter
     {
+        /// <summary>
+        /// Indicates the static size of a single section header.
+        /// </summary>
         public const uint SectionHeaderSize = 8 * sizeof(byte) +
                                              6 * sizeof (uint) +
                                              2 * sizeof (ushort) +
@@ -55,6 +58,10 @@ namespace AsmResolver.PE.File.Headers
             Characteristics = characteristics;
         }
 
+        /// <summary>
+        /// Creates a copy of the provided section header.
+        /// </summary>
+        /// <param name="value">The section header to base information on.</param>
         public SectionHeader(SectionHeader value)
         {
             Offset = value.Offset;
