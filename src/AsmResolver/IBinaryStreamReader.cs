@@ -56,7 +56,6 @@ namespace AsmResolver
         uint Rva
         {
             get;
-            set;
         }
 
         /// <summary>

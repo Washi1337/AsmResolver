@@ -64,11 +64,10 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public uint Rva
-        {
-            get => _index - _startIndex + StartRva;
-            set => throw new NotImplementedException();
-        }
+        public ulong RelativeOffset => _index - _startIndex;
+
+        /// <inheritdoc />
+        public uint Rva => _index - _startIndex + StartRva;
 
         /// <inheritdoc />
         public uint Length
@@ -77,9 +76,6 @@ namespace AsmResolver
             private set;
         }
 
-        /// <inheritdoc />
-        public ulong RelativeOffset => _index - _startIndex;
-        
         private void AssertCanRead(int count)
         {
             if (!this.CanRead(count))

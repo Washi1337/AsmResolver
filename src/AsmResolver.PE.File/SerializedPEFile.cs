@@ -8,14 +8,16 @@ namespace AsmResolver.PE.File
     {
         private readonly IList<SectionHeader> _sectionHeaders;
         private readonly IBinaryStreamReader _reader;
+        private readonly PEMappingMode _mappingMode;
 
-        public SerializedPEFile(IBinaryStreamReader reader)
+        public SerializedPEFile(IBinaryStreamReader reader, PEMappingMode mappingMode)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
-            
+            _mappingMode = mappingMode;
+
             // DOS header.
             DosHeader = DosHeader.FromReader(reader);
-            reader.Offset = DosHeader.NextHeaderOffset;
+            reader.Offset = DosHeader.Offset + DosHeader.NextHeaderOffset;
 
             uint signature = reader.ReadUInt32();
             if (signature != ValidPESignature)
@@ -32,7 +34,7 @@ namespace AsmResolver.PE.File
                 _sectionHeaders.Add(SectionHeader.FromReader(reader));
 
             // Data between section headers and sections.
-            int extraSectionDataLength = (int) (OptionalHeader.SizeOfHeaders - reader.Offset);
+            int extraSectionDataLength = (int) (DosHeader.Offset + OptionalHeader.SizeOfHeaders - reader.Offset);
             if (extraSectionDataLength != 0)
                 ExtraSectionData = DataSegment.FromReader(reader, extraSectionDataLength);
         }
@@ -45,9 +47,17 @@ namespace AsmResolver.PE.File
             for (int i = 0; i < _sectionHeaders.Count; i++)
             {
                 var header = _sectionHeaders[i];
+
+                (ulong offset, uint size) = _mappingMode switch
+                {
+                    PEMappingMode.Unmapped => (header.PointerToRawData, header.SizeOfRawData),
+                    PEMappingMode.Mapped => (_reader.StartOffset + header.VirtualAddress, header.VirtualSize),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
                 
-                var contents = DataSegment.FromReader(_reader, (int) header.SizeOfRawData);
-                contents.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
+                _reader.Offset = offset;
+                
+                var contents = DataSegment.FromReader(_reader, (int) size);
                 result.Add(new PESection(header, new VirtualSegment(contents, header.VirtualSize)));
             }
 

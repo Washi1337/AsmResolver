@@ -27,19 +27,6 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public uint StartRva => (uint) (StartOffset - ((UIntPtr) _basePointer).ToUInt64());
-
-        /// <inheritdoc />
-        public uint Length
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public ulong RelativeOffset => Rva;
-
-        /// <inheritdoc />
         public ulong Offset
         {
             get => ((UIntPtr) _pointer).ToUInt64();
@@ -47,10 +34,23 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
+        public ulong RelativeOffset => Offset - StartOffset;
+
+        /// <inheritdoc />
+        public uint StartRva => (uint) (StartOffset - ((UIntPtr) _basePointer).ToUInt64());
+
+        /// <inheritdoc />
         public uint Rva
         {
-            get => (uint) (Offset - StartOffset);
-            set => Offset = value - StartRva + Offset;
+            get => (uint) (Offset - StartOffset + StartRva);
+            set => Offset = value - StartRva + StartOffset;
+        }
+
+        /// <inheritdoc />
+        public uint Length
+        {
+            get;
+            private set;
         }
 
         /// <inheritdoc />
@@ -77,6 +77,7 @@ namespace AsmResolver
             var start = _pointer;
             while (*_pointer != value)
                 _pointer++;
+            _pointer++;
 
             var data = new byte[_pointer - start + 1];
             Marshal.Copy((IntPtr) _pointer, data, 0, data.Length);
@@ -87,6 +88,7 @@ namespace AsmResolver
         public int ReadBytes(byte[] buffer, int startIndex, int count)
         {
             Marshal.Copy((IntPtr) _pointer, buffer, startIndex, count);
+            _pointer += count;
             return count;
         }
 

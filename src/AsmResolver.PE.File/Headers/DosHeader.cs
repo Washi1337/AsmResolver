@@ -35,6 +35,9 @@ namespace AsmResolver.PE.File.Headers
         /// <exception cref="BadImageFormatException">Occurs when the input stream does not point to a valid DOS header.</exception>
         public static DosHeader FromReader(IBinaryStreamReader reader)
         {
+            ulong offset = reader.Offset;
+            uint rva = reader.Rva;
+            
             var stub = new byte[DefaultNewHeaderOffset];
             
             ushort magic = reader.ReadUInt16();
@@ -52,6 +55,8 @@ namespace AsmResolver.PE.File.Headers
 
             return new DosHeader(stub)
             {
+                Offset = offset,
+                Rva = rva,
                 NextHeaderOffset = nextHeaderOffset
             };
         }
