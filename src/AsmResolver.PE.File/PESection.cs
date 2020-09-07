@@ -56,6 +56,9 @@ namespace AsmResolver.PE.File
             Contents = contents;
         }
 
+        /// <summary>
+        /// Gets the portable executable file this section is part of.
+        /// </summary>
         public PEFile ContainingFile
         {
             get;

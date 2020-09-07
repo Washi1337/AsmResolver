@@ -13,34 +13,32 @@ namespace AsmResolver.PE.File
     /// </summary>
     public class PEFile : IPEFile
     {
+        /// <summary>
+        /// Indicates a valid NT header signature.
+        /// </summary>
         public const uint ValidPESignature = 0x4550; // "PE\0\0"
 
         /// <summary>
-        /// Reads a PE file from the disk.
+        /// Reads an unmapped PE file from the disk.
         /// </summary>
         /// <param name="path">The file path to the PE file.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromFile(string path)
-        {
-            return FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
-        }
+        public static PEFile FromFile(string path) => FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
 
         /// <summary>
-        /// Reads a PE file from memory.
+        /// Reads an unmapped PE file from memory.
         /// </summary>
         /// <param name="raw">The raw bytes representing the contents of the PE file to read.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromBytes(byte[] raw, PEMappingMode mode = PEMappingMode.Unmapped)
-        {
-            return FromReader(new ByteArrayReader(raw), mode);
-        }
+        public static PEFile FromBytes(byte[] raw) => FromReader(new ByteArrayReader(raw));
 
         /// <summary>
         /// Reads a PE file from the provided input stream.
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
+        /// <param name="mode">Indicates how the input PE file is mapped.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static PEFile FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
@@ -51,11 +49,20 @@ namespace AsmResolver.PE.File
         private readonly LazyVariable<ISegment> _extraSectionData;
         private IList<PESection> _sections;
 
+        /// <summary>
+        /// Creates a new empty portable executable file.
+        /// </summary>
         public PEFile()
             : this(new DosHeader(), new FileHeader(), new OptionalHeader())
         {
         }
 
+        /// <summary>
+        /// Creates a new portable executable file.
+        /// </summary>
+        /// <param name="dosHeader">The DOS header to add.</param>
+        /// <param name="fileHeader">The COFF header to add.</param>
+        /// <param name="optionalHeader">The optional header to add.</param>
         public PEFile(DosHeader dosHeader, FileHeader fileHeader, OptionalHeader optionalHeader)
         {
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
@@ -432,8 +439,22 @@ namespace AsmResolver.PE.File
             }
         }
 
+        /// <summary>
+        /// Obtains the sections in the portable executable file.
+        /// </summary>
+        /// <returns>The section.</returns>
+        /// <remarks>
+        /// This method is called upon the initialization of the <see cref="Sections"/> property.
+        /// </remarks>
         protected virtual IList<PESection> GetSections() => new PESectionCollection(this);
 
+        /// <summary>
+        /// Obtains the padding data in between the last section header and the first section.
+        /// </summary>
+        /// <returns>The extra padding data.</returns>
+        /// <remarks>
+        /// This method is called upon the initialization of the <see cref="ExtraSectionData"/> property.
+        /// </remarks>
         protected virtual ISegment GetExtraSectionData() => null;
     }
 }

@@ -7,9 +7,24 @@ namespace AsmResolver.PE.File.Headers
     /// </summary>
     public class DosHeader : SegmentBase
     {
+        /// <summary>
+        /// Indicates the magic constant that every DOS header should start with.
+        /// </summary>
         public const ushort ValidPEMagic = 0x5A4D;
+        
+        /// <summary>
+        /// Indicates the minimal length of a valid DOS header in a portable executable file.
+        /// </summary>
         public const int MinimalDosHeaderLength = 0x40;
+        
+        /// <summary>
+        /// Indicates the offset of the e_flanew field in the DOS header.
+        /// </summary>
         public const int NextHeaderFieldOffset = 0x3C;
+        
+        /// <summary>
+        /// Indicates the default value of the e_flanew field in the DOS header.
+        /// </summary>
         public const int DefaultNewHeaderOffset = 0x80;
 
         private static readonly byte[] DefaultDosHeader = {

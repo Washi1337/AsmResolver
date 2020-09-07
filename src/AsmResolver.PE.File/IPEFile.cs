@@ -4,6 +4,9 @@ using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
 {
+    /// <summary>
+    /// Provides a writable implementation of the <see cref="IPEFile"/> interface.
+    /// </summary>
     public interface IPEFile : ISegmentReferenceResolver, IOffsetConverter
     {
         /// <summary>
