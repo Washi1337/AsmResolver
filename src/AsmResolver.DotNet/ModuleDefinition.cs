@@ -28,6 +28,25 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<AssemblyDefinition>
     {
+        private readonly LazyVariable<string> _name;
+        private readonly LazyVariable<Guid> _mvid;
+        private readonly LazyVariable<Guid> _encId;
+        private readonly LazyVariable<Guid> _encBaseId;
+
+        private IList<TypeDefinition> _topLevelTypes;
+        private IList<AssemblyReference> _assemblyReferences;
+        private IList<CustomAttribute> _customAttributes;
+
+        private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
+        private IList<ModuleReference> _moduleReferences;
+        private IList<FileReference> _fileReferences;
+        private IList<ManifestResource> _resources;
+        private IList<ExportedType> _exportedTypes;
+        private TokenAllocator _tokenAllocator;
+
+        private readonly LazyVariable<string> _runtimeVersion;
+        private readonly LazyVariable<IResourceDirectory> _nativeResources;
+        
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
         /// </summary>
@@ -97,25 +116,6 @@ namespace AsmResolver.DotNet
         {
             return new SerializedModuleDefinition(peImage, readParameters);
         }
-
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<Guid> _mvid;
-        private readonly LazyVariable<Guid> _encId;
-        private readonly LazyVariable<Guid> _encBaseId;
-
-        private IList<TypeDefinition> _topLevelTypes;
-        private IList<AssemblyReference> _assemblyReferences;
-        private IList<CustomAttribute> _customAttributes;
-
-        private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
-        private IList<ModuleReference> _moduleReferences;
-        private IList<FileReference> _fileReferences;
-        private IList<ManifestResource> _resources;
-        private IList<ExportedType> _exportedTypes;
-        private TokenAllocator _tokenAllocator;
-
-        private readonly LazyVariable<string> _runtimeVersion;
-        private readonly LazyVariable<IResourceDirectory> _nativeResources;
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
