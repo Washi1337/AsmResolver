@@ -106,11 +106,11 @@ namespace AsmResolver.PE.DotNet.StrongName
                 : OptionalHeader.OptionalHeader64SizeExcludingDataDirectories;
             ulong certificateEntryOffset = file.OptionalHeader.Offset
                                           + optionalHeaderSize
-                                          + OptionalHeader.CertificateDirectoryIndex * DataDirectory.DataDirectorySize;
+                                          + (int) DataDirectoryIndex.CertificateDirectory * DataDirectory.DataDirectorySize;
             hashBuilder.ZeroRange(new OffsetRange(certificateEntryOffset, certificateEntryOffset + DataDirectory.DataDirectorySize));
             
             // Exclude certificate directory contents.
-            var certificateDirectory = file.OptionalHeader.DataDirectories[OptionalHeader.CertificateDirectoryIndex];
+            var certificateDirectory = file.OptionalHeader.GetDataDirectory(DataDirectoryIndex.CertificateDirectory);
             if (certificateDirectory.IsPresentInPE)
             {
                 ulong offset = file.RvaToFileOffset(certificateDirectory.VirtualAddress);

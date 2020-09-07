@@ -35,7 +35,7 @@ namespace AsmResolver.PE.Win32Resources
             if (IsByName)
             {
                 uint baseRva = peFile.OptionalHeader
-                    .DataDirectories[OptionalHeader.ResourceDirectoryIndex]
+                    .GetDataDirectory(DataDirectoryIndex.ResourceDirectory)
                     .VirtualAddress;
                 
                 if (peFile.TryCreateReaderAtRva(baseRva + IdOrNameOffset, out var nameReader))

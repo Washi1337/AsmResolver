@@ -79,7 +79,9 @@ namespace AsmResolver.PE.Win32Resources
             if (_namedEntries + _idEntries == 0 || _depth >= MaxDepth)
                 return result;
 
-            uint baseRva = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex].VirtualAddress;
+            uint baseRva = _peFile.OptionalHeader
+                .GetDataDirectory(DataDirectoryIndex.ResourceDirectory)
+                .VirtualAddress;
 
             // Create entries reader.
             uint entryListSize = (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
