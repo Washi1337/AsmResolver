@@ -5,10 +5,18 @@ namespace AsmResolver.PE.File.Headers
     /// </summary>
     public class FileHeader : SegmentBase
     {
+        /// <summary>
+        /// Indicates the static size of the COFF file header.
+        /// </summary>
         public const int FileHeaderSize = 2 * sizeof (ushort) +
                                           3 * sizeof (uint) +
                                           2 * sizeof (ushort);
 
+        /// <summary>
+        /// Reads a COFF file header from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The read file header.</returns>
         public static FileHeader FromReader(IBinaryStreamReader reader)
         {
             return new FileHeader
