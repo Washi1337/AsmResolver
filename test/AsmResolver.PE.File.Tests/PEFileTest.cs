@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.Tests;
@@ -86,6 +87,25 @@ namespace AsmResolver.PE.File.Tests
                 .CreateReader()
                 .ReadBytes(newData, 0, newData.Length));
             Assert.Equal(sectionData, newData);
+        }
+
+        [Fact]
+        public void RoundTripPE()
+        {
+            // This test validates that a PE can be loaded, copied, and written, without altering the data
+
+            var originalBytes = Properties.Resources.NativeMemoryDemos;
+            var peFile = PEFile.FromBytes(originalBytes);
+
+            var msOutput = new MemoryStream();
+            var output = new PEFile(peFile.DosHeader, peFile.FileHeader, peFile.OptionalHeader);
+            foreach (var section in peFile.Sections)
+            {
+                var newSection = new PESection(section);
+                output.Sections.Add(newSection);
+            }
+            output.Write(new BinaryStreamWriter(msOutput));            
+            Assert.Equal(originalBytes, msOutput.ToArray());
         }
     }
 }
