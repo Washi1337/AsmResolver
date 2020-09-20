@@ -9,7 +9,7 @@ namespace AsmResolver
     {
         private uint _rva;
 
-        public VirtualSegment(ISegment? physicalContents, uint virtualSize)
+        public VirtualSegment(ISegment physicalContents, uint virtualSize)
         {
             PhysicalContents = physicalContents;
             VirtualSize = virtualSize;
