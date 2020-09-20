@@ -494,7 +494,7 @@ namespace AsmResolver.PE.File
             foreach (var section in Sections)
             {
                 writer.FileOffset = section.FileOffset;
-                section.Contents.Write(writer);
+                section.Contents?.Write(writer);
                 writer.Align(OptionalHeader.FileAlignment);
             }
         }
