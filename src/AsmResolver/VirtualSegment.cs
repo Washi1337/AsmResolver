@@ -46,8 +46,8 @@ namespace AsmResolver
         public bool IsReadable => PhysicalContents is IReadableSegment;
         
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newFileOffset, uint newRva) =>
-            PhysicalContents.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) =>
+            PhysicalContents.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public uint GetPhysicalSize() => PhysicalContents.GetPhysicalSize();

@@ -65,7 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newFileOffset, uint newRva) => Contents.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => Contents.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public uint GetPhysicalSize() => Contents.GetPhysicalSize();

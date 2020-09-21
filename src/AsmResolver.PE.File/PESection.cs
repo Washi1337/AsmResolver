@@ -213,7 +213,7 @@ namespace AsmResolver.PE.File
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newFileOffset, uint newRva) => Contents.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => Contents.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public uint GetPhysicalSize() => Contents.GetPhysicalSize();

@@ -101,7 +101,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         }
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newFileOffset, uint newRva) => _segments.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => _segments.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public uint GetPhysicalSize() => _segments.GetPhysicalSize();

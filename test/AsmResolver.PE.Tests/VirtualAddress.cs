@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Tests
 
         bool IOffsetProvider.CanUpdateOffsets => false;
 
-        void IOffsetProvider.UpdateOffsets(ulong newFileOffset, uint newRva) => throw new InvalidOperationException();
+        void IOffsetProvider.UpdateOffsets(ulong newOffset, uint newRva) => throw new InvalidOperationException();
 
         public bool CanRead => false;
 

@@ -44,10 +44,10 @@ namespace AsmResolver.PE.Debug
         public bool CanUpdateOffsets => Contents?.CanUpdateOffsets ?? false;
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newFileOffset, uint newRva)
+        public void UpdateOffsets(ulong newOffset, uint newRva)
         {
             if (Contents != null)
-                Contents.UpdateOffsets(newFileOffset, newRva);
+                Contents.UpdateOffsets(newOffset, newRva);
             else
                 throw new ArgumentNullException(nameof(Contents));
         }

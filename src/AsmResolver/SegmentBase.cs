@@ -23,9 +23,9 @@ namespace AsmResolver
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public virtual void UpdateOffsets(ulong newFileOffset, uint newRva)
+        public virtual void UpdateOffsets(ulong newOffset, uint newRva)
         {
-            Offset = newFileOffset;
+            Offset = newOffset;
             Rva = newRva;
         }
 

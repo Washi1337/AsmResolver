@@ -41,7 +41,7 @@ namespace AsmResolver.PE.File
         public bool IsBounded => false;
 
         /// <inheritdoc />
-        void IOffsetProvider.UpdateOffsets(ulong newFileOffset, uint newRva) => throw new InvalidOperationException();
+        void IOffsetProvider.UpdateOffsets(ulong newOffset, uint newRva) => throw new InvalidOperationException();
 
         /// <inheritdoc />
         public IBinaryStreamReader CreateReader() => _peFile.CreateReaderAtRva(Rva);

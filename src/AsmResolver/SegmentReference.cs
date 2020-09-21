@@ -44,7 +44,7 @@ namespace AsmResolver
         }
         
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newFileOffset, uint newRva) => Segment.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => Segment.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public IBinaryStreamReader CreateReader()

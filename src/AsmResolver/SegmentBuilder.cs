@@ -43,27 +43,27 @@ namespace AsmResolver
         }
         
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newFileOffset, uint newRva)
+        public void UpdateOffsets(ulong newOffset, uint newRva)
         {
-            Offset = newFileOffset;
+            Offset = newOffset;
             Rva = newRva;
             _physicalSize = 0;
             _virtualSize = 0;
             
             foreach (var item in _items)
             {
-                uint physicalPadding = (uint) (newFileOffset.Align(item.Alignment) - newFileOffset);
+                uint physicalPadding = (uint) (newOffset.Align(item.Alignment) - newOffset);
                 uint virtualPadding = newRva.Align(item.Alignment) - newRva;
                 
-                newFileOffset += physicalPadding;
+                newOffset += physicalPadding;
                 newRva += virtualPadding;
                 
-                item.Segment.UpdateOffsets(newFileOffset, newRva);
+                item.Segment.UpdateOffsets(newOffset, newRva);
 
                 uint physicalSize = item.Segment.GetPhysicalSize();
                 uint virtualSize = item.Segment.GetVirtualSize();
                 
-                newFileOffset += physicalSize;
+                newOffset += physicalSize;
                 newRva += virtualSize;
                 _physicalSize += physicalPadding + physicalSize;
                 _virtualSize += virtualPadding + virtualSize;

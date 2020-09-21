@@ -52,7 +52,7 @@ namespace AsmResolver.PE.DotNet.Builder
         public void AddNativeBody(ISegment body, uint alignment) => _nativeBodies.Add(body, alignment);
         
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newFileOffset, uint newRva) => _segments.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => _segments.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public uint GetPhysicalSize()
