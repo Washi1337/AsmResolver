@@ -7,12 +7,14 @@ namespace AsmResolver
     /// </summary>
     public class VirtualSegment : IReadableSegment
     {
+        private uint _rva;
+
         public VirtualSegment(ISegment physicalContents, uint virtualSize)
         {
-            PhysicalContents = physicalContents ?? throw new ArgumentNullException(nameof(physicalContents));
+            PhysicalContents = physicalContents;
             VirtualSize = virtualSize;
         }
-        
+
         /// <summary>
         /// Gets or sets the physical contents of the segment as it is stored on the disk.
         /// </summary>
@@ -32,29 +34,40 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public uint FileOffset => PhysicalContents.FileOffset;
+        public uint FileOffset => PhysicalContents?.FileOffset ?? 0;
 
         /// <inheritdoc />
-        public uint Rva => PhysicalContents.Rva;
+        public uint Rva
+        {
+            get => _rva;
+            set
+            {
+                _rva = value;                
+                PhysicalContents?.UpdateOffsets(FileOffset, value);
+            }
+        } 
 
         /// <inheritdoc />
-        public bool CanUpdateOffsets => PhysicalContents.CanUpdateOffsets;
+        public bool CanUpdateOffsets => PhysicalContents?.CanUpdateOffsets ?? false;
 
         /// <summary>
         /// Gets a value indicating whether the physical contents of this segment is readable by a binary reader.
         /// </summary>
         public bool IsReadable => PhysicalContents is IReadableSegment;
-        
-        /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva) =>
-            PhysicalContents.UpdateOffsets(newFileOffset, newRva);
 
         /// <inheritdoc />
-        public uint GetPhysicalSize() => PhysicalContents.GetPhysicalSize();
+        public void UpdateOffsets(uint newFileOffset, uint newRva)
+        {
+            this._rva = newRva;
+            PhysicalContents?.UpdateOffsets(newFileOffset, newRva);
+        }
+
+        /// <inheritdoc />
+        public uint GetPhysicalSize() => PhysicalContents?.GetPhysicalSize() ?? 0;
 
         /// <inheritdoc />
         public uint GetVirtualSize() => VirtualSize;
-        
+
         /// <inheritdoc />
         public IBinaryStreamReader CreateReader(uint fileOffset, uint size)
         {
@@ -64,6 +77,6 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => PhysicalContents.Write(writer);
+        public void Write(IBinaryStreamWriter writer) => PhysicalContents?.Write(writer);
     }
 }

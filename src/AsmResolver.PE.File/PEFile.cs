@@ -62,12 +62,15 @@ namespace AsmResolver.PE.File
             for (int i = 0; i < peFile.FileHeader.NumberOfSections; i++)
             {
                 var header = SectionHeader.FromReader(reader);
-                
-                var contentsReader = reader.Fork(header.PointerToRawData, header.SizeOfRawData);
-                var contents = DataSegment.FromReader(contentsReader);
-                contents.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
-
-                peFile.Sections.Add(new PESection(header, new VirtualSegment(contents, header.VirtualSize)));
+                DataSegment contents = null;
+                if (header.SizeOfRawData > 0)
+                {
+                    var contentsReader = reader.Fork(header.PointerToRawData, header.SizeOfRawData);
+                    contents = DataSegment.FromReader(contentsReader);                    
+                }
+                var virtualSegment = new VirtualSegment(contents, header.VirtualSize);
+                virtualSegment.UpdateOffsets(header.PointerToRawData, header.VirtualAddress);
+                peFile.Sections.Add(new PESection(header, virtualSegment));
             }
             
             // Data between section headers and sections.
@@ -405,20 +408,21 @@ namespace AsmResolver.PE.File
         /// </summary>
         public void AlignSections()
         {
+            uint currentFileOffset = OptionalHeader.SizeOfHeaders;
+
             for (int i = 0; i < Sections.Count; i++)
             {
-                var section = Sections[i];
+                var section = Sections[i];                
 
-                uint fileOffset = i > 0
-                    ? Sections[i - 1].FileOffset + Sections[i - 1].GetPhysicalSize()
-                    : OptionalHeader.SizeOfHeaders;
                 uint rva = i > 0
                     ? Sections[i - 1].Rva + Sections[i - 1].GetVirtualSize()
                     : OptionalHeader.SizeOfHeaders.Align(OptionalHeader.SectionAlignment);
 
                 section.UpdateOffsets(
-                    fileOffset.Align(OptionalHeader.FileAlignment),
+                    currentFileOffset.Align(OptionalHeader.FileAlignment),
                     rva.Align(OptionalHeader.SectionAlignment));
+
+                currentFileOffset += section.GetPhysicalSize();
             }
         }
 
@@ -490,7 +494,7 @@ namespace AsmResolver.PE.File
             foreach (var section in Sections)
             {
                 writer.FileOffset = section.FileOffset;
-                section.Contents.Write(writer);
+                section.Contents?.Write(writer);
                 writer.Align(OptionalHeader.FileAlignment);
             }
         }
