@@ -26,7 +26,7 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         /// <param name="peFile">The containing PE file.</param>
         /// <param name="reader">The input stream to read from.</param>
-        public ResourceDirectoryEntry(PEFile peFile, IBinaryStreamReader reader)
+        public ResourceDirectoryEntry(IPEFile peFile, IBinaryStreamReader reader)
         {
             _idOrNameOffset = reader.ReadUInt32();
             _dataOrSubDirOffset = reader.ReadUInt32();
@@ -35,7 +35,7 @@ namespace AsmResolver.PE.Win32Resources
             if (IsByName)
             {
                 uint baseRva = peFile.OptionalHeader
-                    .DataDirectories[OptionalHeader.ResourceDirectoryIndex]
+                    .GetDataDirectory(DataDirectoryIndex.ResourceDirectory)
                     .VirtualAddress;
                 
                 if (peFile.TryCreateReaderAtRva(baseRva + IdOrNameOffset, out var nameReader))

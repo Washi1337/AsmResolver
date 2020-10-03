@@ -2,18 +2,26 @@ using System;
 
 namespace AsmResolver.PE.File
 {
+    /// <summary>
+    /// Represents a reference to a segment of a PE file.
+    /// </summary>
     public readonly struct PESegmentReference : ISegmentReference
     {
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
 
-        public PESegmentReference(PEFile peFile, uint rva)
+        /// <summary>
+        /// Creates a new PE reference.
+        /// </summary>
+        /// <param name="peFile">The underlying PE file.</param>
+        /// <param name="rva">The virtual address of the segment.</param>
+        public PESegmentReference(IPEFile peFile, uint rva)
         {
             _peFile = peFile;
             Rva = rva;
         }
 
         /// <inheritdoc />
-        public uint FileOffset => _peFile.TryGetSectionContainingRva(Rva, out _) 
+        public ulong Offset => _peFile.TryGetSectionContainingRva(Rva, out _) 
             ? _peFile.RvaToFileOffset(Rva) 
             : 0u;
 
@@ -33,7 +41,7 @@ namespace AsmResolver.PE.File
         public bool IsBounded => false;
 
         /// <inheritdoc />
-        void IOffsetProvider.UpdateOffsets(uint newFileOffset, uint newRva) => throw new InvalidOperationException();
+        void IOffsetProvider.UpdateOffsets(ulong newOffset, uint newRva) => throw new InvalidOperationException();
 
         /// <inheritdoc />
         public IBinaryStreamReader CreateReader() => _peFile.CreateReaderAtRva(Rva);

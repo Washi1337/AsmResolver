@@ -3,17 +3,18 @@
     <PropertyGroup>
         <Title>AsmResolver.PE.File</Title>
         <Description>Raw PE file models for the AsmResolver executable file inspection toolsuite.</Description>
-        <Copyright>Copyright © Washi 2016-2020</Copyright>
-        <PackageProjectUrl>https://github.com/Washi1337/AsmResolver</PackageProjectUrl>
-        <PackageLicense>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicense>
-        <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
         <PackageTags>exe pe headers sections inspection manipulation assembly disassembly</PackageTags>
-        <LangVersion>8</LangVersion>
-        <Version>4.0.0-beta.2</Version>
         <TargetFramework>netstandard2.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\AsmResolver.PE.File.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\AsmResolver.PE.File.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>

@@ -80,10 +80,10 @@ namespace AsmResolver.PE.Exports.Builder
         }
         
         /// <inheritdoc />
-        public override void UpdateOffsets(uint newFileOffset, uint newRva)
+        public override void UpdateOffsets(ulong newOffset, uint newRva)
         {
-            base.UpdateOffsets(newFileOffset, newRva);
-            _contentsBuilder.UpdateOffsets(newFileOffset + ExportDirectoryHeaderSize, newRva + ExportDirectoryHeaderSize);
+            base.UpdateOffsets(newOffset, newRva);
+            _contentsBuilder.UpdateOffsets(newOffset + ExportDirectoryHeaderSize, newRva + ExportDirectoryHeaderSize);
         }
 
         /// <inheritdoc />

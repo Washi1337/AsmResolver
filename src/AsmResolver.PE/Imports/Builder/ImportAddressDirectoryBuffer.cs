@@ -17,16 +17,16 @@ namespace AsmResolver.PE.Imports.Builder
         }
 
         /// <inheritdoc />
-        public override void UpdateOffsets(uint newFileOffset, uint newRva)
+        public override void UpdateOffsets(ulong newOffset, uint newRva)
         {
-            base.UpdateOffsets(newFileOffset, newRva);
+            base.UpdateOffsets(newOffset, newRva);
             
             foreach (var module in Modules)
             {
                 var thunkTable = GetModuleThunkTable(module);
                 uint size = thunkTable.GetPhysicalSize();
-                thunkTable.UpdateOffsets(newFileOffset, newRva);
-                newFileOffset += size;
+                thunkTable.UpdateOffsets(newOffset, newRva);
+                newOffset += size;
                 newRva += size;
             }
         }

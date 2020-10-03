@@ -55,9 +55,9 @@ namespace AsmResolver.PE.DotNet.Resources
             if (offset >= _contents.GetPhysicalSize() - sizeof(uint))
                 return null;
             
-            var reader = _contents.CreateReader(_contents.FileOffset + offset);
+            var reader = _contents.CreateReader(_contents.Offset + offset);
             uint length = reader.ReadUInt32();
-            return reader.Fork(reader.FileOffset, length);
+            return reader.Fork(reader.Offset, length);
         }
     }
 }

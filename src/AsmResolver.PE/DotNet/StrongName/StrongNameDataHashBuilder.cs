@@ -69,10 +69,10 @@ namespace AsmResolver.PE.DotNet.StrongName
 
             foreach (var range in _includedRanges)
             {
-                _imageStream.Position = range.Start;
-                while (_imageStream.Position < range.End)
+                _imageStream.Position = (long) range.Start;
+                while ((ulong) _imageStream.Position < range.End)
                 {
-                    int chunkLength = Math.Min(buffer.Length, (int) (range.End - _imageStream.Position));
+                    int chunkLength = Math.Min(buffer.Length, (int) (range.End - (ulong) _imageStream.Position));
                     var currentRange = new OffsetRange(
                         (uint) _imageStream.Position,
                         (uint) (_imageStream.Position + chunkLength));
@@ -95,7 +95,7 @@ namespace AsmResolver.PE.DotNet.StrongName
                 if (currentRange.Intersects(range))
                 {
                     var intersection = currentRange.Intersect(range);
-                    for (uint i = intersection.Start; i < intersection.End; i++)
+                    for (ulong i = intersection.Start; i < intersection.End; i++)
                         buffer[i] = 0;
                 }
             }

@@ -56,6 +56,9 @@ namespace AsmResolver.PE.File
             Contents = contents;
         }
 
+        /// <summary>
+        /// Gets the portable executable file this section is part of.
+        /// </summary>
         public PEFile ContainingFile
         {
             get;
@@ -201,7 +204,7 @@ namespace AsmResolver.PE.File
         public bool IsReadable => Contents is IReadableSegment;
 
         /// <inheritdoc />
-        public uint FileOffset => Contents?.FileOffset ?? 0;
+        public ulong Offset => Contents?.Offset ?? 0;
 
         /// <inheritdoc />
         public uint Rva => Contents?.Rva ?? 0;
@@ -210,7 +213,7 @@ namespace AsmResolver.PE.File
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva) => Contents.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => Contents.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public uint GetPhysicalSize() => Contents.GetPhysicalSize();
@@ -219,7 +222,7 @@ namespace AsmResolver.PE.File
         public uint GetVirtualSize() => Contents.GetVirtualSize();
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader(uint fileOffset, uint size)
+        public IBinaryStreamReader CreateReader(ulong fileOffset, uint size)
         {
             if (!IsReadable)
                 throw new InvalidOperationException("Section contents is not readable.");
@@ -234,9 +237,9 @@ namespace AsmResolver.PE.File
             uint alignment = ContainingFile?.OptionalHeader.FileAlignment ?? 0x200;
             return new SectionHeader(Name, Characteristics)
             {
-                PointerToRawData = FileOffset,
+                PointerToRawData = (uint) Offset,
                 SizeOfRawData = GetPhysicalSize().Align(alignment),
-                VirtualAddress = Rva,
+                VirtualAddress = (uint) Rva,
                 VirtualSize = GetVirtualSize(),
                 NumberOfRelocations = 0,
                 PointerToRelocations = 0,
@@ -250,9 +253,9 @@ namespace AsmResolver.PE.File
         /// </summary>
         /// <param name="fileOffset">The offset to check.</param>
         /// <returns><c>true</c> if the file offset falls within the section, <c>false</c> otherwise.</returns>
-        public bool ContainsFileOffset(uint fileOffset)
+        public bool ContainsFileOffset(ulong fileOffset)
         {
-            return FileOffset <= fileOffset && fileOffset < FileOffset + GetPhysicalSize();
+            return Offset <= fileOffset && fileOffset < Offset + GetPhysicalSize();
         }
 
         /// <summary>
@@ -266,19 +269,19 @@ namespace AsmResolver.PE.File
         }
 
         /// <inheritdoc />
-        public uint FileOffsetToRva(uint fileOffset)
+        public uint FileOffsetToRva(ulong fileOffset)
         {
             if (!ContainsFileOffset(fileOffset))
                 throw new ArgumentOutOfRangeException(nameof(fileOffset));
-            return fileOffset - FileOffset + Rva;
+            return (uint) (fileOffset - Offset + Rva);
         }
 
         /// <inheritdoc />
-        public uint RvaToFileOffset(uint rva)
+        public ulong RvaToFileOffset(uint rva)
         {
             if (!ContainsRva(rva))
                 throw new ArgumentOutOfRangeException(nameof(rva));
-            return rva - Rva + FileOffset;
+            return rva - Rva + Offset;
         }
 
         /// <inheritdoc />

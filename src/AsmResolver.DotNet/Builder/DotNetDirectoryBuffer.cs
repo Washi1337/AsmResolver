@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Builder.Resources;
 using AsmResolver.DotNet.Code;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using AsmResolver.PE.DotNet.StrongName;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -21,14 +21,17 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="module">The module for which this .NET directory is built.</param>
         /// <param name="methodBodySerializer">The method body serializer to use for constructing method bodies.</param>
         /// <param name="metadata">The metadata builder </param>
+        /// <param name="diagnosticBag">The bag that collects all diagnostic information during the building process.</param>
         public DotNetDirectoryBuffer(
             ModuleDefinition module,
             IMethodBodySerializer methodBodySerializer,
-            IMetadataBuffer metadata)
+            IMetadataBuffer metadata,
+            DiagnosticBag diagnosticBag)
         {
-            Module = module;
-            MethodBodySerializer = methodBodySerializer;
-            Metadata = metadata;
+            Module = module ?? throw new ArgumentNullException(nameof(module));
+            MethodBodySerializer = methodBodySerializer ?? throw new ArgumentNullException(nameof(methodBodySerializer));
+            Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+            DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
             Resources = new DotNetResourcesDirectoryBuffer();
         }
         
@@ -57,6 +60,14 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
+        /// Gets the bag that collects all diagnostic information during the building process.
+        /// </summary>
+        public DiagnosticBag DiagnosticBag
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the .NET resources data directory buffer, containing all the resources data stored in the .NET module. 
         /// </summary>
         public DotNetResourcesDirectoryBuffer Resources
@@ -64,10 +75,15 @@ namespace AsmResolver.DotNet.Builder
             get;
         }
 
-        private void AssertIsImported(IModuleProvider member)
+        private bool AssertIsImported(IModuleProvider member)
         {
             if (member.Module != Module)
-                throw new MemberNotImportedException((IMetadataMember) member);
+            {
+                DiagnosticBag.RegisterException(new MemberNotImportedException((IMetadataMember) member));
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -106,7 +122,8 @@ namespace AsmResolver.DotNet.Builder
                     break;
                 
                 case TableIndex.File:
-                    //todo:
+                    DiagnosticBag.Exceptions.Add(
+                        new NotImplementedException("Managed entrypoints defined in a sub module is not support."));
                     break;
             }
 
@@ -169,10 +186,8 @@ namespace AsmResolver.DotNet.Builder
 
         private void DefineGenericParameter(MetadataToken ownerToken, GenericParameter parameter)
         {
-            if (parameter is null)
+            if (parameter is null || !AssertIsImported(parameter))
                 return;
-
-            AssertIsImported(parameter);
 
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);

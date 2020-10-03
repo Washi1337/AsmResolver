@@ -75,8 +75,10 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
+            var writer = context.Writer;
+            
             writer.WriteByte((byte) NativeType);
             if (Size.HasValue)
             {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
@@ -21,7 +21,7 @@ namespace AsmResolver.PE
         /// </summary>
         /// <param name="peFile">The file to base the image from.</param>
         /// <param name="readParameters">The parameters to use while reading the PE image.</param>
-        public SerializedPEImage(PEFile peFile, PEReadParameters readParameters)
+        public SerializedPEImage(IPEFile peFile, PEReadParameters readParameters)
         {
             PEFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
             ReadParameters = readParameters;
@@ -38,7 +38,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets the underlying PE file.
         /// </summary>
-        public PEFile PEFile
+        public IPEFile PEFile
         {
             get;
         }
@@ -54,7 +54,7 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         protected override IList<IImportedModule> GetImports()
         {
-            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ImportDirectoryIndex];
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ImportDirectory);
             return dataDirectory.IsPresentInPE
                 ? (IList<IImportedModule>) new SerializedImportedModuleList(PEFile, dataDirectory)
                 : new List<IImportedModule>();
@@ -63,7 +63,7 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         protected override IExportDirectory GetExports()
         {
-            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ExportDirectoryIndex];
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ExportDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
@@ -73,7 +73,7 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         protected override IResourceDirectory GetResources()
         {
-            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex];
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ResourceDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
@@ -83,7 +83,7 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         protected override IList<BaseRelocation> GetRelocations()
         {
-            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.BaseRelocationDirectoryIndex];
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory);
             return dataDirectory.IsPresentInPE
                 ? new SerializedRelocationList(PEFile, dataDirectory)
                 : (IList<BaseRelocation>) new List<BaseRelocation>();
@@ -92,11 +92,27 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         protected override IDotNetDirectory GetDotNetDirectory()
         {
-            var dataDirectory = PEFile.OptionalHeader.DataDirectories[OptionalHeader.ClrDirectoryIndex];
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ClrDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
             
             return new SerializedDotNetDirectory(PEFile, reader, ReadParameters.MetadataStreamReader);
+        }
+
+        /// <inheritdoc />
+        protected override IList<DebugDataEntry> GetDebugData()
+        {
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.DebugDirectory);
+            
+            var result = new List<DebugDataEntry>();
+            if (dataDirectory.IsPresentInPE && PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
+            {
+                uint count = dataDirectory.Size / DebugDataEntry.DebugDataEntryHeaderSize;
+                for (int i = 0; i < count; i++)
+                    result.Add(new SerializedDebugDataEntry(reader, ReadParameters.DebugDataReader));
+            }
+            
+            return result;
         }
     }
 }

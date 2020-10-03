@@ -58,11 +58,6 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void FixedMultipleArguments()
         {
         }
-
-        [TestCase((object) 2448)]
-        public void FixedBoxedIntArgument()
-        {
-        }
         
         [TestCase(IntValue = 2)]
         public void NamedInt32Argument()
@@ -83,5 +78,56 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public void NamedTypeArgument()
         {
         }
+        
+        [TestCase(typeof(TestGenericType<object>))]
+        public void GenericType()
+        {
+        }
+        
+        [TestCase(typeof(TestGenericType<object>[]))]
+        public void GenericTypeArray()
+        {
+        }
+        
+        [TestCase((object) 123)]
+        public void Int32PassedAsObject()
+        {
+        }
+        
+        [TestCase((object) typeof(int))]
+        public void TypePassedAsObject()
+        {
+        }
+
+        [TestCase(new int[] {1, 2, 3, 4})]
+        public void FixedInt32ArrayArgument()
+        {
+        }
+
+        [TestCase(default(int[]))]
+        public void FixedInt32ArrayNullArgument()
+        {
+        }
+
+        [TestCase(new int[0])]
+        public void FixedInt32ArrayEmptyArgument()
+        {
+        }
+
+        [TestCase((object) new int[] {1, 2, 3, 4})]
+        public void FixedInt32ArrayAsObjectArgument()
+        {
+        }
+
+        [TestCase((object) default(int[]))]
+        public void FixedInt32ArrayAsObjectNullArgument()
+        {
+        }
+
+        [TestCase((object) new int[0])]
+        public void FixedInt32ArrayAsObjectEmptyArgument()
+        {
+        }
+
     }
 }

@@ -13,14 +13,14 @@ namespace AsmResolver
         /// <param name="fileOffset">The file offset to convert.</param>
         /// <returns>The virtual address, relative to the image base.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the file offset falls outside of the range of the convertible file offsets.</exception>
-        uint FileOffsetToRva(uint fileOffset);
-        
+        uint FileOffsetToRva(ulong fileOffset);
+
         /// <summary>
         /// Converts a virtual address to the physical file offset.
         /// </summary>
         /// <param name="rva">The virtual address, relative to the image base, to convert.</param>
         /// <returns>The file offset.</returns>
         /// /// <exception cref="ArgumentOutOfRangeException">Occurs when the virtual address falls outside of the range of the convertible addresses.</exception>
-        uint RvaToFileOffset(uint rva);
+        ulong RvaToFileOffset(uint rva);
     }
 }

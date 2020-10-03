@@ -22,7 +22,7 @@ namespace AsmResolver.Tests
             
             collection.UpdateOffsets(0x400, 0x1000);
             
-            Assert.Equal(0x400u, collection.FileOffset);
+            Assert.Equal(0x400u, collection.Offset);
             Assert.Equal(0x1000u, collection.Rva);
             Assert.Equal(0u, collection.GetPhysicalSize());
             Assert.Equal(0u, collection.GetVirtualSize());
@@ -39,7 +39,7 @@ namespace AsmResolver.Tests
             
             collection.UpdateOffsets(0x400, 0x1000);
             
-            Assert.Equal(0x400u, segment.FileOffset);
+            Assert.Equal(0x400u, segment.Offset);
             Assert.Equal(0x1000u, segment.Rva);
             Assert.Equal(4u, collection.GetPhysicalSize());
             Assert.Equal(4u, collection.GetVirtualSize());
@@ -61,11 +61,11 @@ namespace AsmResolver.Tests
             
             collection.UpdateOffsets(0x400, 0x1000);
             
-            Assert.Equal(0x400u, segment1.FileOffset);
+            Assert.Equal(0x400u, segment1.Offset);
             Assert.Equal(0x1000u, segment1.Rva);
-            Assert.Equal(0x404u, segment2.FileOffset);
+            Assert.Equal(0x404u, segment2.Offset);
             Assert.Equal(0x1004u, segment2.Rva);
-            Assert.Equal(0x407u, segment3.FileOffset);
+            Assert.Equal(0x407u, segment3.Offset);
             Assert.Equal(0x1007u, segment3.Rva);
             
             Assert.Equal(12u, collection.GetPhysicalSize());
@@ -88,7 +88,7 @@ namespace AsmResolver.Tests
             
             builder.UpdateOffsets(0x400, 0x1000);
 
-            Assert.Equal(0x400u, segment.FileOffset);
+            Assert.Equal(0x400u, segment.Offset);
             
             Assert.Equal(4u, builder.GetPhysicalSize());
             Assert.Equal(4u, builder.GetVirtualSize());
@@ -115,11 +115,11 @@ namespace AsmResolver.Tests
 
             builder.UpdateOffsets(0x400, 0x1000);
             
-            Assert.Equal(0x400u, segment1.FileOffset);
+            Assert.Equal(0x400u, segment1.Offset);
             Assert.Equal(0x1000u, segment1.Rva);
-            Assert.Equal(0x408u, segment2.FileOffset);
+            Assert.Equal(0x408u, segment2.Offset);
             Assert.Equal(0x1008u, segment2.Rva);
-            Assert.Equal(0x410u, segment3.FileOffset);
+            Assert.Equal(0x410u, segment3.Offset);
             Assert.Equal(0x1010u, segment3.Rva);
             
             Assert.Equal(0x15u, builder.GetPhysicalSize());

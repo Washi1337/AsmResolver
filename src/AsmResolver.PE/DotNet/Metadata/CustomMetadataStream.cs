@@ -29,7 +29,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public uint FileOffset => Contents.FileOffset;
+        public ulong Offset => Contents.Offset;
 
         /// <inheritdoc />
         public uint Rva => Contents.Rva;
@@ -65,7 +65,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva) => Contents.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => Contents.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public uint GetPhysicalSize() => Contents.GetPhysicalSize();

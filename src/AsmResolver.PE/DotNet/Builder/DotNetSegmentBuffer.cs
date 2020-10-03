@@ -34,7 +34,7 @@ namespace AsmResolver.PE.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public uint FileOffset => _segments.FileOffset;
+        public ulong Offset => _segments.Offset;
 
         /// <inheritdoc />
         public uint Rva => _segments.Rva;
@@ -73,7 +73,7 @@ namespace AsmResolver.PE.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva) => _segments.UpdateOffsets(newFileOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => _segments.UpdateOffsets(newOffset, newRva);
         
         /// <inheritdoc />
         public uint GetPhysicalSize() => _segments.GetPhysicalSize();

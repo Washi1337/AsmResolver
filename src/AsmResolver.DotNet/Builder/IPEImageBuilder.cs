@@ -1,6 +1,4 @@
-﻿using AsmResolver.PE;
-
-namespace AsmResolver.DotNet.Builder
+﻿namespace AsmResolver.DotNet.Builder
 {
     /// <summary>
     /// Provides members for serializing a .NET module to a PE image.
@@ -12,6 +10,6 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="module">The module to serialize.</param>
         /// <returns>The constructed PE image.</returns>
-        IPEImage CreateImage(ModuleDefinition module);
+        PEImageBuildResult CreateImage(ModuleDefinition module);
     }
 }

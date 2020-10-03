@@ -51,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
             uint offset = (index - 1) * GuidSize;
             if (offset < _contents.GetPhysicalSize())
             {
-                var guidReader = _contents.CreateReader((uint) (_contents.FileOffset + offset));
+                var guidReader = _contents.CreateReader(_contents.Offset + offset);
                 var data = new byte[16];
                 guidReader.ReadBytes(data, 0, data.Length);
                 return new System.Guid(data);

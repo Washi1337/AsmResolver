@@ -100,3 +100,31 @@ After writing the module to an output stream, use the ``StrongNameSigner`` class
     
     var signer = new StrongNameSigner(snk);
     signer.SignImage(outputStream, module.Assembly.HashAlgorithm);
+
+
+Image Builder Diagnostics 
+-------------------------
+
+.NET modules that contain invalid metadata and/or method bodies might cause problems upon serializing it to a PE image or file. To inspect all errors that occurred during the construction of a PE image, it is possible to call the ``CreateImage`` method of the image builder directly. This method returns an instance of the ``PEImageBuildResult`` class, which defines a property called ``DiagnosticBag``. This is a collection that contains all the problems that occurred during the process:
+
+.. code-block:: csharp
+
+    var result = imageBuilder.CreateImage(module);
+
+    Console.WriteLine("Construction finished with {0} errors.", result.DiagnosticBag.Exceptions.Count);
+
+    // Print all errors.
+    foreach (var error in result.DiagnosticBag.Exceptions)
+        Console.WriteLine(error.Message);
+
+
+Whenever a problem is reported, AsmResolver attempts to recover or fill in default data where corrupted data was encountered. To test whether any of the errors resulted in AsmResolver to abort the construction of the image, use the ``IsFatal`` property. If this property is set to ``false``, the image stored in the ``ConstructedImage`` property can be written to the disk:
+
+.. code-block:: csharp
+
+    if (!result.DiagnosticBag.IsFatal)
+    {
+        var fileBuilder = new ManagedPEFileBuilder();
+        var file = fileBuilder.CreateFile(result.ConstructedImage);
+        file.Write("output.exe");
+    }

@@ -88,7 +88,7 @@ namespace AsmResolver.PE.Win32Resources.Icon
         {
             var entry = new IconGroupDirectoryEntry
             {
-                FileOffset = reader.FileOffset,
+                Offset = reader.Offset,
                 Rva = reader.Rva,
                 Width = reader.ReadByte(),
                 Height = reader.ReadByte(),

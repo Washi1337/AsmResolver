@@ -22,6 +22,11 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class AssemblyDefinition : AssemblyDescriptor, IHasSecurityDeclaration
     {
+        private IList<ModuleDefinition> _modules;
+        private IList<SecurityDeclaration> _securityDeclarations;
+        private readonly LazyVariable<byte[]> _publicKey;
+        private byte[] _publicKeyToken;
+        
         /// <summary>
         /// Reads a .NET assembly from the provided input buffer.
         /// </summary>
@@ -52,9 +57,13 @@ namespace AsmResolver.DotNet
         /// Reads a .NET assembly from an input stream.
         /// </summary>
         /// <param name="reader">The input stream pointing at the beginning of the executable to load.</param>
+        /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromReader(IBinaryStreamReader reader) => FromImage(PEImage.FromReader(reader));
+        public static AssemblyDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
+        {
+            return FromImage(PEImage.FromReader(reader, mode));
+        }
 
         /// <summary>
         /// Initializes a .NET assembly from a PE image.
@@ -74,11 +83,6 @@ namespace AsmResolver.DotNet
         public static AssemblyDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) =>
             ModuleDefinition.FromImage(peImage, readParameters).Assembly
             ?? throw new BadImageFormatException("The provided PE image does not contain an assembly manifest.");
-
-        private IList<ModuleDefinition> _modules;
-        private IList<SecurityDeclaration> _securityDeclarations;
-        private readonly LazyVariable<byte[]> _publicKey;
-        private byte[] _publicKeyToken;
 
         /// <summary>
         /// Initializes a new assembly definition.

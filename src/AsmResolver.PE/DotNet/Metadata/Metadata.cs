@@ -8,26 +8,9 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// <summary>
     /// Provides a basic implementation of a metadata directory in a managed PE.
     /// </summary>
-    public class Metadata : IMetadata
+    public class Metadata : SegmentBase, IMetadata
     {
         private IList<IMetadataStream> _streams;
-
-        /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public uint Rva
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
         public ushort MajorVersion
@@ -76,16 +59,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-            Rva = newRva;
-            
-            // TODO: update stream offsets.
-        }
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize()
+        public override uint GetPhysicalSize()
         {
             return (uint) (sizeof(uint)                              // Signature
                            + 2 * sizeof(ushort)                      // Version
@@ -99,12 +73,9 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <inheritdoc />
-        public uint GetVirtualSize() => GetPhysicalSize();
-
-        /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public override void Write(IBinaryStreamWriter writer)
         {
-            uint start = writer.FileOffset;
+            ulong start = writer.Offset;
             
             writer.WriteUInt32((uint) MetadataSignature.Bsjb);
             writer.WriteUInt16(MajorVersion);
@@ -119,8 +90,8 @@ namespace AsmResolver.PE.DotNet.Metadata
             writer.WriteUInt16(Flags);
             writer.WriteUInt16((ushort) Streams.Count);
 
-            uint end = writer.FileOffset;
-            WriteStreamHeaders(writer, GetStreamHeaders(end - start));
+            ulong end = writer.Offset;
+            WriteStreamHeaders(writer, GetStreamHeaders((uint) (end - start)));
             WriteStreams(writer);
         }
 

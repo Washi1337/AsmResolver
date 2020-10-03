@@ -6,14 +6,16 @@ namespace AsmResolver.PE.File.Headers
     /// <summary>
     /// Represents a single section header in the portable executable (PE) file format.
     /// </summary>
-    public class SectionHeader : ISegment, IOffsetConverter
+    public class SectionHeader : SegmentBase, IOffsetConverter
     {
+        /// <summary>
+        /// Indicates the static size of a single section header.
+        /// </summary>
         public const uint SectionHeaderSize = 8 * sizeof(byte) +
                                              6 * sizeof (uint) +
                                              2 * sizeof (ushort) +
                                              1 * sizeof (uint);
 
-        private uint _fileOffset;
         private string _name;
 
         /// <summary>
@@ -23,14 +25,16 @@ namespace AsmResolver.PE.File.Headers
         /// <returns>The section header that was read.</returns>
         public static SectionHeader FromReader(IBinaryStreamReader reader)
         {
-            uint offset = reader.FileOffset;
+            ulong offset = reader.Offset;
+            uint rva = reader.Rva;
 
             var nameBytes = new byte[8];
             reader.ReadBytes(nameBytes, 0, nameBytes.Length);
 
             return new SectionHeader(Encoding.UTF8.GetString(nameBytes).Replace("\0", ""), 0)
             {
-                _fileOffset = offset,
+                Offset = offset,
+                Rva = rva,
                 VirtualSize = reader.ReadUInt32(),
                 VirtualAddress = reader.ReadUInt32(),
                 SizeOfRawData = reader.ReadUInt32(),
@@ -54,9 +58,15 @@ namespace AsmResolver.PE.File.Headers
             Characteristics = characteristics;
         }
 
+        /// <summary>
+        /// Creates a copy of the provided section header.
+        /// </summary>
+        /// <param name="value">The section header to base information on.</param>
         public SectionHeader(SectionHeader value)
         {
-            _fileOffset = value._fileOffset;
+            Offset = value.Offset;
+            Rva = value.Rva;
+            
             VirtualSize = value.VirtualSize;
             VirtualAddress = value.VirtualAddress;
             SizeOfRawData = value.SizeOfRawData;
@@ -67,16 +77,7 @@ namespace AsmResolver.PE.File.Headers
             NumberOfLineNumbers = value.NumberOfLineNumbers;
             Characteristics = value.Characteristics;
         }
-
-        /// <inheritdoc />
-        uint IOffsetProvider.FileOffset => _fileOffset;
-
-        /// <inheritdoc />
-        uint IOffsetProvider.Rva => _fileOffset;
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
-
+        
         /// <summary>
         /// Gets or sets the name of the section.
         /// </summary>
@@ -191,29 +192,14 @@ namespace AsmResolver.PE.File.Headers
         }
         
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            _fileOffset = newFileOffset;
-        }
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize()
-        {
-            return SectionHeaderSize;
-        }
-
-        /// <inheritdoc />
-        public uint GetVirtualSize()
-        {
-            return GetPhysicalSize();
-        }
+        public override uint GetPhysicalSize() => SectionHeaderSize;
 
         /// <summary>
         /// Determines whether the provided file offset falls within the section that the header describes. 
         /// </summary>
         /// <param name="fileOffset">The offset to check.</param>
         /// <returns><c>true</c> if the file offset falls within the section, <c>false</c> otherwise.</returns>
-        public bool ContainsFileOffset(uint fileOffset)
+        public bool ContainsFileOffset(ulong fileOffset)
         {
             return PointerToRawData <= fileOffset && fileOffset < PointerToRawData + SizeOfRawData;
         }
@@ -229,15 +215,15 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        public uint FileOffsetToRva(uint fileOffset)
+        public uint FileOffsetToRva(ulong fileOffset)
         {
             if (!ContainsFileOffset(fileOffset))
                 throw new ArgumentOutOfRangeException(nameof(fileOffset));
-            return fileOffset - PointerToRawData + VirtualAddress;
+            return (uint) (fileOffset - PointerToRawData + VirtualAddress);
         }
 
         /// <inheritdoc />
-        public uint RvaToFileOffset(uint rva)
+        public ulong RvaToFileOffset(uint rva)
         {
             if (!ContainsRva(rva))
                 throw new ArgumentOutOfRangeException(nameof(rva));
@@ -245,7 +231,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public override void Write(IBinaryStreamWriter writer)
         {
             var nameBytes = Encoding.UTF8.GetBytes(Name ?? string.Empty);
             writer.WriteBytes(nameBytes);

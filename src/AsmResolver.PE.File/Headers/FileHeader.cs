@@ -3,17 +3,26 @@ namespace AsmResolver.PE.File.Headers
     /// <summary>
     /// Represents the COFF file header of a portable executable file.
     /// </summary>
-    public class FileHeader : ISegment
+    public class FileHeader : SegmentBase
     {
+        /// <summary>
+        /// Indicates the static size of the COFF file header.
+        /// </summary>
         public const int FileHeaderSize = 2 * sizeof (ushort) +
                                           3 * sizeof (uint) +
                                           2 * sizeof (ushort);
 
+        /// <summary>
+        /// Reads a COFF file header from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The read file header.</returns>
         public static FileHeader FromReader(IBinaryStreamReader reader)
         {
             return new FileHeader
             {
-                FileOffset = reader.FileOffset,
+                Offset = reader.Offset,
+                Rva = reader.Rva,
                 Machine = (MachineType) reader.ReadUInt16(),
                 NumberOfSections = reader.ReadUInt16(),
                 TimeDateStamp = reader.ReadUInt32(),
@@ -91,32 +100,10 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
+        public override uint GetPhysicalSize() => FileHeaderSize;
 
         /// <inheritdoc />
-        uint IOffsetProvider.Rva => FileOffset;
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
-
-        /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-        }
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize() => FileHeaderSize;
-
-        /// <inheritdoc />
-        public uint GetVirtualSize() => GetPhysicalSize();
-
-        /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public override void Write(IBinaryStreamWriter writer)
         {
             writer.WriteUInt16((ushort)Machine);
             writer.WriteUInt16(NumberOfSections);

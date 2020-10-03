@@ -22,10 +22,10 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         public const int MaxDepth = 10;
             
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
         private readonly ushort _namedEntries;
         private readonly ushort _idEntries;
-        private readonly uint _entriesOffset;
+        private readonly uint _entriesRva;
         private readonly int _depth;
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Win32Resources
         /// The current depth of the resource directory tree structure.
         /// If this value exceeds <see cref="MaxDepth"/>, this class will not initialize any entries.
         /// </param>
-        public SerializedResourceDirectory(PEFile peFile, ResourceDirectoryEntry? entry, 
+        public SerializedResourceDirectory(IPEFile peFile, ResourceDirectoryEntry? entry, 
             IBinaryStreamReader directoryReader, int depth = 0)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
@@ -63,10 +63,10 @@ namespace AsmResolver.PE.Win32Resources
 
                 _namedEntries = directoryReader.ReadUInt16();
                 _idEntries = directoryReader.ReadUInt16();
-                _entriesOffset = directoryReader.FileOffset;
+                _entriesRva = directoryReader.Rva;
 
-                directoryReader.FileOffset =
-                    (uint) (directoryReader.FileOffset + (_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
+                directoryReader.Offset =
+                    (directoryReader.Offset + (ulong) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize));
             }
         }
 
@@ -79,11 +79,14 @@ namespace AsmResolver.PE.Win32Resources
             if (_namedEntries + _idEntries == 0 || _depth >= MaxDepth)
                 return result;
 
-            uint baseRva = _peFile.OptionalHeader.DataDirectories[OptionalHeader.ResourceDirectoryIndex].VirtualAddress;
+            uint baseRva = _peFile.OptionalHeader
+                .GetDataDirectory(DataDirectoryIndex.ResourceDirectory)
+                .VirtualAddress;
 
             // Create entries reader.
             uint entryListSize = (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
-            var entriesReader = _peFile.CreateReaderAtFileOffset(_entriesOffset, entryListSize);
+            if (!_peFile.TryCreateReaderAtRva(_entriesRva, entryListSize, out var entriesReader))
+                return result;
 
             for (int i = 0; i < _namedEntries + _idEntries; i++)
             {

@@ -113,10 +113,10 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
-            writer.WriteByte((byte) Attributes);
-            WriteParametersAndReturnType(writer, provider);
+            context.Writer.WriteByte((byte) Attributes);
+            WriteParametersAndReturnType(context);
         }
 
         /// <inheritdoc />
@@ -127,7 +127,10 @@ namespace AsmResolver.DotNet.Signatures
                 ? $"[{string.Join(", ", ParameterTypes)}]"
                 : string.Empty;
             
-            return $"{prefix}{ReturnType} *{parameterTypesString}";
+            return string.Format("{0}{1} *{2}",
+                prefix,
+                ReturnType.FullName ?? TypeSignature.NullTypeToString,
+                parameterTypesString);
         }
     }
 }

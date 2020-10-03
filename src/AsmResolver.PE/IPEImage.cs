@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File.Headers;
@@ -145,6 +146,13 @@ namespace AsmResolver.PE
             get;
             set;
         }
-        
+
+        /// <summary>
+        /// Gets a collection of data entries stored in the debug data directory of the PE image (if available).
+        /// </summary>
+        IList<DebugDataEntry> DebugData
+        {
+            get;
+        }
     }
 }

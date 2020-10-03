@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using AsmResolver.DotNet.Code;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -145,9 +146,12 @@ namespace AsmResolver.DotNet.Builder
                     // already to the buffer. If not, we have an invalid ordering of types.
                     
                     var enclosingTypeToken = GetTypeDefinitionToken(type.DeclaringType);
-                    if (enclosingTypeToken.Rid ==0)
-                        throw new ArgumentException($"Nested type {type.FullName} is added before enclosing class.");
-                    
+                    if (enclosingTypeToken.Rid == 0)
+                    {
+                        DiagnosticBag.RegisterException(new MetadataBuilderException(
+                            $"Nested type {type.SafeToString()} is added before its enclosing class {type.DeclaringType.SafeToString()}."));
+                    }
+
                     var nestedClassRow = new NestedClassRow(
                         token.Rid,
                         enclosingTypeToken.Rid);
@@ -170,7 +174,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new FieldDefinitionRow(
                     field.Attributes,
                     Metadata.StringsStream.GetStringIndex(field.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, field.Signature));
+                    Metadata.BlobStream.GetBlobIndex(this, field.Signature, DiagnosticBag));
 
                 var token = table.Add(row);
                 _fieldTokens.Add(field, token);
@@ -195,7 +199,7 @@ namespace AsmResolver.DotNet.Builder
                     method.ImplAttributes,
                     method.Attributes,
                     Metadata.StringsStream.GetStringIndex(method.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, method.Signature),
+                    Metadata.BlobStream.GetBlobIndex(this, method.Signature, DiagnosticBag),
                     0);
 
                 var token = table.Add(row);
@@ -236,7 +240,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new PropertyDefinitionRow(
                     property.Attributes,
                     Metadata.StringsStream.GetStringIndex(property.Name),
-                    Metadata.BlobStream.GetBlobIndex(this, property.Signature));
+                    Metadata.BlobStream.GetBlobIndex(this, property.Signature, DiagnosticBag));
                 
                 var token = table.Add(row);
                 _propertyTokens.Add(property, token);
@@ -340,8 +344,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetFieldDefinitionToken(field);
                 if (newToken == MetadataToken.Zero)
                 {
-                    throw new InvalidOperationException(
-                        $"An attempt was made to finalize field {field}, which was not added to the .NET directory buffer yet.");
+                    DiagnosticBag.RegisterException(new MetadataBuilderException(
+                        $"An attempt was made to finalize field {field.SafeToString()}, which was not added to the .NET directory buffer yet."));
                 }
                 
                 // Add field pointer row, making sure the RID is preserved.
@@ -376,8 +380,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetMethodDefinitionToken(method);
                 if (newToken == MetadataToken.Zero)
                 {
-                    throw new InvalidOperationException(
-                        $"An attempt was made to finalize method {method}, which was not added to the .NET directory buffer yet.");
+                    DiagnosticBag.RegisterException(new MetadataBuilderException(
+                        $"An attempt was made to finalize method {method.SafeToString()}, which was not added to the .NET directory buffer yet."));
                 }
                 
                 // Add method pointer row, making sure the RID is preserved.
@@ -389,8 +393,10 @@ namespace AsmResolver.DotNet.Builder
                 
                 // Serialize method body and update column.
                 var row = definitionTable[newToken.Rid];
+
+                var context = new MethodBodySerializationContext(this, DiagnosticBag);
                 definitionTable[newToken.Rid] = new MethodDefinitionRow(
-                    MethodBodySerializer.SerializeMethodBody(this, method),
+                    MethodBodySerializer.SerializeMethodBody(context, method),
                     row.ImplAttributes,
                     row.Attributes,
                     row.Name,
@@ -419,8 +425,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetParameterDefinitionToken(parameter);
                 if (newToken == MetadataToken.Zero)
                 {
-                    throw new MetadataBuilderException(
-                        $"An attempt was made to finalize parameter {parameter} in {method}, which was not added to the .NET directory buffer yet.");
+                    DiagnosticBag.RegisterException(new MetadataBuilderException(
+                        $"An attempt was made to finalize parameter {parameter.SafeToString()} in {method.SafeToString()}, which was not added to the .NET directory buffer yet."));
                 }
                 
                 // Add parameter pointer row, making sure the RID is preserved.
@@ -456,8 +462,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetPropertyDefinitionToken(property);
                 if (newToken == MetadataToken.Zero)
                 {
-                    throw new MetadataBuilderException(
-                        $"An attempt was made to finalize property {property}, which was not added to the .NET directory buffer yet.");
+                    DiagnosticBag.RegisterException(new MetadataBuilderException(
+                        $"An attempt was made to finalize property {property.SafeToString()}, which was not added to the .NET directory buffer yet."));
                 }
 
                 // Add property pointer row, making sure the RID is preserved.
@@ -495,8 +501,8 @@ namespace AsmResolver.DotNet.Builder
                 var newToken = GetEventDefinitionToken(@event);
                 if (newToken == MetadataToken.Zero)
                 {
-                    throw new MetadataBuilderException(
-                        $"An attempt was made to finalize event {@event}, which was not added to the .NET directory buffer yet.");
+                    DiagnosticBag.RegisterException(new MetadataBuilderException(
+                        $"An attempt was made to finalize event {@event.SafeToString()}, which was not added to the .NET directory buffer yet."));
                 }
                 
                 // Add event pointer row, making sure the RID is preserved.

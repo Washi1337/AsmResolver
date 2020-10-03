@@ -11,11 +11,11 @@ namespace AsmResolver
         /// Creates a new relative reference.
         /// </summary>
         /// <param name="base">The segment the reference is relative to.</param>
-        /// <param name="offset">The number of bytes to skip after the beginning of the segment.</param>
-        public RelativeReference(IOffsetProvider @base, int offset)
+        /// <param name="additive">The number of bytes to skip after the beginning of the segment.</param>
+        public RelativeReference(IOffsetProvider @base, int additive)
         {
             Base = @base;
-            Offset = offset;
+            Additive = additive;
         }
         
         /// <summary>
@@ -29,23 +29,23 @@ namespace AsmResolver
         /// <summary>
         /// Gets the number of bytes to skip after the beginning of the segment indicated by <see cref="Base"/>.
         /// </summary>
-        public int Offset
+        public int Additive
         {
             get;
         }
 
         /// <inheritdoc />
-        public uint FileOffset => (uint) (Base.FileOffset + Offset);
+        public ulong Offset => Base.Offset + (ulong) Additive;
 
         /// <inheritdoc />
-        public uint Rva => (uint) (Base.Rva + Offset);
+        public uint Rva => (uint) (Base.Rva + Additive);
 
         /// <inheritdoc />
         public bool CanUpdateOffsets => Base.CanUpdateOffsets;
 
         /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva) =>
-            Base.UpdateOffsets((uint) (newFileOffset - Offset), (uint) (newRva - Offset));
+        public void UpdateOffsets(ulong newOffset, uint newRva) =>
+            Base.UpdateOffsets( newOffset - (ulong) Additive, (uint) (newRva - Additive));
 
         /// <inheritdoc />
         public bool CanRead => Base is ISegmentReference reference && reference.CanRead;
@@ -59,7 +59,7 @@ namespace AsmResolver
             if (CanRead)
             {
                 var reader = ((ISegmentReference) Base).CreateReader();
-                reader.FileOffset = (uint) (reader.FileOffset + Offset);
+                reader.Offset = reader.Offset + (ulong) Additive;
                 return reader;
             }
             

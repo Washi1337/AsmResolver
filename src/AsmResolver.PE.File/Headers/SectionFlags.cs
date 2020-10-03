@@ -2,6 +2,9 @@ using System;
 
 namespace AsmResolver.PE.File.Headers
 {
+    /// <summary>
+    /// Provides members describing all possible flags that can be assigned to a section.
+    /// </summary>
     [Flags]
     public enum SectionFlags: uint
     {

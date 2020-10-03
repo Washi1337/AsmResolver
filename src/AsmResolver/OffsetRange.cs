@@ -12,7 +12,7 @@ namespace AsmResolver
         /// </summary>
         /// <param name="tuple">The tuple to convert.</param>
         /// <returns>The constructed offset range.</returns>
-        public static implicit operator OffsetRange((uint Start, uint End) tuple) => 
+        public static implicit operator OffsetRange((ulong Start, ulong End) tuple) => 
             new OffsetRange(tuple.Start, tuple.End);
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace AsmResolver
         /// <param name="start">The start offset.</param>
         /// <param name="end">The end offset, this offset is exclusive.</param>
         /// <exception cref="ArgumentException">Occurs when the provided start offset is bigger than the end offset.</exception>
-        public OffsetRange(uint start, uint end)
+        public OffsetRange(ulong start, ulong end)
         {
             if (start > end)
                 throw new ArgumentException("Start offset must be smaller or equal to end offset.");
@@ -33,7 +33,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets the start offset.
         /// </summary>
-        public uint Start
+        public ulong Start
         {
             get;
         }
@@ -41,7 +41,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets the end offset. This offset is exclusive.
         /// </summary>
-        public uint End
+        public ulong End
         {
             get;
         }
@@ -61,7 +61,7 @@ namespace AsmResolver
         /// </summary>
         /// <param name="offset">The offset.</param>
         /// <returns><c>true</c> if the offset falls within the range, <c>false</c> otherwise.</returns>
-        public bool Contains(uint offset) => Start <= offset && End > offset;
+        public bool Contains(ulong offset) => Start <= offset && End > offset;
 
         /// <summary>
         /// Determines whether the provided range is a subset of the range.
@@ -117,7 +117,7 @@ namespace AsmResolver
         /// </summary>
         /// <param name="start">The start offset.</param>
         /// <param name="end">The exclusive end offset.</param>
-        public void Deconstruct(out uint start, out uint end)
+        public void Deconstruct(out ulong start, out ulong end)
         {
             start = Start;
             end = End;

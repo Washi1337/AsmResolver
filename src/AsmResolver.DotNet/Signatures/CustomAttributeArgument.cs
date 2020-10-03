@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -21,47 +20,56 @@ namespace AsmResolver.DotNet.Signatures
         public static CustomAttributeArgument FromReader(ModuleDefinition parentModule, TypeSignature argumentType,
             IBinaryStreamReader reader)
         {
-            return argumentType.ElementType != ElementType.SzArray
-                ? ReadSimpleArgument(parentModule, argumentType, reader)
-                : ReadSzArrayArgument(parentModule, argumentType, reader);
+            var elementReader = new CustomAttributeArgumentReader(parentModule, reader);
+            elementReader.ReadValue(argumentType);
+            
+            return new CustomAttributeArgument(argumentType, elementReader.Elements)
+            {
+                IsNullArray = elementReader.IsNullArray
+            };
         }
         
-        private static CustomAttributeArgument ReadSimpleArgument(ModuleDefinition parentModule,
-            TypeSignature argumentType, IBinaryStreamReader reader)
+        /// <summary>
+        /// Creates a new empty custom attribute argument. 
+        /// </summary>
+        /// <param name="argumentType">The type of the argument.</param>
+        public CustomAttributeArgument(TypeSignature argumentType)
         {
-            var result = new CustomAttributeArgument(argumentType);
-            result.Elements.Add(CustomAttributeArgumentElement.FromReader(parentModule, argumentType, reader));
-            return result;
-        }
-
-        private static CustomAttributeArgument ReadSzArrayArgument(ModuleDefinition parentModule,
-            TypeSignature argumentType, IBinaryStreamReader reader)
-        {
-            var result = new CustomAttributeArgument(argumentType);
-            
-            var arrayElementType = ((SzArrayTypeSignature) argumentType).BaseType;
-            uint elementCount = reader.CanRead(sizeof(uint)) ? reader.ReadUInt32() : uint.MaxValue;
-            result.IsNullArray = elementCount == uint.MaxValue;
-            
-            if (!result.IsNullArray)
-            {
-                for (uint i = 0; i < elementCount; i++)
-                {
-                    var element = CustomAttributeArgumentElement.FromReader(parentModule, arrayElementType, reader);
-                    result.Elements.Add(element);
-                }
-            }
-
-            return result;
+            ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
+            Elements = new List<object>();
         }
 
         /// <summary>
         /// Creates a new custom attribute argument. 
         /// </summary>
         /// <param name="argumentType">The type of the argument.</param>
-        public CustomAttributeArgument(TypeSignature argumentType)
+        /// <param name="value">The value of the argument.</param>
+        public CustomAttributeArgument(TypeSignature argumentType, object value)
         {
             ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
+            Elements = new List<object>(1) {value};
+        }
+        
+        /// <summary>
+        /// Creates a new custom attribute array argument. 
+        /// </summary>
+        /// <param name="argumentType">The type of the argument.</param>
+        /// <param name="elements">The value making up the elements of the array argument.</param>
+        public CustomAttributeArgument(TypeSignature argumentType, IEnumerable<object> elements)
+        {
+            ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
+            Elements = new List<object>(elements);
+        }
+
+        /// <summary>
+        /// Creates a new custom attribute array argument. 
+        /// </summary>
+        /// <param name="argumentType">The type of the argument.</param>
+        /// <param name="elements">The value making up the elements of the array argument.</param>
+        public CustomAttributeArgument(TypeSignature argumentType, params object[] elements)
+        {
+            ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
+            Elements = new List<object>(elements);
         }
 
         /// <summary>
@@ -76,15 +84,15 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// When <see cref="ArgumentType"/> is not a <see cref="SzArrayTypeSignature"/>, gets the first element of the
         /// </summary>
-        public CustomAttributeArgumentElement Element => Elements.Count > 0 ? Elements[0] : default;
+        public object Element => Elements.Count > 0 ? Elements[0] : default;
 
         /// <summary>
         /// Gets a collection of all elements that the argument is built with.
         /// </summary>
-        public IList<CustomAttributeArgumentElement> Elements
+        public IList<object> Elements
         {
             get;
-        } = new List<CustomAttributeArgumentElement>();
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the argument represents the null array value.
@@ -108,25 +116,10 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Writes the fixed argument to the provided output stream.
         /// </summary>
-        /// <param name="writer">The output stream.</param>
-        /// <param name="provider">The object to use for obtaining metadata tokens for members in the tables stream.</param>
-        public void Write(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        public void Write(BlobSerializationContext context)
         {
-            if (ArgumentType is SzArrayTypeSignature szArrayType)
-                WriteArray(szArrayType, writer, provider);
-            else
-                WriteSimple(writer, provider);
-        }
-
-        private void WriteSimple(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
-        {
-            Element.Write(writer, ArgumentType, provider);
-        }
-
-        private void WriteArray(SzArrayTypeSignature szArrayType, IBinaryStreamWriter writer,
-            ITypeCodedIndexProvider provider)
-        {
-            
+            var writer = new CustomAttributeArgumentWriter(context);
+            writer.WriteArgument(this);
         }
     }
 }

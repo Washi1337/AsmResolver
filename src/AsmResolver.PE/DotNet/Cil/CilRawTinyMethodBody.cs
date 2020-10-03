@@ -23,7 +23,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// tiny format.</exception>
         public new static CilRawTinyMethodBody FromReader(IBinaryStreamReader reader)
         {
-            uint fileOffset = reader.FileOffset;
+            ulong fileOffset = reader.Offset;
             uint rva = reader.Rva;
             
             var flag = (CilMethodBodyAttributes) reader.ReadByte();

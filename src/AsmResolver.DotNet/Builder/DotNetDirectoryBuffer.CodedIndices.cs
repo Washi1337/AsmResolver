@@ -21,17 +21,15 @@ namespace AsmResolver.DotNet.Builder
             var row = new CustomAttributeRow(
                 encoder.EncodeToken(ownerToken),
                 AddCustomAttributeType(attribute.Constructor),
-                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature));
+                Metadata.BlobStream.GetBlobIndex(this, attribute.Signature, DiagnosticBag));
 
             table.Add(attribute, row);
         }
         
         private uint AddResolutionScope(IResolutionScope scope)
         {
-            if (scope is null)
+            if (scope is null || !AssertIsImported(scope))
                 return 0;
-            
-            AssertIsImported(scope);
 
             var token = scope.MetadataToken.Table switch
             {
@@ -50,10 +48,8 @@ namespace AsmResolver.DotNet.Builder
         /// <inheritdoc />
         public uint GetTypeDefOrRefIndex(ITypeDefOrRef type)
         {
-            if (type is null)
+            if (type is null || !AssertIsImported(type))
                 return 0;
-            
-            AssertIsImported(type);
 
             var token = type.MetadataToken.Table switch
             {
@@ -70,10 +66,8 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddMemberRefParent(IMemberRefParent parent)
         {
-            if (parent is null)
+            if (parent is null || !AssertIsImported(parent))
                 return 0;
-            
-            AssertIsImported(parent);
 
             var token = parent.MetadataToken.Table switch
             {
@@ -92,10 +86,8 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddMethodDefOrRef(IMethodDefOrRef method)
         {
-            if (method is null)
+            if (method is null || !AssertIsImported(method))
                 return 0;
-
-            AssertIsImported(method);
 
             var token = method.MetadataToken.Table switch
             {
@@ -111,10 +103,8 @@ namespace AsmResolver.DotNet.Builder
 
         private uint AddCustomAttributeType(ICustomAttributeType constructor)
         {
-            if (constructor is null)
+            if (constructor is null || !AssertIsImported(constructor))
                 return 0;
-
-            AssertIsImported(constructor);
 
             var token = constructor.MetadataToken.Table switch
             {
@@ -139,7 +129,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new ConstantRow(
                 constant.Type,
                 encoder.EncodeToken(ownerToken),
-                Metadata.BlobStream.GetBlobIndex(this, constant.Value));
+                Metadata.BlobStream.GetBlobIndex(this, constant.Value, DiagnosticBag));
 
             table.Add(constant, row);
         }
@@ -189,7 +179,7 @@ namespace AsmResolver.DotNet.Builder
                 var row = new SecurityDeclarationRow(
                     declaration.Action,
                     encoder.EncodeToken(ownerToken), 
-                    Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet));
+                    Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet, DiagnosticBag));
                 table.Add(declaration, row);
             }
         }
@@ -204,7 +194,7 @@ namespace AsmResolver.DotNet.Builder
             
             var row = new FieldMarshalRow(
                 encoder.EncodeToken(ownerToken),
-                Metadata.BlobStream.GetBlobIndex(this, owner.MarshalDescriptor));
+                Metadata.BlobStream.GetBlobIndex(this, owner.MarshalDescriptor, DiagnosticBag));
             table.Add(owner, row);
         }
         

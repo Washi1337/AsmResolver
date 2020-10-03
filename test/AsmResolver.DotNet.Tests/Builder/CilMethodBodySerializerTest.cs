@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 }
             });
 
-            var newImage = builder.CreateImage(module);
+            var newImage = builder.CreateImage(module).ConstructedImage;
             var newModule = ModuleDefinition.FromImage(newImage);
 
             Assert.Equal(expectedMaxStack, newModule.ManagedEntrypointMethod.CilMethodBody.MaxStack);

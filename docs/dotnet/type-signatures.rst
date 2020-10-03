@@ -120,7 +120,6 @@ To quickly transform any ``ITypeDescriptor`` into a ``TypeSignature``, it is pos
 
 Likewise, a ``TypeSignature`` can also be converted back to a ``ITypeDefOrRef``, which can be referenced using a metadata token, using the ``TypeSignature.ToTypeDefOrRef()`` method.
 
-
 Decorating type signatures
 --------------------------
 
@@ -138,3 +137,30 @@ Traversing type signature annotations can be done by accessing the ``BaseType`` 
 
     var arrayElementType = arrayTypeSig.BaseType; // returns System.Int32
 
+Adding decorations to types can also be done through shortcut methods that follow the ``MakeXXX`` naming scheme:
+
+.. code-block:: csharp
+
+    var arrayTypeSig = module.CorLibTypeFactory.Int32.MakeSzArrayType();
+
+Below an overview of all factory shortcut methods:
+
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| Factory method                                                    | Description                                                                                                      |
++===================================================================+==================================================================================================================+
+| ``MakeArrayType(int dimensionCount)``                             | Wraps the type in a new ``ArrayTypeSignature`` with ``dimensionCount`` zero based dimensions with no upperbound. |
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| ``MakeArrayType(ArrayDimension[] dimensinos)``                    | Wraps the type in a new ``ArrayTypeSignature`` with ``dimensions`` set as dimensions                             |
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| ``MakeByReferenceType()``                                         | Wraps the type in a new ``ByReferenceTypeSignature``                                                             |
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| ``MakeModifierType(ITypeDefOrRef modifierType, bool isRequired)`` | Wraps the type in a new ``CustomModifierTypeSignature`` with the specified modifier type.                        |
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| ``MakePinnedType()``                                              | Wraps the type in a new ``PinnedTypeSignature``                                                                  |
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| ``MakePointerType()``                                             | Wraps the type in a new ``PointerTypeSignature``                                                                 |
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| ``MakeSzArrayType()``                                             | Wraps the type in a new ``SzArrayTypeSignature``                                                                 |
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| ``MakeGenericInstanceType(TypeSignature[] typeArguments)``        | Wraps the type in a new ``GenericInstanceTypeSignature`` with the provided type arguments.                       |
++-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+

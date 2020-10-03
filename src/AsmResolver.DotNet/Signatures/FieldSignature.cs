@@ -1,5 +1,5 @@
-using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -80,10 +80,19 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
-            writer.WriteByte((byte) Attributes);
-            FieldType.Write(writer, provider);
+            context.Writer.WriteByte((byte) Attributes);
+            if (FieldType is null)
+            {
+                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this, 
+                    "The type referenced in the field signature is null."));
+                context.Writer.WriteByte((byte) ElementType.Object);
+            }
+            else
+            {
+                FieldType.Write(context);
+            }
         }
     }
 }

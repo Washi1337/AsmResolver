@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Tests
             var attribute = declaration.PermissionSet.Attributes[0];
             Assert.Contains(attribute.NamedArguments, argument =>
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyA)
-                && argument.Argument.Element.Value.Equals(1));
+                && argument.Argument.Element.Equals(1));
         }
 
         [Theory]
@@ -83,13 +83,13 @@ namespace AsmResolver.DotNet.Tests
             var attribute = declaration.PermissionSet.Attributes[0];
             Assert.Contains(attribute.NamedArguments, argument =>
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyA)
-                && argument.Argument.Element.Value.Equals(1));
+                && argument.Argument.Element.Equals(1));
             Assert.Contains(attribute.NamedArguments, argument =>
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyB)
-                && argument.Argument.Element.Value.Equals(2));
+                && argument.Argument.Element.Equals(2));
             Assert.Contains(attribute.NamedArguments, argument =>
                 argument.MemberName == nameof(CustomCodeAccessSecurityAttribute.PropertyC)
-                && argument.Argument.Element.Value.Equals(3));
+                && argument.Argument.Element.Equals(3));
         }
     }
 }

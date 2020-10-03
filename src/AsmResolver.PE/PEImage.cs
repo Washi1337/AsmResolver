@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
@@ -16,6 +17,13 @@ namespace AsmResolver.PE
     /// </summary>
     public class PEImage : IPEImage
     {
+        private IList<IImportedModule> _imports;
+        private readonly LazyVariable<IExportDirectory> _exports;
+        private readonly LazyVariable<IResourceDirectory> _resources;
+        private IList<BaseRelocation> _relocations;
+        private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
+        private IList<DebugDataEntry> _debugData;
+        
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
         /// </summary>
@@ -56,19 +64,24 @@ namespace AsmResolver.PE
         /// Opens a PE image from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
+        /// <param name="mode">Indicates the input PE is in its mapped or unmapped form.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader) => FromFile(PEFile.FromReader(reader));
+        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
+        {
+            return FromFile(PEFile.FromReader(reader, mode));
+        }
 
         /// <summary>
         /// Opens a PE image from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
+        /// <param name="mode">Indicates the input PE is in its mapped or unmapped form.</param>
         /// <param name="readParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader, PEReadParameters readParameters) => 
-            FromFile(PEFile.FromReader(reader), readParameters);
+        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode, PEReadParameters readParameters) => 
+            FromFile(PEFile.FromReader(reader, mode), readParameters);
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -76,7 +89,7 @@ namespace AsmResolver.PE
         /// <param name="peFile">The PE file object.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(PEFile peFile) => FromFile(peFile, CreateDefaultReadParameters(peFile));
+        public static IPEImage FromFile(IPEFile peFile) => FromFile(peFile, CreateDefaultReadParameters(peFile));
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -85,17 +98,10 @@ namespace AsmResolver.PE
         /// <param name="readParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(PEFile peFile, PEReadParameters readParameters) =>
+        public static IPEImage FromFile(IPEFile peFile, PEReadParameters readParameters) =>
             new SerializedPEImage(peFile, readParameters);
 
-        private static PEReadParameters CreateDefaultReadParameters(PEFile peFile) => new PEReadParameters(peFile);
-
-
-        private IList<IImportedModule> _imports;
-        private readonly LazyVariable<IExportDirectory> _exports;
-        private readonly LazyVariable<IResourceDirectory> _resources;
-        private IList<BaseRelocation> _relocations;
-        private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
+        private static PEReadParameters CreateDefaultReadParameters(IPEFile peFile) => new PEReadParameters(peFile);
 
         /// <summary>
         /// Initializes a new PE image.
@@ -200,6 +206,17 @@ namespace AsmResolver.PE
             set => _dotNetDirectory.Value = value;
         }
 
+        /// <inheritdoc />
+        public IList<DebugDataEntry> DebugData
+        {
+            get
+            {
+                if (_debugData is null)
+                    Interlocked.CompareExchange(ref _debugData, GetDebugData(), null);
+                return _debugData;
+            }
+        }
+
         /// <summary>
         /// Obtains the list of modules that were imported into the PE.
         /// </summary>
@@ -244,5 +261,14 @@ namespace AsmResolver.PE
         /// This method is called upon initialization of the <see cref="DotNetDirectory"/> property.
         /// </remarks>
         protected virtual IDotNetDirectory GetDotNetDirectory() => null;
+
+        /// <summary>
+        /// Obtains the debug data entries in the PE. 
+        /// </summary>
+        /// <returns>The debug data entries.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DebugData"/> property.
+        /// </remarks>
+        protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
     }
 }

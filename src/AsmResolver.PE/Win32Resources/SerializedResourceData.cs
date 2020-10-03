@@ -14,7 +14,7 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         public const uint ResourceDataEntrySize = 4 * sizeof(uint);
         
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
         private readonly uint _contentsRva;
         private readonly uint _contentsSize;
 
@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Win32Resources
         /// <param name="peFile">The PE file containing the resource.</param>
         /// <param name="entry">The entry to read.</param>
         /// <param name="entryReader">The input stream to read the data from.</param>
-        public SerializedResourceData(PEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader entryReader)
+        public SerializedResourceData(IPEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader entryReader)
         {
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
 

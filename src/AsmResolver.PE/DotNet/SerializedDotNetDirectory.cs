@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet
     /// </summary>
     public class SerializedDotNetDirectory : DotNetDirectory
     {
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
         private readonly IMetadataStreamReader _metadataStreamReader;
         private readonly DataDirectory _metadataDirectory;
         private readonly DataDirectory _resourcesDirectory;
@@ -28,7 +28,7 @@ namespace AsmResolver.PE.DotNet
         /// <param name="reader">The input stream.</param>
         /// <param name="metadataStreamReader"></param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
-        public SerializedDotNetDirectory(PEFile peFile, IBinaryStreamReader reader,
+        public SerializedDotNetDirectory(IPEFile peFile, IBinaryStreamReader reader,
             IMetadataStreamReader metadataStreamReader)
         {
             if (reader == null)
@@ -36,7 +36,7 @@ namespace AsmResolver.PE.DotNet
             _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
             _metadataStreamReader = metadataStreamReader;
 
-            FileOffset = reader.FileOffset;
+            Offset = reader.Offset;
 
             uint cb = reader.ReadUInt32();
             MajorRuntimeVersion = reader.ReadUInt16();

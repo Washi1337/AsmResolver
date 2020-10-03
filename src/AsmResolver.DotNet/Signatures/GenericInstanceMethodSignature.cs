@@ -81,12 +81,13 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
+            var writer = context.Writer;
             writer.WriteByte((byte) Attributes);
             writer.WriteCompressedUInt32((uint) TypeArguments.Count);
             for (int i = 0; i < TypeArguments.Count; i++)
-                TypeArguments[i].Write(writer, provider);
+                TypeArguments[i].Write(context);
         }
 
         /// <inheritdoc />

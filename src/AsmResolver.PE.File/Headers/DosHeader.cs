@@ -5,11 +5,26 @@ namespace AsmResolver.PE.File.Headers
     /// <summary>
     /// Represents the DOS header (also known as the MZ header) in the portable executable (PE) file format.
     /// </summary>
-    public class DosHeader : ISegment
+    public class DosHeader : SegmentBase
     {
+        /// <summary>
+        /// Indicates the magic constant that every DOS header should start with.
+        /// </summary>
         public const ushort ValidPEMagic = 0x5A4D;
+        
+        /// <summary>
+        /// Indicates the minimal length of a valid DOS header in a portable executable file.
+        /// </summary>
         public const int MinimalDosHeaderLength = 0x40;
+        
+        /// <summary>
+        /// Indicates the offset of the e_flanew field in the DOS header.
+        /// </summary>
         public const int NextHeaderFieldOffset = 0x3C;
+        
+        /// <summary>
+        /// Indicates the default value of the e_flanew field in the DOS header.
+        /// </summary>
         public const int DefaultNewHeaderOffset = 0x80;
 
         private static readonly byte[] DefaultDosHeader = {
@@ -35,23 +50,28 @@ namespace AsmResolver.PE.File.Headers
         /// <exception cref="BadImageFormatException">Occurs when the input stream does not point to a valid DOS header.</exception>
         public static DosHeader FromReader(IBinaryStreamReader reader)
         {
+            ulong offset = reader.Offset;
+            uint rva = reader.Rva;
+            
             var stub = new byte[DefaultNewHeaderOffset];
             
             ushort magic = reader.ReadUInt16();
             if (magic != ValidPEMagic)
                 throw new BadImageFormatException();
 
-            reader.FileOffset += NextHeaderFieldOffset - 2;
+            reader.Offset += NextHeaderFieldOffset - 2;
             uint nextHeaderOffset = reader.ReadUInt32();
 
             if (nextHeaderOffset != DefaultNewHeaderOffset)
                 Array.Resize(ref stub, (int) nextHeaderOffset);
 
-            reader.FileOffset -= NextHeaderFieldOffset + 4;
+            reader.Offset -= NextHeaderFieldOffset + 4;
             reader.ReadBytes(stub, 0, stub.Length);
 
             return new DosHeader(stub)
             {
+                Offset = offset,
+                Rva = rva,
                 NextHeaderOffset = nextHeaderOffset
             };
         }
@@ -86,31 +106,10 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        uint IOffsetProvider.FileOffset => 0;
+        public override uint GetPhysicalSize() => (uint) _stub.Length;
 
         /// <inheritdoc />
-        uint IOffsetProvider.Rva => 0;
-
-        /// <inheritdoc />
-        bool IOffsetProvider.CanUpdateOffsets => false;
-
-        /// <inheritdoc />
-        void IOffsetProvider.UpdateOffsets(uint newFileOffset, uint newRva) => throw new NotSupportedException();
-
-        /// <inheritdoc />
-        public uint GetPhysicalSize()
-        {
-            return (uint) _stub.Length;
-        }
-
-        /// <inheritdoc />
-        public uint GetVirtualSize()
-        {
-            return (uint) _stub.Length;
-        }
-
-        /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
+        public override void Write(IBinaryStreamWriter writer)
         {
             writer.WriteBytes(_stub, 0, NextHeaderFieldOffset);
             writer.WriteUInt32(NextHeaderOffset);

@@ -34,8 +34,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => null;
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider) => 
-            writer.WriteByte((byte) ElementType);
+        protected override void WriteContents(BlobSerializationContext context) => 
+            context.Writer.WriteByte((byte) ElementType);
         
         /// <inheritdoc />
         public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 

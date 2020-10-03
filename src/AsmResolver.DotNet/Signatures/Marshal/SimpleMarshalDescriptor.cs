@@ -21,9 +21,9 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
-            writer.WriteByte((byte) NativeType);
+            context.Writer.WriteByte((byte) NativeType);
         }
     }
 }

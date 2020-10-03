@@ -70,6 +70,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public ArrayTypeSignature(TypeSignature baseType)
             : base(baseType)
         {
+            Dimensions = new List<ArrayDimension>(0);
         }
 
         /// <summary>
@@ -82,16 +83,28 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             if (dimensionCount < 0)
                 throw new ArgumentException("Number of dimensions cannot be negative.");
-            
+
+            Dimensions = new List<ArrayDimension>(dimensionCount);
             for (int i = 0; i < dimensionCount;i++)
                 Dimensions.Add(new ArrayDimension());
+        }
+
+        /// <summary>
+        /// Creates a new array type signature with the provided dimensions count.
+        /// </summary>
+        /// <param name="baseType">The element type.</param>
+        /// <param name="dimensions">The dimensions.</param>
+        public ArrayTypeSignature(TypeSignature baseType, params ArrayDimension[] dimensions)
+            : base(baseType)
+        {
+            Dimensions = new List<ArrayDimension>(dimensions);
         }
 
         /// <inheritdoc />
         public override ElementType ElementType => ElementType.Array;
 
         /// <inheritdoc />
-        public override string Name => BaseType.Name + GetDimensionsString();
+        public override string Name => (BaseType?.Name ?? NullTypeToString) + GetDimensionsString();
 
         /// <inheritdoc />
         public override bool IsValueType => false;
@@ -102,7 +115,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         public IList<ArrayDimension> Dimensions
         {
             get;
-        } = new List<ArrayDimension>();
+        }
 
         private string GetDimensionsString()
         {
@@ -168,13 +181,15 @@ namespace AsmResolver.DotNet.Signatures.Types
             visitor.VisitArrayType(this);
 
         /// <inheritdoc />
-        protected override void WriteContents(IBinaryStreamWriter writer, ITypeCodedIndexProvider provider)
+        protected override void WriteContents(BlobSerializationContext context)
         {
             if (!Validate())
                 throw new InvalidOperationException();
 
+            var writer = context.Writer;
+
             writer.WriteByte((byte) ElementType);
-            BaseType.Write(writer, provider);
+            WriteBaseType(context);
             writer.WriteCompressedUInt32((uint) Dimensions.Count);
 
             // Sized dimensions.

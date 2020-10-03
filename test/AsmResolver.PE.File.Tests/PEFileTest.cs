@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.Tests;
 using AsmResolver.Tests.Runners;

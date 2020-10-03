@@ -6,35 +6,39 @@ namespace AsmResolver.PE.File.Headers
     /// <summary>
     /// Represents a 32-bit or 64-bit optional header in a portable executable (PE) file.
     /// </summary>
-    public class OptionalHeader : ISegment
+    public class OptionalHeader : SegmentBase
     {
+        /// <summary>
+        /// Indicates the static size of an optional header in a 32-bit portable executable file, excluding the
+        /// data directory entries.
+        /// </summary>
         public const uint OptionalHeader32SizeExcludingDataDirectories = 0x60;
+        
+        /// <summary>
+        /// Indicates the static size of an optional header in a 64-bit portable executable file, excluding the
+        /// data directory entries.
+        /// </summary>
         public const uint OptionalHeader64SizeExcludingDataDirectories = 0x70;
 
+        /// <summary>
+        /// Indicates the default number of data directory entries in an optional header.
+        /// </summary>
         public const int DefaultNumberOfRvasAndSizes = 16;
-        
-        public const int ExportDirectoryIndex = 0;
-        public const int ImportDirectoryIndex = 1;
-        public const int ResourceDirectoryIndex = 2;
-        public const int ExceptionDirectoryIndex = 3;
-        public const int CertificateDirectoryIndex = 4;
-        public const int BaseRelocationDirectoryIndex = 5;
-        public const int DebugDirectoryIndex = 6;
-        public const int ArchitectureDirectoryIndex = 7;
-        public const int GlobalPtrDirectoryIndex = 8;
-        public const int TlsDirectoryIndex = 9;
-        public const int LoadConfigDirectoryIndex = 10;
-        public const int BoundImportDirectoryIndex = 11;
-        public const int IatDirectoryIndex = 12;
-        public const int DelayImportDescrDirectoryIndex = 13;
-        public const int ClrDirectoryIndex = 14;
-        public const int ReservedDirectoryIndex = 15;
 
+        /// <summary>
+        /// Reads an optional header from the provided input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <param name="ignoreNumberOfRvasAndSizes">Indicates whether the number of data directories should be ignored
+        /// and <see cref="DefaultNumberOfRvasAndSizes"/> should be used instead.</param>
+        /// <returns>The optional header.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the input stream is malformed.</exception>
         public static OptionalHeader FromReader(IBinaryStreamReader reader, bool ignoreNumberOfRvasAndSizes = true)
         {
             var header = new OptionalHeader
             {
-                FileOffset = reader.FileOffset,
+                Offset = reader.Offset,
+                Rva = reader.Rva,
                 Magic = (OptionalHeaderMagic)reader.ReadUInt16(),
                 MajorLinkerVersion = reader.ReadByte(),
                 MinorLinkerVersion = reader.ReadByte(),
@@ -100,19 +104,6 @@ namespace AsmResolver.PE.File.Headers
 
             return header;
         }
-
-        /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        uint IOffsetProvider.Rva => FileOffset;
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
 
         /// <summary>
         /// Gets or sets the magic optional header signature, determining whether the image is a PE32 (32-bit) or a PE32+ (64-bit) image.
@@ -393,29 +384,24 @@ namespace AsmResolver.PE.File.Headers
             get;
         } = new List<DataDirectory>();
 
-        /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-        }
+        /// <summary>
+        /// Gets a data directory by its index.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <returns>The data directory entry.</returns>
+        public DataDirectory GetDataDirectory(DataDirectoryIndex index) => DataDirectories[(int) index];
 
         /// <inheritdoc />
-        public uint GetPhysicalSize()
+        public override uint GetPhysicalSize()
         {
             // TODO: make configurable?
             return Magic == OptionalHeaderMagic.Pe32 ? 0xE0u : 0xF0u;
         }
 
         /// <inheritdoc />
-        public uint GetVirtualSize()
+        public override void Write(IBinaryStreamWriter writer)
         {
-            return GetPhysicalSize();
-        }
-
-        /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer)
-        {
-            uint start = writer.FileOffset;
+            ulong start = writer.Offset;
 
             writer.WriteUInt16((ushort)Magic);
             writer.WriteByte(MajorLinkerVersion);
@@ -475,7 +461,7 @@ namespace AsmResolver.PE.File.Headers
             foreach (var directory in DataDirectories)
                 directory.Write(writer);
 
-            writer.WriteZeroes((int) (GetPhysicalSize() - (writer.FileOffset - start)));
+            writer.WriteZeroes((int) (GetPhysicalSize() - (writer.Offset - start)));
         }
         
     }

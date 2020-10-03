@@ -12,7 +12,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets the starting position of the reader.
         /// </summary>
-        uint StartPosition
+        ulong StartOffset
         {
             get;
         }
@@ -26,9 +26,25 @@ namespace AsmResolver
         }
 
         /// <summary>
+        /// Gets the maximum length of data the reader can read from the stream.
+        /// </summary>
+        uint Length
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the current offset relative to <see cref="StartOffset"/>. 
+        /// </summary>
+        ulong RelativeOffset
+        {
+            get;
+        }
+
+        /// <summary>
         /// Gets the current position of the reader.
         /// </summary>
-        uint FileOffset
+        ulong Offset
         {
             get;
             set;
@@ -43,14 +59,6 @@ namespace AsmResolver
         }
 
         /// <summary>
-        /// Gets the maximum length of data the reader can read from the stream.
-        /// </summary>
-        uint Length
-        {
-            get;
-        }
-
-        /// <summary>
         /// Forks the reader by creating a new instance of a binary stream reader, using the same data source, but a different address and size.
         /// </summary>
         /// <param name="address">The address of the forked reader to start at.</param>
@@ -58,8 +66,13 @@ namespace AsmResolver
         /// <returns>A forked binary stream reader with the same data source, but a different address and size.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="address"/> does not fall within the range of the current reader.</exception>
         /// <exception cref="EndOfStreamException">Occurs when <paramref name="size"/> results in the new reader to reach out of the stream.</exception>
-        IBinaryStreamReader Fork(uint address, uint size);
+        IBinaryStreamReader Fork(ulong address, uint size);
 
+        /// <summary>
+        /// Changes the length of the reader.
+        /// </summary>
+        /// <param name="newSize">The new length of the reader.</param>
+        /// <exception cref="NotSupportedException">Occurs when the reader cannot be resized.</exception>
         void ChangeSize(uint newSize);
 
         /// <summary>
@@ -150,7 +163,7 @@ namespace AsmResolver
         /// <returns></returns>
         public static bool CanRead(this IBinaryStreamReader reader, int size)
         {
-            return (reader.FileOffset - reader.StartPosition) + size <= reader.Length;
+            return reader.RelativeOffset + (ulong) size <= reader.Length;
         }
 
         /// <summary>
@@ -160,7 +173,7 @@ namespace AsmResolver
         /// <returns>The remaining bytes of the input stream.</returns>
         public static byte[] ReadToEnd(this IBinaryStreamReader reader)
         {
-            int remainingByteCount = (int) (reader.Length - (reader.FileOffset - reader.StartPosition));
+            int remainingByteCount = (int) (reader.Length - (reader.Offset - reader.StartOffset));
             var buffer = new byte[remainingByteCount];
             int read = reader.ReadBytes(buffer, 0, remainingByteCount);
             if (read != remainingByteCount)
@@ -175,8 +188,7 @@ namespace AsmResolver
         /// <returns>A forked binary stream reader with the same data source.</returns>
         public static IBinaryStreamReader Fork(this IBinaryStreamReader reader)
         {
-            uint address = reader.FileOffset;
-            return reader.Fork(address, reader.Length - (address - reader.StartPosition));
+            return reader.Fork(reader.Offset, (uint) (reader.Length - reader.RelativeOffset));
         }
 
         /// <summary>
@@ -185,9 +197,9 @@ namespace AsmResolver
         /// <param name="reader">The reader to fork.</param>
         /// <param name="address">The address of the forked reader to start at.</param>
         /// <returns>A forked binary stream reader with the same data source, but a different address.</returns>
-        public static IBinaryStreamReader Fork(this IBinaryStreamReader reader, uint address)
+        public static IBinaryStreamReader Fork(this IBinaryStreamReader reader, ulong address)
         {
-            return reader.Fork(address, reader.Length - (address - reader.StartPosition));
+            return reader.Fork(address, (uint) (reader.Length - (address - reader.StartOffset)));
         }
 
         /// <summary>
@@ -235,12 +247,12 @@ namespace AsmResolver
         /// <returns>The string that was read from the stream.</returns>
         public static string ReadAlignedAsciiString(this IBinaryStreamReader reader, int align)
         {
-            var position = reader.FileOffset;
+            var position = reader.Offset;
             var value = reader.ReadAsciiString();
             do
             {
-                reader.FileOffset++;
-            } while ((reader.FileOffset - position) % align != 0);
+                reader.Offset++;
+            } while ((reader.Offset - position) % (ulong) align != 0);
             return value;
         }
         
@@ -251,7 +263,7 @@ namespace AsmResolver
         /// <param name="alignment">The boundary to use.</param>
         public static void Align(this IBinaryStreamReader reader, uint alignment)
         {
-            reader.FileOffset = reader.FileOffset.Align(alignment);
+            reader.Offset = reader.Offset.Align(alignment);
         }
 
         /// <summary>
@@ -300,7 +312,7 @@ namespace AsmResolver
                 return false;
 
             var firstByte = reader.ReadByte();
-            reader.FileOffset--;
+            reader.Offset--;
 
             if (((firstByte & 0x80) == 0 && reader.CanRead(sizeof(byte))) ||
                 ((firstByte & 0x40) == 0 && reader.CanRead(sizeof(ushort))) ||
@@ -342,7 +354,7 @@ namespace AsmResolver
         {
             if (!reader.CanRead(1) || reader.ReadByte() == 0xFF)
                 return null;
-            reader.FileOffset--;
+            reader.Offset--;
             if (!reader.TryReadCompressedUInt32(out uint length))
                 return null;
             var data = new byte[length];

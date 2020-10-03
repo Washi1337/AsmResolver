@@ -16,7 +16,7 @@ namespace AsmResolver
         /// <returns>The created binary reader.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="fileOffset"/> is not within the range of the segment.</exception>
         /// <exception cref="EndOfStreamException">Occurs when <paramref name="size"/> indicates a too large length.</exception>
-        IBinaryStreamReader CreateReader(uint fileOffset, uint size);
+        IBinaryStreamReader CreateReader(ulong fileOffset, uint size);
         
     }
 
@@ -29,7 +29,7 @@ namespace AsmResolver
         /// <returns>The created binary reader.</returns>
         public static IBinaryStreamReader CreateReader(this IReadableSegment segment)
         {
-            return segment.CreateReader(segment.FileOffset, segment.GetPhysicalSize());
+            return segment.CreateReader(segment.Offset, segment.GetPhysicalSize());
         }
 
         /// <summary>
@@ -38,9 +38,9 @@ namespace AsmResolver
         /// <returns>The created binary reader.</returns>
         /// <param name="segment">The segment to read from.</param>
         /// <param name="fileOffset">The starting file offset of the reader.</param>
-        public static IBinaryStreamReader CreateReader(this IReadableSegment segment, uint fileOffset)
+        public static IBinaryStreamReader CreateReader(this IReadableSegment segment, ulong fileOffset)
         {
-            return segment.CreateReader(fileOffset, segment.GetPhysicalSize() - (fileOffset - segment.FileOffset));
+            return segment.CreateReader(fileOffset, (uint) (segment.GetPhysicalSize() - (fileOffset - segment.Offset)));
         }
 
         /// <summary>
