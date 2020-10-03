@@ -6,7 +6,7 @@ namespace AsmResolver
     public abstract class SegmentBase : ISegment
     {
         /// <inheritdoc />
-        public uint FileOffset
+        public ulong Offset
         {
             get;
             protected set;
@@ -23,9 +23,9 @@ namespace AsmResolver
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public virtual void UpdateOffsets(uint newFileOffset, uint newRva)
+        public virtual void UpdateOffsets(ulong newOffset, uint newRva)
         {
-            FileOffset = newFileOffset;
+            Offset = newOffset;
             Rva = newRva;
         }
 

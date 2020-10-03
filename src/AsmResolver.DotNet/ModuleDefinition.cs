@@ -28,6 +28,25 @@ namespace AsmResolver.DotNet
         IHasCustomAttribute,
         IOwnedCollectionElement<AssemblyDefinition>
     {
+        private readonly LazyVariable<string> _name;
+        private readonly LazyVariable<Guid> _mvid;
+        private readonly LazyVariable<Guid> _encId;
+        private readonly LazyVariable<Guid> _encBaseId;
+
+        private IList<TypeDefinition> _topLevelTypes;
+        private IList<AssemblyReference> _assemblyReferences;
+        private IList<CustomAttribute> _customAttributes;
+
+        private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
+        private IList<ModuleReference> _moduleReferences;
+        private IList<FileReference> _fileReferences;
+        private IList<ManifestResource> _resources;
+        private IList<ExportedType> _exportedTypes;
+        private TokenAllocator _tokenAllocator;
+
+        private readonly LazyVariable<string> _runtimeVersion;
+        private readonly LazyVariable<IResourceDirectory> _nativeResources;
+        
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
         /// </summary>
@@ -64,15 +83,19 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(PEFile file) => FromImage(PEImage.FromFile(file));
+        public static ModuleDefinition FromFile(IPEFile file) => FromImage(PEImage.FromFile(file));
 
         /// <summary>
         /// Reads a .NET module from an input stream.
         /// </summary>
         /// <param name="reader">The input stream pointing at the beginning of the executable to load.</param>
+        /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromReader(IBinaryStreamReader reader) => FromImage(PEImage.FromReader(reader));
+        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
+        {
+            return FromFile(PEFile.FromReader(reader, mode));
+        }
 
         /// <summary>
         /// Initializes a .NET module from a PE image.
@@ -89,27 +112,10 @@ namespace AsmResolver.DotNet
         /// <param name="readParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) =>
-            new SerializedModuleDefinition(peImage, readParameters);
-
-        private readonly LazyVariable<string> _name;
-        private readonly LazyVariable<Guid> _mvid;
-        private readonly LazyVariable<Guid> _encId;
-        private readonly LazyVariable<Guid> _encBaseId;
-
-        private IList<TypeDefinition> _topLevelTypes;
-        private IList<AssemblyReference> _assemblyReferences;
-        private IList<CustomAttribute> _customAttributes;
-
-        private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
-        private IList<ModuleReference> _moduleReferences;
-        private IList<FileReference> _fileReferences;
-        private IList<ManifestResource> _resources;
-        private IList<ExportedType> _exportedTypes;
-        private TokenAllocator _tokenAllocator;
-
-        private readonly LazyVariable<string> _runtimeVersion;
-        private readonly LazyVariable<IResourceDirectory> _nativeResources;
+        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters)
+        {
+            return new SerializedModuleDefinition(peImage, readParameters);
+        }
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.

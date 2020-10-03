@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Relocations
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedRelocationList : LazyList<BaseRelocation>
     {
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
         private readonly DataDirectory _relocDirectory;
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace AsmResolver.PE.Relocations
         /// </summary>
         /// <param name="peFile">The PE file to read the base relocations from.</param>
         /// <param name="relocDirectory">The directory that contains the base relocations.</param>
-        public SerializedRelocationList(PEFile peFile, DataDirectory relocDirectory)
+        public SerializedRelocationList(IPEFile peFile, DataDirectory relocDirectory)
         {
             _peFile = peFile;
             _relocDirectory = relocDirectory;
@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Relocations
             if (!_peFile.TryCreateDataDirectoryReader(_relocDirectory, out var reader))
                 return;
 
-            while (reader.FileOffset < reader.StartPosition + reader.Length) 
+            while (reader.Offset < reader.StartOffset + reader.Length) 
                 ReadBlock(reader);
         }
 

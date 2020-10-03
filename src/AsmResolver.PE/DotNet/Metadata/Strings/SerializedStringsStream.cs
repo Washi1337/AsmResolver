@@ -53,7 +53,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
             
             if (!_cachedStrings.TryGetValue(index, out string value) && index < _contents.GetPhysicalSize())
             {
-                var stringsReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
+                var stringsReader = _contents.CreateReader(_contents.Offset + index);
                 var data = stringsReader.ReadBytesUntil(0);
                 value = Encoding.UTF8.GetString(data, 0, data.Length - 1);
                 _cachedStrings[index] = value;

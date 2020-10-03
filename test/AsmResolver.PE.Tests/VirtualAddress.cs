@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Tests
             Rva = rva;
         }
         
-        uint IOffsetProvider.FileOffset => Rva;
+        ulong IOffsetProvider.Offset => Rva;
 
         public uint Rva
         {
@@ -18,7 +18,7 @@ namespace AsmResolver.PE.Tests
 
         bool IOffsetProvider.CanUpdateOffsets => false;
 
-        void IOffsetProvider.UpdateOffsets(uint newFileOffset, uint newRva) => throw new InvalidOperationException();
+        void IOffsetProvider.UpdateOffsets(ulong newOffset, uint newRva) => throw new InvalidOperationException();
 
         public bool CanRead => false;
 

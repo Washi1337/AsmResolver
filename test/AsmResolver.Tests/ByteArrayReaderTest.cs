@@ -26,7 +26,7 @@ namespace AsmResolver.Tests
             });
 
             Assert.Equal((byte) 0x80, reader.ReadByte());
-            Assert.Equal(1u, reader.FileOffset);
+            Assert.Equal(1u, reader.Offset);
             Assert.Equal((sbyte) -128, reader.ReadSByte());
 
             Assert.Throws<EndOfStreamException>(() => reader.ReadByte());
@@ -42,9 +42,9 @@ namespace AsmResolver.Tests
             });
 
             Assert.Equal((ushort) 0x8001, reader.ReadUInt16());
-            Assert.Equal(2u, reader.FileOffset);
+            Assert.Equal(2u, reader.Offset);
             Assert.Equal((short) -32766, reader.ReadInt16());
-            Assert.Equal(4u, reader.FileOffset);
+            Assert.Equal(4u, reader.Offset);
         }
 
         [Fact]
@@ -57,9 +57,9 @@ namespace AsmResolver.Tests
             });
 
             Assert.Equal(0x81020304u, reader.ReadUInt32());
-            Assert.Equal(4u, reader.FileOffset);
+            Assert.Equal(4u, reader.Offset);
             Assert.Equal(-2063202552, reader.ReadInt32());
-            Assert.Equal(8u, reader.FileOffset);
+            Assert.Equal(8u, reader.Offset);
         }
 
 
@@ -73,9 +73,9 @@ namespace AsmResolver.Tests
             });
 
             Assert.Equal(0x8001020304050607ul, reader.ReadUInt64());
-            Assert.Equal(8u, reader.FileOffset);
+            Assert.Equal(8u, reader.Offset);
             Assert.Equal(-8644366967197856241, reader.ReadInt64());
-            Assert.Equal(16u, reader.FileOffset);
+            Assert.Equal(16u, reader.Offset);
         }
 
         [Fact]
@@ -88,8 +88,8 @@ namespace AsmResolver.Tests
 
             var fork = reader.Fork(2, 3);
             
-            Assert.Equal(2u, fork.StartPosition);
-            Assert.Equal(2u, fork.FileOffset);
+            Assert.Equal(2u, fork.StartOffset);
+            Assert.Equal(2u, fork.Offset);
             Assert.Equal(3u, fork.Length);
         }
 
@@ -138,8 +138,8 @@ namespace AsmResolver.Tests
             var fork = reader.Fork(0, 2);
             fork.ReadUInt16();
                 
-            Assert.Equal(0u, reader.FileOffset);
-            Assert.Equal(2u, fork.FileOffset);
+            Assert.Equal(0u, reader.Offset);
+            Assert.Equal(2u, fork.Offset);
         }
 
         [Fact]

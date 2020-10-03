@@ -17,7 +17,7 @@ namespace AsmResolver.PE.Imports
         /// <param name="peFile">The PE file containing the import entry.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns></returns>
-        public static IImportedModule FromReader(PEFile peFile, IBinaryStreamReader reader)
+        public static IImportedModule FromReader(IPEFile peFile, IBinaryStreamReader reader)
         {
             var entry = new SerializedImportedModule(peFile, reader);
             return entry.IsEmpty ? null : entry;

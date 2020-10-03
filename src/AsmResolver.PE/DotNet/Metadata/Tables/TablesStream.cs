@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// <summary>
     /// Represents the metadata stream containing tables defining each member in a .NET assembly. 
     /// </summary>
-    public class TablesStream : IMetadataStream
+    public class TablesStream : SegmentBase, IMetadataStream
     {
         /// <summary>
         /// The default name of a table stream using the compressed format.
@@ -46,23 +46,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _tables = new LazyVariable<IList<IMetadataTable>>(GetTables);
             _indexEncoders = CreateIndexEncoders();
         }
-
-        /// <inheritdoc />
-        public uint FileOffset
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public uint Rva
-        {
-            get;
-            private set;
-        }
-
-        /// <inheritdoc />
-        public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
         public string Name
@@ -228,13 +211,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         public virtual IBinaryStreamReader CreateReader() => throw new NotSupportedException();
 
-        /// <inheritdoc />
-        public void UpdateOffsets(uint newFileOffset, uint newRva)
-        {
-            FileOffset = newFileOffset;
-            Rva = newRva;
-        }
-
         /// <summary>
         /// Updates the layouts of each metadata table, according to the <see cref="Flags"/> property.
         /// </summary>
@@ -250,7 +226,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public uint GetPhysicalSize()
+        public override uint GetPhysicalSize()
         {
             SynchronizeTableLayoutsWithFlags();
             ulong validBitmask = ComputeValidBitmask();
@@ -265,10 +241,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public uint GetVirtualSize() => GetPhysicalSize();
-
-        /// <inheritdoc />
-        public virtual void Write(IBinaryStreamWriter writer)
+        public override void Write(IBinaryStreamWriter writer)
         {
             SynchronizeTableLayoutsWithFlags();
             

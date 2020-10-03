@@ -14,7 +14,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         public const uint ModuleImportSize = 5 * sizeof(uint);
         
-        private readonly PEFile _peFile;
+        private readonly IPEFile _peFile;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
         
@@ -23,7 +23,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="peFile">The PE file containing the module import.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedImportedModule(PEFile peFile, IBinaryStreamReader reader)
+        public SerializedImportedModule(IPEFile peFile, IBinaryStreamReader reader)
         {
             _peFile = peFile;
             _lookupRva = reader.ReadUInt32();
@@ -31,7 +31,11 @@ namespace AsmResolver.PE.Imports
             ForwarderChain = reader.ReadUInt32();
             uint nameRva = reader.ReadUInt32();
             if (nameRva != 0)
-                Name = _peFile.CreateReaderAtRva(nameRva).ReadAsciiString();
+            {
+                if (_peFile.TryCreateReaderAtRva(nameRva, out var nameReader))
+                    Name = nameReader.ReadAsciiString();
+            }
+
             _addressRva = reader.ReadUInt32();
         }
 
@@ -90,12 +94,12 @@ namespace AsmResolver.PE.Imports
         private IList<ulong> ReadEntries(uint rva)
         {
             var result = new List<ulong>();
-            var itemReader = _peFile.CreateReaderAtRva(rva);
-            
-            ulong currentItem;
+            if (!_peFile.TryCreateReaderAtRva(rva, out var itemReader))
+                return result;
+
             while (true)
             {
-                currentItem = itemReader.ReadNativeInt(_peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32);
+                ulong currentItem = itemReader.ReadNativeInt(_peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32);
                 if (currentItem == 0)
                     break;
                 result.Add(currentItem);

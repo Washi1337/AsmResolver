@@ -20,6 +20,8 @@ Table of Contents:
 
    pefile/index
    pefile/basics
+   pefile/headers
+   pefile/sections
 
 
 .. toctree::

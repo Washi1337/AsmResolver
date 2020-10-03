@@ -68,13 +68,13 @@ namespace AsmResolver.PE.DotNet.StrongName
             var signature = ComputeSignature(hashAlgorithm, hash);
 
             // Copy strong name signature into target PE.
-            imageStream.Position = strongNameDirectory.FileOffset;
+            imageStream.Position = (long) strongNameDirectory.Offset;
             imageStream.Write(signature, 0, signature.Length);
         }
 
         private byte[] GetHashToSign(
             Stream imageStream,
-            PEFile file, 
+            IPEFile file, 
             IPEImage image,
             AssemblyHashAlgorithm hashAlgorithm)
         {
@@ -92,36 +92,36 @@ namespace AsmResolver.PE.DotNet.StrongName
             foreach (var section in file.Sections)
             {
                 hashBuilder.IncludeRange(new OffsetRange(
-                    section.FileOffset,
-                    section.FileOffset + section.GetPhysicalSize()));
+                    section.Offset,
+                    section.Offset + section.GetPhysicalSize()));
             }
 
             // Zero checksum in optional header.
-            uint peChecksumOffset = file.OptionalHeader.FileOffset + 0x40;
+            ulong peChecksumOffset = file.OptionalHeader.Offset + 0x40;
             hashBuilder.ZeroRange(new OffsetRange(peChecksumOffset, peChecksumOffset + sizeof(uint)));
             
             // Zero certificate directory entry.
             uint optionalHeaderSize = file.OptionalHeader.Magic == OptionalHeaderMagic.Pe32
                 ? OptionalHeader.OptionalHeader32SizeExcludingDataDirectories
                 : OptionalHeader.OptionalHeader64SizeExcludingDataDirectories;
-            uint certificateEntryOffset = file.OptionalHeader.FileOffset
+            ulong certificateEntryOffset = file.OptionalHeader.Offset
                                           + optionalHeaderSize
-                                          + OptionalHeader.CertificateDirectoryIndex * DataDirectory.DataDirectorySize;
+                                          + (int) DataDirectoryIndex.CertificateDirectory * DataDirectory.DataDirectorySize;
             hashBuilder.ZeroRange(new OffsetRange(certificateEntryOffset, certificateEntryOffset + DataDirectory.DataDirectorySize));
             
             // Exclude certificate directory contents.
-            var certificateDirectory = file.OptionalHeader.DataDirectories[OptionalHeader.CertificateDirectoryIndex];
+            var certificateDirectory = file.OptionalHeader.GetDataDirectory(DataDirectoryIndex.CertificateDirectory);
             if (certificateDirectory.IsPresentInPE)
             {
-                uint rva = file.RvaToFileOffset(certificateDirectory.VirtualAddress);
-                hashBuilder.ExcludeRange(new OffsetRange(rva, rva + certificateDirectory.Size));
+                ulong offset = file.RvaToFileOffset(certificateDirectory.VirtualAddress);
+                hashBuilder.ExcludeRange(new OffsetRange(offset, offset + certificateDirectory.Size));
             }
             
             // Exclude strong name directory.
             var strongNameDirectory = image.DotNetDirectory.StrongName;
             hashBuilder.ExcludeRange(new OffsetRange(
-                strongNameDirectory.FileOffset,
-                strongNameDirectory.FileOffset + strongNameDirectory.GetPhysicalSize()));
+                strongNameDirectory.Offset,
+                strongNameDirectory.Offset + strongNameDirectory.GetPhysicalSize()));
             
             return hashBuilder.ComputeHash();
         }

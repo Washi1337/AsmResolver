@@ -9,8 +9,8 @@ namespace AsmResolver
     public class ByteArrayReader : IBinaryStreamReader
     {
         private readonly byte[] _data;
-        private readonly int _startIndex;
-        private int _index;
+        private readonly uint _startIndex;
+        private uint _index;
 
         /// <summary>
         /// Creates a new byte array reader that spans the entire array.
@@ -31,7 +31,7 @@ namespace AsmResolver
         /// <param name="startRva">The starting rva of the chunk to read.</param>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="index"/> is outside of the array.</exception>
         /// <exception cref="EndOfStreamException">Occurs when the reader reaches outside of the data source.</exception>
-        public ByteArrayReader(byte[] data, int index, uint length, uint startFileOffset, uint startRva)
+        public ByteArrayReader(byte[] data, uint index, uint length, ulong startFileOffset, uint startRva)
         {
             _data = data ?? throw new ArgumentNullException(nameof(data));
             if (index > data.Length)
@@ -39,13 +39,13 @@ namespace AsmResolver
             if (index + length > data.Length)
                 throw new EndOfStreamException();
             _startIndex = _index = index;
-            StartPosition = startFileOffset;
+            StartOffset = startFileOffset;
             StartRva = startRva;
             Length = length;
         }
 
         /// <inheritdoc />
-        public uint StartPosition
+        public ulong StartOffset
         {
             get;
         }
@@ -57,14 +57,17 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public uint FileOffset
+        public ulong Offset
         {
-            get => (uint) (_index - _startIndex + StartPosition);
-            set => _index = (int) (value - StartPosition + _startIndex);
+            get => _index - _startIndex + StartOffset;
+            set => _index = (uint) (value - StartOffset + _startIndex);
         }
 
         /// <inheritdoc />
-        public uint Rva => (uint) (_index - _startIndex + StartRva);
+        public ulong RelativeOffset => _index - _startIndex;
+
+        /// <inheritdoc />
+        public uint Rva => _index - _startIndex + StartRva;
 
         /// <inheritdoc />
         public uint Length
@@ -80,16 +83,16 @@ namespace AsmResolver
         }
 
         /// <inheritdoc />
-        public IBinaryStreamReader Fork(uint address, uint size)
+        public IBinaryStreamReader Fork(ulong address, uint size)
         {
-            if (address < StartPosition || address >= StartPosition + Length)
+            if (address < StartOffset || address >= StartOffset + Length)
                 throw new ArgumentOutOfRangeException(nameof(address));
             return new ByteArrayReader(
                 _data, 
-                (int) (address - StartPosition + _startIndex), 
+                (uint) (address - StartOffset + _startIndex), 
                 size,
                 address,
-                address - StartPosition + StartRva);
+                (uint) (address - StartOffset + StartRva));
         }
 
         /// <inheritdoc />
@@ -104,7 +107,7 @@ namespace AsmResolver
         /// <inheritdoc />
         public byte[] ReadBytesUntil(byte value)
         {
-            int index = Array.IndexOf(_data, value, _index);
+            int index = Array.IndexOf(_data, value, (int) _index);
             if (index == -1)
                 index = (int) (Length - 1);
 
@@ -119,9 +122,9 @@ namespace AsmResolver
             if (count < 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
             
-            count = (int) Math.Min(count, (StartPosition + Length) - FileOffset);
-            Buffer.BlockCopy(_data, _index, buffer, startIndex, count);
-            _index += count;
+            count = (int) Math.Min((uint) count, StartOffset + Length - Offset);
+            Buffer.BlockCopy(_data, (int) _index, buffer, startIndex, count);
+            _index = (uint) (_index + count);
             
             return count;
         }

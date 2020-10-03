@@ -56,7 +56,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             if (HasExtraData)
                 ExtraData = reader.ReadUInt32();
 
-            _headerSize = reader.FileOffset - reader.StartPosition;
+            _headerSize = (uint) (reader.Offset - reader.StartOffset);
 
             _indexSizes = InitializeIndexSizes();
         }
@@ -166,7 +166,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         protected override IList<IMetadataTable> GetTables()
         {
-            uint offset = _contents.FileOffset + _headerSize;
+            ulong offset = _contents.Offset + _headerSize;
             var tables = new IMetadataTable[]
             {
                 CreateNextTable(TableIndex.Module, ref offset, ModuleDefinitionRow.FromReader),
@@ -219,7 +219,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return tables;
         }
 
-        private IBinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref uint currentOffset)
+        private IBinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref ulong currentOffset)
         {
             int index = (int) currentIndex;
             uint rawSize = TableLayouts[index].RowSize * _rowCounts[index];
@@ -230,7 +230,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private SerializedMetadataTable<TRow> CreateNextTable<TRow>(
             TableIndex index,
-            ref uint offset,
+            ref ulong offset,
             SerializedMetadataTable<TRow>.ReadRowDelegate readRow)
             where TRow : struct, IMetadataRow
         {
@@ -240,7 +240,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private SerializedMetadataTable<TRow> CreateNextTable<TRow>(
             TableIndex index,
-            ref uint offset,
+            ref ulong offset,
             SerializedMetadataTable<TRow>.ReadRowExtendedDelegate readRow,
             ISegmentReferenceResolver referenceResolver)
             where TRow : struct, IMetadataRow

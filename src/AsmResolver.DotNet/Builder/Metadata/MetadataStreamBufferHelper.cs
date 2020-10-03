@@ -31,12 +31,12 @@ namespace AsmResolver.DotNet.Builder.Metadata
             uint index = 1;
             while (index < stream.GetPhysicalSize())
             {
-                uint startOffset = reader.FileOffset;
+                ulong startOffset = reader.Offset;
                 if (!reader.TryReadCompressedUInt32(out uint dataLength))
                     break;
                 
-                uint headerLength = reader.FileOffset - startOffset;
-                reader.FileOffset -= headerLength;
+                uint headerLength = (uint) (reader.Offset - startOffset);
+                reader.Offset -= headerLength;
 
                 if (dataLength > 0)
                     indexAction(index, writer.Length);

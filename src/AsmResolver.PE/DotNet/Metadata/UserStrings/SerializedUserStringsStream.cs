@@ -50,7 +50,7 @@ namespace AsmResolver.PE.DotNet.Metadata.UserStrings
         {
             if (!_cachedStrings.TryGetValue(index, out string value) && index < _contents.GetPhysicalSize())
             {
-                var stringsReader = _contents.CreateReader((uint) (_contents.FileOffset + index));
+                var stringsReader = _contents.CreateReader(_contents.Offset + index);
                 
                 // Try read length.
                 if (stringsReader.TryReadCompressedUInt32(out uint length))

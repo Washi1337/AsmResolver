@@ -11,7 +11,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets or sets the current position of the writer.
         /// </summary>
-        uint FileOffset
+        ulong Offset
         {
             get;
             set;
@@ -134,8 +134,8 @@ namespace AsmResolver
         /// <param name="align">The boundary to use.</param>
         public static void Align(this IBinaryStreamWriter writer, uint align)
         {
-            uint currentPosition = writer.FileOffset;
-            writer.WriteZeroes((int) (currentPosition.Align(align) - writer.FileOffset));
+            ulong currentPosition = writer.Offset;
+            writer.WriteZeroes((int) (currentPosition.Align(align) - writer.Offset));
         }
 
         /// <summary>

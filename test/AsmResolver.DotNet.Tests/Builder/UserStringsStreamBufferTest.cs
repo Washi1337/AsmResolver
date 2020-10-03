@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.Equal(value, usStream.GetStringByIndex(index));
             
             var reader = usStream.CreateReader();
-            reader.FileOffset = (uint) (index + Encoding.Unicode.GetByteCount(value) + 1);
+            reader.Offset = (uint) (index + Encoding.Unicode.GetByteCount(value) + 1);
             byte b = reader.ReadByte();
             
             Assert.Equal(terminatorByte, b);

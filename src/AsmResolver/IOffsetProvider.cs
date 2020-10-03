@@ -8,7 +8,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets the physical starting offset of the segment.
         /// </summary>
-        uint FileOffset
+        ulong Offset
         {
             get;
         }
@@ -28,12 +28,12 @@ namespace AsmResolver
         {
             get;
         }
-        
+
         /// <summary>
         /// Assigns a new file and virtual offset to the segment and all its sub-components.
         /// </summary>
-        /// <param name="newFileOffset">The new file offset.</param>
+        /// <param name="offseteOffset">The new file offset.</param>
         /// <param name="newRva">The new virtual offset.</param>
-        void UpdateOffsets(uint newFileOffset, uint newRva);
+        void UpdateOffsets(ulong newOffset, uint newRva);
     }
 }

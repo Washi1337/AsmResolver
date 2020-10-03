@@ -20,6 +20,12 @@ namespace AsmResolver
             alignment--;
             return (value + alignment) & ~alignment;
         }
+        
+        public static ulong Align(this ulong value, ulong alignment)
+        {
+            alignment--;
+            return (value + alignment) & ~alignment;
+        }
 
         public static uint GetCompressedSize(this uint value)
         {

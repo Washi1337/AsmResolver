@@ -23,7 +23,7 @@ namespace AsmResolver.PE.Debug
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
             _dataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
-            FileOffset = reader.FileOffset;
+            Offset = reader.Offset;
             Rva = reader.Rva;
             
             Characteristics = reader.ReadUInt32();
