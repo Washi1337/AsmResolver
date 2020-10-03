@@ -82,7 +82,6 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var builder = new ManagedPEFileBuilder();
             var peFile = builder.CreateFile(image);
             
-            peFile.Write(@"D:\Washi\Desktop\lol.exe");
             // Verify
             _fixture
                 .GetRunner<FrameworkPERunner>()
