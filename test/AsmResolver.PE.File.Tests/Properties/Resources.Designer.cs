@@ -69,5 +69,17 @@ namespace AsmResolver.PE.File.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] NativeMemoryDemos
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("NativeMemoryDemos", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
