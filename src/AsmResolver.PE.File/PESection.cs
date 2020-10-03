@@ -213,13 +213,13 @@ namespace AsmResolver.PE.File
         public bool CanUpdateOffsets => true;
 
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva) => Contents.UpdateOffsets(newOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => Contents?.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
-        public uint GetPhysicalSize() => Contents.GetPhysicalSize();
+        public uint GetPhysicalSize() => Contents?.GetPhysicalSize() ?? 0;
 
         /// <inheritdoc />
-        public uint GetVirtualSize() => Contents.GetVirtualSize();
+        public uint GetVirtualSize() => Contents?.GetVirtualSize() ?? 0;
 
         /// <inheritdoc />
         public IBinaryStreamReader CreateReader(ulong fileOffset, uint size)
@@ -288,6 +288,6 @@ namespace AsmResolver.PE.File
         public override string ToString() => Name;
 
         /// <inheritdoc />
-        public void Write(IBinaryStreamWriter writer) => Contents.Write(writer);
+        public void Write(IBinaryStreamWriter writer) => Contents?.Write(writer);
     }
 }

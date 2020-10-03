@@ -64,10 +64,14 @@ namespace AsmResolver.PE.File
                 };
                 
                 _reader.Offset = offset;
+
+                ISegment physicalContents = null;
+                if (size > 0) 
+                    physicalContents = DataSegment.FromReader(_reader, (int) size);
                 
-                var contents = DataSegment.FromReader(_reader, (int) size);
-                contents.UpdateOffsets(offset, header.VirtualAddress);
-                result.Add(new PESection(header, new VirtualSegment(contents, header.VirtualSize)));
+                var virtualSegment = new VirtualSegment(physicalContents, header.VirtualSize);
+                virtualSegment.UpdateOffsets(offset, header.VirtualAddress);
+                result.Add(new PESection(header, virtualSegment));
             }
 
             return result;

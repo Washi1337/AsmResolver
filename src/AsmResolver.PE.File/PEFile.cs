@@ -330,20 +330,19 @@ namespace AsmResolver.PE.File
         /// </summary>
         public void AlignSections()
         {
+            uint currentFileOffset = OptionalHeader.SizeOfHeaders;
+
             for (int i = 0; i < Sections.Count; i++)
             {
-                var section = Sections[i];
+                var section = Sections[i];                
 
-                ulong fileOffset = i > 0
-                    ? Sections[i - 1].Offset + Sections[i - 1].GetPhysicalSize()
-                    : OptionalHeader.SizeOfHeaders;
                 uint rva = i > 0
                     ? Sections[i - 1].Rva + Sections[i - 1].GetVirtualSize()
                     : OptionalHeader.SizeOfHeaders.Align(OptionalHeader.SectionAlignment);
 
-                section.UpdateOffsets(
-                    fileOffset.Align(OptionalHeader.FileAlignment),
-                    rva.Align(OptionalHeader.SectionAlignment));
+                currentFileOffset = currentFileOffset.Align(OptionalHeader.FileAlignment);
+                section.UpdateOffsets(currentFileOffset, rva.Align(OptionalHeader.SectionAlignment));
+                currentFileOffset += section.GetPhysicalSize();
             }
         }
 
@@ -434,7 +433,7 @@ namespace AsmResolver.PE.File
             foreach (var section in Sections)
             {
                 writer.Offset = section.Offset;
-                section.Contents.Write(writer);
+                section.Contents?.Write(writer);
                 writer.Align(OptionalHeader.FileAlignment);
             }
         }
