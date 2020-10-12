@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
@@ -176,6 +177,146 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             instructions.OptimizeMacros();
             
             Assert.Equal(CilOpCodes.Br_S, instructions[0].OpCode);
+        }
+
+        [Theory]
+        [InlineData(0, CilCode.Ldloc_0)]
+        [InlineData(1, CilCode.Ldloc_1)]
+        [InlineData(2, CilCode.Ldloc_2)]
+        [InlineData(3, CilCode.Ldloc_3)]
+        [InlineData(4, CilCode.Ldloc_S)]
+        [InlineData(255, CilCode.Ldloc_S)]
+        [InlineData(256, CilCode.Ldloc)]
+        public void OptimizeLoadLocalInstructions(int index, CilCode expected)
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            
+            // Prepare locals.
+            for (int i = 0; i <= index; i++)
+                instructions.Owner.LocalVariables.Add(new CilLocalVariable(_module.CorLibTypeFactory.Object));
+            
+            instructions.AddRange(new []
+            {
+                new CilInstruction(CilOpCodes.Ldloc, instructions.Owner.LocalVariables[index]),
+                new CilInstruction(CilOpCodes.Ret), 
+            });
+
+            instructions.OptimizeMacros();
+            
+            Assert.Equal(expected, instructions[0].OpCode.Code);
+        }
+        
+        [Theory]
+        [InlineData(0, CilCode.Stloc_0)]
+        [InlineData(1, CilCode.Stloc_1)]
+        [InlineData(2, CilCode.Stloc_2)]
+        [InlineData(3, CilCode.Stloc_3)]
+        [InlineData(4, CilCode.Stloc_S)]
+        [InlineData(255, CilCode.Stloc_S)]
+        [InlineData(256, CilCode.Stloc)]
+        public void OptimizeStoreLocalInstructions(int index, CilCode expected)
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            
+            // Prepare locals.
+            for (int i = 0; i <= index; i++)
+                instructions.Owner.LocalVariables.Add(new CilLocalVariable(_module.CorLibTypeFactory.Object));
+            
+            instructions.AddRange(new []
+            {
+                new CilInstruction(CilOpCodes.Ldnull), 
+                new CilInstruction(CilOpCodes.Stloc, instructions.Owner.LocalVariables[index]),
+                new CilInstruction(CilOpCodes.Ret), 
+            });
+            
+            instructions.OptimizeMacros();
+            
+            Assert.Equal(expected, instructions[1].OpCode.Code);
+        }
+
+        [Theory]
+        [InlineData(0, CilCode.Ldarg_0)]
+        [InlineData(1, CilCode.Ldarg_1)]
+        [InlineData(2, CilCode.Ldarg_2)]
+        [InlineData(3, CilCode.Ldarg_3)]
+        [InlineData(4, CilCode.Ldarg_S)]
+        [InlineData(255, CilCode.Ldarg_S)]
+        [InlineData(256, CilCode.Ldarg)]
+        public void OptimizeLoadArgInstructions(int index, CilCode expected)
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            var method = instructions.Owner.Owner;
+
+            // Prepare parameters.
+            for (int i = 0; i <= index; i++)
+                method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
+            method.Parameters.PullUpdatesFromMethodSignature();
+            
+            instructions.AddRange(new []
+            {
+                new CilInstruction(CilOpCodes.Ldarg, method.Parameters[index]),
+                new CilInstruction(CilOpCodes.Ret), 
+            });
+            
+            instructions.OptimizeMacros();
+            
+            Assert.Equal(expected, instructions[0].OpCode.Code);
+        }
+
+        [Theory]
+        [InlineData(0, CilCode.Starg_S)]
+        [InlineData(255, CilCode.Starg_S)]
+        [InlineData(256, CilCode.Starg)]
+        public void OptimizeStoreArgInstructions(int index, CilCode expected)
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            var method = instructions.Owner.Owner;
+
+            // Prepare parameters.
+            for (int i = 0; i <= index; i++)
+                method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
+            method.Parameters.PullUpdatesFromMethodSignature();
+            
+            instructions.AddRange(new []
+            {
+                new CilInstruction(CilOpCodes.Ldnull),
+                new CilInstruction(CilOpCodes.Starg, method.Parameters[index]),
+                new CilInstruction(CilOpCodes.Ret), 
+            });
+            
+            instructions.OptimizeMacros();
+            
+            Assert.Equal(expected, instructions[1].OpCode.Code);
+        }
+
+        [Theory]
+        [InlineData(0, CilCode.Ldc_I4_0)]
+        [InlineData(1, CilCode.Ldc_I4_1)]
+        [InlineData(2, CilCode.Ldc_I4_2)]
+        [InlineData(3, CilCode.Ldc_I4_3)]
+        [InlineData(4, CilCode.Ldc_I4_4)]
+        [InlineData(5, CilCode.Ldc_I4_5)]
+        [InlineData(6, CilCode.Ldc_I4_6)]
+        [InlineData(7, CilCode.Ldc_I4_7)]
+        [InlineData(8, CilCode.Ldc_I4_8)]
+        [InlineData(-1, CilCode.Ldc_I4_M1)]
+        [InlineData(sbyte.MaxValue, CilCode.Ldc_I4_S)]
+        [InlineData(sbyte.MinValue, CilCode.Ldc_I4_S)]
+        [InlineData(sbyte.MaxValue + 1, CilCode.Ldc_I4)]
+        [InlineData(sbyte.MinValue - 1, CilCode.Ldc_I4)]
+        public void OptimizeLdcI4(int operand, CilCode expected)
+        {     
+            var instructions = CreateDummyMethod(false, 0, 0);
+
+            instructions.AddRange(new []
+            {
+                new CilInstruction(CilOpCodes.Ldc_I4, operand),
+                new CilInstruction(CilOpCodes.Ret), 
+            });
+            
+            instructions.OptimizeMacros();
+            
+            Assert.Equal(expected, instructions[1].OpCode.Code);
         }
     }
 }
