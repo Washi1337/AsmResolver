@@ -452,15 +452,9 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             else if (instruction.IsStarg())
             {
-                (code, operand) = parameter.MethodSignatureIndex switch
-                {
-                    0 => (CilOpCodes.Stloc_0, null),
-                    1 => (CilOpCodes.Stloc_1, null),
-                    2 => (CilOpCodes.Stloc_2, null),
-                    3 => (CilOpCodes.Stloc_3, null),
-                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Stloc_S, parameter),
-                    _ => (CilOpCodes.Stloc, parameter),
-                };
+                code = parameter.MethodSignatureIndex <= byte.MaxValue
+                    ? CilOpCodes.Starg_S 
+                    : CilOpCodes.Starg;
             }
 
             if (code != instruction.OpCode)
