@@ -78,19 +78,19 @@ namespace AsmResolver.PE.DotNet.Cil
                     break;
                 
                 case CilOperandType.ShortInlineVar:
-                    _writer.WriteByte((byte) _operandBuilder.GetVariableIndex(instruction.Operand));
+                    _writer.WriteByte((byte) OperandToLocalIndex(instruction));
                     break;
                 
                 case CilOperandType.InlineVar:
-                    _writer.WriteUInt16((ushort) _operandBuilder.GetVariableIndex(instruction.Operand));
+                    _writer.WriteUInt16(OperandToLocalIndex(instruction));
                     break;
                 
                 case CilOperandType.ShortInlineArgument:
-                    _writer.WriteByte((byte) _operandBuilder.GetArgumentIndex(instruction.Operand));
+                    _writer.WriteByte((byte) OperandToArgumentIndex(instruction));
                     break;
                 
                 case CilOperandType.InlineArgument:
-                    _writer.WriteUInt16((ushort) _operandBuilder.GetArgumentIndex(instruction.Operand));
+                    _writer.WriteUInt16(OperandToArgumentIndex(instruction));
                     break;
 
                 case CilOperandType.ShortInlineBrTarget:
@@ -128,6 +128,30 @@ namespace AsmResolver.PE.DotNet.Cil
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private ushort OperandToLocalIndex(CilInstruction instruction)
+        {
+            int variableIndex = _operandBuilder.GetVariableIndex(instruction.Operand);
+            if (instruction.OpCode.OperandType == CilOperandType.ShortInlineVar && variableIndex > byte.MaxValue)
+            {
+                throw new OverflowException(
+                    $"Local index at offset IL_{instruction.Offset:X4} is too large for a ShortInlineVar instruction.");
+            }
+
+            return unchecked((ushort) variableIndex);
+        }
+
+        private ushort OperandToArgumentIndex(CilInstruction instruction)
+        {
+            int variableIndex = _operandBuilder.GetArgumentIndex(instruction.Operand);
+            if (instruction.OpCode.OperandType == CilOperandType.ShortInlineArgument && variableIndex > byte.MaxValue)
+            {
+                throw new OverflowException(
+                    $"Argument index at offset IL_{instruction.Offset:X4} is too large for a ShortInlineArgument instruction.");
+            }
+
+            return unchecked((ushort) variableIndex);
         }
 
         private static sbyte OperandToSByte(CilInstruction instruction)
@@ -177,7 +201,7 @@ namespace AsmResolver.PE.DotNet.Cil
 
             string found = instruction.Operand?.GetType().Name ?? "null";
             throw new ArgumentOutOfRangeException(
-                $"Expected a {operandTypesString} operand on IL_{instruction.Offset:X4}, but found {found}.");
+                $"Expected a {operandTypesString} operand at offset IL_{instruction.Offset:X4}, but found {found}.");
         }
     }
 }
