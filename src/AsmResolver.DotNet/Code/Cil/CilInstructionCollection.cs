@@ -79,6 +79,13 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <inheritdoc />
         public bool Remove(CilInstruction item) => _items.Remove(item);
 
+        /// <summary>
+        /// Removes a range of CIL instructions from the collection.
+        /// </summary>
+        /// <param name="index">The starting index.</param>
+        /// <param name="count">The number of instructions to remove.</param>
+        public void RemoveRange(int index, int count) => _items.RemoveRange(index, count);
+
         /// <inheritdoc />
         public int IndexOf(CilInstruction item) => _items.IndexOf(item);
 
@@ -87,6 +94,53 @@ namespace AsmResolver.DotNet.Code.Cil
 
         /// <inheritdoc />
         public void RemoveAt(int index) => _items.RemoveAt(index);
+
+        /// <summary>
+        /// Removes a set of CIL instructions based on a list of indices that are relative to a starting index.
+        /// </summary>
+        /// <param name="baseIndex">The base index.</param>
+        /// <param name="relativeIndices">The indices relative to <paramref name="baseIndex"/> to remove.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when any relative index in <paramref name="relativeIndices"/> results in an index that is
+        /// out of bounds of the instruction collection.
+        /// </exception>
+        public void RemoveAt(int baseIndex, params int[] relativeIndices) =>
+            RemoveAt(baseIndex, relativeIndices.AsEnumerable());
+        
+        /// <summary>
+        /// Removes a set of CIL instructions based on a list of indices that are relative to a starting index.
+        /// </summary>
+        /// <param name="baseIndex">The base index.</param>
+        /// <param name="relativeIndices">The indices relative to <paramref name="baseIndex"/> to remove.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when any relative index in <paramref name="relativeIndices"/> results in an index that is
+        /// out of bounds of the instruction collection.
+        /// </exception>
+        public void RemoveAt(int baseIndex, IEnumerable<int> relativeIndices)
+        {
+            // Verify and translate relative indices into absolute indices.
+            var absoluteIndices = new List<int>();
+            foreach (int relativeIndex in relativeIndices)
+            {
+                int absoluteIndex = baseIndex + relativeIndex;
+                if (absoluteIndex < 0 || absoluteIndex >= _items.Count)
+                    throw new ArgumentOutOfRangeException(nameof(relativeIndices));
+                absoluteIndices.Add(absoluteIndex);
+            }
+
+            absoluteIndices.Sort();
+            
+            // Remove indices.
+            for (int i = 0; i < absoluteIndices.Count; i++)
+            {
+                int index = absoluteIndices[i];
+                _items.RemoveAt(index);
+                
+                // Removal of instruction offsets all remaining indices by one. Update remaining indices. 
+                for (int j = i+1; j < absoluteIndices.Count; j++)
+                    absoluteIndices[j]--;
+            }
+        }
 
         /// <summary>
         /// Returns an enumerator that enumerates through the instructions sequentially.
