@@ -34,31 +34,31 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             assembler.WriteInstruction(new CilInstruction(CilOpCodes.Br, new CilOffsetLabel(0x12345)));
         }
 
+        [Fact]
+        public void TooLargeLocalShouldThrow()
+        {
+            var stream = new MemoryStream();
+            var writer = new BinaryStreamWriter(stream);
+            var assembler = new CilAssembler(writer, new MockOperandBuilder());
+
+            Assert.ThrowsAny<OverflowException>(() =>
+                assembler.WriteInstruction(new CilInstruction(CilOpCodes.Ldloc_S, 0x12345)));
+            assembler.WriteInstruction(new CilInstruction(CilOpCodes.Ldloc, 0x12345));
+        }
+
         private sealed class MockOperandBuilder : ICilOperandBuilder
         {
             /// <inheritdoc />
-            public int GetVariableIndex(object operand)
-            {
-                throw new System.NotImplementedException();
-            }
+            public int GetVariableIndex(object operand) => Convert.ToInt32(operand);
 
             /// <inheritdoc />
-            public int GetArgumentIndex(object operand)
-            {
-                throw new System.NotImplementedException();
-            }
+            public int GetArgumentIndex(object operand) => Convert.ToInt32(operand);
 
             /// <inheritdoc />
-            public uint GetStringToken(object operand)
-            {
-                throw new System.NotImplementedException();
-            }
+            public uint GetStringToken(object operand) => Convert.ToUInt32(operand);
 
             /// <inheritdoc />
-            public MetadataToken GetMemberToken(object operand)
-            {
-                throw new System.NotImplementedException();
-            }
+            public MetadataToken GetMemberToken(object operand) => (MetadataToken) operand;
         }
     }
 }
