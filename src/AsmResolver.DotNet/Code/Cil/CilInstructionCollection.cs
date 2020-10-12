@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             // Verify and translate relative indices into absolute indices.
             var absoluteIndices = new List<int>();
-            foreach (int relativeIndex in relativeIndices)
+            foreach (int relativeIndex in relativeIndices.Distinct())
             {
                 int absoluteIndex = baseIndex + relativeIndex;
                 if (absoluteIndex < 0 || absoluteIndex >= _items.Count)
