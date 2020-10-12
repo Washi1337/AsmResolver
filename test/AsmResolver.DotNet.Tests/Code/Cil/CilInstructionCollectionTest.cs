@@ -288,5 +288,35 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             
             Assert.Equal(expected, instructions[1].OpCode.Code);
         }
+
+        [Theory]
+        [InlineData(0, CilCode.Ldc_I4_0)]
+        [InlineData(1, CilCode.Ldc_I4_1)]
+        [InlineData(2, CilCode.Ldc_I4_2)]
+        [InlineData(3, CilCode.Ldc_I4_3)]
+        [InlineData(4, CilCode.Ldc_I4_4)]
+        [InlineData(5, CilCode.Ldc_I4_5)]
+        [InlineData(6, CilCode.Ldc_I4_6)]
+        [InlineData(7, CilCode.Ldc_I4_7)]
+        [InlineData(8, CilCode.Ldc_I4_8)]
+        [InlineData(-1, CilCode.Ldc_I4_M1)]
+        [InlineData(sbyte.MaxValue, CilCode.Ldc_I4_S)]
+        [InlineData(sbyte.MinValue, CilCode.Ldc_I4_S)]
+        [InlineData(sbyte.MaxValue + 1, CilCode.Ldc_I4)]
+        [InlineData(sbyte.MinValue - 1, CilCode.Ldc_I4)]
+        public void OptimizeLdcI4(int operand, CilCode expected)
+        {     
+            var instructions = CreateDummyMethod(false, 0, 0);
+
+            instructions.AddRange(new []
+            {
+                new CilInstruction(CilOpCodes.Ldc_I4, operand),
+                new CilInstruction(CilOpCodes.Ret), 
+            });
+            
+            instructions.OptimizeMacros();
+            
+            Assert.Equal(expected, instructions[1].OpCode.Code);
+        }
     }
 }
