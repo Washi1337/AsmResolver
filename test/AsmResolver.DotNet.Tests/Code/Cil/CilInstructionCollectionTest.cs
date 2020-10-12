@@ -316,7 +316,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             
             instructions.OptimizeMacros();
             
-            Assert.Equal(expected, instructions[1].OpCode.Code);
+            Assert.Equal(expected, instructions[0].OpCode.Code);
         }
     }
 }
