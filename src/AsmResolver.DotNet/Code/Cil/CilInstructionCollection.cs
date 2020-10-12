@@ -404,7 +404,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     1 => (CilOpCodes.Ldloc_1, null),
                     2 => (CilOpCodes.Ldloc_2, null),
                     3 => (CilOpCodes.Ldloc_3, null),
-                    {} x when x >= sbyte.MinValue && x <= sbyte.MaxValue => (CilOpCodes.Ldloc_S, variable),
+                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Ldloc_S, variable),
                     _ => (CilOpCodes.Ldloc, variable),
                 };
             }
