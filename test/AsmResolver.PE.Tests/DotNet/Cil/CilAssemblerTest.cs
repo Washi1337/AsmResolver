@@ -22,6 +22,18 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
                 assembler.WriteInstruction(new CilInstruction(code.ToOpCode(), operand)));
         }
 
+        [Fact]
+        public void BranchTooFarAwayShouldThrow()
+        {
+            var stream = new MemoryStream();
+            var writer = new BinaryStreamWriter(stream);
+            var assembler = new CilAssembler(writer, new MockOperandBuilder());
+
+            Assert.ThrowsAny<OverflowException>(() =>
+                assembler.WriteInstruction(new CilInstruction(CilOpCodes.Br_S, new CilOffsetLabel(0x12345))));
+            assembler.WriteInstruction(new CilInstruction(CilOpCodes.Br, new CilOffsetLabel(0x12345)));
+        }
+
         private sealed class MockOperandBuilder : ICilOperandBuilder
         {
             /// <inheritdoc />

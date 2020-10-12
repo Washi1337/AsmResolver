@@ -94,13 +94,11 @@ namespace AsmResolver.PE.DotNet.Cil
                     break;
 
                 case CilOperandType.ShortInlineBrTarget:
-                    sbyte shortOffset = (sbyte) (((ICilLabel) instruction.Operand).Offset - (int) (_writer.Offset + sizeof(sbyte)));
-                    _writer.WriteSByte(shortOffset);
+                    _writer.WriteSByte((sbyte) OperandToBranchDelta(instruction));
                     break;
                 
                 case CilOperandType.InlineBrTarget:
-                    int longOffset = ((ICilLabel) instruction.Operand).Offset - (int) (_writer.Offset + sizeof(int));
-                    _writer.WriteInt32(longOffset);
+                    _writer.WriteInt32(OperandToBranchDelta(instruction));
                     break;
                 
                 case CilOperandType.InlineSwitch:
@@ -128,6 +126,39 @@ namespace AsmResolver.PE.DotNet.Cil
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private int OperandToBranchDelta(CilInstruction instruction)
+        {
+            bool isShort = instruction.OpCode.OperandType == CilOperandType.ShortInlineBrTarget;
+            
+            int delta;
+            switch (instruction.Operand)
+            {
+                case sbyte x:
+                    delta = x;
+                    break;
+                
+                case int x:
+                    delta = x;
+                    break;
+                
+                case ICilLabel label:
+                    int operandSize = isShort ? sizeof(sbyte) : sizeof(int);
+                    delta = label.Offset - (int) (_writer.Offset + (ulong) operandSize);
+                    break;
+                
+                default:
+                    return ThrowInvalidOperandType<sbyte>(instruction, typeof(ICilLabel), typeof(sbyte));
+            }
+
+            if (isShort && (delta < sbyte.MinValue || delta > sbyte.MaxValue))
+            {
+                throw new OverflowException(
+                    $"Branch target at offset IL_{instruction.Offset:X4} is too far away for a ShortInlineBr instruction.");
+            }
+
+            return delta;
         }
 
         private ushort OperandToLocalIndex(CilInstruction instruction)
