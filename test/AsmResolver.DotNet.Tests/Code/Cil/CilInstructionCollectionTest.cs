@@ -189,11 +189,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [InlineData(256, CilCode.Ldloc)]
         public void OptimizeLoadLocalInstructions(int index, CilCode expected)
         {
-            var instructions = CreateDummyMethod(false, 0, 0);
-            
-            // Prepare locals.
-            for (int i = 0; i <= index; i++)
-                instructions.Owner.LocalVariables.Add(new CilLocalVariable(_module.CorLibTypeFactory.Object));
+            var instructions = CreateDummyMethod(false, 0, index + 1);
             
             instructions.AddRange(new []
             {
@@ -216,11 +212,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [InlineData(256, CilCode.Stloc)]
         public void OptimizeStoreLocalInstructions(int index, CilCode expected)
         {
-            var instructions = CreateDummyMethod(false, 0, 0);
-            
-            // Prepare locals.
-            for (int i = 0; i <= index; i++)
-                instructions.Owner.LocalVariables.Add(new CilLocalVariable(_module.CorLibTypeFactory.Object));
+            var instructions = CreateDummyMethod(false, 0, index + 1);
             
             instructions.AddRange(new []
             {
@@ -244,13 +236,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [InlineData(256, CilCode.Ldarg)]
         public void OptimizeLoadArgInstructions(int index, CilCode expected)
         {
-            var instructions = CreateDummyMethod(false, 0, 0);
+            var instructions = CreateDummyMethod(false, index + 1, 0);
             var method = instructions.Owner.Owner;
-
-            // Prepare parameters.
-            for (int i = 0; i <= index; i++)
-                method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
-            method.Parameters.PullUpdatesFromMethodSignature();
             
             instructions.AddRange(new []
             {
@@ -269,13 +256,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         [InlineData(256, CilCode.Starg)]
         public void OptimizeStoreArgInstructions(int index, CilCode expected)
         {
-            var instructions = CreateDummyMethod(false, 0, 0);
+            var instructions = CreateDummyMethod(false, index + 1, 0);
             var method = instructions.Owner.Owner;
-
-            // Prepare parameters.
-            for (int i = 0; i <= index; i++)
-                method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
-            method.Parameters.PullUpdatesFromMethodSignature();
             
             instructions.AddRange(new []
             {
@@ -318,5 +300,56 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             
             Assert.Equal(expected, instructions[0].OpCode.Code);
         }
+
+        [Fact]
+        public void RemoveIndices()
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            instructions.AddRange(new[]
+            {
+                new CilInstruction(0, CilOpCodes.Nop),
+                new CilInstruction(1, CilOpCodes.Nop),
+                new CilInstruction(2, CilOpCodes.Nop),
+                new CilInstruction(3, CilOpCodes.Nop),
+                new CilInstruction(4, CilOpCodes.Nop),
+                new CilInstruction(5, CilOpCodes.Nop),
+                new CilInstruction(6, CilOpCodes.Ret),
+            });
+
+            var expected = new[]
+            {
+                instructions[0],
+                instructions[2],
+                instructions[4],
+                instructions[5],
+                instructions[6],
+            };
+            
+            instructions.RemoveAt(2, -1, 1);
+            Assert.Equal(expected, instructions);
+        }
+
+        [Fact]
+        public void RemoveIndicesWithInvalidRelativeIndicesShouldThrowAndNotChangeAnything()
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            instructions.AddRange(new[]
+            {
+                new CilInstruction(0, CilOpCodes.Nop),
+                new CilInstruction(1, CilOpCodes.Nop),
+                new CilInstruction(2, CilOpCodes.Nop),
+                new CilInstruction(3, CilOpCodes.Nop),
+                new CilInstruction(4, CilOpCodes.Nop),
+                new CilInstruction(5, CilOpCodes.Nop),
+                new CilInstruction(6, CilOpCodes.Ret),
+            });
+
+            var expected = instructions.ToArray();
+
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                instructions.RemoveAt(2, -1, 100));
+            Assert.Equal(expected, instructions);
+        }
+        
     }
 }
