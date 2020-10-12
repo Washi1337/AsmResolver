@@ -46,6 +46,10 @@ namespace AsmResolver.PE.DotNet.Cil
             // Move to code.
             reader.Offset = fileOffset + (ulong) headerSize;
 
+            // Verify code size.
+            if (reader.Offset + codeSize > reader.StartOffset + reader.Length)
+                throw new FormatException("Invalid fat CIL method body code size.");
+
             // Read code.
             var code = new byte[codeSize];
             reader.ReadBytes(code, 0, code.Length);
