@@ -29,12 +29,17 @@ namespace AsmResolver.DotNet.Signatures.Types
                 fieldSignature.FieldType.AcceptVisitor(this));
         }
 
+        public PropertySignature InstantiatePropertySignature(PropertySignature signature)
+        {
+            var result = new PropertySignature(signature.Attributes);
+            InstantiateMethodSignatureBase(signature, result);
+            return result;
+        }
+
         public MethodSignature InstantiateMethodSignature(MethodSignature signature)
         {
-            var result = new MethodSignature(
-                signature.Attributes,
-                signature.ReturnType.AcceptVisitor(this),
-                signature.ParameterTypes.Select(t => t.AcceptVisitor(this)));
+            var result = new MethodSignature(signature.Attributes);
+            InstantiateMethodSignatureBase(signature, result);
             result.GenericParameterCount = signature.GenericParameterCount;
 
             if (signature.IncludeSentinel)
@@ -46,6 +51,14 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             return result;
         }
+
+        private void InstantiateMethodSignatureBase(MethodSignatureBase signature, MethodSignatureBase result)
+        {
+            result.ReturnType = signature.ReturnType.AcceptVisitor(this);
+            foreach (var parameterType in signature.ParameterTypes)
+                result.ParameterTypes.Add(parameterType.AcceptVisitor(this));
+        }
+        
 
         /// <inheritdoc />
         public TypeSignature VisitArrayType(ArrayTypeSignature signature)

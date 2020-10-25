@@ -100,7 +100,7 @@ namespace AsmResolver.DotNet.Signatures
         /// Initializes an empty method signature with no parameters.
         /// </summary>
         /// <param name="attributes">The attributes</param>
-        protected MethodSignature(CallingConventionAttributes attributes)
+        protected internal MethodSignature(CallingConventionAttributes attributes)
             : base(attributes, null, Enumerable.Empty<TypeSignature>())
         {
         }

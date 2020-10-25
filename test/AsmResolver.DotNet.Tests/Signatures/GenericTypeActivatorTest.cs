@@ -153,6 +153,34 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(new FieldSignature(_module.CorLibTypeFactory.String), newSignature, Comparer);
         }
         
+        [Fact]
+        public void InstantiatePropertySignatureWithGenericPropertyType()
+        {
+            var signature = PropertySignature.CreateStatic(new GenericParameterSignature(GenericParameterType.Type, 0));
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+            
+            var newSignature = signature.InstantiateGenericTypes(context);
+            
+            var expected = PropertySignature.CreateStatic(_module.CorLibTypeFactory.String);
+            Assert.Equal(expected, newSignature, Comparer);
+        }
+        
+        [Fact]
+        public void InstantiatePropertySignatureWithGenericParameterType()
+        {
+            var signature = PropertySignature.CreateStatic(
+                _module.CorLibTypeFactory.String, 
+                new GenericParameterSignature(GenericParameterType.Type, 0));
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+            
+            var newSignature = signature.InstantiateGenericTypes(context);
+            
+            var expected = PropertySignature.CreateStatic(
+                _module.CorLibTypeFactory.String, 
+                _module.CorLibTypeFactory.String);
+            Assert.Equal(expected, newSignature, Comparer);
+        }
+        
         private sealed class MockGenericArgumentProvider : IGenericArgumentsProvider
         {
             public MockGenericArgumentProvider(IList<TypeSignature> typeArguments)
