@@ -124,6 +124,12 @@ namespace AsmResolver.DotNet.Signatures
             get;
             set;
         }
+
+        public MethodSignature InstantiateGenericTypes(GenericContext context)
+        {
+            var activator = new GenericTypeActivator(context);
+            return activator.InstantiateMethodSignature(this);
+        }
         
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

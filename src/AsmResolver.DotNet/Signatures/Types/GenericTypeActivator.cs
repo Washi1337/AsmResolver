@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
@@ -18,6 +20,24 @@ namespace AsmResolver.DotNet.Signatures.Types
         public GenericTypeActivator(in GenericContext context)
         {
             _context = context;
+        }
+
+        public MethodSignature InstantiateMethodSignature(MethodSignature signature)
+        {
+            var result = new MethodSignature(
+                signature.Attributes,
+                signature.ReturnType.AcceptVisitor(this),
+                signature.ParameterTypes.Select(t => t.AcceptVisitor(this)));
+            result.GenericParameterCount = signature.GenericParameterCount;
+
+            if (signature.IncludeSentinel)
+            {
+                result.IncludeSentinel = signature.IncludeSentinel;
+                foreach (var sentinelType in signature.SentinelParameterTypes)
+                    result.SentinelParameterTypes.Add(sentinelType.AcceptVisitor(this));
+            }
+
+            return result;
         }
 
         /// <inheritdoc />
