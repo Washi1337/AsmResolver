@@ -76,7 +76,6 @@ namespace AsmResolver.DotNet.Signatures.Types
             foreach (var parameterType in signature.ParameterTypes)
                 result.ParameterTypes.Add(parameterType.AcceptVisitor(this));
         }
-        
 
         /// <inheritdoc />
         public TypeSignature VisitArrayType(ArrayTypeSignature signature)
