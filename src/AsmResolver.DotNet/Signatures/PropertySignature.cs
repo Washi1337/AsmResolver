@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet.Signatures
         /// Initializes a new empty property signature.
         /// </summary>
         /// <param name="attributes">The attributes.</param>
-        protected PropertySignature(CallingConventionAttributes attributes)
+        protected internal PropertySignature(CallingConventionAttributes attributes)
             : base(attributes | CallingConventionAttributes.Property, null, Enumerable.Empty<TypeSignature>())
         {
         }
@@ -112,6 +112,22 @@ namespace AsmResolver.DotNet.Signatures
         {
         }
 
+        /// <summary>
+        /// Substitutes any generic type parameter in the property signature with the parameters provided by
+        /// the generic context. 
+        /// </summary>
+        /// <param name="context">The generic context.</param>
+        /// <returns>The instantiated property signature.</returns>
+        /// <remarks>
+        /// When the type signature does not contain any generic parameter, this method might return the current
+        /// instance of the property signature.
+        /// </remarks>
+        public PropertySignature InstantiateGenericTypes(GenericContext context)
+        {
+            var activator = new GenericTypeActivator(context);
+            return activator.InstantiatePropertySignature(this);
+        }
+        
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {

@@ -10,7 +10,15 @@ namespace AsmResolver.DotNet.Tests.Signatures
     {
         private readonly SignatureComparer Comparer = new SignatureComparer();
         private readonly ModuleDefinition _module = new ModuleDefinition("DummyModule");
+        private TypeReference _dummyGenericType;
 
+        public GenericTypeActivatorTest()
+        {
+            _dummyGenericType = new TypeReference(
+                new AssemblyReference("SomeAssembly", new Version()),
+                "SomeNamespace", "SomeType");
+        }
+        
         public static IGenericArgumentsProvider GetProvider(params TypeSignature[] signatures)
         {
             return new MockGenericArgumentProvider(signatures);
@@ -46,45 +54,34 @@ namespace AsmResolver.DotNet.Tests.Signatures
         [Fact]
         public void InstantiateSimpleGenericInstanceType()
         {
-            var genericType = new TypeReference(
-                new AssemblyReference("SomeAssembly", new Version()),
-                "SomeNamespace", "SomeType");
 
-            var signature = new GenericInstanceTypeSignature(genericType, false,
+            var signature = new GenericInstanceTypeSignature(_dummyGenericType, false,
                 new GenericParameterSignature(GenericParameterType.Type, 0));
 
             var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
             var newSignature = signature.InstantiateGenericTypes(context);
-            Assert.Equal(new GenericInstanceTypeSignature(genericType, false,
+            Assert.Equal(new GenericInstanceTypeSignature(_dummyGenericType, false,
                 _module.CorLibTypeFactory.String), newSignature, Comparer);
         }
 
         [Fact]
         public void InstantiateNestedGenericInstanceType()
         {
-            var genericType = new TypeReference(
-                new AssemblyReference("SomeAssembly", new Version()),
-                "SomeNamespace", "SomeType");
-
-            var signature = new GenericInstanceTypeSignature(genericType, false,
-                new GenericInstanceTypeSignature(genericType, false,
+            var signature = new GenericInstanceTypeSignature(_dummyGenericType, false,
+                new GenericInstanceTypeSignature(_dummyGenericType, false,
                     new GenericParameterSignature(GenericParameterType.Type, 0)));
 
             var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
             var newSignature = signature.InstantiateGenericTypes(context);
-            Assert.Equal(new GenericInstanceTypeSignature(genericType, false,
-                new GenericInstanceTypeSignature(genericType, false,
+            Assert.Equal(new GenericInstanceTypeSignature(_dummyGenericType, false,
+                new GenericInstanceTypeSignature(_dummyGenericType, false,
                     _module.CorLibTypeFactory.String)), newSignature, Comparer);
         }
 
         [Fact]
         public void InstantiateGenericInstanceTypeWithTypeAndMethodArgument()
         {
-            var genericType = new TypeReference(
-                new AssemblyReference("SomeAssembly", new Version()),
-                "SomeNamespace", "SomeType");
-
-            var signature = new GenericInstanceTypeSignature(genericType, false,
+            var signature = new GenericInstanceTypeSignature(_dummyGenericType, false,
                 new GenericParameterSignature(GenericParameterType.Type, 0),
                 new GenericParameterSignature(GenericParameterType.Method, 0));
 
@@ -93,9 +90,95 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 GetProvider(_module.CorLibTypeFactory.Int32));
             
             var newSignature = signature.InstantiateGenericTypes(context);
-            Assert.Equal(new GenericInstanceTypeSignature(genericType, false,
+            Assert.Equal(new GenericInstanceTypeSignature(_dummyGenericType, false,
                     _module.CorLibTypeFactory.String,
                     _module.CorLibTypeFactory.Int32), newSignature, Comparer);
+        }
+
+        [Fact]
+        public void InstantiateMethodSignatureWithGenericReturnType()
+        {
+            var signature = MethodSignature.CreateStatic(
+                    new GenericParameterSignature(GenericParameterType.Type, 0));
+            
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+            
+            var newSignature = signature.InstantiateGenericTypes(context);
+            Assert.Equal(MethodSignature.CreateStatic(
+                _module.CorLibTypeFactory.String
+            ), newSignature, Comparer);
+        } 
+
+        [Fact]
+        public void InstantiateMethodSignatureWithGenericParameterType()
+        {
+            var signature = MethodSignature.CreateStatic(
+                _module.CorLibTypeFactory.Void,
+                    new GenericParameterSignature(GenericParameterType.Type, 0));
+            
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+            
+            var newSignature = signature.InstantiateGenericTypes(context);
+            Assert.Equal(MethodSignature.CreateStatic(
+                _module.CorLibTypeFactory.Void,
+                _module.CorLibTypeFactory.String
+            ), newSignature, Comparer);
+        } 
+
+        [Fact]
+        public void InstantiateMethodSignatureWithGenericSentinelParameterType()
+        {
+            var signature = MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void);
+            signature.IncludeSentinel = true;
+            signature.SentinelParameterTypes.Add(new GenericParameterSignature(GenericParameterType.Type, 0));
+            
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+            
+            var newSignature = signature.InstantiateGenericTypes(context);
+            
+            var expected = MethodSignature.CreateStatic(_module.CorLibTypeFactory.Void);
+            expected.IncludeSentinel = true;
+            expected.SentinelParameterTypes.Add(_module.CorLibTypeFactory.String);
+
+            Assert.Equal(expected, newSignature, Comparer);
+        }
+
+        [Fact]
+        public void InstantiateFieldSignature()
+        {
+            var signature = new FieldSignature(new GenericParameterSignature(GenericParameterType.Type, 0));
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+
+            var newSignature = signature.InstantiateGenericTypes(context);
+            Assert.Equal(new FieldSignature(_module.CorLibTypeFactory.String), newSignature, Comparer);
+        }
+        
+        [Fact]
+        public void InstantiatePropertySignatureWithGenericPropertyType()
+        {
+            var signature = PropertySignature.CreateStatic(new GenericParameterSignature(GenericParameterType.Type, 0));
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+            
+            var newSignature = signature.InstantiateGenericTypes(context);
+            
+            var expected = PropertySignature.CreateStatic(_module.CorLibTypeFactory.String);
+            Assert.Equal(expected, newSignature, Comparer);
+        }
+        
+        [Fact]
+        public void InstantiatePropertySignatureWithGenericParameterType()
+        {
+            var signature = PropertySignature.CreateStatic(
+                _module.CorLibTypeFactory.String, 
+                new GenericParameterSignature(GenericParameterType.Type, 0));
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+            
+            var newSignature = signature.InstantiateGenericTypes(context);
+            
+            var expected = PropertySignature.CreateStatic(
+                _module.CorLibTypeFactory.String, 
+                _module.CorLibTypeFactory.String);
+            Assert.Equal(expected, newSignature, Comparer);
         }
         
         private sealed class MockGenericArgumentProvider : IGenericArgumentsProvider
