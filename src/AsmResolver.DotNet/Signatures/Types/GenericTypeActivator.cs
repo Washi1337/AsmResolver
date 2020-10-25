@@ -22,13 +22,25 @@ namespace AsmResolver.DotNet.Signatures.Types
             _context = context;
         }
 
-        public FieldSignature InstantiateFieldSignature(FieldSignature fieldSignature)
+        /// <summary>
+        /// Instantiates a new field signature, substituting any generic type parameter in the signature with
+        /// the activation context. 
+        /// </summary>
+        /// <param name="signature">The signature to activate.</param>
+        /// <returns>The activated signature.</returns>
+        public FieldSignature InstantiateFieldSignature(FieldSignature signature)
         {
             return new FieldSignature(
-                fieldSignature.Attributes, 
-                fieldSignature.FieldType.AcceptVisitor(this));
+                signature.Attributes, 
+                signature.FieldType.AcceptVisitor(this));
         }
 
+        /// <summary>
+        /// Instantiates a new method signature, substituting any generic type parameter in the signature with
+        /// the activation context. 
+        /// </summary>
+        /// <param name="signature">The signature to activate.</param>
+        /// <returns>The activated signature.</returns>
         public PropertySignature InstantiatePropertySignature(PropertySignature signature)
         {
             var result = new PropertySignature(signature.Attributes);
@@ -36,6 +48,12 @@ namespace AsmResolver.DotNet.Signatures.Types
             return result;
         }
 
+        /// <summary>
+        /// Instantiates a new method signature, substituting any generic type parameter in the signature with
+        /// the activation context. 
+        /// </summary>
+        /// <param name="signature">The signature to activate.</param>
+        /// <returns>The activated signature.</returns>
         public MethodSignature InstantiateMethodSignature(MethodSignature signature)
         {
             var result = new MethodSignature(signature.Attributes);
