@@ -86,6 +86,16 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="count">The number of instructions to remove.</param>
         public void RemoveRange(int index, int count) => _items.RemoveRange(index, count);
 
+        /// <summary>
+        /// Removes a set of CIL instructions from the collection.
+        /// </summary>
+        /// <param name="items">The instructions to remove.</param>
+        public void RemoveRange(IEnumerable<CilInstruction> items)
+        {
+            foreach (var item in items)
+                _items.Remove(item);
+        }
+
         /// <inheritdoc />
         public int IndexOf(CilInstruction item) => _items.IndexOf(item);
 

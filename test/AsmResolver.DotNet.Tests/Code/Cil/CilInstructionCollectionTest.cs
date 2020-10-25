@@ -350,6 +350,38 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 instructions.RemoveAt(2, -1, 100));
             Assert.Equal(expected, instructions);
         }
-        
+
+        [Fact]
+        public void RemoveRangeOnSetOfInstructions()
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            instructions.AddRange(new[]
+            {
+                new CilInstruction(0, CilOpCodes.Nop),
+                new CilInstruction(1, CilOpCodes.Nop),
+                new CilInstruction(2, CilOpCodes.Nop),
+                new CilInstruction(3, CilOpCodes.Nop),
+                new CilInstruction(4, CilOpCodes.Nop),
+                new CilInstruction(5, CilOpCodes.Nop),
+                new CilInstruction(6, CilOpCodes.Ret),
+            });
+
+            var expected = new[]
+            {
+                instructions[0],
+                instructions[2],
+                instructions[4],
+                instructions[6],
+            };
+            
+            instructions.RemoveRange(new []
+            {
+                instructions[1],
+                instructions[3],
+                instructions[5],
+            });
+
+            Assert.Equal(expected, instructions);
+        }
     }
 }
