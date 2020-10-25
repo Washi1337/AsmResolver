@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
@@ -18,6 +20,61 @@ namespace AsmResolver.DotNet.Signatures.Types
         public GenericTypeActivator(in GenericContext context)
         {
             _context = context;
+        }
+
+        /// <summary>
+        /// Instantiates a new field signature, substituting any generic type parameter in the signature with
+        /// the activation context. 
+        /// </summary>
+        /// <param name="signature">The signature to activate.</param>
+        /// <returns>The activated signature.</returns>
+        public FieldSignature InstantiateFieldSignature(FieldSignature signature)
+        {
+            return new FieldSignature(
+                signature.Attributes, 
+                signature.FieldType.AcceptVisitor(this));
+        }
+
+        /// <summary>
+        /// Instantiates a new method signature, substituting any generic type parameter in the signature with
+        /// the activation context. 
+        /// </summary>
+        /// <param name="signature">The signature to activate.</param>
+        /// <returns>The activated signature.</returns>
+        public PropertySignature InstantiatePropertySignature(PropertySignature signature)
+        {
+            var result = new PropertySignature(signature.Attributes);
+            InstantiateMethodSignatureBase(signature, result);
+            return result;
+        }
+
+        /// <summary>
+        /// Instantiates a new method signature, substituting any generic type parameter in the signature with
+        /// the activation context. 
+        /// </summary>
+        /// <param name="signature">The signature to activate.</param>
+        /// <returns>The activated signature.</returns>
+        public MethodSignature InstantiateMethodSignature(MethodSignature signature)
+        {
+            var result = new MethodSignature(signature.Attributes);
+            InstantiateMethodSignatureBase(signature, result);
+            result.GenericParameterCount = signature.GenericParameterCount;
+
+            if (signature.IncludeSentinel)
+            {
+                result.IncludeSentinel = signature.IncludeSentinel;
+                foreach (var sentinelType in signature.SentinelParameterTypes)
+                    result.SentinelParameterTypes.Add(sentinelType.AcceptVisitor(this));
+            }
+
+            return result;
+        }
+
+        private void InstantiateMethodSignatureBase(MethodSignatureBase signature, MethodSignatureBase result)
+        {
+            result.ReturnType = signature.ReturnType.AcceptVisitor(this);
+            foreach (var parameterType in signature.ParameterTypes)
+                result.ParameterTypes.Add(parameterType.AcceptVisitor(this));
         }
 
         /// <inheritdoc />

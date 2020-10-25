@@ -100,7 +100,7 @@ namespace AsmResolver.DotNet.Signatures
         /// Initializes an empty method signature with no parameters.
         /// </summary>
         /// <param name="attributes">The attributes</param>
-        protected MethodSignature(CallingConventionAttributes attributes)
+        protected internal MethodSignature(CallingConventionAttributes attributes)
             : base(attributes, null, Enumerable.Empty<TypeSignature>())
         {
         }
@@ -123,6 +123,22 @@ namespace AsmResolver.DotNet.Signatures
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Substitutes any generic type parameter in the method signature with the parameters provided by
+        /// the generic context. 
+        /// </summary>
+        /// <param name="context">The generic context.</param>
+        /// <returns>The instantiated method signature.</returns>
+        /// <remarks>
+        /// When the type signature does not contain any generic parameter, this method might return the current
+        /// instance of the method signature.
+        /// </remarks>
+        public MethodSignature InstantiateGenericTypes(GenericContext context)
+        {
+            var activator = new GenericTypeActivator(context);
+            return activator.InstantiateMethodSignature(this);
         }
         
         /// <inheritdoc />

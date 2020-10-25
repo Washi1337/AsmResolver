@@ -79,6 +79,23 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <inheritdoc />
         public bool Remove(CilInstruction item) => _items.Remove(item);
 
+        /// <summary>
+        /// Removes a range of CIL instructions from the collection.
+        /// </summary>
+        /// <param name="index">The starting index.</param>
+        /// <param name="count">The number of instructions to remove.</param>
+        public void RemoveRange(int index, int count) => _items.RemoveRange(index, count);
+
+        /// <summary>
+        /// Removes a set of CIL instructions from the collection.
+        /// </summary>
+        /// <param name="items">The instructions to remove.</param>
+        public void RemoveRange(IEnumerable<CilInstruction> items)
+        {
+            foreach (var item in items)
+                _items.Remove(item);
+        }
+
         /// <inheritdoc />
         public int IndexOf(CilInstruction item) => _items.IndexOf(item);
 
@@ -87,6 +104,53 @@ namespace AsmResolver.DotNet.Code.Cil
 
         /// <inheritdoc />
         public void RemoveAt(int index) => _items.RemoveAt(index);
+
+        /// <summary>
+        /// Removes a set of CIL instructions based on a list of indices that are relative to a starting index.
+        /// </summary>
+        /// <param name="baseIndex">The base index.</param>
+        /// <param name="relativeIndices">The indices relative to <paramref name="baseIndex"/> to remove.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when any relative index in <paramref name="relativeIndices"/> results in an index that is
+        /// out of bounds of the instruction collection.
+        /// </exception>
+        public void RemoveAt(int baseIndex, params int[] relativeIndices) =>
+            RemoveAt(baseIndex, relativeIndices.AsEnumerable());
+        
+        /// <summary>
+        /// Removes a set of CIL instructions based on a list of indices that are relative to a starting index.
+        /// </summary>
+        /// <param name="baseIndex">The base index.</param>
+        /// <param name="relativeIndices">The indices relative to <paramref name="baseIndex"/> to remove.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when any relative index in <paramref name="relativeIndices"/> results in an index that is
+        /// out of bounds of the instruction collection.
+        /// </exception>
+        public void RemoveAt(int baseIndex, IEnumerable<int> relativeIndices)
+        {
+            // Verify and translate relative indices into absolute indices.
+            var absoluteIndices = new List<int>();
+            foreach (int relativeIndex in relativeIndices.Distinct())
+            {
+                int absoluteIndex = baseIndex + relativeIndex;
+                if (absoluteIndex < 0 || absoluteIndex >= _items.Count)
+                    throw new ArgumentOutOfRangeException(nameof(relativeIndices));
+                absoluteIndices.Add(absoluteIndex);
+            }
+
+            absoluteIndices.Sort();
+            
+            // Remove indices.
+            for (int i = 0; i < absoluteIndices.Count; i++)
+            {
+                int index = absoluteIndices[i];
+                _items.RemoveAt(index);
+                
+                // Removal of instruction offsets all remaining indices by one. Update remaining indices. 
+                for (int j = i+1; j < absoluteIndices.Count; j++)
+                    absoluteIndices[j]--;
+            }
+        }
 
         /// <summary>
         /// Returns an enumerator that enumerates through the instructions sequentially.
@@ -404,7 +468,7 @@ namespace AsmResolver.DotNet.Code.Cil
                     1 => (CilOpCodes.Ldloc_1, null),
                     2 => (CilOpCodes.Ldloc_2, null),
                     3 => (CilOpCodes.Ldloc_3, null),
-                    {} x when x >= sbyte.MinValue && x <= sbyte.MaxValue => (CilOpCodes.Ldloc_S, variable),
+                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Ldloc_S, variable),
                     _ => (CilOpCodes.Ldloc, variable),
                 };
             }
@@ -452,15 +516,9 @@ namespace AsmResolver.DotNet.Code.Cil
             }
             else if (instruction.IsStarg())
             {
-                (code, operand) = parameter.MethodSignatureIndex switch
-                {
-                    0 => (CilOpCodes.Stloc_0, null),
-                    1 => (CilOpCodes.Stloc_1, null),
-                    2 => (CilOpCodes.Stloc_2, null),
-                    3 => (CilOpCodes.Stloc_3, null),
-                    {} x when x >= byte.MinValue && x <= byte.MaxValue => (CilOpCodes.Stloc_S, parameter),
-                    _ => (CilOpCodes.Stloc, parameter),
-                };
+                code = parameter.MethodSignatureIndex <= byte.MaxValue
+                    ? CilOpCodes.Starg_S 
+                    : CilOpCodes.Starg;
             }
 
             if (code != instruction.OpCode)

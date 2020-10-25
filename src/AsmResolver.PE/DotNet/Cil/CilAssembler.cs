@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.PE.DotNet.Cil
 {
@@ -57,41 +58,47 @@ namespace AsmResolver.PE.DotNet.Cil
                     break;
                 
                 case CilOperandType.ShortInlineI:
-                    _writer.WriteSByte((sbyte) instruction.Operand);
+                    _writer.WriteSByte(OperandToSByte(instruction));
                     break;
+                
                 case CilOperandType.InlineI:
-                    _writer.WriteInt32((int) instruction.Operand);
+                    _writer.WriteInt32(OperandToInt32(instruction));
                     break;
+                
                 case CilOperandType.InlineI8:
-                    _writer.WriteInt64((long) instruction.Operand);
+                    _writer.WriteInt64(OperandToInt64(instruction));
                     break;
+                
                 case CilOperandType.ShortInlineR:
-                    _writer.WriteSingle((float) instruction.Operand);
+                    _writer.WriteSingle(OperandToFloat32(instruction));
                     break;
+                
                 case CilOperandType.InlineR:
-                    _writer.WriteDouble((double) instruction.Operand);
+                    _writer.WriteDouble(OperandToFloat64(instruction));
                     break;
                 
                 case CilOperandType.ShortInlineVar:
-                    _writer.WriteSByte((sbyte) _operandBuilder.GetVariableIndex(instruction.Operand));
+                    _writer.WriteByte((byte) OperandToLocalIndex(instruction));
                     break;
+                
                 case CilOperandType.InlineVar:
-                    _writer.WriteUInt16((ushort) _operandBuilder.GetVariableIndex(instruction.Operand));
+                    _writer.WriteUInt16(OperandToLocalIndex(instruction));
                     break;
+                
                 case CilOperandType.ShortInlineArgument:
-                    _writer.WriteSByte((sbyte) _operandBuilder.GetArgumentIndex(instruction.Operand));
+                    _writer.WriteByte((byte) OperandToArgumentIndex(instruction));
                     break;
+                
                 case CilOperandType.InlineArgument:
-                    _writer.WriteUInt16((ushort) _operandBuilder.GetArgumentIndex(instruction.Operand));
+                    _writer.WriteUInt16(OperandToArgumentIndex(instruction));
                     break;
 
                 case CilOperandType.ShortInlineBrTarget:
-                    sbyte shortOffset = (sbyte) (((ICilLabel) instruction.Operand).Offset - (int) (_writer.Offset + sizeof(sbyte)));
-                    _writer.WriteSByte(shortOffset);
+                    _writer.WriteSByte((sbyte) OperandToBranchDelta(instruction));
                     break;
+                
                 case CilOperandType.InlineBrTarget:
-                    int longOffset = ((ICilLabel) instruction.Operand).Offset - (int) (_writer.Offset + sizeof(int));
-                    _writer.WriteInt32(longOffset);
+                    _writer.WriteInt32(OperandToBranchDelta(instruction));
                     break;
                 
                 case CilOperandType.InlineSwitch:
@@ -119,6 +126,113 @@ namespace AsmResolver.PE.DotNet.Cil
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private int OperandToBranchDelta(CilInstruction instruction)
+        {
+            bool isShort = instruction.OpCode.OperandType == CilOperandType.ShortInlineBrTarget;
+            
+            int delta;
+            switch (instruction.Operand)
+            {
+                case sbyte x:
+                    delta = x;
+                    break;
+                
+                case int x:
+                    delta = x;
+                    break;
+                
+                case ICilLabel label:
+                    int operandSize = isShort ? sizeof(sbyte) : sizeof(int);
+                    delta = label.Offset - (int) (_writer.Offset + (ulong) operandSize);
+                    break;
+                
+                default:
+                    return ThrowInvalidOperandType<sbyte>(instruction, typeof(ICilLabel), typeof(sbyte));
+            }
+
+            if (isShort && (delta < sbyte.MinValue || delta > sbyte.MaxValue))
+            {
+                throw new OverflowException(
+                    $"Branch target at offset IL_{instruction.Offset:X4} is too far away for a ShortInlineBr instruction.");
+            }
+
+            return delta;
+        }
+
+        private ushort OperandToLocalIndex(CilInstruction instruction)
+        {
+            int variableIndex = _operandBuilder.GetVariableIndex(instruction.Operand);
+            if (instruction.OpCode.OperandType == CilOperandType.ShortInlineVar && variableIndex > byte.MaxValue)
+            {
+                throw new OverflowException(
+                    $"Local index at offset IL_{instruction.Offset:X4} is too large for a ShortInlineVar instruction.");
+            }
+
+            return unchecked((ushort) variableIndex);
+        }
+
+        private ushort OperandToArgumentIndex(CilInstruction instruction)
+        {
+            int variableIndex = _operandBuilder.GetArgumentIndex(instruction.Operand);
+            if (instruction.OpCode.OperandType == CilOperandType.ShortInlineArgument && variableIndex > byte.MaxValue)
+            {
+                throw new OverflowException(
+                    $"Argument index at offset IL_{instruction.Offset:X4} is too large for a ShortInlineArgument instruction.");
+            }
+
+            return unchecked((ushort) variableIndex);
+        }
+
+        private static sbyte OperandToSByte(CilInstruction instruction)
+        {
+            if (instruction.Operand is sbyte x)
+                return x;
+            return ThrowInvalidOperandType<sbyte>(instruction, typeof(sbyte));
+        }
+
+        private static int OperandToInt32(CilInstruction instruction)
+        {
+            if (instruction.Operand is int x)
+                return x;
+            return ThrowInvalidOperandType<int>(instruction, typeof(int));
+        }
+
+        private static long OperandToInt64(CilInstruction instruction)
+        {
+            if (instruction.Operand is long x)
+                return x;
+            return ThrowInvalidOperandType<long>(instruction, typeof(long));
+        }
+
+        private static float OperandToFloat32(CilInstruction instruction)
+        {
+            if (instruction.Operand is float x)
+                return x;
+            return ThrowInvalidOperandType<float>(instruction, typeof(float));
+        }
+
+        private static double OperandToFloat64(CilInstruction instruction)
+        {
+            if (instruction.Operand is double x)
+                return x;
+            return ThrowInvalidOperandType<double>(instruction, typeof(double));
+        }
+
+        private static T ThrowInvalidOperandType<T>(CilInstruction instruction, params Type[] expectedOperands)
+        {
+            var names = expectedOperands
+                .Select(o => o.Name)
+                .ToArray();
+
+            string operandTypesString = expectedOperands.Length > 1
+                ? $"{string.Join(", ", names.Take(names.Length - 1))} or {names[names.Length - 1]}"
+                : names[0];
+
+            string found = instruction.Operand?.GetType().Name ?? "null";
+            throw new ArgumentOutOfRangeException(
+                $"Expected a {operandTypesString} operand at offset IL_{instruction.Offset:X4}, but found {found}.");
         }
     }
 }
