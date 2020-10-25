@@ -353,7 +353,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
                 end,
             });
 
-            Assert.Equal(1, body.ComputeMaxStack());
+            Assert.Equal(0, body.ComputeMaxStack());
         }
 
         [Fact]
