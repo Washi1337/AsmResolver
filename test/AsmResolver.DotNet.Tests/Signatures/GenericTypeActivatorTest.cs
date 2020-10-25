@@ -141,7 +141,17 @@ namespace AsmResolver.DotNet.Tests.Signatures
             expected.SentinelParameterTypes.Add(_module.CorLibTypeFactory.String);
 
             Assert.Equal(expected, newSignature, Comparer);
-        } 
+        }
+
+        [Fact]
+        public void InstantiateFieldSignature()
+        {
+            var signature = new FieldSignature(new GenericParameterSignature(GenericParameterType.Type, 0));
+            var context = new GenericContext(GetProvider(_module.CorLibTypeFactory.String), null);
+
+            var newSignature = signature.InstantiateGenericTypes(context);
+            Assert.Equal(new FieldSignature(_module.CorLibTypeFactory.String), newSignature, Comparer);
+        }
         
         private sealed class MockGenericArgumentProvider : IGenericArgumentsProvider
         {

@@ -22,6 +22,13 @@ namespace AsmResolver.DotNet.Signatures.Types
             _context = context;
         }
 
+        public FieldSignature InstantiateFieldSignature(FieldSignature fieldSignature)
+        {
+            return new FieldSignature(
+                fieldSignature.Attributes, 
+                fieldSignature.FieldType.AcceptVisitor(this));
+        }
+
         public MethodSignature InstantiateMethodSignature(MethodSignature signature)
         {
             var result = new MethodSignature(

@@ -79,6 +79,12 @@ namespace AsmResolver.DotNet.Signatures
             set => MemberReturnType = value;
         }
 
+        public FieldSignature InstantiateGenericTypes(GenericContext context)
+        {
+            var activator = new GenericTypeActivator(context);
+            return activator.InstantiateFieldSignature(this);
+        }
+        
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
