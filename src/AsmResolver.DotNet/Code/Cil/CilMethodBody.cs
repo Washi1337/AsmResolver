@@ -397,65 +397,80 @@ namespace AsmResolver.DotNet.Code.Cil
                     {
                         case CilFlowControl.Branch:
                             // Schedule branch target.
-                            agenda.Push(new StackState(
-                                Instructions.GetIndexByOffset(((ICilLabel) instruction.Operand).Offset),
-                                nextStackSize));
+                            ScheduleLabel(instruction.Offset, (ICilLabel) instruction.Operand, nextStackSize);
                             break;
-                        
+
                         case CilFlowControl.ConditionalBranch when instruction.OpCode.Code == CilCode.Switch:
                             // Schedule all switch targets for processing.
                             foreach (var target in (IEnumerable<ICilLabel>) instruction.Operand)
-                            {
-                                agenda.Push(new StackState(
-                                    Instructions.GetIndexByOffset(target.Offset),
-                                    nextStackSize));
-                            }
+                                ScheduleLabel(instruction.Offset, target, nextStackSize);
 
                             // Schedule default case (= fallthrough instruction).
-                            agenda.Push(new StackState(
-                                currentState.InstructionIndex + 1,
-                                nextStackSize));
+                            ScheduleNext(currentState.InstructionIndex, nextStackSize);
                             break;
-                            
+
                         case CilFlowControl.ConditionalBranch:
                             // Schedule branch target.
-                            agenda.Push(new StackState(
-                                Instructions.GetIndexByOffset(((ICilLabel) instruction.Operand).Offset),
-                                nextStackSize));
+                            ScheduleLabel(instruction.Offset, (ICilLabel) instruction.Operand, nextStackSize);
 
                             // Schedule fallthrough instruction.
-                            agenda.Push(new StackState(
-                                currentState.InstructionIndex + 1,
-                                nextStackSize));
+                            ScheduleNext(currentState.InstructionIndex, nextStackSize);
                             break;
-                        
+
                         case CilFlowControl.Call:
                         case CilFlowControl.Break:
                         case CilFlowControl.Meta:
                         case CilFlowControl.Phi:
                         case CilFlowControl.Next:
                             // Schedule fallthrough instruction.
-                            agenda.Push(new StackState(
-                                currentState.InstructionIndex + 1,
-                                nextStackSize));
+                            ScheduleNext(currentState.InstructionIndex, nextStackSize);
                             break;
-                        
+
+                        case CilFlowControl.Throw:
                         case CilFlowControl.Return:
                             // Verify final stack size is correct.
                             if (nextStackSize != 0)
                                 throw new StackImbalanceException(this, instruction.Offset);
                             break;
+
+                        default:
+                            throw new NotSupportedException(
+                                $"Invalid or unsupported operand type at offset IL_{instruction.Offset:X4}.");
                     }
                 }
             }
 
+            void ScheduleLabel(int currentIndex, ICilLabel label, int nextStackSize)
+            {
+                int nextIndex = Instructions.GetIndexByOffset(label.Offset);
+                ScheduleIndex(currentIndex, nextIndex, label.Offset, nextStackSize);
+            }
+
+            void ScheduleNext(int currentIndex, int nextStackSize)
+            {
+                var instruction = Instructions[currentIndex];
+                ScheduleIndex(currentIndex, currentIndex + 1, instruction.Offset + instruction.Size, nextStackSize);
+            }
+            
+            void ScheduleIndex(int currentIndex, int nextIndex, int nextOffset, int nextStackSize)
+            {
+                if (nextIndex < 0 && nextIndex >= Instructions.Count)
+                {
+                    var instruction = Instructions[currentIndex];
+                    throw new InvalidProgramException(
+                        $"Instruction at offset IL_{instruction.Offset:X4} transfers control to a non-existing offset IL_{nextOffset:X4}.");
+                }
+
+                agenda.Push(new StackState(nextIndex, nextStackSize));
+            }
+            
             return recordedStackSizes.Max(x => x.GetValueOrDefault());
         }
 
         /// <summary>
         /// Provides information about the state of the stack at a particular point of execution in a method.  
         /// </summary>
-        private struct StackState
+        private readonly struct StackState
         {
             /// <summary>
             /// The index of the instruction the state is associated to.
