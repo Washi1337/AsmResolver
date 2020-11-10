@@ -1,3 +1,4 @@
+using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 

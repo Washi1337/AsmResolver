@@ -93,5 +93,26 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        public static byte[] ActualLibrary {
+            get {
+                object obj = ResourceManager.GetObject("ActualLibrary", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        public static byte[] ForwarderLibrary {
+            get {
+                object obj = ResourceManager.GetObject("ForwarderLibrary", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        public static byte[] ForwarderRefTest {
+            get {
+                object obj = ResourceManager.GetObject("ForwarderRefTest", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
