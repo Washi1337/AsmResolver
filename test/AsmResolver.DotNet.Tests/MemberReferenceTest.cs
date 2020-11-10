@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet.Tests
             var library = ModuleDefinition.FromBytes(Properties.Resources.ActualLibrary).Assembly;
 
             module.MetadataResolver.AssemblyResolver.AddToCache(forwarder, forwarder);
+            module.MetadataResolver.AssemblyResolver.AddToCache(library, library);
             forwarder.ManifestModule.MetadataResolver.AssemblyResolver.AddToCache(library, library);
 
             var reference = module

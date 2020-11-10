@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet
         private static readonly string[] BinaryFileExtensions = {".dll", ".exe"};
 
         private readonly IDictionary<AssemblyDescriptor, AssemblyDefinition> _cache 
-            = new Dictionary<AssemblyDescriptor, AssemblyDefinition>();
+            = new Dictionary<AssemblyDescriptor, AssemblyDefinition>(new SignatureComparer());
 
         private static readonly SignatureComparer _signatureComparer 
             = new SignatureComparer() { IgnoreAssemblyVersionNumbers = false};

@@ -8,7 +8,7 @@
 .class public abstract sealed MyClass
     extends [mscorlib] System.Object 
 {
-    .method public static void StaticMethod(class IMyModel argument)
+    .method public static hidebysig void StaticMethod(class IMyModel argument)
     {
         ldarg.0
         call instance void IMyModel::MyMethod()
