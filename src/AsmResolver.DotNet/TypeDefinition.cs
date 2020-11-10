@@ -747,8 +747,7 @@ namespace AsmResolver.DotNet
         public MethodDefinition GetStaticConstructor()
         {
             return Methods.FirstOrDefault(m =>
-                m.IsPrivate
-                && m.IsConstructor
+                m.IsConstructor
                 && m.IsStatic
                 && m.Parameters.Count == 0);
         }
