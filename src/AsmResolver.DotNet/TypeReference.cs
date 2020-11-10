@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet
             protected set;
         }
 
-        AssemblyDescriptor IResolutionScope.GetAssembly() => Module?.Assembly;
+        AssemblyDescriptor IResolutionScope.GetAssembly() => Scope?.GetAssembly();
 
         /// <inheritdoc />
         public ITypeDefOrRef DeclaringType => Scope as ITypeDefOrRef;
