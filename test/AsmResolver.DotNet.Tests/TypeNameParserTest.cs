@@ -109,5 +109,35 @@ namespace AsmResolver.DotNet.Tests
             var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[,,,]");
             Assert.Equal(expected, actual, _comparer);
         }
+
+        [Fact]
+        public void GenericTypeSingleBrackets()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            
+            var elementType = new TypeReference(_module, ns, name);
+            var argumentType = _module.CorLibTypeFactory.Object;
+
+            var expected = new GenericInstanceTypeSignature(elementType, false, argumentType);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[{argumentType.Namespace}.{argumentType.Name}]");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void GenericTypeMultiBrackets()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            
+            var elementType = new TypeReference(_module, ns, name);
+            var argumentType = _module.CorLibTypeFactory.Object;
+
+            var expected = new GenericInstanceTypeSignature(elementType, false, argumentType);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[[{argumentType.Namespace}.{argumentType.Name}]]");
+            Assert.Equal(expected, actual, _comparer);
+        }
     }
 }

@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
     {
         private static readonly SignatureComparer Comparer = new SignatureComparer();
         
+        // src/coreclr/src/vm/typeparse.cpp
         // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names
         
         /// <summary>
