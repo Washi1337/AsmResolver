@@ -5,6 +5,7 @@ using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Methods;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
@@ -397,6 +398,24 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             });
 
             Assert.Equal(4, body.ComputeMaxStack());
+        }
+
+        [Fact]
+        public void LazyInitializationTest()
+        {
+            // https://github.com/Washi1337/AsmResolver/issues/97
+            
+            var module = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location);
+            var method = (MethodDefinition) module.LookupMember(new MetadataToken(TableIndex.Method, 1));
+            var body = method.CilMethodBody;
+            method.DeclaringType.Methods.Remove(method);
+            Assert.NotNull(body);
+            
+            var module2 = ModuleDefinition.FromFile(typeof(MethodBodyTypes).Assembly.Location);
+            var method2 = (MethodDefinition) module2.LookupMember(new MetadataToken(TableIndex.Method, 1));
+            method2.DeclaringType.Methods.Remove(method2);
+            var body2 = method2.CilMethodBody;
+            Assert.NotNull(body2);
         }
     }
 }

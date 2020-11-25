@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
@@ -13,7 +10,7 @@ namespace AsmResolver.DotNet.Code.Cil
     /// <summary>
     /// Represents a method body of a method defined in a .NET assembly, implemented using the Common Intermediate Language (CIL). 
     /// </summary>
-    public class CilMethodBody : MethodBody, ICilOperandResolver
+    public class CilMethodBody : MethodBody
     {
          /// <summary>
         ///     Creates a CIL method body from a dynamic method.
@@ -29,12 +26,15 @@ namespace AsmResolver.DotNet.Code.Cil
         ///     method body.
         /// </param>
         /// <returns>The method body.</returns>
-        public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj,
-            ICilOperandResolver operandResolver = null,ReferenceImporter importer = null)
+        public static CilMethodBody FromDynamicMethod(
+             MethodDefinition method, 
+             object dynamicMethodObj,
+             ICilOperandResolver operandResolver = null, 
+             ReferenceImporter importer = null)
         {
             var result = new CilMethodBody(method);
 
-            operandResolver ??= result;
+            operandResolver ??= new CilOperandResolver(method.Module, result);
             
             importer ??= new ReferenceImporter(method.Module);
             
@@ -68,23 +68,27 @@ namespace AsmResolver.DotNet.Code.Cil
             }
 
             return result;
-        } 
-         
-        /// <summary>
-        /// Creates a CIL method body from a raw CIL method body. 
-        /// </summary>
-        /// <param name="method">The method that owns the method body.</param>
-        /// <param name="rawBody">The raw method body.</param>
-        /// <param name="operandResolver">The object instance to use for resolving operands of an instruction in the
-        /// method body.</param>
-        /// <returns>The method body.</returns>
-        public static CilMethodBody FromRawMethodBody(MethodDefinition method, CilRawMethodBody rawBody,
-            ICilOperandResolver operandResolver = null)
+        }
+
+         /// <summary>
+         /// Creates a CIL method body from a raw CIL method body. 
+         /// </summary>
+         /// <param name="parentModule">The module originally defining the method.</param>
+         /// <param name="method">The method that owns the method body.</param>
+         /// <param name="rawBody">The raw method body.</param>
+         /// <param name="operandResolver">The object instance to use for resolving operands of an instruction in the
+         ///     method body.</param>
+         /// <returns>The method body.</returns>
+         public static CilMethodBody FromRawMethodBody(
+             ModuleDefinition parentModule, 
+             MethodDefinition method,
+             CilRawMethodBody rawBody,
+             ICilOperandResolver operandResolver = null)
         {
             var result = new CilMethodBody(method);
 
             if (operandResolver is null)
-                operandResolver = result;
+                operandResolver = new CilOperandResolver(parentModule, result);
 
             // Read raw instructions.
             var reader = new ByteArrayReader(rawBody.Code);
@@ -297,33 +301,6 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get;
         } = new List<CilExceptionHandler>();
-
-        /// <inheritdoc />
-        IMetadataMember ICilOperandResolver.ResolveMember(MetadataToken token)
-        {
-            Owner.Module.TryLookupMember(token, out var member);
-            return member;
-        }
-
-        /// <inheritdoc />
-        string ICilOperandResolver.ResolveString(MetadataToken token)
-        {
-            Owner.Module.TryLookupString(token, out string value);
-            return value;
-        }
-
-        /// <inheritdoc />
-        CilLocalVariable ICilOperandResolver.ResolveLocalVariable(int index)
-        {
-            return index >= 0 && index < LocalVariables.Count ? LocalVariables[index] : null;
-        }
-
-        /// <inheritdoc />
-        Parameter ICilOperandResolver.ResolveParameter(int index)
-        {
-            var parameters = Owner.Parameters;
-            return parameters.ContainsSignatureIndex(index) ? parameters.GetBySignatureIndex(index) : null;
-        }
 
         /// <summary>
         /// Computes the maximum values pushed onto the stack by this method body.
