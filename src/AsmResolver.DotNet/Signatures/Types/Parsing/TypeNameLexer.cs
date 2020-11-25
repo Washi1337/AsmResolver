@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
     internal class TypeNameLexer
     {
-        private static readonly ISet<char> RservedChars = new HashSet<char>("*+=.,&[]…");
+        private static readonly ISet<char> ReservedChars = new HashSet<char>("*+=.,&[]…");
         
         private readonly TextReader _reader;
         private readonly StringBuilder _buffer = new StringBuilder();
@@ -86,8 +86,12 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     break;
                 
                 char currentChar = (char) c;
-                if (char.IsWhiteSpace(currentChar) || RservedChars.Contains(currentChar))
+                if (terminal == TypeNameTerminal.Number && char.IsWhiteSpace(currentChar)
+                    || ReservedChars.Contains(currentChar))
+                {
                     break;
+                }
+
                 if (!char.IsDigit(currentChar))
                     terminal = TypeNameTerminal.Identifier;
 
@@ -95,7 +99,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 _buffer.Append(currentChar);
             }
             
-            return new TypeNameToken(terminal, _buffer.ToString());
+            return new TypeNameToken(terminal, _buffer.ToString().Trim());
         }
 
         private TypeNameToken ReadIdentifierToken()
@@ -107,14 +111,14 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     break;
                 
                 char currentChar = (char) c;
-                if (char.IsWhiteSpace(currentChar) || RservedChars.Contains(currentChar))
+                if (ReservedChars.Contains(currentChar))
                     break;
 
                 _reader.Read();
                 _buffer.Append(currentChar);
             }
             
-            return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString());
+            return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString().Trim());
         }
 
         private TypeNameToken ReadSymbolToken(TypeNameTerminal terminal)
