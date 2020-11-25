@@ -112,6 +112,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             switch (_lexer.Peek().Terminal)
             {
                 case TypeNameTerminal.OpenBracket:
+                case TypeNameTerminal.Identifier:
                     return ParseGenericTypeSpec(typeName);
                 
                 default:
@@ -213,9 +214,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private TypeSignature ParseGenericTypeArgument(GenericInstanceTypeSignature genericInstance)
         {
-            Expect(TypeNameTerminal.OpenBracket);
+            var extraBracketToken = TryExpect(TypeNameTerminal.OpenBracket);
             var result = ParseTypeSpec();
-            Expect(TypeNameTerminal.CloseBracket);
+            if (extraBracketToken.HasValue)
+                Expect(TypeNameTerminal.CloseBracket);
             return result;
         }
 
