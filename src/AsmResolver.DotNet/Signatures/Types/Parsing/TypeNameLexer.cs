@@ -78,6 +78,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private TypeNameToken ReadNumberOrIdentifierToken()
         {
+            bool escape = false;
+            
             TypeNameTerminal terminal = TypeNameTerminal.Number;
             while (true)
             {
@@ -86,24 +88,37 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     break;
                 
                 char currentChar = (char) c;
-                if (terminal == TypeNameTerminal.Number && char.IsWhiteSpace(currentChar)
-                    || ReservedChars.Contains(currentChar))
+                
+                if (escape)
                 {
-                    break;
+                    escape = false;
+                }
+                else
+                {
+                    if (currentChar == '\\')
+                        escape = true;
+                    else if (terminal == TypeNameTerminal.Number && char.IsWhiteSpace(currentChar)
+                             || ReservedChars.Contains(currentChar))
+                    {
+                        break;
+                    }
                 }
 
                 if (!char.IsDigit(currentChar))
                     terminal = TypeNameTerminal.Identifier;
 
                 _reader.Read();
-                _buffer.Append(currentChar);
+                
+                if (!escape)
+                    _buffer.Append(currentChar);
             }
             
             return new TypeNameToken(terminal, _buffer.ToString().Trim());
         }
 
         private TypeNameToken ReadIdentifierToken()
-        {           
+        {
+            bool escape = false;
             while (true)
             {
                 int c = _reader.Peek();
@@ -111,13 +126,25 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     break;
                 
                 char currentChar = (char) c;
-                if (ReservedChars.Contains(currentChar))
-                    break;
+
+                if (escape)
+                {
+                    escape = false;
+                }
+                else
+                {
+                    if (currentChar == '\\')
+                        escape = true;
+                    else if (ReservedChars.Contains(currentChar))
+                        break;
+                }
 
                 _reader.Read();
-                _buffer.Append(currentChar);
+
+                if (!escape)
+                    _buffer.Append(currentChar);
             }
-            
+
             return new TypeNameToken(TypeNameTerminal.Identifier, _buffer.ToString().Trim());
         }
 
