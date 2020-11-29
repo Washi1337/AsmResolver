@@ -7,6 +7,8 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
 {
+    // src/coreclr/src/vm/customattribute.cpp
+    
     internal sealed class CustomAttributeArgumentReader
     {
         private readonly ModuleDefinition _parentModule;
