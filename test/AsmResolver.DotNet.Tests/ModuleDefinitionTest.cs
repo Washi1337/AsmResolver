@@ -249,5 +249,17 @@ namespace AsmResolver.DotNet.Tests
             var newContents = (IReadableSegment) newData.Contents;
             Assert.Equal(entryData, newContents.ToArray());
         }
+
+        [Fact]
+        public void PersistentTimeStamp()
+        {
+            var time = new DateTime(2020, 1, 2, 18, 30, 34);
+            
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            module.TimeDateStamp = time;
+
+            var image = module.ToPEImage();
+            Assert.Equal(time, image.TimeDateStamp);
+        }
     }
 }

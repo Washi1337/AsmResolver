@@ -970,7 +970,7 @@ namespace AsmResolver.DotNet
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
-        /// /// </summary>
+        /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder());
