@@ -354,7 +354,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             return string.IsNullOrEmpty(FullName)
                 ? $"<<<{ElementType}>>>"
-                : Name;
+                : FullName;
         }
     }
 }
