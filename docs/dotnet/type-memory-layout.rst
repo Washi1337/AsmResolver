@@ -18,7 +18,7 @@ To get access to the API, you must include the following namespace:
 Obtaining the type layout
 -------------------------
 
-To get the memory layout of any ``ITypeDescriptor``, use the following extensino method:
+To get the memory layout of any ``ITypeDescriptor``, use the following extension method:
 
 .. code-block:: csharp
 
@@ -63,7 +63,7 @@ This class contains the offset of the queried field within the type:
 
 It also provides another instance of ``TypeMemoryLayout`` to get the layout of the contents of the field:
 
-..code-block:: csharp
+.. code-block:: csharp
 
     TypeMemoryLayout contentsLayout = fieldLayout.ContentsLayout;
 
