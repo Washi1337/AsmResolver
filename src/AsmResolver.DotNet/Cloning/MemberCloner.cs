@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.DotNet.Signatures.Security;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -41,6 +42,35 @@ namespace AsmResolver.DotNet.Cloning
             get;
             set;
         } = new FieldRvaCloner();
+
+        /// <summary>
+        /// Adds the provided member definition to the list of members to clone.
+        /// </summary>
+        /// <param name="member">The member to clone.</param>
+        /// <returns>The metadata cloner that this type was added to.</returns>
+        /// <remarks>
+        /// If <paramref name="member"/> refers to a <see cref="TypeDefinition"/>, all nested types will be included
+        /// as well.
+        /// </remarks>
+        public MemberCloner Include(IMemberDefinition member) => Include(member, true);
+
+        /// <summary>
+        /// Adds the provided member definition to the list of members to clone.
+        /// </summary>
+        /// <param name="member">The member to clone.</param>
+        /// <param name="recursive">
+        /// If <paramref name="member"/> refers to a <see cref="TypeDefinition"/>, indicates
+        /// whether all nested types should be included as well.</param>
+        /// <returns>The metadata cloner that this type was added to.</returns>
+        public MemberCloner Include(IMemberDefinition member, bool recursive) => member.MetadataToken.Table switch
+        {
+            TableIndex.TypeDef => Include((TypeDefinition) member, recursive),
+            TableIndex.Field => Include((FieldDefinition) member),
+            TableIndex.Method => Include((MethodDefinition) member),
+            TableIndex.Event => Include((EventDefinition) member),
+            TableIndex.Property => Include((EventDefinition) member),
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
         /// <summary>
         /// Adds the provided type, and all its members and nested types, to the list of members to clone.
