@@ -80,6 +80,7 @@ namespace AsmResolver.DotNet.Serialized
             PEKind = peImage.PEKind;
             SubSystem = peImage.SubSystem;
             DllCharacteristics = peImage.DllCharacteristics;
+            TimeDateStamp = peImage.TimeDateStamp;
 
             // Copy over "simple" columns.
             Generation = _row.Generation;
