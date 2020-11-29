@@ -17,11 +17,12 @@ namespace AsmResolver.PE.DotNet.Cil
         }
         
         /// <summary>
-        /// Gets the referenced instruction.
+        /// Gets or sets the referenced instruction.
         /// </summary>
         public CilInstruction Instruction
         {
             get;
+            set;
         }
 
         /// <inheritdoc />
