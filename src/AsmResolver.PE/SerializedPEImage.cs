@@ -26,6 +26,7 @@ namespace AsmResolver.PE
             PEFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
             ReadParameters = readParameters;
 
+            FilePath = peFile.FilePath;
             MachineType = PEFile.FileHeader.Machine;
             Characteristics = PEFile.FileHeader.Characteristics;
             TimeDateStamp = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(peFile.FileHeader.TimeDateStamp);

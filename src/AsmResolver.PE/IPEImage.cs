@@ -16,6 +16,14 @@ namespace AsmResolver.PE
     public interface IPEImage
     {
         /// <summary>
+        /// When this PE image was read from the disk, gets the file path to the PE image.
+        /// </summary>
+        string FilePath
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Gets or sets the machine type that the PE image is targeting.
         /// </summary>
         /// <remarks>

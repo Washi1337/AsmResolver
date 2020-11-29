@@ -67,10 +67,8 @@ namespace AsmResolver.PE
         /// <param name="mode">Indicates the input PE is in its mapped or unmapped form.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
-        {
-            return FromFile(PEFile.FromReader(reader, mode));
-        }
+        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
+            FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
         /// Opens a PE image from an input stream.
@@ -111,6 +109,13 @@ namespace AsmResolver.PE
             _exports = new LazyVariable<IExportDirectory>(GetExports);
             _resources = new LazyVariable<IResourceDirectory>(GetResources);
             _dotNetDirectory = new LazyVariable<IDotNetDirectory>(GetDotNetDirectory);
+        }
+
+        /// <inheritdoc />
+        public string FilePath
+        {
+            get;
+            protected set;
         }
 
         /// <inheritdoc />
