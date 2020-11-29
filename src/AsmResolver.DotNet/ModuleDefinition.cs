@@ -190,7 +190,7 @@ namespace AsmResolver.DotNet
         public virtual IDotNetDirectory DotNetDirectory
         {
             get;
-        }
+        } = null;
 
         /// <summary>
         /// Gets the parent assembly that defines this module.
@@ -383,6 +383,19 @@ namespace AsmResolver.DotNet
             set;
         } = MachineType.I386;
 
+        /// <summary>
+        /// Gets or sets the date and time the module was created. 
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the TimeDateStamp field in the file header of a portable
+        /// executable file.
+        /// </remarks>
+        public DateTime TimeDateStamp
+        {
+            get;
+            set;
+        } = DateTime.Now;
+        
         /// <summary>
         /// Gets or sets the attributes assigned to the underlying executable file.
         /// </summary>
@@ -957,7 +970,7 @@ namespace AsmResolver.DotNet
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
-        /// /// </summary>
+        /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder());
