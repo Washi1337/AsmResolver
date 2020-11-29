@@ -61,6 +61,7 @@ namespace AsmResolver.DotNet.Builder
                     DllCharacteristics = module.DllCharacteristics,
                     DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module, context.DiagnosticBag),
                     Resources = module.NativeResourceDirectory,
+                    TimeDateStamp = module.TimeDateStamp,
                 };
             }
             catch (Exception ex)
