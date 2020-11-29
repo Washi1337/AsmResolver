@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Cloning
             TableIndex.Field => Include((FieldDefinition) member),
             TableIndex.Method => Include((MethodDefinition) member),
             TableIndex.Event => Include((EventDefinition) member),
-            TableIndex.Property => Include((EventDefinition) member),
+            TableIndex.Property => Include((PropertyDefinition) member),
             _ => throw new ArgumentOutOfRangeException()
         };
 
