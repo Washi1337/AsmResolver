@@ -24,7 +24,12 @@ namespace AsmResolver.PE.File
         /// <param name="path">The file path to the PE file.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromFile(string path) => FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
+        public static PEFile FromFile(string path)
+        {
+            var result = FromReader(new ByteArrayReader(System.IO.File.ReadAllBytes(path)));
+            result.FilePath = path;
+            return result;
+        }
 
         /// <summary>
         /// Reads an unmapped PE file from memory.
@@ -41,10 +46,8 @@ namespace AsmResolver.PE.File
         /// <param name="mode">Indicates how the input PE file is mapped.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
-        {
-            return new SerializedPEFile(reader, mode);
-        }
+        public static PEFile FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
+            new SerializedPEFile(reader, mode);
 
         private readonly LazyVariable<ISegment> _extraSectionData;
         private IList<PESection> _sections;
@@ -70,6 +73,13 @@ namespace AsmResolver.PE.File
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
             _extraSectionData = new LazyVariable<ISegment>(GetExtraSectionData);
             MappingMode = PEMappingMode.Unmapped;
+        }
+
+        /// <inheritdoc />
+        public string FilePath
+        {
+            get;
+            protected set;
         }
 
         /// <inheritdoc />

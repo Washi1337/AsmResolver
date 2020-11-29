@@ -10,6 +10,14 @@ namespace AsmResolver.PE.File
     public interface IPEFile : ISegmentReferenceResolver, IOffsetConverter
     {
         /// <summary>
+        /// When this PE file was read from the disk, gets the file path to the PE file.
+        /// </summary>
+        string FilePath
+        {
+            get;
+        }
+        
+        /// <summary>
         /// Gets or sets the DOS header of the PE file.
         /// </summary>
         DosHeader DosHeader

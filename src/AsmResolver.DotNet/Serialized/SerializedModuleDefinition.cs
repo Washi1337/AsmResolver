@@ -75,13 +75,14 @@ namespace AsmResolver.DotNet.Serialized
             ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
             
             // Copy over PE header fields.
+            FilePath = peImage.FilePath;
             MachineType = peImage.MachineType;
             FileCharacteristics = peImage.Characteristics;
             PEKind = peImage.PEKind;
             SubSystem = peImage.SubSystem;
             DllCharacteristics = peImage.DllCharacteristics;
             TimeDateStamp = peImage.TimeDateStamp;
-
+            
             // Copy over "simple" columns.
             Generation = _row.Generation;
             Attributes = peImage.DotNetDirectory.Flags;

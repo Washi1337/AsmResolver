@@ -70,12 +70,8 @@ namespace AsmResolver.DotNet
         /// <param name="readParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(string filePath, ModuleReadParameters readParameters)
-        {
-            var module = FromImage(PEImage.FromFile(filePath), readParameters);
-            module.FilePath = filePath;
-            return module;
-        }
+        public static ModuleDefinition FromFile(string filePath, ModuleReadParameters readParameters) => 
+            FromImage(PEImage.FromFile(filePath), readParameters);
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -92,10 +88,8 @@ namespace AsmResolver.DotNet
         /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
-        {
-            return FromFile(PEFile.FromReader(reader, mode));
-        }
+        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
+            FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
         /// Initializes a .NET module from a PE image.
