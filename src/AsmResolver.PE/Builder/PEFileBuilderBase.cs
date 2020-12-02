@@ -122,7 +122,7 @@ namespace AsmResolver.PE.Builder
             peFile.UpdateHeaders();
 
             header.Magic = image.PEKind;
-            header.MajorLinkerVersion = 30;
+            header.MajorLinkerVersion = 0x30;
             header.MinorLinkerVersion = 0;
 
             header.SizeOfCode = 0;

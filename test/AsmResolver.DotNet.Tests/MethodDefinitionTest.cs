@@ -161,6 +161,5 @@ namespace AsmResolver.DotNet.Tests
             
             Assert.True(method.IsRemoveMethod);
         }
-
     }
 }
