@@ -48,7 +48,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _fieldRvas;
         private OneToOneRelation<MetadataToken, uint> _fieldMarshals;
         private OneToOneRelation<MetadataToken, uint> _fieldLayouts;
-        private IPEImage _peImage;
+        private readonly IPEImage _peImage;
 
         /// <summary>
         /// Interprets a PE image as a .NET module.
