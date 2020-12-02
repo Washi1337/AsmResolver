@@ -6,6 +6,7 @@ using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
@@ -869,6 +870,9 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override IResourceDirectory GetNativeResources() => _peImage.Resources;
+
+        /// <inheritdoc />
+        protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(_peImage.DebugData);
 
         private AssemblyDefinition FindParentAssembly()
         {
