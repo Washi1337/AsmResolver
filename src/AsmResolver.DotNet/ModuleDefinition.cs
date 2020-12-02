@@ -9,6 +9,7 @@ using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -46,7 +47,8 @@ namespace AsmResolver.DotNet
 
         private readonly LazyVariable<string> _runtimeVersion;
         private readonly LazyVariable<IResourceDirectory> _nativeResources;
-        
+        private IList<DebugDataEntry> _debugData;
+
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
         /// </summary>
@@ -445,6 +447,19 @@ namespace AsmResolver.DotNet
             | DllCharacteristics.TerminalServerAware;
 
         /// <summary>
+        /// Gets a collection of data entries stored in the debug data directory of the PE image (if available).
+        /// </summary>
+        public IList<DebugDataEntry> DebugData
+        {
+            get
+            {
+                if (_debugData is null)
+                    Interlocked.CompareExchange(ref _debugData, GetDebugData(), null);
+                return _debugData;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the runtime version string
         /// </summary>
         public string RuntimeVersion
@@ -663,7 +678,7 @@ namespace AsmResolver.DotNet
         /// references that were imported during the last compilation or assembly process.  
         /// </remarks>
         public virtual IEnumerable<TypeReference> GetImportedTypeReferences() => Enumerable.Empty<TypeReference>();
-        
+
         /// <summary>
         /// Obtains a list of member references that were imported into the module.
         /// </summary>
@@ -885,6 +900,15 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="NativeResourceDirectory"/> property.
         /// </remarks>
         protected virtual IResourceDirectory GetNativeResources() => null;
+
+        /// <summary>
+        /// Obtains the native debug data directory of the underlying PE image (if available).
+        /// </summary>
+        /// <returns>The debug directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DebugData"/> property.
+        /// </remarks>
+        protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
 
         /// <inheritdoc />
         public override string ToString() => Name;

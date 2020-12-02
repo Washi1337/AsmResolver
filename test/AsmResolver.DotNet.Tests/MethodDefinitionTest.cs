@@ -162,5 +162,11 @@ namespace AsmResolver.DotNet.Tests
             Assert.True(method.IsRemoveMethod);
         }
 
+        [Fact]
+        public void Test()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
+            module.Write("/home/washi/Desktop/HelloWorld.exe");
+        }
     }
 }
