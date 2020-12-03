@@ -1,5 +1,6 @@
 ﻿using System;
 using AsmResolver.PE;
+using AsmResolver.PE.Debug;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -61,7 +62,11 @@ namespace AsmResolver.DotNet.Builder
                     DllCharacteristics = module.DllCharacteristics,
                     DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module, context.DiagnosticBag),
                     Resources = module.NativeResourceDirectory,
+                    TimeDateStamp = module.TimeDateStamp,
                 };
+
+                for (int i = 0; i < module.DebugData.Count; i++)
+                    image.DebugData.Add(module.DebugData[i]);
             }
             catch (Exception ex)
             {

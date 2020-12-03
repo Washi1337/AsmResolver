@@ -6,6 +6,7 @@ using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
@@ -47,7 +48,7 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _fieldRvas;
         private OneToOneRelation<MetadataToken, uint> _fieldMarshals;
         private OneToOneRelation<MetadataToken, uint> _fieldLayouts;
-        private IPEImage _peImage;
+        private readonly IPEImage _peImage;
 
         /// <summary>
         /// Interprets a PE image as a .NET module.
@@ -75,12 +76,14 @@ namespace AsmResolver.DotNet.Serialized
             ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
             
             // Copy over PE header fields.
+            FilePath = peImage.FilePath;
             MachineType = peImage.MachineType;
             FileCharacteristics = peImage.Characteristics;
             PEKind = peImage.PEKind;
             SubSystem = peImage.SubSystem;
             DllCharacteristics = peImage.DllCharacteristics;
-
+            TimeDateStamp = peImage.TimeDateStamp;
+            
             // Copy over "simple" columns.
             Generation = _row.Generation;
             Attributes = peImage.DotNetDirectory.Flags;
@@ -867,6 +870,9 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override IResourceDirectory GetNativeResources() => _peImage.Resources;
+
+        /// <inheritdoc />
+        protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(_peImage.DebugData);
 
         private AssemblyDefinition FindParentAssembly()
         {

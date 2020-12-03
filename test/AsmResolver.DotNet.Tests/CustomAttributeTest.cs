@@ -1,10 +1,14 @@
+using System;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.PE;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -385,6 +389,5 @@ namespace AsmResolver.DotNet.Tests
                 1, 2, 3, 4
             }, boxedArgument.Value);
         }
-        
     }
 }

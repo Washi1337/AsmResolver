@@ -28,7 +28,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             if (type.Scope != type.Module)
             {
                 _writer.Write(", ");
-                _writer.Write(type.Scope.GetAssembly().FullName);
+                WriteAssemblySpec(type.Scope.GetAssembly());
             }
         }
 
@@ -53,9 +53,9 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         public object VisitCorLibType(CorLibTypeSignature signature)
         {
-            _writer.Write(signature.Namespace);
+            WriteIdentifier(signature.Namespace);
             _writer.Write('.');
-            _writer.Write(signature.Name);
+            WriteIdentifier(signature.Name);
             return null;
         }
 
@@ -114,16 +114,51 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 type = type.DeclaringType;
             }
 
-            _writer.Write(ancestors[ancestors.Count - 1].Namespace);
+            WriteIdentifier(ancestors[ancestors.Count - 1].Namespace);
             _writer.Write('.');
-            _writer.Write(ancestors[ancestors.Count - 1].Name);
+            WriteIdentifier(ancestors[ancestors.Count - 1].Name);
             
             for (int i = ancestors.Count - 2; i >= 0; i--)
             {
                 _writer.Write('+');
-                _writer.Write(ancestors[i].Name);
+                WriteIdentifier(ancestors[i].Name);
             }
         }
-        
+
+        private void WriteAssemblySpec(AssemblyDescriptor assembly)
+        {
+            WriteIdentifier(assembly.Name);
+            _writer.Write(", Version=");
+            _writer.Write(assembly.Version.ToString());
+            _writer.Write(", PublicKeyToken=");
+            
+            var token = assembly.GetPublicKeyToken();
+            if (token is null)
+                _writer.Write("null");
+            else
+                WriteHexBlob(token);
+
+            if (assembly.Culture != null)
+            {
+                _writer.Write(", Culture=");
+                WriteIdentifier(assembly.Culture);
+            }
+        }
+
+        private void WriteIdentifier(string identifier)
+        {
+            foreach (char c in identifier)
+            {
+                if (TypeNameLexer.ReservedChars.Contains(c))
+                    _writer.Write('\\');
+                _writer.Write(c);
+            }
+        }
+
+        private void WriteHexBlob(byte[] token)
+        {
+            foreach (byte b in token)
+                _writer.Write(b.ToString("X2"));
+        }
     }
 }
