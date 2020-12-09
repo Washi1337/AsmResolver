@@ -38,16 +38,13 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(IResolutionScope obj)
+        public int GetHashCode(IResolutionScope obj) => obj switch
         {
-            return obj switch
-            {
-                AssemblyDescriptor assembly => GetHashCode(assembly),
-                ModuleDefinition module => GetHashCode(module.Assembly),
-                TypeReference typeRef => GetHashCode(typeRef),
-                _ => throw new ArgumentOutOfRangeException(nameof(obj))
-            };
-        }
+            AssemblyDescriptor assembly => GetHashCode(assembly),
+            ModuleDefinition module => GetHashCode(module.Assembly),
+            TypeReference typeRef => GetHashCode(typeRef),
+            _ => throw new ArgumentOutOfRangeException(nameof(obj))
+        };
 
         /// <inheritdoc />
         public bool Equals(AssemblyDescriptor x, AssemblyDescriptor y)
@@ -73,7 +70,8 @@ namespace AsmResolver.DotNet.Signatures
                 hashCode = (hashCode * 397) ^ (int) TableIndex.AssemblyRef;
                 hashCode = (hashCode * 397) ^ (obj.Version != null ? obj.Version.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (int) obj.Attributes;
-                hashCode = (hashCode * 397) ^ GetHashCode(obj.GetPublicKeyToken());
+                var publicKeyToken = obj.GetPublicKeyToken();
+                hashCode = (hashCode * 397) ^ (publicKeyToken != null ? GetHashCode(publicKeyToken) : 0);
                 return hashCode;
             }
         }
