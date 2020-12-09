@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -18,6 +19,7 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<GenericInstanceTypeSignature>,
         IEqualityComparer<GenericParameterSignature>,
         IEqualityComparer<ArrayTypeSignature>,
+        IEqualityComparer<SentinelTypeSignature>,
         IEqualityComparer<IEnumerable<TypeSignature>>
     {
         /// <inheritdoc />
@@ -28,40 +30,79 @@ namespace AsmResolver.DotNet.Signatures
             if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
                 return false;
 
-            return x switch
+            switch (x.ElementType)
             {
-                CorLibTypeSignature corLibType => Equals(corLibType, y as CorLibTypeSignature),
-                TypeDefOrRefSignature typeDefOrRef => Equals(typeDefOrRef, y as TypeDefOrRefSignature),
-                SzArrayTypeSignature szArrayType => Equals(szArrayType, y as SzArrayTypeSignature),
-                ArrayTypeSignature arrayType => Equals(arrayType, y as ArrayTypeSignature),
-                ByReferenceTypeSignature byRefType => Equals(byRefType, y as ByReferenceTypeSignature),
-                BoxedTypeSignature boxedType => Equals(boxedType, y as BoxedTypeSignature),
-                GenericInstanceTypeSignature genericInstanceType => Equals(genericInstanceType, y as GenericInstanceTypeSignature),
-                GenericParameterSignature genericParameter => Equals(genericParameter, y as GenericParameterSignature),
-                PointerTypeSignature pointerType => Equals(pointerType, y as PointerTypeSignature),
-                PinnedTypeSignature pinnedType => Equals(pinnedType, y as PinnedTypeSignature),
-                CustomModifierTypeSignature modifierType => Equals(modifierType, y as CustomModifierTypeSignature),
-                _ => throw new NotSupportedException()
-            };
+                case ElementType.ValueType:
+                case ElementType.Class:
+                    return Equals(x as TypeDefOrRefSignature, y as TypeDefOrRefSignature);
+                case ElementType.CModReqD:
+                case ElementType.CModOpt:
+                    return Equals(x as CustomModifierTypeSignature, y as CustomModifierTypeSignature);
+                case ElementType.GenericInst:
+                    return Equals(x as GenericInstanceTypeSignature, y as GenericInstanceTypeSignature);
+                case ElementType.Var:
+                case ElementType.MVar:
+                    return Equals(x as GenericParameterSignature, y as GenericParameterSignature);
+                case ElementType.Ptr:
+                    return Equals(x as PointerTypeSignature, y as PointerTypeSignature);
+                case ElementType.ByRef:
+                    return Equals(x as ByReferenceTypeSignature, y as ByReferenceTypeSignature);
+                case ElementType.Array:
+                    return Equals(x as ArrayTypeSignature, y as ArrayTypeSignature);
+                case ElementType.SzArray:
+                    return Equals(x as SzArrayTypeSignature, y as SzArrayTypeSignature);
+                case ElementType.Sentinel:
+                    return Equals(x as SentinelTypeSignature, y as SentinelTypeSignature);
+                case ElementType.Pinned:
+                    return Equals(x as PinnedTypeSignature, y as PinnedTypeSignature);
+                case ElementType.Boxed:
+                    return Equals(x as BoxedTypeSignature, y as BoxedTypeSignature);
+                case ElementType.FnPtr:
+                case ElementType.Internal:
+                case ElementType.Modifier:
+                    throw new NotSupportedException();
+                default:
+                    return Equals(x as CorLibTypeSignature, y as CorLibTypeSignature);
+            }
         }
 
         /// <inheritdoc />
         public int GetHashCode(TypeSignature obj)
         {
-            return obj switch
+            switch (obj.ElementType)
             {
-                CorLibTypeSignature corLibType => GetHashCode(corLibType),
-                TypeDefOrRefSignature typeDefOrRef => GetHashCode(typeDefOrRef),
-                SzArrayTypeSignature szArrayType => GetHashCode(szArrayType),
-                ArrayTypeSignature arrayType => GetHashCode(arrayType),
-                ByReferenceTypeSignature byRefType => GetHashCode(byRefType),
-                GenericInstanceTypeSignature genericInstanceType => GetHashCode(genericInstanceType),
-                GenericParameterSignature genericParameter => GetHashCode(genericParameter),
-                PointerTypeSignature pointerType => GetHashCode(pointerType),
-                PinnedTypeSignature pinnedType => GetHashCode(pinnedType),
-                CustomModifierTypeSignature modifierType => GetHashCode(modifierType),
-                _ => throw new NotSupportedException()
-            };
+                case ElementType.ValueType:
+                case ElementType.Class:
+                    return GetHashCode((TypeDefOrRefSignature) obj);
+                case ElementType.CModReqD:
+                case ElementType.CModOpt:
+                    return GetHashCode((CustomModifierTypeSignature) obj);
+                case ElementType.GenericInst:
+                    return GetHashCode((GenericInstanceTypeSignature) obj);
+                case ElementType.Var:
+                case ElementType.MVar:
+                    return GetHashCode((GenericParameterSignature) obj);
+                case ElementType.Ptr:
+                    return GetHashCode((PointerTypeSignature) obj);
+                case ElementType.ByRef:
+                    return GetHashCode((ByReferenceTypeSignature) obj);
+                case ElementType.Array:
+                    return GetHashCode((ArrayTypeSignature) obj);
+                case ElementType.SzArray:
+                    return GetHashCode((SzArrayTypeSignature) obj);
+                case ElementType.Sentinel:
+                    return GetHashCode((SentinelTypeSignature) obj);
+                case ElementType.Pinned:
+                    return GetHashCode((PinnedTypeSignature) obj);
+                case ElementType.Boxed:
+                    return GetHashCode((BoxedTypeSignature) obj);
+                case ElementType.FnPtr:
+                case ElementType.Internal:
+                case ElementType.Modifier:
+                    throw new NotSupportedException();
+                default:
+                    return GetHashCode((CorLibTypeSignature) obj);
+            }
         }
 
         /// <inheritdoc />
@@ -76,6 +117,22 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <inheritdoc />
         public int GetHashCode(CorLibTypeSignature obj)
+        {
+            return (int) obj.ElementType << ElementTypeOffset;
+        }
+
+        /// <inheritdoc />
+        public bool Equals(SentinelTypeSignature x, SentinelTypeSignature y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+                return false;
+            return x.ElementType == y.ElementType;
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(SentinelTypeSignature obj)
         {
             return (int) obj.ElementType << ElementTypeOffset;
         }
