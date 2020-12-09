@@ -38,16 +38,13 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(IResolutionScope obj)
+        public int GetHashCode(IResolutionScope obj) => obj switch
         {
-            return obj switch
-            {
-                AssemblyDescriptor assembly => GetHashCode(assembly),
-                ModuleDefinition module => GetHashCode(module.Assembly),
-                TypeReference typeRef => GetHashCode(typeRef),
-                _ => throw new ArgumentOutOfRangeException(nameof(obj))
-            };
-        }
+            AssemblyDescriptor assembly => GetHashCode(assembly),
+            ModuleDefinition module => GetHashCode(module.Assembly),
+            TypeReference typeRef => GetHashCode(typeRef),
+            _ => throw new ArgumentOutOfRangeException(nameof(obj))
+        };
 
         /// <inheritdoc />
         public bool Equals(AssemblyDescriptor x, AssemblyDescriptor y)
