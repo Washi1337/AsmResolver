@@ -24,6 +24,7 @@ namespace AsmResolver.DotNet.Tests
 
             Assert.NotNull(assemblyDef);
             Assert.Equal(assemblyName.Name, assemblyDef.Name);
+            Assert.NotNull(assemblyDef.ManifestModule.FilePath);
         }
 
         [Fact]
@@ -36,6 +37,7 @@ namespace AsmResolver.DotNet.Tests
             var assemblyRef = new AssemblyReference(assemblyDef);
 
             Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef), _comparer);
+            Assert.NotNull(assemblyDef.ManifestModule.FilePath);
 
             resolver.ClearCache();
             Assert.False(resolver.HasCached(assemblyRef));

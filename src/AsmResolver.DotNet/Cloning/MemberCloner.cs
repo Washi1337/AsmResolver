@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Marshal;
 using AsmResolver.DotNet.Signatures.Security;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Cloning
 {
@@ -41,6 +42,61 @@ namespace AsmResolver.DotNet.Cloning
             get;
             set;
         } = new FieldRvaCloner();
+
+        /// <summary>
+        /// Adds the provided member definition to the list of members to clone.
+        /// </summary>
+        /// <param name="member">The member to clone.</param>
+        /// <returns>The metadata cloner that this member was added to.</returns>
+        /// <remarks>
+        /// If <paramref name="member"/> refers to a <see cref="TypeDefinition"/>, all nested types will be included
+        /// as well.
+        /// </remarks>
+        public MemberCloner Include(IMemberDefinition member) => Include(member, true);
+
+        /// <summary>
+        /// Adds the provided member definition to the list of members to clone.
+        /// </summary>
+        /// <param name="member">The member to clone.</param>
+        /// <param name="recursive">
+        /// If <paramref name="member"/> refers to a <see cref="TypeDefinition"/>, indicates
+        /// whether all nested types should be included as well.</param>
+        /// <returns>The metadata cloner that this member was added to.</returns>
+        public MemberCloner Include(IMemberDefinition member, bool recursive) => member.MetadataToken.Table switch
+        {
+            TableIndex.TypeDef => Include((TypeDefinition) member, recursive),
+            TableIndex.Field => Include((FieldDefinition) member),
+            TableIndex.Method => Include((MethodDefinition) member),
+            TableIndex.Event => Include((EventDefinition) member),
+            TableIndex.Property => Include((PropertyDefinition) member),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        /// <summary>
+        /// Adds each member in the provided collection of member.
+        /// </summary>
+        /// <param name="members">The members to include.</param>
+        /// <returns>The metadata cloner that the members were added to.</returns>
+        /// <remarks>If a member in the list is a type, all their members and nested types will be included as well.</remarks>
+        public MemberCloner Include(params IMemberDefinition[] members)
+        {
+            foreach (var member in members)
+                Include(member);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds each member in the provided collection of member.
+        /// </summary>
+        /// <param name="members">The members to include.</param>
+        /// <returns>The metadata cloner that the members were added to.</returns>
+        /// <remarks>If a member in the list is a type, all their members and nested types will be included as well.</remarks>
+        public MemberCloner Include(IEnumerable<IMemberDefinition> members)
+        {
+            foreach (var member in members)
+                Include(member);
+            return this;
+        }
 
         /// <summary>
         /// Adds the provided type, and all its members and nested types, to the list of members to clone.

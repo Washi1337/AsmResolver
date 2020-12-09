@@ -11,6 +11,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Reads a method body 
         /// </summary>
+        /// <param name="parentModule">The module originally defining the method.</param>
         /// <param name="owner">The owner of the method body.</param>
         /// <param name="row">The metadata row of the owner method.</param>
         /// <returns>The method, or <c>null</c> if none was provided.</returns>
@@ -18,6 +19,6 @@ namespace AsmResolver.DotNet.Serialized
         /// Implementations should never access <see cref="MethodDefinition.MethodBody"/> or
         /// <see cref="MethodDefinition.CilMethodBody"/>, as this might result in an infinite recursive loop.
         /// </remarks>
-        MethodBody ReadMethodBody(MethodDefinition owner, MethodDefinitionRow row);
+        MethodBody ReadMethodBody(ModuleDefinition parentModule, MethodDefinition owner, MethodDefinitionRow row);
     }
 }

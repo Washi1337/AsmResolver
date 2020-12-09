@@ -109,5 +109,62 @@ namespace AsmResolver.DotNet.Tests
             var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[,,,]");
             Assert.Equal(expected, actual, _comparer);
         }
+
+        [Fact]
+        public void GenericTypeSingleBrackets()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            
+            var elementType = new TypeReference(_module, ns, name);
+            var argumentType = _module.CorLibTypeFactory.Object;
+
+            var expected = new GenericInstanceTypeSignature(elementType, false, argumentType);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[{argumentType.Namespace}.{argumentType.Name}]");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void GenericTypeMultiBrackets()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            
+            var elementType = new TypeReference(_module, ns, name);
+            var argumentType = _module.CorLibTypeFactory.Object;
+
+            var expected = new GenericInstanceTypeSignature(elementType, false, argumentType);
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}[[{argumentType.Namespace}.{argumentType.Name}]]");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void SpacesInAssemblySpec()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+            const string assemblyRef = "Some Assembly";
+
+            var scope = new AssemblyReference(assemblyRef, new Version(1, 0, 0, 0));
+            var expected = new TypeReference(_module, scope, ns, name).ToTypeSignature();
+
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}, {assemblyRef}, Version={scope.Version}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void ReadEscapedTypeName()
+        {
+            const string ns = "MyNamespace";
+            const string escapedName = "MyType\\+WithPlus";
+            const string name = "MyType+WithPlus";
+
+            var expected = new TypeReference(_module, ns, name).ToTypeSignature();
+            
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{escapedName}");
+            Assert.Equal(expected, actual, _comparer);
+        }
     }
 }

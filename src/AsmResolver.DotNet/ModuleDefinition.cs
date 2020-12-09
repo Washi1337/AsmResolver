@@ -9,6 +9,7 @@ using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
+using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -46,7 +47,8 @@ namespace AsmResolver.DotNet
 
         private readonly LazyVariable<string> _runtimeVersion;
         private readonly LazyVariable<IResourceDirectory> _nativeResources;
-        
+        private IList<DebugDataEntry> _debugData;
+
         /// <summary>
         /// Reads a .NET module from the provided input buffer.
         /// </summary>
@@ -70,12 +72,8 @@ namespace AsmResolver.DotNet
         /// <param name="readParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(string filePath, ModuleReadParameters readParameters)
-        {
-            var module = FromImage(PEImage.FromFile(filePath), readParameters);
-            module.FilePath = filePath;
-            return module;
-        }
+        public static ModuleDefinition FromFile(string filePath, ModuleReadParameters readParameters) => 
+            FromImage(PEImage.FromFile(filePath), readParameters);
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -92,10 +90,8 @@ namespace AsmResolver.DotNet
         /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped)
-        {
-            return FromFile(PEFile.FromReader(reader, mode));
-        }
+        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
+            FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
         /// Initializes a .NET module from a PE image.
@@ -190,7 +186,7 @@ namespace AsmResolver.DotNet
         public virtual IDotNetDirectory DotNetDirectory
         {
             get;
-        }
+        } = null;
 
         /// <summary>
         /// Gets the parent assembly that defines this module.
@@ -384,6 +380,19 @@ namespace AsmResolver.DotNet
         } = MachineType.I386;
 
         /// <summary>
+        /// Gets or sets the date and time the module was created. 
+        /// </summary>
+        /// <remarks>
+        /// This property is in direct relation with the TimeDateStamp field in the file header of a portable
+        /// executable file.
+        /// </remarks>
+        public DateTime TimeDateStamp
+        {
+            get;
+            set;
+        } = DateTime.Now;
+        
+        /// <summary>
         /// Gets or sets the attributes assigned to the underlying executable file.
         /// </summary>
         /// <remarks>
@@ -436,6 +445,19 @@ namespace AsmResolver.DotNet
             set;
         } = DllCharacteristics.DynamicBase | DllCharacteristics.NoSeh | DllCharacteristics.NxCompat
             | DllCharacteristics.TerminalServerAware;
+
+        /// <summary>
+        /// Gets a collection of data entries stored in the debug data directory of the PE image (if available).
+        /// </summary>
+        public IList<DebugDataEntry> DebugData
+        {
+            get
+            {
+                if (_debugData is null)
+                    Interlocked.CompareExchange(ref _debugData, GetDebugData(), null);
+                return _debugData;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the runtime version string
@@ -656,7 +678,7 @@ namespace AsmResolver.DotNet
         /// references that were imported during the last compilation or assembly process.  
         /// </remarks>
         public virtual IEnumerable<TypeReference> GetImportedTypeReferences() => Enumerable.Empty<TypeReference>();
-        
+
         /// <summary>
         /// Obtains a list of member references that were imported into the module.
         /// </summary>
@@ -879,6 +901,15 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IResourceDirectory GetNativeResources() => null;
 
+        /// <summary>
+        /// Obtains the native debug data directory of the underlying PE image (if available).
+        /// </summary>
+        /// <returns>The debug directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="DebugData"/> property.
+        /// </remarks>
+        protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
+
         /// <inheritdoc />
         public override string ToString() => Name;
 
@@ -957,7 +988,7 @@ namespace AsmResolver.DotNet
 
         /// <summary>
         /// Rebuilds the .NET module to a portable executable file and returns the IPEImage.
-        /// /// </summary>
+        /// </summary>
         /// <returns>IPEImage built using <see cref="ManagedPEImageBuilder"/> by default</returns>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
         public IPEImage ToPEImage() => ToPEImage(new ManagedPEImageBuilder());

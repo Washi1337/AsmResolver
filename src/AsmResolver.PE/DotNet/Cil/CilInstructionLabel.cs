@@ -5,7 +5,7 @@ namespace AsmResolver.PE.DotNet.Cil
     /// <summary>
     /// Represents a label that references an instruction by its instruction object in a CIL method body.
     /// </summary>
-    public struct CilInstructionLabel : ICilLabel
+    public class CilInstructionLabel : ICilLabel
     {
         /// <summary>
         /// Creates a new instruction label.
@@ -17,11 +17,12 @@ namespace AsmResolver.PE.DotNet.Cil
         }
         
         /// <summary>
-        /// Gets the referenced instruction.
+        /// Gets or sets the referenced instruction.
         /// </summary>
         public CilInstruction Instruction
         {
             get;
+            set;
         }
 
         /// <inheritdoc />

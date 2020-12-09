@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         } = true;
         
         /// <inheritdoc />
-        public MethodBody ReadMethodBody(MethodDefinition owner, MethodDefinitionRow row)
+        public MethodBody ReadMethodBody(ModuleDefinition parentModule, MethodDefinition owner, MethodDefinitionRow row)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Serialized
                     if (owner.IsIL)
                     {
                         var rawBody = CilRawMethodBody.FromReader(row.Body.CreateReader());
-                        return CilMethodBody.FromRawMethodBody(owner, rawBody);
+                        return CilMethodBody.FromRawMethodBody(parentModule, owner, rawBody);
                     }
                     else
                     {
@@ -41,7 +41,7 @@ namespace AsmResolver.DotNet.Serialized
                 }
                 else if (row.Body.IsBounded && row.Body.GetSegment() is CilRawMethodBody rawMethodBody)
                 {
-                    return CilMethodBody.FromRawMethodBody(owner, rawMethodBody);
+                    return CilMethodBody.FromRawMethodBody(parentModule, owner, rawMethodBody);
                 }
             }
             catch when (!ThrowOnInvalidMethodBody)
