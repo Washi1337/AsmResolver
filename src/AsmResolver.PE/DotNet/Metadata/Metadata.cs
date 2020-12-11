@@ -154,9 +154,8 @@ namespace AsmResolver.PE.DotNet.Metadata
         public virtual IMetadataStream GetStream(string name)
         {
             var streams = Streams;
-            
-            // Reversed order search. CLR counts the last stream.  
-            for (int i = streams.Count - 1; i >= 0; i--)
+              
+            for (int i = 0; i < streams.Count; i++)
             {
                 if (streams[i].Name == name)
                     return streams[i];
@@ -171,8 +170,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             var streams = Streams;
             
-            // Reversed order search. CLR counts the last stream.  
-            for (int i = streams.Count - 1; i >= 0; i--)
+            for (int i = 0; i < streams.Count; i++)
             {
                 if (streams[i] is TStream stream)
                     return stream;
@@ -188,9 +186,6 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Streams"/> property.
         /// </remarks>
-        protected virtual IList<IMetadataStream> GetStreams()
-        {
-            return new List<IMetadataStream>();
-        }
+        protected virtual IList<IMetadataStream> GetStreams() => new List<IMetadataStream>();
     }
 }
