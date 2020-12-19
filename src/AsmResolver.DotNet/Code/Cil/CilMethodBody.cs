@@ -370,7 +370,16 @@ namespace AsmResolver.DotNet.Code.Cil
                     nextStackSize += instruction.GetStackPushCount();
 
                     // Add outgoing edges to agenda.
-                    switch (instruction.OpCode.FlowControl)
+                    
+                    if (instruction.OpCode.Code == CilCode.Jmp)
+                    {
+                        // jmp instructions need special treatment:
+                        // Upon execution of a jmp instruction, the stack must be empty.
+                        // Besides, jmps have no outgoing edges, even though they are classified as FlowControl.Call.
+                        if (nextStackSize != 0) 
+                            throw new StackImbalanceException(this, instruction.Offset);
+                    }
+                    else switch (instruction.OpCode.FlowControl)
                     {
                         case CilFlowControl.Branch:
                             // Schedule branch target.

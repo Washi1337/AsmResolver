@@ -265,26 +265,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             Assert.Equal(1, body.ComputeMaxStack());
         }
-
-        [Fact]
-        public void ThrowsInstructionShouldFailIfTooManyValuesOnStack()
-        {
-            var body = CreateDummyBody(false);
-
-            var throwInstruction = new CilInstruction(CilOpCodes.Throw);
-            body.Instructions.AddRange(new[]
-            {
-                // Extra junk value
-                new CilInstruction(CilOpCodes.Ldnull),
-
-                new CilInstruction(CilOpCodes.Ldnull),
-                throwInstruction,
-            });
-
-            var exception = Assert.ThrowsAny<StackImbalanceException>(() => body.ComputeMaxStack());
-            Assert.Equal(throwInstruction.Offset, exception.Offset);   
-        }
-
+        
         [Fact]
         public void ExceptionHandlerExpectsOneValueOnStack()
         {
