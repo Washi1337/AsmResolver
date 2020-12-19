@@ -404,6 +404,10 @@ namespace AsmResolver.DotNet.Code.Cil
                             break;
 
                         case CilFlowControl.Throw:
+                            // Throw instructions just stop execution and clear any remaining values on stack.
+                            // => no stack imbalance if too many values are pushed on the stack. 
+                            break;
+                        
                         case CilFlowControl.Return:
                             // Verify final stack size is correct.
                             if (nextStackSize != 0)
