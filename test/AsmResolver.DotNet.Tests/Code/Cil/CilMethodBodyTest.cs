@@ -433,5 +433,35 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             
             Assert.Equal(2, body.ComputeMaxStack());
         }
+
+        [Fact]
+        public void JmpShouldNotContinueAnalysisAfter()
+        {
+            var body = CreateDummyBody(true);
+            
+            body.Instructions.AddRange(new[]
+            {
+                new CilInstruction(CilOpCodes.Jmp, body.Owner),
+                
+                new CilInstruction(CilOpCodes.Ldnull)
+            });
+
+            Assert.Equal(0, body.ComputeMaxStack());
+        }
+        
+        [Fact]
+        public void NonEmptyStackAtJmpShouldThrow()
+        {
+            var body = CreateDummyBody(true);
+            
+            body.Instructions.AddRange(new[]
+            {
+                new CilInstruction(CilOpCodes.Ldnull),
+                
+                new CilInstruction(CilOpCodes.Jmp, body.Owner)
+            });
+
+            Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
+        }
     }
 }
