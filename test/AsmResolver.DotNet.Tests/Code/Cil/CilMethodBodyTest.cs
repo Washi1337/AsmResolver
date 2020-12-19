@@ -417,5 +417,21 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var body2 = method2.CilMethodBody;
             Assert.NotNull(body2);
         }
+
+        [Fact]
+        public void PathWithThrowDoesNotHaveToEndWithAnEmptyStack()
+        {
+            var body = CreateDummyBody(true);
+            
+            body.Instructions.AddRange(new[]
+            {
+                new CilInstruction(CilOpCodes.Ldc_I4_0),
+                
+                new CilInstruction(CilOpCodes.Ldnull),
+                new CilInstruction(CilOpCodes.Throw)
+            });
+            
+            Assert.Equal(2, body.ComputeMaxStack());
+        }
     }
 }
