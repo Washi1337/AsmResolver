@@ -1,11 +1,12 @@
 using System;
+using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Imports
 {
     /// <summary>
     /// Represents one member of an external module that was imported into a PE image.
     /// </summary>
-    public class ImportedSymbol
+    public class ImportedSymbol : IOwnedCollectionElement<IImportedModule>
     {
         private ushort _ordinalOrHint;
         private string _name;
@@ -28,6 +29,22 @@ namespace AsmResolver.PE.Imports
         {
             Hint = hint;
             Name = name ?? throw new ArgumentNullException(nameof(name));
+        }
+
+        /// <summary>
+        /// Gets the module that defines the symbol.
+        /// </summary>
+        public IImportedModule DeclaringModule
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc />
+        IImportedModule IOwnedCollectionElement<IImportedModule>.Owner
+        {
+            get => DeclaringModule;
+            set => DeclaringModule = value;
         }
 
         /// <summary>
@@ -86,10 +103,13 @@ namespace AsmResolver.PE.Imports
         /// <inheritdoc />
         public override string ToString()
         {
+            string prefix = DeclaringModule is null
+                ? string.Empty
+                : $"{DeclaringModule.Name}!";
+            
             return IsImportByOrdinal
-                ? $"#{Ordinal} ({Address:X8})"
-                : $"{Name} ({Address:X8})";
+                ? $"{prefix}#{Ordinal} ({Address:X8})"
+                : $"{prefix}{Name} ({Address:X8})";
         }
-        
     }
 }

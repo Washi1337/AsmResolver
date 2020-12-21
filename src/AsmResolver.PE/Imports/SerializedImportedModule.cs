@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AsmResolver.Collections;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
@@ -55,7 +56,7 @@ namespace AsmResolver.PE.Imports
         /// <inheritdoc />
         protected override IList<ImportedSymbol> GetSymbols()
         {
-            var result = new List<ImportedSymbol>();
+            var result = new OwnedCollection<IImportedModule, ImportedSymbol>(this);
             
             if (IsEmpty)
                 return result;
