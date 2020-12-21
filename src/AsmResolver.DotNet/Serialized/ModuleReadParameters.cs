@@ -21,8 +21,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
         public ModuleReadParameters(string workingDirectory)
         {
-            WorkingDirectory = workingDirectory ?? throw new ArgumentNullException(nameof(workingDirectory));
-            ModuleResolver = new DirectoryNetModuleResolver(workingDirectory, this);
+            if (workingDirectory != null)
+            {
+                WorkingDirectory = workingDirectory;
+                ModuleResolver = new DirectoryNetModuleResolver(workingDirectory, this);
+            }
         }
 
         /// <summary>
