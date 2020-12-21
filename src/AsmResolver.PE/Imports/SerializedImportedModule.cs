@@ -61,18 +61,21 @@ namespace AsmResolver.PE.Imports
             if (IsEmpty)
                 return result;
 
-            ulong ordinalMask = _peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32
-                ? 0x8000_0000ul
-                : 0x8000_0000_0000_0000ul;
-                
-            var lookupItems = ReadEntries(_lookupRva);
-            var addresses = ReadEntries(_addressRva);
+            bool is32Bit = _peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
+            (ulong ordinalMask, int pointerSize) = is32Bit
+                ? (0x8000_0000ul, sizeof(uint))
+                : (0x8000_0000_0000_0000ul, sizeof(ulong));
 
-            for (int i = 0; i < lookupItems.Count; i++)
+            var lookupItemReader = _peFile.CreateReaderAtRva(_lookupRva);
+
+            while (true)
             {
                 ImportedSymbol entry;
-                
-                ulong lookupItem = lookupItems[i];
+
+                ulong lookupItem = lookupItemReader.ReadNativeInt(is32Bit);
+                if (lookupItem == 0)
+                    break;
+
                 if ((lookupItem & ordinalMask) != 0)
                 {
                     entry = new ImportedSymbol((ushort) (lookupItem & 0xFFFF));
@@ -84,26 +87,8 @@ namespace AsmResolver.PE.Imports
                     entry = new ImportedSymbol(reader.ReadUInt16(), reader.ReadAsciiString());
                 }
 
-                entry.Address = addresses[i];
-
+                entry.AddressTableEntry = _peFile.GetReferenceToRva((uint) (_addressRva + result.Count * pointerSize));
                 result.Add(entry);
-            }
-
-            return result;
-        }
-        
-        private IList<ulong> ReadEntries(uint rva)
-        {
-            var result = new List<ulong>();
-            if (!_peFile.TryCreateReaderAtRva(rva, out var itemReader))
-                return result;
-
-            while (true)
-            {
-                ulong currentItem = itemReader.ReadNativeInt(_peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32);
-                if (currentItem == 0)
-                    break;
-                result.Add(currentItem);
             }
 
             return result;
