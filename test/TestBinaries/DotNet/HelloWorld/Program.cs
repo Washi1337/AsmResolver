@@ -4,9 +4,14 @@ namespace HelloWorld
 {
     public class Program
     {
-        static void Main(string[] args)
+        public static int GetTheAnswer()
         {
-            Console.WriteLine("Hello World!");
+            return 42;
+        }
+        
+        private static void Main(string[] args)
+        {
+            Console.WriteLine($"The answer to life, universe and everything is {GetTheAnswer().ToString()}");
         }
     }
 }
