@@ -219,21 +219,48 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void CreateImportDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
-            // TODO: change to not add mscoree.dll a second time.  
-            
+            bool importEntrypointRequired = image.PEKind == OptionalHeaderMagic.Pe32;
+            string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
+                ? "_CorDllMain"
+                : "_CorExeMain";
+
+            IImportedModule mscoreeModule = null;
+            ImportedSymbol entrypointSymbol = null;
+
+            var modules = new List<IImportedModule>();
             foreach (var module in image.Imports)
-                context.ImportDirectory.AddModule(module);
-            
-            if (image.PEKind == OptionalHeaderMagic.Pe32)
             {
-                string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
-                    ? "_CorDllMain"
-                    : "_CorExeMain";
-                context.ImportDirectory.AddModule(new ImportedModule("mscoree.dll")
+                if (module.Name == "mscoree.dll")
                 {
-                    Symbols = {new ImportedSymbol(0, entrypointName)}
-                });
+                    mscoreeModule = module;
+                    if (importEntrypointRequired)
+                        entrypointSymbol = mscoreeModule.Symbols.FirstOrDefault(s => s.Name == entrypointName);
+                    if (importEntrypointRequired || module.Symbols.Count > 1)
+                        modules.Add(module);
+                }
+                else
+                {
+                    modules.Add(module);
+                }
             }
+            
+            if (importEntrypointRequired)
+            { 
+                if (mscoreeModule is null)
+                {        
+                    mscoreeModule = new ImportedModule("mscoree.dll");
+                    modules.Add(mscoreeModule);
+                }
+
+                if (entrypointSymbol is null)
+                {
+                    entrypointSymbol = new ImportedSymbol(0, entrypointName);
+                    mscoreeModule.Symbols.Add(entrypointSymbol);
+                }
+            }
+
+            foreach (var module in modules)
+                context.ImportDirectory.AddModule(module);
         }
 
         private static void CreateExportDirectory(IPEImage image, ManagedPEBuilderContext context)

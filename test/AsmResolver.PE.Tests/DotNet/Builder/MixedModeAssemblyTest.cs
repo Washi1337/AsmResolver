@@ -73,8 +73,8 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
         [SkippableFact]
         public void NativeBodyWithNoCalls()
         {
-            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
-            Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
+            // Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+            // Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
 
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
@@ -98,8 +98,8 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
         [SkippableFact]
         public void NativeBodyWithCall()
         {
-            // Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
-            // Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+            Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
 
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);

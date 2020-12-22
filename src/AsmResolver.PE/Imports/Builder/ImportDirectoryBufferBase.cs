@@ -85,12 +85,19 @@ namespace AsmResolver.PE.Imports.Builder
 
         private void AddLookupTable(IImportedModule module)
         {
-            var lookupTable = new ThunkTableBuffer(HintNameTable, Is32Bit);
+            var lookupTable = CreateThunkTable();
             foreach (var member in module.Symbols)
                 lookupTable.AddMember(member);
             _lookupTables.Add(module, lookupTable);
             _lookupTablesLength += lookupTable.GetPhysicalSize();
         }
+        
+        /// <summary>
+        /// Creates a new thunk table buffer.
+        /// </summary>
+        /// <returns>The buffer.</returns>
+        protected virtual ThunkTableBuffer CreateThunkTable() => 
+            new ThunkTableBuffer(HintNameTable, Is32Bit, false);
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _lookupTablesLength;
