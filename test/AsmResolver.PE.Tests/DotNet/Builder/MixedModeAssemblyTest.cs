@@ -73,8 +73,8 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
         [SkippableFact]
         public void NativeBodyWithNoCalls()
         {
-            // Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
-            // Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+            Skip.IfNot(Environment.Is64BitOperatingSystem, Non64BitPlatform);
 
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
@@ -104,23 +104,31 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
             
-            var module = new ImportedModule("urctbased.dll");
+            var module = new ImportedModule("ucrtbased.dll");
             image.Imports.Add(module);
             
             var function = new ImportedSymbol(0x4fc, "puts");
             module.Symbols.Add(function);
-            
+
             var body = new CodeSegment(image.ImageBase, new byte[]
             {
-                0xff, 0x35, 0x0c, 0x00, 0x00, 0x00,  // push qword [rel 0x12]
-                0xff, 0x15, 0x00, 0x00, 0x00, 0x00,  // call qword [rel puts]
-                0xb8, 0x37, 0x13, 0x00, 0x00,        // mov eax, 0x1337
-                0xc3,                                // ret
-                0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x00, // "Hello, World!"
+                /* 00: */ 0x48, 0x83, 0xEC, 0x28,                     // sub rsp, 0x28
+                /* 04: */ 0x48, 0x8D, 0x0D, 0x10, 0x00, 0x00, 0x00,   // lea rcx, [rel str]
+                /* 0B: */ 0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,         // call [rel puts]
+                /* 11: */ 0xB8, 0x37, 0x13, 0x00, 0x00,               // mov eax, 0x1337
+                /* 16: */ 0x48, 0x83, 0xC4, 0x28,                     // add rsp, 0x28
+                /* 1A: */ 0xC3,                                       // ret
+
+                                                            // str:
+                0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x66,   // "Hello f"
+                0x72, 0x6f, 0x6d, 0x20, 0x74, 0x68, 0x65,   // "rom the"
+                0x20, 0x75, 0x6e, 0x6d, 0x61, 0x6e, 0x61,   // "unmanag"
+                0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ed worl"
+                0x6c, 0x64, 0x21, 0x00                      // "d!"
             });
             
             body.AddressFixups.Add(new AddressFixup(
-                8, AddressFixupType.Relative32BitAddress, function
+                0xD, AddressFixupType.Relative32BitAddress, function
             ));
             
             ReplaceBodyWithNativeCode(image, body);

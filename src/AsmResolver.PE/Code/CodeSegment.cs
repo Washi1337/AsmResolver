@@ -62,7 +62,7 @@ namespace AsmResolver.PE.Code
         private void ApplyAddressFixup(IBinaryStreamWriter writer, in AddressFixup fixup)
         {
             writer.Offset = Offset + fixup.Offset;
-            uint writerRva = (uint) (fixup.Offset - Offset + Rva);
+            uint writerRva = Rva + fixup.Offset;
             uint targetRva = fixup.ReferencedObject.GetReference()?.Rva ?? 0;
 
             switch (fixup.Type)
