@@ -6,7 +6,7 @@ namespace AsmResolver.PE.Imports
     /// <summary>
     /// Represents one member of an external module that was imported into a PE image.
     /// </summary>
-    public class ImportedSymbol : IOwnedCollectionElement<IImportedModule>
+    public class ImportedSymbol : IOwnedCollectionElement<IImportedModule>, IReferenceableObject
     {
         private ushort _ordinalOrHint;
         private string _name;
@@ -115,5 +115,8 @@ namespace AsmResolver.PE.Imports
                 ? $"{prefix}#{Ordinal.ToString()} ({addressSpecifier})"
                 : $"{prefix}{Name} ({addressSpecifier})";
         }
+
+        /// <inheritdoc />
+        public ISegmentReference GetReference() => AddressTableEntry;
     }
 }

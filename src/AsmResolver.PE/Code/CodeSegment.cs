@@ -62,14 +62,16 @@ namespace AsmResolver.PE.Code
         private void ApplyAddressFixup(IBinaryStreamWriter writer, in AddressFixup fixup)
         {
             writer.Offset = Offset + fixup.Offset;
-            ulong rva = fixup.Offset - Offset + Rva;
+            uint writerRva = (uint) (fixup.Offset - Offset + Rva);
+            uint targetRva = fixup.ReferencedObject.GetReference()?.Rva ?? 0;
+
             switch (fixup.Type)
             {
                 case AddressFixupType.Absolute32BitAddress:
-                    writer.WriteUInt32((uint) (ImageBase + fixup.Reference.Rva));
+                    writer.WriteUInt32((uint) (ImageBase + targetRva));
                     break;
                 case AddressFixupType.Relative32BitAddress:
-                    writer.WriteInt32((int) (fixup.Reference.Rva - (rva + 4)));
+                    writer.WriteInt32((int) (targetRva - (writerRva + 4)));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

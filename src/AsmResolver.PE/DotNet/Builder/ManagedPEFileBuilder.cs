@@ -219,6 +219,11 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void CreateImportDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
+            // TODO: change to not add mscoree.dll a second time.  
+            
+            foreach (var module in image.Imports)
+                context.ImportDirectory.AddModule(module);
+            
             if (image.PEKind == OptionalHeaderMagic.Pe32)
             {
                 string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
