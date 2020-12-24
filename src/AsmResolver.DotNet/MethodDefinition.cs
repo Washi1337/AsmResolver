@@ -5,6 +5,7 @@ using AsmResolver.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -548,6 +549,27 @@ namespace AsmResolver.DotNet
         public CilMethodBody CilMethodBody
         {
             get => MethodBody as CilMethodBody;
+            set => MethodBody = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the unmanaged native body of the method if available. 
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If this property is set to <c>null</c>, it does not necessarily mean the method does not have a method body.
+        /// There could be a managed body assigned instead, or the current method body reader that the declaring module
+        /// uses does not support reading a certain type of native method body. Check the <see cref="MethodBody"/>
+        /// property instead.
+        /// </para>
+        /// <para>
+        /// Updating this property does not automatically set the appropriate implementation attributes in the
+        /// <see cref="ImplAttributes"/>.
+        /// </para>
+        /// </remarks>
+        public NativeMethodBody NativeMethodBody
+        {
+            get => MethodBody as NativeMethodBody;
             set => MethodBody = value;
         }
 

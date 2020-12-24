@@ -10,6 +10,26 @@ namespace AsmResolver.DotNet.Code.Native
     public class NativeMethodBody : MethodBody
     {
         /// <summary>
+        /// Creates a new empty native method body.
+        /// </summary>
+        /// <param name="owner">The method that owns the body.</param>
+        public NativeMethodBody(MethodDefinition owner)
+            : base(owner)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new native method body with the provided raw code stream.
+        /// </summary>
+        /// <param name="owner">The method that owns the body.</param>
+        /// <param name="code">The raw code stream.</param>
+        public NativeMethodBody(MethodDefinition owner, byte[] code)
+            : base(owner)
+        {
+            Code = code;
+        }
+
+        /// <summary>
         /// Gets or sets the raw native code stream.
         /// </summary>
         public byte[] Code
