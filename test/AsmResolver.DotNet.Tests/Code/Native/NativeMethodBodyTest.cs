@@ -98,5 +98,56 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             Assert.Contains(image.Imports, m =>
                 m.Name == ucrtbased.Name && m.Symbols.Any(s => s.Name == puts.Name));
         }
+
+        [Fact]
+        public void DuplicateImportedSymbolsShouldResultInSameImportInImage()
+        {
+            // Create native body.
+            var body = CreateDummyBody(true);
+            body.Code = new byte[]
+            {
+                /* 00: */ 0x48, 0x83, 0xEC, 0x28,                     // sub rsp, 0x28
+                /* 04: */ 0x48, 0x8D, 0x0D, 0x18, 0x00, 0x00, 0x00,   // lea rcx, [rel str]
+                /* 0B: */ 0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,         // call [rel puts]
+                /* 11: */ 0x48, 0x8D, 0x0D, 0x0B, 0x00, 0x00, 0x00,   // lea rcx, [rel str]
+                /* 18: */ 0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,         // call [rel puts]
+                /* 24: */ 0xC3,                                       // ret
+
+                // str:
+                0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x66,   // "Hello f"
+                0x72, 0x6f, 0x6d, 0x20, 0x74, 0x68, 0x65,   // "rom the"
+                0x20, 0x75, 0x6e, 0x6d, 0x61, 0x6e, 0x61,   // "unmanag"
+                0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ed worl"
+                0x6c, 0x64, 0x21, 0x00                      // "d!"
+            };
+            
+            // Add reference to ucrtbased.dll!puts at offset 0xD.
+            var ucrtbased1 = new ImportedModule("ucrtbased.dll");
+            var puts1 = new ImportedSymbol(0x4fc, "puts");
+            ucrtbased1.Symbols.Add(puts1);
+            body.AddressFixups.Add(new AddressFixup(
+                0xD, AddressFixupType.Relative32BitAddress, puts1
+            ));
+            
+            // Add second (duplicated) reference to ucrtbased.dll!puts at offset 0x20.
+            var ucrtbased2 = new ImportedModule("ucrtbased.dll");
+            var puts2 = new ImportedSymbol(0x4fc, "puts");
+            ucrtbased2.Symbols.Add(puts2);
+            body.AddressFixups.Add(new AddressFixup(
+                0x20, AddressFixupType.Relative32BitAddress, puts2
+            ));
+
+            // Serialize module to PE image.
+            var module = body.Owner.Module;
+            var image = module.ToPEImage();
+
+            // Verify import is added to PE image.
+            var importedModule = Assert.Single(image.Imports);
+            Assert.NotNull(importedModule);
+            Assert.Equal(ucrtbased1.Name, importedModule.Name);
+            var importedSymbol = Assert.Single(importedModule.Symbols);
+            Assert.NotNull(importedSymbol);
+            Assert.Equal(puts1.Name, importedSymbol.Name);
+        }
     }
 }
