@@ -14,10 +14,10 @@ namespace AsmResolver.PE.Code
         /// <param name="offset">The offset relative to the start of the code segment pointing to the reference.</param>
         /// <param name="type">The type of fixup to apply at the offset.</param>
         /// <param name="referencedObject">The reference to write the RVA for.</param>
-        public AddressFixup(uint offset, AddressFixupType type, IReferenceableObject referencedObject)
+        public AddressFixup(uint offset, AddressFixupType type, ISymbol referencedObject)
         {
             Offset = offset;
-            ReferencedObject = referencedObject ?? throw new ArgumentNullException(nameof(referencedObject));
+            Symbol = referencedObject ?? throw new ArgumentNullException(nameof(referencedObject));
             Type = type;
         }
         
@@ -40,12 +40,12 @@ namespace AsmResolver.PE.Code
         /// <summary>
         /// Gets the object that is referenced at the offset.
         /// </summary>
-        public IReferenceableObject ReferencedObject
+        public ISymbol Symbol
         {
             get;
         }
 
         /// <inheritdoc />
-        public override string ToString() => $"+{Offset:X8} <{ReferencedObject}> ({Type})";
+        public override string ToString() => $"+{Offset:X8} <{Symbol}> ({Type})";
     }
 }

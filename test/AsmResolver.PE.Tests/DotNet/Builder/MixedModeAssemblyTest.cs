@@ -138,7 +138,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var peFile = builder.CreateFile(image);
 
             // Verify
-            string expectedOutput = "Hello, World!\r\nThe answer to life, universe and everything is 1337\r\n";
+            string expectedOutput = "Hello, World!\r\nThe answer to life, universe and everything is 4919\r\n";
             _fixture
                 .GetRunner<FrameworkPERunner>()
                 .RebuildAndRun(peFile, "TheAnswer", expectedOutput);

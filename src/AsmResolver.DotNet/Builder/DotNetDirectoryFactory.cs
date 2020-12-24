@@ -3,6 +3,7 @@ using AsmResolver.DotNet.Builder.Discovery;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Code;
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
@@ -65,13 +66,16 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public virtual IDotNetDirectory CreateDotNetDirectory(ModuleDefinition module, DiagnosticBag diagnosticBag)
+        public virtual IDotNetDirectory CreateDotNetDirectory(
+            ModuleDefinition module, 
+            INativeSymbolsProvider symbolsProvider,
+            DiagnosticBag diagnosticBag)
         {
             // Find all members in the module.
             var discoveryResult = DiscoverMemberDefinitionsInModule(module);
 
             // Creat new .NET dir buffer.
-            var buffer = CreateDotNetDirectoryBuffer(module, diagnosticBag);
+            var buffer = CreateDotNetDirectoryBuffer(module, symbolsProvider, diagnosticBag);
             buffer.DefineModule(module);
 
             // When specified, import existing AssemblyRef, ModuleRef, TypeRef and MemberRef prior to adding any other
@@ -135,10 +139,13 @@ namespace AsmResolver.DotNet.Builder
             return MemberDiscoverer.DiscoverMembersInModule(module, discoveryFlags);
         }
 
-        private DotNetDirectoryBuffer CreateDotNetDirectoryBuffer(ModuleDefinition module, DiagnosticBag diagnosticBag)
+        private DotNetDirectoryBuffer CreateDotNetDirectoryBuffer(
+            ModuleDefinition module, 
+            INativeSymbolsProvider symbolsProvider, 
+            DiagnosticBag diagnosticBag)
         {
             var metadataBuffer = CreateMetadataBuffer(module);
-            return new DotNetDirectoryBuffer(module, MethodBodySerializer, metadataBuffer, diagnosticBag);
+            return new DotNetDirectoryBuffer(module, MethodBodySerializer, symbolsProvider, metadataBuffer, diagnosticBag);
         }
 
         private IMetadataBuffer CreateMetadataBuffer(ModuleDefinition module)

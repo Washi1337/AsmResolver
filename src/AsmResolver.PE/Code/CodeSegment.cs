@@ -11,6 +11,15 @@ namespace AsmResolver.PE.Code
         /// <summary>
         /// Creates a new segment of native code.
         /// </summary>
+        /// <param name="code">The raw native code stream.</param>
+        public CodeSegment( byte[] code)
+        {
+            Code = code;
+        }
+        
+        /// <summary>
+        /// Creates a new segment of native code.
+        /// </summary>
         /// <param name="imageBase">The base address of the image the segment is going to be stored in.</param>
         /// <param name="code">The raw native code stream.</param>
         public CodeSegment(ulong imageBase, byte[] code)
@@ -25,6 +34,7 @@ namespace AsmResolver.PE.Code
         public ulong ImageBase
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -63,7 +73,7 @@ namespace AsmResolver.PE.Code
         {
             writer.Offset = Offset + fixup.Offset;
             uint writerRva = Rva + fixup.Offset;
-            uint targetRva = fixup.ReferencedObject.GetReference()?.Rva ?? 0;
+            uint targetRva = fixup.Symbol.GetReference()?.Rva ?? 0;
 
             switch (fixup.Type)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AsmResolver.DotNet.Builder.Metadata;
 using AsmResolver.DotNet.Builder.Resources;
 using AsmResolver.DotNet.Code;
+using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -25,11 +26,13 @@ namespace AsmResolver.DotNet.Builder
         public DotNetDirectoryBuffer(
             ModuleDefinition module,
             IMethodBodySerializer methodBodySerializer,
+            INativeSymbolsProvider symbolsProvider,
             IMetadataBuffer metadata,
             DiagnosticBag diagnosticBag)
         {
             Module = module ?? throw new ArgumentNullException(nameof(module));
             MethodBodySerializer = methodBodySerializer ?? throw new ArgumentNullException(nameof(methodBodySerializer));
+            SymbolsProvider = symbolsProvider ?? throw new ArgumentNullException(nameof(symbolsProvider));
             Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
             DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
             Resources = new DotNetResourcesDirectoryBuffer();
@@ -47,6 +50,11 @@ namespace AsmResolver.DotNet.Builder
         /// Gets the method body serializer to use for constructing method bodies.
         /// </summary>
         public IMethodBodySerializer MethodBodySerializer
+        {
+            get;
+        }
+
+        public INativeSymbolsProvider SymbolsProvider
         {
             get;
         }

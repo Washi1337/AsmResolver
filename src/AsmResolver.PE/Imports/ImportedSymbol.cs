@@ -6,7 +6,7 @@ namespace AsmResolver.PE.Imports
     /// <summary>
     /// Represents one member of an external module that was imported into a PE image.
     /// </summary>
-    public class ImportedSymbol : IOwnedCollectionElement<IImportedModule>, IReferenceableObject
+    public class ImportedSymbol : IOwnedCollectionElement<IImportedModule>, ISymbol
     {
         private ushort _ordinalOrHint;
         private string _name;
