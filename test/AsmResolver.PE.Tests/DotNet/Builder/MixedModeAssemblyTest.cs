@@ -8,6 +8,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
+using AsmResolver.PE.Relocations;
 using AsmResolver.Tests.Runners;
 using Xunit;
 
@@ -136,10 +137,12 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
                 0x6c, 0x64, 0x21, 0x00                      // "d!"
             });
             
+            // Fixup puts call.
             body.AddressFixups.Add(new AddressFixup(
                 0xD, AddressFixupType.Relative32BitAddress, function
             ));
             
+            // Replace body.
             ReplaceBodyWithNativeCode(image, body, false);
 
             // Rebuild
@@ -182,9 +185,14 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
 
             });
             
+            // Fix up puts call.
             body.AddressFixups.Add(new AddressFixup(
                 0xD, AddressFixupType.Absolute32BitAddress, function
             ));
+            image.Relocations.Clear();
+            image.Relocations.Add(new BaseRelocation(RelocationType.HighLow, new RelativeReference(body, 0xD)));
+            
+            // Replace body.
             ReplaceBodyWithNativeCode(image, body, true);
 
             // Rebuild
