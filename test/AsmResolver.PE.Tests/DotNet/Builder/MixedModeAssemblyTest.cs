@@ -25,13 +25,23 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             _fixture = fixture;
         }
 
-        private static void ReplaceBodyWithNativeCode(IPEImage image, CodeSegment body)
+        private static void ReplaceBodyWithNativeCode(IPEImage image, CodeSegment body, bool is32bit)
         {
             // Adjust image flags appropriately.
-            image.MachineType = MachineType.Amd64;
-            image.PEKind = OptionalHeaderMagic.Pe32Plus;
             image.DotNetDirectory.Flags &= ~DotNetDirectoryFlags.ILOnly;
             
+            if (is32bit)
+            {
+                image.MachineType = MachineType.I386;
+                image.PEKind = OptionalHeaderMagic.Pe32;
+                image.DotNetDirectory.Flags |= DotNetDirectoryFlags.Bit32Required;
+            }
+            else
+            {
+                image.MachineType = MachineType.Amd64;
+                image.PEKind = OptionalHeaderMagic.Pe32Plus;
+            }
+
             // Access metadata.
             var metadata = image.DotNetDirectory.Metadata;
             var stringsStream = metadata.GetStream<StringsStream>();
@@ -82,7 +92,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             {
                 0xb8, 0x39, 0x05, 0x00, 0x00,      // mov rax, 1337
                 0xc3                               // ret
-            }));
+            }), false);
 
             // Rebuild
             var builder = new ManagedPEFileBuilder();
@@ -91,7 +101,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Verify
             _fixture
                 .GetRunner<FrameworkPERunner>()
-                .RebuildAndRun(peFile, "TheAnswer", "The answer to life, universe and everything is 1337" + Environment.NewLine);
+                .RebuildAndRun(peFile, "TheAnswer", "The answer to life, universe and everything is 1337\r\n");
         }
 
         [SkippableFact]
@@ -112,8 +122,8 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             var body = new CodeSegment(image.ImageBase, new byte[]
             {
                 /* 00: */ 0x48, 0x83, 0xEC, 0x28,                     // sub rsp, 0x28
-                /* 04: */ 0x48, 0x8D, 0x0D, 0x10, 0x00, 0x00, 0x00,   // lea rcx, [rel str]
-                /* 0B: */ 0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,         // call [rel puts]
+                /* 04: */ 0x48, 0x8D, 0x0D, 0x10, 0x00, 0x00, 0x00,   // lea rcx, qword [rel str]
+                /* 0B: */ 0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,         // call qword [rel puts]
                 /* 11: */ 0xB8, 0x37, 0x13, 0x00, 0x00,               // mov eax, 0x1337
                 /* 16: */ 0x48, 0x83, 0xC4, 0x28,                     // add rsp, 0x28
                 /* 1A: */ 0xC3,                                       // ret
@@ -130,14 +140,59 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
                 0xD, AddressFixupType.Relative32BitAddress, function
             ));
             
-            ReplaceBodyWithNativeCode(image, body);
+            ReplaceBodyWithNativeCode(image, body, false);
 
             // Rebuild
             var builder = new ManagedPEFileBuilder();
             var peFile = builder.CreateFile(image);
 
             // Verify
-            string expectedOutput = "Hello, World!\r\nThe answer to life, universe and everything is 4919\r\n";
+            string expectedOutput = "Hello from the unmanaged world!\r\nThe answer to life, universe and everything is 4919\r\n";
+            _fixture
+                .GetRunner<FrameworkPERunner>()
+                .RebuildAndRun(peFile, "TheAnswer", expectedOutput);
+        }
+
+        [SkippableFact]
+        public void NativeBodyWithCallX86()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            // Read image
+            var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
+            
+            var module = new ImportedModule("ucrtbased.dll");
+            image.Imports.Add(module);
+            
+            var function = new ImportedSymbol(0x4fc, "puts");
+            module.Symbols.Add(function);
+
+            var body = new CodeSegment(image.ImageBase, new byte[]
+            {
+                /* 00: */  0x55,                                 // push ebp
+                /* 01: */  0x89, 0xE5,                           // mov ebp,esp
+                /* 03: */  0x6A, 0x6F,                           // push byte +0x6f         ; H
+                /* 05: */  0x68, 0x48, 0x65, 0x6C, 0x6C,         // push dword 0x6c6c6548   ; ello
+                /* 0A: */  0x54,                                 // push esp
+                /* 0B: */  0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,   // call [dword puts]
+                /* 11: */  0x83, 0xC4, 0x0C,                     // add esp,byte +0xc
+                /* 14: */  0xB8, 0x37, 0x13, 0x00, 0x00,         // mov eax,0x1337
+                /* 19: */  0x5D,                                 // pop ebp
+                /* 1A: */  0xC3,                                 // ret
+
+            });
+            
+            body.AddressFixups.Add(new AddressFixup(
+                0xD, AddressFixupType.Absolute32BitAddress, function
+            ));
+            ReplaceBodyWithNativeCode(image, body, true);
+
+            // Rebuild
+            var builder = new ManagedPEFileBuilder();
+            var peFile = builder.CreateFile(image);
+
+            // Verify
+            string expectedOutput = "Hello\r\nThe answer to life, universe and everything is 4919\r\n";
             _fixture
                 .GetRunner<FrameworkPERunner>()
                 .RebuildAndRun(peFile, "TheAnswer", expectedOutput);
