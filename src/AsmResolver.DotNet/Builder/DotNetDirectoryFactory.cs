@@ -23,6 +23,9 @@ namespace AsmResolver.DotNet.Builder
         /// Creates a new instance of the <see cref="DotNetDirectoryFactory"/> claDiagnosticBag// </summary>
         public DotNetDirectoryFactory()
         {
+            MethodBodySerializer = new MultiMethodBodySerializer(
+                new CilMethodBodySerializer(),
+                new NativeMethodBodySerializer());
         }
         
         /// <summary>
@@ -54,7 +57,7 @@ namespace AsmResolver.DotNet.Builder
         {
             get;
             set;
-        } = new CilMethodBodySerializer();
+        }
 
         /// <summary>
         /// Gets or sets the strong-name private key to use for signing the module.
