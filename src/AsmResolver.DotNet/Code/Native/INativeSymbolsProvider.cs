@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Code.Native
         /// <summary>
         /// Gets or sets the image base the final PE image is using. 
         /// </summary>
-        uint ImageBase
+        ulong ImageBase
         {
             get;
         }

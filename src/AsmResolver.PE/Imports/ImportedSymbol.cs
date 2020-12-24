@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Imports
