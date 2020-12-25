@@ -77,7 +77,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
                 typeRow.Namespace,
                 typeRow.Extends,
                 typeRow.FieldList,
-                typeRow.MethodList + 1);
+                (uint) (index + 2));
         }
 
         [SkippableFact]
@@ -114,7 +114,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
             
-            var module = new ImportedModule("ucrtbased.dll");
+            var module = new ImportedModule("api-ms-win-crt-stdio-l1-1-0.dll");
             image.Imports.Add(module);
             
             var function = new ImportedSymbol(0x4fc, "puts");
@@ -132,9 +132,9 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
                                                             // str:
                 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x66,   // "Hello f"
                 0x72, 0x6f, 0x6d, 0x20, 0x74, 0x68, 0x65,   // "rom the"
-                0x20, 0x75, 0x6e, 0x6d, 0x61, 0x6e, 0x61,   // "unmanag"
-                0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ed worl"
-                0x6c, 0x64, 0x21, 0x00                      // "d!"
+                0x20, 0x75, 0x6e, 0x6d, 0x61, 0x6e, 0x61,   // " unmana"
+                0x67, 0x65, 0x64, 0x20, 0x77, 0x6f, 0x72,   // "ged wor"
+                0x6c, 0x64, 0x21, 0x00                      // "ld!"
             });
             
             // Fixup puts call.
@@ -164,7 +164,7 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
             // Read image
             var image = PEImage.FromBytes(Properties.Resources.TheAnswer_NetFx);
             
-            var module = new ImportedModule("ucrtbased.dll");
+            var module = new ImportedModule("api-ms-win-crt-stdio-l1-1-0.dll");
             image.Imports.Add(module);
             
             var function = new ImportedSymbol(0x4fc, "puts");

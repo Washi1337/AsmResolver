@@ -426,8 +426,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 throw new NotImplementedException("Native unbounded method bodies cannot be reassembled yet.");
             }
 
-            throw new NotSupportedException(
-                $"Invalid or unsupported method body reference for method {i + 1}.");
+            return null;
         }
 
         private static void AddFieldRvasToTable(ManagedPEBuilderContext context)
