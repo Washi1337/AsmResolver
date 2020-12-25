@@ -34,7 +34,8 @@ namespace AsmResolver.DotNet.Code.Native
                 // TODO: keep architecture into account..
                 if (fixup.Type == AddressFixupType.Absolute32BitAddress)
                 {
-                    var relocation = new BaseRelocation(RelocationType.HighLow, symbol.GetReference());
+                    var relocation = new BaseRelocation(RelocationType.HighLow,
+                        new RelativeReference(segment, (int) fixup.Offset));
                     provider.RegisterBaseRelocation(relocation);
                 }
             }

@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE;
 using AsmResolver.PE.Code;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -13,30 +15,52 @@ namespace AsmResolver.DotNet.Tests.Code.Native
 {
     public class NativeMethodBodyTest
     {
-        private static NativeMethodBody CreateDummyBody(bool isVoid)
+        private static NativeMethodBody CreateDummyBody(bool isVoid, bool is32Bit)
         {
-            var module = new ModuleDefinition("DummyModule");
-            module.Attributes &= DotNetDirectoryFlags.ILOnly;
-            module.PEKind = OptionalHeaderMagic.Pe32Plus;
-            module.MachineType = MachineType.Amd64;
-
-            var method = new MethodDefinition("NativeMethod",
-                MethodAttributes.Static | MethodAttributes.PInvokeImpl,
-                MethodSignature.CreateStatic(isVoid ? module.CorLibTypeFactory.Void : module.CorLibTypeFactory.Int32));
+            var module = ModuleDefinition.FromBytes(Properties.Resources.TheAnswer_NetFx);
             
+            module.Attributes &= DotNetDirectoryFlags.ILOnly;
+            if (is32Bit)
+            {
+                module.PEKind = OptionalHeaderMagic.Pe32;
+                module.MachineType = MachineType.I386;
+                module.Attributes |= DotNetDirectoryFlags.Bit32Required;
+            }
+            else
+            {
+                module.PEKind = OptionalHeaderMagic.Pe32Plus;
+                module.MachineType = MachineType.Amd64;
+            }
+
+            var method = module
+                .TopLevelTypes.First(t => t.Name == "Program")
+                .Methods.First(m => m.Name == "GetTheAnswer");
+            method.Attributes |= MethodAttributes.PInvokeImpl;
             method.ImplAttributes |= MethodImplAttributes.Unmanaged
                                      | MethodImplAttributes.Native
                                      | MethodImplAttributes.PreserveSig;
-
+            method.DeclaringType.Methods.Remove(method);
             module.GetOrCreateModuleType().Methods.Add(method);
+            
             return method.NativeMethodBody = new NativeMethodBody(method);
+        }
+
+        private static CodeSegment GetNewCodeSegment(IPEImage image)
+        {
+            var methodTable = image.DotNetDirectory.Metadata
+                .GetStream<TablesStream>()
+                .GetTable<MethodDefinitionRow>(TableIndex.Method);
+            var row = methodTable.First(r => (r.ImplAttributes & MethodImplAttributes.Native) != 0);
+            Assert.True(row.Body.IsBounded);
+            var segment = Assert.IsAssignableFrom<CodeSegment>(row.Body.GetSegment());
+            return segment;
         }
 
         [Fact]
         public void NativeMethodBodyShouldResultInRawCodeSegment()
         {
             // Create native body.
-            var body = CreateDummyBody(false);
+            var body = CreateDummyBody(false, false);
             body.Code = new byte[]
             {
                 0xb8, 0x39, 0x05, 0x00, 0x00, // mov rax, 1337
@@ -48,14 +72,9 @@ namespace AsmResolver.DotNet.Tests.Code.Native
             var image = module.ToPEImage();
 
             // Lookup method row.
-            var methodTable = image.DotNetDirectory.Metadata
-                .GetStream<TablesStream>()
-                .GetTable<MethodDefinitionRow>(TableIndex.Method);
-            var row = methodTable.First(r => (r.ImplAttributes & MethodImplAttributes.Native) != 0);
-            
+            var segment = GetNewCodeSegment(image);
+
             // Verify code segment was created.
-            Assert.True(row.Body.IsBounded);
-            var segment = Assert.IsAssignableFrom<CodeSegment>(row.Body.GetSegment());
             Assert.Equal(segment.Code, body.Code);
         }
 
@@ -63,7 +82,7 @@ namespace AsmResolver.DotNet.Tests.Code.Native
         public void NativeMethodBodyImportedSymbolShouldEndUpInImportsDirectory()
         {
             // Create native body.
-            var body = CreateDummyBody(false);
+            var body = CreateDummyBody(false, false);
             body.Code = new byte[]
             {
                 /* 00: */ 0x48, 0x83, 0xEC, 0x28,                     // sub rsp, 0x28
@@ -100,10 +119,54 @@ namespace AsmResolver.DotNet.Tests.Code.Native
         }
 
         [Fact]
+        public void Native32BitMethodShouldResultInBaseRelocation()
+        {
+            // Create native body.
+            var body = CreateDummyBody(false, true);
+            body.Code = new byte[]
+            {
+                /* 00: */  0x55,                                 // push ebp
+                /* 01: */  0x89, 0xE5,                           // mov ebp,esp
+                /* 03: */  0x6A, 0x6F,                           // push byte +0x6f         ; H
+                /* 05: */  0x68, 0x48, 0x65, 0x6C, 0x6C,         // push dword 0x6c6c6548   ; ello
+                /* 0A: */  0x54,                                 // push esp
+                /* 0B: */  0xFF, 0x15, 0x00, 0x00, 0x00, 0x00,   // call [dword puts]
+                /* 11: */  0x83, 0xC4, 0x0C,                     // add esp,byte +0xc
+                /* 14: */  0xB8, 0x37, 0x13, 0x00, 0x00,         // mov eax,0x1337
+                /* 19: */  0x5D,                                 // pop ebp
+                /* 1A: */  0xC3,                                 // ret
+            };
+            
+            // Fix up reference to ucrtbased.dll!puts
+            var ucrtbased = new ImportedModule("ucrtbased.dll");
+            var puts = new ImportedSymbol(0x4fc, "puts");
+            ucrtbased.Symbols.Add(puts);
+            
+            body.AddressFixups.Add(new AddressFixup(
+                0xD, AddressFixupType.Absolute32BitAddress, puts
+            ));
+
+            // Serialize module to PE image.
+            var module = body.Owner.Module;
+            var image = module.ToPEImage();
+
+            // Verify import is added to PE image.
+            Assert.Contains(image.Imports, m =>
+                m.Name == ucrtbased.Name && m.Symbols.Any(s => s.Name == puts.Name));
+            
+            // Verify relocation is added.
+            var segment = GetNewCodeSegment(image);
+            Assert.Contains(image.Relocations, r =>
+                r.Location is RelativeReference relativeRef
+                && relativeRef.Base == segment
+                && relativeRef.Offset == 0xD);
+        }
+
+        [Fact]
         public void DuplicateImportedSymbolsShouldResultInSameImportInImage()
         {
             // Create native body.
-            var body = CreateDummyBody(true);
+            var body = CreateDummyBody(true, false);
             body.Code = new byte[]
             {
                 /* 00: */ 0x48, 0x83, 0xEC, 0x28,                     // sub rsp, 0x28

@@ -22,10 +22,8 @@ namespace AsmResolver.DotNet.Builder
         /// <summary>
         /// Creates a new instance of the <see cref="DotNetDirectoryFactory"/> claDiagnosticBag// </summary>
         public DotNetDirectoryFactory()
+            : this(MetadataBuilderFlags.None)
         {
-            MethodBodySerializer = new MultiMethodBodySerializer(
-                new CilMethodBodySerializer(),
-                new NativeMethodBodySerializer());
         }
         
         /// <summary>
@@ -38,6 +36,9 @@ namespace AsmResolver.DotNet.Builder
         public DotNetDirectoryFactory(MetadataBuilderFlags metadataBuilderFlags)
         {
             MetadataBuilderFlags = metadataBuilderFlags;
+            MethodBodySerializer = new MultiMethodBodySerializer(
+                new CilMethodBodySerializer(),
+                new NativeMethodBodySerializer());
         }
 
         /// <summary>

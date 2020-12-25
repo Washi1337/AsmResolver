@@ -182,7 +182,6 @@ namespace AsmResolver.PE.Tests.DotNet.Builder
                 /* 14: */  0xB8, 0x37, 0x13, 0x00, 0x00,         // mov eax,0x1337
                 /* 19: */  0x5D,                                 // pop ebp
                 /* 1A: */  0xC3,                                 // ret
-
             });
             
             // Fix up puts call.
