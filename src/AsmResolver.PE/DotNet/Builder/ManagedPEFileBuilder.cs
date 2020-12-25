@@ -159,19 +159,28 @@ namespace AsmResolver.PE.DotNet.Builder
         /// <inheritdoc />
         protected override IEnumerable<PESection> CreateSections(IPEImage image, ManagedPEBuilderContext context)
         {
+            // Always create .text section.
             var sections = new List<PESection>
             {
                 CreateTextSection(image, context)
             };
 
-            // Add resource section when necessary.
+            // Add .rsrc section when necessary.
             if (image.Resources != null && image.Resources.Entries.Count > 0)
                 sections.Add(CreateRsrcSection(image, context));
 
-            // Add reloc section when necessary.
-            var relocations = new List<BaseRelocation>(image.Relocations);
+            // Collect all base relocations.
+            // Since the PE is rebuild in its entirety, all relocations that were originally in the PE are invalidated.
+            // Therefore, we filter out all relocations that were added by the reader.
+            var relocations = image.Relocations
+                .Where(r => !(r.Location is PESegmentReference))
+                .ToList();
+            
+            // Add relocations of the bootstrapper stub if necessary.
             if (context.Bootstrapper != null)
                 relocations.AddRange(context.Bootstrapper.GetRelocations());
+                    
+            // Add .reloc section when necessary.
             if (relocations.Count > 0)
                 sections.Add(CreateRelocSection(context, relocations));
             
