@@ -18,7 +18,7 @@ Before you can start adding native method bodies to a .NET module, it is require
 .. code-block:: csharp 
 
     ModuleDefinition module = ...
-    module.Attributes &= DotNetDirectoryFlags.ILOnly;
+    module.Attributes &= ~DotNetDirectoryFlags.ILOnly;
 
 Failing to do so will make the CLR not run your mixed mode application, and might throw runtime or image format exceptions, even if everything else conforms to the right format.
 

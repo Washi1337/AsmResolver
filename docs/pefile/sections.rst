@@ -39,6 +39,6 @@ Some sections (such as `.data` or `.bss`) contain uninitialized data, and might 
 
         var section = new PESection(".asmres", SectionFlags.MemoryRead | SectionFlags.ContentUninitializedData);
         var physicalContents = new DataSegment(new byte[] {1, 2, 3, 4});
-        section = new VirtualSegment(physicalContents, 0x1000); // Create a new segment with a virtual size of 0x1000 bytes.
+        section.Contents = new VirtualSegment(physicalContents, 0x1000); // Create a new segment with a virtual size of 0x1000 bytes.
         
         peFile.Sections.Add(section);

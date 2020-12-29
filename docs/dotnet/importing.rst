@@ -49,9 +49,13 @@ Metadata members from external modules can be imported using the ``ReferenceImpo
 
 Some key points:
 
-- The reference importer does no caching. Each call to any of the import methods will result in a new instance of the imported member.
+.. note::
 
-- If the member that is passsed onto the reference importer is a definition the current module or was already imported into the module, the same instance of this member definition or reference will be returned.
+    The reference importer does no caching. Each call to any of the import methods will result in a new instance of the imported member.
+
+.. note::
+
+    If the member that is passsed onto the reference importer is a definition the current module or was already imported into the module, the same instance of this member definition or reference will be returned.
 
 
 Below an example of how to import a type definition called ``SomeType``:
@@ -64,19 +68,22 @@ Below an example of how to import a type definition called ``SomeType``:
     ITypeDefOrRef importedType = importer.ImportType(typeToImport);
 
 
-
 Importing type signatures
 -------------------------
 
 Type signatures can also be imported using the ``ReferenceImporter`` class, but these should be imported using the ``ImportTypeSignature`` method instead.
 
-Some key points:
+.. note::
+    
+    Similar to importing ``IMetadataMember`` instances, the importer does no caching for this either. Each call to any of the import methods will result in a new instance of the imported member.
 
-- The reference importer does no caching. Each call to any of the import methods will result in a new instance of the imported member.
+.. note:: 
 
-- If the type signature passed on was already an imported type signature, the same instance will be returned.
+    If the type signature passed on was already an imported type signature, the same instance will be returned.
 
-- If a corlib type signature is imported, the appropriate type from the ``CorLibTypeFactory`` of the target module will be selected, regardless of whether CorLib versions are compatible with each other.
+.. note:: 
+
+    If a corlib type signature is imported, the appropriate type from the ``CorLibTypeFactory`` of the target module will be selected, regardless of whether CorLib versions are compatible with each other.
 
 
 Importing using reflection
@@ -100,20 +107,21 @@ Types and members can also be imported by passing on an instance of various ``Sy
 | ``FieldInfo``             | ``ImportScope``        | ``MemberReference``  |
 +---------------------------+------------------------+----------------------+
 
-Some key points:
 
-- The reference importer does no caching. Each call to any of the import methods will result in a new instance of the imported member.
+There is limited support for importing compound types. Types that can be imported through reflection include:
 
-- There is limited support for importing compound types. Types that can be imported through reflection include:
+- Pointer types.
 
-    - Pointer types
+- By reference types.
+
+- Array types: If an array contains only one dimension, a ``SzArrayTypeSignature`` is returned. Otherwise a ``ArrayTypeSignature`` is created.
+
+- Generic parameters.
+
+- Generic type instantiations.
+
+Instantiations of generic methods are supported.
+
+.. note::
     
-    - By reference types 
-
-    - Array types: If an array contains only one dimension, a ``SzArrayTypeSignature`` is returned. Otherwise a ``ArrayTypeSignature`` is created.
-
-    - Generic parameters
-
-    - Generic type instantiations
-
-- Instantiations of generic methods are supported.
+    Similar to importing ``ITypeDescriptor`` instances, the reference importer does no caching for reflection types either. Each call to any of the import methods will result in a new instance of the imported member.
