@@ -207,17 +207,9 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <param name="owner">The method that owns the method body.</param>
         public CilMethodBody(MethodDefinition owner)
+            : base(owner)
         {
-            Owner = owner;
             Instructions = new CilInstructionCollection(this);
-        }
-
-        /// <summary>
-        /// Gets the method that owns the method body.
-        /// </summary>
-        public MethodDefinition Owner
-        {
-            get;
         }
 
         /// <summary>

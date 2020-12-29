@@ -1,6 +1,6 @@
 ﻿using System;
+using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE;
-using AsmResolver.PE.Debug;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -53,6 +53,7 @@ namespace AsmResolver.DotNet.Builder
             PEImage image = null;
             try
             {
+                // Create basic PE image skeleton.
                 image = new PEImage
                 {
                     MachineType = module.MachineType,
@@ -60,11 +61,26 @@ namespace AsmResolver.DotNet.Builder
                     Characteristics = module.FileCharacteristics,
                     SubSystem = module.SubSystem,
                     DllCharacteristics = module.DllCharacteristics,
-                    DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(module, context.DiagnosticBag),
                     Resources = module.NativeResourceDirectory,
-                    TimeDateStamp = module.TimeDateStamp,
+                    TimeDateStamp = module.TimeDateStamp
                 };
 
+                // Construct new .NET directory.
+                var symbolProvider = new NativeSymbolsProvider(image.ImageBase);
+                image.DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(
+                    module, 
+                    symbolProvider, 
+                    context.DiagnosticBag);
+                
+                // Copy any collected native symbols over to the image.
+                foreach (var import in symbolProvider.GetImportedModules())
+                    image.Imports.Add(import);
+                
+                // Copy any collected base relocations over to the image.
+                foreach (var relocation in symbolProvider.GetBaseRelocations())
+                    image.Relocations.Add(relocation);
+                
+                // Copy over debug data.
                 for (int i = 0; i < module.DebugData.Count; i++)
                     image.DebugData.Add(module.DebugData[i]);
             }

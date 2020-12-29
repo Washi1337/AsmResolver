@@ -31,5 +31,8 @@ namespace AsmResolver.PE.Imports.Builder
             }
         }
         
+        /// <inheritdoc />
+        protected override ThunkTableBuffer CreateThunkTable() => 
+            new ThunkTableBuffer(HintNameTable, Is32Bit, true);
     }
 }

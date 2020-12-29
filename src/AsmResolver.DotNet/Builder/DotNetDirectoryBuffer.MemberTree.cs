@@ -373,6 +373,8 @@ namespace AsmResolver.DotNet.Builder
             var definitionTable = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             var pointerTable = Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr);
             
+            var context = new MethodBodySerializationContext(this, SymbolsProvider, DiagnosticBag);
+            
             for (int i = 0; i < type.Methods.Count; i++)
             {
                 var method = type.Methods[i];
@@ -394,7 +396,6 @@ namespace AsmResolver.DotNet.Builder
                 // Serialize method body and update column.
                 var row = definitionTable[newToken.Rid];
 
-                var context = new MethodBodySerializationContext(this, DiagnosticBag);
                 definitionTable[newToken.Rid] = new MethodDefinitionRow(
                     MethodBodySerializer.SerializeMethodBody(context, method),
                     row.ImplAttributes,

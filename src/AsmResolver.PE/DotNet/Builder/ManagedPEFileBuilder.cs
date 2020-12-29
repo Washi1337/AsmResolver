@@ -28,20 +28,21 @@ namespace AsmResolver.PE.DotNet.Builder
     /// i.e. they are represented by a single segment. Any method definition in the metadata table that references a
     /// native method body of which the size is not explicitly defined will cause an exception. This class also might
     /// replace rows in the method and/or field RVA metadata tables with new ones containing the updated references to
-    /// method bodies and/or field data. ALl remaining metadata in the tables stream and in the other metadata streams
+    /// method bodies and/or field data. All remaining metadata in the tables stream and in the other metadata streams
     /// is written as-is without any change or verification.
     /// </para>
     /// <para>
-    /// This class ignores the contents of the imports directory (exposed by the <see cref="IPEImage.Imports"/>
-    /// property), as well as the base relocations directory (exposed by the <see cref="IPEImage.Relocations"/> property).
-    /// It completely rebuilds the contents of these directories.
+    /// This class might modify the final imports directory (exposed by the <see cref="IPEImage.Imports"/> property),
+    /// as well as the base relocations directory (exposed by the <see cref="IPEImage.Relocations"/> property). In
+    /// particular, it might add or remove the entry to <c>mscoree.dll!_CorExeMain</c> or <c>mscoree.dll!_CorDllMain</c>,
+    /// depending on the machine type specified by the <see cref="IPEImage.MachineType"/> property.
     /// </para>
     /// <para>
     /// This class builds up at most three PE sections; .text, .rsrc and .reloc, similar to what a normal .NET language
     /// compiler would emit. Almost everything is put into the .text section, including the import and debug directories.
     /// The win32 resources are put into .rsrc section, and this section will only be added if there is at least one entry
     /// in the root resource directory of the <see cref="IPEImage.Resources"/> property. Similarly, the .reloc section
-    /// is only added if a bootstrapper code segment initializing the CLR is added and needs base relocations. 
+    /// is only added if at least one base relocation was put into the directory, or when the CLR bootstrapper required one. 
     /// </para>
     /// </remarks>
     public class ManagedPEFileBuilder : PEFileBuilderBase<ManagedPEFileBuilder.ManagedPEBuilderContext>
@@ -158,21 +159,31 @@ namespace AsmResolver.PE.DotNet.Builder
         /// <inheritdoc />
         protected override IEnumerable<PESection> CreateSections(IPEImage image, ManagedPEBuilderContext context)
         {
+            // Always create .text section.
             var sections = new List<PESection>
             {
                 CreateTextSection(image, context)
             };
 
+            // Add .rsrc section when necessary.
             if (image.Resources != null && image.Resources.Entries.Count > 0)
                 sections.Add(CreateRsrcSection(image, context));
 
+            // Collect all base relocations.
+            // Since the PE is rebuild in its entirety, all relocations that were originally in the PE are invalidated.
+            // Therefore, we filter out all relocations that were added by the reader.
+            var relocations = image.Relocations
+                .Where(r => !(r.Location is PESegmentReference))
+                .ToList();
+            
+            // Add relocations of the bootstrapper stub if necessary.
             if (context.Bootstrapper != null)
-            {
-                var relocations = context.Bootstrapper.GetRelocations().ToArray();
-                if (relocations.Length > 0)
-                    sections.Add(CreateRelocSection(context, relocations));
-            }
-
+                relocations.AddRange(context.Bootstrapper.GetRelocations());
+                    
+            // Add .reloc section when necessary.
+            if (relocations.Count > 0)
+                sections.Add(CreateRelocSection(context, relocations));
+            
             return sections;
         }
 
@@ -219,16 +230,64 @@ namespace AsmResolver.PE.DotNet.Builder
 
         private static void CreateImportDirectory(IPEImage image, ManagedPEBuilderContext context)
         {
-            if (image.PEKind == OptionalHeaderMagic.Pe32)
+            bool importEntrypointRequired = image.PEKind == OptionalHeaderMagic.Pe32;
+            string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
+                ? "_CorDllMain"
+                : "_CorExeMain";
+
+            var modules = CollectImportedModules(image, importEntrypointRequired, entrypointName);
+
+            foreach (var module in modules)
+                context.ImportDirectory.AddModule(module);
+        }
+
+        private static List<IImportedModule> CollectImportedModules(IPEImage image, bool entryRequired, string mscoreeEntryName)
+        {
+            var modules = new List<IImportedModule>();
+            
+            IImportedModule mscoreeModule = null;
+            ImportedSymbol entrypointSymbol = null;
+            
+            foreach (var module in image.Imports)
             {
-                string entrypointName = (image.Characteristics & Characteristics.Dll) != 0
-                    ? "_CorDllMain"
-                    : "_CorExeMain";
-                context.ImportDirectory.AddModule(new ImportedModule("mscoree.dll")
+                // Check if the CLR entrypoint is already imported.
+                if (module.Name == "mscoree.dll")
                 {
-                    Symbols = {new ImportedSymbol(0, entrypointName)}
-                });
+                    mscoreeModule = module;
+                    
+                    // Find entrypoint in this imported module.
+                    if (entryRequired)
+                        entrypointSymbol = mscoreeModule.Symbols.FirstOrDefault(s => s.Name == mscoreeEntryName);
+                    
+                    // Only include mscoree.dll if necessary.
+                    if (entryRequired || module.Symbols.Count > 1)
+                        modules.Add(module);
+                }
+                else
+                {
+                    // Imported module is some other module. Just add in its entirety.
+                    modules.Add(module);
+                }
             }
+
+            if (entryRequired)
+            {
+                // Add mscoree.dll if it wasn't imported yet.
+                if (mscoreeModule is null)
+                {
+                    mscoreeModule = new ImportedModule("mscoree.dll");
+                    modules.Add(mscoreeModule);
+                }
+
+                // Add entrypoint sumbol if it wasn't imported yet.
+                if (entrypointSymbol is null)
+                {
+                    entrypointSymbol = new ImportedSymbol(0, mscoreeEntryName);
+                    mscoreeModule.Symbols.Add(entrypointSymbol);
+                }
+            }
+
+            return modules;
         }
 
         private static void CreateExportDirectory(IPEImage image, ManagedPEBuilderContext context)
@@ -287,27 +346,27 @@ namespace AsmResolver.PE.DotNet.Builder
 
             var exportDataDirectory = !context.ExportDirectory.IsEmpty
                 ? new DataDirectory(context.ExportDirectory.Rva, context.ExportDirectory.GetPhysicalSize())
-                : new DataDirectory(0, 0);
+                : default;
             var debugDataDirectory = !context.DebugDirectory.IsEmpty
                 ? new DataDirectory(context.DebugDirectory.Rva, context.DebugDirectory.GetPhysicalSize())
-                : new DataDirectory(0, 0);
+                : default;
             
             return new[]
             {
                 exportDataDirectory,
                 new DataDirectory(importDirectory.Rva, importDirectory.GetPhysicalSize()),
                 new DataDirectory(resourceDirectory.Rva, resourceDirectory.GetPhysicalSize()),
-                new DataDirectory(0, 0),
-                new DataDirectory(0, 0),
+                default,
+                default,
                 new DataDirectory(relocDirectory.Rva, relocDirectory.GetPhysicalSize()),
                 debugDataDirectory,
-                new DataDirectory(0, 0),
-                new DataDirectory(0, 0),
-                new DataDirectory(0, 0),
-                new DataDirectory(0, 0),
-                new DataDirectory(0, 0),
+                default,
+                default,
+                default,
+                default,
+                default,
                 new DataDirectory(iatDirectory.Rva, iatDirectory.GetPhysicalSize()),
-                new DataDirectory(0, 0),
+                default,
                 new DataDirectory(dotNetDirectory.Rva, dotNetDirectory.GetPhysicalSize()),
             };
         }
@@ -376,8 +435,7 @@ namespace AsmResolver.PE.DotNet.Builder
                 throw new NotImplementedException("Native unbounded method bodies cannot be reassembled yet.");
             }
 
-            throw new NotSupportedException(
-                $"Invalid or unsupported method body reference for method {i + 1}.");
+            return null;
         }
 
         private static void AddFieldRvasToTable(ManagedPEBuilderContext context)
