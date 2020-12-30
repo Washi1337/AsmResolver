@@ -4,7 +4,7 @@ using System.IO;
 
 namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
-    internal readonly struct TypeNameBuilder : ITypeSignatureVisitor<object>
+    public readonly struct TypeNameBuilder : ITypeSignatureVisitor<object>
     {
         public static string GetAssemblyQualifiedName(TypeSignature signature)
         {
@@ -25,12 +25,6 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             type.AcceptVisitor(this);
 
-            if (type.Name == "<SaveMefStateAsync>d__22")
-            {
-                
-            }
-            
-            
             if (type.Scope.GetAssembly() != type.Module.Assembly)
             {
                 _writer.Write(", ");
@@ -38,6 +32,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             }
         }
 
+        /// <inheritdoc />
         public object VisitArrayType(ArrayTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
@@ -48,8 +43,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitBoxedType(BoxedTypeSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitByReferenceType(ByReferenceTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
@@ -57,6 +54,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitCorLibType(CorLibTypeSignature signature)
         {
             WriteIdentifier(signature.Namespace);
@@ -65,8 +63,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitCustomModifierType(CustomModifierTypeSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitGenericInstanceType(GenericInstanceTypeSignature signature)
         {
             WriteSimpleTypeName(signature.GenericType);
@@ -85,10 +85,13 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitGenericParameter(GenericParameterSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitPinnedType(PinnedTypeSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitPointerType(PointerTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
@@ -96,8 +99,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitSentinelType(SentinelTypeSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitSzArrayType(SzArrayTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
@@ -105,6 +110,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitTypeDefOrRef(TypeDefOrRefSignature signature)
         {
             WriteSimpleTypeName(signature.Type);
@@ -120,7 +126,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 type = type.DeclaringType;
             }
 
-            WriteIdentifier(ancestors[ancestors.Count - 1].Namespace);
+            WriteIdentifier(ancestors[ancestors.Count - 1].Namespace, true);
             _writer.Write('.');
             WriteIdentifier(ancestors[ancestors.Count - 1].Name);
             
@@ -133,7 +139,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private void WriteAssemblySpec(AssemblyDescriptor assembly)
         {
-            WriteIdentifier(assembly.Name);
+            WriteIdentifier(assembly.Name, true);
             _writer.Write(", Version=");
             _writer.Write(assembly.Version.ToString());
             _writer.Write(", PublicKeyToken=");
@@ -144,19 +150,17 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             else
                 WriteHexBlob(token);
 
-            if (assembly.Culture != null)
-            {
-                _writer.Write(", Culture=");
-                WriteIdentifier(assembly.Culture);
-            }
+            _writer.Write(", Culture=");
+            WriteIdentifier(assembly.Culture ?? "neutral");
         }
 
-        private void WriteIdentifier(string identifier)
+        private void WriteIdentifier(string identifier, bool escapeDots = false)
         {
             foreach (char c in identifier)
             {
-                if (TypeNameLexer.ReservedChars.Contains(c))
+                if (TypeNameLexer.ReservedChars.Contains(c) && (c != '.' || !escapeDots))
                     _writer.Write('\\');
+
                 _writer.Write(c);
             }
         }
@@ -164,7 +168,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private void WriteHexBlob(byte[] token)
         {
             foreach (byte b in token)
-                _writer.Write(b.ToString("X2"));
+                _writer.Write(b.ToString("x2"));
         }
     }
 }
