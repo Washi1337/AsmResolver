@@ -49,6 +49,9 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override IResolutionScope Scope => Type?.Scope;
 
         /// <inheritdoc />
+        public override ModuleDefinition Module => Type?.Module;
+
+        /// <inheritdoc />
         public override bool IsValueType
         {
             get;

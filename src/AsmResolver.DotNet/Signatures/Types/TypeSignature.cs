@@ -304,7 +304,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public ModuleDefinition Module => Scope.Module;
+        public virtual ModuleDefinition Module => Scope?.Module;
         
         /// <inheritdoc />
         public ITypeDescriptor DeclaringType => Scope as ITypeDescriptor;
