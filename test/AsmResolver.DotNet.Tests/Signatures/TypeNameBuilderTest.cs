@@ -1,3 +1,4 @@
+using System.Linq;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using Xunit;
 
@@ -28,5 +29,6 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.DoesNotContain('\\', name);
             Assert.Contains("Company.ProductName", name);
         }
+        
     }
 }

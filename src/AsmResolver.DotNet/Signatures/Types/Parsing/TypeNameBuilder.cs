@@ -139,7 +139,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private void WriteAssemblySpec(AssemblyDescriptor assembly)
         {
-            WriteIdentifier(assembly.Name);
+            WriteIdentifier(assembly.Name, true);
             _writer.Write(", Version=");
             _writer.Write(assembly.Version.ToString());
             _writer.Write(", PublicKeyToken=");
@@ -157,11 +157,11 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             }
         }
 
-        private void WriteIdentifier(string identifier, bool isNamespace = false)
+        private void WriteIdentifier(string identifier, bool escapeDots = false)
         {
             foreach (char c in identifier)
             {
-                if (TypeNameLexer.ReservedChars.Contains(c) && (c != '.' || !isNamespace))
+                if (TypeNameLexer.ReservedChars.Contains(c) && (c != '.' || !escapeDots))
                     _writer.Write('\\');
 
                 _writer.Write(c);
