@@ -21,6 +21,7 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="module">The module for which this .NET directory is built.</param>
         /// <param name="methodBodySerializer">The method body serializer to use for constructing method bodies.</param>
+        /// <param name="symbolsProvider">The object responsible for providing references to native symbols.</param>
         /// <param name="metadata">The metadata builder </param>
         /// <param name="diagnosticBag">The bag that collects all diagnostic information during the building process.</param>
         public DotNetDirectoryBuffer(
@@ -54,6 +55,9 @@ namespace AsmResolver.DotNet.Builder
             get;
         }
 
+        /// <summary>
+        /// Gets the object responsible for providing references to native symbols.
+        /// </summary>
         public INativeSymbolsProvider SymbolsProvider
         {
             get;
@@ -83,6 +87,16 @@ namespace AsmResolver.DotNet.Builder
             get;
         }
 
+        /// <summary>
+        /// Gets or sets the size of the strong name directory to be emitted. A value of 0 indicates no strong name
+        /// directory will be emitted.
+        /// </summary>
+        public int StrongNameSize
+        {
+            get;
+            set;
+        }
+
         private bool AssertIsImported(IModuleProvider member)
         {
             if (member.Module != Module)
@@ -105,14 +119,15 @@ namespace AsmResolver.DotNet.Builder
             // Since we're finalizing the .NET directory, we can safely do this now:
             FinalizeInterfaces();
             FinalizeGenericParameters();
-
+            
             // Create new .NET directory.
             return new DotNetDirectory
             {
                 Metadata = Metadata.CreateMetadata(),
                 DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null,
                 Entrypoint = GetEntrypoint(),
-                Flags = Module.Attributes
+                Flags = Module.Attributes,
+                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null 
             };
         }
 
