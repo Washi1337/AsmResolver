@@ -150,11 +150,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             else
                 WriteHexBlob(token);
 
-            if (assembly.Culture != null)
-            {
-                _writer.Write(", Culture=");
-                WriteIdentifier(assembly.Culture);
-            }
+            _writer.Write(", Culture=");
+            WriteIdentifier(assembly.Culture ?? "neutral");
         }
 
         private void WriteIdentifier(string identifier, bool escapeDots = false)
@@ -171,7 +168,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private void WriteHexBlob(byte[] token)
         {
             foreach (byte b in token)
-                _writer.Write(b.ToString("X2"));
+                _writer.Write(b.ToString("x2"));
         }
     }
 }
