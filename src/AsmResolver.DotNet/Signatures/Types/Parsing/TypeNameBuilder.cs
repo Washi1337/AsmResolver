@@ -4,7 +4,7 @@ using System.IO;
 
 namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
-    internal readonly struct TypeNameBuilder : ITypeSignatureVisitor<object>
+    public readonly struct TypeNameBuilder : ITypeSignatureVisitor<object>
     {
         public static string GetAssemblyQualifiedName(TypeSignature signature)
         {
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             type.AcceptVisitor(this);
 
-            if (type.Name == "<SaveMefStateAsync>d__22")
+            if (type.FullName == "dnSpy.UI.UIDispatcher")
             {
                 
             }
