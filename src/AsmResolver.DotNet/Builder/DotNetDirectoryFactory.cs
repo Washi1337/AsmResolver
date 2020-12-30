@@ -114,13 +114,15 @@ namespace AsmResolver.DotNet.Builder
             // Finalize module.
             buffer.FinalizeModule(module);
 
-            var result = buffer.CreateDirectory();
-            
             // Delay sign when necessary.
-            if (StrongNamePrivateKey is {})
-                result.StrongName = new DataSegment(new byte[StrongNamePrivateKey.Modulus.Length]);
-            
-            return result;
+            if (StrongNamePrivateKey is { })
+                buffer.StrongNameSize = StrongNamePrivateKey.Modulus.Length;
+            else if (module.Assembly?.PublicKey is { } publicKey)
+                buffer.StrongNameSize = publicKey.Length - 0x20;
+            else if ((module.Attributes & DotNetDirectoryFlags.StrongNameSigned) != 0)
+                buffer.StrongNameSize = 0x80;
+
+            return buffer.CreateDirectory();
         }
 
         private MemberDiscoveryResult DiscoverMemberDefinitionsInModule(ModuleDefinition module)
