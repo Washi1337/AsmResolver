@@ -4,7 +4,7 @@
       - master
   
   image: Visual Studio 2019
-  version: 4.2.0-master-build.{build}
+  version: 4.3.0-master-build.{build}
   configuration: Release
 
   skip_commits:
