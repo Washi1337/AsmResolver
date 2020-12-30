@@ -4,7 +4,7 @@ using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
 using Xunit;
 
-namespace AsmResolver.DotNet.Tests
+namespace AsmResolver.DotNet.Tests.Signatures
 {
     public class TypeNameParserTest
     {

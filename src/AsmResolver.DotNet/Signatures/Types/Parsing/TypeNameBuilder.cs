@@ -25,12 +25,6 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             type.AcceptVisitor(this);
 
-            if (type.FullName == "dnSpy.UI.UIDispatcher")
-            {
-                
-            }
-            
-            
             if (type.Scope.GetAssembly() != type.Module.Assembly)
             {
                 _writer.Write(", ");
@@ -38,6 +32,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             }
         }
 
+        /// <inheritdoc />
         public object VisitArrayType(ArrayTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
@@ -48,8 +43,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitBoxedType(BoxedTypeSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitByReferenceType(ByReferenceTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
@@ -57,6 +54,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitCorLibType(CorLibTypeSignature signature)
         {
             WriteIdentifier(signature.Namespace);
@@ -65,8 +63,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitCustomModifierType(CustomModifierTypeSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitGenericInstanceType(GenericInstanceTypeSignature signature)
         {
             WriteSimpleTypeName(signature.GenericType);
@@ -85,10 +85,13 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitGenericParameter(GenericParameterSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitPinnedType(PinnedTypeSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitPointerType(PointerTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
@@ -96,8 +99,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitSentinelType(SentinelTypeSignature signature) => throw new NotSupportedException();
 
+        /// <inheritdoc />
         public object VisitSzArrayType(SzArrayTypeSignature signature)
         {
             signature.BaseType.AcceptVisitor(this);
@@ -105,6 +110,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             return null;
         }
 
+        /// <inheritdoc />
         public object VisitTypeDefOrRef(TypeDefOrRefSignature signature)
         {
             WriteSimpleTypeName(signature.Type);
@@ -120,7 +126,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 type = type.DeclaringType;
             }
 
-            WriteIdentifier(ancestors[ancestors.Count - 1].Namespace);
+            WriteIdentifier(ancestors[ancestors.Count - 1].Namespace, true);
             _writer.Write('.');
             WriteIdentifier(ancestors[ancestors.Count - 1].Name);
             
@@ -151,12 +157,13 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             }
         }
 
-        private void WriteIdentifier(string identifier)
+        private void WriteIdentifier(string identifier, bool isNamespace = false)
         {
             foreach (char c in identifier)
             {
-                if (TypeNameLexer.ReservedChars.Contains(c))
+                if (TypeNameLexer.ReservedChars.Contains(c) && (c != '.' || !isNamespace))
                     _writer.Write('\\');
+
                 _writer.Write(c);
             }
         }
