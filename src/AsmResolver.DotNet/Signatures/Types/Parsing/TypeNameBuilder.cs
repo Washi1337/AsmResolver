@@ -24,8 +24,14 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private void WriteTypeAssemblyQualifiedName(TypeSignature type)
         {
             type.AcceptVisitor(this);
+
+            if (type.Name == "<SaveMefStateAsync>d__22")
+            {
+                
+            }
             
-            if (type.Scope != type.Module)
+            
+            if (type.Scope.GetAssembly() != type.Module.Assembly)
             {
                 _writer.Write(", ");
                 WriteAssemblySpec(type.Scope.GetAssembly());
