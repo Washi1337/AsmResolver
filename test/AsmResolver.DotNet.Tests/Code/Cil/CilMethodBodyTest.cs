@@ -265,26 +265,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             Assert.Equal(1, body.ComputeMaxStack());
         }
-
-        [Fact]
-        public void ThrowsInstructionShouldFailIfTooManyValuesOnStack()
-        {
-            var body = CreateDummyBody(false);
-
-            var throwInstruction = new CilInstruction(CilOpCodes.Throw);
-            body.Instructions.AddRange(new[]
-            {
-                // Extra junk value
-                new CilInstruction(CilOpCodes.Ldnull),
-
-                new CilInstruction(CilOpCodes.Ldnull),
-                throwInstruction,
-            });
-
-            var exception = Assert.ThrowsAny<StackImbalanceException>(() => body.ComputeMaxStack());
-            Assert.Equal(throwInstruction.Offset, exception.Offset);   
-        }
-
+        
         [Fact]
         public void ExceptionHandlerExpectsOneValueOnStack()
         {
@@ -416,6 +397,52 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             method2.DeclaringType.Methods.Remove(method2);
             var body2 = method2.CilMethodBody;
             Assert.NotNull(body2);
+        }
+
+        [Fact]
+        public void PathWithThrowDoesNotHaveToEndWithAnEmptyStack()
+        {
+            var body = CreateDummyBody(true);
+            
+            body.Instructions.AddRange(new[]
+            {
+                new CilInstruction(CilOpCodes.Ldc_I4_0),
+                
+                new CilInstruction(CilOpCodes.Ldnull),
+                new CilInstruction(CilOpCodes.Throw)
+            });
+            
+            Assert.Equal(2, body.ComputeMaxStack());
+        }
+
+        [Fact]
+        public void JmpShouldNotContinueAnalysisAfter()
+        {
+            var body = CreateDummyBody(true);
+            
+            body.Instructions.AddRange(new[]
+            {
+                new CilInstruction(CilOpCodes.Jmp, body.Owner),
+                
+                new CilInstruction(CilOpCodes.Ldnull)
+            });
+
+            Assert.Equal(0, body.ComputeMaxStack());
+        }
+        
+        [Fact]
+        public void NonEmptyStackAtJmpShouldThrow()
+        {
+            var body = CreateDummyBody(true);
+            
+            body.Instructions.AddRange(new[]
+            {
+                new CilInstruction(CilOpCodes.Ldnull),
+                
+                new CilInstruction(CilOpCodes.Jmp, body.Owner)
+            });
+
+            Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
         }
     }
 }

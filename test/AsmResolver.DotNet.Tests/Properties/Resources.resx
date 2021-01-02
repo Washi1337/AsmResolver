@@ -39,4 +39,16 @@
     <data name="ConstantZeroValueColumn" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\ConstantZeroValueColumn.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="ActualLibrary" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\ActualLibrary.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="ForwarderLibrary" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\ForwarderLibrary.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="ForwarderRefTest" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\ForwarderRefTest.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="TheAnswer_NetFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\TheAnswer.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
 </root>

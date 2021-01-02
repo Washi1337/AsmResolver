@@ -19,4 +19,9 @@
       <ProjectReference Include="..\..\src\AsmResolver\AsmResolver.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Resources\DpesFileTemplate.txt" />
+      <EmbeddedResource Include="Resources\RuntimeConfigTemplate.txt" />
+    </ItemGroup>
+
 </Project>

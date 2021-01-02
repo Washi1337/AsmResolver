@@ -45,40 +45,22 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public bool Equals(ITypeDefOrRef x, ITypeDefOrRef y)
-        {
-            return Equals((ITypeDescriptor) x, y);
-        }
+        public bool Equals(ITypeDefOrRef x, ITypeDefOrRef y) => Equals((ITypeDescriptor) x, y);
 
         /// <inheritdoc />
-        public int GetHashCode(ITypeDefOrRef obj)
-        {
-            return GetHashCode((ITypeDescriptor) obj);
-        }
+        public int GetHashCode(ITypeDefOrRef obj) => GetHashCode((ITypeDescriptor) obj);
 
         /// <inheritdoc />
-        public bool Equals(TypeDefinition x, TypeDefinition y)
-        {
-            return Equals((ITypeDescriptor) x, y);
-        }
+        public bool Equals(TypeDefinition x, TypeDefinition y) => Equals((ITypeDescriptor) x, y);
 
         /// <inheritdoc />
-        public int GetHashCode(TypeDefinition obj)
-        {
-            return GetHashCode((ITypeDescriptor) obj);
-        }
+        public int GetHashCode(TypeDefinition obj) => GetHashCode((ITypeDescriptor) obj);
 
         /// <inheritdoc />
-        public bool Equals(TypeReference x, TypeReference y)
-        {
-            return Equals((ITypeDescriptor) x, y);
-        }
+        public bool Equals(TypeReference x, TypeReference y) => Equals((ITypeDescriptor) x, y);
 
         /// <inheritdoc />
-        public int GetHashCode(TypeReference obj)
-        {
-            return GetHashCode((ITypeDescriptor) obj);
-        }
+        public int GetHashCode(TypeReference obj) => GetHashCode((ITypeDescriptor) obj);
 
         /// <inheritdoc />
         public bool Equals(TypeSpecification x, TypeSpecification y)
@@ -92,10 +74,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(TypeSpecification obj)
-        {
-            return GetHashCode(obj.Signature);
-        }
+        public int GetHashCode(TypeSpecification obj) => GetHashCode(obj.Signature);
 
         /// <inheritdoc />
         public bool Equals(ExportedType x, ExportedType y)
@@ -109,10 +88,7 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(ExportedType obj)
-        {
-            return GetHashCode((ITypeDescriptor) obj);
-        }
+        public int GetHashCode(ExportedType obj) => GetHashCode((ITypeDescriptor) obj);
 
         /// <inheritdoc />
         public bool Equals(InvalidTypeDefOrRef x, InvalidTypeDefOrRef y)
@@ -126,9 +102,6 @@ namespace AsmResolver.DotNet.Signatures
         }
 
         /// <inheritdoc />
-        public int GetHashCode(InvalidTypeDefOrRef obj)
-        {
-            return (int) obj.Error;
-        }
+        public int GetHashCode(InvalidTypeDefOrRef obj) => (int) obj.Error;
     }
 }

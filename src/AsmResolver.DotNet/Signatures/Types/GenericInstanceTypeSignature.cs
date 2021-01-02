@@ -85,10 +85,13 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override string Namespace => GenericType.Namespace;
+        public override string Namespace => GenericType?.Namespace;
 
         /// <inheritdoc />
-        public override IResolutionScope Scope => GenericType.Scope;
+        public override IResolutionScope Scope => GenericType?.Scope;
+
+        /// <inheritdoc />
+        public override ModuleDefinition Module => GenericType?.Module;
 
         /// <inheritdoc />
         public override bool IsValueType

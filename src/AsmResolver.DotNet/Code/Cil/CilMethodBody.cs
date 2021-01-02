@@ -207,17 +207,9 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <param name="owner">The method that owns the method body.</param>
         public CilMethodBody(MethodDefinition owner)
+            : base(owner)
         {
-            Owner = owner;
             Instructions = new CilInstructionCollection(this);
-        }
-
-        /// <summary>
-        /// Gets the method that owns the method body.
-        /// </summary>
-        public MethodDefinition Owner
-        {
-            get;
         }
 
         /// <summary>
@@ -370,7 +362,16 @@ namespace AsmResolver.DotNet.Code.Cil
                     nextStackSize += instruction.GetStackPushCount();
 
                     // Add outgoing edges to agenda.
-                    switch (instruction.OpCode.FlowControl)
+                    
+                    if (instruction.OpCode.Code == CilCode.Jmp)
+                    {
+                        // jmp instructions need special treatment:
+                        // Upon execution of a jmp instruction, the stack must be empty.
+                        // Besides, jmps have no outgoing edges, even though they are classified as FlowControl.Call.
+                        if (nextStackSize != 0) 
+                            throw new StackImbalanceException(this, instruction.Offset);
+                    }
+                    else switch (instruction.OpCode.FlowControl)
                     {
                         case CilFlowControl.Branch:
                             // Schedule branch target.
@@ -404,6 +405,10 @@ namespace AsmResolver.DotNet.Code.Cil
                             break;
 
                         case CilFlowControl.Throw:
+                            // Throw instructions just stop execution and clear any remaining values on stack.
+                            // => no stack imbalance if too many values are pushed on the stack. 
+                            break;
+                        
                         case CilFlowControl.Return:
                             // Verify final stack size is correct.
                             if (nextStackSize != 0)

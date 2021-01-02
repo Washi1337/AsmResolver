@@ -15,7 +15,7 @@ Table of Contents:
 
 .. toctree::
    :maxdepth: 1
-   :caption: Abstraction Layer 1: PE Files
+   :caption: PE Files
    :name: sec-pefile
 
    pefile/index
@@ -26,7 +26,7 @@ Table of Contents:
 
 .. toctree::
    :maxdepth: 1
-   :caption: Abstraction Layer 2: PE Images
+   :caption: PE Images
    :name: sec-peimage
 
    peimage/index
@@ -39,7 +39,7 @@ Table of Contents:
 
 .. toctree::
    :maxdepth: 1
-   :caption: Abstraction Layer 3: .NET assemblies
+   :caption: .NET assemblies and modules
    :name: sec-peimage
 
    dotnet/index
@@ -48,6 +48,7 @@ Table of Contents:
    dotnet/type-signatures
    dotnet/importing
    dotnet/managed-method-bodies
+   dotnet/unmanaged-method-bodies
    dotnet/cloning
    dotnet/token-allocation
    dotnet/type-memory-layout

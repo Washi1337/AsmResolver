@@ -99,7 +99,7 @@ Creating a new instruction can be done using one of the constructors, together w
 
     body.Instructions.AddRange(new[] 
     {
-        new CilInstruction(CilOpCodes.Ldstr, "Hello, World!),
+        new CilInstruction(CilOpCodes.Ldstr, "Hello, World!"),
         new CilInstruction(CilOpCodes.Ret),
     });
 

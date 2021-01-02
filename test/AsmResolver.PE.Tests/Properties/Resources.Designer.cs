@@ -107,5 +107,19 @@ namespace AsmResolver.PE.Tests.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        public static byte[] TheAnswer_NetFx {
+            get {
+                object obj = ResourceManager.GetObject("TheAnswer_NetFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        public static byte[] TheAnswer_NetCore {
+            get {
+                object obj = ResourceManager.GetObject("TheAnswer_NetCore", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

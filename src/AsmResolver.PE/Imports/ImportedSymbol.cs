@@ -1,11 +1,13 @@
 using System;
+using System.Threading;
+using AsmResolver.Collections;
 
 namespace AsmResolver.PE.Imports
 {
     /// <summary>
     /// Represents one member of an external module that was imported into a PE image.
     /// </summary>
-    public class ImportedSymbol
+    public class ImportedSymbol : IOwnedCollectionElement<IImportedModule>, ISymbol
     {
         private ushort _ordinalOrHint;
         private string _name;
@@ -28,6 +30,22 @@ namespace AsmResolver.PE.Imports
         {
             Hint = hint;
             Name = name ?? throw new ArgumentNullException(nameof(name));
+        }
+
+        /// <summary>
+        /// Gets the module that defines the symbol.
+        /// </summary>
+        public IImportedModule DeclaringModule
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc />
+        IImportedModule IOwnedCollectionElement<IImportedModule>.Owner
+        {
+            get => DeclaringModule;
+            set => DeclaringModule = value;
         }
 
         /// <summary>
@@ -67,7 +85,7 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Gets or sets the entry in the import address table (IAT). 
         /// </summary>
-        public ulong Address
+        public ISegmentReference AddressTableEntry
         {
             get;
             set;
@@ -86,10 +104,20 @@ namespace AsmResolver.PE.Imports
         /// <inheritdoc />
         public override string ToString()
         {
+            string prefix = DeclaringModule is null
+                ? string.Empty
+                : $"{DeclaringModule.Name}!";
+
+            string addressSpecifier = AddressTableEntry is null
+                ? "???"
+                : AddressTableEntry.Rva.ToString("X8");
+            
             return IsImportByOrdinal
-                ? $"#{Ordinal} ({Address:X8})"
-                : $"{Name} ({Address:X8})";
+                ? $"{prefix}#{Ordinal.ToString()} ({addressSpecifier})"
+                : $"{prefix}{Name} ({addressSpecifier})";
         }
-        
+
+        /// <inheritdoc />
+        public ISegmentReference GetReference() => AddressTableEntry;
     }
 }

@@ -11,6 +11,7 @@ namespace AsmResolver.PE.Imports.Builder
         private readonly IList<ImportedSymbol> _members = new List<ImportedSymbol>();
         private readonly IDictionary<ImportedSymbol, uint> _memberOffsets = new Dictionary<ImportedSymbol, uint>();
         private readonly HintNameTableBuffer _hintNameTable;
+        private readonly bool _isIat;
 
         private uint _length;
 
@@ -19,9 +20,10 @@ namespace AsmResolver.PE.Imports.Builder
         /// </summary>
         /// <param name="hintNameTable">The hint-name table containing the names of each imported member</param>
         /// <param name="is32Bit">Indicates whether the thunk-table should use 32-bit addresses or 64-bit addresses.</param>
-        public ThunkTableBuffer(HintNameTableBuffer hintNameTable, bool is32Bit)
+        public ThunkTableBuffer(HintNameTableBuffer hintNameTable, bool is32Bit, bool isIat)
         {
             _hintNameTable = hintNameTable ?? throw new ArgumentNullException(nameof(hintNameTable));
+            _isIat = isIat;
             Is32Bit = is32Bit;
             _length = ThunkSize;
         }
@@ -45,8 +47,14 @@ namespace AsmResolver.PE.Imports.Builder
         /// <param name="entry">The member to add.</param>
         public void AddMember(ImportedSymbol entry)
         {
-            _memberOffsets.Add(entry, _length - ThunkSize);
+            uint relativeOffset = _length - ThunkSize;
+
+            if (_isIat)
+                entry.AddressTableEntry = new RelativeReference(this, (int) relativeOffset);
+
+            _memberOffsets.Add(entry, relativeOffset);
             _members.Add(entry);
+
             _length += ThunkSize;
         }
 
@@ -82,7 +90,7 @@ namespace AsmResolver.PE.Imports.Builder
             if (Is32Bit)
                 writer.WriteUInt32(0);
             else
-                writer.WriteUInt16(0);
+                writer.WriteUInt64(0);
         }
         
     }

@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet
         private IList<AssemblyReference> _assemblyReferences;
         private IList<CustomAttribute> _customAttributes;
 
-        private LazyVariable<IManagedEntrypoint> _managedEntrypoint;
+        private readonly LazyVariable<IManagedEntrypoint> _managedEntrypoint;
         private IList<ModuleReference> _moduleReferences;
         private IList<FileReference> _fileReferences;
         private IList<ManifestResource> _resources;
@@ -55,7 +55,8 @@ namespace AsmResolver.DotNet
         /// <param name="buffer">The raw contents of the executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromBytes(byte[] buffer) => FromImage(PEImage.FromBytes(buffer));
+        public static ModuleDefinition FromBytes(byte[] buffer) =>
+            FromImage(PEImage.FromBytes(buffer));
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -63,7 +64,8 @@ namespace AsmResolver.DotNet
         /// <param name="filePath">The file path to the input executable to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(string filePath) => FromFile(filePath, new ModuleReadParameters());
+        public static ModuleDefinition FromFile(string filePath) =>
+            FromFile(filePath, new ModuleReadParameters(Path.GetDirectoryName(filePath)));
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -81,7 +83,8 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file) => FromImage(PEImage.FromFile(file));
+        public static ModuleDefinition FromFile(IPEFile file) => 
+            FromImage(PEImage.FromFile(file));
 
         /// <summary>
         /// Reads a .NET module from an input stream.
@@ -99,7 +102,8 @@ namespace AsmResolver.DotNet
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage) => FromImage(peImage, new ModuleReadParameters());
+        public static ModuleDefinition FromImage(IPEImage peImage) => FromImage(peImage,
+            new ModuleReadParameters(Path.GetDirectoryName(peImage.FilePath)));
 
         /// <summary>
         /// Initializes a .NET module from a PE image.
@@ -108,10 +112,8 @@ namespace AsmResolver.DotNet
         /// <param name="readParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters)
-        {
-            return new SerializedModuleDefinition(peImage, readParameters);
-        }
+        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) => 
+            new SerializedModuleDefinition(peImage, readParameters);
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.

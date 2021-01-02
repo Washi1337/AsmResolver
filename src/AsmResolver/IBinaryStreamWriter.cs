@@ -114,7 +114,29 @@ namespace AsmResolver
         /// <param name="count">The amount of zeroes to write.</param>
         public static void WriteZeroes(this IBinaryStreamWriter writer, int count)
         {
-            writer.WriteBytes(new byte[count]);
+            while (count >= sizeof(ulong))
+            {
+                writer.WriteUInt64(0);
+                count -= sizeof(ulong);
+            }
+            
+            while (count >= sizeof(uint))
+            {
+                writer.WriteUInt32(0);
+                count -= sizeof(uint);
+            }
+            
+            while (count >= sizeof(ushort))
+            {
+                writer.WriteUInt16(0);
+                count -= sizeof(ushort);
+            }
+
+            while (count >= sizeof(byte))
+            {
+                writer.WriteByte(0);
+                count -= sizeof(byte);
+            }
         }
 
         /// <summary>
