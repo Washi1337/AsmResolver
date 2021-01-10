@@ -215,9 +215,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var body = CreateDummyBody(false);
             var instructions = body.Instructions;
 
-            var branchTarget1 = new CilInstructionLabel(); //new CilInstruction(CilOpCodes.Ldc_I4_0);
-            var branchTarget2 = new CilInstructionLabel(); // new CilInstruction(CilOpCodes.Nop);
-            var end = new CilInstructionLabel(); // new CilInstruction(CilOpCodes.Ret);
+            var branchTarget1 = new CilInstructionLabel();
+            var branchTarget2 = new CilInstructionLabel();
+            var end = new CilInstructionLabel();
             
             instructions.Add(CilOpCodes.Ldarg_0);
             instructions.Add(CilOpCodes.Brtrue, branchTarget1);
