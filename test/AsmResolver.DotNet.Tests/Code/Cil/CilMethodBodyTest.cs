@@ -161,10 +161,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void MaxStackComputationOnNonVoidShouldFailIfNoValueOnStack()
         {
             var body = CreateDummyBody(false);
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ret), 
-            });
+            body.Instructions.Add(CilOpCodes.Ret);
 
             Assert.ThrowsAny<StackImbalanceException>(() => body.ComputeMaxStack());
         }
@@ -173,11 +170,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void MaxStackComputationOnNonVoid()
         {
             var body = CreateDummyBody(false);
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ldnull),
-                new CilInstruction(CilOpCodes.Ret), 
-            });
+            body.Instructions.Add(CilOpCodes.Ldnull);
+            body.Instructions.Add(CilOpCodes.Ret);
 
             Assert.Equal(1, body.ComputeMaxStack());
         }
@@ -186,11 +180,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void MaxStackComputationOnVoidShouldFailIfValueOnStack()
         {
             var body = CreateDummyBody(true);
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ldnull),
-                new CilInstruction(CilOpCodes.Ret), 
-            });
+            body.Instructions.Add(CilOpCodes.Ldnull);
+            body.Instructions.Add(CilOpCodes.Ret);
 
             Assert.ThrowsAny<StackImbalanceException>(() => body.ComputeMaxStack());
         }
@@ -199,23 +190,21 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void JoiningPathsWithSameStackSizeShouldSucceed()
         {
             var body = CreateDummyBody(false);
+            var instructions = body.Instructions;
 
-            var branchTarget1 = new CilInstruction(CilOpCodes.Ldc_I4_0);
-            var branchTarget2 = new CilInstruction(CilOpCodes.Nop);
-            
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ldarg_0),
-                new CilInstruction(CilOpCodes.Brtrue, new CilInstructionLabel(branchTarget1)),
+            var branchTarget1 = new CilInstructionLabel();
+            var branchTarget2 = new CilInstructionLabel();
 
-                new CilInstruction(CilOpCodes.Ldc_I4_1),
-                new CilInstruction(CilOpCodes.Br, new CilInstructionLabel(branchTarget2)),
-                
-                branchTarget1,
-                branchTarget2,
-                
-                new CilInstruction(CilOpCodes.Ret), 
-            });
+            instructions.Add(CilOpCodes.Ldarg_0);
+            instructions.Add(CilOpCodes.Brtrue, branchTarget1);
+
+            instructions.Add(CilOpCodes.Ldc_I4_1);
+            instructions.Add(CilOpCodes.Br, branchTarget2);
+
+            branchTarget1.Instruction = instructions.Add(CilOpCodes.Ldc_I4_0);
+            branchTarget2.Instruction = instructions.Add(CilOpCodes.Nop);
+
+            instructions.Add(CilOpCodes.Ret);
 
             Assert.Equal(1, body.ComputeMaxStack());
         }
@@ -224,26 +213,22 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void JoiningPathsWithDifferentStackSizesShouldFail()
         {
             var body = CreateDummyBody(false);
+            var instructions = body.Instructions;
 
-            var branchTarget1 = new CilInstruction(CilOpCodes.Ldc_I4_0);
-            var branchTarget2 = new CilInstruction(CilOpCodes.Nop);
-            var end = new CilInstruction(CilOpCodes.Ret);
+            var branchTarget1 = new CilInstructionLabel(); //new CilInstruction(CilOpCodes.Ldc_I4_0);
+            var branchTarget2 = new CilInstructionLabel(); // new CilInstruction(CilOpCodes.Nop);
+            var end = new CilInstructionLabel(); // new CilInstruction(CilOpCodes.Ret);
             
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ldarg_0),
-                new CilInstruction(CilOpCodes.Brtrue, new CilInstructionLabel(branchTarget1)),
+            instructions.Add(CilOpCodes.Ldarg_0);
+            instructions.Add(CilOpCodes.Brtrue, branchTarget1);
 
-                new CilInstruction(CilOpCodes.Ldc_I4_1),
-                new CilInstruction(CilOpCodes.Ldc_I4_2),
-                new CilInstruction(CilOpCodes.Br, new CilInstructionLabel(branchTarget2)),
+            instructions.Add(CilOpCodes.Ldc_I4_1);
+            instructions.Add(CilOpCodes.Ldc_I4_2);
+            instructions.Add(CilOpCodes.Br, branchTarget2);
 
-                branchTarget1,
-                
-                branchTarget2,
-
-                end, 
-            });
+            branchTarget1.Instruction = instructions.Add(CilOpCodes.Ldc_I4_0);
+            branchTarget2.Instruction = instructions.Add(CilOpCodes.Nop);
+            end.Instruction = instructions.Add(CilOpCodes.Ret); 
 
             var exception = Assert.ThrowsAny<StackImbalanceException>(() => body.ComputeMaxStack());
             Assert.Equal(end.Offset, exception.Offset);   
@@ -253,51 +238,44 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void ThrowsInstructionShouldTerminateTraversal()
         {
             var body = CreateDummyBody(false);
+            var instructions = body.Instructions;
 
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ldnull),
-                new CilInstruction(CilOpCodes.Throw),
+            instructions.Add(CilOpCodes.Ldnull);
+            instructions.Add(CilOpCodes.Throw);
 
-                // Junk opcodes..
-                new CilInstruction(CilOpCodes.Ldc_I4_0),
-            });
+            // Junk opcodes..
+            instructions.Add(CilOpCodes.Ldc_I4_0);
 
             Assert.Equal(1, body.ComputeMaxStack());
         }
-        
+
         [Fact]
         public void ExceptionHandlerExpectsOneValueOnStack()
         {
             var body = CreateDummyBody(true);
 
-            var end = new CilInstruction(CilOpCodes.Ret);
-            var endLabel = new CilInstructionLabel(end);
-            
-            var tryStart = new CilInstruction(CilOpCodes.Nop);
-            var tryEnd = new CilInstruction(CilOpCodes.Leave, endLabel);
-            var handlerStart = new CilInstruction(CilOpCodes.Pop);
-            var handlerEnd = new CilInstruction(CilOpCodes.Leave, endLabel);
+            var end = new CilInstructionLabel();
+
+            var tryStart = new CilInstructionLabel();
+            var tryEnd = new CilInstructionLabel();
+            var handlerStart = new CilInstructionLabel();
+            var handlerEnd = new CilInstructionLabel();
 
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Exception,
                 ExceptionType = body.Owner.Module.CorLibTypeFactory.Object.ToTypeDefOrRef(),
-                TryStart = new CilInstructionLabel(tryStart),
-                TryEnd = new CilInstructionLabel(tryEnd),
-                HandlerStart = new CilInstructionLabel(handlerStart),
-                HandlerEnd = new CilInstructionLabel(handlerEnd),
+                TryStart = tryStart,
+                TryEnd = tryEnd,
+                HandlerStart = handlerStart,
+                HandlerEnd = handlerEnd,
             });
-            
-            body.Instructions.AddRange(new[]
-            {
-                tryStart,
-                tryEnd,
 
-                handlerStart,
-                handlerEnd,
-                end,
-            });
+            tryStart.Instruction = body.Instructions.Add(CilOpCodes.Nop);
+            tryEnd.Instruction = body.Instructions.Add(CilOpCodes.Leave, end);
+            handlerStart.Instruction = body.Instructions.Add(CilOpCodes.Pop);
+            handlerEnd.Instruction = body.Instructions.Add(CilOpCodes.Leave, end);
+            end.Instruction = body.Instructions.Add(CilOpCodes.Ret);
 
             Assert.Equal(1, body.ComputeMaxStack());
         }
@@ -307,34 +285,29 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var body = CreateDummyBody(true);
 
-            var end = new CilInstruction(CilOpCodes.Ret);
-            var endLabel = new CilInstructionLabel(end);
-            
-            var tryStart = new CilInstruction(CilOpCodes.Nop);
-            var tryEnd = new CilInstruction(CilOpCodes.Leave, endLabel);
-            var handlerStart = new CilInstruction(CilOpCodes.Nop);
-            var handlerEnd = new CilInstruction(CilOpCodes.Leave, endLabel);
+            var end = new CilInstructionLabel();
+
+            var tryStart = new CilInstructionLabel();
+            var tryEnd = new CilInstructionLabel();
+            var handlerStart = new CilInstructionLabel();
+            var handlerEnd = new CilInstructionLabel();
 
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Finally,
                 ExceptionType = body.Owner.Module.CorLibTypeFactory.Object.ToTypeDefOrRef(),
-                TryStart = new CilInstructionLabel(tryStart),
-                TryEnd = new CilInstructionLabel(tryEnd),
-                HandlerStart = new CilInstructionLabel(handlerStart),
-                HandlerEnd = new CilInstructionLabel(handlerEnd),
+                TryStart = tryStart,
+                TryEnd = tryEnd,
+                HandlerStart = handlerStart,
+                HandlerEnd = handlerEnd,
             });
             
-            body.Instructions.AddRange(new[]
-            {
-                tryStart,
-                tryEnd,
-
-                handlerStart,
-                handlerEnd,
-                end,
-            });
-
+            tryStart.Instruction = body.Instructions.Add(CilOpCodes.Nop);
+            tryEnd.Instruction = body.Instructions.Add(CilOpCodes.Leave, end);
+            handlerStart.Instruction = body.Instructions.Add(CilOpCodes.Nop);
+            handlerEnd.Instruction = body.Instructions.Add(CilOpCodes.Leave, end);
+            end.Instruction = body.Instructions.Add(CilOpCodes.Ret);
+            
             Assert.Equal(0, body.ComputeMaxStack());
         }
 
@@ -342,42 +315,37 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void LeaveInstructionShouldClearStackAndNotFail()
         {
             var body = CreateDummyBody(true);
-
-            var end = new CilInstruction(CilOpCodes.Ret);
-            var endLabel = new CilInstructionLabel(end);
             
-            var tryStart = new CilInstruction(CilOpCodes.Nop);
-            var tryEnd = new CilInstruction(CilOpCodes.Leave, endLabel);
-            var handlerStart = new CilInstruction(CilOpCodes.Nop);
-            var handlerEnd = new CilInstruction(CilOpCodes.Leave, endLabel);
+            var end = new CilInstructionLabel();
+
+            var tryStart = new CilInstructionLabel();
+            var tryEnd = new CilInstructionLabel();
+            var handlerStart = new CilInstructionLabel();
+            var handlerEnd = new CilInstructionLabel();
 
             body.ExceptionHandlers.Add(new CilExceptionHandler
             {
                 HandlerType = CilExceptionHandlerType.Exception,
                 ExceptionType = body.Owner.Module.CorLibTypeFactory.Object.ToTypeDefOrRef(),
-                TryStart = new CilInstructionLabel(tryStart),
-                TryEnd = new CilInstructionLabel(tryEnd),
-                HandlerStart = new CilInstructionLabel(handlerStart),
-                HandlerEnd = new CilInstructionLabel(handlerEnd),
+                TryStart = tryStart,
+                TryEnd = tryEnd,
+                HandlerStart = handlerStart,
+                HandlerEnd = handlerEnd,
             });
             
-            body.Instructions.AddRange(new[]
-            {
-                tryStart,
-                tryEnd,
-
-                handlerStart,
-                
-                // Push junk values on the stack.
-                new CilInstruction(CilOpCodes.Ldc_I4_0),
-                new CilInstruction(CilOpCodes.Ldc_I4_1),
-                new CilInstruction(CilOpCodes.Ldc_I4_2), 
-                
-                // Leave should clear.
-                handlerEnd,
-                end,
-            });
-
+            tryStart.Instruction = body.Instructions.Add(CilOpCodes.Nop);
+            tryEnd.Instruction = body.Instructions.Add(CilOpCodes.Leave, end);
+            
+            handlerStart.Instruction = body.Instructions.Add(CilOpCodes.Nop);
+            // Push junk values on the stack.
+            body.Instructions.Add(CilOpCodes.Ldc_I4_0);
+            body.Instructions.Add(CilOpCodes.Ldc_I4_1);
+            body.Instructions.Add(CilOpCodes.Ldc_I4_2);
+            // Leave should clear.
+            handlerEnd.Instruction = body.Instructions.Add(CilOpCodes.Leave, end);
+            
+            end.Instruction = body.Instructions.Add(CilOpCodes.Ret);
+            
             Assert.Equal(4, body.ComputeMaxStack());
         }
 
@@ -403,14 +371,10 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void PathWithThrowDoesNotHaveToEndWithAnEmptyStack()
         {
             var body = CreateDummyBody(true);
-            
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ldc_I4_0),
-                
-                new CilInstruction(CilOpCodes.Ldnull),
-                new CilInstruction(CilOpCodes.Throw)
-            });
+
+            body.Instructions.Add(CilOpCodes.Ldc_I4_0);
+            body.Instructions.Add(CilOpCodes.Ldnull);
+            body.Instructions.Add(CilOpCodes.Throw);
             
             Assert.Equal(2, body.ComputeMaxStack());
         }
@@ -419,13 +383,9 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         public void JmpShouldNotContinueAnalysisAfter()
         {
             var body = CreateDummyBody(true);
-            
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Jmp, body.Owner),
-                
-                new CilInstruction(CilOpCodes.Ldnull)
-            });
+
+            body.Instructions.Add(CilOpCodes.Jmp, body.Owner);
+            body.Instructions.Add(CilOpCodes.Ldnull);
 
             Assert.Equal(0, body.ComputeMaxStack());
         }
@@ -435,12 +395,8 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
         {
             var body = CreateDummyBody(true);
             
-            body.Instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ldnull),
-                
-                new CilInstruction(CilOpCodes.Jmp, body.Owner)
-            });
+            body.Instructions.Add(CilOpCodes.Ldnull);
+            body.Instructions.Add(CilOpCodes.Jmp, body.Owner);
 
             Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
         }

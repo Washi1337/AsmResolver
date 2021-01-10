@@ -218,7 +218,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             var method = instructions.Owner.Owner;
 
             instructions.Add(CilOpCodes.Ldarg, method.Parameters[index]);
-            instructions.Add(new CilInstruction(CilOpCodes.Ret));
+            instructions.Add(CilOpCodes.Ret);
             
             instructions.OptimizeMacros();
             

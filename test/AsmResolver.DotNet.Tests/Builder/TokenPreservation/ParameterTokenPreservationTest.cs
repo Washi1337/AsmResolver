@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 MethodSignature.CreateStatic(module.CorLibTypeFactory.Void));
             
             method.CilMethodBody = new CilMethodBody(method);
-            method.CilMethodBody.Instructions.Add(new CilInstruction(CilOpCodes.Ret));
+            method.CilMethodBody.Instructions.Add(CilOpCodes.Ret);
 
             for (int i = 0; i < parameterCount; i++)
             {
