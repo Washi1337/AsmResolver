@@ -210,7 +210,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         public void CalculateOffsets()
         {
-            var currentOffset = 0;
+            int currentOffset = 0;
             foreach (var instruction in _items)
             {
                 instruction.Offset = currentOffset;
@@ -226,9 +226,12 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </remarks>
         public void ExpandMacros()
         {
+            int currentOffset = 0;
             foreach (var instruction in _items)
             {
+                instruction.Offset = currentOffset;
                 ExpandMacro(instruction);
+                currentOffset += instruction.Size;
             }
         }
 

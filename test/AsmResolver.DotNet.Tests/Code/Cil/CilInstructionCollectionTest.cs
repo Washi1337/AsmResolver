@@ -383,5 +383,49 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             Assert.Equal(expected, instructions);
         }
+
+        [Fact]
+        public void OptimizeShouldUpdateOffsets()
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            instructions.AddRange(new[]
+            {
+                new CilInstruction(CilOpCodes.Ldc_I4, 0),
+                new CilInstruction(CilOpCodes.Ldc_I4, 1),
+                new CilInstruction(CilOpCodes.Ldc_I4, 2),
+                new CilInstruction(CilOpCodes.Add),
+                new CilInstruction(CilOpCodes.Add),
+                new CilInstruction(CilOpCodes.Ret),
+            });
+
+            instructions.OptimizeMacros();
+            
+            int[] offsets = instructions.Select(i => i.Offset).ToArray();
+            Assert.NotEqual(offsets, instructions.Select(i => 0));
+            instructions.CalculateOffsets();
+            Assert.Equal(offsets, instructions.Select(i => i.Offset));
+        }
+
+        [Fact]
+        public void ExpandShouldUpdateOffsets()
+        {
+            var instructions = CreateDummyMethod(false, 0, 0);
+            instructions.AddRange(new []
+            {
+                new CilInstruction(CilOpCodes.Ldc_I4_0),
+                new CilInstruction(CilOpCodes.Ldc_I4_1),
+                new CilInstruction(CilOpCodes.Ldc_I4_2),
+                new CilInstruction(CilOpCodes.Add),
+                new CilInstruction(CilOpCodes.Add),
+                new CilInstruction(CilOpCodes.Ret),
+            });
+            
+            instructions.ExpandMacros();
+            
+            int[] offsets = instructions.Select(i => i.Offset).ToArray();
+            Assert.NotEqual(offsets, instructions.Select(i => 0));
+            instructions.CalculateOffsets();
+            Assert.Equal(offsets, instructions.Select(i => i.Offset));
+        }
     }
 }
