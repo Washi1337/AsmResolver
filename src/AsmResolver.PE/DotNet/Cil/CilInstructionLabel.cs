@@ -8,6 +8,13 @@ namespace AsmResolver.PE.DotNet.Cil
     public class CilInstructionLabel : ICilLabel
     {
         /// <summary>
+        /// Creates a new instruction label thar references no instruction yet.
+        /// </summary>
+        public CilInstructionLabel()
+        {
+        }
+        
+        /// <summary>
         /// Creates a new instruction label.
         /// </summary>
         /// <param name="instruction">The instruction to reference.</param>
@@ -26,9 +33,11 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public int Offset => Instruction.Offset;
+        public int Offset => Instruction?.Offset ?? -1;
 
         /// <inheritdoc />
-        public override string ToString() => "IL_" + Offset.ToString("X4");
+        public override string ToString() => Instruction is null
+            ? "IL_????"
+            : $"IL_{Offset:X4}";
     }
 }
