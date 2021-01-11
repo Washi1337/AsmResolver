@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using AsmResolver.Collections;
 using AsmResolver.PE.File;
@@ -12,16 +13,19 @@ namespace AsmResolver.PE.Relocations
     public class SerializedRelocationList : LazyList<BaseRelocation>
     {
         private readonly IPEFile _peFile;
+        private readonly IErrorListener _errorListener;
         private readonly DataDirectory _relocDirectory;
 
         /// <summary>
         /// Prepares a new lazy-initialized list of base relocations.
         /// </summary>
         /// <param name="peFile">The PE file to read the base relocations from.</param>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
         /// <param name="relocDirectory">The directory that contains the base relocations.</param>
-        public SerializedRelocationList(IPEFile peFile, DataDirectory relocDirectory)
+        public SerializedRelocationList(IPEFile peFile, IErrorListener errorListener, DataDirectory relocDirectory)
         {
-            _peFile = peFile;
+            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            _errorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
             _relocDirectory = relocDirectory;
         }
 
@@ -29,7 +33,10 @@ namespace AsmResolver.PE.Relocations
         protected override void Initialize()
         {
             if (!_peFile.TryCreateDataDirectoryReader(_relocDirectory, out var reader))
+            {
+                _errorListener.BadImage("Invalid base relocation data directory RVA and/or size.");
                 return;
+            }
 
             while (reader.Offset < reader.StartOffset + reader.Length) 
                 ReadBlock(reader);

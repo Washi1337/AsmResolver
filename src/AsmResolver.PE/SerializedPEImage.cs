@@ -86,7 +86,7 @@ namespace AsmResolver.PE
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory);
             return dataDirectory.IsPresentInPE
-                ? new SerializedRelocationList(PEFile, dataDirectory)
+                ? new SerializedRelocationList(PEFile, ReadParameters.ErrorListener, dataDirectory)
                 : (IList<BaseRelocation>) new List<BaseRelocation>();
         }
 
