@@ -32,6 +32,15 @@ namespace AsmResolver.PE
         }
 
         /// <summary>
+        /// Gets the object responsible for collecting any errors during the parsing.
+        /// </summary>
+        public IErrorListener ErrorListener
+        {
+            get;
+            set;
+        } = new DiagnosticBag();
+
+        /// <summary>
         /// Gets or sets the object responsible for reading metadata streams in the .NET data directory.
         /// </summary>
         public IMetadataStreamReader MetadataStreamReader
