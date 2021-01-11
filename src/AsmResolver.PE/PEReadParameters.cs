@@ -21,6 +21,7 @@ namespace AsmResolver.PE
             ReferenceResolver = resolver;
             MetadataStreamReader = new DefaultMetadataStreamReader(resolver);
             DebugDataReader = new DefaultDebugDataReader(resolver);
+            ErrorListener = ThrowErrorListener.Instance;
         }
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace AsmResolver.PE
         {
             get;
             set;
-        } = new DiagnosticBag();
+        }
 
         /// <summary>
         /// Gets or sets the object responsible for reading metadata streams in the .NET data directory.
