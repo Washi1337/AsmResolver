@@ -22,8 +22,19 @@ namespace AsmResolver
     public static class ErrorListenerExtensions
     {
         /// <summary>
+        /// Registers an instance of a <see cref="BadImageFormatException"/> class.
+        /// </summary>
+        /// <param name="self">The error listener.</param>
+        /// <param name="message">The message of the error.</param>
+        public static void BadImage(this IErrorListener self, string message)
+        {
+            self.RegisterException(new BadImageFormatException(message));
+        }
+
+        /// <summary>
         /// Registers an error, and returns a default value for the provided type.
         /// </summary>
+        /// <param name="self">The error listener.</param>
         /// <param name="exception">The error.</param>
         /// <typeparam name="T">The type of value to return.</typeparam>
         public static T RegisterExceptionAndReturnDefault<T>(this IErrorListener self, Exception exception)

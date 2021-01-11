@@ -17,10 +17,14 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="peFile">The PE file containing the import entry.</param>
         /// <param name="reader">The input stream.</param>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
         /// <returns></returns>
-        public static IImportedModule FromReader(IPEFile peFile, IBinaryStreamReader reader)
+        public static IImportedModule FromReader(
+            IPEFile peFile,
+            IBinaryStreamReader reader,
+            IErrorListener errorListener)
         {
-            var entry = new SerializedImportedModule(peFile, reader);
+            var entry = new SerializedImportedModule(peFile, reader, errorListener);
             return entry.IsEmpty ? null : entry;
         }
         
