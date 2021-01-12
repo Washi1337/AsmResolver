@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Serialized
                 return null;
 
             return _parentModule.ReadParameters.FieldRvaDataReader
-                .ResolveFieldData(_parentModule.DotNetDirectory.Metadata, fieldRvaRow);
+                .ResolveFieldData(ThrowErrorListener.Instance, _parentModule.DotNetDirectory.Metadata, fieldRvaRow);
         }
 
         /// <inheritdoc />

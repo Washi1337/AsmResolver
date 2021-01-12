@@ -453,7 +453,7 @@ namespace AsmResolver.PE.DotNet.Builder
             
             foreach (var row in fieldRvaTable)
             {
-                var data = reader.ResolveFieldData(metadata, row);
+                var data = reader.ResolveFieldData(ThrowErrorListener.Instance, metadata, row);
                 table.Add(data);
             }
         }
