@@ -37,9 +37,12 @@ namespace AsmResolver.PE.DotNet.Metadata
                     // BSJB header is the default header.
                     break;
                 case MetadataSignature.Moc:
-                    throw new NotSupportedException("Old +MOC metadata header format is not supported.");
+                    _context.Parameters.ErrorListener.NotSupported("Old +MOC metadata header format is not supported.");
+                    return;
+                    
                 default:
-                    throw new BadImageFormatException($"Invalid metadata header ({(uint) signature:X8}).");
+                    _context.Parameters.ErrorListener.BadImage($"Invalid metadata header ({(uint) signature:X8}).");
+                    return;
             }
 
             MajorVersion = directoryReader.ReadUInt16();
@@ -48,7 +51,11 @@ namespace AsmResolver.PE.DotNet.Metadata
 
             int versionLength = directoryReader.ReadInt32();
             if (!directoryReader.CanRead(versionLength))
-                throw new BadImageFormatException($"Invalid version length in metadata header ({versionLength} characters).");
+            {
+                _context.Parameters.ErrorListener.BadImage(
+                    $"Invalid version length in metadata header ({versionLength.ToString()} characters).");
+                return;
+            }
 
             var versionBytes = new byte[versionLength];
             directoryReader.ReadBytes(versionBytes, 0, versionBytes.Length);

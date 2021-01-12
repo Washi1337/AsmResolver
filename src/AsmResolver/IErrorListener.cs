@@ -32,6 +32,16 @@ namespace AsmResolver
         }
 
         /// <summary>
+        /// Registers an instance of a <see cref="NotSupportedException"/> class.
+        /// </summary>
+        /// <param name="self">The error listener.</param>
+        /// <param name="message">The message of the error.</param>
+        public static void NotSupported(this IErrorListener self, string message)
+        {
+            self.RegisterException(new NotSupportedException(message));
+        }
+
+        /// <summary>
         /// Registers an error, and returns a default value for the provided type.
         /// </summary>
         /// <param name="self">The error listener.</param>
