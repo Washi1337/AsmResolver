@@ -16,7 +16,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
                 .GetByRid(cctorToken.Rid)
                 .Body.CreateReader();
 
-            var body = CilRawMethodBody.FromReader(reader);
+            var body = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, reader);
             var disassembler = new CilDisassembler(new ByteArrayReader(body.Code));
 
             var initialValueFieldToken = MetadataToken.Zero;

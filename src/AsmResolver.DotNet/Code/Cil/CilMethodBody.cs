@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -73,14 +74,14 @@ namespace AsmResolver.DotNet.Code.Cil
          /// <summary>
          /// Creates a CIL method body from a raw CIL method body. 
          /// </summary>
-         /// <param name="parentModule">The module originally defining the method.</param>
+         /// <param name="context">The reader context.</param>
          /// <param name="method">The method that owns the method body.</param>
          /// <param name="rawBody">The raw method body.</param>
          /// <param name="operandResolver">The object instance to use for resolving operands of an instruction in the
          ///     method body.</param>
          /// <returns>The method body.</returns>
          public static CilMethodBody FromRawMethodBody(
-             ModuleDefinition parentModule, 
+             ModuleReadContext context, 
              MethodDefinition method,
              CilRawMethodBody rawBody,
              ICilOperandResolver operandResolver = null)
@@ -88,7 +89,7 @@ namespace AsmResolver.DotNet.Code.Cil
             var result = new CilMethodBody(method);
 
             if (operandResolver is null)
-                operandResolver = new CilOperandResolver(parentModule, result);
+                operandResolver = new CilOperandResolver(context.ParentModule, result);
 
             // Read raw instructions.
             var reader = new ByteArrayReader(rawBody.Code);

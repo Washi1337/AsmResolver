@@ -14,7 +14,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
             
             var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
-            var methodBody = CilRawMethodBody.FromReader(methodTable[0].Body.CreateReader());
+            var methodBody = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, methodTable[0].Body.CreateReader());
 
             Assert.False(methodBody.IsFat);
             Assert.Equal(new byte[]

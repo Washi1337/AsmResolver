@@ -21,14 +21,17 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
         /// tiny format.</exception>
-        public new static CilRawTinyMethodBody FromReader(IBinaryStreamReader reader)
+        public new static CilRawTinyMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
         {
             ulong fileOffset = reader.Offset;
             uint rva = reader.Rva;
             
             var flag = (CilMethodBodyAttributes) reader.ReadByte();
             if ((flag & CilMethodBodyAttributes.Tiny) != CilMethodBodyAttributes.Tiny)
-                throw new FormatException("Invalid tiny CIL method body header.");
+            {
+                errorListener.BadImage("Invalid tiny CIL method body header.");
+                return null;
+            }
 
             int codeSize = (byte) flag >> 2;
             var code = new byte[codeSize];

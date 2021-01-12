@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Serialized
         /// Gets or sets the parameters used for parsing a PE file into a PE image.
         /// </summary>
         /// <remarks>
-        /// This property is ignored when the module was read from a <see cref="IPEImage"/> directly.
+        /// This property is ignored when the module was read from a <see cref="IPEImage"/>
         /// </remarks>
         public PEReadParameters PEReadParameters
         {
