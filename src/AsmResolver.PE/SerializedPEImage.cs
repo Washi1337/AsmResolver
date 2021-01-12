@@ -57,7 +57,7 @@ namespace AsmResolver.PE
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ImportDirectory);
             return dataDirectory.IsPresentInPE
-                ? (IList<IImportedModule>) new SerializedImportedModuleList(PEFile, ReadContext.Parameters.ErrorListener, dataDirectory)
+                ? (IList<IImportedModule>) new SerializedImportedModuleList(ReadContext, dataDirectory)
                 : new List<IImportedModule>();
         }
 

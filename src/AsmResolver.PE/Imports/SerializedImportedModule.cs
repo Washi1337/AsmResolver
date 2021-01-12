@@ -11,28 +11,26 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public class SerializedImportedModule : ImportedModule
     {
+        private readonly PEReadContext _context;
+
         /// <summary>
         /// The amount of bytes a single entry uses in the import directory table.
         /// </summary>
         public const uint ModuleImportSize = 5 * sizeof(uint);
         
-        private readonly IPEFile _peFile;
-        private readonly IErrorListener _errorListener;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
 
         /// <summary>
         /// Reads a module import entry from an input stream.
         /// </summary>
-        /// <param name="peFile">The PE file containing the module import.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        /// <param name="errorListener">The object responsible for recording parser errors.</param>
-        public SerializedImportedModule(IPEFile peFile, IBinaryStreamReader reader, IErrorListener errorListener)
+        public SerializedImportedModule(PEReadContext context, IBinaryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _errorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
 
             _lookupRva = reader.ReadUInt32();
             TimeDateStamp = reader.ReadUInt32();
@@ -42,10 +40,10 @@ namespace AsmResolver.PE.Imports
 
             if (nameRva != 0)
             {
-                if (_peFile.TryCreateReaderAtRva(nameRva, out var nameReader))
+                if (_context.File.TryCreateReaderAtRva(nameRva, out var nameReader))
                     Name = nameReader.ReadAsciiString();
                 else
-                    _errorListener.BadImage("Import module contains an invalid name RVA.");
+                    _context.Parameters.ErrorListener.BadImage("Import module contains an invalid name RVA.");
             }
         }
 
@@ -70,14 +68,14 @@ namespace AsmResolver.PE.Imports
             if (IsEmpty)
                 return result;
 
-            bool is32Bit = _peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
+            bool is32Bit = _context.File.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
             (ulong ordinalMask, int pointerSize) = is32Bit
                 ? (0x8000_0000ul, sizeof(uint))
                 : (0x8000_0000_0000_0000ul, sizeof(ulong));
 
-            if (!_peFile.TryCreateReaderAtRva(_lookupRva, out var lookupItemReader))
+            if (!_context.File.TryCreateReaderAtRva(_lookupRva, out var lookupItemReader))
             {
-                _errorListener.BadImage($"Imported module \"{Name}\" has an invalid import lookup thunk table RVA.");
+                _context.Parameters.ErrorListener.BadImage($"Imported module \"{Name}\" has an invalid import lookup thunk table RVA.");
                 return result;
             }
 
@@ -96,9 +94,9 @@ namespace AsmResolver.PE.Imports
                 else
                 {
                     uint hintNameRva = (uint) (lookupItem & 0xFFFFFFFF);
-                    if (!_peFile.TryCreateReaderAtRva(hintNameRva, out var reader))
+                    if (!_context.File.TryCreateReaderAtRva(hintNameRva, out var reader))
                     {
-                        _errorListener.BadImage($"Invalid Hint-Name RVA for import {Name}!#{result.Count.ToString()}.");
+                        _context.Parameters.ErrorListener.BadImage($"Invalid Hint-Name RVA for import {Name}!#{result.Count.ToString()}.");
                         entry = new ImportedSymbol(0, "<<<INVALID_NAME_RVA>>>");
                     }
                     else
@@ -107,7 +105,7 @@ namespace AsmResolver.PE.Imports
                     }
                 }
 
-                entry.AddressTableEntry = _peFile.GetReferenceToRva((uint) (_addressRva + result.Count * pointerSize));
+                entry.AddressTableEntry = _context.File.GetReferenceToRva((uint) (_addressRva + result.Count * pointerSize));
                 result.Add(entry);
             }
 
