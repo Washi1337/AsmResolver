@@ -24,7 +24,7 @@ namespace AsmResolver.PE
         public SerializedPEImage(IPEFile peFile, PEReadParameters readParameters)
         {
             PEFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            ReadParameters = readParameters;
+            ReadContext = new PEReadContext(peFile, readParameters);
 
             FilePath = peFile.FilePath;
             MachineType = PEFile.FileHeader.Machine;
@@ -47,7 +47,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets the reading parameters used for reading the PE image.
         /// </summary>
-        public PEReadParameters ReadParameters
+        public PEReadContext ReadContext
         {
             get;
         }
@@ -57,7 +57,7 @@ namespace AsmResolver.PE
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ImportDirectory);
             return dataDirectory.IsPresentInPE
-                ? (IList<IImportedModule>) new SerializedImportedModuleList(PEFile, ReadParameters.ErrorListener, dataDirectory)
+                ? (IList<IImportedModule>) new SerializedImportedModuleList(PEFile, ReadContext.Parameters.ErrorListener, dataDirectory)
                 : new List<IImportedModule>();
         }
 
@@ -86,7 +86,7 @@ namespace AsmResolver.PE
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory);
             return dataDirectory.IsPresentInPE
-                ? new SerializedRelocationList(PEFile, ReadParameters.ErrorListener, dataDirectory)
+                ? new SerializedRelocationList(PEFile, ReadContext.Parameters.ErrorListener, dataDirectory)
                 : (IList<BaseRelocation>) new List<BaseRelocation>();
         }
 
@@ -97,7 +97,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
             
-            return new SerializedDotNetDirectory(PEFile, reader, ReadParameters.MetadataStreamReader);
+            return new SerializedDotNetDirectory(PEFile, reader, ReadContext.Parameters.MetadataStreamReader);
         }
 
         /// <inheritdoc />
@@ -110,7 +110,7 @@ namespace AsmResolver.PE
             {
                 uint count = dataDirectory.Size / DebugDataEntry.DebugDataEntryHeaderSize;
                 for (int i = 0; i < count; i++)
-                    result.Add(new SerializedDebugDataEntry(reader, ReadParameters.DebugDataReader));
+                    result.Add(new SerializedDebugDataEntry(ReadContext, reader));
             }
             
             return result;

@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Debug
     /// </summary>
     public class SerializedDebugDataEntry : DebugDataEntry
     {
-        private readonly IDebugDataReader _dataReader;
+        private readonly PEReadContext _context;
         private readonly DebugDataType _type;
         private readonly uint _sizeOfData;
         private readonly uint _addressOfRawData;
@@ -16,28 +16,51 @@ namespace AsmResolver.PE.Debug
         /// <summary>
         /// Reads a single debug data entry from an input stream.
         /// </summary>
-        /// <param name="reader">The input stream.</param>
-        /// <param name="dataReader">The object responsible for reading the contents.</param>
-        public SerializedDebugDataEntry(IBinaryStreamReader reader, IDebugDataReader dataReader)
+        /// <param name="context">The reading context.</param>
+        /// <param name="directoryReader">The input stream.</param>
+        public SerializedDebugDataEntry(
+            PEReadContext context,
+            IBinaryStreamReader directoryReader)
         {
-            if (reader == null)
-                throw new ArgumentNullException(nameof(reader));
-            _dataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
-            Offset = reader.Offset;
-            Rva = reader.Rva;
+            if (directoryReader == null)
+                throw new ArgumentNullException(nameof(directoryReader));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             
-            Characteristics = reader.ReadUInt32();
-            TimeDateStamp = reader.ReadUInt32();
-            MajorVersion = reader.ReadUInt16();
-            MinorVersion = reader.ReadUInt16();
-            _type = (DebugDataType) reader.ReadUInt32();
-            _sizeOfData = reader.ReadUInt32();
-            _addressOfRawData = reader.ReadUInt32();
-            _pointerToRawData = reader.ReadUInt32();
+            Offset = directoryReader.Offset;
+            Rva = directoryReader.Rva;
+            
+            Characteristics = directoryReader.ReadUInt32();
+            TimeDateStamp = directoryReader.ReadUInt32();
+            MajorVersion = directoryReader.ReadUInt16();
+            MinorVersion = directoryReader.ReadUInt16();
+            _type = (DebugDataType) directoryReader.ReadUInt32();
+            _sizeOfData = directoryReader.ReadUInt32();
+            _addressOfRawData = directoryReader.ReadUInt32();
+            _pointerToRawData = directoryReader.ReadUInt32();
         }
         
         /// <inheritdoc />
-        protected override IDebugDataSegment GetContents() => 
-            _dataReader.ReadDebugData(_type, _addressOfRawData, _sizeOfData);
+        protected override IDebugDataSegment GetContents()
+        {
+            if (_sizeOfData == 0)
+                return null;
+            
+            var reference = _context.ReferenceResolver.GetReferenceToRva(_addressOfRawData);
+            if (reference is null || !reference.CanRead)
+            {
+                _context.Parameters.ErrorListener.BadImage("Debug data entry contains an invalid RVA.");
+                return null;
+            }
+
+            var reader = reference.CreateReader();
+            if (_sizeOfData > reader.Length)
+            {
+                _context.Parameters.ErrorListener.BadImage("Debug data entry contains a too large size.");
+                return null;
+            }
+
+            reader.ChangeSize(_sizeOfData);
+            return _context.Parameters.DebugDataReader.ReadDebugData(_type, reader);
+        }
     }
 }

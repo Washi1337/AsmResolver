@@ -20,7 +20,7 @@ namespace AsmResolver.PE
         {
             ReferenceResolver = resolver;
             MetadataStreamReader = new DefaultMetadataStreamReader(resolver);
-            DebugDataReader = new DefaultDebugDataReader(resolver);
+            DebugDataReader = new DefaultDebugDataReader();
             ErrorListener = ThrowErrorListener.Instance;
         }
 
