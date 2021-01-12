@@ -9,7 +9,7 @@ namespace AsmResolver.PE.Exports
     /// </summary>
     public class SerializedExportDirectory : ExportDirectory
     {
-        private readonly IPEFile _peFile;
+        private readonly PEReadContext _context;
         private readonly uint _nameRva;
         private readonly uint _numberOfFunctions;
         private readonly uint _numberOfNames;
@@ -20,13 +20,13 @@ namespace AsmResolver.PE.Exports
         /// <summary>
         /// Reads a single export directory from an input stream.
         /// </summary>
-        /// <param name="peFile">The PE file containing the export directory.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedExportDirectory(IPEFile peFile, IBinaryStreamReader reader)
+        public SerializedExportDirectory(PEReadContext context, IBinaryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
 
             ExportFlags = reader.ReadUInt32();
             TimeDateStamp = reader.ReadUInt32();
@@ -42,21 +42,33 @@ namespace AsmResolver.PE.Exports
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _peFile.TryCreateReaderAtRva(_nameRva, out var reader)
-            ? reader.ReadAsciiString()
-            : null;
+        protected override string GetName()
+        {
+            if (!_context.File.TryCreateReaderAtRva(_nameRva, out var reader))
+            {
+                _context.Parameters.ErrorListener.BadImage("Export directory contains an invalid name RVA.");
+                return null;
+            }
+            
+            return reader.ReadAsciiString();
+        }
 
         /// <inheritdoc />
         protected override IList<ExportedSymbol> GetExports()
         {
             var result = new ExportedSymbolCollection(this);
+
+            if (!_context.File.TryCreateReaderAtRva(_addressTableRva, out var addressReader))
+                _context.Parameters.ErrorListener.BadImage("Export directory contains an invalid address table RVA.");
             
-            if (!_peFile.TryCreateReaderAtRva(_addressTableRva, out var addressReader)
-                || !_peFile.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader)
-                || !_peFile.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
-            {
+            if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
+                _context.Parameters.ErrorListener.BadImage("Export directory contains an invalid name pointer table RVA.");
+
+            if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
+                _context.Parameters.ErrorListener.BadImage("Export directory contains an invalid ordinal table RVA.");
+            
+            if (addressReader is null || namePointerReader is null || ordinalReader is null)
                 return result;
-            }
 
             var ordinalNameTable = ReadOrdinalNameTable(namePointerReader, ordinalReader);
 
@@ -64,7 +76,7 @@ namespace AsmResolver.PE.Exports
             {
                 uint rva = addressReader.ReadUInt32();
                 ordinalNameTable.TryGetValue(i, out string name);
-                result.Add(new ExportedSymbol(_peFile.GetReferenceToRva(rva), name));
+                result.Add(new ExportedSymbol(_context.File.GetReferenceToRva(rva), name));
             }
 
             return result;
@@ -80,7 +92,7 @@ namespace AsmResolver.PE.Exports
                 uint ordinal = ordinalReader.ReadUInt16();
                 uint nameRva = namePointerReader.ReadUInt32();
 
-                if (_peFile.TryCreateReaderAtRva(nameRva, out var nameReader))
+                if (_context.File.TryCreateReaderAtRva(nameRva, out var nameReader))
                     result[ordinal] = nameReader.ReadAsciiString();
             }
 
