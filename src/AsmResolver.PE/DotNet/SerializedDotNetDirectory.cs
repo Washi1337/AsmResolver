@@ -34,7 +34,7 @@ namespace AsmResolver.PE.DotNet
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _peFile = (IPEFile) context.ReferenceResolver;
+            _peFile = (IPEFile) context.File;
 
             Offset = reader.Offset;
 

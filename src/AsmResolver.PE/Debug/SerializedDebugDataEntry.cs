@@ -45,7 +45,7 @@ namespace AsmResolver.PE.Debug
             if (_sizeOfData == 0)
                 return null;
             
-            var reference = _context.ReferenceResolver.GetReferenceToRva(_addressOfRawData);
+            var reference = _context.File.GetReferenceToRva(_addressOfRawData);
             if (reference is null || !reference.CanRead)
             {
                 _context.Parameters.ErrorListener.BadImage("Debug data entry contains an invalid RVA.");

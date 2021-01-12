@@ -1,21 +1,22 @@
 using System;
+using AsmResolver.PE.File;
 
 namespace AsmResolver.PE
 {
     public class PEReadContext
     {
-        public PEReadContext(ISegmentReferenceResolver referenceResolver)
-            : this(referenceResolver, new PEReadParameters())
+        public PEReadContext(IPEFile file)
+            : this(file, new PEReadParameters())
         {
         }
 
-        public PEReadContext(ISegmentReferenceResolver referenceResolver, PEReadParameters parameters)
+        public PEReadContext(IPEFile file, PEReadParameters parameters)
         {
-            ReferenceResolver = referenceResolver;
+            File = file;
             Parameters = parameters;
         }
         
-        public ISegmentReferenceResolver ReferenceResolver
+        public IPEFile File
         {
             get;
         }
