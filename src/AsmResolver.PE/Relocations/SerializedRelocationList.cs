@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Relocations
         {
             if (!_context.File.TryCreateDataDirectoryReader(_relocDirectory, out var reader))
             {
-                _context.Parameters.ErrorListener.BadImage("Invalid base relocation data directory RVA and/or size.");
+                _context.BadImage("Invalid base relocation data directory RVA and/or size.");
                 return;
             }
 

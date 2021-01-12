@@ -46,7 +46,7 @@ namespace AsmResolver.PE.Exports
         {
             if (!_context.File.TryCreateReaderAtRva(_nameRva, out var reader))
             {
-                _context.Parameters.ErrorListener.BadImage("Export directory contains an invalid name RVA.");
+                _context.BadImage("Export directory contains an invalid name RVA.");
                 return null;
             }
             
@@ -59,13 +59,13 @@ namespace AsmResolver.PE.Exports
             var result = new ExportedSymbolCollection(this);
 
             if (!_context.File.TryCreateReaderAtRva(_addressTableRva, out var addressReader))
-                _context.Parameters.ErrorListener.BadImage("Export directory contains an invalid address table RVA.");
+                _context.BadImage("Export directory contains an invalid address table RVA.");
             
             if (!_context.File.TryCreateReaderAtRva(_namePointerRva, out var namePointerReader))
-                _context.Parameters.ErrorListener.BadImage("Export directory contains an invalid name pointer table RVA.");
+                _context.BadImage("Export directory contains an invalid name pointer table RVA.");
 
             if (!_context.File.TryCreateReaderAtRva(_ordinalTableRva, out var ordinalReader))
-                _context.Parameters.ErrorListener.BadImage("Export directory contains an invalid ordinal table RVA.");
+                _context.BadImage("Export directory contains an invalid ordinal table RVA.");
             
             if (addressReader is null || namePointerReader is null || ordinalReader is null)
                 return result;

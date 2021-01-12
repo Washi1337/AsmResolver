@@ -55,7 +55,7 @@ namespace AsmResolver.PE.DotNet
 
             if (!_context.File.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
             {
-                _context.Parameters.ErrorListener.BadImage(".NET data directory contains an invalid metadata directory RVA and/or size.");
+                _context.BadImage(".NET data directory contains an invalid metadata directory RVA and/or size.");
                 return null;
             }
             
@@ -71,7 +71,7 @@ namespace AsmResolver.PE.DotNet
 
             if (!_context.File.TryCreateDataDirectoryReader(_resourcesDirectory, out var directoryReader))
             {
-                _context.Parameters.ErrorListener.BadImage(".NET data directory contains an invalid resources directory RVA and/or size.");
+                _context.BadImage(".NET data directory contains an invalid resources directory RVA and/or size.");
                 return null;
             }
 
@@ -87,7 +87,7 @@ namespace AsmResolver.PE.DotNet
 
             if (!_context.File.TryCreateDataDirectoryReader(_strongNameDirectory, out var directoryReader))
             {
-                _context.Parameters.ErrorListener.BadImage(".NET data directory contains an invalid strong name directory RVA and/or size.");
+                _context.BadImage(".NET data directory contains an invalid strong name directory RVA and/or size.");
                 return null;
             }
             
@@ -104,7 +104,7 @@ namespace AsmResolver.PE.DotNet
 
             if (!_context.File.TryCreateDataDirectoryReader(_codeManagerDirectory, out var directoryReader))
             {
-                _context.Parameters.ErrorListener.BadImage(".NET data directory contains an invalid code manager directory RVA and/or size.");
+                _context.BadImage(".NET data directory contains an invalid code manager directory RVA and/or size.");
                 return null;
             }
             
@@ -120,7 +120,7 @@ namespace AsmResolver.PE.DotNet
 
             if (!_context.File.TryCreateDataDirectoryReader(_vtableFixupsDirectory, out var directoryReader))
             {
-                _context.Parameters.ErrorListener.BadImage(".NET data directory contains an invalid VTable fixups directory RVA and/or size.");
+                _context.BadImage(".NET data directory contains an invalid VTable fixups directory RVA and/or size.");
                 return null;
             }
 
@@ -136,7 +136,7 @@ namespace AsmResolver.PE.DotNet
 
             if (!_context.File.TryCreateDataDirectoryReader(_exportsDirectory, out var directoryReader))
             {
-                _context.Parameters.ErrorListener.BadImage(".NET data directory contains an invalid export address directory RVA and/or size.");
+                _context.BadImage(".NET data directory contains an invalid export address directory RVA and/or size.");
                 return null;
             }
             
@@ -152,7 +152,7 @@ namespace AsmResolver.PE.DotNet
 
             if (!_context.File.TryCreateDataDirectoryReader(_nativeHeaderDirectory, out var directoryReader))
             {
-                _context.Parameters.ErrorListener.BadImage(".NET data directory contains an invalid native header directory RVA and/or size.");
+                _context.BadImage(".NET data directory contains an invalid native header directory RVA and/or size.");
                 return null;
             }
             

@@ -48,14 +48,14 @@ namespace AsmResolver.PE.Debug
             var reference = _context.File.GetReferenceToRva(_addressOfRawData);
             if (reference is null || !reference.CanRead)
             {
-                _context.Parameters.ErrorListener.BadImage("Debug data entry contains an invalid RVA.");
+                _context.BadImage("Debug data entry contains an invalid RVA.");
                 return null;
             }
 
             var reader = reference.CreateReader();
             if (_sizeOfData > reader.Length)
             {
-                _context.Parameters.ErrorListener.BadImage("Debug data entry contains a too large size.");
+                _context.BadImage("Debug data entry contains a too large size.");
                 return null;
             }
 

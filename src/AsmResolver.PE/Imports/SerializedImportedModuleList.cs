@@ -31,7 +31,7 @@ namespace AsmResolver.PE.Imports
         {
             if (!_context.File.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
             {
-                _context.Parameters.ErrorListener.BadImage("Invalid import data directory RVA and/or size.");
+                _context.BadImage("Invalid import data directory RVA and/or size.");
                 return;
             }
 

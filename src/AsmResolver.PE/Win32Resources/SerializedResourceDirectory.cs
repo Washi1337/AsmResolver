@@ -77,7 +77,7 @@ namespace AsmResolver.PE.Win32Resources
             // Optimisation, check for invalid resource directory offset, and prevention of self loop:
             if (_namedEntries + _idEntries == 0 || _depth >= MaxDepth)
             {
-                _context.Parameters.ErrorListener.BadImage($"Reached maximum recursion depth of {_depth} sub resource directories.");
+                _context.BadImage($"Reached maximum recursion depth of {_depth} sub resource directories.");
                 return result;
             }
 
@@ -89,7 +89,7 @@ namespace AsmResolver.PE.Win32Resources
             uint entryListSize = (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
             if (!_context.File.TryCreateReaderAtRva(_entriesRva, entryListSize, out var entriesReader))
             {
-                _context.Parameters.ErrorListener.BadImage("Resource directory contains an invalid entry table RVA and/or entry count.");
+                _context.BadImage("Resource directory contains an invalid entry table RVA and/or entry count.");
                 return result;
             }
 
@@ -102,7 +102,7 @@ namespace AsmResolver.PE.Win32Resources
                 //       following if statement does not dictate the creation of the data entry or not.
                 
                 if (!_context.File.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader))
-                    _context.Parameters.ErrorListener.BadImage($"Resource directory entry {i.ToString()} has an invalid data offset.");
+                    _context.BadImage($"Resource directory entry {i.ToString()} has an invalid data offset.");
                 
                 result.Add(rawEntry.IsSubDirectory
                     ? (IResourceEntry) new SerializedResourceDirectory(_context,  rawEntry, entryReader, _depth + 1)

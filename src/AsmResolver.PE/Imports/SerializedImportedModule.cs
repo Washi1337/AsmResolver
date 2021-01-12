@@ -43,7 +43,7 @@ namespace AsmResolver.PE.Imports
                 if (_context.File.TryCreateReaderAtRva(nameRva, out var nameReader))
                     Name = nameReader.ReadAsciiString();
                 else
-                    _context.Parameters.ErrorListener.BadImage("Import module contains an invalid name RVA.");
+                    _context.BadImage("Import module contains an invalid name RVA.");
             }
         }
 
@@ -75,7 +75,7 @@ namespace AsmResolver.PE.Imports
 
             if (!_context.File.TryCreateReaderAtRva(_lookupRva, out var lookupItemReader))
             {
-                _context.Parameters.ErrorListener.BadImage($"Imported module \"{Name}\" has an invalid import lookup thunk table RVA.");
+                _context.BadImage($"Imported module \"{Name}\" has an invalid import lookup thunk table RVA.");
                 return result;
             }
 
@@ -96,7 +96,7 @@ namespace AsmResolver.PE.Imports
                     uint hintNameRva = (uint) (lookupItem & 0xFFFFFFFF);
                     if (!_context.File.TryCreateReaderAtRva(hintNameRva, out var reader))
                     {
-                        _context.Parameters.ErrorListener.BadImage($"Invalid Hint-Name RVA for import {Name}!#{result.Count.ToString()}.");
+                        _context.BadImage($"Invalid Hint-Name RVA for import {Name}!#{result.Count.ToString()}.");
                         entry = new ImportedSymbol(0, "<<<INVALID_NAME_RVA>>>");
                     }
                     else

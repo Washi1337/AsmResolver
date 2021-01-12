@@ -43,7 +43,7 @@ namespace AsmResolver.PE.Win32Resources
         {
             if (!_context.File.TryCreateReaderAtRva(_contentsRva, _contentsSize, out var reader))
             {
-                _context.Parameters.ErrorListener.BadImage("Resource data entry contains an invalid RVA and/or size.");
+                _context.BadImage("Resource data entry contains an invalid RVA and/or size.");
                 return null;
             }
             
