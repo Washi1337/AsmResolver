@@ -22,7 +22,7 @@ namespace AsmResolver.PE.DotNet.Metadata
             {
                 case TablesStream.CompressedStreamName:
                 case TablesStream.EncStreamName:
-                    return new SerializedTableStream(header.Name,DataSegment.FromReader(reader), context.File);
+                    return new SerializedTableStream(context, header.Name,DataSegment.FromReader(reader));
                     
                 case StringsStream.DefaultName:
                     return new SerializedStringsStream(header.Name, DataSegment.FromReader(reader));

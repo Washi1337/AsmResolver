@@ -10,8 +10,8 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// </summary>
     public class SerializedTableStream : TablesStream
     {
+        private readonly PEReadContext _context;
         private readonly IReadableSegment _contents;
-        private readonly ISegmentReferenceResolver _referenceResolver;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
         private readonly uint[] _rowCounts;
@@ -22,25 +22,25 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <summary>
         /// Creates a new tables stream based on a byte array.
         /// </summary>
+        /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
-        /// <param name="referenceResolver">The instance that resolves references to other segments in the file to segments.</param>
-        public SerializedTableStream(string name, byte[] rawData, ISegmentReferenceResolver referenceResolver)
-            : this(name, new DataSegment(rawData), referenceResolver)
+        public SerializedTableStream(PEReadContext context, string name, byte[] rawData)
+            : this(context, name, new DataSegment(rawData))
         {
         }
 
         /// <summary>
         /// Creates a new tables stream based on a segment in a file.
         /// </summary>
+        /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
         /// <param name="contents">The raw contents of the stream.</param>
-        /// <param name="referenceResolver">The instance that resolves references to other segments in the file to segments.</param>
-        public SerializedTableStream(string name, IReadableSegment contents, ISegmentReferenceResolver referenceResolver)
+        public SerializedTableStream(PEReadContext context, string name, IReadableSegment contents)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             _contents = contents ?? throw new ArgumentNullException(nameof(contents));
-            _referenceResolver = referenceResolver ?? throw new ArgumentNullException(nameof(referenceResolver));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
 
             var reader = contents.CreateReader();
             Reserved = reader.ReadUInt32();
@@ -175,7 +175,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.FieldPtr, ref offset, FieldPointerRow.FromReader),
                 CreateNextTable(TableIndex.Field, ref offset, FieldDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.MethodPtr, ref offset, MethodPointerRow.FromReader),
-                CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader, _referenceResolver),
+                CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader, _context.File),
                 CreateNextTable(TableIndex.ParamPtr, ref offset, ParameterPointerRow.FromReader),
                 CreateNextTable(TableIndex.Param, ref offset, ParameterDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.InterfaceImpl, ref offset, InterfaceImplementationRow.FromReader),
@@ -198,7 +198,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ModuleRef, ref offset, ModuleReferenceRow.FromReader),
                 CreateNextTable(TableIndex.TypeSpec, ref offset, TypeSpecificationRow.FromReader),
                 CreateNextTable(TableIndex.ImplMap, ref offset, ImplementationMapRow.FromReader),
-                CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader, _referenceResolver),
+                CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader, _context.File),
                 CreateNextTable(TableIndex.EncLog, ref offset, EncLogRow.FromReader),
                 CreateNextTable(TableIndex.EncMap, ref offset, EncMapRow.FromReader),
                 CreateNextTable(TableIndex.Assembly, ref offset, AssemblyDefinitionRow.FromReader),
