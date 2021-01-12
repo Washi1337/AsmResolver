@@ -1,6 +1,6 @@
+using System;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE
 {
@@ -13,10 +13,19 @@ namespace AsmResolver.PE
         /// Initializes the PE reader parameters.
         /// </summary>
         public PEReadParameters()
+            : this(ThrowErrorListener.Instance)
+        {
+        }
+
+        /// <summary>
+        /// Initializes the PE reader parameters.
+        /// </summary>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
+        public PEReadParameters(IErrorListener errorListener)
         {
             MetadataStreamReader = new DefaultMetadataStreamReader();
             DebugDataReader = new DefaultDebugDataReader();
-            ErrorListener = ThrowErrorListener.Instance;
+            ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
         }
 
         /// <summary>

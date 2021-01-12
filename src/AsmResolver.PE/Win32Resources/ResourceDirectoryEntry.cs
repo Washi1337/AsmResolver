@@ -24,9 +24,9 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Reads a new resource directory entry from the reader.
         /// </summary>
-        /// <param name="peFile">The containing PE file.</param>
+        /// <param name="context">The containing PE file.</param>
         /// <param name="reader">The input stream to read from.</param>
-        public ResourceDirectoryEntry(IPEFile peFile, IBinaryStreamReader reader)
+        public ResourceDirectoryEntry(PEReadContext context, IBinaryStreamReader reader)
         {
             _idOrNameOffset = reader.ReadUInt32();
             _dataOrSubDirOffset = reader.ReadUInt32();
@@ -34,18 +34,21 @@ namespace AsmResolver.PE.Win32Resources
 
             if (IsByName)
             {
-                uint baseRva = peFile.OptionalHeader
+                uint baseRva = context.File.OptionalHeader
                     .GetDataDirectory(DataDirectoryIndex.ResourceDirectory)
                     .VirtualAddress;
-                
-                if (peFile.TryCreateReaderAtRva(baseRva + IdOrNameOffset, out var nameReader))
-                {
-                    int length = nameReader.ReadUInt16() * 2;
-                    var data = new byte[length];
-                    length = nameReader.ReadBytes(data, 0, length);
 
-                    Name = Encoding.Unicode.GetString(data, 0, length);
+                if (!context.File.TryCreateReaderAtRva(baseRva + IdOrNameOffset, out var nameReader))
+                {
+                    context.Parameters.ErrorListener.BadImage("Resource directory entry contains an invalid name RVA.");
+                    return;
                 }
+
+                int length = nameReader.ReadUInt16() * 2;
+                var data = new byte[length];
+                length = nameReader.ReadBytes(data, 0, length);
+
+                Name = Encoding.Unicode.GetString(data, 0, length);
             }
         }
 

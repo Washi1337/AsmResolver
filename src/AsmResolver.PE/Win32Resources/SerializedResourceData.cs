@@ -14,19 +14,19 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         public const uint ResourceDataEntrySize = 4 * sizeof(uint);
         
-        private readonly IPEFile _peFile;
+        private readonly PEReadContext _context;
         private readonly uint _contentsRva;
         private readonly uint _contentsSize;
 
         /// <summary>
         /// Reads a resource data entry from the provided input stream.
         /// </summary>
-        /// <param name="peFile">The PE file containing the resource.</param>
+        /// <param name="context">The PE reader context.</param>
         /// <param name="entry">The entry to read.</param>
         /// <param name="entryReader">The input stream to read the data from.</param>
-        public SerializedResourceData(IPEFile peFile, ResourceDirectoryEntry entry, IBinaryStreamReader entryReader)
+        public SerializedResourceData(PEReadContext context, ResourceDirectoryEntry entry, IBinaryStreamReader entryReader)
         {
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
 
             if (entry.IsByName)
                 Name = entry.Name;
@@ -41,9 +41,13 @@ namespace AsmResolver.PE.Win32Resources
         /// <inheritdoc />
         protected override ISegment GetContents()
         {
-            return _peFile.TryCreateReaderAtRva(_contentsRva, _contentsSize, out var reader)
-                ? DataSegment.FromReader(reader)
-                : null;
+            if (!_context.File.TryCreateReaderAtRva(_contentsRva, _contentsSize, out var reader))
+            {
+                _context.Parameters.ErrorListener.BadImage("Resource data entry contains an invalid RVA and/or size.");
+                return null;
+            }
+            
+            return DataSegment.FromReader(reader);
         }
         
     }
