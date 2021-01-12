@@ -12,24 +12,11 @@ namespace AsmResolver.PE
         /// <summary>
         /// Initializes the PE reader parameters.
         /// </summary>
-        /// <param name="resolver">
-        /// The object responsible for resolving references within the original PE file.
-        /// This is usually just the underlying <see cref="PEFile"/> instance.
-        /// </param>
-        public PEReadParameters(ISegmentReferenceResolver resolver)
+        public PEReadParameters()
         {
-            ReferenceResolver = resolver;
-            MetadataStreamReader = new DefaultMetadataStreamReader(resolver);
+            MetadataStreamReader = new DefaultMetadataStreamReader();
             DebugDataReader = new DefaultDebugDataReader();
             ErrorListener = ThrowErrorListener.Instance;
-        }
-
-        /// <summary>
-        /// Gets the object responsible for resolving references to segments within the raw PE file.
-        /// </summary>
-        public ISegmentReferenceResolver ReferenceResolver
-        {
-            get;
         }
 
         /// <summary>

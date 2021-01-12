@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class SerializedMetadata : Metadata
     {
-        private readonly IMetadataStreamReader _metadataStreamReader;
+        private readonly PEReadContext _context;
         private readonly IBinaryStreamReader _streamEntriesReader;
         private readonly IBinaryStreamReader _streamContentsReader;
         private readonly int _numberOfStreams;
@@ -17,20 +17,20 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <summary>
         /// Reads a metadata directory from an input stream.
         /// </summary>
-        /// <param name="reader">The input stream.</param>
-        /// <param name="metadataStreamReader"></param>
+        /// <param name="context">The reader context.</param>
+        /// <param name="directoryReader">The input stream containing the metadata directory.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
         /// <exception cref="NotSupportedException">Occurs when an unsupported metadata directory format was encountered.</exception>
         /// <exception cref="BadImageFormatException">Occurs when the metadata directory header is invalid.</exception>
-        public SerializedMetadata(IBinaryStreamReader reader, IMetadataStreamReader metadataStreamReader)
+        public SerializedMetadata(PEReadContext context, IBinaryStreamReader directoryReader)
         {
-            if (reader == null) 
-                throw new ArgumentNullException(nameof(reader));
-            _metadataStreamReader = metadataStreamReader;
+            if (directoryReader == null) 
+                throw new ArgumentNullException(nameof(directoryReader));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
 
-            _streamContentsReader = reader.Fork();
+            _streamContentsReader = directoryReader.Fork();
             
-            var signature = (MetadataSignature) reader.ReadUInt32();
+            var signature = (MetadataSignature) directoryReader.ReadUInt32();
             switch (signature)
             {
                 case MetadataSignature.Bsjb:
@@ -42,21 +42,21 @@ namespace AsmResolver.PE.DotNet.Metadata
                     throw new BadImageFormatException($"Invalid metadata header ({(uint) signature:X8}).");
             }
 
-            MajorVersion = reader.ReadUInt16();
-            MinorVersion = reader.ReadUInt16();
-            Reserved = reader.ReadUInt32();
+            MajorVersion = directoryReader.ReadUInt16();
+            MinorVersion = directoryReader.ReadUInt16();
+            Reserved = directoryReader.ReadUInt32();
 
-            int versionLength = reader.ReadInt32();
-            if (!reader.CanRead(versionLength))
+            int versionLength = directoryReader.ReadInt32();
+            if (!directoryReader.CanRead(versionLength))
                 throw new BadImageFormatException($"Invalid version length in metadata header ({versionLength} characters).");
 
             var versionBytes = new byte[versionLength];
-            reader.ReadBytes(versionBytes, 0, versionBytes.Length);
+            directoryReader.ReadBytes(versionBytes, 0, versionBytes.Length);
             VersionString = Encoding.ASCII.GetString(versionBytes);
 
-            Flags = reader.ReadUInt16();
-            _numberOfStreams = reader.ReadInt16();
-            _streamEntriesReader = reader.Fork();
+            Flags = directoryReader.ReadUInt16();
+            _numberOfStreams = directoryReader.ReadInt16();
+            _streamEntriesReader = directoryReader.Fork();
         }
 
         /// <inheritdoc />
@@ -66,10 +66,10 @@ namespace AsmResolver.PE.DotNet.Metadata
                 return base.GetStreams();
             
             return new MetadataStreamList(
+                _context, 
                 _streamContentsReader.Fork(),
                 _streamEntriesReader.Fork(),
-                _numberOfStreams,
-                _metadataStreamReader);
+                _numberOfStreams);
         }
 
     }

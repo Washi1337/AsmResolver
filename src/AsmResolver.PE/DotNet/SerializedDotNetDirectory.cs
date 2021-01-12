@@ -11,8 +11,7 @@ namespace AsmResolver.PE.DotNet
     /// </summary>
     public class SerializedDotNetDirectory : DotNetDirectory
     {
-        private readonly IPEFile _peFile;
-        private readonly IMetadataStreamReader _metadataStreamReader;
+        private readonly PEReadContext _context;
         private readonly DataDirectory _metadataDirectory;
         private readonly DataDirectory _resourcesDirectory;
         private readonly DataDirectory _strongNameDirectory;
@@ -20,21 +19,22 @@ namespace AsmResolver.PE.DotNet
         private readonly DataDirectory _vtableFixupsDirectory;
         private readonly DataDirectory _exportsDirectory;
         private readonly DataDirectory _nativeHeaderDirectory;
+        
+        // TODO: remove
+        private readonly IPEFile _peFile;
 
         /// <summary>
         /// Reads a .NET directory from an input stream.
         /// </summary>
-        /// <param name="peFile">The PE file containing the .NET directory.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        /// <param name="metadataStreamReader"></param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
-        public SerializedDotNetDirectory(IPEFile peFile, IBinaryStreamReader reader,
-            IMetadataStreamReader metadataStreamReader)
+        public SerializedDotNetDirectory(PEReadContext context, IBinaryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _metadataStreamReader = metadataStreamReader;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _peFile = (IPEFile) context.ReferenceResolver;
 
             Offset = reader.Offset;
 
@@ -58,7 +58,7 @@ namespace AsmResolver.PE.DotNet
             if (_metadataDirectory.IsPresentInPE
                 && _peFile.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
             {
-                return new SerializedMetadata(directoryReader, _metadataStreamReader);
+                return new SerializedMetadata(_context, directoryReader);
             }
 
             return null;

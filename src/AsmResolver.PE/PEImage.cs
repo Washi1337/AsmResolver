@@ -87,7 +87,7 @@ namespace AsmResolver.PE
         /// <param name="peFile">The PE file object.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(IPEFile peFile) => FromFile(peFile, CreateDefaultReadParameters(peFile));
+        public static IPEImage FromFile(IPEFile peFile) => FromFile(peFile, new PEReadParameters());
 
         /// <summary>
         /// Opens a PE image from a PE file object.
@@ -98,8 +98,6 @@ namespace AsmResolver.PE
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
         public static IPEImage FromFile(IPEFile peFile, PEReadParameters readParameters) =>
             new SerializedPEImage(peFile, readParameters);
-
-        private static PEReadParameters CreateDefaultReadParameters(IPEFile peFile) => new PEReadParameters(peFile);
 
         /// <summary>
         /// Initializes a new PE image.

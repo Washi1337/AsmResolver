@@ -14,27 +14,15 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class DefaultMetadataStreamReader : IMetadataStreamReader
     {
-        private readonly ISegmentReferenceResolver _referenceResolver;
-
-        /// <summary>
-        /// Creates a new instance of the <see cref="DefaultMetadataStreamReader"/> class.
-        /// </summary>
-        /// <param name="referenceResolver">
-        /// The object responsible for resolving references to segments in the original PE file.
-        /// </param>
-        public DefaultMetadataStreamReader(ISegmentReferenceResolver referenceResolver)
-        {
-            _referenceResolver = referenceResolver ?? throw new ArgumentNullException(nameof(referenceResolver));
-        }
-
         /// <inheritdoc />
-        public IMetadataStream ReadStream(MetadataStreamHeader header, IBinaryStreamReader reader)
+        public IMetadataStream ReadStream(PEReadContext context, MetadataStreamHeader header,
+            IBinaryStreamReader reader)
         {
             switch (header.Name)
             {
                 case TablesStream.CompressedStreamName:
                 case TablesStream.EncStreamName:
-                    return new SerializedTableStream(header.Name,DataSegment.FromReader(reader), _referenceResolver);
+                    return new SerializedTableStream(header.Name,DataSegment.FromReader(reader), context.ReferenceResolver);
                     
                 case StringsStream.DefaultName:
                     return new SerializedStringsStream(header.Name, DataSegment.FromReader(reader));

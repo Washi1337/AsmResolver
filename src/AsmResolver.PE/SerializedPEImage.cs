@@ -97,7 +97,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
             
-            return new SerializedDotNetDirectory(PEFile, reader, ReadContext.Parameters.MetadataStreamReader);
+            return new SerializedDotNetDirectory(ReadContext, reader);
         }
 
         /// <inheritdoc />
