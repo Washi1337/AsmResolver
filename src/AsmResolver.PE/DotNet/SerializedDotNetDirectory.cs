@@ -1,7 +1,6 @@
 using System;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
-using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet
@@ -19,9 +18,6 @@ namespace AsmResolver.PE.DotNet
         private readonly DataDirectory _vtableFixupsDirectory;
         private readonly DataDirectory _exportsDirectory;
         private readonly DataDirectory _nativeHeaderDirectory;
-        
-        // TODO: remove
-        private readonly IPEFile _peFile;
 
         /// <summary>
         /// Reads a .NET directory from an input stream.
@@ -34,7 +30,6 @@ namespace AsmResolver.PE.DotNet
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            _peFile = (IPEFile) context.File;
 
             Offset = reader.Offset;
 
@@ -56,7 +51,7 @@ namespace AsmResolver.PE.DotNet
         protected override IMetadata GetMetadata()
         {
             if (_metadataDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
+                && _context.File.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
             {
                 return new SerializedMetadata(_context, directoryReader);
             }
@@ -68,7 +63,7 @@ namespace AsmResolver.PE.DotNet
         protected override DotNetResourcesDirectory GetResources()
         {
             if (_resourcesDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_resourcesDirectory, out var directoryReader))
+                && _context.File.TryCreateDataDirectoryReader(_resourcesDirectory, out var directoryReader))
             {
                 return new SerializedDotNetResourcesDirectory(directoryReader);
             }
@@ -81,7 +76,7 @@ namespace AsmResolver.PE.DotNet
         protected override IReadableSegment GetStrongName()
         {
             if (_strongNameDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_strongNameDirectory, out var directoryReader))
+                && _context.File.TryCreateDataDirectoryReader(_strongNameDirectory, out var directoryReader))
             {
                 // TODO: interpretation instead of raw contents.
                 return DataSegment.FromReader(directoryReader);
@@ -94,7 +89,7 @@ namespace AsmResolver.PE.DotNet
         protected override IReadableSegment GetCodeManagerTable()
         {
             if (_codeManagerDirectory.IsPresentInPE
-            && _peFile.TryCreateDataDirectoryReader(_codeManagerDirectory, out var directoryReader))
+            && _context.File.TryCreateDataDirectoryReader(_codeManagerDirectory, out var directoryReader))
             {
                 // TODO: interpretation instead of raw contents.
                 return DataSegment.FromReader(directoryReader);
@@ -107,7 +102,7 @@ namespace AsmResolver.PE.DotNet
         protected override IReadableSegment GetVTableFixups()
         {
             if (_vtableFixupsDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_vtableFixupsDirectory, out var directoryReader))
+                && _context.File.TryCreateDataDirectoryReader(_vtableFixupsDirectory, out var directoryReader))
             {
                 // TODO: interpretation instead of raw contents.
                 return DataSegment.FromReader(directoryReader);
@@ -120,7 +115,7 @@ namespace AsmResolver.PE.DotNet
         protected override IReadableSegment GetExportAddressTable()
         {
             if (_exportsDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_exportsDirectory, out var directoryReader))
+                && _context.File.TryCreateDataDirectoryReader(_exportsDirectory, out var directoryReader))
             {
                 // TODO: interpretation instead of raw contents.
                 return DataSegment.FromReader(directoryReader);
@@ -133,7 +128,7 @@ namespace AsmResolver.PE.DotNet
         protected override IReadableSegment GetManagedNativeHeader()
         {
             if (_nativeHeaderDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_nativeHeaderDirectory, out var directoryReader))
+                && _context.File.TryCreateDataDirectoryReader(_nativeHeaderDirectory, out var directoryReader))
             {
                 // TODO: interpretation instead of raw contents.
                 return DataSegment.FromReader(directoryReader);
