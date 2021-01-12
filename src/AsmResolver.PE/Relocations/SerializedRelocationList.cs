@@ -12,29 +12,26 @@ namespace AsmResolver.PE.Relocations
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedRelocationList : LazyList<BaseRelocation>
     {
-        private readonly IPEFile _peFile;
-        private readonly IErrorListener _errorListener;
+        private readonly PEReadContext _context;
         private readonly DataDirectory _relocDirectory;
 
         /// <summary>
         /// Prepares a new lazy-initialized list of base relocations.
         /// </summary>
-        /// <param name="peFile">The PE file to read the base relocations from.</param>
-        /// <param name="errorListener">The object responsible for recording parser errors.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="relocDirectory">The directory that contains the base relocations.</param>
-        public SerializedRelocationList(IPEFile peFile, IErrorListener errorListener, DataDirectory relocDirectory)
+        public SerializedRelocationList(PEReadContext context, DataDirectory relocDirectory)
         {
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _errorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _relocDirectory = relocDirectory;
         }
 
         /// <inheritdoc />
         protected override void Initialize()
         {
-            if (!_peFile.TryCreateDataDirectoryReader(_relocDirectory, out var reader))
+            if (!_context.File.TryCreateDataDirectoryReader(_relocDirectory, out var reader))
             {
-                _errorListener.BadImage("Invalid base relocation data directory RVA and/or size.");
+                _context.Parameters.ErrorListener.BadImage("Invalid base relocation data directory RVA and/or size.");
                 return;
             }
 
@@ -60,7 +57,7 @@ namespace AsmResolver.PE.Relocations
             var type = (RelocationType) (rawValue >> 12);
             int offset = rawValue & 0xFFF;
 
-            Items.Add(new BaseRelocation(type, _peFile.GetReferenceToRva((uint) (pageRva + offset))));
+            Items.Add(new BaseRelocation(type, _context.File.GetReferenceToRva((uint) (pageRva + offset))));
         }
     }
 }
