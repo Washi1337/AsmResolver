@@ -14,29 +14,29 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedManifestResource : ManifestResource
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReadContext _context;
         private readonly ManifestResourceRow _row;
 
         /// <summary>
         /// Creates a manifest resource from a manifest resource metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the resource.</param>
+        /// <param name="context">The module that contains the resource.</param>
         /// <param name="token">The token to initialize the resource for.</param>
         /// <param name="row">The metadata table row to base the resource \on.</param>
-        public SerializedManifestResource(SerializedModuleDefinition parentModule, MetadataToken token, ManifestResourceRow row)
+        public SerializedManifestResource(ModuleReadContext context, MetadataToken token, in ManifestResourceRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Attributes = row.Attributes;
-            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = parentModule;
+            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = context.ParentModule;
         }
 
         /// <inheritdoc />
         protected override string GetName()
         {
-            return _parentModule.DotNetDirectory.Metadata
+            return _context.Image.DotNetDirectory.Metadata
                 .GetStream<StringsStream>()
                 .GetStringByIndex(_row.Name);
         }
@@ -47,12 +47,12 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Implementation != 0)
                 return null;
 
-            var encoder = _parentModule.DotNetDirectory.Metadata
+            var encoder = _context.Image.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.Implementation);
 
             var token = encoder.DecodeIndex(_row.Implementation);
-            return _parentModule.TryLookupMember(token, out var member)
+            return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IImplementation
                 : null;
         }
@@ -63,12 +63,14 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Implementation != 0)
                 return null;
 
-            var reader = _parentModule.DotNetDirectory.DotNetResources.CreateManifestResourceReader(_row.Offset);
-            return reader is null ? null : DataSegment.FromReader(reader);
+            var reader = _context.Image.DotNetDirectory.DotNetResources.CreateManifestResourceReader(_row.Offset);
+            return reader is null 
+                ? null 
+                : DataSegment.FromReader(reader);
         }
 
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

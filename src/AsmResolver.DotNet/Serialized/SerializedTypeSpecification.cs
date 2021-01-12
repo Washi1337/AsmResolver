@@ -15,36 +15,36 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedTypeSpecification : TypeSpecification
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReadContext _context;
         private readonly TypeSpecificationRow _row;
 
         /// <summary>
         /// Creates a type specification from a type metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that references the type.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type specification on.</param>
-        public SerializedTypeSpecification(SerializedModuleDefinition parentModule, MetadataToken token, TypeSpecificationRow row)
+        public SerializedTypeSpecification(ModuleReadContext context, MetadataToken token, in TypeSpecificationRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
         }
 
         /// <inheritdoc />
         protected override TypeSignature GetSignature()
         {
-            var reader = _parentModule.DotNetDirectory.Metadata
+            var reader = _context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Signature);
             
             var protection = RecursionProtection.CreateNew();
             protection.TraversedTokens.Add(MetadataToken);
-            return TypeSignature.FromReader(_parentModule, reader, protection);
+            return TypeSignature.FromReader(_context.ParentModule, reader, protection);
         }
         
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

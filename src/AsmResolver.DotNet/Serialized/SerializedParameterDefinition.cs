@@ -16,19 +16,19 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedParameterDefinition : ParameterDefinition
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReadContext _context;
         private readonly ParameterDefinitionRow _row;
 
         /// <summary>
         /// Creates a parameter definition from a parameter metadata row.
         /// </summary>
-        /// <param name="parentModule"></param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the parameter for.</param>
         /// <param name="row">The metadata table row to base the parameter definition on.</param>
-        public SerializedParameterDefinition(SerializedModuleDefinition parentModule, MetadataToken token, ParameterDefinitionRow row)
+        public SerializedParameterDefinition(ModuleReadContext context, MetadataToken token, in ParameterDefinitionRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Sequence = row.Sequence;
@@ -36,30 +36,30 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()
             .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override MethodDefinition GetMethod()
         {
-            var ownerToken = new MetadataToken(TableIndex.Method, _parentModule.GetParameterOwner(MetadataToken.Rid));
-            return _parentModule.TryLookupMember(ownerToken, out var member)
+            var ownerToken = new MetadataToken(TableIndex.Method, _context.ParentModule.GetParameterOwner(MetadataToken.Rid));
+            return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as MethodDefinition
                 : null;
         }
         
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
 
         /// <inheritdoc />
         protected override Constant GetConstant() => 
-            _parentModule.GetConstant(MetadataToken);
+            _context.ParentModule.GetConstant(MetadataToken);
 
         /// <inheritdoc />
         protected override MarshalDescriptor GetMarshalDescriptor() =>
-            _parentModule.GetFieldMarshal(MetadataToken);
+            _context.ParentModule.GetFieldMarshal(MetadataToken);
 
     }
 }

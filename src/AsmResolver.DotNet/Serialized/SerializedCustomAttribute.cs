@@ -14,27 +14,27 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedCustomAttribute : CustomAttribute
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReadContext _context;
         private readonly CustomAttributeRow _row;
 
         /// <summary>
         /// Creates a custom attribute from a custom attribute metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the custom attribute.</param>
+        /// <param name="context">The reader context..</param>
         /// <param name="token">The token to initialize the custom attribute for.</param>
         /// <param name="row">The metadata table row to base the custom attribute on.</param>
-        public SerializedCustomAttribute(SerializedModuleDefinition parentModule, MetadataToken token, CustomAttributeRow row)
+        public SerializedCustomAttribute(ModuleReadContext context, MetadataToken token, in CustomAttributeRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
         }
 
         /// <inheritdoc />
         protected override IHasCustomAttribute GetParent()
         {
-            var ownerToken = _parentModule.GetCustomAttributeOwner(MetadataToken.Rid);
-            return _parentModule.TryLookupMember(ownerToken, out var member)
+            var ownerToken = _context.ParentModule.GetCustomAttributeOwner(MetadataToken.Rid);
+            return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IHasCustomAttribute
                 : null;
         }
@@ -42,11 +42,11 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override ICustomAttributeType GetConstructor()
         {
-            var tablesStream = _parentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = _context.Image.DotNetDirectory.Metadata.GetStream<TablesStream>();
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.CustomAttributeType);
 
             var token = encoder.DecodeIndex(_row.Type);
-            return _parentModule.TryLookupMember(token, out var member)
+            return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ICustomAttributeType
                 : null;
         }
@@ -54,8 +54,8 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override CustomAttributeSignature GetSignature()
         {
-            return CustomAttributeSignature.FromReader(_parentModule, Constructor,
-                _parentModule.DotNetDirectory.Metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Value));
+            return CustomAttributeSignature.FromReader(_context.ParentModule, Constructor,
+                _context.Image.DotNetDirectory.Metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Value));
         }
     }
 }

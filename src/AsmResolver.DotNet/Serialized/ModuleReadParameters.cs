@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.DotNet.Serialized
@@ -62,5 +63,17 @@ namespace AsmResolver.DotNet.Serialized
             get;
             set;
         } = new FieldRvaDataReader();
+
+        /// <summary>
+        /// Gets or sets the parameters used for parsing a PE file into a PE image.
+        /// </summary>
+        /// <remarks>
+        /// This property is ignored when the module was read from a <see cref="IPEImage"/> directly.
+        /// </remarks>
+        public PEReadParameters PEReadParameters
+        {
+            get;
+            set;
+        } = new PEReadParameters();
     }
 }

@@ -14,34 +14,34 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedModuleReference : ModuleReference
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReadContext _context;
         private readonly ModuleReferenceRow _row;
 
         /// <summary>
         /// Creates a module reference from a module reference metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the module reference.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the module reference for.</param>
         /// <param name="row">The metadata table row to base the module reference. on.</param>
-        public SerializedModuleReference(SerializedModuleDefinition parentModule, MetadataToken token, ModuleReferenceRow row)
+        public SerializedModuleReference(ModuleReadContext context, MetadataToken token, in ModuleReferenceRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
-            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = parentModule;
+            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = context.ParentModule;
         }
 
         /// <inheritdoc />
         protected override string GetName()
         {
-            return _parentModule.DotNetDirectory.Metadata
+            return _context.Image.DotNetDirectory.Metadata
                 .GetStream<StringsStream>()
                 .GetStringByIndex(_row.Name);
         }
 
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

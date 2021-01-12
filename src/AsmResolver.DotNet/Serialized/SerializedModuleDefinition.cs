@@ -48,7 +48,6 @@ namespace AsmResolver.DotNet.Serialized
         private OneToOneRelation<MetadataToken, uint> _fieldRvas;
         private OneToOneRelation<MetadataToken, uint> _fieldMarshals;
         private OneToOneRelation<MetadataToken, uint> _fieldLayouts;
-        private readonly IPEImage _peImage;
 
         /// <summary>
         /// Interprets a PE image as a .NET module.
@@ -58,7 +57,10 @@ namespace AsmResolver.DotNet.Serialized
         public SerializedModuleDefinition(IPEImage peImage, ModuleReadParameters readParameters)
             : base(new MetadataToken(TableIndex.Module, 1))
         {
-            _peImage = peImage ?? throw new ArgumentNullException(nameof(peImage));
+            if (peImage is null)
+                throw new ArgumentNullException(nameof(peImage));
+            if (readParameters is null)
+                throw new ArgumentNullException(nameof(readParameters));
             
             var metadata = peImage.DotNetDirectory?.Metadata;
             if (metadata is null)
@@ -71,10 +73,10 @@ namespace AsmResolver.DotNet.Serialized
             var moduleTable = tablesStream.GetTable<ModuleDefinitionRow>(TableIndex.Module);
             if (!moduleTable.TryGetByRid(1, out _row))
                 throw new BadImageFormatException("Module definition table does not contain any rows.");
-            
+
             // Store parameters in fields.
-            ReadParameters = readParameters ?? throw new ArgumentNullException(nameof(readParameters));
-            
+            ReadContext = new ModuleReadContext(peImage, this, readParameters);
+
             // Copy over PE header fields.
             FilePath = peImage.FilePath;
             MachineType = peImage.MachineType;
@@ -89,7 +91,7 @@ namespace AsmResolver.DotNet.Serialized
             Attributes = peImage.DotNetDirectory.Flags;
             
             // Initialize member factory.
-            _memberFactory = new CachedSerializedMemberFactory(metadata, this);
+            _memberFactory = new CachedSerializedMemberFactory(ReadContext);
             
             // Find assembly definition and corlib assembly.
             Assembly = FindParentAssembly();
@@ -121,12 +123,12 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        public override IDotNetDirectory DotNetDirectory => _peImage.DotNetDirectory;
+        public override IDotNetDirectory DotNetDirectory => ReadContext.Image.DotNetDirectory;
 
         /// <summary>
-        /// Gets the reading parameters that are used for reading the contents of the module.
+        /// Gets the reading context that is used for reading the contents of the module.
         /// </summary>
-        public ModuleReadParameters ReadParameters
+        public ModuleReadContext ReadContext
         {
             get;
         }
@@ -765,7 +767,7 @@ namespace AsmResolver.DotNet.Serialized
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.AssemblyRef, (uint) i + 1);
-                result.Add(new SerializedAssemblyReference(this, token, table[i]));
+                result.Add(new SerializedAssemblyReference(ReadContext, token, table[i]));
             }
             
             return result;
@@ -869,10 +871,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory GetNativeResources() => _peImage.Resources;
+        protected override IResourceDirectory GetNativeResources() => ReadContext.Image.Resources;
 
         /// <inheritdoc />
-        protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(_peImage.DebugData);
+        protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReadContext.Image.DebugData);
 
         private AssemblyDefinition FindParentAssembly()
         {
@@ -882,11 +884,11 @@ namespace AsmResolver.DotNet.Serialized
 
             if (assemblyTable.Count > 0)
             {
-                var assembly = new SerializedAssemblyDefinition(DotNetDirectory,
+                var assembly = new SerializedAssemblyDefinition(
+                    ReadContext,
                     new MetadataToken(TableIndex.Assembly, 1),
                     assemblyTable[0],
-                    this,
-                    ReadParameters);
+                    this);
                 return assembly;
             }
 
