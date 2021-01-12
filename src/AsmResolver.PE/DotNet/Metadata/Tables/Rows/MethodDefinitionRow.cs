@@ -12,14 +12,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <summary>
         /// Reads a single method definition row from an input stream.
         /// </summary>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the method definition table.</param>
-        /// <param name="referenceResolver">The resolver to use for resolving the virtual address of the method body.</param>
         /// <returns>The row.</returns>
-        public static MethodDefinitionRow FromReader(IBinaryStreamReader reader, TableLayout layout, ISegmentReferenceResolver referenceResolver)
+        public static MethodDefinitionRow FromReader(PEReadContext context, IBinaryStreamReader reader, TableLayout layout)
         {
             return new MethodDefinitionRow(
-                referenceResolver.GetReferenceToRva(reader.ReadUInt32()),
+                context.File.GetReferenceToRva(reader.ReadUInt32()),
                 (MethodImplAttributes) reader.ReadUInt16(),
                 (MethodAttributes) reader.ReadUInt16(),
                 reader.ReadIndex((IndexSize) layout.Columns[3].Size),

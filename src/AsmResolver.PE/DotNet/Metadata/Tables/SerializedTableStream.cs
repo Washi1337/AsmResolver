@@ -175,7 +175,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.FieldPtr, ref offset, FieldPointerRow.FromReader),
                 CreateNextTable(TableIndex.Field, ref offset, FieldDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.MethodPtr, ref offset, MethodPointerRow.FromReader),
-                CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader, _context.File),
+                CreateNextTable(TableIndex.Method, ref offset, MethodDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.ParamPtr, ref offset, ParameterPointerRow.FromReader),
                 CreateNextTable(TableIndex.Param, ref offset, ParameterDefinitionRow.FromReader),
                 CreateNextTable(TableIndex.InterfaceImpl, ref offset, InterfaceImplementationRow.FromReader),
@@ -198,7 +198,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
                 CreateNextTable(TableIndex.ModuleRef, ref offset, ModuleReferenceRow.FromReader),
                 CreateNextTable(TableIndex.TypeSpec, ref offset, TypeSpecificationRow.FromReader),
                 CreateNextTable(TableIndex.ImplMap, ref offset, ImplementationMapRow.FromReader),
-                CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader, _context.File),
+                CreateNextTable(TableIndex.FieldRva, ref offset, FieldRvaRow.FromReader),
                 CreateNextTable(TableIndex.EncLog, ref offset, EncLogRow.FromReader),
                 CreateNextTable(TableIndex.EncMap, ref offset, EncMapRow.FromReader),
                 CreateNextTable(TableIndex.Assembly, ref offset, AssemblyDefinitionRow.FromReader),
@@ -235,18 +235,24 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             where TRow : struct, IMetadataRow
         {
             return new SerializedMetadataTable<TRow>(
-                CreateNextRawTableReader(index, ref offset), index, TableLayouts[(int) index], readRow);
+                CreateNextRawTableReader(index, ref offset),
+                index,
+                TableLayouts[(int) index], 
+                readRow);
         }
 
         private SerializedMetadataTable<TRow> CreateNextTable<TRow>(
             TableIndex index,
             ref ulong offset,
-            SerializedMetadataTable<TRow>.ReadRowExtendedDelegate readRow,
-            ISegmentReferenceResolver referenceResolver)
+            SerializedMetadataTable<TRow>.ReadRowExtendedDelegate readRow)
             where TRow : struct, IMetadataRow
         {
             return new SerializedMetadataTable<TRow>(
-                CreateNextRawTableReader(index, ref offset), index, TableLayouts[(int) index], readRow, referenceResolver);
+                _context,
+                CreateNextRawTableReader(index, ref offset), 
+                index, 
+                TableLayouts[(int) index], 
+                readRow);
         }
         
     }

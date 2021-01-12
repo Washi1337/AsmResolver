@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.File;
 using Xunit;
 
 namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
@@ -32,7 +33,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
 
             using var tempStream = new MemoryStream();
             expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
-            var newRow = readRow(new ByteArrayReader(tempStream.ToArray()), table.Layout, VirtualAddressResolver.Instance);
+            var newRow = readRow(new PEReadContext(new PEFile()), new ByteArrayReader(tempStream.ToArray()), table.Layout);
             
             Assert.Equal(expected, newRow);
         }
