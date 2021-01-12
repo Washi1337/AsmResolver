@@ -21,12 +21,24 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
         public ModuleReadParameters(string workingDirectory)
+            : this(workingDirectory, ThrowErrorListener.Instance)
+        {
+        }
+
+        /// <summary>
+        /// Initializes the module read parameters with a working directory.
+        /// </summary>
+        /// <param name="workingDirectory">The working directory of the modules to read.</param>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
+        public ModuleReadParameters(string workingDirectory, IErrorListener errorListener)
         {
             if (workingDirectory != null)
             {
                 WorkingDirectory = workingDirectory;
                 ModuleResolver = new DirectoryNetModuleResolver(workingDirectory, this);
             }
+
+            PEReadParameters.ErrorListener = errorListener;
         }
 
         /// <summary>
