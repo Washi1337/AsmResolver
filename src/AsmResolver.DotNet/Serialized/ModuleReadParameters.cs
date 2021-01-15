@@ -17,6 +17,15 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <summary>
+        /// Initializes the module read parameters with an error listener.
+        /// </summary>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
+        public ModuleReadParameters(IErrorListener errorListener)
+            : this(null,errorListener)
+        {
+        }
+
+        /// <summary>
         /// Initializes the module read parameters with a working directory.
         /// </summary>
         /// <param name="workingDirectory">The working directory of the modules to read.</param>

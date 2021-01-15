@@ -149,25 +149,42 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             // Check if type specs can be encoded.
             if (token.Table == TableIndex.TypeSpec && !allowTypeSpec)
+            {
+                context.ReadContext.BadImage("Invalid reference to a TypeSpec metadata row.");
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
-            
+            }
+
+            ITypeDefOrRef result = null;
             switch (token.Table)
             {
                 // Check for infinite recursion.
                 case TableIndex.TypeSpec when !context.TraversedTokens.Add(token):
-                    return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
+                    context.ReadContext.BadImage("Infinite metadata loop was detected.");
+                    result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
+                    break;
                 
                 // Any other type is legal.
                 case TableIndex.TypeSpec:
                 case TableIndex.TypeDef:
                 case TableIndex.TypeRef:
                     if (module.TryLookupMember(token, out var member) && member is ITypeDefOrRef typeDefOrRef)
-                        return typeDefOrRef;
+                    {
+                        result = typeDefOrRef;
+                    }
+                    else
+                    {
+                        context.ReadContext.BadImage($"Metadata token in type signature refers to a non-existing TypeDefOrRef member {token}.");
+                    }
+
+                    break;
+
+                default:
+                    context.ReadContext.BadImage("Invalid coded index.");
+                    result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
                     break;
             }
 
-            context.TraversedTokens.Remove(token);
-            return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
+            return result;
         } 
 
         /// <summary>
