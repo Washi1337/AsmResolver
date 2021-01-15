@@ -14,23 +14,28 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <summary>
         /// Reads a single security attribute from the provided input blob stream.
         /// </summary>
-        /// <param name="parentModule">The module that the security attribute resides in.</param>
         /// <param name="reader">The input blob stream.</param>
         /// <returns>The security attribute.</returns>
-        public static SecurityAttribute FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        public static SecurityAttribute FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
-            var type = TypeNameParser.Parse(parentModule, reader.ReadSerString());
+            var type = TypeNameParser.Parse(context.ModuleReadContext.ParentModule, reader.ReadSerString());
             var result = new SecurityAttribute(type);
 
             if (!reader.TryReadCompressedUInt32(out uint size))
+            {
+                context.ModuleReadContext.BadImage("Invalid size in security attribute.");
                 return result;
-            
+            }
+
             if (!reader.TryReadCompressedUInt32(out uint namedArgumentCount))
+            {
+                context.ModuleReadContext.BadImage("Invalid number of arguments in security attribute.");
                 return result;
+            }
 
             for (int i = 0; i < namedArgumentCount; i++)
             {
-                var argument = CustomAttributeNamedArgument.FromReader(parentModule, reader);
+                var argument = CustomAttributeNamedArgument.FromReader(context, reader);
                 result.NamedArguments.Add(argument);
             }
 

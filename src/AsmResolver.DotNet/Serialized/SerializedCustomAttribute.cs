@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override CustomAttributeSignature GetSignature()
         {
-            return CustomAttributeSignature.FromReader(_context.ParentModule, Constructor,
+            return CustomAttributeSignature.FromReader(new BlobReadContext(_context), Constructor,
                 _context.Image.DotNetDirectory.Metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Value));
         }
     }

@@ -29,6 +29,16 @@ namespace AsmResolver.PE.DotNet.Cil
         public int Offset => Instruction.Offset;
 
         /// <inheritdoc />
+        public bool Equals(ICilLabel other) => other != null && Offset == other.Offset;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => Equals(obj as ICilLabel);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => Offset;
+
+        /// <inheritdoc />
         public override string ToString() => "IL_" + Offset.ToString("X4");
+
     }
 }

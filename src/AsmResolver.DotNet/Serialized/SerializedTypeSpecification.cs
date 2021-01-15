@@ -37,10 +37,10 @@ namespace AsmResolver.DotNet.Serialized
             var reader = _context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Signature);
-            
-            var protection = RecursionProtection.CreateNew();
-            protection.TraversedTokens.Add(MetadataToken);
-            return TypeSignature.FromReader(_context.ParentModule, reader, protection);
+
+            var context = new BlobReadContext(_context);
+            context.TraversedTokens.Add(MetadataToken);
+            return TypeSignature.FromReader(context, reader);
         }
         
         /// <inheritdoc />

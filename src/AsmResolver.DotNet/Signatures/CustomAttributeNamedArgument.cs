@@ -14,18 +14,17 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single named argument from the input stream.
         /// </summary>
-        /// <param name="parentModule">The module the argument is residing in.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The argument.</returns>
-        public static CustomAttributeNamedArgument FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        public static CustomAttributeNamedArgument FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
             var result = new CustomAttributeNamedArgument
             {
                 MemberType = (CustomAttributeArgumentMemberType) reader.ReadByte(),
-                ArgumentType = TypeSignature.ReadFieldOrPropType(parentModule, reader),
+                ArgumentType = TypeSignature.ReadFieldOrPropType(context, reader),
                 MemberName = reader.ReadSerString(),
             };
-            result.Argument = CustomAttributeArgument.FromReader(parentModule, result.ArgumentType, reader);
+            result.Argument = CustomAttributeArgument.FromReader(context, result.ArgumentType, reader);
             return result;
         }
 

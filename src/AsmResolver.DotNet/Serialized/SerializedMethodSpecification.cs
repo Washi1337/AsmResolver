@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet.Serialized
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Instantiation);
             
-            return GenericInstanceMethodSignature.FromReader(_context.ParentModule, reader);
+            return GenericInstanceMethodSignature.FromReader(new BlobReadContext(_context), reader);
         }
 
         /// <inheritdoc />

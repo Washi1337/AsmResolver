@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Serialized
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Signature);
             
-            return CallingConventionSignature.FromReader(_context.ParentModule, reader);
+            return CallingConventionSignature.FromReader(new BlobReadContext(_context), reader);
         }
         
         /// <inheritdoc />

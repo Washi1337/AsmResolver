@@ -40,7 +40,8 @@ namespace AsmResolver.DotNet.Serialized
             .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override FieldSignature GetSignature() => FieldSignature.FromReader(_context.ParentModule,
+        protected override FieldSignature GetSignature() => FieldSignature.FromReader(
+            new BlobReadContext(_context),
             _context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Signature));

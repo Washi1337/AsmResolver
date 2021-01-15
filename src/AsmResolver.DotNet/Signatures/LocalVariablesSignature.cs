@@ -13,31 +13,21 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single local variables signature from the provided input stream.
         /// </summary>
-        /// <param name="parentModule">The module containing the signature.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The signature.</returns>
-        public static LocalVariablesSignature FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
-        {
-            return FromReader(parentModule, reader, RecursionProtection.CreateNew());
-        }
-
-        /// <summary>
-        /// Reads a single local variables signature from the provided input stream.
-        /// </summary>
-        /// <param name="parentModule">The module containing the signature.</param>
-        /// <param name="reader">The input stream.</param>
-        /// <param name="protection">The object responsible for detecting infinite recursion.</param>
-        /// <returns>The signature.</returns>
-        public static LocalVariablesSignature FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader, RecursionProtection protection)
+        public static LocalVariablesSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
             var result = new LocalVariablesSignature();
             result.Attributes = (CallingConventionAttributes) reader.ReadByte();
 
             if (!reader.TryReadCompressedUInt32(out uint count))
+            {
+                context.ModuleReadContext.BadImage("Invalid number of local variables in local variable signature.");
                 return result;
+            }
 
             for (int i = 0; i < count; i++)
-                result.VariableTypes.Add(TypeSignature.FromReader(parentModule, reader, protection));
+                result.VariableTypes.Add(TypeSignature.FromReader(context, reader));
             
             return result;
         }

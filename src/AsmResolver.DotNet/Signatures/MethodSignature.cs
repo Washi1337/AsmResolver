@@ -14,21 +14,9 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single method signature from an input stream.
         /// </summary>
-        /// <param name="module">The module containing the signature.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The method signature.</returns>
-        public static MethodSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader)
-            => FromReader(module, reader, RecursionProtection.CreateNew());
-
-        /// <summary>
-        /// Reads a single method signature from an input stream.
-        /// </summary>
-        /// <param name="module">The module containing the signature.</param>
-        /// <param name="reader">The blob input stream.</param>
-        /// <param name="protection">The object responsible for detecting infinite recursion.</param>
-        /// <returns>The method signature.</returns>
-        public static MethodSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader, 
-            RecursionProtection protection)
+        public static MethodSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
             var result = new MethodSignature((CallingConventionAttributes) reader.ReadByte());
 
@@ -36,11 +24,15 @@ namespace AsmResolver.DotNet.Signatures
             if (result.IsGeneric)
             {
                 if (!reader.TryReadCompressedUInt32(out uint genericParameterCount))
+                {
+                    context.ModuleReadContext.BadImage("Invalid generic parameter count in method signature.");
                     return result;
+                }
+
                 result.GenericParameterCount = (int) genericParameterCount;
             }
         
-            result.ReadParametersAndReturnType(module, reader, protection);
+            result.ReadParametersAndReturnType(context, reader);
             return result;
         }
 

@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Serialized
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Type);
             
-            return PropertySignature.FromReader(_context.ParentModule, reader);
+            return PropertySignature.FromReader(new BlobReadContext(_context), reader);
         }
 
         /// <inheritdoc />

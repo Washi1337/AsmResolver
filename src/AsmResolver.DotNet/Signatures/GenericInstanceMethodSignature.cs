@@ -10,26 +10,27 @@ namespace AsmResolver.DotNet.Signatures
     /// </summary>
     public class GenericInstanceMethodSignature : CallingConventionSignature, IGenericArgumentsProvider
     {
-        internal static GenericInstanceMethodSignature FromReader(ModuleDefinition parentModule,
+        internal static GenericInstanceMethodSignature FromReader(
+            in BlobReadContext context,
             IBinaryStreamReader reader)
         {
-            return FromReader(parentModule, reader, RecursionProtection.CreateNew());
-        }
-
-        internal static GenericInstanceMethodSignature FromReader(ModuleDefinition parentModule,
-            IBinaryStreamReader reader, RecursionProtection protection)
-        {
             if (!reader.CanRead(sizeof(byte)))
+            {
+                context.ModuleReadContext.BadImage("Insufficient data for a generic method instance signature.");
                 return null;
-            
+            }
+
             var attributes = (CallingConventionAttributes) reader.ReadByte();
             var result = new GenericInstanceMethodSignature(attributes);
-            
+
             if (!reader.TryReadCompressedUInt32(out uint count))
+            {
+                context.ModuleReadContext.BadImage("Invalid number of type arguments in generic method signature.");
                 return result;
+            }
 
             for (int i = 0; i < count; i++)
-                result.TypeArguments.Add(TypeSignature.FromReader(parentModule, reader, protection));
+                result.TypeArguments.Add(TypeSignature.FromReader(context, reader));
 
             return result;
         }

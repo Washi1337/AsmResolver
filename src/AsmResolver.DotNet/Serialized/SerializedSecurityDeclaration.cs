@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Security;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -52,7 +53,7 @@ namespace AsmResolver.DotNet.Serialized
                 .GetBlobReaderByIndex(_row.PermissionSet);
             
             return reader is {} ? 
-                PermissionSetSignature.FromReader(_context.ParentModule, reader) 
+                PermissionSetSignature.FromReader(new BlobReadContext(_context), reader) 
                 : null;
         }
     }

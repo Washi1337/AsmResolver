@@ -9,17 +9,19 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     public class GenericInstanceTypeSignature : TypeSignature, IGenericArgumentsProvider
     {
-        internal new static GenericInstanceTypeSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader,
-            RecursionProtection protection)
+        internal new static GenericInstanceTypeSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
-            var genericType = TypeSignature.FromReader(module, reader, protection);
+            var genericType = TypeSignature.FromReader(context, reader);
             var signature = new GenericInstanceTypeSignature(genericType.ToTypeDefOrRef(), genericType.ElementType == ElementType.ValueType);
 
             if (!reader.TryReadCompressedUInt32(out uint count))
+            {
+                context.ModuleReadContext.BadImage("Invalid number of type arguments in generic type signature.");
                 return signature;
+            }
 
             for (int i = 0; i < count; i++)
-                signature.TypeArguments.Add(TypeSignature.FromReader(module, reader, protection));
+                signature.TypeArguments.Add(TypeSignature.FromReader(context, reader));
 
             return signature;
         }

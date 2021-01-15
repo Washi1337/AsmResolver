@@ -16,16 +16,18 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single custom attribute signature from the input stream.
         /// </summary>
-        /// <param name="parentModule">The module that contains the attribute signature.</param>
         /// <param name="ctor">The constructor that was called.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The signature.</returns>
         /// <exception cref="FormatException">Occurs when the input stream does not point to a valid signature.</exception>
-        public static CustomAttributeSignature FromReader(ModuleDefinition parentModule, ICustomAttributeType ctor, IBinaryStreamReader reader)
+        public static CustomAttributeSignature FromReader(in BlobReadContext context, ICustomAttributeType ctor, IBinaryStreamReader reader)
         {
             ushort prologue = reader.ReadUInt16();
             if (prologue != CustomAttributeSignaturePrologue)
-                throw new FormatException("Input stream does not point to a valid custom attribute signature.");
+            {
+                context.ModuleReadContext.BadImage("Input stream does not point to a valid custom attribute signature.");
+                return null;
+            }
 
             var result = new CustomAttributeSignature();
             
@@ -33,7 +35,7 @@ namespace AsmResolver.DotNet.Signatures
             var parameterTypes = ctor.Signature.ParameterTypes;
             for (int i = 0; i < parameterTypes.Count; i++)
             {
-                var argument = CustomAttributeArgument.FromReader(parentModule, parameterTypes[i], reader);
+                var argument = CustomAttributeArgument.FromReader(context, parameterTypes[i], reader);
                 result.FixedArguments.Add(argument);
             }
             
@@ -41,7 +43,7 @@ namespace AsmResolver.DotNet.Signatures
             ushort namedArgumentCount = reader.ReadUInt16(); 
             for (int i = 0; i < namedArgumentCount; i++)
             {
-                var argument = CustomAttributeNamedArgument.FromReader(parentModule, reader);
+                var argument = CustomAttributeNamedArgument.FromReader(context, reader);
                 result.NamedArguments.Add(argument);
             }
 

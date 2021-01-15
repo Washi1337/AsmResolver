@@ -33,10 +33,12 @@ namespace AsmResolver.DotNet.Code.Cil
              ICilOperandResolver operandResolver = null, 
              ReferenceImporter importer = null)
         {
+            if (!(method.Module is SerializedModuleDefinition module))
+                throw new ArgumentException("Method body should reference a serialized module.");
+            
             var result = new CilMethodBody(method);
 
             operandResolver ??= new CilOperandResolver(method.Module, result);
-            
             importer ??= new ReferenceImporter(method.Module);
             
             dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
@@ -55,16 +57,16 @@ namespace AsmResolver.DotNet.Code.Cil
             result.Instructions.AddRange(disassembler.ReadAllInstructions());
 
             //Local Variables
-            result.ReadLocalVariables(method,localSig);
+            DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
             //Exception Handlers
-            result.ReadReflectionExceptionHandlers(ehInfos, ehHeader, importer);
+            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, importer);
             
             // Resolve all operands.
             foreach (var instruction in result.Instructions)
             {
                 instruction.Operand = 
-                    result.ResolveOperandReflection(instruction, operandResolver, tokenList, importer) ?? 
+                    DynamicMethodHelper.ResolveOperandReflection(module.ReadContext, result, instruction, operandResolver, tokenList, importer) ?? 
                     instruction.Operand;
             }
 
@@ -173,13 +175,14 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
-        private static void ReadLocalVariables(ModuleDefinition module, CilMethodBody result,
+        private static void ReadLocalVariables(
+            ModuleDefinition module, 
+            CilMethodBody result,
             CilRawFatMethodBody fatBody)
         {
             if (fatBody.LocalVarSigToken != MetadataToken.Zero
                 && module.TryLookupMember(fatBody.LocalVarSigToken, out var member)
-                && member is StandAloneSignature signature
-                && signature.Signature is LocalVariablesSignature localVariablesSignature)
+                && member is StandAloneSignature {Signature: LocalVariablesSignature localVariablesSignature})
             {
                 foreach (var type in localVariablesSignature.VariableTypes)
                     result.LocalVariables.Add(new CilLocalVariable(type));

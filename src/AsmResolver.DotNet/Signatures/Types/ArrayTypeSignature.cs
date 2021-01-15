@@ -14,36 +14,52 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </remarks>
     public class ArrayTypeSignature : TypeSpecificationSignature
     {
-        internal new static ArrayTypeSignature FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader, 
-            RecursionProtection protection)
+        internal new static ArrayTypeSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
-            var signature = new ArrayTypeSignature(TypeSignature.FromReader(parentModule, reader, protection));
+            var signature = new ArrayTypeSignature(TypeSignature.FromReader(context, reader));
 
             // Rank
             if (!reader.TryReadCompressedUInt32(out uint rank))
+            {
+                context.ModuleReadContext.BadImage("Invalid rank in array type signature.");
                 return signature;
+            }
 
             // Sizes.
             if (!reader.TryReadCompressedUInt32(out uint numSizes))
+            {
+                context.ModuleReadContext.BadImage("Invalid number of dimension sizes in array type signature.");
                 return signature;
+            }
 
             var sizes = new List<uint>();
             for (int i = 0; i < numSizes; i++)
             {
                 if (!reader.TryReadCompressedUInt32(out uint size))
+                {
+                    context.ModuleReadContext.BadImage($"Dimension {i.ToString()} of array signature is invalid.");
                     return signature;
+                }
+
                 sizes.Add(size);
             }
 
             // Lower bounds.
             if (!reader.TryReadCompressedUInt32(out uint numLoBounds))
+            {
+                context.ModuleReadContext.BadImage("Invalid number of dimension lower bounds in array type signature.");
                 return signature;
+            }
 
             var loBounds = new List<uint>();
             for (int i = 0; i < numLoBounds; i++)
             {
                 if (!reader.TryReadCompressedUInt32(out uint bound))
+                {
+                    context.ModuleReadContext.BadImage($"Lower bound {i.ToString()} of array type signature is invalid.");
                     return signature;
+                }
+
                 loBounds.Add(bound);
             }
 
@@ -133,11 +149,8 @@ namespace AsmResolver.DotNet.Signatures.Types
             })) + "]";
         }
 
-        private static string FormatDimensionBounds(int low, int size)
-        {
-            return $"{low}...{low + size - 1}";
-        }
-        
+        private static string FormatDimensionBounds(int low, int size) => $"{low}...{low + size - 1}";
+
         /// <summary>
         /// Verifies that the array signature only contains dimensions that are valid.
         /// </summary>

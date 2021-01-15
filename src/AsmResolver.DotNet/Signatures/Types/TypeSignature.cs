@@ -12,29 +12,27 @@ namespace AsmResolver.DotNet.Signatures.Types
     public abstract class TypeSignature : ExtendableBlobSignature, ITypeDescriptor
     {
         internal const string NullTypeToString = "<<???>>";
+
+        private static MethodInfo GetTypeFromHandleUnsafeMethod;
+
+        static TypeSignature()
+        {
+            GetTypeFromHandleUnsafeMethod = typeof(Type)
+                .GetMethod("GetTypeFromHandleUnsafe", 
+                    (BindingFlags) (-1), 
+                    null, 
+                    new[] {typeof(IntPtr)},
+                    null);
+        }
         
         /// <summary>
         /// Reads a type signature from a blob reader.
         /// </summary>
-        /// <param name="module">The module containing the blob signature.</param>
         /// <param name="reader">The blob signature reader.</param>
         /// <returns>The type signature.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the blob reader points to an element type that is
         /// invalid or unsupported.</exception>
-        public static TypeSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader) =>
-            FromReader(module, reader, RecursionProtection.CreateNew());
-
-        /// <summary>
-        /// Reads a type signature from a blob reader.
-        /// </summary>
-        /// <param name="module">The module containing the blob signature.</param>
-        /// <param name="reader">The blob signature reader.</param>
-        /// <param name="protection">The object responsible for detecting infinite recursion.</param>
-        /// <returns>The type signature.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Occurs when the blob reader points to an element type that is
-        /// invalid or unsupported.</exception>
-        public static TypeSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader, 
-            RecursionProtection protection)
+        public static TypeSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
@@ -57,76 +55,75 @@ namespace AsmResolver.DotNet.Signatures.Types
                 case ElementType.U:
                 case ElementType.TypedByRef:
                 case ElementType.Object:
-                    return module.CorLibTypeFactory.FromElementType(elementType);
+                    return context.ModuleReadContext.ParentModule.CorLibTypeFactory.FromElementType(elementType);
 
                 case ElementType.ValueType:
-                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection, false), true);
+                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(context, reader, false), true);
 
                 case ElementType.Class:
-                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(module, reader, protection, false), false);
+                    return new TypeDefOrRefSignature(ReadTypeDefOrRef(context, reader, false), false);
 
                 case ElementType.Ptr:
-                    return new PointerTypeSignature(FromReader(module, reader, protection));
+                    return new PointerTypeSignature(FromReader(context, reader));
 
                 case ElementType.ByRef:
-                    return new ByReferenceTypeSignature(FromReader(module, reader, protection));
+                    return new ByReferenceTypeSignature(FromReader(context, reader));
 
                 case ElementType.Var:
-                    return new GenericParameterSignature(module, GenericParameterType.Type,
+                    return new GenericParameterSignature(context.ModuleReadContext.ParentModule, 
+                        GenericParameterType.Type,
                         (int) reader.ReadCompressedUInt32());
 
                 case ElementType.MVar:
-                    return new GenericParameterSignature(module, GenericParameterType.Method,
+                    return new GenericParameterSignature(context.ModuleReadContext.ParentModule, 
+                        GenericParameterType.Method,
                         (int) reader.ReadCompressedUInt32());
 
                 case ElementType.Array:
-                    return ArrayTypeSignature.FromReader(module, reader, protection);
+                    return ArrayTypeSignature.FromReader(context, reader);
 
                 case ElementType.GenericInst:
-                    return GenericInstanceTypeSignature.FromReader(module, reader, protection);
+                    return GenericInstanceTypeSignature.FromReader(context, reader);
 
                 case ElementType.FnPtr:
                     throw new NotImplementedException();
 
                 case ElementType.SzArray:
-                    return new SzArrayTypeSignature(FromReader(module, reader, protection));
+                    return new SzArrayTypeSignature(FromReader(context, reader));
 
                 case ElementType.CModReqD:
                     return new CustomModifierTypeSignature(
-                        ReadTypeDefOrRef(module, reader, protection, true),
+                        ReadTypeDefOrRef(context, reader, true),
                         true,
-                        FromReader(module, reader, protection));
+                        FromReader(context, reader));
 
                 case ElementType.CModOpt:
                     return new CustomModifierTypeSignature(
-                        ReadTypeDefOrRef(module, reader, protection, true),
+                        ReadTypeDefOrRef(context, reader, true),
                         false,
-                        FromReader(module, reader, protection));
+                        FromReader(context, reader));
 
                 case ElementType.Sentinel:
                     return new SentinelTypeSignature();
 
                 case ElementType.Pinned:
-                    return new PinnedTypeSignature(FromReader(module, reader, protection));
+                    return new PinnedTypeSignature(FromReader(context, reader));
 
                 case ElementType.Boxed:
-                    return new BoxedTypeSignature(FromReader(module, reader, protection));
+                    return new BoxedTypeSignature(FromReader(context, reader));
 
                 case ElementType.Internal:
-                    IntPtr address = IntPtr.Size switch
+                    var address = IntPtr.Size switch
                     {
                         4 => new IntPtr(reader.ReadInt32()),
                         _ => new IntPtr(reader.ReadInt64())
                     };
                     
-                    //Get Internal Method Through Reflection
-                    var GetTypeFromHandleUnsafeReflection = typeof(Type)
-                        .GetMethod("GetTypeFromHandleUnsafe", ((BindingFlags) (-1)), null, new[] {typeof(IntPtr)},
-                            null);
-                    //Invoke It To Get The Value
-                    var Type = (Type)GetTypeFromHandleUnsafeReflection?.Invoke(null, new object[] {address});
-                    //Import it
-                    return new TypeDefOrRefSignature(new ReferenceImporter(module).ImportType((Type)));
+                    // Let the runtime translate the address to a type and import it.
+                    var clrType = (Type) GetTypeFromHandleUnsafeMethod.Invoke(null, new object[] {address});
+                    var asmResType = new ReferenceImporter(context.ModuleReadContext.ParentModule).ImportType(clrType);
+                    return new TypeDefOrRefSignature(asmResType);
+                
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
             }
@@ -135,18 +132,16 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <summary>
         /// Reads a TypeDefOrRef coded index from the provided blob reader.
         /// </summary>
-        /// <param name="module">The module containing the blob signature.</param>
         /// <param name="reader">The blob reader.</param>
-        /// <param name="protection">The object responsible for detecting infinite recursion.</param>
         /// <param name="allowTypeSpec">Indicates the coded index to the type is allowed to be decoded to a member in
         /// the type specification table.</param>
         /// <returns>The decoded and resolved type definition or reference.</returns>
-        protected static ITypeDefOrRef ReadTypeDefOrRef(ModuleDefinition module, IBinaryStreamReader reader,
-            RecursionProtection protection, bool allowTypeSpec)
+        protected static ITypeDefOrRef ReadTypeDefOrRef(in BlobReadContext context, IBinaryStreamReader reader, bool allowTypeSpec)
         {
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.BlobTooShort);
 
+            var module = context.ModuleReadContext.ParentModule;
             var decoder = module.GetIndexEncoder(CodedIndex.TypeDefOrRef);
             var token = decoder.DecodeIndex(codedIndex);
 
@@ -157,7 +152,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             switch (token.Table)
             {
                 // Check for infinite recursion.
-                case TableIndex.TypeSpec when !protection.TraversedTokens.Add(token):
+                case TableIndex.TypeSpec when !context.TraversedTokens.Add(token):
                     return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
                 
                 // Any other type is legal.
@@ -169,6 +164,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     break;
             }
 
+            context.TraversedTokens.Remove(token);
             return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
         } 
 
@@ -196,22 +192,24 @@ namespace AsmResolver.DotNet.Signatures.Types
             context.Writer.WriteCompressedUInt32(index);
         }
         
-        internal static TypeSignature ReadFieldOrPropType(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        internal static TypeSignature ReadFieldOrPropType(in BlobReadContext context, IBinaryStreamReader reader)
         {
+            var module = context.ModuleReadContext.ParentModule;
+            
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
             {
                 case ElementType.Boxed:
-                    return parentModule.CorLibTypeFactory.Object;
+                    return module.CorLibTypeFactory.Object;
                 case ElementType.SzArray:
-                    return new SzArrayTypeSignature(ReadFieldOrPropType(parentModule, reader));
+                    return new SzArrayTypeSignature(ReadFieldOrPropType(context, reader));
                 case ElementType.Enum:
-                    return TypeNameParser.Parse(parentModule, reader.ReadSerString());
+                    return TypeNameParser.Parse(module, reader.ReadSerString());
                 case ElementType.Type:
-                    return new TypeDefOrRefSignature(new TypeReference(parentModule,
-                        parentModule.CorLibTypeFactory.CorLibScope, "System", "Type"));
+                    return new TypeDefOrRefSignature(new TypeReference(module,
+                        module.CorLibTypeFactory.CorLibScope, "System", "Type"));
                 default:
-                    return parentModule.CorLibTypeFactory.FromElementType(elementType);
+                    return module.CorLibTypeFactory.FromElementType(elementType);
             }
         }
 
