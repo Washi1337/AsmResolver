@@ -17,6 +17,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Reads a raw method body from the given binary input stream using the tiny method body format.
         /// </summary>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
         /// <param name="reader">The binary input stream to read from.</param>
         /// <returns>The raw method body.</returns>
         /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the

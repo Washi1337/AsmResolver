@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single property signature from an input stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The property signature.</returns>
         public static PropertySignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet.Signatures
             var attributes = (CallingConventionAttributes) reader.ReadByte();
             if ((attributes & CallingConventionAttributes.Property) == 0)
             {
-                context.ModuleReadContext.BadImage("Input stream does not point to a valid property signature.");
+                context.ReadContext.BadImage("Input stream does not point to a valid property signature.");
                 return null;
             }
 

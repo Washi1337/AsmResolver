@@ -27,6 +27,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single field signature from an input stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The field signature.</returns>
         public static FieldSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)

@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single argument from the provided input stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="argumentType">The type of the argument to read.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The argument.</returns>

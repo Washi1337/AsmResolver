@@ -21,14 +21,14 @@ namespace AsmResolver.DotNet.Signatures.Types
             // Rank
             if (!reader.TryReadCompressedUInt32(out uint rank))
             {
-                context.ModuleReadContext.BadImage("Invalid rank in array type signature.");
+                context.ReadContext.BadImage("Invalid rank in array type signature.");
                 return signature;
             }
 
             // Sizes.
             if (!reader.TryReadCompressedUInt32(out uint numSizes))
             {
-                context.ModuleReadContext.BadImage("Invalid number of dimension sizes in array type signature.");
+                context.ReadContext.BadImage("Invalid number of dimension sizes in array type signature.");
                 return signature;
             }
 
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             {
                 if (!reader.TryReadCompressedUInt32(out uint size))
                 {
-                    context.ModuleReadContext.BadImage($"Dimension {i.ToString()} of array signature is invalid.");
+                    context.ReadContext.BadImage($"Dimension {i.ToString()} of array signature is invalid.");
                     return signature;
                 }
 
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             // Lower bounds.
             if (!reader.TryReadCompressedUInt32(out uint numLoBounds))
             {
-                context.ModuleReadContext.BadImage("Invalid number of dimension lower bounds in array type signature.");
+                context.ReadContext.BadImage("Invalid number of dimension lower bounds in array type signature.");
                 return signature;
             }
 
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             {
                 if (!reader.TryReadCompressedUInt32(out uint bound))
                 {
-                    context.ModuleReadContext.BadImage($"Lower bound {i.ToString()} of array type signature is invalid.");
+                    context.ReadContext.BadImage($"Lower bound {i.ToString()} of array type signature is invalid.");
                     return signature;
                 }
 

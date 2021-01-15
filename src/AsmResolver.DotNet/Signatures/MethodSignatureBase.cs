@@ -68,13 +68,14 @@ namespace AsmResolver.DotNet.Signatures
         /// Initializes the <see cref="ParameterTypes"/> and <see cref="ReturnType"/> properties by reading
         /// the parameter count, return type and parameter fields of the signature from the provided input stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
         protected void ReadParametersAndReturnType(in BlobReadContext context, IBinaryStreamReader reader)
         {
             // Parameter count.
             if (!reader.TryReadCompressedUInt32(out uint parameterCount))
             {
-                context.ModuleReadContext.BadImage("Invalid number of parameters in signature.");
+                context.ReadContext.BadImage("Invalid number of parameters in signature.");
                 return;
             }
 

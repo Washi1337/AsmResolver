@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             if (!reader.TryReadCompressedUInt32(out uint count))
             {
-                context.ModuleReadContext.BadImage("Invalid number of type arguments in generic type signature.");
+                context.ReadContext.BadImage("Invalid number of type arguments in generic type signature.");
                 return signature;
             }
 

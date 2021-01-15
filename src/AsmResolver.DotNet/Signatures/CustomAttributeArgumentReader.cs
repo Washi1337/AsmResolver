@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Signatures
 
         public void ReadValue(TypeSignature valueType)
         {
-            var module = _context.ModuleReadContext.ParentModule;
+            var module = _context.ReadContext.ParentModule;
             
             if (valueType.IsTypeOf("System", "Type"))
             {
@@ -131,7 +131,7 @@ namespace AsmResolver.DotNet.Signatures
 
                     if (underlyingType is null)
                     {
-                        _context.ModuleReadContext.BadImage($"Underlying enum type {valueType} could not be resolved. Assuming System.Int32 for custom attribute argument.");
+                        _context.ReadContext.BadImage($"Underlying enum type {valueType} could not be resolved. Assuming System.Int32 for custom attribute argument.");
                         underlyingType = module.CorLibTypeFactory.Int32;
                     }
                     
@@ -139,7 +139,7 @@ namespace AsmResolver.DotNet.Signatures
                     break;
 
                 default:
-                    _context.ModuleReadContext.NotSupported($"Unsupported element type {valueType.ElementType} in custom attribute argument.");
+                    _context.ReadContext.NotSupported($"Unsupported element type {valueType.ElementType} in custom attribute argument.");
                     Elements.Add(null);
                     break;
             }

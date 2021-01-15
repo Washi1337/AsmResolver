@@ -14,6 +14,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single method signature from an input stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The method signature.</returns>
         public static MethodSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
@@ -25,7 +26,7 @@ namespace AsmResolver.DotNet.Signatures
             {
                 if (!reader.TryReadCompressedUInt32(out uint genericParameterCount))
                 {
-                    context.ModuleReadContext.BadImage("Invalid generic parameter count in method signature.");
+                    context.ReadContext.BadImage("Invalid generic parameter count in method signature.");
                     return result;
                 }
 

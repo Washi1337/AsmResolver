@@ -14,6 +14,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single named argument from the input stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The argument.</returns>
         public static CustomAttributeNamedArgument FromReader(in BlobReadContext context, IBinaryStreamReader reader)

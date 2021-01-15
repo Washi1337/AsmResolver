@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single calling convention signature at the current position of the provided stream reader.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The reader to use.</param>
         /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
         /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>

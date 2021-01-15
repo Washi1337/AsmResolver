@@ -10,6 +10,7 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <summary>
         /// Reads a permission set signature from the provided input blob stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input blob stream.</param>
         /// <returns>The permission set.</returns>
         public static PermissionSetSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)

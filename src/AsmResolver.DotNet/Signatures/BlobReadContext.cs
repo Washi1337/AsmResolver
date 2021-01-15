@@ -5,23 +5,36 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Signatures
 {
+    /// <summary>
+    /// Provides a context in which a metadata blob parser exists in. This includes the original module reader context
+    /// as well as a mechanism to protect against infinite recursion.
+    /// </summary>
     public readonly struct BlobReadContext
     {
-        public BlobReadContext(ModuleReadContext moduleReadContext)
-            : this(moduleReadContext, Enumerable.Empty<MetadataToken>())
+        /// <summary>
+        /// Creates a new instance of the <see cref="BlobReadContext"/> structure.
+        /// </summary>
+        /// <param name="readContext">The original read context.</param>
+        public BlobReadContext(ModuleReadContext readContext)
+            : this(readContext, Enumerable.Empty<MetadataToken>())
         {
         }
 
-        public BlobReadContext(ModuleReadContext moduleReadContext, IEnumerable<MetadataToken> traversedTokens)
+        /// <summary>
+        /// Creates a new instance of the <see cref="BlobReadContext"/> structure.
+        /// </summary>
+        /// <param name="readContext">The original read context.</param>
+        /// <param name="traversedTokens">A collection of traversed metadata tokens.</param>
+        public BlobReadContext(ModuleReadContext readContext, IEnumerable<MetadataToken> traversedTokens)
         {
-            ModuleReadContext = moduleReadContext;
+            ReadContext = readContext;
             TraversedTokens = new HashSet<MetadataToken>(traversedTokens);
         }
 
         /// <summary>
         /// Gets the module reader context.
         /// </summary>
-        public ModuleReadContext ModuleReadContext
+        public ModuleReadContext ReadContext
         {
             get;
         }

@@ -13,6 +13,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single local variables signature from the provided input stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The signature.</returns>
         public static LocalVariablesSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
@@ -22,7 +23,7 @@ namespace AsmResolver.DotNet.Signatures
 
             if (!reader.TryReadCompressedUInt32(out uint count))
             {
-                context.ModuleReadContext.BadImage("Invalid number of local variables in local variable signature.");
+                context.ReadContext.BadImage("Invalid number of local variables in local variable signature.");
                 return result;
             }
 

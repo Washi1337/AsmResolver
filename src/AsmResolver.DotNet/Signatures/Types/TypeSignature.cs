@@ -28,6 +28,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <summary>
         /// Reads a type signature from a blob reader.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob signature reader.</param>
         /// <returns>The type signature.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Occurs when the blob reader points to an element type that is
@@ -55,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 case ElementType.U:
                 case ElementType.TypedByRef:
                 case ElementType.Object:
-                    return context.ModuleReadContext.ParentModule.CorLibTypeFactory.FromElementType(elementType);
+                    return context.ReadContext.ParentModule.CorLibTypeFactory.FromElementType(elementType);
 
                 case ElementType.ValueType:
                     return new TypeDefOrRefSignature(ReadTypeDefOrRef(context, reader, false), true);
@@ -70,12 +71,12 @@ namespace AsmResolver.DotNet.Signatures.Types
                     return new ByReferenceTypeSignature(FromReader(context, reader));
 
                 case ElementType.Var:
-                    return new GenericParameterSignature(context.ModuleReadContext.ParentModule, 
+                    return new GenericParameterSignature(context.ReadContext.ParentModule, 
                         GenericParameterType.Type,
                         (int) reader.ReadCompressedUInt32());
 
                 case ElementType.MVar:
-                    return new GenericParameterSignature(context.ModuleReadContext.ParentModule, 
+                    return new GenericParameterSignature(context.ReadContext.ParentModule, 
                         GenericParameterType.Method,
                         (int) reader.ReadCompressedUInt32());
 
@@ -121,7 +122,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     
                     // Let the runtime translate the address to a type and import it.
                     var clrType = (Type) GetTypeFromHandleUnsafeMethod.Invoke(null, new object[] {address});
-                    var asmResType = new ReferenceImporter(context.ModuleReadContext.ParentModule).ImportType(clrType);
+                    var asmResType = new ReferenceImporter(context.ReadContext.ParentModule).ImportType(clrType);
                     return new TypeDefOrRefSignature(asmResType);
                 
                 default:
@@ -132,6 +133,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <summary>
         /// Reads a TypeDefOrRef coded index from the provided blob reader.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob reader.</param>
         /// <param name="allowTypeSpec">Indicates the coded index to the type is allowed to be decoded to a member in
         /// the type specification table.</param>
@@ -141,7 +143,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.BlobTooShort);
 
-            var module = context.ModuleReadContext.ParentModule;
+            var module = context.ReadContext.ParentModule;
             var decoder = module.GetIndexEncoder(CodedIndex.TypeDefOrRef);
             var token = decoder.DecodeIndex(codedIndex);
 
@@ -194,7 +196,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         
         internal static TypeSignature ReadFieldOrPropType(in BlobReadContext context, IBinaryStreamReader reader)
         {
-            var module = context.ModuleReadContext.ParentModule;
+            var module = context.ReadContext.ParentModule;
             
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)

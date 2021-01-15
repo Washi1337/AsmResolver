@@ -16,6 +16,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single custom attribute signature from the input stream.
         /// </summary>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="ctor">The constructor that was called.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The signature.</returns>
@@ -25,7 +26,7 @@ namespace AsmResolver.DotNet.Signatures
             ushort prologue = reader.ReadUInt16();
             if (prologue != CustomAttributeSignaturePrologue)
             {
-                context.ModuleReadContext.BadImage("Input stream does not point to a valid custom attribute signature.");
+                context.ReadContext.BadImage("Input stream does not point to a valid custom attribute signature.");
                 return null;
             }
 
