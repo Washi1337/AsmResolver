@@ -6,7 +6,8 @@ namespace AsmResolver.PE.Debug
     public class DefaultDebugDataReader : IDebugDataReader
     {
         /// <inheritdoc />
-        public IDebugDataSegment ReadDebugData(DebugDataType type, IBinaryStreamReader reader)
+        public IDebugDataSegment ReadDebugData(PEReaderContext context, DebugDataType type,
+            IBinaryStreamReader reader)
         {
             return new CustomDebugDataSegment(type, DataSegment.FromReader(reader));
         }

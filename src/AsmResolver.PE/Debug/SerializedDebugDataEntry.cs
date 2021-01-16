@@ -60,7 +60,7 @@ namespace AsmResolver.PE.Debug
             }
 
             reader.ChangeSize(_sizeOfData);
-            return _context.Parameters.DebugDataReader.ReadDebugData(_type, reader);
+            return _context.Parameters.DebugDataReader.ReadDebugData(_context, _type, reader);
         }
     }
 }
