@@ -45,6 +45,7 @@ Table of Contents:
 
    dotnet/index
    dotnet/basics
+   dotnet/advanced-module-reading
    dotnet/member-tree
    dotnet/type-signatures
    dotnet/importing
