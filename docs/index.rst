@@ -31,6 +31,7 @@ Table of Contents:
 
    peimage/index
    peimage/basics
+   peimage/advanced-pe-reading
    peimage/imports
    peimage/exports
    peimage/win32resources
