@@ -1,7 +1,7 @@
 Advanced Module Reading
 =======================
 
-Advanced users might have the need to configure AsmResolver's module reader. For example, instead of letting the module reader throw exceptions upon reading invalid data, errors should be ignored and recovered from. Other uses might include a custom PE reader parameters, or change the way method bodies are read. These kinds of settings can be configured using the ``ModuleReaderParameters`` class.
+Advanced users might have the need to configure AsmResolver's module reader. For example, instead of letting the module reader throw exceptions upon reading invalid data, errors should be ignored and recovered from. Other uses might include changing the way the underlying PE or method bodies are read. These kinds of settings can be configured using the ``ModuleReaderParameters`` class.
 
 .. code-block:: csharp
 

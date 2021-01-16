@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Serialized
         public DirectoryNetModuleResolver(string directory, ModuleReaderParameters readerParameters)
         {
             Directory = directory ?? throw new ArgumentNullException(nameof(directory));
-            ReaderParameters = readerParameters;
+            ReaderParameters = readerParameters ?? throw new ArgumentNullException(nameof(readerParameters));
         }
         
         /// <summary>
@@ -39,20 +39,19 @@ namespace AsmResolver.DotNet.Serialized
         public ModuleDefinition Resolve(string name)
         {
             string path = Path.Combine(Directory, name);
-            if (File.Exists(path))
+            if (!File.Exists(path))
+                return null;
+            
+            try
             {
-                try
-                {
-                    return ModuleDefinition.FromFile(path, ReaderParameters);
-                }
-                catch
-                {
-                    // Ignore errors.
-                    return null;
-                }
+                return ModuleDefinition.FromFile(path, ReaderParameters);
             }
-
-            return null;
+            catch
+            {
+                // Ignore errors.
+                return null;
+            }
         }
+        
     }
 }
