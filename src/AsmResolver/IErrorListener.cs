@@ -19,6 +19,9 @@ namespace AsmResolver
         void RegisterException(Exception exception);
     }
 
+    /// <summary>
+    /// Provides extension methods for instances of the <see cref="IErrorListener"/> interface. 
+    /// </summary>
     public static class ErrorListenerExtensions
     {
         /// <summary>
