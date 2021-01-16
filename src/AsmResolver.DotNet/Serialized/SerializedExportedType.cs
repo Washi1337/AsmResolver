@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedExportedType : ExportedType
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly ExportedTypeRow _row;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the exported type for.</param>
         /// <param name="row">The metadata table row to base the exported type on.</param>
-        public SerializedExportedType(ModuleReadContext context, MetadataToken token, in ExportedTypeRow row)
+        public SerializedExportedType(ModuleReaderContext context, MetadataToken token, in ExportedTypeRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

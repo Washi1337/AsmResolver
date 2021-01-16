@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (!reader.CanRead(sizeof(byte)))
             {
-                context.ReadContext.BadImage("Insufficient data for a generic method instance signature.");
+                context.ReaderContext.BadImage("Insufficient data for a generic method instance signature.");
                 return null;
             }
 
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Signatures
 
             if (!reader.TryReadCompressedUInt32(out uint count))
             {
-                context.ReadContext.BadImage("Invalid number of type arguments in generic method signature.");
+                context.ReaderContext.BadImage("Invalid number of type arguments in generic method signature.");
                 return result;
             }
 

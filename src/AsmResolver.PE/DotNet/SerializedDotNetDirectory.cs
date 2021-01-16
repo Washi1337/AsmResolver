@@ -10,7 +10,7 @@ namespace AsmResolver.PE.DotNet
     /// </summary>
     public class SerializedDotNetDirectory : DotNetDirectory
     {
-        private readonly PEReadContext _context;
+        private readonly PEReaderContext _context;
         private readonly DataDirectory _metadataDirectory;
         private readonly DataDirectory _resourcesDirectory;
         private readonly DataDirectory _strongNameDirectory;
@@ -25,7 +25,7 @@ namespace AsmResolver.PE.DotNet
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
-        public SerializedDotNetDirectory(PEReadContext context, IBinaryStreamReader reader)
+        public SerializedDotNetDirectory(PEReaderContext context, IBinaryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));

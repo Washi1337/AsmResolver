@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Signatures
             ushort prologue = reader.ReadUInt16();
             if (prologue != CustomAttributeSignaturePrologue)
             {
-                context.ReadContext.BadImage("Input stream does not point to a valid custom attribute signature.");
+                context.ReaderContext.BadImage("Input stream does not point to a valid custom attribute signature.");
                 return null;
             }
 

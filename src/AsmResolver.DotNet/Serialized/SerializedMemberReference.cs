@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedMemberReference : MemberReference
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly MemberReferenceRow _row;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the reference for.</param>
         /// <param name="row">The metadata table row to base the member reference on.</param>
         public SerializedMemberReference(
-            ModuleReadContext context,
+            ModuleReaderContext context,
             MetadataToken token,
             in MemberReferenceRow row)
             : base(token)

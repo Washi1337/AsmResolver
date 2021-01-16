@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedClassLayout : ClassLayout
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly ClassLayoutRow _row;
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the class layout for.</param>
         /// <param name="row">The metadata table row to base the class layout on.</param>
         public SerializedClassLayout(
-            ModuleReadContext context, 
+            ModuleReaderContext context, 
             MetadataToken token,
             in ClassLayoutRow row)
             : base(token)

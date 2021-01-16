@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet.Signatures
             // Parameter count.
             if (!reader.TryReadCompressedUInt32(out uint parameterCount))
             {
-                context.ReadContext.BadImage("Invalid number of parameters in signature.");
+                context.ReaderContext.BadImage("Invalid number of parameters in signature.");
                 return;
             }
 

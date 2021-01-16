@@ -12,7 +12,7 @@ namespace AsmResolver.PE.Relocations
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedRelocationList : LazyList<BaseRelocation>
     {
-        private readonly PEReadContext _context;
+        private readonly PEReaderContext _context;
         private readonly DataDirectory _relocDirectory;
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Relocations
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="relocDirectory">The directory that contains the base relocations.</param>
-        public SerializedRelocationList(PEReadContext context, DataDirectory relocDirectory)
+        public SerializedRelocationList(PEReaderContext context, DataDirectory relocDirectory)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _relocDirectory = relocDirectory;

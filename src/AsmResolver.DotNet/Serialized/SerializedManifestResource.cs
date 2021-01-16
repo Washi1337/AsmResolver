@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedManifestResource : ManifestResource
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly ManifestResourceRow _row;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The module that contains the resource.</param>
         /// <param name="token">The token to initialize the resource for.</param>
         /// <param name="row">The metadata table row to base the resource \on.</param>
-        public SerializedManifestResource(ModuleReadContext context, MetadataToken token, in ManifestResourceRow row)
+        public SerializedManifestResource(ModuleReaderContext context, MetadataToken token, in ManifestResourceRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

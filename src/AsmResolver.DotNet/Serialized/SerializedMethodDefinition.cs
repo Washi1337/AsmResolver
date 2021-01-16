@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedMethodDefinition : MethodDefinition
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly MethodDefinitionRow _row;
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the method for.</param>
         /// <param name="row">The metadata table row to base the method definition on.</param>
-        public SerializedMethodDefinition(ModuleReadContext context, MetadataToken token, in MethodDefinitionRow row)
+        public SerializedMethodDefinition(ModuleReaderContext context, MetadataToken token, in MethodDefinitionRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

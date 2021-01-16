@@ -26,7 +26,7 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         /// <param name="context">The containing PE file.</param>
         /// <param name="reader">The input stream to read from.</param>
-        public ResourceDirectoryEntry(PEReadContext context, IBinaryStreamReader reader)
+        public ResourceDirectoryEntry(PEReaderContext context, IBinaryStreamReader reader)
         {
             _idOrNameOffset = reader.ReadUInt32();
             _dataOrSubDirOffset = reader.ReadUInt32();

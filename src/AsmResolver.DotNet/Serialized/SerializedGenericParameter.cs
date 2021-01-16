@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedGenericParameter : GenericParameter
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly GenericParameterRow _row;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the generic parameter for.</param>
         /// <param name="row">The metadata table row to base the generic parameter on.</param>
-        public SerializedGenericParameter(ModuleReadContext context, MetadataToken token, in GenericParameterRow row)
+        public SerializedGenericParameter(ModuleReaderContext context, MetadataToken token, in GenericParameterRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

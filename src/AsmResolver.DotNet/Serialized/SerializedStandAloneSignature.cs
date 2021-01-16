@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedStandAloneSignature : StandAloneSignature
     {    
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly StandAloneSignatureRow _row;
         
         /// <summary>
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the signature for.</param>
         /// <param name="row">The metadata table row to base the signature on.</param>
         public SerializedStandAloneSignature(
-            ModuleReadContext context,
+            ModuleReaderContext context,
             MetadataToken token, 
             in StandAloneSignatureRow row)
             : base(token)

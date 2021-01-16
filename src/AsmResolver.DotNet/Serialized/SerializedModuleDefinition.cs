@@ -53,14 +53,14 @@ namespace AsmResolver.DotNet.Serialized
         /// Interprets a PE image as a .NET module.
         /// </summary>
         /// <param name="peImage">The image to interpret as a .NET module.</param>
-        /// <param name="readParameters">The parameters to use while reading the module.</param>
-        public SerializedModuleDefinition(IPEImage peImage, ModuleReadParameters readParameters)
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        public SerializedModuleDefinition(IPEImage peImage, ModuleReaderParameters readerParameters)
             : base(new MetadataToken(TableIndex.Module, 1))
         {
             if (peImage is null)
                 throw new ArgumentNullException(nameof(peImage));
-            if (readParameters is null)
-                throw new ArgumentNullException(nameof(readParameters));
+            if (readerParameters is null)
+                throw new ArgumentNullException(nameof(readerParameters));
             
             var metadata = peImage.DotNetDirectory?.Metadata;
             if (metadata is null)
@@ -75,7 +75,7 @@ namespace AsmResolver.DotNet.Serialized
                 throw new BadImageFormatException("Module definition table does not contain any rows.");
 
             // Store parameters in fields.
-            ReadContext = new ModuleReadContext(peImage, this, readParameters);
+            ReaderContext = new ModuleReaderContext(peImage, this, readerParameters);
 
             // Copy over PE header fields.
             FilePath = peImage.FilePath;
@@ -91,7 +91,7 @@ namespace AsmResolver.DotNet.Serialized
             Attributes = peImage.DotNetDirectory.Flags;
             
             // Initialize member factory.
-            _memberFactory = new CachedSerializedMemberFactory(ReadContext);
+            _memberFactory = new CachedSerializedMemberFactory(ReaderContext);
             
             // Find assembly definition and corlib assembly.
             Assembly = FindParentAssembly();
@@ -106,7 +106,7 @@ namespace AsmResolver.DotNet.Serialized
                 corLib = CorLibTypeFactory.CorLibScope;
             }
 
-            var assemblyResolver = CreateAssemblyResolver(corLib, readParameters.WorkingDirectory);
+            var assemblyResolver = CreateAssemblyResolver(corLib, readerParameters.WorkingDirectory);
             MetadataResolver = new DefaultMetadataResolver(assemblyResolver);
 
             // Prepare lazy RID lists.
@@ -123,12 +123,12 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        public override IDotNetDirectory DotNetDirectory => ReadContext.Image.DotNetDirectory;
+        public override IDotNetDirectory DotNetDirectory => ReaderContext.Image.DotNetDirectory;
 
         /// <summary>
         /// Gets the reading context that is used for reading the contents of the module.
         /// </summary>
-        public ModuleReadContext ReadContext
+        public ModuleReaderContext ReaderContext
         {
             get;
         }
@@ -767,7 +767,7 @@ namespace AsmResolver.DotNet.Serialized
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.AssemblyRef, (uint) i + 1);
-                result.Add(new SerializedAssemblyReference(ReadContext, token, table[i]));
+                result.Add(new SerializedAssemblyReference(ReaderContext, token, table[i]));
             }
             
             return result;
@@ -871,10 +871,10 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IResourceDirectory GetNativeResources() => ReadContext.Image.Resources;
+        protected override IResourceDirectory GetNativeResources() => ReaderContext.Image.Resources;
 
         /// <inheritdoc />
-        protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReadContext.Image.DebugData);
+        protected override IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>(ReaderContext.Image.DebugData);
 
         private AssemblyDefinition FindParentAssembly()
         {
@@ -885,7 +885,7 @@ namespace AsmResolver.DotNet.Serialized
             if (assemblyTable.Count > 0)
             {
                 var assembly = new SerializedAssemblyDefinition(
-                    ReadContext,
+                    ReaderContext,
                     new MetadataToken(TableIndex.Assembly, 1),
                     assemblyTable[0],
                     this);

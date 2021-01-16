@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedParameterDefinition : ParameterDefinition
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly ParameterDefinitionRow _row;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the parameter for.</param>
         /// <param name="row">The metadata table row to base the parameter definition on.</param>
-        public SerializedParameterDefinition(ModuleReadContext context, MetadataToken token, in ParameterDefinitionRow row)
+        public SerializedParameterDefinition(ModuleReaderContext context, MetadataToken token, in ParameterDefinitionRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

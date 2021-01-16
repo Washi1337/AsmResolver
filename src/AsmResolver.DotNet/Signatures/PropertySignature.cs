@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Signatures
             var attributes = (CallingConventionAttributes) reader.ReadByte();
             if ((attributes & CallingConventionAttributes.Property) == 0)
             {
-                context.ReadContext.BadImage("Input stream does not point to a valid property signature.");
+                context.ReaderContext.BadImage("Input stream does not point to a valid property signature.");
                 return null;
             }
 

@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedImplementationMap : ImplementationMap
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly ImplementationMapRow _row;
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the mapping for.</param>
         /// <param name="row">The metadata table row to base the mapping on.</param>
         public SerializedImplementationMap(
-            ModuleReadContext context,
+            ModuleReaderContext context,
             MetadataToken token,
             in ImplementationMapRow row)
             : base(token)

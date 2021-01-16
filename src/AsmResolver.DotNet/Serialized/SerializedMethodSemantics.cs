@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedMethodSemantics : MethodSemantics
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly MethodSemanticsRow _row;
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the semantics for.</param>
         /// <param name="row">The metadata table row to base the semantics on.</param>
-        public SerializedMethodSemantics(ModuleReadContext context, MetadataToken token, in MethodSemanticsRow row)
+        public SerializedMethodSemantics(ModuleReaderContext context, MetadataToken token, in MethodSemanticsRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedEventDefinition : EventDefinition
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly EventDefinitionRow _row;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the event for.</param>
         /// <param name="row">The metadata table row to base the event definition on.</param>
-        public SerializedEventDefinition(ModuleReadContext context, MetadataToken token, in EventDefinitionRow row)
+        public SerializedEventDefinition(ModuleReaderContext context, MetadataToken token, in EventDefinitionRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

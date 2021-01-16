@@ -7,7 +7,7 @@ namespace AsmResolver.PE.Debug
     /// </summary>
     public class SerializedDebugDataEntry : DebugDataEntry
     {
-        private readonly PEReadContext _context;
+        private readonly PEReaderContext _context;
         private readonly DebugDataType _type;
         private readonly uint _sizeOfData;
         private readonly uint _addressOfRawData;
@@ -19,7 +19,7 @@ namespace AsmResolver.PE.Debug
         /// <param name="context">The reading context.</param>
         /// <param name="directoryReader">The input stream.</param>
         public SerializedDebugDataEntry(
-            PEReadContext context,
+            PEReaderContext context,
             IBinaryStreamReader directoryReader)
         {
             if (directoryReader == null)

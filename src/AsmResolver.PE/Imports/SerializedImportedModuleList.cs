@@ -12,7 +12,7 @@ namespace AsmResolver.PE.Imports
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedImportedModuleList : LazyList<IImportedModule>
     {
-        private readonly PEReadContext _context;
+        private readonly PEReaderContext _context;
         private readonly DataDirectory _dataDirectory;
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="dataDirectory">The import data directory.</param>
-        public SerializedImportedModuleList(PEReadContext context, DataDirectory dataDirectory)
+        public SerializedImportedModuleList(PEReaderContext context, DataDirectory dataDirectory)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dataDirectory = dataDirectory;

@@ -66,7 +66,7 @@ namespace AsmResolver.DotNet.Code.Cil
             foreach (var instruction in result.Instructions)
             {
                 instruction.Operand = 
-                    DynamicMethodHelper.ResolveOperandReflection(module.ReadContext, result, instruction, operandResolver, tokenList, importer) ?? 
+                    DynamicMethodHelper.ResolveOperandReflection(module.ReaderContext, result, instruction, operandResolver, tokenList, importer) ?? 
                     instruction.Operand;
             }
 
@@ -83,7 +83,7 @@ namespace AsmResolver.DotNet.Code.Cil
          ///     method body.</param>
          /// <returns>The method body.</returns>
          public static CilMethodBody FromRawMethodBody(
-             ModuleReadContext context, 
+             ModuleReaderContext context, 
              MethodDefinition method,
              CilRawMethodBody rawBody,
              ICilOperandResolver operandResolver = null)

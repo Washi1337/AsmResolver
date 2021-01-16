@@ -11,7 +11,7 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public class SerializedImportedModule : ImportedModule
     {
-        private readonly PEReadContext _context;
+        private readonly PEReaderContext _context;
 
         /// <summary>
         /// The amount of bytes a single entry uses in the import directory table.
@@ -26,7 +26,7 @@ namespace AsmResolver.PE.Imports
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedImportedModule(PEReadContext context, IBinaryStreamReader reader)
+        public SerializedImportedModule(PEReaderContext context, IBinaryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));

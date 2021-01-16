@@ -14,27 +14,27 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Creates a new instance of the <see cref="BlobReadContext"/> structure.
         /// </summary>
-        /// <param name="readContext">The original read context.</param>
-        public BlobReadContext(ModuleReadContext readContext)
-            : this(readContext, Enumerable.Empty<MetadataToken>())
+        /// <param name="readerContext">The original read context.</param>
+        public BlobReadContext(ModuleReaderContext readerContext)
+            : this(readerContext, Enumerable.Empty<MetadataToken>())
         {
         }
 
         /// <summary>
         /// Creates a new instance of the <see cref="BlobReadContext"/> structure.
         /// </summary>
-        /// <param name="readContext">The original read context.</param>
+        /// <param name="readerContext">The original read context.</param>
         /// <param name="traversedTokens">A collection of traversed metadata tokens.</param>
-        public BlobReadContext(ModuleReadContext readContext, IEnumerable<MetadataToken> traversedTokens)
+        public BlobReadContext(ModuleReaderContext readerContext, IEnumerable<MetadataToken> traversedTokens)
         {
-            ReadContext = readContext;
+            ReaderContext = readerContext;
             TraversedTokens = new HashSet<MetadataToken>(traversedTokens);
         }
 
         /// <summary>
         /// Gets the module reader context.
         /// </summary>
-        public ModuleReadContext ReadContext
+        public ModuleReaderContext ReaderContext
         {
             get;
         }

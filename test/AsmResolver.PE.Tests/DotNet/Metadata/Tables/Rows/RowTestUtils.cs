@@ -33,7 +33,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables.Rows
 
             using var tempStream = new MemoryStream();
             expected.Write(new BinaryStreamWriter(tempStream), table.Layout);
-            var newRow = readRow(new PEReadContext(new PEFile()), new ByteArrayReader(tempStream.ToArray()), table.Layout);
+            var newRow = readRow(new PEReaderContext(new PEFile()), new ByteArrayReader(tempStream.ToArray()), table.Layout);
             
             Assert.Equal(expected, newRow);
         }

@@ -36,7 +36,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata.Tables
             using var tempStream = new MemoryStream();
             tablesStream.Write(new BinaryStreamWriter(tempStream));
 
-            var newTablesStream = new SerializedTableStream(new PEReadContext(new PEFile()), tablesStream.Name, tempStream.ToArray());
+            var newTablesStream = new SerializedTableStream(new PEReaderContext(new PEFile()), tablesStream.Name, tempStream.ToArray());
             
             Assert.Equal(tablesStream.Reserved, newTablesStream.Reserved);
             Assert.Equal(tablesStream.MajorVersion, newTablesStream.MajorVersion);

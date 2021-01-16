@@ -19,7 +19,7 @@ namespace AsmResolver.PE.Imports
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
         public static IImportedModule FromReader(
-            PEReadContext context,
+            PEReaderContext context,
             IBinaryStreamReader reader)
         {
             var entry = new SerializedImportedModule(context, reader);

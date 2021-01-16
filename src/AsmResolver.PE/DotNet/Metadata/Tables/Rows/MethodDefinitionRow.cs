@@ -16,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the method definition table.</param>
         /// <returns>The row.</returns>
-        public static MethodDefinitionRow FromReader(PEReadContext context, IBinaryStreamReader reader, TableLayout layout)
+        public static MethodDefinitionRow FromReader(PEReaderContext context, IBinaryStreamReader reader, TableLayout layout)
         {
             return new MethodDefinitionRow(
                 context.File.GetReferenceToRva(reader.ReadUInt32()),

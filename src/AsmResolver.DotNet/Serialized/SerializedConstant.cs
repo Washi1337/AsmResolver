@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedConstant : Constant
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly ConstantRow _row;
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the constant for.</param>
         /// <param name="row">The metadata table row to base the constant on.</param>
         public SerializedConstant(
-            ModuleReadContext context,
+            ModuleReaderContext context,
             MetadataToken token,
             in ConstantRow row)
             : base(token)

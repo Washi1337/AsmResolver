@@ -22,7 +22,7 @@ namespace AsmResolver.PE.Win32Resources
         /// </summary>
         public const int MaxDepth = 10;
 
-        private readonly PEReadContext _context;
+        private readonly PEReaderContext _context;
         private readonly ushort _namedEntries;
         private readonly ushort _idEntries;
         private readonly uint _entriesRva;
@@ -38,7 +38,7 @@ namespace AsmResolver.PE.Win32Resources
         /// The current depth of the resource directory tree structure.
         /// If this value exceeds <see cref="MaxDepth"/>, this class will not initialize any entries.
         /// </param>
-        public SerializedResourceDirectory(PEReadContext context, ResourceDirectoryEntry? entry, 
+        public SerializedResourceDirectory(PEReaderContext context, ResourceDirectoryEntry? entry, 
             IBinaryStreamReader directoryReader, int depth = 0)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedFileReference : FileReference
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly FileReferenceRow _row;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the reference for.</param>
         /// <param name="row">The metadata table row to base the member reference on.</param>
         public SerializedFileReference(
-            ModuleReadContext context,
+            ModuleReaderContext context,
             MetadataToken token,
             in FileReferenceRow row)
             : base(token)

@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedCustomAttribute : CustomAttribute
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly CustomAttributeRow _row;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context..</param>
         /// <param name="token">The token to initialize the custom attribute for.</param>
         /// <param name="row">The metadata table row to base the custom attribute on.</param>
-        public SerializedCustomAttribute(ModuleReadContext context, MetadataToken token, in CustomAttributeRow row)
+        public SerializedCustomAttribute(ModuleReaderContext context, MetadataToken token, in CustomAttributeRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

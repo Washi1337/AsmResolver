@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedInterfaceImplementation : InterfaceImplementation
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly InterfaceImplementationRow _row;
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the interface implementation for.</param>
         /// <param name="row">The metadata table row to base the interface implementation on.</param>
         public SerializedInterfaceImplementation(
-            ModuleReadContext context,
+            ModuleReaderContext context,
             MetadataToken token,
             in InterfaceImplementationRow row)
             : base(token)

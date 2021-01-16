@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 case ElementType.U:
                 case ElementType.TypedByRef:
                 case ElementType.Object:
-                    return context.ReadContext.ParentModule.CorLibTypeFactory.FromElementType(elementType);
+                    return context.ReaderContext.ParentModule.CorLibTypeFactory.FromElementType(elementType);
 
                 case ElementType.ValueType:
                     return new TypeDefOrRefSignature(ReadTypeDefOrRef(context, reader, false), true);
@@ -71,12 +71,12 @@ namespace AsmResolver.DotNet.Signatures.Types
                     return new ByReferenceTypeSignature(FromReader(context, reader));
 
                 case ElementType.Var:
-                    return new GenericParameterSignature(context.ReadContext.ParentModule, 
+                    return new GenericParameterSignature(context.ReaderContext.ParentModule, 
                         GenericParameterType.Type,
                         (int) reader.ReadCompressedUInt32());
 
                 case ElementType.MVar:
-                    return new GenericParameterSignature(context.ReadContext.ParentModule, 
+                    return new GenericParameterSignature(context.ReaderContext.ParentModule, 
                         GenericParameterType.Method,
                         (int) reader.ReadCompressedUInt32());
 
@@ -122,7 +122,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     
                     // Let the runtime translate the address to a type and import it.
                     var clrType = (Type) GetTypeFromHandleUnsafeMethod.Invoke(null, new object[] {address});
-                    var asmResType = new ReferenceImporter(context.ReadContext.ParentModule).ImportType(clrType);
+                    var asmResType = new ReferenceImporter(context.ReaderContext.ParentModule).ImportType(clrType);
                     return new TypeDefOrRefSignature(asmResType);
                 
                 default:
@@ -143,14 +143,14 @@ namespace AsmResolver.DotNet.Signatures.Types
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.BlobTooShort);
 
-            var module = context.ReadContext.ParentModule;
+            var module = context.ReaderContext.ParentModule;
             var decoder = module.GetIndexEncoder(CodedIndex.TypeDefOrRef);
             var token = decoder.DecodeIndex(codedIndex);
 
             // Check if type specs can be encoded.
             if (token.Table == TableIndex.TypeSpec && !allowTypeSpec)
             {
-                context.ReadContext.BadImage("Invalid reference to a TypeSpec metadata row.");
+                context.ReaderContext.BadImage("Invalid reference to a TypeSpec metadata row.");
                 return InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.IllegalTypeSpec);
             }
 
@@ -159,7 +159,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             {
                 // Check for infinite recursion.
                 case TableIndex.TypeSpec when !context.TraversedTokens.Add(token):
-                    context.ReadContext.BadImage("Infinite metadata loop was detected.");
+                    context.ReaderContext.BadImage("Infinite metadata loop was detected.");
                     result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
                     break;
                 
@@ -173,13 +173,13 @@ namespace AsmResolver.DotNet.Signatures.Types
                     }
                     else
                     {
-                        context.ReadContext.BadImage($"Metadata token in type signature refers to a non-existing TypeDefOrRef member {token}.");
+                        context.ReaderContext.BadImage($"Metadata token in type signature refers to a non-existing TypeDefOrRef member {token}.");
                     }
 
                     break;
 
                 default:
-                    context.ReadContext.BadImage("Invalid coded index.");
+                    context.ReaderContext.BadImage("Invalid coded index.");
                     result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
                     break;
             }
@@ -213,7 +213,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         
         internal static TypeSignature ReadFieldOrPropType(in BlobReadContext context, IBinaryStreamReader reader)
         {
-            var module = context.ReadContext.ParentModule;
+            var module = context.ReaderContext.ParentModule;
             
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)

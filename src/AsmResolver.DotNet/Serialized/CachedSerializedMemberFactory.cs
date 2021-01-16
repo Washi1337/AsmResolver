@@ -8,7 +8,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     internal class CachedSerializedMemberFactory
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
 
         private TypeReference[] _typeReferences;
         private TypeDefinition[] _typeDefinitions;
@@ -35,7 +35,7 @@ namespace AsmResolver.DotNet.Serialized
         private InterfaceImplementation[] _interfaceImplementations;
         private SecurityDeclaration[] _securityDeclarations;
 
-        internal CachedSerializedMemberFactory(ModuleReadContext context)
+        internal CachedSerializedMemberFactory(ModuleReaderContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
@@ -242,7 +242,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         internal TMember LookupOrCreateMember<TMember, TRow>(ref TMember[] cache, MetadataToken token,
-            Func<ModuleReadContext, MetadataToken, TRow, TMember> createMember)
+            Func<ModuleReaderContext, MetadataToken, TRow, TMember> createMember)
             where TRow : struct, IMetadataRow
             where TMember : class, IMetadataMember
         {

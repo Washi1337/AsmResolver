@@ -19,6 +19,6 @@ namespace AsmResolver.DotNet.Serialized
         /// Implementations should never access <see cref="MethodDefinition.MethodBody"/> or
         /// <see cref="MethodDefinition.CilMethodBody"/>, as this might result in an infinite recursive loop.
         /// </remarks>
-        MethodBody ReadMethodBody(ModuleReadContext context, MethodDefinition owner, in MethodDefinitionRow row);
+        MethodBody ReadMethodBody(ModuleReaderContext context, MethodDefinition owner, in MethodDefinitionRow row);
     }
 }

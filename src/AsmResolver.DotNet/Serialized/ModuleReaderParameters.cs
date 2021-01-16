@@ -7,12 +7,12 @@ namespace AsmResolver.DotNet.Serialized
     /// <summary>
     /// Provides parameters for the reading process of a .NET module.
     /// </summary>
-    public class ModuleReadParameters
+    public class ModuleReaderParameters
     {
         /// <summary>
         /// Initializes the default module read parameters.
         /// </summary>
-        public ModuleReadParameters()
+        public ModuleReaderParameters()
         {
         }
 
@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Serialized
         /// Initializes the module read parameters with an error listener.
         /// </summary>
         /// <param name="errorListener">The object responsible for recording parser errors.</param>
-        public ModuleReadParameters(IErrorListener errorListener)
+        public ModuleReaderParameters(IErrorListener errorListener)
             : this(null,errorListener)
         {
         }
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Serialized
         /// Initializes the module read parameters with a working directory.
         /// </summary>
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
-        public ModuleReadParameters(string workingDirectory)
+        public ModuleReaderParameters(string workingDirectory)
             : this(workingDirectory, ThrowErrorListener.Instance)
         {
         }
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Serialized
         /// </summary>
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
         /// <param name="errorListener">The object responsible for recording parser errors.</param>
-        public ModuleReadParameters(string workingDirectory, IErrorListener errorListener)
+        public ModuleReaderParameters(string workingDirectory, IErrorListener errorListener)
         {
             if (workingDirectory != null)
             {
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Serialized
                 ModuleResolver = new DirectoryNetModuleResolver(workingDirectory, this);
             }
 
-            PEReadParameters.ErrorListener = errorListener;
+            PEReaderParameters.ErrorListener = errorListener;
         }
 
         /// <summary>
@@ -91,10 +91,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <remarks>
         /// This property is ignored when the module was read from a <see cref="IPEImage"/>
         /// </remarks>
-        public PEReadParameters PEReadParameters
+        public PEReaderParameters PEReaderParameters
         {
             get;
             set;
-        } = new PEReadParameters();
+        } = new PEReaderParameters();
     }
 }

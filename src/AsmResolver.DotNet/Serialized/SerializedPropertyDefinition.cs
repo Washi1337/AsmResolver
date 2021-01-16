@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedPropertyDefinition : PropertyDefinition
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly PropertyDefinitionRow _row;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the property for.</param>
         /// <param name="row">The metadata table row to base the property definition on.</param>
-        public SerializedPropertyDefinition(ModuleReadContext context, MetadataToken token, in PropertyDefinitionRow row)
+        public SerializedPropertyDefinition(ModuleReaderContext context, MetadataToken token, in PropertyDefinitionRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

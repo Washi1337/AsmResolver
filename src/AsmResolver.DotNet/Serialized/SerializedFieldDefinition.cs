@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedFieldDefinition : FieldDefinition
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly FieldDefinitionRow _row;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the field for.</param>
         /// <param name="row">The metadata table row to base the field definition on.</param>
-        public SerializedFieldDefinition(ModuleReadContext context, MetadataToken token, in FieldDefinitionRow row)
+        public SerializedFieldDefinition(ModuleReaderContext context, MetadataToken token, in FieldDefinitionRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

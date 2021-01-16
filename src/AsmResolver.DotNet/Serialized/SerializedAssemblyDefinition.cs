@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedAssemblyDefinition : AssemblyDefinition
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly AssemblyDefinitionRow _row;
         private readonly ModuleDefinition _manifestModule;
 
@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="row">The metadata table row to base the assembly definition on.</param>
         /// <param name="manifestModule">The instance containing the manifest module definition.</param>
         public SerializedAssemblyDefinition(
-            ModuleReadContext context, 
+            ModuleReaderContext context, 
             MetadataToken token, 
             in AssemblyDefinitionRow row,
             SerializedModuleDefinition manifestModule)

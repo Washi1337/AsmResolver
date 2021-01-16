@@ -7,12 +7,12 @@ namespace AsmResolver.PE
     /// <summary>
     /// Provides parameters for the reading process of a PE image. 
     /// </summary>
-    public class PEReadParameters
+    public class PEReaderParameters
     {
         /// <summary>
         /// Initializes the PE reader parameters.
         /// </summary>
-        public PEReadParameters()
+        public PEReaderParameters()
             : this(ThrowErrorListener.Instance)
         {
         }
@@ -21,7 +21,7 @@ namespace AsmResolver.PE
         /// Initializes the PE reader parameters.
         /// </summary>
         /// <param name="errorListener">The object responsible for recording parser errors.</param>
-        public PEReadParameters(IErrorListener errorListener)
+        public PEReaderParameters(IErrorListener errorListener)
         {
             MetadataStreamReader = new DefaultMetadataStreamReader();
             DebugDataReader = new DefaultDebugDataReader();

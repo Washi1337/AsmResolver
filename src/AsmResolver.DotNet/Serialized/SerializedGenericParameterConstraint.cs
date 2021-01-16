@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedGenericParameterConstraint : GenericParameterConstraint
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly GenericParameterConstraintRow _row;
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the constraint for.</param>
         /// <param name="row">The metadata table row to base the constraint on.</param>
         public SerializedGenericParameterConstraint(
-            ModuleReadContext context, 
+            ModuleReaderContext context, 
             MetadataToken token,
             in GenericParameterConstraintRow row)
             : base(token)

@@ -458,7 +458,7 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             // Read module with diagnostic bag as error listener.
             var module = ModuleDefinition.FromBytes(
                 Properties.Resources.HelloWorld_InvalidMethodBody,
-                new ModuleReadParameters(bag));
+                new ModuleReaderParameters(bag));
 
             // Ensure invalid method body is loaded.
             foreach (var method in module.GetOrCreateModuleType().Methods)

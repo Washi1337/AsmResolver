@@ -104,7 +104,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         public void MaliciousSelfLoop()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResLoop,
-                new PEReadParameters(EmptyErrorListener.Instance));
+                new PEReaderParameters(EmptyErrorListener.Instance));
 
             const int maxDirCount = 20;
             int dirCount = 0;
@@ -129,7 +129,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         public void MaliciousDirectoryName()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDirName,
-                new PEReadParameters(EmptyErrorListener.Instance));
+                new PEReaderParameters(EmptyErrorListener.Instance));
             Assert.Null(peImage.Resources.Entries[0].Name);
         }
 
@@ -137,7 +137,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         public void MaliciousDirectoryOffset()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDirOffset,
-                new PEReadParameters(EmptyErrorListener.Instance));
+                new PEReaderParameters(EmptyErrorListener.Instance));
             
             var entry = peImage.Resources.Entries[0];
             Assert.Equal(16u, entry.Id);
@@ -151,7 +151,7 @@ namespace AsmResolver.PE.Tests.Win32Resources
         public void MaliciousDataOffset()
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld_MaliciousWin32ResDataOffset,
-                new PEReadParameters(EmptyErrorListener.Instance));
+                new PEReaderParameters(EmptyErrorListener.Instance));
 
             var directory = (IResourceDirectory) peImage.Resources.Entries[0];
             directory = (IResourceDirectory) directory.Entries[0];

@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedModuleReference : ModuleReference
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly ModuleReferenceRow _row;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the module reference for.</param>
         /// <param name="row">The metadata table row to base the module reference. on.</param>
-        public SerializedModuleReference(ModuleReadContext context, MetadataToken token, in ModuleReferenceRow row)
+        public SerializedModuleReference(ModuleReaderContext context, MetadataToken token, in ModuleReferenceRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

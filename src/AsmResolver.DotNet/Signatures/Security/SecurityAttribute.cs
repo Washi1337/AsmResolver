@@ -19,18 +19,18 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <returns>The security attribute.</returns>
         public static SecurityAttribute FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
-            var type = TypeNameParser.Parse(context.ReadContext.ParentModule, reader.ReadSerString());
+            var type = TypeNameParser.Parse(context.ReaderContext.ParentModule, reader.ReadSerString());
             var result = new SecurityAttribute(type);
 
             if (!reader.TryReadCompressedUInt32(out uint size))
             {
-                context.ReadContext.BadImage("Invalid size in security attribute.");
+                context.ReaderContext.BadImage("Invalid size in security attribute.");
                 return result;
             }
 
             if (!reader.TryReadCompressedUInt32(out uint namedArgumentCount))
             {
-                context.ReadContext.BadImage("Invalid number of arguments in security attribute.");
+                context.ReaderContext.BadImage("Invalid number of arguments in security attribute.");
                 return result;
             }
 

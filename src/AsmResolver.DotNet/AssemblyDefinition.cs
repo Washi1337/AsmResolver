@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static AssemblyDefinition FromFile(string filePath) =>
-            FromImage(PEImage.FromFile(filePath), new ModuleReadParameters(Path.GetDirectoryName(filePath)));
+            FromImage(PEImage.FromFile(filePath), new ModuleReaderParameters(Path.GetDirectoryName(filePath)));
 
         /// <summary>
         /// Reads a .NET assembly from the provided input file.
@@ -71,17 +71,17 @@ namespace AsmResolver.DotNet
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static AssemblyDefinition FromImage(IPEImage peImage) => 
-            FromImage(peImage, new ModuleReadParameters(Path.GetDirectoryName(peImage.FilePath)));
+            FromImage(peImage, new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath)));
 
         /// <summary>
         /// Initializes a .NET assembly from a PE image.
         /// </summary>
         /// <param name="peImage">The image containing the .NET metadata.</param>
-        /// <param name="readParameters">The parameters to use while reading the assembly.</param>
+        /// <param name="readerParameters">The parameters to use while reading the assembly.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) =>
-            ModuleDefinition.FromImage(peImage, readParameters).Assembly
+        public static AssemblyDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
+            ModuleDefinition.FromImage(peImage, readerParameters).Assembly
             ?? throw new BadImageFormatException("The provided PE image does not contain an assembly manifest.");
 
         /// <summary>

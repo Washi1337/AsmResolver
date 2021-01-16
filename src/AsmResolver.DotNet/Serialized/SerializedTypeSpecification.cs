@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedTypeSpecification : TypeSpecification
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly TypeSpecificationRow _row;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type specification on.</param>
-        public SerializedTypeSpecification(ModuleReadContext context, MetadataToken token, in TypeSpecificationRow row)
+        public SerializedTypeSpecification(ModuleReaderContext context, MetadataToken token, in TypeSpecificationRow row)
             : base(token)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));

@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Signatures
 
             if (!reader.TryReadCompressedUInt32(out uint count))
             {
-                context.ReadContext.BadImage("Invalid number of local variables in local variable signature.");
+                context.ReaderContext.BadImage("Invalid number of local variables in local variable signature.");
                 return result;
             }
 

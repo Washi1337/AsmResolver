@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Signatures
             {
                 if (!reader.TryReadCompressedUInt32(out uint genericParameterCount))
                 {
-                    context.ReadContext.BadImage("Invalid generic parameter count in method signature.");
+                    context.ReaderContext.BadImage("Invalid generic parameter count in method signature.");
                     return result;
                 }
 

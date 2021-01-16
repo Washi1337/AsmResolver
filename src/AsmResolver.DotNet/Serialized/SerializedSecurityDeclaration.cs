@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedSecurityDeclaration : SecurityDeclaration
     {
-        private readonly ModuleReadContext _context;
+        private readonly ModuleReaderContext _context;
         private readonly SecurityDeclarationRow _row;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <param name="token">The token to initialize the declaration for.</param>
         /// <param name="row">The metadata table row to base the security declaration on.</param>
         public SerializedSecurityDeclaration(
-            ModuleReadContext context,
+            ModuleReaderContext context,
             MetadataToken token,
             in SecurityDeclarationRow row)
             : base(token)

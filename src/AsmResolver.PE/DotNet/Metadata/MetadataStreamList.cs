@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public class MetadataStreamList : LazyList<IMetadataStream>
     {
-        private readonly PEReadContext _context;
+        private readonly PEReaderContext _context;
         private readonly IBinaryStreamReader _directoryReader;
         private readonly IBinaryStreamReader _entriesReader;
         private readonly int _numberOfStreams;
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// <param name="entriesReader">The input stream containing the metadata stream entries.</param>
         /// <param name="numberOfStreams">The number of streams.</param>
         public MetadataStreamList(
-            PEReadContext context,
+            PEReaderContext context,
             IBinaryStreamReader directoryReader, 
             IBinaryStreamReader entriesReader, 
             int numberOfStreams)

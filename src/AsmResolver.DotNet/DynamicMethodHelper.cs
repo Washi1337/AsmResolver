@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var localsSignature = (LocalVariablesSignature) CallingConventionSignature.FromReader(
-                new BlobReadContext(module.ReadContext), 
+                new BlobReadContext(module.ReaderContext), 
                 new ByteArrayReader(localSig));
             
             for (int i = 0; i < localsSignature?.VariableTypes.Count; i++)
@@ -77,7 +77,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        public static object ResolveOperandReflection(ModuleReadContext context, CilMethodBody methodBody, CilInstruction instruction,
+        public static object ResolveOperandReflection(ModuleReaderContext context, CilMethodBody methodBody, CilInstruction instruction,
             ICilOperandResolver resolver, List<object> tokens, ReferenceImporter importer)
         {
             switch (instruction.OpCode.OperandType)
@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        private static object ReadToken(ModuleReadContext moduleReadContext, MetadataToken token, IList<object> tokens, ReferenceImporter importer)
+        private static object ReadToken(ModuleReaderContext readerContext, MetadataToken token, IList<object> tokens, ReferenceImporter importer)
         {
             switch (token.Table)
             {
@@ -185,7 +185,7 @@ namespace AsmResolver.DotNet
                 
                 case TableIndex.StandAloneSig:
                     return CallingConventionSignature.FromReader(
-                        new BlobReadContext(moduleReadContext),
+                        new BlobReadContext(readerContext),
                         new ByteArrayReader((byte[]) tokens[(int) token.Rid]));
                 
                 case (TableIndex) 112:
