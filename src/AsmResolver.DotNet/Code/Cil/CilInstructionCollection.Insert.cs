@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Code.Cil
 {
@@ -364,5 +365,53 @@ namespace AsmResolver.DotNet.Code.Cil
 
             return InsertAndReturn(index, code, signature);
         }
+
+        /// <summary>
+        /// Verifies and inserts a instruction into the collection that references a metadata member by its token.
+        /// </summary>
+        /// <param name="index">The zero-based index at which the instruction should be inserted at.</param>
+        /// <param name="code">The opcode.</param>
+        /// <param name="token">The token of the referenced member.</param>
+        /// <returns>The created instruction.</returns>
+        /// <exception cref="InvalidCilInstructionException">
+        /// Occurs when the provided operation is not an opcode referencing a metadata member.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when the provided token is not valid in a CIL stream.
+        /// </exception>
+        public CilInstruction Insert(int index, CilOpCode code, MetadataToken token)
+        {
+            switch (code.OperandType)
+            {
+                case CilOperandType.InlineField:
+                case CilOperandType.InlineMethod:
+                case CilOperandType.InlineSig:
+                case CilOperandType.InlineTok:
+                case CilOperandType.InlineType:
+                case CilOperandType.InlineString:
+                    break;
+                default:
+                    throw new InvalidCilInstructionException(code);
+            }
+
+            switch (token.Table)
+            {
+                case TableIndex.TypeRef:
+                case TableIndex.TypeDef:
+                case TableIndex.TypeSpec:
+                case TableIndex.Field:
+                case TableIndex.Method:
+                case TableIndex.MethodSpec:
+                case TableIndex.MemberRef:
+                case TableIndex.StandAloneSig:
+                case (TableIndex) 0x70:
+                    break;
+                default:
+                    throw new InvalidCilInstructionException(code);
+            }
+
+            return InsertAndReturn(index, code, token);
+        }
+        
     }
 }

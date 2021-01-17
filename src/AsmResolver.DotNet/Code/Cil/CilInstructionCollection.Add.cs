@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Code.Cil
 {
@@ -227,5 +228,20 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CilInstruction Add(CilOpCode code, StandAloneSignature signature) => Insert(Count, code, signature);
+        
+        /// <summary>
+        /// Verifies and adds a instruction to the end of the collection that references a metadata member by its token.
+        /// </summary>
+        /// <param name="code">The opcode.</param>
+        /// <param name="token">The token of the referenced member.</param>
+        /// <returns>The created instruction.</returns>
+        /// <exception cref="InvalidCilInstructionException">
+        /// Occurs when the provided operation is not an opcode referencing a metadata member.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Occurs when the provided token is not valid in a CIL stream.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public CilInstruction Add(CilOpCode code, MetadataToken token) => Insert(Count, code, token);
     }
 }
