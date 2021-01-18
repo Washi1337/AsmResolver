@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Code.Cil
     /// Represents a collection of CIL instructions found in a method body.
     /// </summary>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
-    public class CilInstructionCollection : IList<CilInstruction>
+    public partial class CilInstructionCollection : IList<CilInstruction>
     {
         private readonly List<CilInstruction> _items = new List<CilInstruction>();
 

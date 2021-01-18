@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             
             var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
             instructions.Clear();
-            instructions.Add(new CilInstruction(CilOpCodes.Ret));
+            instructions.Add(CilOpCodes.Ret);
             
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveAssemblyReferenceIndices);
             var newAssemblyRefs = GetMembers<AssemblyReference>(newModule, TableIndex.AssemblyRef);
@@ -47,14 +47,11 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var exists = importer.ImportMethod(typeof(File).GetMethod("Exists", new[] {typeof(string)}));
 
             var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
-            instructions.RemoveAt(instructions.Count-1);
-            instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Ldstr, "file.txt"),
-                new CilInstruction(CilOpCodes.Call, exists),
-                new CilInstruction(CilOpCodes.Pop),
-                new CilInstruction(CilOpCodes.Ret),
-            });
+            instructions.RemoveAt(instructions.Count - 1);
+            instructions.Add(CilOpCodes.Ldstr, "file.txt");
+            instructions.Add(CilOpCodes.Call, exists);
+            instructions.Add(CilOpCodes.Pop);
+            instructions.Add(CilOpCodes.Ret);
             
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveAssemblyReferenceIndices);
             var newAssemblyRefs = GetMembers<AssemblyReference>(newModule, TableIndex.AssemblyRef);
