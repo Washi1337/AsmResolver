@@ -11,7 +11,7 @@ namespace AsmResolver.PE.DotNet.Metadata
     public class FieldRvaDataReader : IFieldRvaDataReader
     {
         /// <inheritdoc />
-        public ISegment ResolveFieldData(IMetadata metadata, FieldRvaRow fieldRvaRow)
+        public ISegment ResolveFieldData(IErrorListener listener, IMetadata metadata, in FieldRvaRow fieldRvaRow)
         {
             if (fieldRvaRow.Data is null)
                 return null;
@@ -26,7 +26,10 @@ namespace AsmResolver.PE.DotNet.Metadata
                     .GetTable<FieldDefinitionRow>(TableIndex.Field);
 
                 if (fieldRvaRow.Field > table.Count)
-                    throw new ArgumentException("Invalid Field column value.");
+                {
+                    listener.BadImage("FieldRva row has an invalid Field column value.");
+                    return null;
+                }
 
                 var field = table.GetByRid(fieldRvaRow.Field);
                 int valueSize = DetermineFieldSize(metadata, field);
@@ -35,7 +38,8 @@ namespace AsmResolver.PE.DotNet.Metadata
                 return DataSegment.FromReader(reader, valueSize);
             }
 
-            throw new NotSupportedException("Invalid or unsupported data column.");
+            listener.NotSupported("FieldRva row has an invalid or unsupported data column.");
+            return null;
         }
 
         private int DetermineFieldSize(IMetadata metadata, in FieldDefinitionRow field)

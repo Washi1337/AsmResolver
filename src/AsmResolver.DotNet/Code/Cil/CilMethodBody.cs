@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -32,10 +33,12 @@ namespace AsmResolver.DotNet.Code.Cil
              ICilOperandResolver operandResolver = null, 
              ReferenceImporter importer = null)
         {
+            if (!(method.Module is SerializedModuleDefinition module))
+                throw new ArgumentException("Method body should reference a serialized module.");
+            
             var result = new CilMethodBody(method);
 
             operandResolver ??= new CilOperandResolver(method.Module, result);
-            
             importer ??= new ReferenceImporter(method.Module);
             
             dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
@@ -54,16 +57,16 @@ namespace AsmResolver.DotNet.Code.Cil
             result.Instructions.AddRange(disassembler.ReadAllInstructions());
 
             //Local Variables
-            result.ReadLocalVariables(method,localSig);
+            DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
             //Exception Handlers
-            result.ReadReflectionExceptionHandlers(ehInfos, ehHeader, importer);
+            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, importer);
             
             // Resolve all operands.
             foreach (var instruction in result.Instructions)
             {
                 instruction.Operand = 
-                    result.ResolveOperandReflection(instruction, operandResolver, tokenList, importer) ?? 
+                    DynamicMethodHelper.ResolveOperandReflection(module.ReaderContext, result, instruction, operandResolver, tokenList, importer) ?? 
                     instruction.Operand;
             }
 
@@ -73,14 +76,14 @@ namespace AsmResolver.DotNet.Code.Cil
          /// <summary>
          /// Creates a CIL method body from a raw CIL method body. 
          /// </summary>
-         /// <param name="parentModule">The module originally defining the method.</param>
+         /// <param name="context">The reader context.</param>
          /// <param name="method">The method that owns the method body.</param>
          /// <param name="rawBody">The raw method body.</param>
          /// <param name="operandResolver">The object instance to use for resolving operands of an instruction in the
          ///     method body.</param>
          /// <returns>The method body.</returns>
          public static CilMethodBody FromRawMethodBody(
-             ModuleDefinition parentModule, 
+             ModuleReaderContext context, 
              MethodDefinition method,
              CilRawMethodBody rawBody,
              ICilOperandResolver operandResolver = null)
@@ -88,7 +91,7 @@ namespace AsmResolver.DotNet.Code.Cil
             var result = new CilMethodBody(method);
 
             if (operandResolver is null)
-                operandResolver = new CilOperandResolver(parentModule, result);
+                operandResolver = new CilOperandResolver(context.ParentModule, result);
 
             // Read raw instructions.
             var reader = new ByteArrayReader(rawBody.Code);
@@ -172,13 +175,14 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
-        private static void ReadLocalVariables(ModuleDefinition module, CilMethodBody result,
+        private static void ReadLocalVariables(
+            ModuleDefinition module, 
+            CilMethodBody result,
             CilRawFatMethodBody fatBody)
         {
             if (fatBody.LocalVarSigToken != MetadataToken.Zero
                 && module.TryLookupMember(fatBody.LocalVarSigToken, out var member)
-                && member is StandAloneSignature signature
-                && signature.Signature is LocalVariablesSignature localVariablesSignature)
+                && member is StandAloneSignature {Signature: LocalVariablesSignature localVariablesSignature})
             {
                 foreach (var type in localVariablesSignature.VariableTypes)
                     result.LocalVariables.Add(new CilLocalVariable(type));

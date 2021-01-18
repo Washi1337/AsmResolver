@@ -16,57 +16,60 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedFieldDefinition : FieldDefinition
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly FieldDefinitionRow _row;
 
         /// <summary>
         /// Creates a field definition from a field metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the field.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the field for.</param>
         /// <param name="row">The metadata table row to base the field definition on.</param>
-        public SerializedFieldDefinition(SerializedModuleDefinition parentModule, MetadataToken token, FieldDefinitionRow row)
+        public SerializedFieldDefinition(ModuleReaderContext context, MetadataToken token, in FieldDefinitionRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Attributes = row.Attributes;
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()
             .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override FieldSignature GetSignature() => FieldSignature.FromReader(_parentModule,
-            _parentModule.DotNetDirectory.Metadata
+        protected override FieldSignature GetSignature() => FieldSignature.FromReader(
+            new BlobReadContext(_context),
+            _context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Signature));
 
         /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()
         {
-            var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _parentModule.GetFieldDeclaringType(MetadataToken.Rid));
-            return _parentModule.TryLookupMember(declaringTypeToken, out var member)
+            var module = _context.ParentModule;
+            var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, module.GetFieldDeclaringType(MetadataToken.Rid));
+            return module.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
                 : null;
         }
 
         /// <inheritdoc />
-        protected override Constant GetConstant() => 
-            _parentModule.GetConstant(MetadataToken);
+        protected override Constant GetConstant() =>
+            _context.ParentModule.GetConstant(MetadataToken);
 
         /// <inheritdoc />
         protected override MarshalDescriptor GetMarshalDescriptor() =>
-            _parentModule.GetFieldMarshal(MetadataToken);
+            _context.ParentModule.GetFieldMarshal(MetadataToken);
         
         /// <inheritdoc />
         protected override ImplementationMap GetImplementationMap()
         {
-            uint mapRid = _parentModule.GetImplementationMapRid(MetadataToken);
-            return _parentModule.TryLookupMember(new MetadataToken(TableIndex.ImplMap, mapRid), out var member)
+            var module = _context.ParentModule;
+            uint mapRid = module.GetImplementationMapRid(MetadataToken);
+            return module.TryLookupMember(new MetadataToken(TableIndex.ImplMap, mapRid), out var member)
                 ? member as ImplementationMap
                 : null;
         }
@@ -74,8 +77,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override ISegment GetFieldRva()
         {
-            uint rid = _parentModule.GetFieldRvaRid(MetadataToken);
-            bool result = _parentModule.DotNetDirectory.Metadata
+            var module = _context.ParentModule;
+            
+            uint rid = module.GetFieldRvaRid(MetadataToken);
+            bool result = module.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable<FieldRvaRow>()
                 .TryGetByRid(rid, out var fieldRvaRow);
@@ -83,15 +88,15 @@ namespace AsmResolver.DotNet.Serialized
             if (!result)
                 return null;
 
-            return _parentModule.ReadParameters.FieldRvaDataReader
-                .ResolveFieldData(_parentModule.DotNetDirectory.Metadata, fieldRvaRow);
+            return _context.Parameters.FieldRvaDataReader
+                .ResolveFieldData(ThrowErrorListener.Instance, _context.Image.DotNetDirectory.Metadata, fieldRvaRow);
         }
 
         /// <inheritdoc />
         protected override int? GetFieldOffset()
         {
-            uint rid = _parentModule.GetFieldLayoutRid(MetadataToken);
-            bool result = _parentModule.DotNetDirectory.Metadata
+            uint rid = _context.ParentModule.GetFieldLayoutRid(MetadataToken);
+            bool result = _context.Image.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable<FieldLayoutRow>()
                 .TryGetByRid(rid, out var fieldLayoutRow);
@@ -104,6 +109,6 @@ namespace AsmResolver.DotNet.Serialized
 
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

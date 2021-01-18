@@ -36,6 +36,14 @@ namespace AsmResolver.PE.DotNet.Cil
         public int Offset => Instruction?.Offset ?? -1;
 
         /// <inheritdoc />
+        public bool Equals(ICilLabel other) => other != null && Offset == other.Offset;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => Equals(obj as ICilLabel);
+
+        /// <inheritdoc />
+        public override int GetHashCode() => Offset;
+
         public override string ToString() => Instruction is null
             ? "IL_????"
             : $"IL_{Offset:X4}";

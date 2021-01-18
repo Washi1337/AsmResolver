@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.DotNet.Serialized
@@ -6,12 +7,21 @@ namespace AsmResolver.DotNet.Serialized
     /// <summary>
     /// Provides parameters for the reading process of a .NET module.
     /// </summary>
-    public class ModuleReadParameters
+    public class ModuleReaderParameters
     {
         /// <summary>
         /// Initializes the default module read parameters.
         /// </summary>
-        public ModuleReadParameters()
+        public ModuleReaderParameters()
+        {
+        }
+
+        /// <summary>
+        /// Initializes the module read parameters with an error listener.
+        /// </summary>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
+        public ModuleReaderParameters(IErrorListener errorListener)
+            : this(null,errorListener)
         {
         }
 
@@ -19,13 +29,25 @@ namespace AsmResolver.DotNet.Serialized
         /// Initializes the module read parameters with a working directory.
         /// </summary>
         /// <param name="workingDirectory">The working directory of the modules to read.</param>
-        public ModuleReadParameters(string workingDirectory)
+        public ModuleReaderParameters(string workingDirectory)
+            : this(workingDirectory, ThrowErrorListener.Instance)
+        {
+        }
+
+        /// <summary>
+        /// Initializes the module read parameters with a working directory.
+        /// </summary>
+        /// <param name="workingDirectory">The working directory of the modules to read.</param>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
+        public ModuleReaderParameters(string workingDirectory, IErrorListener errorListener)
         {
             if (workingDirectory != null)
             {
                 WorkingDirectory = workingDirectory;
                 ModuleResolver = new DirectoryNetModuleResolver(workingDirectory, this);
             }
+
+            PEReaderParameters.ErrorListener = errorListener;
         }
 
         /// <summary>
@@ -62,5 +84,17 @@ namespace AsmResolver.DotNet.Serialized
             get;
             set;
         } = new FieldRvaDataReader();
+
+        /// <summary>
+        /// Gets or sets the parameters used for parsing a PE file into a PE image.
+        /// </summary>
+        /// <remarks>
+        /// This property is ignored when the module was read from a <see cref="IPEImage"/>
+        /// </remarks>
+        public PEReaderParameters PEReaderParameters
+        {
+            get;
+            set;
+        } = new PEReaderParameters();
     }
 }

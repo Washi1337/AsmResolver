@@ -1,3 +1,5 @@
+using System;
+using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Security;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -11,20 +13,22 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedSecurityDeclaration : SecurityDeclaration
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly SecurityDeclarationRow _row;
 
         /// <summary>
         /// Creates a security declaration from a declaration metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the security declaration.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the declaration for.</param>
         /// <param name="row">The metadata table row to base the security declaration on.</param>
-        public SerializedSecurityDeclaration(SerializedModuleDefinition parentModule, MetadataToken token,
-            SecurityDeclarationRow row)
+        public SerializedSecurityDeclaration(
+            ModuleReaderContext context,
+            MetadataToken token,
+            in SecurityDeclarationRow row)
             : base(token)
         {
-            _parentModule = parentModule;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Action = row.Action;
@@ -33,8 +37,10 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IHasSecurityDeclaration GetParent()
         {
-            var ownerToken = _parentModule.GetSecurityDeclarationOwner(MetadataToken.Rid);
-            return _parentModule.TryLookupMember(ownerToken, out var member)
+            var module = _context.ParentModule;
+            
+            var ownerToken = module.GetSecurityDeclarationOwner(MetadataToken.Rid);
+            return module.TryLookupMember(ownerToken, out var member)
                 ? member as IHasSecurityDeclaration
                 : null;
         }
@@ -42,12 +48,12 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override PermissionSetSignature GetPermissionSet()
         {
-            var reader = _parentModule.DotNetDirectory.Metadata
+            var reader = _context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.PermissionSet);
             
             return reader is {} ? 
-                PermissionSetSignature.FromReader(_parentModule, reader) 
+                PermissionSetSignature.FromReader(new BlobReadContext(_context), reader) 
                 : null;
         }
     }

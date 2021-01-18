@@ -1,10 +1,14 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.Methods;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Strings;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
@@ -399,6 +403,25 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             body.Instructions.Add(CilOpCodes.Jmp, body.Owner);
 
             Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
+        }
+
+
+        [Fact]
+        public void ReadInvalidMethodBodyErrorShouldAppearInDiagnostics()
+        {
+            var bag = new DiagnosticBag();
+            
+            // Read module with diagnostic bag as error listener.
+            var module = ModuleDefinition.FromBytes(
+                Properties.Resources.HelloWorld_InvalidMethodBody,
+                new ModuleReaderParameters(bag));
+
+            // Ensure invalid method body is loaded.
+            foreach (var method in module.GetOrCreateModuleType().Methods)
+                Assert.Null(method.CilMethodBody);
+
+            // Verify error was reported.
+            Assert.NotEmpty(bag.Exceptions);
         }
     }
 }

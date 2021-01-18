@@ -59,6 +59,13 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
         
+        public static byte[] HelloWorld_InvalidMethodBody {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_InvalidMethodBody", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
         public static byte[] HelloWorld_MaliciousNestedClassLoop {
             get {
                 object obj = ResourceManager.GetObject("HelloWorld_MaliciousNestedClassLoop", resourceCulture);

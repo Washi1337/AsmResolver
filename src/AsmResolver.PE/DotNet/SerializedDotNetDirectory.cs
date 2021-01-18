@@ -1,7 +1,6 @@
 using System;
 using AsmResolver.PE.DotNet.Metadata;
 using AsmResolver.PE.DotNet.Resources;
-using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.DotNet
@@ -11,8 +10,7 @@ namespace AsmResolver.PE.DotNet
     /// </summary>
     public class SerializedDotNetDirectory : DotNetDirectory
     {
-        private readonly IPEFile _peFile;
-        private readonly IMetadataStreamReader _metadataStreamReader;
+        private readonly PEReaderContext _context;
         private readonly DataDirectory _metadataDirectory;
         private readonly DataDirectory _resourcesDirectory;
         private readonly DataDirectory _strongNameDirectory;
@@ -24,17 +22,14 @@ namespace AsmResolver.PE.DotNet
         /// <summary>
         /// Reads a .NET directory from an input stream.
         /// </summary>
-        /// <param name="peFile">The PE file containing the .NET directory.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        /// <param name="metadataStreamReader"></param>
         /// <exception cref="ArgumentNullException">Occurs when any of the arguments are <c>null</c>.</exception>
-        public SerializedDotNetDirectory(IPEFile peFile, IBinaryStreamReader reader,
-            IMetadataStreamReader metadataStreamReader)
+        public SerializedDotNetDirectory(PEReaderContext context, IBinaryStreamReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            _metadataStreamReader = metadataStreamReader;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
 
             Offset = reader.Offset;
 
@@ -55,91 +50,115 @@ namespace AsmResolver.PE.DotNet
         /// <inheritdoc />
         protected override IMetadata GetMetadata()
         {
-            if (_metadataDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
-            {
-                return new SerializedMetadata(directoryReader, _metadataStreamReader);
-            }
+            if (!_metadataDirectory.IsPresentInPE)
+                return null;
 
-            return null;
+            if (!_context.File.TryCreateDataDirectoryReader(_metadataDirectory, out var directoryReader))
+            {
+                _context.BadImage(".NET data directory contains an invalid metadata directory RVA and/or size.");
+                return null;
+            }
+            
+            return new SerializedMetadata(_context, directoryReader);
+
         }
 
         /// <inheritdoc />
         protected override DotNetResourcesDirectory GetResources()
         {
-            if (_resourcesDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_resourcesDirectory, out var directoryReader))
+            if (!_resourcesDirectory.IsPresentInPE)
+                return null;
+
+            if (!_context.File.TryCreateDataDirectoryReader(_resourcesDirectory, out var directoryReader))
             {
-                return new SerializedDotNetResourcesDirectory(directoryReader);
+                _context.BadImage(".NET data directory contains an invalid resources directory RVA and/or size.");
+                return null;
             }
 
-            return null;
+            return new SerializedDotNetResourcesDirectory(directoryReader);
 
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetStrongName()
         {
-            if (_strongNameDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_strongNameDirectory, out var directoryReader))
-            {
-                // TODO: interpretation instead of raw contents.
-                return DataSegment.FromReader(directoryReader);
-            }
+            if (!_strongNameDirectory.IsPresentInPE)
+                return null;
 
-            return null;
+            if (!_context.File.TryCreateDataDirectoryReader(_strongNameDirectory, out var directoryReader))
+            {
+                _context.BadImage(".NET data directory contains an invalid strong name directory RVA and/or size.");
+                return null;
+            }
+            
+            // TODO: interpretation instead of raw contents.
+            return DataSegment.FromReader(directoryReader);
+
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetCodeManagerTable()
         {
-            if (_codeManagerDirectory.IsPresentInPE
-            && _peFile.TryCreateDataDirectoryReader(_codeManagerDirectory, out var directoryReader))
-            {
-                // TODO: interpretation instead of raw contents.
-                return DataSegment.FromReader(directoryReader);
-            }
+            if (!_codeManagerDirectory.IsPresentInPE)
+                return null;
 
-            return null;
+            if (!_context.File.TryCreateDataDirectoryReader(_codeManagerDirectory, out var directoryReader))
+            {
+                _context.BadImage(".NET data directory contains an invalid code manager directory RVA and/or size.");
+                return null;
+            }
+            
+            // TODO: interpretation instead of raw contents.
+            return DataSegment.FromReader(directoryReader);
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetVTableFixups()
         {
-            if (_vtableFixupsDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_vtableFixupsDirectory, out var directoryReader))
+            if (!_vtableFixupsDirectory.IsPresentInPE)
+                return null;
+
+            if (!_context.File.TryCreateDataDirectoryReader(_vtableFixupsDirectory, out var directoryReader))
             {
-                // TODO: interpretation instead of raw contents.
-                return DataSegment.FromReader(directoryReader);
+                _context.BadImage(".NET data directory contains an invalid VTable fixups directory RVA and/or size.");
+                return null;
             }
 
-            return null;
+            // TODO: interpretation instead of raw contents.
+            return DataSegment.FromReader(directoryReader);
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetExportAddressTable()
         {
-            if (_exportsDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_exportsDirectory, out var directoryReader))
-            {
-                // TODO: interpretation instead of raw contents.
-                return DataSegment.FromReader(directoryReader);
-            }
+            if (!_exportsDirectory.IsPresentInPE)
+                return null;
 
-            return null;
+            if (!_context.File.TryCreateDataDirectoryReader(_exportsDirectory, out var directoryReader))
+            {
+                _context.BadImage(".NET data directory contains an invalid export address directory RVA and/or size.");
+                return null;
+            }
+            
+            // TODO: interpretation instead of raw contents.
+            return DataSegment.FromReader(directoryReader);
         }
 
         /// <inheritdoc />
         protected override IReadableSegment GetManagedNativeHeader()
         {
-            if (_nativeHeaderDirectory.IsPresentInPE
-                && _peFile.TryCreateDataDirectoryReader(_nativeHeaderDirectory, out var directoryReader))
-            {
-                // TODO: interpretation instead of raw contents.
-                return DataSegment.FromReader(directoryReader);
-            }
+            if (!_nativeHeaderDirectory.IsPresentInPE)
+                return null;
 
-            return null;
+            if (!_context.File.TryCreateDataDirectoryReader(_nativeHeaderDirectory, out var directoryReader))
+            {
+                _context.BadImage(".NET data directory contains an invalid native header directory RVA and/or size.");
+                return null;
+            }
+            
+            // TODO: interpretation instead of raw contents.
+            return DataSegment.FromReader(directoryReader);
+
         }
 
     }

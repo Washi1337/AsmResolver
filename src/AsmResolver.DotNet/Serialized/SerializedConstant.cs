@@ -12,20 +12,22 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedConstant : Constant
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly ConstantRow _row;
 
         /// <summary>
         /// Creates a constant from a constant metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the constant.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the constant for.</param>
         /// <param name="row">The metadata table row to base the constant on.</param>
-        public SerializedConstant(SerializedModuleDefinition parentModule, MetadataToken token,
-            ConstantRow row)
+        public SerializedConstant(
+            ModuleReaderContext context,
+            MetadataToken token,
+            in ConstantRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Type = row.Type;
@@ -34,8 +36,8 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IHasConstant GetParent()
         {
-            var token = _parentModule.GetConstantOwner(MetadataToken.Rid);
-            return _parentModule.TryLookupMember(token, out var member)
+            var token = _context.ParentModule.GetConstantOwner(MetadataToken.Rid);
+            return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as IHasConstant
                 : null;
         }
@@ -43,7 +45,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override DataBlobSignature GetValue()
         {
-            var reader = _parentModule.DotNetDirectory.Metadata
+            var reader = _context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Value);
             

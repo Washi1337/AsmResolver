@@ -12,29 +12,32 @@ namespace AsmResolver.PE.Imports
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedImportedModuleList : LazyList<IImportedModule>
     {
-        private readonly IPEFile _peFile;
+        private readonly PEReaderContext _context;
         private readonly DataDirectory _dataDirectory;
 
         /// <summary>
         /// Prepares a new lazy-initialized list of module import entries.
         /// </summary>
-        /// <param name="peFile">The PE file containing the list of modules.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="dataDirectory">The import data directory.</param>
-        public SerializedImportedModuleList(IPEFile peFile, DataDirectory dataDirectory)
+        public SerializedImportedModuleList(PEReaderContext context, DataDirectory dataDirectory)
         {
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dataDirectory = dataDirectory;
         }
 
         /// <inheritdoc />
         protected override void Initialize()
         {
-            if (!_peFile.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
+            if (!_context.File.TryCreateDataDirectoryReader(_dataDirectory, out var reader))
+            {
+                _context.BadImage("Invalid import data directory RVA and/or size.");
                 return;
-            
+            }
+
             while (true)
             {
-                var entry = ImportedModule.FromReader(_peFile, reader);
+                var entry = ImportedModule.FromReader(_context, reader);
                 if (entry == null)
                     break;
                 Items.Add(entry);

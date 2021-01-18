@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -12,63 +13,72 @@ namespace AsmResolver.DotNet
 {
     internal static class DynamicMethodHelper
     {
-        public static void ReadLocalVariables(this CilMethodBody methodBody, MethodDefinition method, byte[] localSig)
+        public static void ReadLocalVariables(CilMethodBody methodBody, MethodDefinition method, byte[] localSig)
         {
-            var locals = CallingConventionSignature.FromReader(method.Module, new ByteArrayReader(localSig)) as LocalVariablesSignature;
-            for (var i = 0; i < locals?.VariableTypes.Count; i++)
-                methodBody.LocalVariables.Add(new CilLocalVariable(locals.VariableTypes[i]));
+            if (!(method.Module is SerializedModuleDefinition module))
+                throw new ArgumentException("Method body should reference a serialized module.");
+
+            var localsSignature = (LocalVariablesSignature) CallingConventionSignature.FromReader(
+                new BlobReadContext(module.ReaderContext), 
+                new ByteArrayReader(localSig));
+            
+            for (int i = 0; i < localsSignature?.VariableTypes.Count; i++)
+                methodBody.LocalVariables.Add(new CilLocalVariable(localsSignature.VariableTypes[i]));
         }
-        
-        public static void ReadReflectionExceptionHandlers(this CilMethodBody methodBody,
+
+        public static void ReadReflectionExceptionHandlers(CilMethodBody methodBody,
             IList<object> ehInfos, byte[] ehHeader, ReferenceImporter importer)
         {
+            //Sample needed!
             if (ehHeader != null && ehHeader.Length > 4)
-                //Sample needed!
-                throw new NotImplementedException("Exception Handlers From ehHeader Not Supported Yet.");
+                throw new NotImplementedException("Exception handlers from ehHeader not supported yet.");
+
             if (ehInfos != null && ehInfos.Count > 0)
             {
-                foreach(var ehInfo in ehInfos)
-                {
-                    for (int i = 0; i < FieldReader.ReadField<int>(ehInfo, "m_currentCatch");i++) {
-                        
-                        //Get ExceptionHandlerInfo Field Values
-                        var endFinally = FieldReader.ReadField<int>(ehInfo, "m_endFinally");
-                        var endFinallyLabel = endFinally < 0
-                            ? null
-                            : methodBody.Instructions.GetByOffset(endFinally)?.CreateLabel() ??
-                              new CilOffsetLabel(endFinally);
-                        var endTry = FieldReader.ReadField<int>(ehInfo, "m_endAddr");
-                        var endTryLabel = methodBody.Instructions.GetByOffset(endTry)?.CreateLabel() ??
-                                          new CilOffsetLabel(endTry);
-                        var handlerEnd = FieldReader.ReadField<int[]>(ehInfo, "m_catchEndAddr")[i];
-                        var exceptionType = FieldReader.ReadField<Type[]>(ehInfo, "m_catchClass")[i];
-                        var handlerStart = FieldReader.ReadField<int[]>(ehInfo, "m_catchAddr")[i];
-                        var tryStart = FieldReader.ReadField<int>(ehInfo, "m_startAddr");
-                        var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfo, "m_type")[i];
-
-                        //Create the handler
-                        var handler = new CilExceptionHandler
-                        {
-                            HandlerType = handlerType,
-                            TryStart = methodBody.Instructions.GetByOffset(tryStart)?.CreateLabel() ??
-                                       new CilOffsetLabel(tryStart),
-                            TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
-                            FilterStart = null,
-                            HandlerStart = methodBody.Instructions.GetByOffset(handlerStart)?.CreateLabel() ??
-                                           new CilOffsetLabel(handlerStart),
-                            HandlerEnd = methodBody.Instructions.GetByOffset(handlerEnd)?.CreateLabel() ??
-                                         new CilOffsetLabel(handlerEnd),
-                            ExceptionType = exceptionType != null ? importer.ImportType(exceptionType) : null
-                        };
-
-                        methodBody.ExceptionHandlers.Add(handler);
-                    }
-                }
+                foreach (var ehInfo in ehInfos)
+                    InterpretEHInfo(methodBody, importer, ehInfo);
             }
         }
-        
-        public static object ResolveOperandReflection(this CilMethodBody methodBody, CilInstruction instruction,
-            ICilOperandResolver resolver, List<object> Tokens, ReferenceImporter Importer)
+
+        private static void InterpretEHInfo(CilMethodBody methodBody, ReferenceImporter importer, object ehInfo)
+        {
+            for (int i = 0; i < FieldReader.ReadField<int>(ehInfo, "m_currentCatch"); i++)
+            {
+                // Get ExceptionHandlerInfo Field Values
+                var endFinally = FieldReader.ReadField<int>(ehInfo, "m_endFinally");
+                var instructions = methodBody.Instructions;
+
+                var endFinallyLabel = endFinally >= 0
+                    ? instructions.GetByOffset(endFinally)?.CreateLabel() ?? new CilOffsetLabel(endFinally)
+                    : null;
+
+                int tryStart = FieldReader.ReadField<int>(ehInfo, "m_startAddr");
+                int tryEnd = FieldReader.ReadField<int>(ehInfo, "m_endAddr");
+                int handlerStart = FieldReader.ReadField<int[]>(ehInfo, "m_catchAddr")[i];
+                int handlerEnd = FieldReader.ReadField<int[]>(ehInfo, "m_catchEndAddr")[i];
+                var exceptionType = FieldReader.ReadField<Type[]>(ehInfo, "m_catchClass")[i];
+                var handlerType = (CilExceptionHandlerType) FieldReader.ReadField<int[]>(ehInfo, "m_type")[i];
+
+                var endTryLabel = instructions.GetByOffset(tryEnd)?.CreateLabel() ?? new CilOffsetLabel(tryEnd);
+
+                // Create the handler
+                var handler = new CilExceptionHandler
+                {
+                    HandlerType = handlerType,
+                    TryStart = instructions.GetByOffset(tryStart)?.CreateLabel() ?? new CilOffsetLabel(tryStart),
+                    TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
+                    FilterStart = null,
+                    HandlerStart = instructions.GetByOffset(handlerStart)?.CreateLabel() ?? new CilOffsetLabel(handlerStart),
+                    HandlerEnd = instructions.GetByOffset(handlerEnd)?.CreateLabel() ?? new CilOffsetLabel(handlerEnd),
+                    ExceptionType = exceptionType != null ? importer.ImportType(exceptionType) : null
+                };
+
+                methodBody.ExceptionHandlers.Add(handler);
+            }
+        }
+
+        public static object ResolveOperandReflection(ModuleReaderContext context, CilMethodBody methodBody, CilInstruction instruction,
+            ICilOperandResolver resolver, List<object> tokens, ReferenceImporter importer)
         {
             switch (instruction.OpCode.OperandType)
             {
@@ -76,29 +86,37 @@ namespace AsmResolver.DotNet
                 case CilOperandType.ShortInlineBrTarget:
                     return new CilInstructionLabel(
                         methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset));
+                
                 case CilOperandType.InlineField:
                 case CilOperandType.InlineMethod:
                 case CilOperandType.InlineSig:
                 case CilOperandType.InlineTok:
                 case CilOperandType.InlineType:
-                    return ReadToken(((MetadataToken) instruction.Operand).ToUInt32(), Tokens, Importer);
+                    return ReadToken(context, ((MetadataToken) instruction.Operand).ToUInt32(), tokens, importer);
+                
                 case CilOperandType.InlineString:
-                    return ReadToken(((MetadataToken) instruction.Operand).ToUInt32(), Tokens, Importer);
+                    return ReadToken(context, ((MetadataToken) instruction.Operand).ToUInt32(), tokens, importer);
+                
                 case CilOperandType.InlineSwitch:
                     var result = new List<ICilLabel>();
                     var labels = (IEnumerable<ICilLabel>) instruction.Operand;
                     foreach (var label in labels)
                     {
                         var target = methodBody.Instructions.GetByOffset(label.Offset);
-                        result.Add(target == null ? label : new CilInstructionLabel(target));
+                        result.Add(target != null 
+                            ? new CilInstructionLabel(target) 
+                            : label);
                     }
                     return result;
+                
                 case CilOperandType.InlineVar:
                 case CilOperandType.ShortInlineVar:
                     return resolver.ResolveLocalVariable(Convert.ToInt32(instruction.Operand));
+                
                 case CilOperandType.InlineArgument:
                 case CilOperandType.ShortInlineArgument:
                     return resolver.ResolveParameter(Convert.ToInt32(instruction.Operand));
+                
                 case CilOperandType.InlineI:
                 case CilOperandType.InlineI8:
                 case CilOperandType.InlineNone:
@@ -115,7 +133,7 @@ namespace AsmResolver.DotNet
             }
         }
 
-        private static object ReadToken(MetadataToken token, IList<object> tokens, ReferenceImporter importer)
+        private static object ReadToken(ModuleReaderContext readerContext, MetadataToken token, IList<object> tokens, ReferenceImporter importer)
         {
             switch (token.Table)
             {
@@ -124,6 +142,7 @@ namespace AsmResolver.DotNet
                     if (type is RuntimeTypeHandle runtimeTypeHandle)
                         return importer.ImportType(Type.GetTypeFromHandle(runtimeTypeHandle));
                     break;
+                
                 case TableIndex.Field:
                     var field = tokens[(int) token.Rid];
                     if (field is null)
@@ -141,6 +160,7 @@ namespace AsmResolver.DotNet
                     }
 
                     break;
+                
                 case TableIndex.Method:
                 case TableIndex.MemberRef:
                     var obj = tokens[(int) token.Rid];
@@ -162,9 +182,12 @@ namespace AsmResolver.DotNet
                     if (obj.GetType().FullName == "System.Reflection.Emit.VarArgMethod")
                         return importer.ImportMethod(FieldReader.ReadField<MethodInfo>(obj, "m_method"));
                     break;
+                
                 case TableIndex.StandAloneSig:
-                    return CallingConventionSignature.FromReader(importer.TargetModule,
-                        new ByteArrayReader(tokens[(int) token.Rid] as byte[]));
+                    return CallingConventionSignature.FromReader(
+                        new BlobReadContext(readerContext),
+                        new ByteArrayReader((byte[]) tokens[(int) token.Rid]));
+                
                 case (TableIndex) 112:
                     return tokens[(int) token.Rid] as string;
             }

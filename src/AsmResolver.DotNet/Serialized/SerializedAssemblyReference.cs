@@ -14,19 +14,19 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedAssemblyReference : AssemblyReference
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly AssemblyReferenceRow _row;
 
         /// <summary>
         /// Creates an assembly reference from an assembly reference metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contained the reference.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the reference for.</param>
         /// <param name="row">The metadata table row to base the assembly reference on.</param>
-        public SerializedAssemblyReference(SerializedModuleDefinition parentModule, MetadataToken token, AssemblyReferenceRow row)
+        public SerializedAssemblyReference(ModuleReaderContext context, MetadataToken token, in AssemblyReferenceRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Attributes = row.Attributes;
@@ -34,19 +34,19 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override string GetCulture() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetCulture() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()?.GetStringByIndex(_row.Culture);
 
         /// <inheritdoc />
-        protected override byte[] GetPublicKeyOrToken() => _parentModule.DotNetDirectory.Metadata
+        protected override byte[] GetPublicKeyOrToken() => _context.Image.DotNetDirectory.Metadata
             .GetStream<BlobStream>()?.GetBlobByIndex(_row.PublicKeyOrToken);
       
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() =>
-            _parentModule.GetCustomAttributeCollection(this);  
+            _context.ParentModule.GetCustomAttributeCollection(this);  
     }
 }

@@ -20,11 +20,11 @@ namespace AsmResolver.PE
         /// Opens a PE image from a file.
         /// </summary>
         /// <param name="peFile">The file to base the image from.</param>
-        /// <param name="readParameters">The parameters to use while reading the PE image.</param>
-        public SerializedPEImage(IPEFile peFile, PEReadParameters readParameters)
+        /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
+        public SerializedPEImage(IPEFile peFile, PEReaderParameters readerParameters)
         {
             PEFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-            ReadParameters = readParameters;
+            ReaderContext = new PEReaderContext(peFile, readerParameters);
 
             FilePath = peFile.FilePath;
             MachineType = PEFile.FileHeader.Machine;
@@ -47,7 +47,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets the reading parameters used for reading the PE image.
         /// </summary>
-        public PEReadParameters ReadParameters
+        public PEReaderContext ReaderContext
         {
             get;
         }
@@ -57,7 +57,7 @@ namespace AsmResolver.PE
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ImportDirectory);
             return dataDirectory.IsPresentInPE
-                ? (IList<IImportedModule>) new SerializedImportedModuleList(PEFile, dataDirectory)
+                ? (IList<IImportedModule>) new SerializedImportedModuleList(ReaderContext, dataDirectory)
                 : new List<IImportedModule>();
         }
 
@@ -68,7 +68,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return new SerializedExportDirectory(PEFile, reader);
+            return new SerializedExportDirectory(ReaderContext, reader);
         }
 
         /// <inheritdoc />
@@ -78,7 +78,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
-            return new SerializedResourceDirectory(PEFile, null, reader);
+            return new SerializedResourceDirectory(ReaderContext, null, reader);
         }
 
         /// <inheritdoc />
@@ -86,7 +86,7 @@ namespace AsmResolver.PE
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory);
             return dataDirectory.IsPresentInPE
-                ? new SerializedRelocationList(PEFile, dataDirectory)
+                ? new SerializedRelocationList(ReaderContext, dataDirectory)
                 : (IList<BaseRelocation>) new List<BaseRelocation>();
         }
 
@@ -97,7 +97,7 @@ namespace AsmResolver.PE
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
             
-            return new SerializedDotNetDirectory(PEFile, reader, ReadParameters.MetadataStreamReader);
+            return new SerializedDotNetDirectory(ReaderContext, reader);
         }
 
         /// <inheritdoc />
@@ -110,7 +110,7 @@ namespace AsmResolver.PE
             {
                 uint count = dataDirectory.Size / DebugDataEntry.DebugDataEntryHeaderSize;
                 for (int i = 0; i < count; i++)
-                    result.Add(new SerializedDebugDataEntry(reader, ReadParameters.DebugDataReader));
+                    result.Add(new SerializedDebugDataEntry(ReaderContext, reader));
             }
             
             return result;

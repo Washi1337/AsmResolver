@@ -11,13 +11,13 @@ namespace AsmResolver.DotNet.Signatures
     
     internal sealed class CustomAttributeArgumentReader
     {
-        private readonly ModuleDefinition _parentModule;
+        private readonly BlobReadContext _context;
         private readonly IBinaryStreamReader _reader;
 
-        public CustomAttributeArgumentReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        public CustomAttributeArgumentReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
-            _parentModule = parentModule;
-            _reader = reader;
+            _context = context;
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
 
         public IList<object> Elements
@@ -33,9 +33,11 @@ namespace AsmResolver.DotNet.Signatures
 
         public void ReadValue(TypeSignature valueType)
         {
+            var module = _context.ReaderContext.ParentModule;
+            
             if (valueType.IsTypeOf("System", "Type"))
             {
-                Elements.Add(TypeNameParser.Parse(_parentModule, _reader.ReadSerString()));
+                Elements.Add(TypeNameParser.Parse(module, _reader.ReadSerString()));
                 return;
             }
 
@@ -94,8 +96,8 @@ namespace AsmResolver.DotNet.Signatures
                     break;
 
                 case ElementType.Object:
-                    var reader = new CustomAttributeArgumentReader(_parentModule, _reader);
-                    var type = TypeSignature.ReadFieldOrPropType(_parentModule, _reader);
+                    var reader = new CustomAttributeArgumentReader(_context, _reader);
+                    var type = TypeSignature.ReadFieldOrPropType(_context, _reader);
                     reader.ReadValue(type);
                     Elements.Add(new BoxedArgument(type, type.ElementType == ElementType.SzArray
                         ? reader.Elements.ToArray()
@@ -121,21 +123,25 @@ namespace AsmResolver.DotNet.Signatures
                     // Value is an enum, resolve it and get underlying type.
                     // If that fails, most enums are int32s, assume that is the case in an attempt to recover.
                     
-                    var enumTypeDef = _parentModule.MetadataResolver.ResolveType(valueType);
-                    
-                    TypeSignature underlyingType;
-                    if (enumTypeDef is null) 
-                        underlyingType = _parentModule.CorLibTypeFactory.Int32;
-                    else if (enumTypeDef.IsEnum)
-                        underlyingType = enumTypeDef.GetEnumUnderlyingType() ?? _parentModule.CorLibTypeFactory.Int32;
-                    else
-                        throw new NotSupportedException($"Type {valueType} is not an enum.");
+                    var enumTypeDef = module.MetadataResolver.ResolveType(valueType);
 
+                    TypeSignature underlyingType = null;
+                    if (enumTypeDef != null && enumTypeDef.IsEnum)
+                        underlyingType = enumTypeDef.GetEnumUnderlyingType();
+
+                    if (underlyingType is null)
+                    {
+                        _context.ReaderContext.BadImage($"Underlying enum type {valueType} could not be resolved. Assuming System.Int32 for custom attribute argument.");
+                        underlyingType = module.CorLibTypeFactory.Int32;
+                    }
+                    
                     ReadValue(underlyingType);
                     break;
 
                 default:
-                    throw new NotSupportedException($"Unsupported element type {valueType.ElementType}.");
+                    _context.ReaderContext.NotSupported($"Unsupported element type {valueType.ElementType} in custom attribute argument.");
+                    Elements.Add(null);
+                    break;
             }
 
         }

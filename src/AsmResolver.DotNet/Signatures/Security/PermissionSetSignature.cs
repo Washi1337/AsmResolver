@@ -10,10 +10,10 @@ namespace AsmResolver.DotNet.Signatures.Security
         /// <summary>
         /// Reads a permission set signature from the provided input blob stream.
         /// </summary>
-        /// <param name="parentModule">The module the permission set resides in.</param>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input blob stream.</param>
         /// <returns>The permission set.</returns>
-        public static PermissionSetSignature FromReader(ModuleDefinition parentModule, IBinaryStreamReader reader)
+        public static PermissionSetSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
             var result = new PermissionSetSignature();
             if (reader.ReadByte() != '.')
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Signatures.Security
                 return result;
 
             for (int i = 0; i < count && reader.CanRead(1); i++)
-                result.Attributes.Add(SecurityAttribute.FromReader(parentModule, reader));
+                result.Attributes.Add(SecurityAttribute.FromReader(context, reader));
 
             return result;
         }

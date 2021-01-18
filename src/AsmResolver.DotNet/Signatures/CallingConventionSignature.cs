@@ -13,42 +13,23 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single calling convention signature at the current position of the provided stream reader.
         /// </summary>
-        /// <param name="module">The module the signature is defined in.</param>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The reader to use.</param>
         /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
         /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
-        /// <returns>The read signature.</returns>
-        public static CallingConventionSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader,
-            bool readToEnd = false)
-        {
-            return FromReader(module, reader, readToEnd, RecursionProtection.CreateNew());
-        }
-
-        /// <summary>
-        /// Reads a single calling convention signature at the current position of the provided stream reader.
-        /// </summary>
-        /// <param name="module">The module the signature is defined in.</param>
-        /// <param name="reader">The reader to use.</param>
-        /// <param name="readToEnd">Determines whether any extra data after the signature should be read and
-        /// put into the <see cref="ExtendableBlobSignature.ExtraData"/> property.</param>
-        /// <param name="protection">The recursion protection that is used to detect malicious loops in the metadata.</param>
         /// <returns>The read signature.</returns>
         public static CallingConventionSignature FromReader(
-            ModuleDefinition module, 
+            in BlobReadContext context, 
             IBinaryStreamReader reader, 
-            bool readToEnd,
-            RecursionProtection protection)
+            bool readToEnd = true)
         {
-            var signature = ReadSignature(module, reader, protection);
+            var signature = ReadSignature(context, reader);
             if (readToEnd)
                 signature.ExtraData = reader.ReadToEnd();
             return signature;
         }
 
-        private static CallingConventionSignature ReadSignature(
-            ModuleDefinition module, 
-            IBinaryStreamReader reader, 
-            RecursionProtection protection)
+        private static CallingConventionSignature ReadSignature(in BlobReadContext context, IBinaryStreamReader reader)
         {
             byte flag = reader.ReadByte();
             reader.Offset--;
@@ -62,19 +43,19 @@ namespace AsmResolver.DotNet.Signatures
                 case CallingConventionAttributes.StdCall:
                 case CallingConventionAttributes.ThisCall:
                 case CallingConventionAttributes.VarArg:
-                    return MethodSignature.FromReader(module, reader, protection);
+                    return MethodSignature.FromReader(context, reader);
                 
                 case CallingConventionAttributes.Property:
-                    return PropertySignature.FromReader(module, reader, protection);
+                    return PropertySignature.FromReader(context, reader);
                 
                 case CallingConventionAttributes.Local:
-                    return LocalVariablesSignature.FromReader(module, reader, protection);
+                    return LocalVariablesSignature.FromReader(context, reader);
                     
                 case CallingConventionAttributes.GenericInstance:
-                    return GenericInstanceMethodSignature.FromReader(module, reader, protection);
+                    return GenericInstanceMethodSignature.FromReader(context, reader);
                 
                 case CallingConventionAttributes.Field:
-                    return FieldSignature.FromReader(module, reader, protection);
+                    return FieldSignature.FromReader(context, reader);
             }
 
             throw new NotSupportedException();

@@ -13,20 +13,22 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedFileReference : FileReference
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly FileReferenceRow _row;
 
         /// <summary>
         /// Creates a file reference from a file reference metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the reference.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the reference for.</param>
         /// <param name="row">The metadata table row to base the member reference on.</param>
-        public SerializedFileReference(SerializedModuleDefinition parentModule,
-            MetadataToken token, FileReferenceRow row)
+        public SerializedFileReference(
+            ModuleReaderContext context,
+            MetadataToken token,
+            in FileReferenceRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Attributes = row.Attributes;
@@ -35,7 +37,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override string GetName()
         {
-            return _parentModule.DotNetDirectory.Metadata
+            return _context.Image.DotNetDirectory.Metadata
                 .GetStream<StringsStream>()
                 .GetStringByIndex(_row.Name);
         }
@@ -43,13 +45,13 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override byte[] GetHashValue()
         {
-            return _parentModule.DotNetDirectory.Metadata
+            return _context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobByIndex(_row.HashValue);
         }
 
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

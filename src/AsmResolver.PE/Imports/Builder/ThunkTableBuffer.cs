@@ -20,6 +20,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// </summary>
         /// <param name="hintNameTable">The hint-name table containing the names of each imported member</param>
         /// <param name="is32Bit">Indicates whether the thunk-table should use 32-bit addresses or 64-bit addresses.</param>
+        /// <param name="isIat">Indicates the buffer contains the import address table or lookup table.</param>
         public ThunkTableBuffer(HintNameTableBuffer hintNameTable, bool is32Bit, bool isIat)
         {
             _hintNameTable = hintNameTable ?? throw new ArgumentNullException(nameof(hintNameTable));
