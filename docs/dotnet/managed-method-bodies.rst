@@ -92,7 +92,6 @@ By default, depending on the value of ``OpCode.OperandType``, ``Operand`` contai
     
     Providing an incorrect operand type will result in the CIL assembler to fail assembling the method body upon writing the module to the disk.
 
-
 Creating a new instruction can be done using one of the constructors, together with the ``CilOpCodes`` static class:
 
 .. code-block:: csharp 
@@ -102,6 +101,14 @@ Creating a new instruction can be done using one of the constructors, together w
         new CilInstruction(CilOpCodes.Ldstr, "Hello, World!"),
         new CilInstruction(CilOpCodes.Ret),
     });
+
+However, the preferred way of adding instructions to add or insert new instructions is to use one of the ``Add`` or ``Insert`` overloads that directly take an opcode and operand. This is because it avoids an allocation of an array, and the overloads perform immediate validation on the created instruction.
+
+.. code-block:: csharp 
+
+    var instructions = body.Instructions;
+    instructions.Add(CilOpCodes.Ldstr, "Hello, World!");
+    instructions.Add(CilOpCodes.Ret);
 
 
 Pushing 32-bit integer constants onto the stack
@@ -130,8 +137,19 @@ Branch instructions are instructions that (might) transfer control to another pa
     CilInstruction targetInstruction = ...
     ICilLabel label = targetInstruction.CreateLabel();
 
-    var branchInstruction = new CilInstruction(CilOpCodes.Br, label);
+    instructions.Add(CilOpCodes.Br, label);
 
+Alternatively, when using the ``Add`` or ``Insert`` overloads, it is possible to use the return value of these overloads.
+
+.. code-block:: csharp 
+
+    var instructions = body.Instructions;
+    var label = new CilInstructionLabel();
+
+    instructions.Add(CilOpCodes.Br, label);
+    /* ... */
+    label.Instruction = instruction.Add(CilOpCodes.Ret);
+    
  
 The ``switch`` operation uses a ``IList<ICilLabel>`` instead.
 
