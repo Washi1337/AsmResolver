@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using AsmResolver.DotNet.Code;
 using AsmResolver.PE.DotNet.Metadata.Tables;
@@ -9,9 +8,6 @@ namespace AsmResolver.DotNet.Builder
 {
     public partial class DotNetDirectoryBuffer
     {
-        private readonly IDictionary<ModuleDefinition, MetadataToken> _moduleDefTokens =
-            new Dictionary<ModuleDefinition, MetadataToken>();
-        
         /// <summary>
         /// Adds an assembly, its entire manifest module, and all secondary module file references, to the buffer.
         /// </summary>
@@ -59,7 +55,7 @@ namespace AsmResolver.DotNet.Builder
                 guidStream.GetGuidIndex(module.EncBaseId));
             
             var token = table.Add(row);
-            _moduleDefTokens[module] = token;
+            _tokenMapping[module] = token;
         }
 
         /// <summary>
@@ -68,7 +64,7 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="module">The module to finalize.</param>
         public void FinalizeModule(ModuleDefinition module)
         {
-            var token = _moduleDefTokens[module];
+            var token = _tokenMapping[module];
             
             // Ensure reference to corlib is added. 
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)

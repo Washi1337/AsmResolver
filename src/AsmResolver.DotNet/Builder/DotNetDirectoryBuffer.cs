@@ -16,6 +16,8 @@ namespace AsmResolver.DotNet.Builder
     /// </summary>
     public partial class DotNetDirectoryBuffer
     {
+        private readonly Dictionary<IMetadataMember, MetadataToken> _tokenMapping = new Dictionary<IMetadataMember, MetadataToken>(); 
+            
         /// <summary>
         /// Creates a new .NET data directory buffer.
         /// </summary>
@@ -112,7 +114,7 @@ namespace AsmResolver.DotNet.Builder
         /// Builds the .NET data directory from the buffer. 
         /// </summary>
         /// <returns></returns>
-        public IDotNetDirectory CreateDirectory()
+        public DotNetDirectoryBuildResult CreateDirectory()
         {
             // At this point, the interfaces and generic parameters tables are not sorted yet, so we were not able
             // to add any custom attributes and/or generic parameter constraint rows to the metadata table buffers.
@@ -121,7 +123,7 @@ namespace AsmResolver.DotNet.Builder
             FinalizeGenericParameters();
             
             // Create new .NET directory.
-            return new DotNetDirectory
+            var directory = new DotNetDirectory
             {
                 Metadata = Metadata.CreateMetadata(),
                 DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null,
@@ -129,6 +131,8 @@ namespace AsmResolver.DotNet.Builder
                 Flags = Module.Attributes,
                 StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null 
             };
+
+            return new DotNetDirectoryBuildResult(directory, _tokenMapping);
         }
 
         private uint GetEntrypoint()

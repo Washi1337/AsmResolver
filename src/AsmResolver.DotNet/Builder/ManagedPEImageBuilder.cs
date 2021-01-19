@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -51,6 +53,8 @@ namespace AsmResolver.DotNet.Builder
             var context = new PEImageBuildContext();
 
             PEImage image = null;
+            IReadOnlyDictionary<IMetadataMember, MetadataToken> tokenMapping = null;
+            
             try
             {
                 // Create basic PE image skeleton.
@@ -67,10 +71,12 @@ namespace AsmResolver.DotNet.Builder
 
                 // Construct new .NET directory.
                 var symbolProvider = new NativeSymbolsProvider(image.ImageBase);
-                image.DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(
+                var result = DotNetDirectoryFactory.CreateDotNetDirectory(
                     module, 
                     symbolProvider, 
                     context.DiagnosticBag);
+                image.DotNetDirectory = result.Directory;
+                tokenMapping = result.TokenMapping;
                 
                 // Copy any collected native symbols over to the image.
                 foreach (var import in symbolProvider.GetImportedModules())
@@ -90,7 +96,8 @@ namespace AsmResolver.DotNet.Builder
                 context.DiagnosticBag.MarkAsFatal();
             }
 
-            return new PEImageBuildResult(image, context.DiagnosticBag);
+            tokenMapping ??= new Dictionary<IMetadataMember, MetadataToken>();
+            return new PEImageBuildResult(image, context.DiagnosticBag, tokenMapping);
         }
     }
 }
