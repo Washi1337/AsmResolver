@@ -28,6 +28,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(assembly.Culture));
 
             var token = table.Add(row);
+            _tokenMapping.Add(assembly, token);
             AddCustomAttributes(token, assembly);
             AddSecurityDeclarations(token, assembly);
         }
@@ -55,7 +56,7 @@ namespace AsmResolver.DotNet.Builder
                 guidStream.GetGuidIndex(module.EncBaseId));
             
             var token = table.Add(row);
-            _tokenMapping[module] = token;
+            _tokenMapping.Add(module, token);
         }
 
         /// <summary>
@@ -103,6 +104,7 @@ namespace AsmResolver.DotNet.Builder
                 AddImplementation(resource.Implementation));
 
             var token = table.Add(row);
+            _tokenMapping.Add(resource, token);
             AddCustomAttributes(token, resource);
             return token;
         }
@@ -133,6 +135,7 @@ namespace AsmResolver.DotNet.Builder
                     0);
 
                 var token = typeDefTable.Add(row);
+                _tokenMapping[type] = token;
                 _typeDefTokens.Add(type, token);
 
                 if (type.IsNested)
@@ -173,6 +176,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.BlobStream.GetBlobIndex(this, field.Signature, DiagnosticBag));
 
                 var token = table.Add(row);
+                _tokenMapping.Add(field, token);
                 _fieldTokens.Add(field, token);
             }
         }
@@ -199,6 +203,7 @@ namespace AsmResolver.DotNet.Builder
                     0);
 
                 var token = table.Add(row);
+                _tokenMapping.Add(method, token);
                 _methodTokens.Add(method, token);
             }
         }
@@ -219,6 +224,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.StringsStream.GetStringIndex(parameter.Name));
 
                 var token = table.Add(row);
+                _tokenMapping.Add(parameter, token);
                 _parameterTokens.Add(parameter, token);
             }
         }
@@ -239,6 +245,7 @@ namespace AsmResolver.DotNet.Builder
                     Metadata.BlobStream.GetBlobIndex(this, property.Signature, DiagnosticBag));
                 
                 var token = table.Add(row);
+                _tokenMapping.Add(property, token);
                 _propertyTokens.Add(property, token);
             }
         }
@@ -259,6 +266,7 @@ namespace AsmResolver.DotNet.Builder
                     GetTypeDefOrRefIndex(@event.EventType));
                 
                 var token = table.Add(row);
+                _tokenMapping.Add(@event, token);
                 _eventTokens.Add(@event, token);
             }
         }
@@ -578,6 +586,7 @@ namespace AsmResolver.DotNet.Builder
                 AddImplementation(exportedType.Implementation));
 
             var token = table.Add(row);
+            _tokenMapping.Add(exportedType, token);
             AddCustomAttributes(token, exportedType);
             return token;
         }
@@ -592,6 +601,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.BlobStream.GetBlobIndex(fileReference.HashValue));
 
             var token = table.Add(row);
+            _tokenMapping.Add(fileReference, token);
             AddCustomAttributes(token, fileReference);
             return token;
         }
