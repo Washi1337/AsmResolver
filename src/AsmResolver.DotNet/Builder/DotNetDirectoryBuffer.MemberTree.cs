@@ -74,7 +74,8 @@ namespace AsmResolver.DotNet.Builder
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
                 GetAssemblyReferenceToken(corLibScope);
 
-            AddExportedTypes(module);
+            AddFileReferencesInModule(module);
+            AddExportedTypesInModule(module);
             AddResourcesInModule(module);
             AddCustomAttributes(token, module);
         }
@@ -571,7 +572,7 @@ namespace AsmResolver.DotNet.Builder
             table.Add(field, row);
         }
 
-        private void AddExportedTypes(ModuleDefinition module)
+        private void AddExportedTypesInModule(ModuleDefinition module)
         {
             for (int i = 0; i < module.ExportedTypes.Count; i++)
                 AddExportedType(module.ExportedTypes[i]);
@@ -593,6 +594,12 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
+        private void AddFileReferencesInModule(ModuleDefinition module)
+        {
+            for (int i = 0; i < module.FileReferences.Count; i++)
+                AddFileReference(module.FileReferences[i]);
+        } 
+        
         private MetadataToken AddFileReference(FileReference fileReference)
         {
             var table = Metadata.TablesStream.GetTable<FileReferenceRow>(TableIndex.File);
