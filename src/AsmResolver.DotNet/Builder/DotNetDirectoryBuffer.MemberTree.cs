@@ -74,6 +74,7 @@ namespace AsmResolver.DotNet.Builder
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
                 GetAssemblyReferenceToken(corLibScope);
 
+            AddExportedTypes(module);
             AddResourcesInModule(module);
             AddCustomAttributes(token, module);
         }
@@ -110,7 +111,7 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, resource);
             return token;
         }
-        
+
         /// <summary>
         /// Allocates metadata rows for the provided type definitions in the buffer.  
         /// </summary>
@@ -180,7 +181,7 @@ namespace AsmResolver.DotNet.Builder
                 _fieldTokens.Add(field, token);
             }
         }
-        
+
         /// <summary>
         /// Allocates metadata rows for the provided method definitions in the buffer. 
         /// </summary>
@@ -266,7 +267,7 @@ namespace AsmResolver.DotNet.Builder
                 _eventTokens.Add(@event, token);
             }
         }
-        
+
         /// <summary>
         /// Finalizes all type definitions added in the buffer.
         /// </summary>
@@ -363,7 +364,7 @@ namespace AsmResolver.DotNet.Builder
                 AddFieldMarshal(newToken, field);
             }
         }
-        
+
         private void FinalizeMethodsInType(
             TypeDefinition type,
             ref bool methodPtrRequired,
@@ -445,7 +446,7 @@ namespace AsmResolver.DotNet.Builder
 
             paramList += (uint) method.ParameterDefinitions.Count;
         }
-        
+
         private void FinalizePropertiesInType(TypeDefinition type, uint typeRid, ref uint propertyList,
             ref bool propertyPtrRequired)
         {
@@ -568,6 +569,12 @@ namespace AsmResolver.DotNet.Builder
                 ownerToken.Rid);
 
             table.Add(field, row);
+        }
+
+        private void AddExportedTypes(ModuleDefinition module)
+        {
+            for (int i = 0; i < module.ExportedTypes.Count; i++)
+                AddExportedType(module.ExportedTypes[i]);
         }
 
         private MetadataToken AddExportedType(ExportedType exportedType)
