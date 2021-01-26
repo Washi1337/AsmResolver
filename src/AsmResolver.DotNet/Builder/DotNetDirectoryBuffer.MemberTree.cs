@@ -82,8 +82,8 @@ namespace AsmResolver.DotNet.Builder
 
         private void AddResourcesInModule(ModuleDefinition module)
         {
-            foreach (var resource in module.Resources)
-                AddManifestResource(resource);
+            for (int i = 0; i < module.Resources.Count; i++)
+                AddManifestResource(module.Resources[i]);
         }
 
         /// <summary>
