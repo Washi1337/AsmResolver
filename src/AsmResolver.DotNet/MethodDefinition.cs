@@ -519,6 +519,12 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Gets a value indicating whether the method is implemented using a method body. That is, whether the
+        /// <see cref="MethodBody"/> property is not <c>null</c>.
+        /// </summary>
+        public bool HasMethodBody => MethodBody != null;
+
+        /// <summary>
         /// Gets or sets the body of the method. 
         /// </summary>
         /// <remarks>
@@ -539,7 +545,8 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// <para>
         /// If this property is set to <c>null</c>, it does not necessarily mean the method does not have a method body.
-        /// There could be an unmanaged method body assigned instead. See the <see cref="MethodBody"/> property instead.
+        /// There could be an unmanaged method body assigned instead. See the <see cref="MethodBody"/> or
+        /// <see cref="HasMethodBody"/> properties instead.
         /// </para>
         /// <para>
         /// Updating this property does not automatically set the appropriate implementation attributes in the
@@ -559,8 +566,8 @@ namespace AsmResolver.DotNet
         /// <para>
         /// If this property is set to <c>null</c>, it does not necessarily mean the method does not have a method body.
         /// There could be a managed body assigned instead, or the current method body reader that the declaring module
-        /// uses does not support reading a certain type of native method body. Check the <see cref="MethodBody"/>
-        /// property instead.
+        /// uses does not support reading a certain type of native method body. See the <see cref="MethodBody"/>  or
+        /// <see cref="HasMethodBody"/> properties instead.
         /// </para>
         /// <para>
         /// Updating this property does not automatically set the appropriate implementation attributes in the
