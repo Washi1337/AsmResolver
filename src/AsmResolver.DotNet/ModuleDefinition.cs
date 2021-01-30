@@ -423,7 +423,7 @@ namespace AsmResolver.DotNet
         {
             get;
             set;
-        } = DateTime.Now;
+        }
         
         /// <summary>
         /// Gets or sets the attributes assigned to the underlying executable file.
