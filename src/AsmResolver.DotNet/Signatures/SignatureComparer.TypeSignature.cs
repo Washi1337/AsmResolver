@@ -179,7 +179,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
             return SimpleTypeEquals(x.Type, y.Type);
         }
@@ -280,7 +280,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null) || x.Dimensions.Count != y.Dimensions.Count)
+            if (x is null || y is null || x.Dimensions.Count != y.Dimensions.Count)
                 return false;
 
             for (int i = 0; i < x.Dimensions.Count; i++)
@@ -302,8 +302,9 @@ namespace AsmResolver.DotNet.Signatures
             {
                 int hashCode = (int) obj.ElementType << ElementTypeOffset;
                 hashCode = (hashCode * 397) ^ GetHashCode(obj.BaseType);
-                foreach (var dimension in obj.Dimensions)
-                    hashCode = (hashCode * 397) ^ dimension.GetHashCode();
+                for (int i = 0; i < obj.Dimensions.Count; i++)
+                    hashCode = (hashCode * 397) ^ obj.Dimensions[i].GetHashCode();
+
                 return hashCode;
             }
         }
