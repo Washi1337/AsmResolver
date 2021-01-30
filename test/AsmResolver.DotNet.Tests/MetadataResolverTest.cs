@@ -183,7 +183,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_Forwarder);
             var assembly1 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly1_Forwarder);
             var assembly2 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly2_Actual);
-                
+
             // Manually wire assemblies together for in-memory resolution.
             var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
@@ -191,7 +191,7 @@ namespace AsmResolver.DotNet.Tests
             resolver.AddToCache(assembly2, assembly2);
             resolver = (AssemblyResolverBase) assembly2.ManifestModule.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
-            
+
             // Resolve 
             var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
             Assert.NotNull(((IMethodDescriptor) instructions[0].Operand).Resolve());
