@@ -187,10 +187,10 @@ namespace AsmResolver.DotNet.Tests
             // Manually wire assemblies together for in-memory resolution.
             var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
-            resolver = (AssemblyResolverBase) assembly1.ManifestModule.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly2, assembly2);
-            resolver = (AssemblyResolverBase) assembly2.ManifestModule.MetadataResolver.AssemblyResolver;
+            resolver = (AssemblyResolverBase) assembly1.ManifestModule.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
+            resolver.AddToCache(assembly2, assembly2);
 
             // Resolve 
             var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
@@ -208,10 +208,13 @@ namespace AsmResolver.DotNet.Tests
             // Manually wire assemblies together for in-memory resolution.
             var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
+            resolver.AddToCache(assembly2, assembly2);
             resolver = (AssemblyResolverBase) assembly1.ManifestModule.MetadataResolver.AssemblyResolver;
+            resolver.AddToCache(assembly1, assembly1);
             resolver.AddToCache(assembly2, assembly2);
             resolver = (AssemblyResolverBase) assembly2.ManifestModule.MetadataResolver.AssemblyResolver;
             resolver.AddToCache(assembly1, assembly1);
+            resolver.AddToCache(assembly2, assembly2);
             
             // Find reference to exported type loop.
             var reference = module

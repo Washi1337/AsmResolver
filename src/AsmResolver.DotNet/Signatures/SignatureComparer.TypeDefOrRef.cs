@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -23,12 +24,15 @@ namespace AsmResolver.DotNet.Signatures
             {
                 case InvalidTypeDefOrRef invalidType:
                     return Equals(invalidType, y as InvalidTypeDefOrRef);
-                case TypeSpecification typeSpec:
-                    return Equals(typeSpec, y as TypeSpecification);
+
+                case TypeSpecification specification:
+                    return Equals(specification, y as TypeSpecification);
+
+                case TypeSignature signature:
+                    return Equals(signature, y as TypeSignature);
+
                 default:
-                    return x.Name == y.Name
-                           && x.Namespace == y.Namespace
-                           && Equals(x.Scope, y.Scope);
+                    return SimpleTypeEquals(x, y);
             }
         }
 
@@ -42,6 +46,20 @@ namespace AsmResolver.DotNet.Signatures
                 hashCode = (hashCode * 397) ^ (obj.DeclaringType != null ? GetHashCode(obj.DeclaringType) : 0);
                 return hashCode;
             }
+        }
+
+        private bool SimpleTypeEquals(ITypeDescriptor x, ITypeDescriptor y)
+        {
+            // Check the basic properties first.
+            if (!x.IsTypeOf(y.Namespace, y.Name))
+                return false;
+
+            // If scope matches, it is a perfect match.
+            if (Equals(x.Scope, y.Scope))
+                return true;
+
+            // If scope does not match, it can still be a reference to an exported type.
+            return Equals(x.Resolve(), y.Resolve());
         }
 
         /// <inheritdoc />

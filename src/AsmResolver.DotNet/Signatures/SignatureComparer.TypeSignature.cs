@@ -180,17 +180,7 @@ namespace AsmResolver.DotNet.Signatures
                 return true;
             if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
                 return false;
-
-            // Check the basic properties first.
-            if (x.Name != y.Name || x.Namespace != y.Namespace)
-                return false;
-
-            // If scope matches, it is a perfect match.
-            if (Equals(x.Scope, y.Scope))
-                return true;
-
-            // If scope does not match, it can still be a reference to an exported type.
-            return Equals(x.Resolve(), y.Resolve());
+            return SimpleTypeEquals(x.Type, y.Type);
         }
 
         /// <inheritdoc />

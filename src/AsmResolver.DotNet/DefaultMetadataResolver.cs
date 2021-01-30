@@ -153,8 +153,7 @@ namespace AsmResolver.DotNet
         public DefaultMetadataResolver(IAssemblyResolver assemblyResolver)
         {
             AssemblyResolver = assemblyResolver ?? throw new ArgumentNullException(nameof(assemblyResolver));
-            
-            _typeCache = new Dictionary<ITypeDescriptor, TypeDefinition>(_comparer);
+            _typeCache = new Dictionary<ITypeDescriptor, TypeDefinition>();
         }
 
         /// <inheritdoc />
@@ -182,7 +181,7 @@ namespace AsmResolver.DotNet
             if (_typeCache.TryGetValue(type, out var typeDef))
             {
                 // Check if type definition has changed since last lookup.
-                if (_comparer.Equals(type, typeDef))
+                if (typeDef.IsTypeOf(type.Namespace, type.Name))
                     return typeDef;
                 _typeCache.Remove(type);
             }
