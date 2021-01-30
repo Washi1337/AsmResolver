@@ -16,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x switch
@@ -47,7 +47,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.Attributes == y.Attributes
@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.Attributes == y.Attributes
@@ -99,7 +99,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.Attributes == y.Attributes
@@ -122,7 +122,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.Attributes == y.Attributes
@@ -145,7 +145,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.Attributes == y.Attributes

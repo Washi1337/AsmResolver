@@ -17,23 +17,16 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
-            switch (x)
+            return x switch
             {
-                case InvalidTypeDefOrRef invalidType:
-                    return Equals(invalidType, y as InvalidTypeDefOrRef);
-
-                case TypeSpecification specification:
-                    return Equals(specification, y as TypeSpecification);
-
-                case TypeSignature signature:
-                    return Equals(signature, y as TypeSignature);
-
-                default:
-                    return SimpleTypeEquals(x, y);
-            }
+                InvalidTypeDefOrRef invalidType => Equals(invalidType, y as InvalidTypeDefOrRef),
+                TypeSpecification specification => Equals(specification, y as TypeSpecification),
+                TypeSignature signature => Equals(signature, y as TypeSignature),
+                _ => SimpleTypeEquals(x, y)
+            };
         }
 
         /// <inheritdoc />
@@ -85,7 +78,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return Equals(x.Signature, y.Signature);
@@ -99,7 +92,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return Equals((ITypeDescriptor) x, y);
@@ -113,7 +106,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.Error == y.Error;
