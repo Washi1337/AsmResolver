@@ -188,6 +188,21 @@ namespace AsmResolver.DotNet.Code.Cil
         public CilInstruction Add(CilOpCode code, IMethodDescriptor method) => Insert(Count, code, method);
 
         /// <summary>
+        /// Verifies and adds an instruction to the end of the collection that references a member.
+        /// </summary>
+        /// <param name="code">The member opcode.</param>
+        /// <param name="member">The member referenced by the instruction.</param>
+        /// <returns>The created instruction.</returns>
+        /// <exception cref="InvalidCilInstructionException">
+        /// Occurs when the provided operation does not match with the provided member reference.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Occurs when <paramref name="member"/> is null.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public CilInstruction Add(CilOpCode code, MemberReference member) => Insert(Count, code, member);
+
+        /// <summary>
         /// Verifies and adds an instruction to the end of the collection that references a type.
         /// </summary>
         /// <param name="code">The type opcode.</param>

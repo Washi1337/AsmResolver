@@ -292,6 +292,37 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
+        /// Verifies and inserts an instruction into the collection that references a member.
+        /// </summary>
+        /// <param name="index">The zero-based index at which the instruction should be inserted at.</param>
+        /// <param name="code">The member opcode.</param>
+        /// <param name="member">The member referenced by the instruction.</param>
+        /// <returns>The created instruction.</returns>
+        /// <exception cref="InvalidCilInstructionException">
+        /// Occurs when the provided operation does not match with the provided member reference.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Occurs when <paramref name="member"/> is null.
+        /// </exception>
+        public CilInstruction Insert(int index, CilOpCode code, MemberReference member)
+        {
+            if (member is null)
+                throw new ArgumentNullException(nameof(member));
+            
+            switch (code.OperandType)
+            {
+                case CilOperandType.InlineField when member.IsField:
+                case CilOperandType.InlineMethod when member.IsMethod:
+                case CilOperandType.InlineTok:
+                    break;
+                default:
+                    throw new InvalidCilInstructionException(code);    
+            }
+
+            return InsertAndReturn(index, code, member);
+        }
+
+        /// <summary>
         /// Verifies and inserts an instruction into the collection that references a type.
         /// </summary>
         /// <param name="index">The zero-based index at which the instruction should be inserted at.</param>
