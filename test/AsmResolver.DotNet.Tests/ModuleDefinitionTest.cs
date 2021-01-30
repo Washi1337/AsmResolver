@@ -10,6 +10,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.Win32Resources;
 using Xunit;
+using FileAttributes = AsmResolver.PE.DotNet.Metadata.Tables.Rows.FileAttributes;
 
 namespace AsmResolver.DotNet.Tests
 {
@@ -260,6 +261,37 @@ namespace AsmResolver.DotNet.Tests
 
             var image = module.ToPEImage();
             Assert.Equal(time, image.TimeDateStamp);
+        }
+
+        [Fact]
+        public void PersistentExportedType()
+        {
+            var module = new ModuleDefinition("SomeModule.exe");
+
+            var assembly = new AssemblyReference("SomeAssembly", new Version(1, 0, 0, 0));
+            var type = new ExportedType(assembly, "SomeNamespace", "SomeType");
+
+            module.AssemblyReferences.Add(assembly);
+            module.ExportedTypes.Add(type);
+
+            var newModule = Rebuild(module);
+            var newType = Assert.Single(newModule.ExportedTypes);
+            Assert.Equal(type, newType, new SignatureComparer());
+        }
+
+        [Fact]
+        public void PersistentFileReferences()
+        {
+            var module = new ModuleDefinition("SomeModule.exe");
+
+            var file = new FileReference("SubModule.netmodule", FileAttributes.ContainsMetadata);
+
+            module.FileReferences.Add(file);
+
+            var newModule = Rebuild(module);
+            var newFile = Assert.Single(newModule.FileReferences);
+            Assert.NotNull(newFile);
+            Assert.Equal(file.Name, newFile.Name);
         }
     }
 }

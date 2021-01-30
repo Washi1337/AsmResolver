@@ -74,14 +74,16 @@ namespace AsmResolver.DotNet.Builder
             if (module.CorLibTypeFactory.CorLibScope is AssemblyReference corLibScope)
                 GetAssemblyReferenceToken(corLibScope);
 
+            AddFileReferencesInModule(module);
+            AddExportedTypesInModule(module);
             AddResourcesInModule(module);
             AddCustomAttributes(token, module);
         }
 
         private void AddResourcesInModule(ModuleDefinition module)
         {
-            foreach (var resource in module.Resources)
-                AddManifestResource(resource);
+            for (int i = 0; i < module.Resources.Count; i++)
+                AddManifestResource(module.Resources[i]);
         }
 
         /// <summary>
@@ -110,7 +112,7 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, resource);
             return token;
         }
-        
+
         /// <summary>
         /// Allocates metadata rows for the provided type definitions in the buffer.  
         /// </summary>
@@ -180,7 +182,7 @@ namespace AsmResolver.DotNet.Builder
                 _fieldTokens.Add(field, token);
             }
         }
-        
+
         /// <summary>
         /// Allocates metadata rows for the provided method definitions in the buffer. 
         /// </summary>
@@ -266,7 +268,7 @@ namespace AsmResolver.DotNet.Builder
                 _eventTokens.Add(@event, token);
             }
         }
-        
+
         /// <summary>
         /// Finalizes all type definitions added in the buffer.
         /// </summary>
@@ -363,7 +365,7 @@ namespace AsmResolver.DotNet.Builder
                 AddFieldMarshal(newToken, field);
             }
         }
-        
+
         private void FinalizeMethodsInType(
             TypeDefinition type,
             ref bool methodPtrRequired,
@@ -445,7 +447,7 @@ namespace AsmResolver.DotNet.Builder
 
             paramList += (uint) method.ParameterDefinitions.Count;
         }
-        
+
         private void FinalizePropertiesInType(TypeDefinition type, uint typeRid, ref uint propertyList,
             ref bool propertyPtrRequired)
         {
@@ -570,6 +572,12 @@ namespace AsmResolver.DotNet.Builder
             table.Add(field, row);
         }
 
+        private void AddExportedTypesInModule(ModuleDefinition module)
+        {
+            for (int i = 0; i < module.ExportedTypes.Count; i++)
+                AddExportedType(module.ExportedTypes[i]);
+        }
+
         private MetadataToken AddExportedType(ExportedType exportedType)
         {
             var table = Metadata.TablesStream.GetTable<ExportedTypeRow>(TableIndex.ExportedType);
@@ -586,6 +594,12 @@ namespace AsmResolver.DotNet.Builder
             return token;
         }
 
+        private void AddFileReferencesInModule(ModuleDefinition module)
+        {
+            for (int i = 0; i < module.FileReferences.Count; i++)
+                AddFileReference(module.FileReferences[i]);
+        } 
+        
         private MetadataToken AddFileReference(FileReference fileReference)
         {
             var table = Metadata.TablesStream.GetTable<FileReferenceRow>(TableIndex.File);
