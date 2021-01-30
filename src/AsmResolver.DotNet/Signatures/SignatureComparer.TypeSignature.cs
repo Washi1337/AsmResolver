@@ -20,6 +20,7 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<GenericParameterSignature>,
         IEqualityComparer<ArrayTypeSignature>,
         IEqualityComparer<SentinelTypeSignature>,
+        IEqualityComparer<IList<TypeSignature>>,
         IEqualityComparer<IEnumerable<TypeSignature>>
     {
         /// <inheritdoc />
@@ -305,6 +306,32 @@ namespace AsmResolver.DotNet.Signatures
                     hashCode = (hashCode * 397) ^ dimension.GetHashCode();
                 return hashCode;
             }
+        }
+
+        /// <inheritdoc />
+        public bool Equals(IList<TypeSignature> x, IList<TypeSignature> y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (x is null || y is null || x.Count != y.Count)
+                return false;
+
+            for (int i = 0; i < x.Count; i++)
+            {
+                if (!Equals(x[i], y[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(IList<TypeSignature> obj)
+        {
+            int checksum = 0;
+            for (int i = 0; i < obj.Count; i++)
+                checksum ^= GetHashCode(obj[i]);
+            return checksum;
         }
 
         /// <inheritdoc />
