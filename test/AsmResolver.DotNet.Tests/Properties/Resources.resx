@@ -39,6 +39,24 @@
     <data name="HelloWorld_MaliciousTypeSpecLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\HelloWorld.MaliciousTypeSpecLoop.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
+    <data name="HelloWorld_MaliciousExportedTypeLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld_MaliciousExportedTypeLoop.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="Assembly1_MaliciousExportedTypeLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\Assembly1_MaliciousExportedTypeLoop.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="Assembly2_MaliciousExportedTypeLoop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\Assembly2_MaliciousExportedTypeLoop.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="HelloWorld_Forwarder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\HelloWorld_Forwarder.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="Assembly1_Forwarder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\Assembly1_Forwarder.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
+    <data name="Assembly2_Actual" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>..\Resources\Assembly2_Actual.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
     <data name="ConstantZeroValueColumn" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\ConstantZeroValueColumn.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </data>
