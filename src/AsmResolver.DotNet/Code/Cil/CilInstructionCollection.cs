@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -23,6 +22,7 @@ namespace AsmResolver.DotNet.Code.Cil
         public CilInstructionCollection(CilMethodBody body)
         {
             Owner = body ?? throw new ArgumentNullException(nameof(body));
+            EndLabel = new CilEndLabel(this);
         }
 
         /// <summary>
@@ -49,6 +49,17 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get => _items[index];
             set => _items[index] = value;
+        }
+
+        /// <summary>
+        /// Gets the label indicating the end of the CIL code stream.
+        /// </summary>
+        /// <remarks>
+        /// The offset of this label is equal to the last instruction's offset + its size.
+        /// </remarks>
+        public ICilLabel EndLabel
+        {
+            get;
         }
         
         /// <inheritdoc />
@@ -564,7 +575,34 @@ namespace AsmResolver.DotNet.Code.Cil
 
             /// <inheritdoc />
             public void Dispose() => _enumerator.Dispose();
-        } 
+        }
+
+        private sealed class CilEndLabel : ICilLabel
+        {
+            private readonly CilInstructionCollection _collection;
+
+            public CilEndLabel(CilInstructionCollection collection)
+            {
+                _collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            }
+
+            /// <inheritdoc />
+            public int Offset
+            {
+                get
+                {
+                    if (_collection.Count == 0)
+                        return 0;
+                    var last = _collection[_collection.Count - 1];
+                    return last.Offset + last.Size;
+                }
+            }
+
+            /// <inheritdoc />
+            public bool Equals(ICilLabel other) => other != null && Offset == other.Offset;
+
+            public override string ToString() => $"IL_{Offset:X4}";
+        }
 
     }
 }
