@@ -127,6 +127,13 @@ namespace AsmResolver.DotNet.Tests.Properties {
                 object obj = ResourceManager.GetObject("TheAnswer_NetFx", resourceCulture);
                 return ((byte[])(obj));
             }
+        }  
+        
+        public static byte[] HandlerEndAtEndOfMethodBody {
+            get {
+                object obj = ResourceManager.GetObject("HandlerEndAtEndOfMethodBody", resourceCulture);
+                return ((byte[])(obj));
+            }
         }
     }
 }

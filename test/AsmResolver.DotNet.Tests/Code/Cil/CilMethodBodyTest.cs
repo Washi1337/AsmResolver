@@ -405,7 +405,6 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             Assert.Throws<StackImbalanceException>(() => body.ComputeMaxStack());
         }
 
-
         [Fact]
         public void ReadInvalidMethodBodyErrorShouldAppearInDiagnostics()
         {
@@ -423,5 +422,13 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
             // Verify error was reported.
             Assert.NotEmpty(bag.Exceptions);
         }
+
+        [Fact]
+        public void ExceptionHandlerWithHandlerEndOutsideOfMethodShouldResultInEndLabel()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HandlerEndAtEndOfMethodBody);
+            var body = module.ManagedEntrypointMethod.CilMethodBody;
+            Assert.Same(body.Instructions.EndLabel, body.ExceptionHandlers[0].HandlerEnd);
+        } 
     }
 }
