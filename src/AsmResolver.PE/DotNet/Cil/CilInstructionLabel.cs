@@ -44,6 +44,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <inheritdoc />
         public override int GetHashCode() => Offset;
 
+        /// <inheritdoc />
         public override string ToString() => Instruction is null
             ? "IL_????"
             : $"IL_{Offset:X4}";

@@ -55,7 +55,8 @@ namespace AsmResolver.DotNet.Code.Cil
         /// Gets the label indicating the end of the CIL code stream.
         /// </summary>
         /// <remarks>
-        /// The offset of this label is equal to the last instruction's offset + its size.
+        /// This label does not point to the beginning of an instruction. The offset of this label is equal
+        /// to the last instruction's offset + its size.
         /// </remarks>
         public ICilLabel EndLabel
         {
