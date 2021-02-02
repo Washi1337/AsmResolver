@@ -217,6 +217,25 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
+        /// Gets a label at the provided offset.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The label.</returns>
+        /// <remarks>
+        /// If the provided offset falls outside of the CIL code stream, <see cref="EndLabel"/> is returned instead.
+        /// </remarks>
+        public ICilLabel GetLabel(int offset)
+        {
+            if (offset >= EndLabel.Offset)
+                return EndLabel;
+            
+            var instruction = GetByOffset(offset);
+            return instruction is null
+                ? new CilOffsetLabel(offset)
+                : instruction.CreateLabel();
+        }
+
+        /// <summary>
         /// Calculates the offsets of each instruction in the list. 
         /// </summary>
         public void CalculateOffsets()
