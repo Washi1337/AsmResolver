@@ -58,13 +58,10 @@ namespace AsmResolver.DotNet.Code.Cil
             var handler = new CilExceptionHandler
             {
                 HandlerType = handlerType,
-                TryStart = body.Instructions.GetByOffset(tryStartOffset)?.CreateLabel() ??
-                           new CilOffsetLabel(tryStartOffset),
-                TryEnd = body.Instructions.GetByOffset(tryEndOffset)?.CreateLabel() ?? new CilOffsetLabel(tryEndOffset),
-                HandlerStart = body.Instructions.GetByOffset(handlerStartOffset)?.CreateLabel() ??
-                               new CilOffsetLabel(handlerStartOffset),
-                HandlerEnd = body.Instructions.GetByOffset(handlerEndOffset)?.CreateLabel() ??
-                             new CilOffsetLabel(handlerEndOffset),
+                TryStart = body.Instructions.GetLabel(tryStartOffset),
+                TryEnd = body.Instructions.GetLabel(tryEndOffset),
+                HandlerStart = body.Instructions.GetLabel(handlerStartOffset),
+                HandlerEnd = body.Instructions.GetLabel(handlerEndOffset),
             };
             
             // Interpret last field.
