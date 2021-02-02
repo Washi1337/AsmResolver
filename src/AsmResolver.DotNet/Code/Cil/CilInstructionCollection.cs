@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -14,6 +15,7 @@ namespace AsmResolver.DotNet.Code.Cil
     public partial class CilInstructionCollection : IList<CilInstruction>
     {
         private readonly List<CilInstruction> _items = new List<CilInstruction>();
+        private ICilLabel _endLabel;
 
         /// <summary>
         /// Creates a new collection of CIL instructions stored in a method body.
@@ -22,7 +24,6 @@ namespace AsmResolver.DotNet.Code.Cil
         public CilInstructionCollection(CilMethodBody body)
         {
             Owner = body ?? throw new ArgumentNullException(nameof(body));
-            EndLabel = new CilEndLabel(this);
         }
 
         /// <summary>
@@ -60,7 +61,13 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </remarks>
         public ICilLabel EndLabel
         {
-            get;
+            get
+            {
+                // Most method bodies won't be using the end label. Delay allocation if it can be avoided.
+                if (_endLabel is null)
+                    Interlocked.CompareExchange(ref _endLabel, new CilEndLabel(this), null);
+                return _endLabel;
+            }
         }
         
         /// <inheritdoc />
