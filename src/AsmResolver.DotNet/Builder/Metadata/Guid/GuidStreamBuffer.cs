@@ -7,7 +7,7 @@ using AsmResolver.PE.DotNet.Metadata.Guid;
 namespace AsmResolver.DotNet.Builder.Metadata.Guid
 {
     /// <summary>
-    /// Provides a mutable buffer for building up a GUID stream in a .NET portable executable. 
+    /// Provides a mutable buffer for building up a GUID stream in a .NET portable executable.
     /// </summary>
     public class GuidStreamBuffer : IMetadataStreamBuffer
     {
@@ -38,6 +38,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
         {
             get;
         }
+
+        /// <inheritdoc />
+        public bool IsEmpty => _rawStream.Length <= 0;
 
         /// <summary>
         /// Imports the contents of a GUID stream and indexes all present GUIDs.
@@ -81,7 +84,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
         {
             if (guid == System.Guid.Empty)
                 return 0;
-            
+
             if (!_guids.TryGetValue(guid, out uint index))
             {
                 index = AppendGuid(guid);
@@ -95,7 +98,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
         /// Serializes the GUID stream buffer to a metadata stream.
         /// </summary>
         /// <returns>The metadata stream.</returns>
-        public GuidStream CreateStream() => 
+        public GuidStream CreateStream() =>
             new SerializedGuidStream(Name, _rawStream.ToArray());
 
         /// <inheritdoc />

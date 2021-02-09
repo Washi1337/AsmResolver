@@ -8,7 +8,7 @@ using AsmResolver.PE.DotNet.Metadata.Strings;
 namespace AsmResolver.DotNet.Builder.Metadata.Strings
 {
     /// <summary>
-    /// Provides a mutable buffer for building up a strings stream in a .NET portable executable. 
+    /// Provides a mutable buffer for building up a strings stream in a .NET portable executable.
     /// </summary>
     public class StringsStreamBuffer : IMetadataStreamBuffer
     {
@@ -40,6 +40,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         {
             get;
         }
+
+        /// <inheritdoc />
+        public bool IsEmpty => _rawStream.Length <= 1;
 
         /// <summary>
         /// Imports the contents of a strings stream and indexes all present strings.
@@ -101,13 +104,13 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
                 offset = AppendString(value);
                 _strings.Add(value, offset);
             }
-            
+
             return offset;
         }
 
         /// <summary>
-        /// Serializes the strings stream buffer to a metadata stream. 
-        /// </summary> 
+        /// Serializes the strings stream buffer to a metadata stream.
+        /// </summary>
         /// <returns>The metadata stream.</returns>
         public StringsStream CreateStream()
         {
