@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
         }
 
         /// <inheritdoc />
-        public bool IsEmpty => _rawStream.Length > 1;
+        public bool IsEmpty => _rawStream.Length <= 1;
 
         /// <summary>
         /// Imports the contents of a strings stream and indexes all present strings.

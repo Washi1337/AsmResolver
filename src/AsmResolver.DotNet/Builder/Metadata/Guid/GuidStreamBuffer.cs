@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
         }
 
         /// <inheritdoc />
-        public bool IsEmpty => _rawStream.Length > 0;
+        public bool IsEmpty => _rawStream.Length <= 0;
 
         /// <summary>
         /// Imports the contents of a GUID stream and indexes all present GUIDs.
