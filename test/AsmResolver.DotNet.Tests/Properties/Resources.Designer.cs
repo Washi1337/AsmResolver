@@ -101,6 +101,48 @@ namespace AsmResolver.DotNet.Tests.Properties {
             }
         }
 
+        public static byte[] HelloWorld_MaliciousExportedTypeLoop {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_MaliciousExportedTypeLoop", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] Assembly1_MaliciousExportedTypeLoop {
+            get {
+                object obj = ResourceManager.GetObject("Assembly1_MaliciousExportedTypeLoop", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] Assembly2_MaliciousExportedTypeLoop {
+            get {
+                object obj = ResourceManager.GetObject("Assembly2_MaliciousExportedTypeLoop", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] HelloWorld_Forwarder {
+            get {
+                object obj = ResourceManager.GetObject("HelloWorld_Forwarder", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] Assembly1_Forwarder {
+            get {
+                object obj = ResourceManager.GetObject("Assembly1_Forwarder", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        public static byte[] Assembly2_Actual {
+            get {
+                object obj = ResourceManager.GetObject("Assembly2_Actual", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         public static byte[] ConstantZeroValueColumn {
             get {
                 object obj = ResourceManager.GetObject("ConstantZeroValueColumn", resourceCulture);
