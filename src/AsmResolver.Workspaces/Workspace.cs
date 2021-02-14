@@ -32,7 +32,10 @@
                 var nextSubject = context.Agenda.Dequeue();
                 var analyzers = Analyzers.GetAnalyzers(nextSubject.GetType());
                 foreach (var analyzer in analyzers)
-                    analyzer.Analyze(context, nextSubject);
+                {
+                    if (analyzer.CanAnalyze(context, nextSubject))
+                        analyzer.Analyze(context, nextSubject);
+                }
             }
         }
 
