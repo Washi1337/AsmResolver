@@ -3,6 +3,9 @@ using AsmResolver.DotNet;
 
 namespace AsmResolver.Workspaces.DotNet
 {
+    /// <summary>
+    /// Defines default relations between objects in a .NET assembly.
+    /// </summary>
     public static class DotNetRelations
     {
         /// <summary>
