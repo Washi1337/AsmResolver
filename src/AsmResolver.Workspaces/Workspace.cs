@@ -1,7 +1,7 @@
 ﻿namespace AsmResolver.Workspaces
 {
     /// <summary>
-    /// Provides a mechanism for indexing assemblies and their components.
+    /// Provides a base mechanism for indexing assemblies and their components.
     /// </summary>
     public abstract class Workspace
     {
