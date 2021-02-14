@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace AsmResolver.Workspaces
@@ -39,6 +40,16 @@ namespace AsmResolver.Workspaces
         {
             get;
         } = new HashSet<object>();
+
+        /// <summary>
+        /// Determines whether the provided object type can be analyzed by at least one analyzer in this repository.
+        /// </summary>
+        /// <param name="type">The type of objects to analyze.</param>
+        /// <returns>
+        /// <c>true</c> if there exists at least one analyzer that can analyze objects of the provided type,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool HasAnalyzers(Type type) => Workspace.Analyzers.HasAnalyzers(type);
 
         /// <summary>
         /// Schedules the provided object if it was not scheduled before.

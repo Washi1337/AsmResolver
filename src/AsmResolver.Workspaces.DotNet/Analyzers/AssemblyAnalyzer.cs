@@ -12,8 +12,12 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
         {
             context.Workspace.Index.GetOrCreateNode(subject);
 
-            for (int i = 0; i < subject.Modules.Count; i++)
-                context.SchedulaForAnalysis(subject.Modules[i]);
+            // Schedule all the defined modules in the module for analysis.
+            if (context.HasAnalyzers(typeof(AssemblyDefinition)))
+            {
+                for (int i = 0; i < subject.Modules.Count; i++)
+                    context.SchedulaForAnalysis(subject.Modules[i]);
+            }
         }
     }
 }

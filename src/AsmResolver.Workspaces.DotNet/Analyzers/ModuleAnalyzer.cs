@@ -12,8 +12,12 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
         {
             context.Workspace.Index.GetOrCreateNode(subject);
 
-            foreach (var type in subject.GetAllTypes())
-                context.SchedulaForAnalysis(type);
+            // Schedule all the defined types in the module for analysis.
+            if (context.HasAnalyzers(typeof(TypeDefinition)))
+            {
+                foreach (var type in subject.GetAllTypes())
+                    context.SchedulaForAnalysis(type);
+            }
         }
     }
 }

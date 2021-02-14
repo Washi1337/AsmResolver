@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AsmResolver.Workspaces
 {
@@ -25,6 +24,30 @@ namespace AsmResolver.Workspaces
             }
 
             node.Analyzers.Add(analyzer);
+        }
+
+        /// <summary>
+        /// Determines whether the provided object type can be analyzed by at least one analyzer in this repository.
+        /// </summary>
+        /// <param name="type">The type of objects to analyze.</param>
+        /// <returns>
+        /// <c>true</c> if there exists at least one analyzer that can analyze objects of the provided type,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        public bool HasAnalyzers(Type? type)
+        {
+            while (type is not null)
+            {
+                if (_analyzers.TryGetValue(type, out var node))
+                {
+                    if (node.Analyzers.Count > 0)
+                        return true;
+                }
+
+                type = type.BaseType;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -58,10 +81,10 @@ namespace AsmResolver.Workspaces
                 get;
             }
 
-            public ICollection<IObjectAnalyzer> Analyzers
+            public HashSet<IObjectAnalyzer> Analyzers
             {
                 get;
-            } = new HashSet<IObjectAnalyzer>();
+            } = new();
         }
     }
 }

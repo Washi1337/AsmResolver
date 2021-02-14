@@ -40,8 +40,11 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
             }
 
             // Schedule methods for analysis.
-            for (int i = 0; i < subject.Methods.Count; i++)
-                context.SchedulaForAnalysis(subject.Methods[i]);
+            if (context.HasAnalyzers(typeof(MethodDefinition)))
+            {
+                for (int i = 0; i < subject.Methods.Count; i++)
+                    context.SchedulaForAnalysis(subject.Methods[i]);
+            }
         }
 
     }
