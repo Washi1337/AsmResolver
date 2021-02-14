@@ -5,13 +5,8 @@ namespace AsmResolver.Workspaces.Tests
 {
     public class AnalyzerRepositoryTest
     {
-        private readonly AnalyzerRepository _repository;
-
-        public AnalyzerRepositoryTest()
-        {
-            _repository = new AnalyzerRepository();
-        }
-
+        private readonly AnalyzerRepository _repository = new();
+        
         [Fact]
         public void RegisteredAnalyzerShouldAppearInRepository()
         {
