@@ -23,7 +23,7 @@
       <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
       <ProjectReference Include="..\..\src\AsmResolver.Workspaces.DotNet\AsmResolver.Workspaces.DotNet.csproj" />
       <ProjectReference Include="..\..\src\AsmResolver.Workspaces\AsmResolver.Workspaces.csproj" />
-      <ProjectReference Include="..\TestBinaries\DotNet\AsmResoilver.Workspaces.DotNet.TestCases\AsmResoilver.Workspaces.DotNet.TestCases.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.Workspaces.DotNet.TestCases\AsmResolver.Workspaces.DotNet.TestCases.csproj" />
     </ItemGroup>
 
 </Project>

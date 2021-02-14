@@ -1,4 +1,4 @@
-namespace AsmResoilver.Workspaces.DotNet.TestCases
+namespace AsmResolver.Workspaces.DotNet.TestCases
 {
     public class MyDerivedClass : MyClass
     {

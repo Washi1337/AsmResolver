@@ -1,5 +1,5 @@
 using System.Linq;
-using AsmResoilver.Workspaces.DotNet.TestCases;
+using AsmResolver.Workspaces.DotNet.TestCases;
 using AsmResolver.DotNet;
 using AsmResolver.Workspaces.Dotnet;
 using Xunit;
@@ -48,7 +48,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         [Fact]
         public void ExplicitMethodImplementation()
         {
-            const string name = "AsmResoilver.Workspaces.DotNet.TestCases.IMyInterface.Explicit";
+            const string name = "AsmResolver.Workspaces.DotNet.TestCases.IMyInterface.Explicit";
 
             var module = _fixture.Assembly.ManifestModule;
             var implementationMethod =

@@ -69,7 +69,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Workspaces.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Workspaces.DotNet.Tests", "test\AsmResolver.Workspaces.DotNet.Tests\AsmResolver.Workspaces.DotNet.Tests.csproj", "{61F08E60-22A5-4D9E-B963-4EAD96F473D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResoilver.Workspaces.DotNet.TestCases", "test\TestBinaries\DotNet\AsmResoilver.Workspaces.DotNet.TestCases\AsmResoilver.Workspaces.DotNet.TestCases.csproj", "{1B178E8D-1B3F-4148-84F8-DBA7B2EC312D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Workspaces.DotNet.TestCases", "test\TestBinaries\DotNet\AsmResolver.Workspaces.DotNet.TestCases\AsmResolver.Workspaces.DotNet.TestCases.csproj", "{1B178E8D-1B3F-4148-84F8-DBA7B2EC312D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

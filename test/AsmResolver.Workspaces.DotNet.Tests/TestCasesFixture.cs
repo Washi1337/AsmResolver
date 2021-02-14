@@ -1,4 +1,4 @@
-using AsmResoilver.Workspaces.DotNet.TestCases;
+using AsmResolver.Workspaces.DotNet.TestCases;
 using AsmResolver.DotNet;
 
 namespace AsmResolver.Workspaces.DotNet.Tests
