@@ -23,10 +23,10 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
             var declaringType = subject.DeclaringType;
 
             var candidates = index
-                .GetOrCreateNode(declaringType)                                     // Get indexed declaring type.
-                .GetRelatedObjects(DotNetRelations.BaseType)                 // Get types that this declaring type is implementing.
-                .SelectMany(type => type.Methods)                                   // Get the methods.
-                .Where(method => method.Name == subject.Name)                       // Filter on methods with the same name.
+                .GetOrCreateNode(declaringType) // Get indexed declaring type.
+                .GetRelatedObjects(DotNetRelations.BaseType) // Get types that this declaring type is implementing.
+                .SelectMany(type => type.Resolve()?.Methods ?? Enumerable.Empty<MethodDefinition>()) // Get the methods.
+                .Where(method => method.Name == subject.Name) // Filter on methods with the same name.
                 .ToArray();
 
             var comparer = new SignatureComparer();

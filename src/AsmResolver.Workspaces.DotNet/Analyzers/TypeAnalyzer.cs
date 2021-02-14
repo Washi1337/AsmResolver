@@ -28,7 +28,7 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
                 var declarationNode = index.GetOrCreateNode(impl.Declaration);
                 var bodyNode = index.GetOrCreateNode(impl.Body);
 
-                declarationNode.AddRelation(DotNetRelations.BaseType, bodyNode);
+                bodyNode.AddRelation(DotNetRelations.ImplementationMethod, declarationNode);
             }
         }
 

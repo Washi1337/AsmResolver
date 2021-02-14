@@ -12,7 +12,7 @@ namespace AsmResolver.Workspaces.DotNet
         /// Describes the relationship between a base type and a derived type. This includes both abstract classes
         /// as well as interfaces.
         /// </summary>
-        public static readonly ObjectRelation<TypeDefinition> BaseType = new(
+        public static readonly ObjectRelation<ITypeDefOrRef> BaseType = new(
             "BaseType",
             new Guid("B74FDD84-C147-4B23-B81E-CD63519CFD65"));
 
