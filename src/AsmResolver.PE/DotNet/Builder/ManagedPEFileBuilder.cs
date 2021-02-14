@@ -431,7 +431,7 @@ namespace AsmResolver.PE.DotNet.Builder
             if (methodRow.Body.CanRead)
             {
                 if ((methodRow.ImplAttributes & MethodImplAttributes.CodeTypeMask) == MethodImplAttributes.IL)
-                    return CilRawMethodBody.FromReader(methodRow.Body.CreateReader());
+                    return CilRawMethodBody.FromReader(ThrowErrorListener.Instance, methodRow.Body.CreateReader());
                 throw new NotImplementedException("Native unbounded method bodies cannot be reassembled yet.");
             }
 
@@ -453,7 +453,7 @@ namespace AsmResolver.PE.DotNet.Builder
             
             foreach (var row in fieldRvaTable)
             {
-                var data = reader.ResolveFieldData(metadata, row);
+                var data = reader.ResolveFieldData(ThrowErrorListener.Instance, metadata, row);
                 table.Add(data);
             }
         }

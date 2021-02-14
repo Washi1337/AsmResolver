@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AsmResolver.Collections;
 using AsmResolver.PE.File;
@@ -10,34 +11,40 @@ namespace AsmResolver.PE.Imports
     /// </summary>
     public class SerializedImportedModule : ImportedModule
     {
+        private readonly PEReaderContext _context;
+
         /// <summary>
         /// The amount of bytes a single entry uses in the import directory table.
         /// </summary>
         public const uint ModuleImportSize = 5 * sizeof(uint);
         
-        private readonly IPEFile _peFile;
         private readonly uint _lookupRva;
         private readonly uint _addressRva;
-        
+
         /// <summary>
         /// Reads a module import entry from an input stream.
         /// </summary>
-        /// <param name="peFile">The PE file containing the module import.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
-        public SerializedImportedModule(IPEFile peFile, IBinaryStreamReader reader)
+        public SerializedImportedModule(PEReaderContext context, IBinaryStreamReader reader)
         {
-            _peFile = peFile;
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+
             _lookupRva = reader.ReadUInt32();
             TimeDateStamp = reader.ReadUInt32();
             ForwarderChain = reader.ReadUInt32();
             uint nameRva = reader.ReadUInt32();
+            _addressRva = reader.ReadUInt32();
+
             if (nameRva != 0)
             {
-                if (_peFile.TryCreateReaderAtRva(nameRva, out var nameReader))
+                if (_context.File.TryCreateReaderAtRva(nameRva, out var nameReader))
                     Name = nameReader.ReadAsciiString();
+                else
+                    _context.BadImage("Import module contains an invalid name RVA.");
             }
-
-            _addressRva = reader.ReadUInt32();
         }
 
         /// <summary>
@@ -61,12 +68,16 @@ namespace AsmResolver.PE.Imports
             if (IsEmpty)
                 return result;
 
-            bool is32Bit = _peFile.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
+            bool is32Bit = _context.File.OptionalHeader.Magic == OptionalHeaderMagic.Pe32;
             (ulong ordinalMask, int pointerSize) = is32Bit
                 ? (0x8000_0000ul, sizeof(uint))
                 : (0x8000_0000_0000_0000ul, sizeof(ulong));
 
-            var lookupItemReader = _peFile.CreateReaderAtRva(_lookupRva);
+            if (!_context.File.TryCreateReaderAtRva(_lookupRva, out var lookupItemReader))
+            {
+                _context.BadImage($"Imported module \"{Name}\" has an invalid import lookup thunk table RVA.");
+                return result;
+            }
 
             while (true)
             {
@@ -83,11 +94,18 @@ namespace AsmResolver.PE.Imports
                 else
                 {
                     uint hintNameRva = (uint) (lookupItem & 0xFFFFFFFF);
-                    var reader = _peFile.CreateReaderAtRva(hintNameRva);
-                    entry = new ImportedSymbol(reader.ReadUInt16(), reader.ReadAsciiString());
+                    if (!_context.File.TryCreateReaderAtRva(hintNameRva, out var reader))
+                    {
+                        _context.BadImage($"Invalid Hint-Name RVA for import {Name}!#{result.Count.ToString()}.");
+                        entry = new ImportedSymbol(0, "<<<INVALID_NAME_RVA>>>");
+                    }
+                    else
+                    {
+                        entry = new ImportedSymbol(reader.ReadUInt16(), reader.ReadAsciiString());
+                    }
                 }
 
-                entry.AddressTableEntry = _peFile.GetReferenceToRva((uint) (_addressRva + result.Count * pointerSize));
+                entry.AddressTableEntry = _context.File.GetReferenceToRva((uint) (_addressRva + result.Count * pointerSize));
                 result.Add(entry);
             }
 

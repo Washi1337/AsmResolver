@@ -11,20 +11,22 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedImplementationMap : ImplementationMap
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly ImplementationMapRow _row;
 
         /// <summary>
         /// Creates a member reference from an implementation map metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the mapping.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the mapping for.</param>
         /// <param name="row">The metadata table row to base the mapping on.</param>
-        public SerializedImplementationMap(SerializedModuleDefinition parentModule,
-            MetadataToken token, ImplementationMapRow row)
+        public SerializedImplementationMap(
+            ModuleReaderContext context,
+            MetadataToken token,
+            in ImplementationMapRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Attributes = _row.Attributes;
@@ -33,21 +35,21 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IMemberForwarded GetMemberForwarded()
         {
-            var ownerToken = _parentModule.GetImplementationMapOwner(MetadataToken.Rid);
-            return _parentModule.TryLookupMember(ownerToken, out var member)
+            var ownerToken = _context.ParentModule.GetImplementationMapOwner(MetadataToken.Rid);
+            return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IMemberForwarded
                 : null;
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()
             .GetStringByIndex(_row.ImportName);
 
         /// <inheritdoc />
         protected override ModuleReference GetScope()
         {
-            return _parentModule.TryLookupMember(new MetadataToken(TableIndex.ModuleRef, _row.ImportScope),
+            return _context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.ModuleRef, _row.ImportScope),
                 out var member)
                 ? member as ModuleReference
                 : null;

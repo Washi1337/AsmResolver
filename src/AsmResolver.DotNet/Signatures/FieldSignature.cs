@@ -27,25 +27,14 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single field signature from an input stream.
         /// </summary>
-        /// <param name="module">The module containing the signature.</param>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The field signature.</returns>
-        public static FieldSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader) =>
-            FromReader(module, reader, RecursionProtection.CreateNew());
-
-        /// <summary>
-        /// Reads a single field signature from an input stream.
-        /// </summary>
-        /// <param name="module">The module containing the signature.</param>
-        /// <param name="reader">The blob input stream.</param>
-        /// <param name="protection">The object responsible for detecting infinite recursion.</param>
-        /// <returns>The field signature.</returns>
-        public static FieldSignature FromReader(ModuleDefinition module, IBinaryStreamReader reader,
-            RecursionProtection protection)
+        public static FieldSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
             return new FieldSignature(
                 (CallingConventionAttributes) reader.ReadByte(),
-                TypeSignature.FromReader(module, reader, protection));
+                TypeSignature.FromReader(context, reader));
         }
         
         /// <summary>

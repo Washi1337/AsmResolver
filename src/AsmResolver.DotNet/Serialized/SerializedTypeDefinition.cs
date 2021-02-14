@@ -15,32 +15,32 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedTypeDefinition : TypeDefinition
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly TypeDefinitionRow _row;
 
         /// <summary>
         /// Creates a type definition from a type metadata row.
         /// </summary>
-        /// <param name="parentModule"></param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type definition on.</param>
-        public SerializedTypeDefinition(SerializedModuleDefinition parentModule, MetadataToken token, TypeDefinitionRow row)
+        public SerializedTypeDefinition(ModuleReaderContext context, MetadataToken token, in TypeDefinitionRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
             Attributes = row.Attributes;
 
-            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = parentModule;
+            ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = context.ParentModule;
         }
 
         /// <inheritdoc />
-        protected override string GetNamespace() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetNamespace() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()?
             .GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />
-        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()?
             .GetStringByIndex(_row.Name);
 
@@ -50,12 +50,12 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Extends == 0)
                 return null;
             
-            var decoder = _parentModule.DotNetDirectory.Metadata
+            var decoder = _context.Image.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef);
             
             var token = decoder.DecodeIndex(_row.Extends);
-            return (ITypeDefOrRef) _parentModule.LookupMember(token);
+            return (ITypeDefOrRef) _context.ParentModule.LookupMember(token);
         }
 
         /// <inheritdoc />
@@ -63,10 +63,10 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new OwnedCollection<TypeDefinition, TypeDefinition>(this);
             
-            var rids = _parentModule.GetNestedTypeRids(MetadataToken.Rid);
+            var rids = _context.ParentModule.GetNestedTypeRids(MetadataToken.Rid);
             foreach (uint rid in rids)
             {
-                var nestedType = (TypeDefinition) _parentModule.LookupMember(new MetadataToken(TableIndex.TypeDef, rid));
+                var nestedType = (TypeDefinition) _context.ParentModule.LookupMember(new MetadataToken(TableIndex.TypeDef, rid));
                 result.Add(nestedType);
             }
 
@@ -76,27 +76,27 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()
         {
-            uint parentTypeRid = _parentModule.GetParentTypeRid(MetadataToken.Rid);
-            return _parentModule.TryLookupMember(new MetadataToken(TableIndex.TypeDef, parentTypeRid), out var member)
+            uint parentTypeRid = _context.ParentModule.GetParentTypeRid(MetadataToken.Rid);
+            return _context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.TypeDef, parentTypeRid), out var member)
                 ? member as TypeDefinition
                 : null;
         }
 
         /// <inheritdoc />
         protected override IList<FieldDefinition> GetFields() => 
-            CreateMemberCollection<FieldDefinition>(_parentModule.GetFieldRange(MetadataToken.Rid));
+            CreateMemberCollection<FieldDefinition>(_context.ParentModule.GetFieldRange(MetadataToken.Rid));
 
         /// <inheritdoc />
         protected override IList<MethodDefinition> GetMethods() => 
-            CreateMemberCollection<MethodDefinition>(_parentModule.GetMethodRange(MetadataToken.Rid));
+            CreateMemberCollection<MethodDefinition>(_context.ParentModule.GetMethodRange(MetadataToken.Rid));
 
         /// <inheritdoc />
         protected override IList<PropertyDefinition> GetProperties() =>
-            CreateMemberCollection<PropertyDefinition>(_parentModule.GetPropertyRange(MetadataToken.Rid));
+            CreateMemberCollection<PropertyDefinition>(_context.ParentModule.GetPropertyRange(MetadataToken.Rid));
 
         /// <inheritdoc />
         protected override IList<EventDefinition> GetEvents() =>
-            CreateMemberCollection<EventDefinition>(_parentModule.GetEventRange(MetadataToken.Rid));
+            CreateMemberCollection<EventDefinition>(_context.ParentModule.GetEventRange(MetadataToken.Rid));
         
         private IList<TMember> CreateMemberCollection<TMember>(MetadataRange range)
             where TMember : class, IMetadataMember, IOwnedCollectionElement<TypeDefinition>
@@ -104,27 +104,27 @@ namespace AsmResolver.DotNet.Serialized
             var result = new OwnedCollection<TypeDefinition, TMember>(this);
 
             foreach (var token in range)
-                result.Add((TMember) _parentModule.LookupMember(token));
+                result.Add((TMember) _context.ParentModule.LookupMember(token));
 
             return result;
         }
         
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
 
         /// <inheritdoc />
         protected override IList<SecurityDeclaration> GetSecurityDeclarations() => 
-            _parentModule.GetSecurityDeclarationCollection(this);
+            _context.ParentModule.GetSecurityDeclarationCollection(this);
 
         /// <inheritdoc />
         protected override IList<GenericParameter> GetGenericParameters()
         {
             var result = new OwnedCollection<IHasGenericParameters, GenericParameter>(this);
             
-            foreach (uint rid in _parentModule.GetGenericParameters(MetadataToken))
+            foreach (uint rid in _context.ParentModule.GetGenericParameters(MetadataToken))
             {
-                if (_parentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
+                if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.GenericParam, rid), out var member)
                     && member is GenericParameter genericParameter)
                 {
                     result.Add(genericParameter);
@@ -139,10 +139,10 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new OwnedCollection<TypeDefinition, InterfaceImplementation>(this);
             
-            var rids = _parentModule.GetInterfaceImplementationRids(MetadataToken);
+            var rids = _context.ParentModule.GetInterfaceImplementationRids(MetadataToken);
             foreach (uint rid in rids)
             {
-                if (_parentModule.TryLookupMember(new MetadataToken(TableIndex.InterfaceImpl, rid), out var member)
+                if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.InterfaceImpl, rid), out var member)
                     && member is InterfaceImplementation type)
                 {
                     result.Add(type);
@@ -157,17 +157,17 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new List<MethodImplementation>();
 
-            var tablesStream = _parentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = _context.ParentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
             var table = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.MethodDefOrRef);
 
-            var rids = _parentModule.GetMethodImplementationRids(MetadataToken);
+            var rids = _context.ParentModule.GetMethodImplementationRids(MetadataToken);
             foreach (uint rid in rids)
             {
                 var row = table.GetByRid(rid);
 
-                _parentModule.TryLookupMember(encoder.DecodeIndex(row.MethodBody), out var body);
-                _parentModule.TryLookupMember(encoder.DecodeIndex(row.MethodDeclaration), out var declaration);
+                _context.ParentModule.TryLookupMember(encoder.DecodeIndex(row.MethodBody), out var body);
+                _context.ParentModule.TryLookupMember(encoder.DecodeIndex(row.MethodDeclaration), out var declaration);
 
                 result.Add(new MethodImplementation(
                     declaration as IMethodDefOrRef,
@@ -180,9 +180,9 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override ClassLayout GetClassLayout()
         {
-            uint rid = _parentModule.GetClassLayoutRid(MetadataToken);
+            uint rid = _context.ParentModule.GetClassLayoutRid(MetadataToken);
             
-            if (_parentModule.TryLookupMember(new MetadataToken(TableIndex.ClassLayout, rid), out var member)
+            if (_context.ParentModule.TryLookupMember(new MetadataToken(TableIndex.ClassLayout, rid), out var member)
                 && member is ClassLayout layout)
             {
                 layout.Parent = this;

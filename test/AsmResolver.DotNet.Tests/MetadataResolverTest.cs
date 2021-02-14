@@ -1,9 +1,12 @@
 using System;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.NestedClasses;
 using AsmResolver.PE.DotNet.Cil;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -169,6 +172,57 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(definition);
             Assert.Equal(emptyField.Name, definition.Name);
             Assert.Equal(emptyField.Signature, definition.Signature, _comparer);
+        }
+        
+        [Fact]
+        public void ResolveExportedMemberReference()
+        {
+            // Issue: https://github.com/Washi1337/AsmResolver/issues/124
+
+            // Load assemblies.
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_Forwarder);
+            var assembly1 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly1_Forwarder);
+            var assembly2 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly2_Actual);
+
+            // Manually wire assemblies together for in-memory resolution.
+            var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
+            resolver.AddToCache(assembly1, assembly1);
+            resolver.AddToCache(assembly2, assembly2);
+            resolver = (AssemblyResolverBase) assembly1.ManifestModule.MetadataResolver.AssemblyResolver;
+            resolver.AddToCache(assembly1, assembly1);
+            resolver.AddToCache(assembly2, assembly2);
+
+            // Resolve 
+            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            Assert.NotNull(((IMethodDescriptor) instructions[0].Operand).Resolve());
+        }
+
+        [Fact]
+        public void MaliciousExportedTypeLoop()
+        {
+            // Load assemblies.
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousExportedTypeLoop);
+            var assembly1 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly1_MaliciousExportedTypeLoop);
+            var assembly2 = AssemblyDefinition.FromBytes(Properties.Resources.Assembly2_MaliciousExportedTypeLoop);
+                
+            // Manually wire assemblies together for in-memory resolution.
+            var resolver = (AssemblyResolverBase) module.MetadataResolver.AssemblyResolver;
+            resolver.AddToCache(assembly1, assembly1);
+            resolver.AddToCache(assembly2, assembly2);
+            resolver = (AssemblyResolverBase) assembly1.ManifestModule.MetadataResolver.AssemblyResolver;
+            resolver.AddToCache(assembly1, assembly1);
+            resolver.AddToCache(assembly2, assembly2);
+            resolver = (AssemblyResolverBase) assembly2.ManifestModule.MetadataResolver.AssemblyResolver;
+            resolver.AddToCache(assembly1, assembly1);
+            resolver.AddToCache(assembly2, assembly2);
+            
+            // Find reference to exported type loop.
+            var reference = module
+                .GetImportedTypeReferences()
+                .First(t => t.Name == "SomeName");
+
+            // Attempt to resolve. The test here is that it should not result in an infinite loop / stack overflow.
+            Assert.Null(reference.Resolve());
         }
     }
 }

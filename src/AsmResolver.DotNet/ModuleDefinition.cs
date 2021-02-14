@@ -59,23 +59,33 @@ namespace AsmResolver.DotNet
             FromImage(PEImage.FromBytes(buffer));
 
         /// <summary>
+        /// Reads a .NET module from the provided input buffer.
+        /// </summary>
+        /// <param name="buffer">The raw contents of the executable file to load.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromBytes(byte[] buffer, ModuleReaderParameters readerParameters) =>
+            FromImage(PEImage.FromBytes(buffer), readerParameters);
+
+        /// <summary>
         /// Reads a .NET module from the provided input file.
         /// </summary>
         /// <param name="filePath">The file path to the input executable to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromFile(string filePath) =>
-            FromFile(filePath, new ModuleReadParameters(Path.GetDirectoryName(filePath)));
+            FromFile(filePath, new ModuleReaderParameters(Path.GetDirectoryName(filePath)));
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
         /// </summary>
         /// <param name="filePath">The file path to the input executable to load.</param>
-        /// <param name="readParameters">The parameters to use while reading the module.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(string filePath, ModuleReadParameters readParameters) => 
-            FromImage(PEImage.FromFile(filePath), readParameters);
+        public static ModuleDefinition FromFile(string filePath, ModuleReaderParameters readerParameters) => 
+            FromImage(PEImage.FromFile(filePath), readerParameters);
 
         /// <summary>
         /// Reads a .NET module from the provided input file.
@@ -85,6 +95,16 @@ namespace AsmResolver.DotNet
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromFile(IPEFile file) => 
             FromImage(PEImage.FromFile(file));
+
+        /// <summary>
+        /// Reads a .NET module from the provided input file.
+        /// </summary>
+        /// <param name="file">The portable executable file to load.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromFile(IPEFile file, ModuleReaderParameters readerParameters) => 
+            FromImage(PEImage.FromFile(file), readerParameters);
 
         /// <summary>
         /// Reads a .NET module from an input stream.
@@ -97,23 +117,34 @@ namespace AsmResolver.DotNet
             FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
+        /// Reads a .NET module from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream pointing at the beginning of the executable to load.</param>
+        /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
+        /// <returns>The module.</returns>
+        /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
+        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode, ModuleReaderParameters readerParameters) => 
+            FromFile(PEFile.FromReader(reader, mode));
+
+        /// <summary>
         /// Initializes a .NET module from a PE image.
         /// </summary>
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
         public static ModuleDefinition FromImage(IPEImage peImage) => FromImage(peImage,
-            new ModuleReadParameters(Path.GetDirectoryName(peImage.FilePath)));
+            new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath)));
 
         /// <summary>
         /// Initializes a .NET module from a PE image.
         /// </summary>
         /// <param name="peImage">The image containing the .NET metadata.</param>
-        /// <param name="readParameters">The parameters to use while reading the module.</param>
+        /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReadParameters readParameters) => 
-            new SerializedModuleDefinition(peImage, readParameters);
+        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) => 
+            new SerializedModuleDefinition(peImage, readerParameters);
 
         /// <summary>
         /// Initializes a new empty module with the provided metadata token.
@@ -392,7 +423,7 @@ namespace AsmResolver.DotNet
         {
             get;
             set;
-        } = DateTime.Now;
+        }
         
         /// <summary>
         /// Gets or sets the attributes assigned to the underlying executable file.

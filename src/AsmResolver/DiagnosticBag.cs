@@ -6,7 +6,7 @@ namespace AsmResolver
     /// <summary>
     /// Provides a container for collecting exceptions during a process.
     /// </summary>
-    public class DiagnosticBag
+    public class DiagnosticBag : IErrorListener
     {
         /// <summary>
         /// Gets a collection of all the exceptions that were thrown during the process.
@@ -43,17 +43,6 @@ namespace AsmResolver
         public void RegisterException(Exception exception)
         {
             Exceptions.Add(exception);
-        }
-        
-        /// <summary>
-        /// Registers an error in the diagnostic bag, and returns a default value for the provided type.
-        /// </summary>
-        /// <param name="exception">The error.</param>
-        /// <typeparam name="T">The type of value to return.</typeparam>
-        public T RegisterExceptionAndReturnDefault<T>(Exception exception)
-        {
-            Exceptions.Add(exception);
-            return default;
         }
     }
 }

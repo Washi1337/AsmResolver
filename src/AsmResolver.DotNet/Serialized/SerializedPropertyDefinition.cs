@@ -16,44 +16,46 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedPropertyDefinition : PropertyDefinition
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly PropertyDefinitionRow _row;
 
         /// <summary>
         /// Creates a property definition from a property metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that contains the property.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the property for.</param>
         /// <param name="row">The metadata table row to base the property definition on.</param>
-        public SerializedPropertyDefinition(SerializedModuleDefinition parentModule, MetadataToken token, PropertyDefinitionRow row)
+        public SerializedPropertyDefinition(ModuleReaderContext context, MetadataToken token, in PropertyDefinitionRow row)
             : base(token)
         {
-            _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
 
             Attributes = row.Attributes;
         }
 
         /// <inheritdoc />
-        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()
             .GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
         protected override PropertySignature GetSignature()
         {
-            var reader = _parentModule.DotNetDirectory.Metadata
+            var reader = _context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .GetBlobReaderByIndex(_row.Type);
             
-            return PropertySignature.FromReader(_parentModule, reader);
+            return PropertySignature.FromReader(new BlobReadContext(_context), reader);
         }
 
         /// <inheritdoc />
         protected override TypeDefinition GetDeclaringType()
         {
-            var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, _parentModule.GetPropertyDeclaringType(MetadataToken.Rid));
-            return _parentModule.TryLookupMember(declaringTypeToken, out var member)
+            var module = _context.ParentModule;
+            
+            var declaringTypeToken = new MetadataToken(TableIndex.TypeDef, module.GetPropertyDeclaringType(MetadataToken.Rid));
+            return module.TryLookupMember(declaringTypeToken, out var member)
                 ? member as TypeDefinition
                 : null;
         }
@@ -63,11 +65,12 @@ namespace AsmResolver.DotNet.Serialized
         {
             var result = new MethodSemanticsCollection(this);
             result.ValidateMembership = false;
-            
-            foreach (uint rid in _parentModule.GetMethodSemantics(MetadataToken))
+
+            var module = _context.ParentModule;
+            foreach (uint rid in module.GetMethodSemantics(MetadataToken))
             {
                 var semanticsToken = new MetadataToken(TableIndex.MethodSemantics, rid);
-                result.Add((MethodSemantics) _parentModule.LookupMember(semanticsToken));
+                result.Add((MethodSemantics) module.LookupMember(semanticsToken));
             }
 
             result.ValidateMembership = true;
@@ -76,10 +79,10 @@ namespace AsmResolver.DotNet.Serialized
         
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
 
         /// <inheritdoc />
         protected override Constant GetConstant() => 
-            _parentModule.GetConstant(MetadataToken);
+            _context.ParentModule.GetConstant(MetadataToken);
     }
 }

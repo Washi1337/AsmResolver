@@ -10,19 +10,20 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Reads a raw method body from the given binary input stream.
         /// </summary>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
         /// <param name="reader">The binary input stream to read from.</param>
         /// <returns>The raw method body.</returns>
         /// <exception cref="NotSupportedException">Occurs when the method header indicates an invalid or unsupported
         /// method body format.</exception>
-        public static CilRawMethodBody FromReader(IBinaryStreamReader reader)
+        public static CilRawMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
         {
             var flag = (CilMethodBodyAttributes) reader.ReadByte();
             reader.Offset--;
 
             if ((flag & CilMethodBodyAttributes.Fat) == CilMethodBodyAttributes.Fat)
-                return CilRawFatMethodBody.FromReader(reader);
+                return CilRawFatMethodBody.FromReader(errorListener, reader);
             if ((flag & CilMethodBodyAttributes.Tiny) == CilMethodBodyAttributes.Tiny)
-                return CilRawTinyMethodBody.FromReader(reader);
+                return CilRawTinyMethodBody.FromReader(errorListener, reader);
             
             throw new NotSupportedException("Invalid or unsupported method body format.");
         }

@@ -21,8 +21,8 @@ namespace AsmResolver.PE.Win32Resources
         /// reading the resource tree branch. 
         /// </summary>
         public const int MaxDepth = 10;
-            
-        private readonly IPEFile _peFile;
+
+        private readonly PEReaderContext _context;
         private readonly ushort _namedEntries;
         private readonly ushort _idEntries;
         private readonly uint _entriesRva;
@@ -31,18 +31,17 @@ namespace AsmResolver.PE.Win32Resources
         /// <summary>
         /// Reads a single resource directory from an input stream.
         /// </summary>
-        /// <param name="peFile">The PE file containing the resource.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="entry">The entry to read. If this value is <c>null</c>, the root directory is assumed.</param>
         /// <param name="directoryReader">The input stream.</param>
         /// <param name="depth">
         /// The current depth of the resource directory tree structure.
         /// If this value exceeds <see cref="MaxDepth"/>, this class will not initialize any entries.
         /// </param>
-        public SerializedResourceDirectory(IPEFile peFile, ResourceDirectoryEntry? entry, 
+        public SerializedResourceDirectory(PEReaderContext context, ResourceDirectoryEntry? entry, 
             IBinaryStreamReader directoryReader, int depth = 0)
         {
-            _peFile = peFile ?? throw new ArgumentNullException(nameof(peFile));
-
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _depth = depth;
 
             if (entry.HasValue)
@@ -77,30 +76,37 @@ namespace AsmResolver.PE.Win32Resources
             
             // Optimisation, check for invalid resource directory offset, and prevention of self loop:
             if (_namedEntries + _idEntries == 0 || _depth >= MaxDepth)
+            {
+                _context.BadImage($"Reached maximum recursion depth of {_depth} sub resource directories.");
                 return result;
+            }
 
-            uint baseRva = _peFile.OptionalHeader
+            uint baseRva = _context.File.OptionalHeader
                 .GetDataDirectory(DataDirectoryIndex.ResourceDirectory)
                 .VirtualAddress;
 
             // Create entries reader.
             uint entryListSize = (uint) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
-            if (!_peFile.TryCreateReaderAtRva(_entriesRva, entryListSize, out var entriesReader))
+            if (!_context.File.TryCreateReaderAtRva(_entriesRva, entryListSize, out var entriesReader))
+            {
+                _context.BadImage("Resource directory contains an invalid entry table RVA and/or entry count.");
                 return result;
+            }
 
             for (int i = 0; i < _namedEntries + _idEntries; i++)
             {
-                var rawEntry = new ResourceDirectoryEntry(_peFile, entriesReader);
+                var rawEntry = new ResourceDirectoryEntry(_context, entriesReader);
                 
                 // Note: Even if creating the directory reader fails, we still want to include the directory entry
                 //       itself. In such a case, we expose the directory as an empty directory. This is why the
-                //       following statement is not used as a condition for an if statement.
+                //       following if statement does not dictate the creation of the data entry or not.
                 
-                _peFile.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader);
+                if (!_context.File.TryCreateReaderAtRva(baseRva + rawEntry.DataOrSubDirOffset, out var entryReader))
+                    _context.BadImage($"Resource directory entry {i.ToString()} has an invalid data offset.");
                 
                 result.Add(rawEntry.IsSubDirectory
-                    ? (IResourceEntry) new SerializedResourceDirectory(_peFile,  rawEntry, entryReader, _depth + 1)
-                    : new SerializedResourceData(_peFile, rawEntry, entryReader));
+                    ? (IResourceEntry) new SerializedResourceDirectory(_context,  rawEntry, entryReader, _depth + 1)
+                    : new SerializedResourceData(_context, rawEntry, entryReader));
             }
 
             return result;

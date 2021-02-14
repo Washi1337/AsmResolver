@@ -15,28 +15,20 @@ namespace AsmResolver.DotNet.Signatures
         /// <summary>
         /// Reads a single property signature from an input stream.
         /// </summary>
-        /// <param name="module">The module containing the signature.</param>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The property signature.</returns>
-        public static PropertySignature FromReader(ModuleDefinition module, IBinaryStreamReader reader)
-            => FromReader(module, reader, RecursionProtection.CreateNew());
-
-        /// <summary>
-        /// Reads a single property signature from an input stream.
-        /// </summary>
-        /// <param name="module">The module containing the signature.</param>
-        /// <param name="reader">The blob input stream.</param>
-        /// <param name="protection">The object responsible for detecting infinite recursion.</param>
-        /// <returns>The property signature.</returns>
-        public static PropertySignature FromReader(ModuleDefinition module, IBinaryStreamReader reader, 
-            RecursionProtection protection)
+        public static PropertySignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
         {
             var attributes = (CallingConventionAttributes) reader.ReadByte();
             if ((attributes & CallingConventionAttributes.Property) == 0)
-                throw new FormatException("Input stream does not point to a valid property signature.");
-            
+            {
+                context.ReaderContext.BadImage("Input stream does not point to a valid property signature.");
+                return null;
+            }
+
             var result = new PropertySignature(attributes);
-            result.ReadParametersAndReturnType(module, reader, protection);
+            result.ReadParametersAndReturnType(context, reader);
             return result;
         }
 

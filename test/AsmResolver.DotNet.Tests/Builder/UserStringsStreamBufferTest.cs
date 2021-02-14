@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             uint index2 = buffer.GetStringIndex(string2);
 
             Assert.NotEqual(index1, index2);
-            
+
             var usStream = buffer.CreateStream();
             Assert.Equal(string1, usStream.GetStringByIndex(index1));
             Assert.Equal(string2, usStream.GetStringByIndex(index2));
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             uint index2 = buffer.GetStringIndex(string2);
 
             Assert.Equal(index1, index2);
-            
+
             var usStream = buffer.CreateStream();
             Assert.Equal(string1, usStream.GetStringByIndex(index1));
         }
@@ -76,20 +76,20 @@ namespace AsmResolver.DotNet.Tests.Builder
         public void SpecialCharactersTerminatorByte(char specialChar, byte terminatorByte)
         {
             string value = "My String" + specialChar;
-            
+
             var buffer = new UserStringsStreamBuffer();
             uint index = buffer.GetStringIndex(value);
             var usStream = buffer.CreateStream();
 
             Assert.Equal(value, usStream.GetStringByIndex(index));
-            
+
             var reader = usStream.CreateReader();
             reader.Offset = (uint) (index + Encoding.Unicode.GetByteCount(value) + 1);
             byte b = reader.ReadByte();
-            
+
             Assert.Equal(terminatorByte, b);
         }
-        
+
         [Fact]
         public void ImportStreamShouldIndexExistingUserStrings()
         {
@@ -115,7 +115,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 0x20, 0x00, 0x75, 0x00, 0x73, 0x00, 0x65, 0x00, 0x72, 0x00, 0x20, 0x00, 0x73, 0x00,
                 0x74, 0x00, 0x72, 0x00, 0x69, 0x00, 0x6E, 0x00, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00
             });
-            
+
             var buffer = new UserStringsStreamBuffer();
             buffer.ImportStream(existingUserStringsStream);
             var newStream = buffer.CreateStream();
@@ -124,10 +124,10 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.Equal("A longer user string", newStream.GetStringByIndex(25));
             Assert.Equal("An even longer user string", newStream.GetStringByIndex(67));
         }
-        
+
         [Fact]
         public void ImportStreamWithDuplicateUserStrings()
-        { 
+        {
             var existingUserStringsStream = new SerializedUserStringsStream(UserStringsStream.DefaultName, new byte[]
             {
                 0x00,
@@ -147,7 +147,7 @@ namespace AsmResolver.DotNet.Tests.Builder
                 0x55, 0x00, 0x73, 0x00, 0x65, 0x00, 0x72, 0x00, 0x20, 0x00, 0x73, 0x00, 0x74, 0x00,
                 0x72, 0x00, 0x69, 0x00, 0x6E, 0x00, 0x67, 0x00, 0x00,
             });
-            
+
             var buffer = new UserStringsStreamBuffer();
             buffer.ImportStream(existingUserStringsStream);
             var newStream = buffer.CreateStream();
@@ -156,7 +156,7 @@ namespace AsmResolver.DotNet.Tests.Builder
             Assert.Equal("User string", newStream.GetStringByIndex(25));
             Assert.Equal("User string", newStream.GetStringByIndex(49));
         }
-        
+
         [Fact]
         public void ImportStreamWithGarbageData()
         {
@@ -170,19 +170,27 @@ namespace AsmResolver.DotNet.Tests.Builder
                 0x72, 0x00, 0x69, 0x00, 0x6E, 0x00, 0x67, 0x00, 0x00,
 
                 0xAA,
-                
+
                 // "User string"
                 0x17,
                 0x55, 0x00, 0x73, 0x00, 0x65, 0x00, 0x72, 0x00, 0x20, 0x00, 0x73, 0x00, 0x74, 0x00,
                 0x72, 0x00, 0x69, 0x00, 0x6E, 0x00, 0x67, 0x00, 0x00,
             });
-            
+
             var buffer = new UserStringsStreamBuffer();
             buffer.ImportStream(existingUserStringsStream);
             var newStream = buffer.CreateStream();
 
             Assert.Equal("User string", newStream.GetStringByIndex(1));
             Assert.Equal("User string", newStream.GetStringByIndex(26));
+        }
+
+        [Fact]
+        public void RebuildWithPreserveAbsentUSStream()
+        {
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NoUSStream);
+            var image = module.ToPEImage(new ManagedPEImageBuilder(MetadataBuilderFlags.PreserveUserStringIndices));
+            Assert.Null(image.DotNetDirectory.Metadata.GetStream<UserStringsStream>());
         }
     }
 }

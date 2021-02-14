@@ -8,7 +8,7 @@ using AsmResolver.PE.DotNet.Metadata.Blob;
 namespace AsmResolver.DotNet.Builder.Metadata.Blob
 {
     /// <summary>
-    /// Provides a mutable buffer for building up a blob stream in a .NET portable executable. 
+    /// Provides a mutable buffer for building up a blob stream in a .NET portable executable.
     /// </summary>
     public class BlobStreamBuffer : IMetadataStreamBuffer
     {
@@ -40,6 +40,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         {
             get;
         }
+
+        /// <inheritdoc />
+        public bool IsEmpty => _rawStream.Length <= 1;
 
         /// <summary>
         /// Imports the contents of a user strings stream and indexes all present strings.
@@ -85,13 +88,13 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         {
             if (blob is null || blob.Length == 0)
                 return 0;
-            
+
             if (!_blobs.TryGetValue(blob, out uint offset))
             {
                 offset = AppendBlob(blob);
                 _blobs.Add(blob, offset);
             }
-            
+
             return offset;
         }
 
@@ -107,12 +110,12 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
         {
             if (signature is null)
                 return 0u;
-            
+
             // Serialize blob.
             using var stream = new MemoryStream();
             var writer = new BinaryStreamWriter(stream);
             signature.Write(new BlobSerializationContext(writer, provider, diagnosticBag));
-            
+
             return GetBlobIndex(stream.ToArray());
         }
 

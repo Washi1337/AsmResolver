@@ -16,7 +16,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
                 .GetByRid(cctorToken.Rid)
                 .Body.CreateReader();
 
-            var body = CilRawMethodBody.FromReader(reader);
+            var body = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, reader);
             var disassembler = new CilDisassembler(new ByteArrayReader(body.Code));
 
             var initialValueFieldToken = MetadataToken.Zero;
@@ -60,7 +60,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
 
             // Read the data.
             var dataReader = new FieldRvaDataReader();
-            var segment = dataReader.ResolveFieldData(metadata, fieldRvaRow) as IReadableSegment;
+            var segment = dataReader.ResolveFieldData(ThrowErrorListener.Instance, metadata, fieldRvaRow) as IReadableSegment;
             
             Assert.NotNull(segment);
             Assert.Equal(InitialValues.ByteArray, segment.ToArray());

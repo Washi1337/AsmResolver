@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.Generics;
@@ -64,9 +65,10 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void MaliciousTypeSpecLoop()
         {
-            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousTypeSpecLoop);
+            var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_MaliciousTypeSpecLoop,
+                new ModuleReaderParameters(EmptyErrorListener.Instance));
             var typeSpec =  (TypeSpecification) module.LookupMember(new MetadataToken(TableIndex.TypeSpec, 1));
-            Assert.NotNull(typeSpec);
+            Assert.NotNull(typeSpec.Signature);
         }
         
     }

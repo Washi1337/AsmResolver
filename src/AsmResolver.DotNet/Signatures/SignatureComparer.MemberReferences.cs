@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
         
             if (x.IsMethod)
@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             if (x is MethodSpecification specification)
@@ -68,7 +68,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.Name == y.Name
@@ -93,7 +93,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return Equals(x.Method, y.Method)

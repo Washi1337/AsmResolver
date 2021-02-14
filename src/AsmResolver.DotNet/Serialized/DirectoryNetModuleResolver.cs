@@ -12,11 +12,11 @@ namespace AsmResolver.DotNet.Serialized
         /// Creates a new net module resolver that searches for the module in a directory.
         /// </summary>
         /// <param name="directory">The path to the search directory.</param>
-        /// <param name="readParameters">The parameters to use for reading a module.</param>
-        public DirectoryNetModuleResolver(string directory, ModuleReadParameters readParameters)
+        /// <param name="readerParameters">The parameters to use for reading a module.</param>
+        public DirectoryNetModuleResolver(string directory, ModuleReaderParameters readerParameters)
         {
             Directory = directory ?? throw new ArgumentNullException(nameof(directory));
-            ReadParameters = readParameters;
+            ReaderParameters = readerParameters ?? throw new ArgumentNullException(nameof(readerParameters));
         }
         
         /// <summary>
@@ -30,7 +30,7 @@ namespace AsmResolver.DotNet.Serialized
         /// <summary>
         /// Gets the parameters to be used for reading a .NET module.
         /// </summary>
-        public ModuleReadParameters ReadParameters
+        public ModuleReaderParameters ReaderParameters
         {
             get;
         }
@@ -39,20 +39,19 @@ namespace AsmResolver.DotNet.Serialized
         public ModuleDefinition Resolve(string name)
         {
             string path = Path.Combine(Directory, name);
-            if (File.Exists(path))
+            if (!File.Exists(path))
+                return null;
+            
+            try
             {
-                try
-                {
-                    return ModuleDefinition.FromFile(path, ReadParameters);
-                }
-                catch
-                {
-                    // Ignore errors.
-                    return null;
-                }
+                return ModuleDefinition.FromFile(path, ReaderParameters);
             }
-
-            return null;
+            catch
+            {
+                // Ignore errors.
+                return null;
+            }
         }
+        
     }
 }

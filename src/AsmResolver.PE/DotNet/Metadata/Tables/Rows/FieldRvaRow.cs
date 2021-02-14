@@ -12,14 +12,14 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <summary>
         /// Reads a single field RVA row from an input stream.
         /// </summary>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the field RVA table.</param>
-        /// <param name="referenceResolver"></param>
         /// <returns>The row.</returns>
-        public static FieldRvaRow FromReader(IBinaryStreamReader reader, TableLayout layout, ISegmentReferenceResolver referenceResolver)
+        public static FieldRvaRow FromReader(PEReaderContext context, IBinaryStreamReader reader, TableLayout layout)
         {
             return new FieldRvaRow(
-                 referenceResolver.GetReferenceToRva(reader.ReadUInt32()),
+                 context.File.GetReferenceToRva(reader.ReadUInt32()),
                 reader.ReadIndex((IndexSize) layout.Columns[1].Size));
         }
         

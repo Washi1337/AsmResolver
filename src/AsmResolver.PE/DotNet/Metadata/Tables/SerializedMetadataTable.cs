@@ -21,12 +21,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <summary>
         /// Defines a method that reads a single row from an input stream, using the provided table layout.
         /// </summary>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the table.</param>
-        /// <param name="resolver">The instance used to resolve RVAs to segments.</param>
-        public delegate TRow ReadRowExtendedDelegate(IBinaryStreamReader reader,
-            TableLayout layout,
-            ISegmentReferenceResolver resolver);
+        public delegate TRow ReadRowExtendedDelegate(
+            PEReaderContext context,
+            IBinaryStreamReader reader,
+            TableLayout layout);
 
         private readonly IBinaryStreamReader _reader;
         private readonly TableLayout _originalLayout;
@@ -52,14 +53,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <summary>
         /// Reads a metadata table from an input stream. 
         /// </summary>
+        /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <param name="tableIndex">The index of the table.</param>
         /// <param name="originalLayout">The layout of the table.</param>
         /// <param name="readRow">The method to use for reading each row in the table.</param>
-        /// <param name="referenceResolver">The instance used to resolve RVAs to segments.</param>
-        public SerializedMetadataTable(IBinaryStreamReader reader, TableIndex tableIndex, TableLayout originalLayout,
-            ReadRowExtendedDelegate readRow, ISegmentReferenceResolver referenceResolver)
-            : this(reader, tableIndex, originalLayout, (r, l) => readRow(r, l, referenceResolver))
+        public SerializedMetadataTable(
+            PEReaderContext context,
+            IBinaryStreamReader reader,
+            TableIndex tableIndex,
+            TableLayout originalLayout,
+            ReadRowExtendedDelegate readRow)
+            : this(reader, tableIndex, originalLayout, (r, l) => readRow(context, r, l))
         {
         }
 

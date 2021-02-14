@@ -15,12 +15,14 @@ namespace AsmResolver.PE.Imports
         /// <summary>
         /// Reads a single module import entry from an input stream.
         /// </summary>
-        /// <param name="peFile">The PE file containing the import entry.</param>
-        /// <param name="reader">The input stream.</param>
+        /// <param name="context">The reader context.</param>
+        /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public static IImportedModule FromReader(IPEFile peFile, IBinaryStreamReader reader)
+        public static IImportedModule FromReader(
+            PEReaderContext context,
+            IBinaryStreamReader reader)
         {
-            var entry = new SerializedImportedModule(peFile, reader);
+            var entry = new SerializedImportedModule(context, reader);
             return entry.IsEmpty ? null : entry;
         }
         

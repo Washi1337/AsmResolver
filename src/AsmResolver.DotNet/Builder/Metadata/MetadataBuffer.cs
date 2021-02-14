@@ -5,6 +5,11 @@ using AsmResolver.DotNet.Builder.Metadata.Strings;
 using AsmResolver.DotNet.Builder.Metadata.Tables;
 using AsmResolver.DotNet.Builder.Metadata.UserStrings;
 using AsmResolver.PE.DotNet.Metadata;
+using AsmResolver.PE.DotNet.Metadata.Blob;
+using AsmResolver.PE.DotNet.Metadata.Guid;
+using AsmResolver.PE.DotNet.Metadata.Strings;
+using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.UserStrings;
 
 namespace AsmResolver.DotNet.Builder.Metadata
 {
@@ -16,13 +21,13 @@ namespace AsmResolver.DotNet.Builder.Metadata
         private readonly string _versionString;
 
         /// <summary>
-        /// Creates a new metadata directory buffer that targets runtime version v4.0.30319. 
+        /// Creates a new metadata directory buffer that targets runtime version v4.0.30319.
         /// </summary>
         public MetadataBuffer()
             : this(KnownRuntimeVersions.Clr40)
         {
         }
-        
+
         /// <summary>
         /// Creates a new metadata directory buffer.
         /// </summary>
@@ -31,7 +36,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
         {
             _versionString = versionString ?? throw new ArgumentNullException(nameof(versionString));
         }
-        
+
         /// <inheritdoc />
         public BlobStreamBuffer BlobStream
         {
@@ -65,32 +70,39 @@ namespace AsmResolver.DotNet.Builder.Metadata
         /// <inheritdoc />
         public IMetadata CreateMetadata()
         {
-            // Create streams.
-            var tablesStream = TablesStream.CreateStream();
-            var stringsStream = StringsStream.CreateStream();
-            var userStringsStream = UserStringsStream.CreateStream();
-            var guidStream = GuidStream.CreateStream();
-            var blobStream = BlobStream.CreateStream();
-
-            // Update index sizes.
-            tablesStream.StringIndexSize = stringsStream.IndexSize;
-            tablesStream.GuidIndexSize = guidStream.IndexSize;
-            tablesStream.BlobIndexSize = blobStream.IndexSize;
-            
             // Create metadata directory.
-            return new PE.DotNet.Metadata.Metadata
+            var result = new PE.DotNet.Metadata.Metadata
             {
                 VersionString = _versionString,
-                Streams =
-                {
-                    tablesStream,
-                    stringsStream,
-                    userStringsStream,
-                    guidStream,
-                    blobStream
-                }
             };
+
+            // Create and add streams.
+            var tablesStream = AddIfNotEmpty<TablesStream>(result, TablesStream);
+            var stringsStream =  AddIfNotEmpty<StringsStream>(result, StringsStream);
+            AddIfNotEmpty<UserStringsStream>(result, UserStringsStream);
+            var guidStream = AddIfNotEmpty<GuidStream>(result, GuidStream);
+            var blobStream = AddIfNotEmpty<BlobStream>(result, BlobStream);
+
+            // Update index sizes.
+            tablesStream.StringIndexSize = stringsStream?.IndexSize ?? IndexSize.Short;
+            tablesStream.GuidIndexSize = guidStream?.IndexSize ?? IndexSize.Short;
+            tablesStream.BlobIndexSize = blobStream?.IndexSize ?? IndexSize.Short;
+
+            return result;
         }
-        
+
+        private static TStream AddIfNotEmpty<TStream>(IMetadata metadata, IMetadataStreamBuffer streamBuffer)
+            where TStream : class, IMetadataStream
+        {
+            if (!streamBuffer.IsEmpty)
+            {
+                var stream = streamBuffer.CreateStream();
+                metadata.Streams.Add(stream);
+                return (TStream) stream;
+            }
+
+            return null;
+        }
+
     }
 }

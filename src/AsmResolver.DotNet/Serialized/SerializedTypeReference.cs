@@ -13,29 +13,31 @@ namespace AsmResolver.DotNet.Serialized
     /// </summary>
     public class SerializedTypeReference : TypeReference
     {
-        private readonly SerializedModuleDefinition _parentModule;
+        private readonly ModuleReaderContext _context;
         private readonly TypeReferenceRow _row;
 
         /// <summary>
         /// Creates a type reference from a type metadata row.
         /// </summary>
-        /// <param name="parentModule">The module that references the type.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="token">The token to initialize the type for.</param>
         /// <param name="row">The metadata table row to base the type definition on.</param>
-        public SerializedTypeReference(SerializedModuleDefinition parentModule, MetadataToken token, TypeReferenceRow row)
+        public SerializedTypeReference(ModuleReaderContext context, MetadataToken token, in TypeReferenceRow row)
             : base(token)
         {
-            Module = _parentModule = parentModule ?? throw new ArgumentNullException(nameof(parentModule));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _row = row;
+
+            Module = context.ParentModule;
         }
 
         /// <inheritdoc />
-        protected override string GetNamespace() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetNamespace() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()?
             .GetStringByIndex(_row.Namespace);
 
         /// <inheritdoc />
-        protected override string GetName() => _parentModule.DotNetDirectory.Metadata
+        protected override string GetName() => _context.Image.DotNetDirectory.Metadata
             .GetStream<StringsStream>()?
             .GetStringByIndex(_row.Name);
 
@@ -43,9 +45,9 @@ namespace AsmResolver.DotNet.Serialized
         protected override IResolutionScope GetScope()
         {
             if (_row.ResolutionScope == 0)
-                return _parentModule;
+                return _context.ParentModule;
             
-            var tablesStream = _parentModule.DotNetDirectory.Metadata.GetStream<TablesStream>();
+            var tablesStream = _context.Image.DotNetDirectory.Metadata.GetStream<TablesStream>();
             var decoder = tablesStream.GetIndexEncoder(CodedIndex.ResolutionScope);
             var token = decoder.DecodeIndex(_row.ResolutionScope);
 
@@ -54,7 +56,7 @@ namespace AsmResolver.DotNet.Serialized
         
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => 
-            _parentModule.GetCustomAttributeCollection(this);
+            _context.ParentModule.GetCustomAttributeCollection(this);
    
     }
 }

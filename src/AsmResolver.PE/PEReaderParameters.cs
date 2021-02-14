@@ -1,34 +1,40 @@
+using System;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet.Metadata;
-using AsmResolver.PE.File;
 
 namespace AsmResolver.PE
 {
     /// <summary>
     /// Provides parameters for the reading process of a PE image. 
     /// </summary>
-    public class PEReadParameters
+    public class PEReaderParameters
     {
         /// <summary>
         /// Initializes the PE reader parameters.
         /// </summary>
-        /// <param name="resolver">
-        /// The object responsible for resolving references within the original PE file.
-        /// This is usually just the underlying <see cref="PEFile"/> instance.
-        /// </param>
-        public PEReadParameters(ISegmentReferenceResolver resolver)
+        public PEReaderParameters()
+            : this(ThrowErrorListener.Instance)
         {
-            ReferenceResolver = resolver;
-            MetadataStreamReader = new DefaultMetadataStreamReader(resolver);
-            DebugDataReader = new DefaultDebugDataReader(resolver);
         }
 
         /// <summary>
-        /// Gets the object responsible for resolving references to segments within the raw PE file.
+        /// Initializes the PE reader parameters.
         /// </summary>
-        public ISegmentReferenceResolver ReferenceResolver
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
+        public PEReaderParameters(IErrorListener errorListener)
+        {
+            MetadataStreamReader = new DefaultMetadataStreamReader();
+            DebugDataReader = new DefaultDebugDataReader();
+            ErrorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
+        }
+
+        /// <summary>
+        /// Gets the object responsible for collecting any errors during the parsing.
+        /// </summary>
+        public IErrorListener ErrorListener
         {
             get;
+            set;
         }
 
         /// <summary>

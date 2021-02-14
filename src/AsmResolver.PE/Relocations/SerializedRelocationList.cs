@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using AsmResolver.Collections;
 using AsmResolver.PE.File;
@@ -11,25 +12,28 @@ namespace AsmResolver.PE.Relocations
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class SerializedRelocationList : LazyList<BaseRelocation>
     {
-        private readonly IPEFile _peFile;
+        private readonly PEReaderContext _context;
         private readonly DataDirectory _relocDirectory;
 
         /// <summary>
         /// Prepares a new lazy-initialized list of base relocations.
         /// </summary>
-        /// <param name="peFile">The PE file to read the base relocations from.</param>
+        /// <param name="context">The reader context.</param>
         /// <param name="relocDirectory">The directory that contains the base relocations.</param>
-        public SerializedRelocationList(IPEFile peFile, DataDirectory relocDirectory)
+        public SerializedRelocationList(PEReaderContext context, DataDirectory relocDirectory)
         {
-            _peFile = peFile;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _relocDirectory = relocDirectory;
         }
 
         /// <inheritdoc />
         protected override void Initialize()
         {
-            if (!_peFile.TryCreateDataDirectoryReader(_relocDirectory, out var reader))
+            if (!_context.File.TryCreateDataDirectoryReader(_relocDirectory, out var reader))
+            {
+                _context.BadImage("Invalid base relocation data directory RVA and/or size.");
                 return;
+            }
 
             while (reader.Offset < reader.StartOffset + reader.Length) 
                 ReadBlock(reader);
@@ -53,7 +57,7 @@ namespace AsmResolver.PE.Relocations
             var type = (RelocationType) (rawValue >> 12);
             int offset = rawValue & 0xFFF;
 
-            Items.Add(new BaseRelocation(type, _peFile.GetReferenceToRva((uint) (pageRva + offset))));
+            Items.Add(new BaseRelocation(type, _context.File.GetReferenceToRva((uint) (pageRva + offset))));
         }
     }
 }

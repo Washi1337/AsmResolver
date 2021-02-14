@@ -20,11 +20,12 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Reads a raw method body from the given binary input stream using the fat method body format.
         /// </summary>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
         /// <param name="reader">The binary input stream to read from.</param>
         /// <returns>The raw method body.</returns>
         /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
         /// fat format.</exception>
-        public new static CilRawFatMethodBody FromReader(IBinaryStreamReader reader)
+        public new static CilRawFatMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
         {
             ulong fileOffset = reader.Offset;
             uint rva = reader.Rva;
@@ -36,7 +37,10 @@ namespace AsmResolver.PE.DotNet.Cil
 
             // Verify this is a fat method body.
             if ((flags & CilMethodBodyAttributes.Fat) != CilMethodBodyAttributes.Fat)
-                throw new FormatException("Invalid fat CIL method body header.");
+            {
+                errorListener.BadImage("Invalid fat CIL method body header.");
+                return null;
+            }
 
             // Read remaining header.
             ushort maxStack = reader.ReadUInt16();
@@ -48,7 +52,10 @@ namespace AsmResolver.PE.DotNet.Cil
 
             // Verify code size.
             if (reader.Offset + codeSize > reader.StartOffset + reader.Length)
-                throw new FormatException("Invalid fat CIL method body code size.");
+            {
+                errorListener.BadImage("Invalid fat CIL method body code size.");
+                return null;
+            }
 
             // Read code.
             var code = new byte[codeSize];

@@ -50,7 +50,7 @@ Or grab the stream by its type:
 
 .. code-block:: csharp
 
-    var stringsStream = metadata.GetStream<StringsStream>;
+    var stringsStream = metadata.GetStream<StringsStream>();
 
 AsmResolver supports parsing streams using the names in the table below. Any stream with a different name will be converted to a ``CustomMetadataStream``.
 

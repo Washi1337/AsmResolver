@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             
             var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
             instructions.Clear();
-            instructions.Add(new CilInstruction(CilOpCodes.Ret));
+            instructions.Add(CilOpCodes.Ret);
             
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveMemberReferenceIndices);
             var newMemberRefs = GetMembers<MemberReference>(newModule, TableIndex.MemberRef);
@@ -47,13 +47,10 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             var readKey = importer.ImportMethod(typeof(Console).GetMethod("ReadKey", Type.EmptyTypes));
 
             var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
-            instructions.RemoveAt(instructions.Count-1);
-            instructions.AddRange(new[]
-            {
-                new CilInstruction(CilOpCodes.Call, readKey),
-                new CilInstruction(CilOpCodes.Pop),
-                new CilInstruction(CilOpCodes.Ret),
-            });
+            instructions.RemoveAt(instructions.Count - 1);
+            instructions.Add(CilOpCodes.Call, readKey);
+            instructions.Add(CilOpCodes.Pop);
+            instructions.Add(CilOpCodes.Ret);
             
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveMemberReferenceIndices);
             var newMemberRefs = GetMembers<MemberReference>(newModule, TableIndex.MemberRef);

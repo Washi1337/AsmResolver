@@ -4,8 +4,16 @@ using System.IO;
 
 namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
+    /// <summary>
+    /// Provides a mechanism for building up a fully qualified type names, as they are stored in custom attribute signatures.
+    /// </summary>
     public readonly struct TypeNameBuilder : ITypeSignatureVisitor<object>
     {
+        /// <summary>
+        /// Builds up an assembly qualified type name.
+        /// </summary>
+        /// <param name="signature">The type to convert to a string.</param>
+        /// <returns>The built up type name.</returns>
         public static string GetAssemblyQualifiedName(TypeSignature signature)
         {
             var writer = new StringWriter();

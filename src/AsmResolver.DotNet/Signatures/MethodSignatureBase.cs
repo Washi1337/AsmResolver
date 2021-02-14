@@ -68,24 +68,25 @@ namespace AsmResolver.DotNet.Signatures
         /// Initializes the <see cref="ParameterTypes"/> and <see cref="ReturnType"/> properties by reading
         /// the parameter count, return type and parameter fields of the signature from the provided input stream.
         /// </summary>
-        /// <param name="module">The module that contains the signature.</param>
+        /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
-        /// <param name="protection">The object instance responsible for detecting infinite recursion.</param>
-        protected void ReadParametersAndReturnType(ModuleDefinition module, IBinaryStreamReader reader,
-            RecursionProtection protection)
+        protected void ReadParametersAndReturnType(in BlobReadContext context, IBinaryStreamReader reader)
         {
             // Parameter count.
             if (!reader.TryReadCompressedUInt32(out uint parameterCount))
+            {
+                context.ReaderContext.BadImage("Invalid number of parameters in signature.");
                 return;
+            }
 
             // Return type.
-            ReturnType = TypeSignature.FromReader(module, reader, protection);
+            ReturnType = TypeSignature.FromReader(context, reader);
 
             // Parameter types.
             bool sentinel = false;
             for (int i = 0; i < parameterCount; i++)
             {
-                var parameterType = TypeSignature.FromReader(module, reader, protection);
+                var parameterType = TypeSignature.FromReader(context, reader);
 
                 if (parameterType.ElementType == ElementType.Sentinel)
                 {
