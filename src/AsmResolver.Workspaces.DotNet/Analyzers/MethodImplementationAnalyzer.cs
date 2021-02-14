@@ -1,7 +1,7 @@
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.Workspaces.Dotnet.Relations;
+using AsmResolver.Workspaces.DotNet;
 
 namespace AsmResolver.Workspaces.Dotnet.Analyzers
 {
@@ -23,12 +23,10 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
             var declaringType = subject.DeclaringType;
 
             var candidates = index
-                .GetOrCreateNode(declaringType)               // Get indexed declaring type.
-                .GetRelatedObjects<BaseType>()                // Get types that this declaring type is implementing.
-                .Select(n => n.Subject)                       // Get the actual type definition.
-                .OfType<TypeDefinition>()                     //  TODO: should be more generic later
-                .SelectMany(type => type.Methods)             // Get the methods.
-                .Where(method => method.Name == subject.Name) // Filter on methods with the same name.
+                .GetOrCreateNode(declaringType)                                     // Get indexed declaring type.
+                .GetRelatedObjects(DotNetRelations.BaseType)                 // Get types that this declaring type is implementing.
+                .SelectMany(type => type.Methods)                                   // Get the methods.
+                .Where(method => method.Name == subject.Name)                       // Filter on methods with the same name.
                 .ToArray();
 
             var comparer = new SignatureComparer();
@@ -47,7 +45,7 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
                 if (comparer.Equals(candidate.Signature, subject.Signature))
                 {
                     var candidateNode = index.GetOrCreateNode(candidate);
-                    node.AddRelation<Implementation>(candidateNode);
+                    node.AddRelation(DotNetRelations.ImplementationMethod, candidateNode);
                 }
             }
 

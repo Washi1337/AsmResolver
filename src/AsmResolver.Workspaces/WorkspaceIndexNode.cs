@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,7 +8,7 @@ namespace AsmResolver.Workspaces
     /// </summary>
     public class WorkspaceIndexNode
     {
-        private readonly Dictionary<Type, ISet<WorkspaceIndexNode>> _neighbors = new();
+        private readonly Dictionary<ObjectRelation, ISet<WorkspaceIndexNode>> _neighbors = new();
 
         /// <summary>
         /// Creates a new instance of the <see cref="WorkspaceIndexNode"/> class.
@@ -31,15 +30,15 @@ namespace AsmResolver.Workspaces
         /// <summary>
         /// Registers a relation between two objects.
         /// </summary>
+        /// <param name="relation">The relation.</param>
         /// <param name="node">The node representing the other object.</param>
-        /// <typeparam name="TRelation">The type of relation to register.</typeparam>
-        public void AddRelation<TRelation>(WorkspaceIndexNode node)
+        /// <typeparam name="T">The type of object to relate to.</typeparam>
+        public void AddRelation<T>(ObjectRelation<T> relation, WorkspaceIndexNode node)
         {
-            var type = typeof(TRelation);
-            if (!_neighbors.TryGetValue(type, out var neighbors))
+            if (!_neighbors.TryGetValue(relation, out var neighbors))
             {
                 neighbors = new HashSet<WorkspaceIndexNode>();
-                _neighbors.Add(type, neighbors);
+                _neighbors.Add(relation, neighbors);
             }
 
             neighbors.Add(node);
@@ -58,13 +57,13 @@ namespace AsmResolver.Workspaces
         /// <summary>
         /// Gets a collection of all nodes that are related to this object of a given relation type.
         /// </summary>
-        /// <typeparam name="TRelation">The type of relation.</typeparam>
-        public IEnumerable<WorkspaceIndexNode> GetRelatedObjects<TRelation>()
-            where TRelation : IObjectRelation
+        /// <param name="relation">The relation.</param>
+        /// <typeparam name="T">The type of object to obtain.</typeparam>
+        public IEnumerable<T> GetRelatedObjects<T>(ObjectRelation<T> relation)
         {
-            return _neighbors.TryGetValue(typeof(TRelation), out var neighbors)
-                ? neighbors
-                : Enumerable.Empty<WorkspaceIndexNode>();
+            return _neighbors.TryGetValue(relation, out var neighbors)
+                ? neighbors.Select(n => n.Subject).Cast<T>()
+                : Enumerable.Empty<T>();
         }
     }
 }

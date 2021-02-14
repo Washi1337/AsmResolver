@@ -1,5 +1,5 @@
 using AsmResolver.DotNet;
-using AsmResolver.Workspaces.Dotnet.Relations;
+using AsmResolver.Workspaces.DotNet;
 
 namespace AsmResolver.Workspaces.Dotnet.Analyzers
 {
@@ -18,14 +18,14 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
             if (subject.BaseType is {} baseType)
             {
                 var relatedNode = index.GetOrCreateNode(baseType);
-                node.AddRelation<BaseType>(relatedNode);
+                node.AddRelation(DotNetRelations.BaseType, relatedNode);
             }
 
             // Register interface relations.
             for (int i = 0; i < subject.Interfaces.Count; i++)
             {
                 var relatedNode = index.GetOrCreateNode(subject.Interfaces[i].Interface);
-                node.AddRelation<BaseType>(relatedNode);
+                node.AddRelation(DotNetRelations.BaseType, relatedNode);
             }
 
             // Register explicit method implementations.
@@ -36,7 +36,7 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
                 var declarationNode = index.GetOrCreateNode(impl.Declaration);
                 var bodyNode = index.GetOrCreateNode(impl.Body);
 
-                declarationNode.AddRelation<Implementation>(bodyNode);
+                declarationNode.AddRelation(DotNetRelations.BaseType, bodyNode);
             }
 
             // Schedule methods for analysis.
