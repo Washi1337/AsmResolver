@@ -47,10 +47,11 @@ namespace AsmResolver.Workspaces
         /// <summary>
         /// Gets a collection of all nodes that are related to this object.
         /// </summary>
-        public IEnumerable<WorkspaceIndexNode> GetAllRelatedObjects()
+        public IEnumerable<object> GetAllRelatedObjects()
         {
             return _neighbors.Values
                 .SelectMany(x => x)
+                .Select(x => x.Subject)
                 .Distinct();
         }
 
