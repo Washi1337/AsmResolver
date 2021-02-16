@@ -8,7 +8,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     /// Provides an implementation of a metadata table that was serialized to a PE file.
     /// </summary>
     /// <typeparam name="TRow">The type of rows that this table stores.</typeparam>
-    public class SerializedMetadataTable<TRow> : MetadataTable<TRow> 
+    public class SerializedMetadataTable<TRow> : MetadataTable<TRow>
         where TRow : struct, IMetadataRow
     {
         /// <summary>
@@ -17,7 +17,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the table.</param>
         public delegate TRow ReadRowDelegate(IBinaryStreamReader reader, TableLayout layout);
-        
+
         /// <summary>
         /// Defines a method that reads a single row from an input stream, using the provided table layout.
         /// </summary>
@@ -35,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         private readonly ReadRowDelegate _readRow;
 
         /// <summary>
-        /// Reads a metadata table from an input stream. 
+        /// Reads a metadata table from an input stream.
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <param name="tableIndex">The index of the table.</param>
@@ -51,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <summary>
-        /// Reads a metadata table from an input stream. 
+        /// Reads a metadata table from an input stream.
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
@@ -69,18 +69,19 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         }
 
         /// <inheritdoc />
-        public override int Count => IsInitialized ? Rows.Count : _rowCount; 
+        public override int Count => IsInitialized ? Rows.Count : _rowCount;
 
         /// <inheritdoc />
         protected override IList<TRow> GetRows()
         {
             var result = new List<TRow>();
 
-            for (int i = 0; i < _rowCount; i++) 
-                result.Add(_readRow(_reader, _originalLayout));
+            var reader = _reader.Fork();
+            for (int i = 0; i < _rowCount; i++)
+                result.Add(_readRow(reader, _originalLayout));
 
             return result;
         }
-        
+
     }
 }
