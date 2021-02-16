@@ -85,11 +85,11 @@ namespace AsmResolver
         /// <inheritdoc />
         public IBinaryStreamReader Fork(ulong address, uint size)
         {
-            if (address < StartOffset || address >= StartOffset + Length)
+            if (address < StartOffset || address > StartOffset + Length)
                 throw new ArgumentOutOfRangeException(nameof(address));
             return new ByteArrayReader(
-                _data, 
-                (uint) (address - StartOffset + _startIndex), 
+                _data,
+                (uint) (address - StartOffset + _startIndex),
                 size,
                 address,
                 (uint) (address - StartOffset + StartRva));
@@ -100,7 +100,7 @@ namespace AsmResolver
         {
             if (newSize > Length)
                 throw new EndOfStreamException();
-            
+
             Length = newSize;
         }
 
@@ -121,11 +121,11 @@ namespace AsmResolver
         {
             if (count < 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
-            
+
             count = (int) Math.Min((uint) count, StartOffset + Length - Offset);
             Buffer.BlockCopy(_data, (int) _index, buffer, startIndex, count);
             _index = (uint) (_index + count);
-            
+
             return count;
         }
 
@@ -232,6 +232,6 @@ namespace AsmResolver
             ulong raw = ReadUInt64();
             return *(double*) &raw;
         }
-        
+
     }
 }
