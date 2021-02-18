@@ -20,7 +20,7 @@ namespace AsmResolver.PE.Debug
             Signature = reader.ReadUInt32();
             byte[] buffer = new byte[16];
             reader.ReadBytes(buffer, 0, 16);
-            GUID = new Guid(buffer);
+            Guid = new Guid(buffer);
             Age = reader.ReadUInt32();
             Path = Encoding.UTF8.GetString(reader.ReadBytesUntil(0x00));
         }
@@ -42,10 +42,9 @@ namespace AsmResolver.PE.Debug
         /// <summary>
         /// Gets or sets the PDB GUID
         /// </summary>
-        public Guid GUID
+        public Guid Guid
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -54,7 +53,6 @@ namespace AsmResolver.PE.Debug
         public uint Age
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -81,7 +79,7 @@ namespace AsmResolver.PE.Debug
         public override void Write(IBinaryStreamWriter writer)
         {
             writer.WriteUInt32(Signature);
-            writer.WriteBytes(GUID.ToByteArray());
+            writer.WriteBytes(Guid.ToByteArray());
             writer.WriteUInt32(Age);
             writer.WriteBytes(Encoding.UTF8.GetBytes(Path));
         }
