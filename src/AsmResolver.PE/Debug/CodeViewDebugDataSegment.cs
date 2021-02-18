@@ -37,7 +37,6 @@ namespace AsmResolver.PE.Debug
         public uint Signature
         {
             get;
-            set;
         }
 
         /// <summary>
