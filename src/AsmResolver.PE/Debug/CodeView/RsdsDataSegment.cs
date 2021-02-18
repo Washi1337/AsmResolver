@@ -8,11 +8,10 @@ namespace AsmResolver.PE.Debug.CodeView
     /// </summary>
     public class RsdsDataSegment : CodeViewDataSegment
     {
-
         /// <summary>
         /// Initializes a new instance of <see cref="RsdsDataSegment"/>
         /// </summary>
-        /// <param name="reader"></param>
+        /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
         public new static RsdsDataSegment FromReader(IBinaryStreamReader reader)
         {
@@ -61,19 +60,22 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
-            return sizeof(uint)                    //Signature
-                   + 16                            //Guid
-                   + sizeof(uint)                  //Age
-                   + ((uint) Path.Length).Align(4) //Path
+            return sizeof(uint)         //Signature
+                   + 16                 //Guid
+                   + sizeof(uint)       //Age
+                   + (uint) Path.Length //Path
+                   + sizeof(byte)       //Zero byte for null terminated string
                 ;
         }
+
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            writer.WriteUInt32((uint)Signature);
+            writer.WriteUInt32((uint) Signature);
             writer.WriteBytes(Guid.ToByteArray());
             writer.WriteUInt32(Age);
             writer.WriteBytes(Encoding.UTF8.GetBytes(Path));
+            writer.WriteByte(0x00);
         }
     }
 }

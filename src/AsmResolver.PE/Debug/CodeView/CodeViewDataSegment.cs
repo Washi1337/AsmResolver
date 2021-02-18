@@ -4,12 +4,10 @@ using System.IO;
 namespace AsmResolver.PE.Debug.CodeView
 {
     /// <summary>
-    /// Represents a debug data stream using the CodeView format, wrapping an instance of <see cref="SegmentBase"/>
-    /// into a <see cref="IDebugDataSegment"/>.
+    /// Represents a debug data stream using the CodeView format
     /// </summary>
     public abstract class CodeViewDataSegment : SegmentBase, IDebugDataSegment
     {
-
         /// <summary>
         /// Get uniquely identifying signature for PDB format
         /// </summary>
@@ -24,7 +22,7 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <summary>
         /// Creates a new CodeViewDataSegment depending on CodeView Signature
         /// </summary>
-        /// <param name="reader"></param>
+        /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
         public static CodeViewDataSegment FromReader(IBinaryStreamReader reader)
         {
