@@ -1,43 +1,35 @@
-using System;
+﻿using System;
 using System.Text;
 
-namespace AsmResolver.PE.Debug
+namespace AsmResolver.PE.Debug.CodeView
 {
     /// <summary>
-    /// Represents a debug data stream with CodeView format, wrapping an instance of <see cref="ISegment"/>
-    /// into a <see cref="IDebugDataSegment"/>.
+    /// Represents the CodeView data in RSDS format
     /// </summary>
-    public class CodeViewDebugDataSegment : SegmentBase, IDebugDataSegment
+    public class RsdsDataSegment : CodeViewDataSegment
     {
+
         /// <summary>
-        /// Creates a new instance of the <see cref="CustomDebugDataSegment"/> class.
+        /// Initializes a new instance of <see cref="RsdsDataSegment"/>
         /// </summary>
-        /// <param name="type">The format of the data.</param>
-        /// <param name="reader">BinaryStreamReader for the segment contents</param>
-        public CodeViewDebugDataSegment(DebugDataType type, IBinaryStreamReader reader)
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public new static RsdsDataSegment FromReader(IBinaryStreamReader reader)
         {
-            Type = type;
-            Signature = reader.ReadUInt32();
+            var result = new RsdsDataSegment();
             byte[] buffer = new byte[16];
             reader.ReadBytes(buffer, 0, 16);
-            Guid = new Guid(buffer);
-            Age = reader.ReadUInt32();
-            Path = Encoding.UTF8.GetString(reader.ReadBytesUntil(0x00));
-        }
+            result.Guid = new Guid(buffer);
+            result.Age = reader.ReadUInt32();
+            result.Path = Encoding.UTF8.GetString(reader.ReadBytesUntil(0x00));
 
-        /// <inheritdoc />
-        public DebugDataType Type
-        {
-            get;
+            return result;
         }
 
         /// <summary>
-        /// Gets or sets the PDB Signature
+        /// Gets the PDB Signature
         /// </summary>
-        public uint Signature
-        {
-            get;
-        }
+        public override CodeViewSignature Signature => CodeViewSignature.Rsds;
 
         /// <summary>
         /// Gets or sets the PDB GUID
@@ -45,6 +37,7 @@ namespace AsmResolver.PE.Debug
         public Guid Guid
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -53,6 +46,7 @@ namespace AsmResolver.PE.Debug
         public uint Age
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -64,7 +58,6 @@ namespace AsmResolver.PE.Debug
             set;
         }
 
-
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
@@ -74,11 +67,10 @@ namespace AsmResolver.PE.Debug
                    + ((uint) Path.Length).Align(4) //Path
                 ;
         }
-
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            writer.WriteUInt32(Signature);
+            writer.WriteUInt32((uint)Signature);
             writer.WriteBytes(Guid.ToByteArray());
             writer.WriteUInt32(Age);
             writer.WriteBytes(Encoding.UTF8.GetBytes(Path));

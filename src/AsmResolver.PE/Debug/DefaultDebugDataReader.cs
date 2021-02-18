@@ -1,3 +1,5 @@
+using AsmResolver.PE.Debug.CodeView;
+
 namespace AsmResolver.PE.Debug
 {
     /// <summary>
@@ -10,7 +12,7 @@ namespace AsmResolver.PE.Debug
             IBinaryStreamReader reader)
         {
             if (type == DebugDataType.CodeView)
-                return new CodeViewDebugDataSegment(type, reader);
+                return CodeViewDataSegment.FromReader(reader);
 
             return new CustomDebugDataSegment(type, DataSegment.FromReader(reader));
         }
