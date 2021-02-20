@@ -19,8 +19,8 @@
         /// <summary>
         /// Creates a new CodeViewDataSegment depending on CodeView Signature
         /// </summary>
-        /// <param name="reader">The input stream to read from.</param>
         /// <param name="context">Context for the reader</param>
+        /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
         public static CodeViewDataSegment FromReader(PEReaderContext context, IBinaryStreamReader reader)
         {
