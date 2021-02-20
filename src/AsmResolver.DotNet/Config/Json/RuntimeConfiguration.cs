@@ -10,7 +10,9 @@ namespace AsmResolver.DotNet.Config.Json
     {
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true,
+            IgnoreNullValues = true
         };
 
         /// <summary>

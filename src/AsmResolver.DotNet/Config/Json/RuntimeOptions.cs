@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Gets or sets a value that determines the roll-forward behavior.
         /// </summary>
-        public int RollForwardOnNoCandidateFx
+        public int? RollForwardOnNoCandidateFx
         {
             get;
             set;
