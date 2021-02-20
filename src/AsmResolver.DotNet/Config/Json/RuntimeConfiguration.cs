@@ -41,5 +41,23 @@ namespace AsmResolver.DotNet.Config.Json
             get;
             set;
         }
+
+        /// <summary>
+        /// Serializes the configuration to a JSON string.
+        /// </summary>
+        /// <returns>The JSON string.</returns>
+        public string ToJson()
+        {
+            return JsonSerializer.Serialize(this, JsonSerializerOptions);
+        }
+
+        /// <summary>
+        /// Writes the configuration to a file.
+        /// </summary>
+        /// <param name="path">The path to the JSON output file.</param>
+        public void Write(string path)
+        {
+            File.WriteAllText(path, ToJson());
+        }
     }
 }
