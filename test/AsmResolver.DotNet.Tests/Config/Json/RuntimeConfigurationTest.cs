@@ -26,5 +26,34 @@ namespace AsmResolver.DotNet.Tests.Config.Json
             Assert.Equal("Microsoft.NETCore.App", framework.Name);
             Assert.Equal("3.1.0", framework.Version);
         }
+
+        [Fact]
+        public void ReadMultipleFrameworks()
+        {
+            var config = RuntimeConfiguration.FromJson(@"{
+    ""runtimeOptions"": {
+        ""tfm"": ""net5.0"",
+        ""includedFrameworks"": [
+            {
+                ""name"": ""Microsoft.NETCore.App"",
+                ""version"": ""5.0.0""
+            },
+            {
+                ""name"": ""Microsoft.WindowsDesktop.App"",
+                ""version"": ""5.0.0""
+            }
+        ]
+    }
+}");
+
+            Assert.NotNull(config.RuntimeOptions);
+            Assert.Equal("net5.0", config.RuntimeOptions.TargetFrameworkMoniker);
+
+            var frameworks = config.RuntimeOptions.IncludedFrameworks;
+            Assert.Contains(frameworks, framework => framework.Name == "Microsoft.NETCore.App"
+                                                     && framework.Version == "5.0.0");
+            Assert.Contains(frameworks, framework => framework.Name == "Microsoft.WindowsDesktop.App"
+                                                     && framework.Version == "5.0.0");
+        }
     }
 }

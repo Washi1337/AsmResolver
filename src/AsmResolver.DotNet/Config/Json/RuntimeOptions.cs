@@ -11,10 +11,11 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Indicates configuration properties to configure the runtime and the framework
         /// </summary>
-        public IDictionary<string, object> ConfigProperties
+        public Dictionary<string, object> ConfigProperties
         {
             get;
-        } = new Dictionary<string, object>();
+            set;
+        }
 
         /// <summary>
         /// Gets or sets the optional string value which specifies the Target Framework Moniker.
@@ -42,10 +43,11 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Gets an optional array (added in .NET Core 3.0) that allows multiple frameworks to be specified.
         /// </summary>
-        public IList<RuntimeFramework> Frameworks
+        public List<RuntimeFramework> IncludedFrameworks
         {
             get;
-        } = new List<RuntimeFramework>();
+            set;
+        }
 
         /// <summary>
         /// When false, the most compatible framework version previously found is used. When it is
@@ -71,9 +73,10 @@ namespace AsmResolver.DotNet.Config.Json
         /// Optional property which specifies additional paths to consider when looking for dependencies.
         /// The value is either a single string, or an array of strings.
         /// </summary>
-        public IList<string> AdditionalProbingPaths
+        public List<string> AdditionalProbingPaths
         {
             get;
-        } = new List<string>();
+            set;
+        }
     }
 }
