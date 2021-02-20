@@ -20,7 +20,7 @@ namespace AsmResolver
     }
 
     /// <summary>
-    /// Provides extension methods for instances of the <see cref="IErrorListener"/> interface. 
+    /// Provides extension methods for instances of the <see cref="IErrorListener"/> interface.
     /// </summary>
     public static class ErrorListenerExtensions
     {
@@ -53,6 +53,17 @@ namespace AsmResolver
         public static T RegisterExceptionAndReturnDefault<T>(this IErrorListener self, Exception exception)
         {
             self.RegisterException(exception);
+            return default;
+        }
+
+        /// <summary>
+        /// Registers a NotSupportedException, and returns a default value for the provided type.
+        /// </summary>
+        /// <param name="self">The error listener.</param>
+        /// <typeparam name="T">The type of value to return.</typeparam>
+        public static T NotSupportedAndReturn<T>(this IErrorListener self)
+        {
+            self.RegisterException(new NotSupportedException());
             return default;
         }
     }

@@ -32,11 +32,11 @@ namespace AsmResolver.PE.Debug.CodeView
             return signature switch
             {
                 CodeViewSignature.Rsds => RsdsDataSegment.FromReader(reader, context),
-                CodeViewSignature.Nb05 => throw new NotSupportedException(),
-                CodeViewSignature.Nb09 => throw new NotSupportedException(),
-                CodeViewSignature.Nb10 => throw new NotSupportedException(),
-                CodeViewSignature.Nb11 => throw new NotSupportedException(),
-                _ => throw new InvalidDataException()
+                CodeViewSignature.Nb05 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
+                CodeViewSignature.Nb09 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
+                CodeViewSignature.Nb10 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
+                CodeViewSignature.Nb11 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
+                _ => throw new BadImageFormatException()
             };
         }
     }
