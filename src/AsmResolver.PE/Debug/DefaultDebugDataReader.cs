@@ -13,7 +13,7 @@ namespace AsmResolver.PE.Debug
         {
             return type switch
             {
-                DebugDataType.CodeView => CodeViewDataSegment.FromReader(reader, context),
+                DebugDataType.CodeView => CodeViewDataSegment.FromReader(context, reader),
                 _ => new CustomDebugDataSegment(type, DataSegment.FromReader(reader))
             };
         }

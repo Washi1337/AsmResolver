@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace AsmResolver.PE.Debug.CodeView
+﻿namespace AsmResolver.PE.Debug.CodeView
 {
     /// <summary>
     /// Represents a debug data stream using the CodeView format
@@ -25,7 +22,7 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <param name="reader">The input stream to read from.</param>
         /// <param name="context">Context for the reader</param>
         /// <returns></returns>
-        public static CodeViewDataSegment FromReader(IBinaryStreamReader reader, PEReaderContext context)
+        public static CodeViewDataSegment FromReader(PEReaderContext context, IBinaryStreamReader reader)
         {
             var signature = (CodeViewSignature) reader.ReadUInt32();
 
