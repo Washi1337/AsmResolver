@@ -23,15 +23,19 @@ namespace AsmResolver.PE.Debug.CodeView
         /// Creates a new CodeViewDataSegment depending on CodeView Signature
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
+        /// <param name="context">Context for the reader</param>
         /// <returns></returns>
-        public static CodeViewDataSegment FromReader(IBinaryStreamReader reader)
+        public static CodeViewDataSegment FromReader(IBinaryStreamReader reader, PEReaderContext context)
         {
             var signature = (CodeViewSignature) reader.ReadUInt32();
 
             return signature switch
             {
-                CodeViewSignature.Rsds => RsdsDataSegment.FromReader(reader),
-                CodeViewSignature.Nb10 => throw new NotImplementedException(),
+                CodeViewSignature.Rsds => RsdsDataSegment.FromReader(reader, context),
+                CodeViewSignature.Nb05 => throw new NotSupportedException(),
+                CodeViewSignature.Nb09 => throw new NotSupportedException(),
+                CodeViewSignature.Nb10 => throw new NotSupportedException(),
+                CodeViewSignature.Nb11 => throw new NotSupportedException(),
                 _ => throw new InvalidDataException()
             };
         }
