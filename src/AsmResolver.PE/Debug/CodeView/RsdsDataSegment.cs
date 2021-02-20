@@ -24,7 +24,7 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <param name="reader">The input stream to read from.</param>
         /// <param name="context">Context for the reader</param>
         /// <returns></returns>
-        public new static RsdsDataSegment FromReader(IBinaryStreamReader reader, PEReaderContext context)
+        public new static RsdsDataSegment FromReader(PEReaderContext context, IBinaryStreamReader reader)
         {
             if (reader.Length < RsdsExpectedDataSize)
             {

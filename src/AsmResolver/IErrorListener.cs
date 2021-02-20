@@ -66,5 +66,16 @@ namespace AsmResolver
             self.RegisterException(new NotSupportedException());
             return default;
         }
+
+        /// <summary>
+        /// Registers a BadImage, and returns a default value for the provided type.
+        /// </summary>
+        /// <param name="self">The error listener.</param>
+        /// <typeparam name="T">The type of value to return.</typeparam>
+        public static T BadImageAndReturn<T>(this IErrorListener self)
+        {
+            self.RegisterException(new BadImageFormatException());
+            return default;
+        }
     }
 }
