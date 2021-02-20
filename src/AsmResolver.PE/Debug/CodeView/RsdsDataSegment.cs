@@ -9,12 +9,28 @@ namespace AsmResolver.PE.Debug.CodeView
     public class RsdsDataSegment : CodeViewDataSegment
     {
         /// <summary>
+        /// Gets the minimal expected data size for the rsds format
+        /// </summary>
+        private const uint RsdsExpectedDataSize =
+                sizeof(uint)   // Signature
+                + 16           // Guid
+                + sizeof(uint) // Age
+                + sizeof(byte) // Path
+            ;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="RsdsDataSegment"/>
         /// </summary>
+        /// <param name="context">Context for the reader</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public new static RsdsDataSegment FromReader(IBinaryStreamReader reader)
+        public new static RsdsDataSegment FromReader(PEReaderContext context, IBinaryStreamReader reader)
         {
+            if (reader.Length < RsdsExpectedDataSize)
+            {
+                context.BadImage("RSDS Data was shorter than the minimal expected length");
+                return null;
+            }
             var result = new RsdsDataSegment();
             byte[] buffer = new byte[16];
             reader.ReadBytes(buffer, 0, 16);
