@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace AsmResolver.DotNet.Config.Json
@@ -11,7 +12,7 @@ namespace AsmResolver.DotNet.Config.Json
         /// <summary>
         /// Indicates configuration properties to configure the runtime and the framework
         /// </summary>
-        public Dictionary<string, object> ConfigProperties
+        public Dictionary<string, JsonElement> ConfigProperties
         {
             get;
             set;
