@@ -23,5 +23,13 @@ namespace AsmResolver.Workspaces.DotNet
         public static readonly ObjectRelation<MethodDefinition> ImplementationMethod = new(
             "ImplementationMethod",
             new Guid("2DE7DFED-2EAB-458A-BBA4-7F75A7DE199F"));
+        
+        /// <summary>
+        /// Describes the relationship between a base property and an overriding property. This includes both abstract
+        /// properties, as well as interface implementations.
+        /// </summary>
+        public static readonly ObjectRelation<PropertyDefinition> ImplementationProperty = new(
+            "ImplementationProperty",
+            new Guid("d2cfdd88-a701-4051-b9ae-2d5d30e70905"));
     }
 }
