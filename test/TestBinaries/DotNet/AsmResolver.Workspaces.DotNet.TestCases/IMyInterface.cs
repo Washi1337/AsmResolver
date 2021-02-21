@@ -7,5 +7,12 @@ namespace AsmResolver.Workspaces.DotNet.TestCases
         bool Implicit();
 
         int Shadowed(int x);
+        
+        bool ExplicitP { get; set; }
+        
+        int ImplicitP { get; set; }
+        
+        float ShadowedP { get; set; }
+        
     }
 }
