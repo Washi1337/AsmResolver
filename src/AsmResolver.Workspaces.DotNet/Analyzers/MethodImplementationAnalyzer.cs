@@ -1,7 +1,6 @@
 using AsmResolver.DotNet;
-using AsmResolver.Workspaces.DotNet;
 
-namespace AsmResolver.Workspaces.Dotnet.Analyzers
+namespace AsmResolver.Workspaces.DotNet.Analyzers
 {
     /// <summary>
     /// Analyzes a <see cref="MethodDefinition"/> for implicit base definitions, such as abstract methods in

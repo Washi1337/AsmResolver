@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using AsmResolver.DotNet;
-using AsmResolver.Workspaces.Dotnet.Analyzers;
+using AsmResolver.Workspaces.DotNet.Analyzers;
 
-namespace AsmResolver.Workspaces.Dotnet
+namespace AsmResolver.Workspaces.DotNet
 {
     /// <summary>
     /// Represents a workspace of .NET assemblies.
@@ -27,7 +27,7 @@ namespace AsmResolver.Workspaces.Dotnet
         public IList<AssemblyDefinition> Assemblies
         {
             get;
-        } = new List<AssemblyDefinition>();
+        } = new AssemblyCollection();
 
         /// <summary>
         /// Analyzes all the assemblies in the workspace.

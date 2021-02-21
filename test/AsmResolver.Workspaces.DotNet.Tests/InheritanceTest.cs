@@ -1,7 +1,7 @@
 using System.Linq;
 using AsmResolver.Workspaces.DotNet.TestCases;
 using AsmResolver.DotNet;
-using AsmResolver.Workspaces.Dotnet;
+using AsmResolver.Workspaces.DotNet;
 using Xunit;
 
 namespace AsmResolver.Workspaces.DotNet.Tests

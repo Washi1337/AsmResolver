@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.Workspaces.DotNet;
 
-namespace AsmResolver.Workspaces.Dotnet.Analyzers
+namespace AsmResolver.Workspaces.DotNet.Analyzers
 {
     internal static class AnalyzerUtilities
     {
