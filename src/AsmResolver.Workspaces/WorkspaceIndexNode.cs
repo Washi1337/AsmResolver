@@ -47,10 +47,14 @@ namespace AsmResolver.Workspaces
         /// <summary>
         /// Gets a collection of all nodes that are related to this object.
         /// </summary>
+        public IEnumerable<WorkspaceIndexNode> GetAllRelatedNodes() => _neighbors.Values.SelectMany(x => x);
+
+        /// <summary>
+        /// Gets a collection of all nodes that are related to this object.
+        /// </summary>
         public IEnumerable<object> GetAllRelatedObjects()
         {
-            return _neighbors.Values
-                .SelectMany(x => x)
+            return GetAllRelatedNodes()
                 .Select(x => x.Subject)
                 .Distinct();
         }
@@ -59,12 +63,23 @@ namespace AsmResolver.Workspaces
         /// Gets a collection of all nodes that are related to this object of a given relation type.
         /// </summary>
         /// <param name="relation">The relation.</param>
+        public IEnumerable<WorkspaceIndexNode> GetRelatedNodes(ObjectRelation relation)
+        {
+            return _neighbors.TryGetValue(relation, out var neighbors)
+                ? neighbors
+                : Enumerable.Empty<WorkspaceIndexNode>();
+        }
+
+        /// <summary>
+        /// Gets a collection of all objects that are related to this object of a given relation type.
+        /// </summary>
+        /// <param name="relation">The relation.</param>
         /// <typeparam name="T">The type of object to obtain.</typeparam>
         public IEnumerable<T> GetRelatedObjects<T>(ObjectRelation<T> relation)
         {
-            return _neighbors.TryGetValue(relation, out var neighbors)
-                ? neighbors.Select(n => n.Subject).Cast<T>()
-                : Enumerable.Empty<T>();
+            return GetRelatedNodes(relation)
+                .Select(n => (T) n.Subject)
+                .Distinct();
         }
     }
 }
