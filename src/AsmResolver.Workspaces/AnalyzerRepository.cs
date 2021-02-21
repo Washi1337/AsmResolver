@@ -38,16 +38,30 @@ namespace AsmResolver.Workspaces
         {
             while (type is not null)
             {
-                if (_analyzers.TryGetValue(type, out var node))
+                foreach (var @interface in type.GetInterfaces())
                 {
-                    if (node.Analyzers.Count > 0)
+                    if (HasAnalyzerForSpecificType(@interface))
                         return true;
                 }
+
+                if (HasAnalyzerForSpecificType(type))
+                    return true;
 
                 type = type.BaseType;
             }
 
             return false;
+
+            bool HasAnalyzerForSpecificType(Type @interface)
+            {
+                if (_analyzers.TryGetValue(@interface, out var node))
+                {
+                    if (node.Analyzers.Count > 0)
+                        return true;
+                }
+
+                return false;
+            }
         }
 
         /// <summary>
@@ -57,16 +71,25 @@ namespace AsmResolver.Workspaces
         /// <returns>The collection of analyzers.</returns>
         public IEnumerable<IObjectAnalyzer> GetAnalyzers(Type? type)
         {
+            var result = new HashSet<IObjectAnalyzer>();
+
             while (type is not null)
             {
-                if (_analyzers.TryGetValue(type, out var node))
+                Node? node;
+
+                foreach (var @interface in type.GetInterfaces())
                 {
-                    foreach (var analyzer in node.Analyzers)
-                        yield return analyzer;
+                    if (_analyzers.TryGetValue(@interface, out node))
+                        result.UnionWith(node.Analyzers);
                 }
+
+                if (_analyzers.TryGetValue(type, out node))
+                    result.UnionWith(node.Analyzers);
 
                 type = type.BaseType;
             }
+
+            return result;
         }
 
         private sealed class Node

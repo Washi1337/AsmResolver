@@ -154,7 +154,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationProperty);
-            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationProperty));
+            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
         }
 
         [Fact]
@@ -172,7 +172,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationProperty);
-            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationProperty));
+            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
         }
 
         [Fact]
@@ -190,7 +190,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(overrideProperty);
-            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationProperty));
+            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
         }
 
         [Fact]
@@ -208,7 +208,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(shadowedProperty);
-            Assert.DoesNotContain(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationProperty));
+            Assert.DoesNotContain(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
         }
 
         [Fact]
@@ -226,7 +226,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationProperty);
-            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationProperty));
+            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
         }
     }
 }
