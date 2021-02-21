@@ -84,13 +84,12 @@ namespace AsmResolver.Workspaces.DotNet
                 }
 
                 // If not, resolve using the original assembly resolver of the module.
-                if (assembly is AssemblyReference reference)
-                {
-                    var originalResolver = _collection._originalResolvers[reference.Module];
-                    return originalResolver.AssemblyResolver.Resolve(assembly);
-                }
+                if (assembly is not AssemblyReference reference)
+                    return null;
 
-                return null;
+                if (!_collection._originalResolvers.TryGetValue(reference.Module, out var originalResolver))
+                    originalResolver = reference.Module.MetadataResolver;
+                return originalResolver.AssemblyResolver.Resolve(assembly);
             }
         }
 
