@@ -25,11 +25,29 @@ namespace AsmResolver.Workspaces.Dotnet.Analyzers
             {
                 var impl = subject.MethodImplementations[i];
 
+                // Register relationship between explicit implementation and base method.
                 var declarationNode = index.GetOrCreateNode(impl.Declaration);
                 var bodyNode = index.GetOrCreateNode(impl.Body);
-
                 bodyNode.AddRelation(DotNetRelations.ImplementationMethod, declarationNode);
+
+                // See if the method is actually part of a property or event, and if so, link that property/event with
+                // its base definition as well.
+                if (GetAssociatedSemantics(impl.Body) is { } bodyAssociation
+                    && GetAssociatedSemantics(impl.Declaration) is { } declarationAssociation)
+                {
+                    declarationNode = index.GetOrCreateNode(declarationAssociation);
+                    bodyNode = index.GetOrCreateNode(bodyAssociation);
+                    bodyNode.AddRelation(DotNetRelations.ImplementationSemantics, declarationNode);
+                }
             }
+        }
+
+        private static IHasSemantics? GetAssociatedSemantics(IMethodDefOrRef method)
+        {
+            var bodyDefinition = method.Resolve();
+            return bodyDefinition is not null && bodyDefinition.IsSpecialName && bodyDefinition.Semantics is not null
+                ? bodyDefinition.Semantics.Association
+                : null;
         }
 
         private static void InspectBaseTypes(AnalysisContext context, TypeDefinition subject)
