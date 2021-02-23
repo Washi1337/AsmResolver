@@ -11,10 +11,11 @@ namespace AsmResolver.PE.Debug
         public IDebugDataSegment ReadDebugData(PEReaderContext context, DebugDataType type,
             IBinaryStreamReader reader)
         {
-            if (type == DebugDataType.CodeView)
-                return CodeViewDataSegment.FromReader(reader);
-
-            return new CustomDebugDataSegment(type, DataSegment.FromReader(reader));
+            return type switch
+            {
+                DebugDataType.CodeView => CodeViewDataSegment.FromReader(context, reader),
+                _ => new CustomDebugDataSegment(type, DataSegment.FromReader(reader))
+            };
         }
     }
 }

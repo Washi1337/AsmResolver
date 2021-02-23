@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace AsmResolver.PE.Debug.CodeView
+﻿namespace AsmResolver.PE.Debug.CodeView
 {
     /// <summary>
     /// Represents a debug data stream using the CodeView format
@@ -22,17 +19,21 @@ namespace AsmResolver.PE.Debug.CodeView
         /// <summary>
         /// Creates a new CodeViewDataSegment depending on CodeView Signature
         /// </summary>
+        /// <param name="context">Context for the reader</param>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns></returns>
-        public static CodeViewDataSegment FromReader(IBinaryStreamReader reader)
+        public static CodeViewDataSegment FromReader(PEReaderContext context, IBinaryStreamReader reader)
         {
             var signature = (CodeViewSignature) reader.ReadUInt32();
 
             return signature switch
             {
-                CodeViewSignature.Rsds => RsdsDataSegment.FromReader(reader),
-                CodeViewSignature.Nb10 => throw new NotImplementedException(),
-                _ => throw new InvalidDataException()
+                CodeViewSignature.Rsds => RsdsDataSegment.FromReader(context, reader),
+                CodeViewSignature.Nb05 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
+                CodeViewSignature.Nb09 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
+                CodeViewSignature.Nb10 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
+                CodeViewSignature.Nb11 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
+                _ => context.BadImageAndReturn<CodeViewDataSegment>()
             };
         }
     }
