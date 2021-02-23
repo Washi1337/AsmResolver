@@ -1,7 +1,10 @@
 using System;
+using AsmResolver.DotNet.Builder;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.PE.DotNet.Builder;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Signatures
@@ -39,12 +42,11 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.Equal(expected, actual, _comparer);
         }
 
-        [Fact]
-        public void NestedType()
+        [Theory]
+        [InlineData("MyNamespace", "MyType", "MyNestedType")]
+        [InlineData("MyNamespace", "#=abc", "#=def")]
+        public void NestedType(string ns, string name, string nestedType)
         {
-            const string ns = "MyNamespace";
-            const string name = "MyType";
-            const string nestedType = "MyNestedType";
             var expected = new TypeReference(
                     new TypeReference(_module, ns, name),
                     null,
@@ -52,6 +54,21 @@ namespace AsmResolver.DotNet.Tests.Signatures
                 .ToTypeSignature();
 
             var actual = TypeNameParser.Parse(_module, $"{ns}.{name}+{nestedType}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Theory]
+        [InlineData("MyType", "MyNestedType")]
+        [InlineData("#=abc", "#=def")]
+        public void NestedTypeNoNamespace(string name, string nestedType)
+        {
+            var expected = new TypeReference(
+                    new TypeReference(_module, null, name),
+                    null,
+                    nestedType)
+                .ToTypeSignature();
+
+            var actual = TypeNameParser.Parse(_module, $"{name}+{nestedType}");
             Assert.Equal(expected, actual, _comparer);
         }
 
@@ -173,5 +190,6 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var actual = TypeNameParser.Parse(_module, $"{ns}.{escapedName}");
             Assert.Equal(expected, actual, _comparer);
         }
+
     }
 }

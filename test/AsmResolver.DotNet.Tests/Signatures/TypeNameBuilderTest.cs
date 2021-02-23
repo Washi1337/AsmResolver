@@ -46,5 +46,27 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.DoesNotContain('\\', name);
             Assert.Contains("#=abc", name);
         }
+
+        [Theory]
+        [InlineData("MyNamespace", "MyType", "MyNestedType")]
+        [InlineData("MyNamespace", "#=abc", "#=def")]
+        public void NestedTypeShouldContainPlus(string ns, string name, string nestedType)
+        {
+            var type = new TypeReference(_module, new TypeReference(_module, ns, name), null, nestedType);
+            string fullname = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature());
+            Assert.DoesNotContain('\\', fullname);
+            Assert.Contains($"{ns}.{name}+{nestedType}", fullname);
+        }
+
+        [Theory]
+        [InlineData("MyType", "MyNestedType")]
+        [InlineData("#=abc", "#=def")]
+        public void NestedTypeNoNamespaceShouldContainPlus(string name, string nestedType)
+        {
+            var type = new TypeReference(_module, new TypeReference(_module, null, name), null, nestedType);
+            string fullname = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature());
+            Assert.DoesNotContain('\\', fullname);
+            Assert.Contains($"{name}+{nestedType}", fullname);
+        }
     }
 }
