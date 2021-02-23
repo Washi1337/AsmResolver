@@ -6,7 +6,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
     public class TypeNameBuilderTest
     {
         private readonly ModuleDefinition _module;
-        
+
         public TypeNameBuilderTest()
         {
             _module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemPrivateCoreLib_v4_0_0_0);
@@ -21,12 +21,30 @@ namespace AsmResolver.DotNet.Tests.Signatures
         }
 
         [Fact]
+        public void NameWithEqualsShouldNotBeEscaped()
+        {
+            var type = new TypeReference(_module, _module, "Company.ProductName", "#=abc");
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature());
+            Assert.DoesNotContain('\\', name);
+            Assert.Contains("#=abc", name);
+        }
+
+        [Fact]
         public void NamespaceShouldNotBeEscaped()
         {
             var type = new TypeReference(_module, _module, "Company.ProductName", "ClassName");
             string name = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature());
             Assert.DoesNotContain('\\', name);
             Assert.Contains("Company.ProductName", name);
+        }
+
+        [Fact]
+        public void NamespaceWithEqualsShouldNotBeEscaped()
+        {
+            var type = new TypeReference(_module, _module, "#=abc", "ClassName");
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type.ToTypeSignature());
+            Assert.DoesNotContain('\\', name);
+            Assert.Contains("#=abc", name);
         }
     }
 }
