@@ -33,7 +33,7 @@
                 CodeViewSignature.Nb09 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
                 CodeViewSignature.Nb10 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
                 CodeViewSignature.Nb11 => context.NotSupportedAndReturn<CodeViewDataSegment>(),
-                _ => context.BadImageAndReturn<CodeViewDataSegment>()
+                _ => context.BadImageAndReturn<CodeViewDataSegment>("Invalid code view debug data signature.")
             };
         }
     }
