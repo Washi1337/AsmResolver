@@ -1,10 +1,7 @@
 using System;
-using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
-using AsmResolver.PE.DotNet.Builder;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Signatures
@@ -190,6 +187,5 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var actual = TypeNameParser.Parse(_module, $"{ns}.{escapedName}");
             Assert.Equal(expected, actual, _comparer);
         }
-
     }
 }
