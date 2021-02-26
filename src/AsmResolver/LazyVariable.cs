@@ -8,8 +8,8 @@ namespace AsmResolver
     /// <typeparam name="T">The type of the values that the variable stores.</typeparam>
     public class LazyVariable<T>
     {
-        private T _value;
-        private readonly Func<T> _getValue;
+        private T? _value;
+        private readonly Func<T>? _getValue;
         private readonly object _lockObject = new object();
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace AsmResolver
             {
                 if (!IsInitialized)
                     InitializeValue();
-                return _value;
+                return _value!;
             }
             set
             {
@@ -67,11 +67,11 @@ namespace AsmResolver
             {
                 if (!IsInitialized)
                 {
-                    _value = _getValue();
+                    _value = _getValue!();
                     IsInitialized = true;
                 }
             }
         }
-        
+
     }
 }

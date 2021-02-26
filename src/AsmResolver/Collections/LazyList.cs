@@ -150,11 +150,11 @@ namespace AsmResolver.Collections
         }
 
         protected virtual void OnSetItem(int index, TItem item) => _items[index] = item;
-        
+
         protected virtual void OnInsertItem(int index, TItem item) => _items.Insert(index, item);
-        
+
         protected virtual void OnInsertRange(int index, IEnumerable<TItem> items) => _items.InsertRange(index, items);
-        
+
         protected virtual void OnRemoveItem(int index) => _items.RemoveAt(index);
 
         protected virtual void OnClearItems() => _items.Clear();
@@ -186,7 +186,7 @@ namespace AsmResolver.Collections
             private readonly LazyList<TItem> _list;
             private List<TItem>.Enumerator _enumerator;
             private bool hasEnumerator;
-            
+
             public Enumerator(LazyList<TItem> list)
             {
                 _list = list;
@@ -195,10 +195,10 @@ namespace AsmResolver.Collections
             }
 
             /// <inheritdoc />
-            public TItem Current => hasEnumerator ? _enumerator.Current : default;
+            public TItem Current => hasEnumerator ? _enumerator.Current : default!;
 
             /// <inheritdoc />
-            object IEnumerator.Current => Current;
+            object IEnumerator.Current => Current!;
 
             /// <inheritdoc />
             public bool MoveNext()
@@ -223,6 +223,6 @@ namespace AsmResolver.Collections
                     _enumerator.Dispose();
             }
         }
-        
+
     }
 }

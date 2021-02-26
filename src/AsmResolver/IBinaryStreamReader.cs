@@ -34,7 +34,7 @@ namespace AsmResolver
         }
 
         /// <summary>
-        /// Gets the current offset relative to <see cref="StartOffset"/>. 
+        /// Gets the current offset relative to <see cref="StartOffset"/>.
         /// </summary>
         ulong RelativeOffset
         {
@@ -150,7 +150,7 @@ namespace AsmResolver
         /// </summary>
         /// <returns>The 64-bit floating point number that was read from the stream.</returns>
         double ReadDouble();
-        
+
     }
 
     public static partial class Extensions
@@ -211,11 +211,11 @@ namespace AsmResolver
         {
             var data = reader.ReadBytesUntil(0);
             int length = data.Length;
-            
+
             // Exclude trailing 0 byte.
             if (data[data.Length - 1] == 0)
                 length--;
-            
+
             return Encoding.ASCII.GetString(data, 0, length);
         }
 
@@ -255,7 +255,7 @@ namespace AsmResolver
             } while ((reader.Offset - position) % (ulong) align != 0);
             return value;
         }
-        
+
         /// <summary>
         /// Aligns the reader to a specified boundary.
         /// </summary>
@@ -344,13 +344,13 @@ namespace AsmResolver
                     throw new ArgumentOutOfRangeException(nameof(size));
             }
         }
-        
+
         /// <summary>
         /// Reads a serialized UTF8 string from the stream.
         /// </summary>
         /// <param name="reader">The reader to use for reading the data.</param>
         /// <returns>The string that was read from the stream.</returns>
-        public static string ReadSerString(this IBinaryStreamReader reader)
+        public static string? ReadSerString(this IBinaryStreamReader reader)
         {
             if (!reader.CanRead(1) || reader.ReadByte() == 0xFF)
                 return null;

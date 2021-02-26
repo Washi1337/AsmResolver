@@ -50,7 +50,7 @@ namespace AsmResolver
         /// <param name="self">The error listener.</param>
         /// <param name="exception">The error.</param>
         /// <typeparam name="T">The type of value to return.</typeparam>
-        public static T RegisterExceptionAndReturnDefault<T>(this IErrorListener self, Exception exception)
+        public static T? RegisterExceptionAndReturnDefault<T>(this IErrorListener self, Exception exception)
         {
             self.RegisterException(exception);
             return default;
@@ -61,7 +61,7 @@ namespace AsmResolver
         /// </summary>
         /// <param name="self">The error listener.</param>
         /// <typeparam name="T">The type of value to return.</typeparam>
-        public static T NotSupportedAndReturn<T>(this IErrorListener self)
+        public static T? NotSupportedAndReturn<T>(this IErrorListener self)
         {
             self.RegisterException(new NotSupportedException());
             return default;
@@ -73,7 +73,7 @@ namespace AsmResolver
         /// <param name="self">The error listener.</param>
         /// <param name="message">The message of the error.</param>
         /// <typeparam name="T">The type of value to return.</typeparam>
-        public static T BadImageAndReturn<T>(this IErrorListener self, string message)
+        public static T? BadImageAndReturn<T>(this IErrorListener self, string message)
         {
             self.RegisterException(new BadImageFormatException());
             return default;
