@@ -50,10 +50,10 @@ namespace AsmResolver
         public IBinaryStreamReader CreateReader()
         {
             return CanRead
-                ? ((IReadableSegment) Segment)!.CreateReader()
+                ? (Segment as IReadableSegment)!.CreateReader()
                 : throw new InvalidOperationException("Cannot read the segment using a binary reader.");
         }
 
-        ISegment ISegmentReference.GetSegment() => Segment;
+        ISegment? ISegmentReference.GetSegment() => Segment;
     }
 }
