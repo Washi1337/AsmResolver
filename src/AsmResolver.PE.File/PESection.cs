@@ -18,7 +18,7 @@ namespace AsmResolver.PE.File
         /// <param name="characteristics">The section flags.</param>
         public PESection(string name, SectionFlags characteristics)
         {
-            Name = name;
+            _name = name ?? throw new ArgumentNullException(nameof(name));
             Characteristics = characteristics;
         }
 
@@ -28,9 +28,9 @@ namespace AsmResolver.PE.File
         /// <param name="name">The name of the section.</param>
         /// <param name="characteristics">The section flags.</param>
         /// <param name="contents">The contents of the section.</param>
-        public PESection(string name, SectionFlags characteristics, ISegment contents)
+        public PESection(string name, SectionFlags characteristics, ISegment? contents)
         {
-            Name = name;
+            _name = name ?? throw new ArgumentNullException(nameof(name));
             Characteristics = characteristics;
             Contents = contents;
         }
@@ -39,8 +39,9 @@ namespace AsmResolver.PE.File
         /// Copy a new section.
         /// </summary>
         /// <param name="section">The section to be copied.</param>
-        public PESection(PESection section) 
-            : this (section.Name, section.Characteristics, section.Contents)
+        public PESection(PESection section)
+            : this ((section ?? throw new ArgumentNullException(nameof(section))).Name,
+                    section.Characteristics, section.Contents)
         {
         }
 
@@ -51,7 +52,10 @@ namespace AsmResolver.PE.File
         /// <param name="contents">The contents of the section.</param>
         public PESection(SectionHeader header, ISegment contents)
         {
-            Name = header.Name;
+            if (header == null)
+                throw new ArgumentNullException(nameof(header));
+
+            _name = header.Name;
             Characteristics = header.Characteristics;
             Contents = contents;
         }
@@ -59,7 +63,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets the portable executable file this section is part of.
         /// </summary>
-        public PEFile ContainingFile
+        public PEFile? ContainingFile
         {
             get;
             internal set;
@@ -76,12 +80,15 @@ namespace AsmResolver.PE.File
             get => _name;
             set
             {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(value));
+
                 if (Encoding.UTF8.GetByteCount(value) > 8)
                     throw new ArgumentException("Name is too long.");
                 _name = value;
             }
         }
-        
+
         /// <summary>
         /// Gets or sets the characteristics of the section.
         /// </summary>
@@ -192,7 +199,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the contents of the section.
         /// </summary>
-        public ISegment Contents
+        public ISegment? Contents
         {
             get;
             set;
@@ -226,7 +233,7 @@ namespace AsmResolver.PE.File
         {
             if (!IsReadable)
                 throw new InvalidOperationException("Section contents is not readable.");
-            return ((IReadableSegment) Contents).CreateReader(fileOffset, size);
+            return (Contents as IReadableSegment)!.CreateReader(fileOffset, size);
         }
 
         /// <summary>
@@ -249,7 +256,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Determines whether the provided file offset falls within the section that the header describes. 
+        /// Determines whether the provided file offset falls within the section that the header describes.
         /// </summary>
         /// <param name="fileOffset">The offset to check.</param>
         /// <returns><c>true</c> if the file offset falls within the section, <c>false</c> otherwise.</returns>
@@ -259,7 +266,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Determines whether the provided virtual address falls within the section that the header describes. 
+        /// Determines whether the provided virtual address falls within the section that the header describes.
         /// </summary>
         /// <param name="rva">The virtual address to check.</param>
         /// <returns><c>true</c> if the virtual address falls within the section, <c>false</c> otherwise.</returns>
