@@ -204,15 +204,20 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         public override AssemblyDefinition Resolve() => this;
 
+        /// <summary>
+        /// Attempts to extract the target runtime from the <see cref="TryGetTargetFramework"/> attribute.
+        /// </summary>
+        /// <param name="info">The runtime.</param>
+        /// <returns><c>true</c> if the attribute was found and the runtime was extracted, <c>false</c> otherwise.</returns>
         public virtual bool TryGetTargetFramework(out DotNetRuntimeInfo info)
         {
-            foreach (var attr in CustomAttributes)
+            for (int i = 0; i < CustomAttributes.Count; i++)
             {
-                var ctor = attr.Constructor;
+                var ctor = CustomAttributes[i].Constructor;
 
                 if (ctor is not null
                     && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", "TargetFrameworkAttribute")
-                    && attr.Signature.FixedArguments[0].Element is string name
+                    && CustomAttributes[i].Signature.FixedArguments[0].Element is string name
                     && DotNetRuntimeInfo.TryParse(name, out info))
                 {
                     return true;

@@ -3,7 +3,7 @@ using System;
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Provides an implementation of an assembly resolver that includes .NET Core runtime libraries.
+    /// Provides an implementation of an assembly resolver that includes .NET or .NET Core runtime libraries.
     /// </summary>
     public class DotNetCoreAssemblyResolver : AssemblyResolverBase
     {
@@ -11,8 +11,8 @@ namespace AsmResolver.DotNet
         private readonly DotNetCorePathProvider _pathProvider;
 
         /// <summary>
-        /// Creates a new .NET Core assembly resolver, by attempting to autodetect the current .NET Core installation
-        /// directory.
+        /// Creates a new .NET Core assembly resolver, by attempting to autodetect the current .NET or .NET Core
+        /// installation directory.
         /// </summary>
         public DotNetCoreAssemblyResolver(Version runtimeVersion)
             : this(runtimeVersion, DotNetCorePathProvider.Default)
@@ -22,6 +22,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Creates a new .NET Core assembly resolver.
         /// </summary>
+        /// <param name="runtimeVersion">The version of .NET or .NET Core.</param>
         /// <param name="pathProvider">The installation directory of .NET Core.</param>
         public DotNetCoreAssemblyResolver(Version runtimeVersion, DotNetCorePathProvider pathProvider)
         {

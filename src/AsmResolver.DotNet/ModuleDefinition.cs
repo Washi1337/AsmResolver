@@ -222,6 +222,9 @@ namespace AsmResolver.DotNet
             get;
         } = null;
 
+        /// <summary>
+        /// Gets the runtime that this module targeted upon creation or reading.
+        /// </summary>
         public DotNetRuntimeInfo OriginalTargetRuntime
         {
             get;
@@ -932,6 +935,13 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
 
+        /// <summary>
+        /// Detects the runtime that this module targets.
+        /// </summary>
+        /// <remarks>
+        /// This method is called to initialize the <see cref="OriginalTargetRuntime"/> property.
+        /// It should be called before the assembly resolver is initialized.
+        /// </remarks>
         protected void DetectTargetRuntime()
         {
             OriginalTargetRuntime = Assembly is not null && Assembly.TryGetTargetFramework(out var targetRuntime)

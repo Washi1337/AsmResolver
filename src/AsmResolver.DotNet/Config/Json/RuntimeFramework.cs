@@ -5,10 +5,16 @@ namespace AsmResolver.DotNet.Config.Json
     /// </summary>
     public class RuntimeFramework
     {
+        /// <summary>
+        /// Creates a new empty runtime framework description.
+        /// </summary>
         public RuntimeFramework()
         {
         }
 
+        /// <summary>
+        /// Creates a new runtime framework description.
+        /// </summary>
         public RuntimeFramework(string name, string version)
         {
             Name = name;

@@ -227,6 +227,10 @@ namespace AsmResolver.DotNet.Signatures.Types
             return null;
         }
 
+        /// <summary>
+        /// Maps the corlib reference to the appropriate .NET or .NET Core version.
+        /// </summary>
+        /// <returns>The runtime information.</returns>
         public DotNetRuntimeInfo ExtractDotNetRuntimeInfo()
         {
             var assembly = CorLibScope.GetAssembly();
@@ -235,32 +239,31 @@ namespace AsmResolver.DotNet.Signatures.Types
                 return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetFramework, new Version(4, 0));
 
             var v = assembly.Version;
+            if (v.Major >= 5)
+                return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, v);
 
-            if (v.Major < 5)
+            switch (assembly.Name)
             {
-                switch (assembly.Name)
+                case "mscorlib":
+                    return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetFramework, v);
+
+                case "netstandard":
+                    return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetStandard, v);
+
+                case "System.Private.CoreLib":
+                    return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(1, 0));
+
+                case "System.Runtime":
                 {
-                    case "mscorlib":
-                        return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetFramework, v);
-
-                    case "netstandard":
-                        return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetStandard, v);
-
-                    case "System.Private.CoreLib":
-                        return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(1, 0));
-
-                    case "System.Runtime":
-                    {
-                        (string name, Version version) =
-                            (v.Major, v.Minor, v.Build, v.Revision) switch
-                            {
-                                (4, 0, 20, 0) => (DotNetRuntimeInfo.NetStandard, new Version(1, 3)),
-                                (4, 1, 0, 0) => (DotNetRuntimeInfo.NetStandard, new Version(1, 5)),
-                                (4, 2, 1, 0) => (DotNetRuntimeInfo.NetCoreApp, new Version(2, 1)),
-                                (4, 2, 2, 0) => (DotNetRuntimeInfo.NetCoreApp, new Version(3, 1))
-                            };
-                        return new DotNetRuntimeInfo(name, version);
-                    }
+                    (string name, Version version) =
+                        (v.Major, v.Minor, v.Build, v.Revision) switch
+                        {
+                            (4, 0, 20, 0) => (DotNetRuntimeInfo.NetStandard, new Version(1, 3)),
+                            (4, 1, 0, 0) => (DotNetRuntimeInfo.NetStandard, new Version(1, 5)),
+                            (4, 2, 1, 0) => (DotNetRuntimeInfo.NetCoreApp, new Version(2, 1)),
+                            _ => (DotNetRuntimeInfo.NetCoreApp, new Version(3, 1)),
+                        };
+                    return new DotNetRuntimeInfo(name, version);
                 }
             }
 
