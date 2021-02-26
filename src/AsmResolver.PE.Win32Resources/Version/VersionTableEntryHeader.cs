@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 
 namespace AsmResolver.PE.Win32Resources.Version
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <summary>
-        /// Gets or sets the raw length in bytes of the structure. 
+        /// Gets or sets the raw length in bytes of the structure.
         /// </summary>
         public ushort Length
         {
@@ -68,23 +69,35 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <summary>
         /// Gets or sets the key name of the resource.
         /// </summary>
-        public string Key
+        public string? Key
         {
             get;
             set;
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => GetHeaderSize(Key);
+        public override uint GetPhysicalSize()
+        {
+            ThrowIfKeyNull();
+            return GetHeaderSize(Key!);
+        }
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
+            ThrowIfKeyNull();
+
             writer.WriteUInt16(Length);
             writer.WriteUInt16(ValueLength);
             writer.WriteUInt16((ushort) Type);
-            writer.WriteBytes(Encoding.Unicode.GetBytes(Key));
+            writer.WriteBytes(Encoding.Unicode.GetBytes(Key!));
             writer.WriteUInt16(0);
+        }
+
+        private void ThrowIfKeyNull()
+        {
+            if (Key == null)
+                throw new InvalidOperationException($"{nameof(Key)} is not set.");
         }
     }
 }
