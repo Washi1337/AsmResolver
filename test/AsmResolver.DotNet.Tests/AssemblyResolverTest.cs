@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
@@ -15,11 +16,11 @@ namespace AsmResolver.DotNet.Tests
             var assemblyName = typeof(object).Assembly.GetName();
             var assemblyRef = new AssemblyReference(
                 assemblyName.Name,
-                assemblyName.Version, 
+                assemblyName.Version,
                 false,
                 assemblyName.GetPublicKeyToken());
-         
-            var resolver = new DotNetCoreAssemblyResolver();
+
+            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
             var assemblyDef = resolver.Resolve(assemblyRef);
 
             Assert.NotNull(assemblyDef);
@@ -30,9 +31,9 @@ namespace AsmResolver.DotNet.Tests
         [Fact]
         public void ResolveLocalLibrary()
         {
-            var resolver = new DotNetCoreAssemblyResolver();
+            var resolver = new DotNetCoreAssemblyResolver(new Version(3, 1, 0));
             resolver.SearchDirectories.Add(Path.GetDirectoryName(typeof(AssemblyResolverTest).Assembly.Location));
-         
+
             var assemblyDef = AssemblyDefinition.FromFile(typeof(TopLevelClass1).Assembly.Location);
             var assemblyRef = new AssemblyReference(assemblyDef);
 
@@ -41,7 +42,7 @@ namespace AsmResolver.DotNet.Tests
 
             resolver.ClearCache();
             Assert.False(resolver.HasCached(assemblyRef));
-            
+
             resolver.AddToCache(assemblyRef, assemblyDef);
             Assert.True(resolver.HasCached(assemblyRef));
             Assert.Equal(assemblyDef, resolver.Resolve(assemblyRef));

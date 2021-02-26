@@ -82,6 +82,7 @@ namespace AsmResolver.DotNet
 
         private void DetectInstalledRuntimes(string installationDirectory)
         {
+            installationDirectory = Path.Combine(installationDirectory, "shared");
             foreach (string directory in Directory.EnumerateDirectories(installationDirectory))
                 _installedRuntimes.Add(new DotNetCoreRuntimeInfo(directory));
             _installedRuntimes.Sort();
