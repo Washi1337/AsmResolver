@@ -200,6 +200,12 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override IList<CustomAttribute> GetCustomAttributes() => GetCustomAttributeCollection(this);
 
+        internal ICollection<uint> GetCustomAttributes(MetadataToken ownerToken)
+        {
+            EnsureCustomAttributesInitialized();
+            return _customAttributes.GetValues(ownerToken);
+        }
+
         internal MetadataToken GetCustomAttributeOwner(uint attributeRid)
         {
             EnsureCustomAttributesInitialized();

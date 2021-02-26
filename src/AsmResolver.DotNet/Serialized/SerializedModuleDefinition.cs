@@ -74,7 +74,8 @@ namespace AsmResolver.DotNet.Serialized
             Assembly = FindParentAssembly();
             CorLibTypeFactory = CreateCorLibTypeFactory();
 
-            var assemblyResolver = CreateAssemblyResolver(CorLibTypeFactory.CorLibScope);
+            DetectTargetRuntime();
+            var assemblyResolver = CreateAssemblyResolver();
             MetadataResolver = new DefaultMetadataResolver(assemblyResolver);
 
             // Prepare lazy RID lists.

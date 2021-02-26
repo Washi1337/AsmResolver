@@ -196,8 +196,8 @@ namespace AsmResolver.DotNet
             CorLibTypeFactory = new CorLibTypeFactory(corLib);
             AssemblyReferences.Add(corLib);
 
-            var resolver = CreateAssemblyResolver(corLib);
-            MetadataResolver = new DefaultMetadataResolver(resolver);
+            DetectTargetRuntime();
+            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver());
 
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
@@ -221,6 +221,12 @@ namespace AsmResolver.DotNet
         {
             get;
         } = null;
+
+        public DotNetRuntimeInfo OriginalTargetRuntime
+        {
+            get;
+            protected set;
+        }
 
         /// <summary>
         /// Gets the parent assembly that defines this module.
@@ -909,35 +915,6 @@ namespace AsmResolver.DotNet
         protected virtual IManagedEntrypoint GetManagedEntrypoint() => null;
 
         /// <summary>
-        /// Creates an assembly resolver based on the corlib reference.
-        /// </summary>
-        /// <param name="corLib">The corlib reference.</param>
-        /// <returns>The resolver.</returns>
-        protected IAssemblyResolver CreateAssemblyResolver(IResolutionScope corLib)
-        {
-            string fullPath = FilePath;
-            (string directory, string name) = !string.IsNullOrEmpty(fullPath)
-                ? (Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath))
-                : (null, null);
-
-            AssemblyResolverBase resolver;
-            if (corLib.Name == "mscorlib")
-            {
-                resolver = new DotNetFrameworkAssemblyResolver();
-            }
-            else
-            {
-                // TODO: more robust way of getting .NET core version.
-                resolver = new DotNetCoreAssemblyResolver(corLib.GetAssembly().Version);
-            }
-
-            if (!string.IsNullOrEmpty(directory))
-                resolver.SearchDirectories.Add(directory);
-
-            return resolver;
-        }
-
-        /// <summary>
         /// Obtains the native win32 resources directory of the underlying PE image (if available).
         /// </summary>
         /// <returns>The resources directory.</returns>
@@ -954,6 +931,44 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="DebugData"/> property.
         /// </remarks>
         protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
+
+        protected void DetectTargetRuntime()
+        {
+            OriginalTargetRuntime = Assembly is not null && Assembly.TryGetTargetFramework(out var targetRuntime)
+                ? targetRuntime
+                : CorLibTypeFactory.ExtractDotNetRuntimeInfo();
+        }
+
+        /// <summary>
+        /// Creates an assembly resolver based on the corlib reference.
+        /// </summary>
+        /// <returns>The resolver.</returns>
+        protected IAssemblyResolver CreateAssemblyResolver()
+        {
+            string fullPath = FilePath;
+            (string directory, string name) = !string.IsNullOrEmpty(fullPath)
+                ? (Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath))
+                : (null, null);
+
+            var runtime = OriginalTargetRuntime;
+
+            AssemblyResolverBase resolver;
+            if (runtime.Name == DotNetRuntimeInfo.NetFramework
+                || runtime.Name == DotNetRuntimeInfo.NetStandard
+                && string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath))
+            {
+                resolver = new DotNetFrameworkAssemblyResolver();
+            }
+            else
+            {
+                resolver = new DotNetCoreAssemblyResolver(runtime.Version);
+            }
+
+            if (!string.IsNullOrEmpty(directory))
+                resolver.SearchDirectories.Add(directory);
+
+            return resolver;
+        }
 
         /// <inheritdoc />
         public override string ToString() => Name;

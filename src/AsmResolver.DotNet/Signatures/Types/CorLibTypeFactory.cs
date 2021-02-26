@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// <summary>
     /// Provides a mechanism for obtaining commonly used element type signatures in various blob signatures, defined
     /// in the common object runtime library, such as mscorlib (for .NET framework) or System.Private.CorLib
-    /// (for .NET Core). 
+    /// (for .NET Core).
     /// </summary>
     public class CorLibTypeFactory
     {
@@ -39,7 +39,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         private CorLibTypeSignature _uintPtr;
         private CorLibTypeSignature _object;
         private CorLibTypeSignature _typedReference;
-        
+
         /// <summary>
         /// Creates a new factory with the provided resolution scope referencing a common object runtime library.
         /// </summary>
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Gets the element type signature for <see cref="System.Void"/>.
         /// </summary>
         public CorLibTypeSignature Void => GetOrCreateCorLibTypeSignature(ref _void, ElementType.Void, nameof(Void));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.Boolean"/>.
         /// </summary>
@@ -76,37 +76,37 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Gets the element type signature for <see cref="System.SByte"/>.
         /// </summary>
         public CorLibTypeSignature SByte => GetOrCreateCorLibTypeSignature(ref _sbyte, ElementType.I1, nameof(SByte));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.Byte"/>.
         /// </summary>
         public CorLibTypeSignature Byte => GetOrCreateCorLibTypeSignature(ref _byte, ElementType.U1, nameof(Byte));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.Int16"/>.
         /// </summary>
         public CorLibTypeSignature Int16 => GetOrCreateCorLibTypeSignature(ref _int16, ElementType.I2, nameof(Int16));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.UInt16"/>.
         /// </summary>
         public CorLibTypeSignature UInt16 => GetOrCreateCorLibTypeSignature(ref _uint16, ElementType.U2, nameof(UInt16));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.Int32"/>.
         /// </summary>
         public CorLibTypeSignature Int32 => GetOrCreateCorLibTypeSignature(ref _int32, ElementType.I4, nameof(Int32));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.UInt32"/>.
         /// </summary>
         public CorLibTypeSignature UInt32 => GetOrCreateCorLibTypeSignature(ref _uint32, ElementType.U4, nameof(UInt32));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.Int64"/>.
         /// </summary>
         public CorLibTypeSignature Int64 => GetOrCreateCorLibTypeSignature(ref _int64, ElementType.I8, nameof(Int64));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.UInt64"/>.
         /// </summary>
@@ -126,12 +126,12 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Gets the element type signature for <see cref="System.String"/>.
         /// </summary>
         public CorLibTypeSignature String => GetOrCreateCorLibTypeSignature(ref _string, ElementType.String, nameof(String));
-      
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.IntPtr"/>.
         /// </summary>
         public CorLibTypeSignature IntPtr => GetOrCreateCorLibTypeSignature(ref _intPtr, ElementType.I, nameof(IntPtr));
-        
+
         /// <summary>
         /// Gets the element type signature for <see cref="System.UIntPtr"/>.
         /// </summary>
@@ -158,7 +158,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 ? FromElementType(typeSig.ElementType)
                 : FromName(type.Namespace, type.Name);
         }
-        
+
         /// <summary>
         /// Obtains the common object runtime type signature from its element type.
         /// </summary>
@@ -225,6 +225,46 @@ namespace AsmResolver.DotNet.Signatures.Types
             }
 
             return null;
+        }
+
+        public DotNetRuntimeInfo ExtractDotNetRuntimeInfo()
+        {
+            var assembly = CorLibScope.GetAssembly();
+
+            if (assembly is null)
+                return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetFramework, new Version(4, 0));
+
+            var v = assembly.Version;
+
+            if (v.Major < 5)
+            {
+                switch (assembly.Name)
+                {
+                    case "mscorlib":
+                        return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetFramework, v);
+
+                    case "netstandard":
+                        return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetStandard, v);
+
+                    case "System.Private.CoreLib":
+                        return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(1, 0));
+
+                    case "System.Runtime":
+                    {
+                        (string name, Version version) =
+                            (v.Major, v.Minor, v.Build, v.Revision) switch
+                            {
+                                (4, 0, 20, 0) => (DotNetRuntimeInfo.NetStandard, new Version(1, 3)),
+                                (4, 1, 0, 0) => (DotNetRuntimeInfo.NetStandard, new Version(1, 5)),
+                                (4, 2, 1, 0) => (DotNetRuntimeInfo.NetCoreApp, new Version(2, 1)),
+                                (4, 2, 2, 0) => (DotNetRuntimeInfo.NetCoreApp, new Version(3, 1))
+                            };
+                        return new DotNetRuntimeInfo(name, version);
+                    }
+                }
+            }
+
+            return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, v);
         }
 
         private CorLibTypeSignature GetOrCreateCorLibTypeSignature(ref CorLibTypeSignature cache, ElementType elementType, string name)

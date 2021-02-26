@@ -15,31 +15,20 @@ namespace AsmResolver.DotNet
 
         private static readonly Regex NetCoreRuntimePattern = new(@"\.NET( Core)? \d+\.\d+\.\d+");
 
+        static DotNetCorePathProvider()
+        {
+            DefaultInstallationPath = FindDotNetPath();
+            Default = new();
+        }
+
         public static DotNetCorePathProvider Default
         {
             get;
-        } = new();
-
-        private readonly List<DotNetCoreRuntimeInfo> _installedRuntimes = new();
-
-        public DotNetCorePathProvider()
-            : this(FindDotNetPath())
-        {
         }
 
-        public DotNetCorePathProvider(string installationDirectory)
+        public static string DefaultInstallationPath
         {
-            if (!string.IsNullOrEmpty(installationDirectory) && Directory.Exists(installationDirectory))
-                DetectInstalledRuntimes(installationDirectory);
-        }
-
-        public IEnumerable<string> GetRuntimePathCandidates(Version version)
-        {
-            foreach (var runtime in _installedRuntimes)
-            {
-                if (runtime.TryFindBestMatchingVersion(version, out var match))
-                    yield return match.FullPath;
-            }
+            get;
         }
 
         private static string FindDotNetPath()
@@ -47,7 +36,7 @@ namespace AsmResolver.DotNet
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Probe PATH for installation folder of dotnet.
-                string[] paths = (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';');
+                string[] paths = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator);
                 foreach (string path in paths)
                 {
                     if (File.Exists(Path.Combine(path, "dotnet.exe")))
@@ -80,6 +69,28 @@ namespace AsmResolver.DotNet
             return null;
         }
 
+        private readonly List<DotNetCoreRuntimeInfo> _installedRuntimes = new();
+
+        public DotNetCorePathProvider()
+            : this(DefaultInstallationPath)
+        {
+        }
+
+        public DotNetCorePathProvider(string installationDirectory)
+        {
+            if (!string.IsNullOrEmpty(installationDirectory) && Directory.Exists(installationDirectory))
+                DetectInstalledRuntimes(installationDirectory);
+        }
+
+        public IEnumerable<string> GetRuntimePathCandidates(Version version)
+        {
+            foreach (var runtime in _installedRuntimes)
+            {
+                if (runtime.TryFindBestMatchingVersion(version, out var match))
+                    yield return match.FullPath;
+            }
+        }
+
         private void DetectInstalledRuntimes(string installationDirectory)
         {
             installationDirectory = Path.Combine(installationDirectory, "shared");
@@ -92,7 +103,7 @@ namespace AsmResolver.DotNet
         {
             public DotNetCoreRuntimeInfo(string path)
             {
-                string name = Path.GetDirectoryName(path);
+                string name = Path.GetFileName(path);
                 var installedVersions = DetectInstalledVersionsInDirectory(name, path);
 
                 Name = name;
