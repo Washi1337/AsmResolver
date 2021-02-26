@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet
                     directoryName = _prefix + directoryName;
 
                 string filePath = Path.Combine(fullPath, directoryName, assembly.Name);
-                filePath = NetFrameworkAssemblyResolver.ProbeFileFromFilePathWithoutExtension(filePath);
+                filePath = DotNetFrameworkAssemblyResolver.ProbeFileFromFilePathWithoutExtension(filePath);
                 if (!string.IsNullOrEmpty(filePath))
                     return filePath;
             }

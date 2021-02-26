@@ -9,6 +9,22 @@ namespace AsmResolver.DotNet.Config.Json
     /// </summary>
     public class RuntimeOptions
     {
+        public RuntimeOptions()
+        {
+        }
+
+        public RuntimeOptions(string tfm, RuntimeFramework framework)
+        {
+            TargetFrameworkMoniker = tfm;
+            Framework = framework;
+        }
+
+        public RuntimeOptions(string tfm, string runtimeName, string runtimeVersion)
+        {
+            TargetFrameworkMoniker = tfm;
+            Framework = new RuntimeFramework(runtimeName, runtimeVersion);
+        }
+
         /// <summary>
         /// Indicates configuration properties to configure the runtime and the framework
         /// </summary>

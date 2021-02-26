@@ -72,18 +72,9 @@ namespace AsmResolver.DotNet.Serialized
 
             // Find assembly definition and corlib assembly.
             Assembly = FindParentAssembly();
-            var corLib = FindMostRecentCorLib();
-            if (corLib is {})
-            {
-                CorLibTypeFactory = new CorLibTypeFactory(corLib);
-            }
-            else
-            {
-                CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
-                corLib = CorLibTypeFactory.CorLibScope;
-            }
+            CorLibTypeFactory = CreateCorLibTypeFactory();
 
-            var assemblyResolver = CreateAssemblyResolver(corLib, readerParameters.WorkingDirectory);
+            var assemblyResolver = CreateAssemblyResolver(CorLibTypeFactory.CorLibScope);
             MetadataResolver = new DefaultMetadataResolver(assemblyResolver);
 
             // Prepare lazy RID lists.
@@ -351,6 +342,13 @@ namespace AsmResolver.DotNet.Serialized
             }
 
             return null;
+        }
+
+        private CorLibTypeFactory CreateCorLibTypeFactory()
+        {
+            return FindMostRecentCorLib() is { } corLib
+                ? new CorLibTypeFactory(corLib)
+                : CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
         }
 
         private IResolutionScope FindMostRecentCorLib()

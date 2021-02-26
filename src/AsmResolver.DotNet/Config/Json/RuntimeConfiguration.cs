@@ -35,6 +35,16 @@ namespace AsmResolver.DotNet.Config.Json
             return JsonSerializer.Deserialize<RuntimeConfiguration>(json, JsonSerializerOptions);
         }
 
+        public RuntimeConfiguration()
+        {
+            RuntimeOptions = new();
+        }
+
+        public RuntimeConfiguration(RuntimeOptions options)
+        {
+            RuntimeOptions = options;
+        }
+
         /// <summary>
         /// Gets or sets the runtime options.
         /// </summary>

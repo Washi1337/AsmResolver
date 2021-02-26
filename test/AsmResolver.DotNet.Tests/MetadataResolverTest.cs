@@ -19,14 +19,14 @@ namespace AsmResolver.DotNet.Tests
         
         public MetadataResolverTest()
         {
-            _fwResolver = new DefaultMetadataResolver(new NetFrameworkAssemblyResolver()
+            _fwResolver = new DefaultMetadataResolver(new DotNetFrameworkAssemblyResolver()
             {
                 SearchDirectories =
                 {
                     Path.GetDirectoryName(typeof(MetadataResolverTest).Assembly.Location)
                 }
             });
-            _coreResolver = new DefaultMetadataResolver(new NetCoreAssemblyResolver()
+            _coreResolver = new DefaultMetadataResolver(new DotNetCoreAssemblyResolver()
             {
                 SearchDirectories =
                 {
