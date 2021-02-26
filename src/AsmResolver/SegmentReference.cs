@@ -8,49 +8,49 @@ namespace AsmResolver
     public readonly struct SegmentReference : ISegmentReference
     {
         /// <summary>
-        /// Represents the null reference. 
+        /// Represents the null reference.
         /// </summary>
         public static SegmentReference Null
         {
             get;
         } = new SegmentReference(null);
-        
-        public SegmentReference(ISegment segment)
+
+        public SegmentReference(ISegment? segment)
         {
             Segment = segment;
         }
-        
+
         /// <inheritdoc />
         public ulong Offset => Segment?.Offset ?? 0;
 
         /// <inheritdoc />
         public uint Rva => Segment?.Rva ?? 0;
-        
+
         /// <inheritdoc />
-        public bool CanUpdateOffsets => Segment.CanUpdateOffsets;
-        
+        public bool CanUpdateOffsets => Segment!.CanUpdateOffsets;
+
         /// <inheritdoc />
         public bool IsBounded => true;
-        
+
         /// <inheritdoc />
         public bool CanRead => Segment is IReadableSegment;
 
         /// <summary>
         /// Gets the referenced segment.
         /// </summary>
-        public ISegment Segment
+        public ISegment? Segment
         {
             get;
         }
-        
+
         /// <inheritdoc />
-        public void UpdateOffsets(ulong newOffset, uint newRva) => Segment.UpdateOffsets(newOffset, newRva);
+        public void UpdateOffsets(ulong newOffset, uint newRva) => Segment?.UpdateOffsets(newOffset, newRva);
 
         /// <inheritdoc />
         public IBinaryStreamReader CreateReader()
         {
             return CanRead
-                ? ((IReadableSegment) Segment).CreateReader()
+                ? ((IReadableSegment) Segment)!.CreateReader()
                 : throw new InvalidOperationException("Cannot read the segment using a binary reader.");
         }
 
