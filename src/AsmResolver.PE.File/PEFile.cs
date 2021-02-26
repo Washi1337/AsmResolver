@@ -9,7 +9,7 @@ namespace AsmResolver.PE.File
 {
     /// <summary>
     /// Models a file using the portable executable (PE) file format. It provides access to various PE headers, as well
-    /// as the raw contents of each section present in the file. 
+    /// as the raw contents of each section present in the file.
     /// </summary>
     public class PEFile : IPEFile
     {
@@ -46,11 +46,11 @@ namespace AsmResolver.PE.File
         /// <param name="mode">Indicates how the input PE file is mapped.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
+        public static PEFile FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
             new SerializedPEFile(reader, mode);
 
-        private readonly LazyVariable<ISegment> _extraSectionData;
-        private IList<PESection> _sections;
+        private readonly LazyVariable<ISegment?> _extraSectionData;
+        private IList<PESection>? _sections;
 
         /// <summary>
         /// Creates a new empty portable executable file.
@@ -71,12 +71,12 @@ namespace AsmResolver.PE.File
             DosHeader = dosHeader ?? throw new ArgumentNullException(nameof(dosHeader));
             FileHeader = fileHeader ?? throw new ArgumentNullException(nameof(fileHeader));
             OptionalHeader = optionalHeader ?? throw new ArgumentNullException(nameof(optionalHeader));
-            _extraSectionData = new LazyVariable<ISegment>(GetExtraSectionData);
+            _extraSectionData = new LazyVariable<ISegment?>(GetExtraSectionData);
             MappingMode = PEMappingMode.Unmapped;
         }
 
         /// <inheritdoc />
-        public string FilePath
+        public string? FilePath
         {
             get;
             protected set;
@@ -124,7 +124,7 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets or sets the padding data in between the last section header and the first section.
         /// </summary>
-        public ISegment ExtraSectionData
+        public ISegment? ExtraSectionData
         {
             get => _extraSectionData.Value;
             set => _extraSectionData.Value = value;
@@ -134,7 +134,7 @@ namespace AsmResolver.PE.File
         public ISegmentReference GetReferenceToRva(uint rva) => new PESegmentReference(this, rva);
 
         /// <inheritdoc />
-        public uint FileOffsetToRva(ulong fileOffset) => 
+        public uint FileOffsetToRva(ulong fileOffset) =>
             GetSectionContainingOffset(fileOffset).FileOffsetToRva(fileOffset);
 
         /// <inheritdoc />
@@ -198,7 +198,7 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = null!;
             return false;
         }
 
@@ -208,7 +208,7 @@ namespace AsmResolver.PE.File
             var section = GetSectionContainingOffset(fileOffset);
             return section.CreateReader(fileOffset);
         }
-        
+
         /// <inheritdoc />
         public bool TryCreateReaderAtFileOffset(uint fileOffset, out IBinaryStreamReader reader)
         {
@@ -218,7 +218,7 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = null!;
             return false;
         }
 
@@ -227,8 +227,8 @@ namespace AsmResolver.PE.File
         {
             var section = GetSectionContainingOffset(fileOffset);
             return section.CreateReader(fileOffset, size);
-        } 
-        
+        }
+
         /// <inheritdoc />
         public bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out IBinaryStreamReader reader)
         {
@@ -238,7 +238,7 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = null!;
             return false;
         }
 
@@ -258,7 +258,7 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = null!;
             return false;
         }
 
@@ -278,10 +278,10 @@ namespace AsmResolver.PE.File
                 return true;
             }
 
-            reader = null;
+            reader = null!;
             return false;
         }
-        
+
         /// <summary>
         /// Recomputes file offsets and sizes in the file, optional and section headers.
         /// </summary>
@@ -313,9 +313,9 @@ namespace AsmResolver.PE.File
             var oldSections = Sections.Select(_ => _.CreateHeader()).ToList();
 
             FileHeader.NumberOfSections = (ushort) Sections.Count;
-            
+
             FileHeader.UpdateOffsets(
-                DosHeader.NextHeaderOffset + 4, 
+                DosHeader.NextHeaderOffset + 4,
                 DosHeader.NextHeaderOffset + 4);
             OptionalHeader.UpdateOffsets(
                 FileHeader.Offset + FileHeader.GetPhysicalSize(),
@@ -326,7 +326,7 @@ namespace AsmResolver.PE.File
                                                    + FileHeader.SizeOfOptionalHeader
                                                    + SectionHeader.SectionHeaderSize * (uint) Sections.Count)
                 .Align(OptionalHeader.FileAlignment);
-            
+
             AlignSections();
             AlignDataDirectoryEntries(oldSections);
 
@@ -336,7 +336,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Aligns all sections according to the file and section alignment properties in the optional header. 
+        /// Aligns all sections according to the file and section alignment properties in the optional header.
         /// </summary>
         public void AlignSections()
         {
@@ -344,7 +344,7 @@ namespace AsmResolver.PE.File
 
             for (int i = 0; i < Sections.Count; i++)
             {
-                var section = Sections[i];                
+                var section = Sections[i];
 
                 uint rva = i > 0
                     ? Sections[i - 1].Rva + Sections[i - 1].GetVirtualSize()
@@ -357,9 +357,9 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Aligns all data directories' virtual address according to the section header's ones. 
+        /// Aligns all data directories' virtual address according to the section header's ones.
         /// </summary>
-        public void AlignDataDirectoryEntries(IList<SectionHeader> oldHeaders) 
+        public void AlignDataDirectoryEntries(IList<SectionHeader> oldHeaders)
         {
             var dataDirectoryEntries = OptionalHeader.DataDirectories;
             for (int j = 0; j < dataDirectoryEntries.Count; j++)
@@ -371,8 +371,8 @@ namespace AsmResolver.PE.File
                     for(int i = 0; i < oldHeaders.Count; i++)
                     {
                         var header = oldHeaders[i];
-                        
-                        // Locate section containing image directory. 
+
+                        // Locate section containing image directory.
                         if (header.VirtualAddress <= virtualAddress && header.VirtualAddress + header.SizeOfRawData > virtualAddress)
                         {
                             // Calculate the delta between the new section.rva and the old one.
@@ -410,7 +410,7 @@ namespace AsmResolver.PE.File
         /// </summary>
         /// <param name="stream">The output stream to write to.</param>
         public void Write(Stream stream) => Write(new BinaryStreamWriter(stream));
-        
+
         /// <summary>
         /// Writes the PE file to the provided output stream.
         /// </summary>
@@ -418,27 +418,27 @@ namespace AsmResolver.PE.File
         public void Write(IBinaryStreamWriter writer)
         {
             UpdateHeaders();
-            
+
             // Dos header.
             DosHeader.Write(writer);
-            
+
             // NT headers
             writer.Offset = DosHeader.NextHeaderOffset;
-            
+
             writer.WriteUInt32(ValidPESignature);
             FileHeader.Write(writer);
             OptionalHeader.Write(writer);
 
             // Section headers.
             writer.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;
-            foreach (var section in Sections) 
+            foreach (var section in Sections)
                 section.CreateHeader().Write(writer);
 
             // Data between section headers and sections.
             ExtraSectionData?.Write(writer);
 
             // Sections.
-            
+
             writer.Offset = OptionalHeader.SizeOfHeaders;
             foreach (var section in Sections)
             {
@@ -464,6 +464,6 @@ namespace AsmResolver.PE.File
         /// <remarks>
         /// This method is called upon the initialization of the <see cref="ExtraSectionData"/> property.
         /// </remarks>
-        protected virtual ISegment GetExtraSectionData() => null;
+        protected virtual ISegment? GetExtraSectionData() => null;
     }
 }
