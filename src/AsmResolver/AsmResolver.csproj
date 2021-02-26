@@ -6,6 +6,7 @@
        <PackageTags>exe pe dotnet cil inspection manipulation assembly disassembly</PackageTags>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <LangVersion>9</LangVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
     </PropertyGroup>
