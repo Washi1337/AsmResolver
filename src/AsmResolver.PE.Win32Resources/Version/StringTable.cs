@@ -16,7 +16,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// The name of the string describing the comments assigned to the executable file.
         /// </summary>
         public const string CommentsKey = "Comments";
-        
+
         /// <summary>
         /// The name of the string describing the name of the company that developed the executable file.
         /// </summary>
@@ -31,47 +31,47 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// The name of the string describing the version of the file.
         /// </summary>
         public const string FileVersionKey = "FileVersion";
-        
+
         /// <summary>
         /// The name of the string describing the internal name of the file.
         /// </summary>
         public const string InternalNameKey = "InternalName";
-        
+
         /// <summary>
         /// The name of the string describing the copyright notices that apply to the file.
         /// </summary>
         public const string LegalCopyrightKey = "LegalCopyright";
-        
+
         /// <summary>
         /// The name of the string describing the trademark notices that apply to the file.
         /// </summary>
         public const string LegalTrademarksKey = "LegalTrademarks";
-        
+
         /// <summary>
         /// The name of the string providing the original file name.
         /// </summary>
         public const string OriginalFilenameKey = "OriginalFilename";
-        
+
         /// <summary>
         /// The name of the string describing by whom, where, and why this private version of the file was built.
         /// </summary>
         public const string PrivateBuildKey = "PrivateBuild";
-        
+
         /// <summary>
         /// The name of the string describing the name of the product with which this file is distributed.
         /// </summary>
         public const string ProductNameKey = "ProductName";
-        
+
         /// <summary>
         /// The name of the string describing the version of the product with which this file is distributed.
         /// </summary>
         public const string ProductVersionKey = "ProductVersion";
-        
+
         /// <summary>
         /// The name of the string describing how this version of the file differs from the normal version
         /// </summary>
         public const string SpecialBuildKey = "SpecialBuild";
-        
+
         /// <summary>
         /// Reads a single StringTable structure from the provided input stream.
         /// </summary>
@@ -80,14 +80,14 @@ namespace AsmResolver.PE.Win32Resources.Version
         public static StringTable FromReader(IBinaryStreamReader reader)
         {
             ulong start = reader.Offset;
-            
+
             // Read header.
             var header = VersionTableEntryHeader.FromReader(reader);
-            if (header.Key.Length != 8 || !uint.TryParse(header.Key, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint rawKey))
+            if (header.Key!.Length != 8 || !uint.TryParse(header.Key, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint rawKey))
                 throw new FormatException("Invalid string table language identifier or code page.");
 
             var result = new StringTable((ushort) (rawKey >> 16), (ushort) (rawKey & 0xFFFF));
-            
+
             // Read entries.
             while (reader.Offset - start < header.Length)
             {
@@ -102,7 +102,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         private static KeyValuePair<string, string> ReadEntry(IBinaryStreamReader reader)
         {
             ulong start = reader.Offset;
-            
+
             // Read header.
             var header = VersionTableEntryHeader.FromReader(reader);
             reader.Align(4);
@@ -110,21 +110,21 @@ namespace AsmResolver.PE.Win32Resources.Version
             // Read value.
             var data = new byte[header.ValueLength * sizeof(char)];
             int count = reader.ReadBytes(data, 0, data.Length);
-            
+
             // Exclude zero terminator.
             count = Math.Max(count - 2, 0);
             string value = Encoding.Unicode.GetString(data, 0, count);
-            
+
             // Skip any unprocessed bytes.
             reader.Offset = start + header.Length;
 
-            return new KeyValuePair<string, string>(header.Key, value);
+            return new KeyValuePair<string, string>(header.Key!, value);
         }
 
         private readonly IDictionary<string, string> _entries = new Dictionary<string, string>();
-        
+
         /// <summary>
-        /// Creates a new string table. 
+        /// Creates a new string table.
         /// </summary>
         /// <param name="languageIdentifier">The language identifier.</param>
         /// <param name="codePage">The code page.</param>
@@ -169,7 +169,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             {
                 if (value is null)
                     _entries.Remove(key);
-                else 
+                else
                     _entries[key] = value;
             }
         }
@@ -179,7 +179,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         /// <param name="key">The name of the field.</param>
         /// <param name="value">The value of the field.</param>
-        public void Add(string key, string value) => 
+        public void Add(string key, string value) =>
             _entries[key] = value ?? throw new ArgumentNullException(nameof(value));
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace AsmResolver.PE.Win32Resources.Version
                 size = size.Align(4);
                 size += CalculateEntrySize(entry);
             }
-            
+
             return size;
         }
 
