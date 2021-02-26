@@ -12,11 +12,11 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// When this PE file was read from the disk, gets the file path to the PE file.
         /// </summary>
-        string FilePath
+        string? FilePath
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets or sets the DOS header of the PE file.
         /// </summary>
@@ -52,13 +52,13 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets a value indicating the mapping mode of the PE file. If the PE file is in its mapped form,
         /// then every offset of all segments in the PE file will be equal to the physical memory address.
-        /// If the file is in its unmapped form, the offsets will be equal to the file offset. 
+        /// If the file is in its unmapped form, the offsets will be equal to the file offset.
         /// </summary>
         PEMappingMode MappingMode
         {
             get;
         }
-        
+
         /// <summary>
         /// Finds the section containing the provided virtual address.
         /// </summary>
@@ -121,7 +121,7 @@ namespace AsmResolver.PE.File
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
         bool TryCreateReaderAtRva(uint rva, uint size, out IBinaryStreamReader reader);
-        
+
         /// <summary>
         /// Creates a new reader at the provided file offset.
         /// </summary>
