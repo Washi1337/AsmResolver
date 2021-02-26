@@ -9,7 +9,7 @@ namespace AsmResolver
     {
         private uint _rva;
 
-        public VirtualSegment(ISegment physicalContents, uint virtualSize)
+        public VirtualSegment(ISegment? physicalContents, uint virtualSize)
         {
             PhysicalContents = physicalContents;
             VirtualSize = virtualSize;
@@ -18,7 +18,7 @@ namespace AsmResolver
         /// <summary>
         /// Gets or sets the physical contents of the segment as it is stored on the disk.
         /// </summary>
-        public ISegment PhysicalContents
+        public ISegment? PhysicalContents
         {
             get;
             set;
@@ -42,10 +42,10 @@ namespace AsmResolver
             get => _rva;
             set
             {
-                _rva = value;                
+                _rva = value;
                 PhysicalContents?.UpdateOffsets(Offset, value);
             }
-        } 
+        }
 
         /// <inheritdoc />
         public bool CanUpdateOffsets => PhysicalContents?.CanUpdateOffsets ?? false;
