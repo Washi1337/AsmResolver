@@ -1,4 +1,6 @@
-﻿namespace AsmResolver.PE.Win32Resources.Icon
+﻿using System;
+
+namespace AsmResolver.PE.Win32Resources.Icon
 {
     /// <summary>
     /// Represents a single icon resource entry.
@@ -8,7 +10,7 @@
         /// <summary>
         /// The raw bytes of the icon.
         /// </summary>
-        public byte[] RawIcon
+        public byte[]? RawIcon
         {
             get;
             set;
@@ -33,12 +35,23 @@
         }
 
         /// <inheritdoc />
-        public override uint GetPhysicalSize() => (uint)RawIcon.Length;
+        public override uint GetPhysicalSize()
+        {
+            ThrowIfRawIconNull();
+            return (uint)RawIcon!.Length;
+        }
 
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            writer.WriteBytes(RawIcon, 0, RawIcon.Length);
+            ThrowIfRawIconNull();
+            writer.WriteBytes(RawIcon!, 0, RawIcon!.Length);
+        }
+
+        private void ThrowIfRawIconNull()
+        {
+            if (RawIcon == null)
+                throw new InvalidOperationException($"{nameof(RawIcon)} is not set.");
         }
     }
 }
