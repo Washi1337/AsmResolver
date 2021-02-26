@@ -5,6 +5,7 @@
         <Description>PE image models for the AsmResolver executable file inspection toolsuite.</Description>
         <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
     </PropertyGroup>
@@ -16,7 +17,7 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DocumentationFile>bin\Release\AsmResolver.PE.xml</DocumentationFile>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <ProjectReference Include="..\AsmResolver.PE.File\AsmResolver.PE.File.csproj" />
     </ItemGroup>

@@ -5,6 +5,7 @@
         <Description>High level .NET image models for the AsmResolver executable file inspection toolsuite.</Description>
         <PackageTags>exe pe directories imports exports resources dotnet cil inspection manipulation assembly disassembly</PackageTags>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>1701;1702;NU5105</NoWarn>
         <LangVersion>9</LangVersion>
