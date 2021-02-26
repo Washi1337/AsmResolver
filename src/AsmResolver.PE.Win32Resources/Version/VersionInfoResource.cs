@@ -5,12 +5,12 @@ using System.Linq;
 namespace AsmResolver.PE.Win32Resources.Version
 {
     /// <summary>
-    /// Represents a native version resource file. 
+    /// Represents a native version resource file.
     /// </summary>
     public class VersionInfoResource : VersionTableEntry, IWin32Resource
     {
         /// <summary>
-        /// The name of the root object of the native version resource file. 
+        /// The name of the root object of the native version resource file.
         /// </summary>
         public const string VsVersionInfoKey = "VS_VERSION_INFO";
 
@@ -19,15 +19,18 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </summary>
         /// <param name="rootDirectory">The root resources directory to extract the version info from.</param>
         /// <returns>The version info resource, or <c>null</c> if none was found.</returns>
-        public static VersionInfoResource FromDirectory(IResourceDirectory rootDirectory)
+        public static VersionInfoResource? FromDirectory(IResourceDirectory rootDirectory)
         {
+            if (rootDirectory == null)
+                throw new ArgumentNullException(nameof(rootDirectory));
+
             var versionDirectory = (IResourceDirectory) rootDirectory.Entries[ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Version)];
 
             var categoryDirectory = versionDirectory
                 ?.Entries
                 .OfType<IResourceDirectory>()
                 .FirstOrDefault();
-            
+
             var dataEntry = categoryDirectory
                 ?.Entries
                 .OfType<IResourceData>()
@@ -35,14 +38,14 @@ namespace AsmResolver.PE.Win32Resources.Version
 
             if (dataEntry is null)
                 return null;
-            
+
             if (dataEntry.CanRead)
                 return FromReader(dataEntry.CreateReader());
             if (dataEntry.Contents is VersionInfoResource resource)
                 return resource;
             throw new ArgumentException("Version resource data is not readable.");
         }
-        
+
         /// <summary>
         /// Reads a version resource from an input stream.
         /// </summary>
@@ -53,13 +56,16 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// </exception>
         public static VersionInfoResource FromReader(IBinaryStreamReader reader)
         {
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+
             ulong start = reader.Offset;
-            
+
             // Read header.
             var header = VersionTableEntryHeader.FromReader(reader);
             if (header.Key != VsVersionInfoKey)
                 throw new FormatException($"Input stream does not point to a {VsVersionInfoKey} entry.");
-            
+
             var result = new VersionInfoResource();
 
             // Read fixed version info.
@@ -79,7 +85,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         private static VersionTableEntry ReadNextEntry(IBinaryStreamReader reader)
         {
             ulong start = reader.Offset;
-            
+
             var header = VersionTableEntryHeader.FromReader(reader);
             reader.Align(4);
 
@@ -126,7 +132,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         }
 
         /// <summary>
-        /// Gets a collection of entries stored in the version resource. 
+        /// Gets a collection of entries stored in the version resource.
         /// </summary>
         public IEnumerable<VersionTableEntry> GetChildren() => _entries.Values;
 
@@ -136,14 +142,14 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <param name="name">The name of the child.</param>
         /// <typeparam name="TEntry">The type of the version table entry to lookup.</typeparam>
         /// <returns>The entry.</returns>
-        public TEntry GetChild<TEntry>(string name) 
+        public TEntry? GetChild<TEntry>(string name)
             where TEntry : VersionTableEntry
         {
             return this[name] as TEntry;
         }
 
         /// <summary>
-        /// Adds (or overrides the existing entry with the same name) to the version resource. 
+        /// Adds (or overrides the existing entry with the same name) to the version resource.
         /// </summary>
         /// <param name="entry">The entry to add.</param>
         public void AddEntry(VersionTableEntry entry) => _entries[entry.Key] = entry;
@@ -164,7 +170,7 @@ namespace AsmResolver.PE.Win32Resources.Version
             size = size.Align(4);
             size += _fixedVersionInfo.GetPhysicalSize();
             size = size.Align(4);
-            
+
             foreach (var entry in _entries)
             {
                 size = size.Align(4);
@@ -191,7 +197,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         {
             // Find and remove old version directory.
             int index = ResourceDirectoryHelper.IndexOfResourceDirectoryType(rootDirectory, ResourceType.Version);
-            
+
             if (index == -1)
                 index = rootDirectory.Entries.Count;
             else
@@ -208,7 +214,7 @@ namespace AsmResolver.PE.Win32Resources.Version
                     }
                 }
             };
-            
+
             // Insert.
             rootDirectory.Entries.Insert(index, newVersionDirectory);
         }
