@@ -54,7 +54,7 @@ namespace AsmResolver.PE.File.Headers
         /// <param name="characteristics">The section flags to assign.</param>
         public SectionHeader(string name, SectionFlags characteristics)
         {
-            Name = name;
+            _name = name ?? throw new ArgumentNullException(nameof(name));
             Characteristics = characteristics;
         }
 
@@ -64,9 +64,11 @@ namespace AsmResolver.PE.File.Headers
         /// <param name="value">The section header to base information on.</param>
         public SectionHeader(SectionHeader value)
         {
+            _name = string.Empty;
+
             Offset = value.Offset;
             Rva = value.Rva;
-            
+
             VirtualSize = value.VirtualSize;
             VirtualAddress = value.VirtualAddress;
             SizeOfRawData = value.SizeOfRawData;
@@ -77,7 +79,7 @@ namespace AsmResolver.PE.File.Headers
             NumberOfLineNumbers = value.NumberOfLineNumbers;
             Characteristics = value.Characteristics;
         }
-        
+
         /// <summary>
         /// Gets or sets the name of the section.
         /// </summary>
@@ -89,6 +91,9 @@ namespace AsmResolver.PE.File.Headers
             get => _name;
             set
             {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(value));
+
                 if (Encoding.UTF8.GetByteCount(value) > 8)
                     throw new ArgumentException("Name is too long.");
                 _name = value;
@@ -135,10 +140,10 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the file offset to the beginning of the relocations table for the section. 
+        /// Gets or sets the file offset to the beginning of the relocations table for the section.
         /// </summary>
         /// <remarks>
-        /// This field is set to zero in a normal PE image. 
+        /// This field is set to zero in a normal PE image.
         /// </remarks>
         public uint PointerToRelocations
         {
@@ -147,7 +152,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the file offset to the beginning of the line numbers table for the section. 
+        /// Gets or sets the file offset to the beginning of the line numbers table for the section.
         /// </summary>
         /// <remarks>
         /// This field is set to zero in a normal PE image.
@@ -162,7 +167,7 @@ namespace AsmResolver.PE.File.Headers
         /// Gets or sets the number of relocations in the relocation table of the section.
         /// </summary>
         /// <remarks>
-        /// This field is set to zero for executable files. 
+        /// This field is set to zero for executable files.
         /// </remarks>
         public ushort NumberOfRelocations
         {
@@ -171,7 +176,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets or sets the total amount of line numbers table referenced by <see cref="PointerToLineNumbers" /> for the section. 
+        /// Gets or sets the total amount of line numbers table referenced by <see cref="PointerToLineNumbers" /> for the section.
         /// </summary>
         /// <remarks>
         /// This field is not used in a normal PE image.
@@ -190,12 +195,12 @@ namespace AsmResolver.PE.File.Headers
             get;
             set;
         }
-        
+
         /// <inheritdoc />
         public override uint GetPhysicalSize() => SectionHeaderSize;
 
         /// <summary>
-        /// Determines whether the provided file offset falls within the section that the header describes. 
+        /// Determines whether the provided file offset falls within the section that the header describes.
         /// </summary>
         /// <param name="fileOffset">The offset to check.</param>
         /// <returns><c>true</c> if the file offset falls within the section, <c>false</c> otherwise.</returns>
@@ -205,7 +210,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Determines whether the provided virtual address falls within the section that the header describes. 
+        /// Determines whether the provided virtual address falls within the section that the header describes.
         /// </summary>
         /// <param name="rva">The virtual address to check.</param>
         /// <returns><c>true</c> if the virtual address falls within the section, <c>false</c> otherwise.</returns>
@@ -233,7 +238,7 @@ namespace AsmResolver.PE.File.Headers
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            var nameBytes = Encoding.UTF8.GetBytes(Name ?? string.Empty);
+            var nameBytes = Encoding.UTF8.GetBytes(Name);
             writer.WriteBytes(nameBytes);
             writer.WriteZeroes(8 - nameBytes.Length);
 
