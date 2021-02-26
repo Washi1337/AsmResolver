@@ -82,6 +82,27 @@ namespace AsmResolver.DotNet
                 DetectInstalledRuntimes(installationDirectory);
         }
 
+        public bool TryGetLatestCompatibleVersion(Version netstandardVersion, out Version coreVersion)
+        {
+            bool foundMatch = false;
+            coreVersion = default;
+
+            foreach (var runtime in _installedRuntimes)
+            {
+                for (int i = 0; i < runtime.InstalledVersions.Count; i++)
+                {
+                    var versionInfo = runtime.InstalledVersions[i];
+                    if (versionInfo.IsCompatibleWithStandard(netstandardVersion) && versionInfo.Version > coreVersion)
+                    {
+                        foundMatch = true;
+                        coreVersion = versionInfo.Version;
+                    }
+                }
+            }
+
+            return foundMatch;
+        }
+
         public IEnumerable<string> GetRuntimePathCandidates(Version version)
         {
             foreach (var runtime in _installedRuntimes)
@@ -213,6 +234,21 @@ namespace AsmResolver.DotNet
             public string FullPath
             {
                 get;
+            }
+
+            public bool IsCompatibleWithStandard(Version standardVersion)
+            {
+                // https://docs.microsoft.com/en-us/dotnet/standard/net-standard
+
+                if (standardVersion.Major == 2)
+                {
+                    if (standardVersion.Minor == 0)
+                        return Version.Major >= 2;
+                    if (standardVersion.Minor == 1)
+                        return Version.Major >= 3;
+                }
+
+                return true;
             }
 
 #if DEBUG

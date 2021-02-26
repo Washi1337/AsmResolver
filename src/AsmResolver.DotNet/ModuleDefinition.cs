@@ -953,15 +953,24 @@ namespace AsmResolver.DotNet
             var runtime = OriginalTargetRuntime;
 
             AssemblyResolverBase resolver;
-            if (runtime.Name == DotNetRuntimeInfo.NetFramework
-                || runtime.Name == DotNetRuntimeInfo.NetStandard
-                && string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath))
+            switch (runtime.Name)
             {
-                resolver = new DotNetFrameworkAssemblyResolver();
-            }
-            else
-            {
-                resolver = new DotNetCoreAssemblyResolver(runtime.Version);
+                case DotNetRuntimeInfo.NetFramework:
+                case DotNetRuntimeInfo.NetStandard
+                    when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
+                    resolver = new DotNetFrameworkAssemblyResolver();
+                    break;
+                case DotNetRuntimeInfo.NetStandard
+                    when DotNetCorePathProvider.Default.TryGetLatestCompatibleVersion(
+                        runtime.Version, out var coreVersion):
+                    resolver = new DotNetCoreAssemblyResolver(coreVersion);
+                    break;
+                case DotNetRuntimeInfo.NetCoreApp:
+                    resolver = new DotNetCoreAssemblyResolver(runtime.Version);
+                    break;
+                default:
+                    resolver = new DotNetFrameworkAssemblyResolver();
+                    break;
             }
 
             if (!string.IsNullOrEmpty(directory))
