@@ -154,8 +154,10 @@ namespace AsmResolver.DotNet
                 var bestMatchVersion = new Version();
                 bool foundMatch = false;
 
-                foreach (var candidate in InstalledVersions)
+                for (int i = 0; i < InstalledVersions.Count; i++)
                 {
+                    var candidate = InstalledVersions[i];
+
                     var candidateVersion = candidate.Version;
                     if (candidateVersion == requestedVersion)
                     {
