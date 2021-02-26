@@ -31,7 +31,7 @@ namespace AsmResolver.PE.File
             if (signature != ValidPESignature)
                 throw new BadImageFormatException();
 
-            // Read NT headers. 
+            // Read NT headers.
             FileHeader = FileHeader.FromReader(reader);
             OptionalHeader = OptionalHeader.FromReader(reader);
 
@@ -51,7 +51,7 @@ namespace AsmResolver.PE.File
         protected override IList<PESection> GetSections()
         {
             var result = new PESectionCollection(this);
-            
+
             for (int i = 0; i < _sectionHeaders.Count; i++)
             {
                 var header = _sectionHeaders[i];
@@ -62,13 +62,13 @@ namespace AsmResolver.PE.File
                     PEMappingMode.Mapped => (_reader.StartOffset + header.VirtualAddress, header.VirtualSize),
                     _ => throw new ArgumentOutOfRangeException()
                 };
-                
+
                 _reader.Offset = offset;
 
-                ISegment physicalContents = null;
-                if (size > 0) 
+                ISegment? physicalContents = null;
+                if (size > 0)
                     physicalContents = DataSegment.FromReader(_reader, (int) size);
-                
+
                 var virtualSegment = new VirtualSegment(physicalContents, header.VirtualSize);
                 virtualSegment.UpdateOffsets(offset, header.VirtualAddress);
                 result.Add(new PESection(header, virtualSegment));
