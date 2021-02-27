@@ -971,7 +971,7 @@ namespace AsmResolver.DotNet
                     resolver = new DotNetFrameworkAssemblyResolver();
                     break;
                 case DotNetRuntimeInfo.NetStandard
-                    when DotNetCorePathProvider.Default.TryGetLatestCompatibleVersion(
+                    when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
                         runtime.Version, out var coreVersion):
                     resolver = new DotNetCoreAssemblyResolver(coreVersion);
                     break;

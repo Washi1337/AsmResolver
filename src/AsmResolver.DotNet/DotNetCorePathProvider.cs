@@ -106,10 +106,10 @@ namespace AsmResolver.DotNet
         /// Attempts to get the most recent version of .NET Core or .NET that is compatible with the provided
         /// .NET standard version.
         /// </summary>
-        /// <param name="netstandardVersion">The .NET standard version.</param>
+        /// <param name="standardVersion">The .NET standard version.</param>
         /// <param name="coreVersion">The most recent compatible .NET or .NET Core version available.</param>
         /// <returns><c>true</c> if a compatible version was found, <c>false</c> otherwise.</returns>
-        public bool TryGetLatestCompatibleVersion(Version netstandardVersion, out Version coreVersion)
+        public bool TryGetLatestStandardCompatibleVersion(Version standardVersion, out Version coreVersion)
         {
             bool foundMatch = false;
             coreVersion = default;
@@ -119,7 +119,7 @@ namespace AsmResolver.DotNet
                 for (int i = 0; i < runtime.InstalledVersions.Count; i++)
                 {
                     var versionInfo = runtime.InstalledVersions[i];
-                    if (versionInfo.IsCompatibleWithStandard(netstandardVersion) && versionInfo.Version > coreVersion)
+                    if (versionInfo.IsCompatibleWithStandard(standardVersion) && versionInfo.Version > coreVersion)
                     {
                         foundMatch = true;
                         coreVersion = versionInfo.Version;
@@ -145,6 +145,19 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
+        /// Collects all paths to the runtimes that implement the provided .NET or .NET Core runtime version.
+        /// </summary>
+        /// <returns>A collection of paths that implement the requested version.</returns>
+        public IEnumerable<string> GetRuntimePathCandidates(string runtimeName, Version runtimeVersion)
+        {
+            foreach (var runtime in _installedRuntimes)
+            {
+                if (runtime.Name == runtimeName && runtime.TryFindBestMatchingVersion(runtimeVersion, out var match))
+                    yield return match.FullPath;
+            }
+        }
+
+        /// <summary>
         /// Determines whether a specific version of the runtime is installed or not.
         /// </summary>
         /// <param name="runtimeVersion">The runtime version.</param>
@@ -154,6 +167,22 @@ namespace AsmResolver.DotNet
             foreach (var runtime in _installedRuntimes)
             {
                 if (runtime.TryFindBestMatchingVersion(runtimeVersion, out _))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether a specific version of the runtime is installed or not.
+        /// </summary>
+        /// <param name="runtimeVersion">The runtime version.</param>
+        /// <returns><c>true</c> if the version is installed, <c>false</c> otherwise.</returns>
+        public bool HasRuntimeInstalled(string runtimeName, Version runtimeVersion)
+        {
+            foreach (var runtime in _installedRuntimes)
+            {
+                if (runtime.Name == runtimeName && runtime.TryFindBestMatchingVersion(runtimeVersion, out _))
                     return true;
             }
 

@@ -109,5 +109,17 @@ namespace AsmResolver.DotNet.Config.Json
             get;
             set;
         }
+
+        public IEnumerable<RuntimeFramework> GetAllFrameworks()
+        {
+            if (Framework is { } framework)
+                yield return framework;
+
+            if (IncludedFrameworks is { } frameworks)
+            {
+                foreach (var includedFramework in frameworks)
+                    yield return includedFramework;
+            }
+        }
     }
 }
