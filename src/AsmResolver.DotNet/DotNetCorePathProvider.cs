@@ -144,6 +144,22 @@ namespace AsmResolver.DotNet
             }
         }
 
+        /// <summary>
+        /// Determines whether a specific version of the runtime is installed or not.
+        /// </summary>
+        /// <param name="runtimeVersion">The runtime version.</param>
+        /// <returns><c>true</c> if the version is installed, <c>false</c> otherwise.</returns>
+        public bool HasRuntimeInstalled(Version runtimeVersion)
+        {
+            foreach (var runtime in _installedRuntimes)
+            {
+                if (runtime.TryFindBestMatchingVersion(runtimeVersion, out _))
+                    return true;
+            }
+
+            return false;
+        }
+
         private void DetectInstalledRuntimes(string installationDirectory)
         {
             installationDirectory = Path.Combine(installationDirectory, "shared");
