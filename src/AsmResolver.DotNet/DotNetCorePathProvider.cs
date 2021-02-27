@@ -311,8 +311,12 @@ namespace AsmResolver.DotNet
                 // Ensure .NETCoreApp is sorted last to give other runtimes (like Microsoft.WindowsDesktop.App)
                 // priority. This prevents libraries such as WindowsBase.dll to be incorrectly resolved.
 
+                if (Name == other.Name)
+                    return 0;
                 if (Name == KnownRuntimeNames.NetCoreApp)
                     return 1;
+                if (other.Name == KnownRuntimeNames.NetCoreApp)
+                    return -1;
                 return 0;
             }
 
