@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="ModuleDefinition"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedModuleDefinition : ModuleDefinition
     {
@@ -61,7 +61,7 @@ namespace AsmResolver.DotNet.Serialized
                 throw new ArgumentNullException(nameof(peImage));
             if (readerParameters is null)
                 throw new ArgumentNullException(nameof(readerParameters));
-            
+
             var metadata = peImage.DotNetDirectory?.Metadata;
             if (metadata is null)
                 throw new BadImageFormatException("Input PE image does not contain a .NET metadata directory.");
@@ -85,14 +85,14 @@ namespace AsmResolver.DotNet.Serialized
             SubSystem = peImage.SubSystem;
             DllCharacteristics = peImage.DllCharacteristics;
             TimeDateStamp = peImage.TimeDateStamp;
-            
+
             // Copy over "simple" columns.
             Generation = _row.Generation;
             Attributes = peImage.DotNetDirectory.Flags;
-            
+
             // Initialize member factory.
             _memberFactory = new CachedSerializedMemberFactory(ReaderContext);
-            
+
             // Find assembly definition and corlib assembly.
             Assembly = FindParentAssembly();
             var corLib = FindMostRecentCorLib();
@@ -112,11 +112,11 @@ namespace AsmResolver.DotNet.Serialized
             // Prepare lazy RID lists.
             _fieldLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetFieldRange);
-            _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef, 
+            _methodLists = new LazyRidListRelation<TypeDefinitionRow>(metadata, TableIndex.TypeDef,
                 (rid, _) => rid, tablesStream.GetMethodRange);
-            _paramLists = new LazyRidListRelation<MethodDefinitionRow>(metadata, TableIndex.Method, 
+            _paramLists = new LazyRidListRelation<MethodDefinitionRow>(metadata, TableIndex.Method,
                 (rid, _) => rid, tablesStream.GetParameterRange);
-            _propertyLists = new LazyRidListRelation<PropertyMapRow>(metadata, TableIndex.PropertyMap, 
+            _propertyLists = new LazyRidListRelation<PropertyMapRow>(metadata, TableIndex.PropertyMap,
                 (_, map) => map.Parent, tablesStream.GetPropertyRange);
             _eventLists = new LazyRidListRelation<EventMapRow>(metadata, TableIndex.EventMap,
                 (_, map) => map.Parent, tablesStream.GetEventRange);
@@ -144,7 +144,7 @@ namespace AsmResolver.DotNet.Serialized
             _memberFactory.TryLookupMember(token, out member);
 
         /// <inheritdoc />
-        public override string LookupString(MetadataToken token) => 
+        public override string LookupString(MetadataToken token) =>
             !TryLookupString(token, out var member)
                 ? throw new ArgumentException($"Cannot resolve string token {token}.")
                 : member;
@@ -153,7 +153,7 @@ namespace AsmResolver.DotNet.Serialized
         public override bool TryLookupString(MetadataToken token, out string value)
         {
             value = DotNetDirectory.Metadata.GetStream<UserStringsStream>().GetStringByIndex(token.Rid);
-            return value == null;
+            return value is not null;
         }
 
         /// <inheritdoc />
@@ -195,11 +195,11 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override string GetName() 
+        protected override string GetName()
             => DotNetDirectory.Metadata.GetStream<StringsStream>()?.GetStringByIndex(_row.Name);
 
         /// <inheritdoc />
-        protected override Guid GetMvid() 
+        protected override Guid GetMvid()
             => DotNetDirectory.Metadata.GetStream<GuidStream>()?.GetGuidByIndex(_row.Mvid) ?? Guid.Empty;
 
         /// <inheritdoc />
@@ -214,14 +214,14 @@ namespace AsmResolver.DotNet.Serialized
         protected override IList<TypeDefinition> GetTopLevelTypes()
         {
             EnsureTypeDefinitionTreeInitialized();
-            
+
             var types = new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
 
             var typeDefTable = DotNetDirectory
                 .Metadata
                 .GetStream<TablesStream>()
                 .GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
-            
+
             for (int i = 0; i < typeDefTable.Count; i++)
             {
                 uint rid = (uint) i + 1;
@@ -245,7 +245,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var nestedClassTable = tablesStream.GetTable<NestedClassRow>(TableIndex.NestedClass);
-            
+
             var typeDefTree = new OneToManyRelation<uint, uint>();
             foreach (var nestedClass in nestedClassTable)
                 typeDefTree.Add(nestedClass.EnclosingClass, nestedClass.NestedClass);
@@ -287,14 +287,14 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var semanticsTable = tablesStream.GetTable<MethodSemanticsRow>(TableIndex.MethodSemantics);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasSemantics);
-            
+
             var semantics = new OneToManyRelation<MetadataToken, uint>();
             var semanticMethods = new Dictionary<uint, MetadataToken>();
             for (int i = 0; i < semanticsTable.Count; i++)
             {
                 var methodSemanticsRow = semanticsTable[i];
                 var semanticsToken = new MetadataToken(TableIndex.MethodSemantics, (uint) (i + 1));
-                
+
                 var ownerToken = encoder.DecodeIndex(methodSemanticsRow.Association);
                 semantics.Add(ownerToken, semanticsToken.Rid);
                 semanticMethods.Add(methodSemanticsRow.Method, semanticsToken);
@@ -334,7 +334,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var constantTable = tablesStream.GetTable<ConstantRow>(TableIndex.Constant);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasConstant);
-            
+
             var constants = new OneToOneRelation<MetadataToken, uint>();
             for (int i = 0; i < constantTable.Count; i++)
             {
@@ -377,7 +377,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var attributeTable = tablesStream.GetTable<CustomAttributeRow>(TableIndex.CustomAttribute);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasCustomAttribute);
-            
+
             var customAttributes = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < attributeTable.Count; i++)
             {
@@ -402,16 +402,16 @@ namespace AsmResolver.DotNet.Serialized
         {
             EnsureCustomAttributesInitialized();
             var result = new OwnedCollection<IHasCustomAttribute, CustomAttribute>(owner);
-            
+
             foreach (uint rid in _customAttributes.GetValues(owner.MetadataToken))
             {
                 var attribute = (CustomAttribute) LookupMember(new MetadataToken(TableIndex.CustomAttribute, rid));
                 result.Add(attribute);
             }
-            
+
             return result;
         }
-        
+
         private void EnsureSecurityDeclarationsInitialized()
         {
             if (_securityDeclarations is null)
@@ -423,7 +423,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var declarationTable = tablesStream.GetTable<SecurityDeclarationRow>(TableIndex.DeclSecurity);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
-            
+
             var securityDeclarations = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < declarationTable.Count; i++)
             {
@@ -466,7 +466,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var parameterTable = tablesStream.GetTable<GenericParameterRow>(TableIndex.GenericParam);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
-            
+
             var genericParameters = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < parameterTable.Count; i++)
             {
@@ -483,7 +483,7 @@ namespace AsmResolver.DotNet.Serialized
             EnsureGenericParametersInitialized();
             return _genericParameters.GetKey(parameterRid);
         }
-        
+
         internal ICollection<uint> GetGenericParameters(MetadataToken ownerToken)
         {
             EnsureGenericParametersInitialized();
@@ -500,7 +500,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var constraintTable = tablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
-            
+
             var constraints = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < constraintTable.Count; i++)
             {
@@ -517,7 +517,7 @@ namespace AsmResolver.DotNet.Serialized
             EnsureGenericParameterConstrainsInitialized();
             return _genericParameterConstraints.GetKey(constraintRid);
         }
-        
+
         internal ICollection<uint> GetGenericParameterConstraints(MetadataToken ownerToken)
         {
             EnsureGenericParameterConstrainsInitialized();
@@ -534,7 +534,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var interfaceImplTable = tablesStream.GetTable<InterfaceImplementationRow>(TableIndex.InterfaceImpl);
-            
+
             var interfaces = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < interfaceImplTable.Count; i++)
             {
@@ -568,7 +568,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var methodImplTable = tablesStream.GetTable<MethodImplementationRow>(TableIndex.MethodImpl);
-            
+
             var methodImplementations = new OneToManyRelation<MetadataToken, uint>();
             for (int i = 0; i < methodImplTable.Count; i++)
             {
@@ -596,7 +596,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var layoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);
-            
+
             var layouts = new OneToOneRelation<MetadataToken, uint>();
             for (int i = 0; i < layoutTable.Count; i++)
             {
@@ -625,7 +625,7 @@ namespace AsmResolver.DotNet.Serialized
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var mapTable = tablesStream.GetTable<ImplementationMapRow>(TableIndex.ImplMap);
             var encoder = tablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
-            
+
             var maps = new OneToOneRelation<MetadataToken, uint>();
             for (int i = 0; i < mapTable.Count; i++)
             {
@@ -659,7 +659,7 @@ namespace AsmResolver.DotNet.Serialized
         {
             var tablesStream = DotNetDirectory.Metadata.GetStream<TablesStream>();
             var rvaTable = tablesStream.GetTable<FieldRvaRow>(TableIndex.FieldRva);
-            
+
             var rvas = new OneToOneRelation<MetadataToken, uint>();
             for (int i = 0; i < rvaTable.Count; i++)
             {
@@ -712,7 +712,7 @@ namespace AsmResolver.DotNet.Serialized
             var table = metadata
                 .GetStream<TablesStream>()
                 .GetTable<FieldMarshalRow>(TableIndex.FieldMarshal);
-            
+
             uint rid = GetFieldMarshalRid(ownerToken);
 
             if (table.TryGetByRid(rid, out var row))
@@ -724,8 +724,8 @@ namespace AsmResolver.DotNet.Serialized
             }
 
             return null;
-        } 
-        
+        }
+
         private void EnsureFieldLayoutsInitialized()
         {
             if (_fieldLayouts is null)
@@ -753,7 +753,7 @@ namespace AsmResolver.DotNet.Serialized
             EnsureFieldLayoutsInitialized();
             return _fieldLayouts.GetValue(fieldToken);
         }
-        
+
         /// <inheritdoc />
         protected override IList<AssemblyReference> GetAssemblyReferences()
         {
@@ -762,14 +762,14 @@ namespace AsmResolver.DotNet.Serialized
             var table = DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
-            
+
             // Don't use the member factory here, this method may be called before the member factory is initialized.
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.AssemblyRef, (uint) i + 1);
                 result.Add(new SerializedAssemblyReference(ReaderContext, token, table[i]));
             }
-            
+
             return result;
         }
 
@@ -781,14 +781,14 @@ namespace AsmResolver.DotNet.Serialized
             var table = DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(TableIndex.ModuleRef);
-            
+
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.ModuleRef, (uint) i + 1);
                 if (_memberFactory.TryLookupMember(token, out var member) && member is ModuleReference module)
                     result.Add(module);
             }
-            
+
             return result;
         }
 
@@ -800,14 +800,14 @@ namespace AsmResolver.DotNet.Serialized
             var table = DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(TableIndex.File);
-            
+
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.File, (uint) i + 1);
                 if (_memberFactory.TryLookupMember(token, out var member) && member is FileReference file)
                     result.Add(file);
             }
-            
+
             return result;
         }
 
@@ -819,14 +819,14 @@ namespace AsmResolver.DotNet.Serialized
             var table = DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(TableIndex.ManifestResource);
-            
+
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.ManifestResource, (uint) i + 1);
                 if (_memberFactory.TryLookupMember(token, out var member) && member is ManifestResource resource)
                     result.Add(resource);
             }
-            
+
             return result;
         }
 
@@ -838,14 +838,14 @@ namespace AsmResolver.DotNet.Serialized
             var table = DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(TableIndex.ExportedType);
-            
+
             for (int i = 0; i < table.Count; i++)
             {
                 var token = new MetadataToken(TableIndex.ExportedType, (uint) i + 1);
                 if (_memberFactory.TryLookupMember(token, out var member) && member is ExportedType exportedType)
                     result.Add(exportedType);
             }
-            
+
             return result;
         }
 
@@ -898,7 +898,7 @@ namespace AsmResolver.DotNet.Serialized
         private IResolutionScope FindMostRecentCorLib()
         {
             // TODO: perhaps check public key tokens.
-            
+
             IResolutionScope mostRecentCorLib = null;
             var mostRecentVersion = new Version();
             foreach (var reference in AssemblyReferences)
