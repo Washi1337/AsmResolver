@@ -79,7 +79,7 @@ namespace AsmResolver.DotNet.Signatures
             if (IgnoreAssemblyVersionNumbers)
                 versionMatch = true;
             else if (AcceptNewerAssemblyVersionNumbers)
-                versionMatch = x.Version < y.Version;
+                versionMatch = x.Version <= y.Version;
             else
                 versionMatch = x.Version == y.Version;
 
