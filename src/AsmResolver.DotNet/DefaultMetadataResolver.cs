@@ -115,7 +115,7 @@ namespace AsmResolver.DotNet
                 var candidate = declaringType.Methods[i];
                 if (candidate.Name != method.Name)
                     continue;
-                if (!candidate.IsHideBySig || _comparer.Equals(candidate.Signature, method.Signature))
+                if (!candidate.IsHideBySig || _comparer.Equals(method.Signature, candidate.Signature))
                     return candidate;
             }
 
@@ -132,7 +132,7 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < declaringType.Fields.Count; i++)
             {
                 var candidate = declaringType.Fields[i];
-                if (candidate.Name == field.Name && _comparer.Equals(candidate.Signature, field.Signature))
+                if (candidate.Name == field.Name && _comparer.Equals(field.Signature, candidate.Signature))
                     return candidate;
             }
 
