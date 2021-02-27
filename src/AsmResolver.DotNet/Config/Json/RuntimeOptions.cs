@@ -110,6 +110,9 @@ namespace AsmResolver.DotNet.Config.Json
             set;
         }
 
+        /// <summary>
+        /// Gets a collection of all frameworks specified in the configuration.
+        /// </summary>
         public IEnumerable<RuntimeFramework> GetAllFrameworks()
         {
             if (Framework is { } framework)

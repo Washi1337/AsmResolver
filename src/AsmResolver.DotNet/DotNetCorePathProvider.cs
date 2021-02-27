@@ -176,6 +176,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Determines whether a specific version of the runtime is installed or not.
         /// </summary>
+        /// <param name="runtimeName">The name of the runtime.</param>
         /// <param name="runtimeVersion">The runtime version.</param>
         /// <returns><c>true</c> if the version is installed, <c>false</c> otherwise.</returns>
         public bool HasRuntimeInstalled(string runtimeName, Version runtimeVersion)

@@ -74,7 +74,7 @@ namespace AsmResolver.DotNet.Tests
         }
     }
 }");
-            var resolver = new DotNetCoreAssemblyResolver(config);
+            var resolver = new DotNetCoreAssemblyResolver(config, new Version(3, 1, 0));
             var assemblyDef = resolver.Resolve(assemblyRef);
 
             Assert.NotNull(assemblyDef);
@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Tests
         }
 
         [SkippableFact]
-        public void ResolveWithConfiguredRuntimeWindows()
+        public void ResolveWithConfiguredRuntimeWindowsCanStillResolveCorLib()
         {
             Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
 
@@ -104,11 +104,39 @@ namespace AsmResolver.DotNet.Tests
         }
     }
 }");
-            var resolver = new DotNetCoreAssemblyResolver(config);
+            var resolver = new DotNetCoreAssemblyResolver(config, new Version(3, 1, 0));
             var assemblyDef = resolver.Resolve(assemblyRef);
 
             Assert.NotNull(assemblyDef);
             Assert.Equal(assemblyName.Name, assemblyDef.Name);
+            Assert.NotNull(assemblyDef.ManifestModule.FilePath);
+        }
+
+        [SkippableFact]
+        public void ResolveWithConfiguredRuntimeWindowsResolvesRightWindowsBase()
+        {
+            Skip.IfNot(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), NonWindowsPlatform);
+
+            var assemblyRef = new AssemblyReference(
+                "WindowsBase",
+                new Version(4,0,0,0),
+                false,
+                new byte[] {0x31, 0xbf, 0x38, 0x56, 0xad, 0x36, 0x4e, 0x35});
+
+            var config = RuntimeConfiguration.FromJson(@"{
+    ""runtimeOptions"": {
+        ""tfm"": ""netcoreapp3.1"",
+        ""framework"": {
+            ""name"": ""Microsoft.WindowsDesktop.App"",
+            ""version"": ""3.1.0""
+        }
+    }
+}");
+            var resolver = new DotNetCoreAssemblyResolver(config, new Version(3, 1, 0));
+            var assemblyDef = resolver.Resolve(assemblyRef);
+
+            Assert.NotNull(assemblyDef);
+            Assert.Equal("WindowsBase", assemblyDef.Name);
             Assert.NotNull(assemblyDef.ManifestModule.FilePath);
             Assert.Contains("Microsoft.WindowsDesktop.App", assemblyDef.ManifestModule.FilePath);
         }

@@ -17,16 +17,7 @@ namespace AsmResolver.DotNet
         /// installation directory.
         /// </summary>
         public DotNetCoreAssemblyResolver(Version runtimeVersion)
-            : this(runtimeVersion, DotNetCorePathProvider.Default)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new .NET Core assembly resolver, by attempting to autodetect the current .NET or .NET Core
-        /// installation directory.
-        /// </summary>
-        public DotNetCoreAssemblyResolver(RuntimeConfiguration configuration)
-            : this(configuration, DotNetCorePathProvider.Default)
+            : this(null, runtimeVersion, DotNetCorePathProvider.Default)
         {
         }
 
@@ -36,16 +27,6 @@ namespace AsmResolver.DotNet
         /// </summary>
         public DotNetCoreAssemblyResolver(RuntimeConfiguration configuration, Version fallbackVersion)
             : this(configuration, fallbackVersion, DotNetCorePathProvider.Default)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new .NET Core assembly resolver.
-        /// </summary>
-        /// <param name="runtimeVersion">The version of .NET or .NET Core.</param>
-        /// <param name="pathProvider">The installation directory of .NET Core.</param>
-        public DotNetCoreAssemblyResolver(Version runtimeVersion, DotNetCorePathProvider pathProvider)
-            : this(null, runtimeVersion, pathProvider)
         {
         }
 
@@ -67,6 +48,13 @@ namespace AsmResolver.DotNet
         /// <param name="pathProvider">The installation directory of .NET Core.</param>
         public DotNetCoreAssemblyResolver(RuntimeConfiguration configuration, Version fallbackVersion, DotNetCorePathProvider pathProvider)
         {
+            if (fallbackVersion is null)
+                throw new ArgumentNullException(nameof(fallbackVersion));
+            if (pathProvider == null)
+                throw new ArgumentNullException(nameof(pathProvider));
+
+            bool hasNetCoreApp = false;
+
             // Prefer runtime configuration if provided.
             if (configuration?.RuntimeOptions is { } options)
             {
@@ -77,12 +65,42 @@ namespace AsmResolver.DotNet
 
                 // Get relevant framework directories.
                 foreach (var framework in frameworks)
-                    AddFrameworkDirectories(pathProvider, framework);
+                {
+                    string[] directories = GetFrameworkDirectories(pathProvider, framework);
+                    if (directories.Length > 0)
+                    {
+                        hasNetCoreApp |= framework.Name == KnownRuntimeNames.NetCoreApp;
+                        _runtimeDirectories.AddRange(directories);
+                    }
+                }
             }
 
             // If no directories where found, use the fallback .NET version.
-            if (_runtimeDirectories.Count == 0 && pathProvider.HasRuntimeInstalled(fallbackVersion))
-                _runtimeDirectories.AddRange(pathProvider.GetRuntimePathCandidates(fallbackVersion));
+            if (pathProvider.HasRuntimeInstalled(fallbackVersion))
+            {
+                if (_runtimeDirectories.Count == 0)
+                {
+                    _runtimeDirectories.AddRange(pathProvider.GetRuntimePathCandidates(fallbackVersion));
+                }
+                else if (!hasNetCoreApp)
+                {
+                    // Ensure that Microsoft.NETCore.App is at least present. This is required since some runtimes
+                    // do not define corlib libraries such as System.Private.CoreLib or System.Runtime.
+                    _runtimeDirectories.AddRange(pathProvider.GetRuntimePathCandidates(
+                        KnownRuntimeNames.NetCoreApp, fallbackVersion));
+                }
+            }
+        }
+
+        private static string[] GetFrameworkDirectories(DotNetCorePathProvider pathProvider, RuntimeFramework framework)
+        {
+            if (TryParseVersion(framework.Version, out var version)
+                && pathProvider.HasRuntimeInstalled(framework.Name, version))
+            {
+                return pathProvider.GetRuntimePathCandidates(framework.Name, version).ToArray();
+            }
+
+            return Array.Empty<string>();
         }
 
         /// <inheritdoc />
@@ -96,15 +114,6 @@ namespace AsmResolver.DotNet
             }
 
             return null;
-        }
-
-        private void AddFrameworkDirectories(DotNetCorePathProvider pathProvider, RuntimeFramework framework)
-        {
-            if (TryParseVersion(framework.Version, out var version)
-                && pathProvider.HasRuntimeInstalled(framework.Name, version))
-            {
-                _runtimeDirectories.AddRange(pathProvider.GetRuntimePathCandidates(framework.Name, version));
-            }
         }
 
         private static bool TryParseVersion(string versionString, out Version version)
