@@ -2,7 +2,6 @@ using AsmResolver.DotNet.Signatures;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace AsmResolver.DotNet
 {
@@ -13,12 +12,12 @@ namespace AsmResolver.DotNet
     public abstract class AssemblyResolverBase : IAssemblyResolver
     {
         private static readonly string[] BinaryFileExtensions = {".dll", ".exe"};
+        private static readonly SignatureComparer Comparer = new()
+        {
+            IgnoreAssemblyVersionNumbers = false
+        };
 
-        private readonly IDictionary<AssemblyDescriptor, AssemblyDefinition> _cache
-            = new Dictionary<AssemblyDescriptor, AssemblyDefinition>(new SignatureComparer());
-
-        private static readonly SignatureComparer _signatureComparer
-            = new SignatureComparer() { IgnoreAssemblyVersionNumbers = false};
+        private readonly Dictionary<AssemblyDescriptor, AssemblyDefinition> _cache = new(new SignatureComparer());
 
         /// <summary>
         /// Gets a collection of custom search directories that are probed upon resolving a reference
@@ -48,7 +47,7 @@ namespace AsmResolver.DotNet
             if (_cache.ContainsKey(descriptor))
                 throw new ArgumentException($"The cache already contains an entry of assembly {descriptor.FullName}.", nameof(descriptor));
 
-            if(!_signatureComparer.Equals(descriptor, definition))
+            if (!Comparer.Equals(descriptor, definition))
                 throw new ArgumentException("Assembly descriptor and definition do not refer to the same assembly.");
 
             _cache.Add(descriptor, definition);
@@ -119,10 +118,9 @@ namespace AsmResolver.DotNet
         /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
         protected string ProbeSearchDirectories(AssemblyDescriptor assembly)
         {
-            foreach (string directory in SearchDirectories)
+            for (int i = 0; i < SearchDirectories.Count; i++)
             {
-                string path = ProbeDirectory(assembly, directory);
-
+                string path = ProbeDirectory(assembly, SearchDirectories[i]);
                 if (!string.IsNullOrEmpty(path))
                     return path;
             }
@@ -156,9 +154,14 @@ namespace AsmResolver.DotNet
 
         internal static string ProbeFileFromFilePathWithoutExtension(string baseFilePath)
         {
-            return BinaryFileExtensions
-                .Select(extension => baseFilePath + extension)
-                .FirstOrDefault(File.Exists);
+            foreach (string extension in BinaryFileExtensions)
+            {
+                string path = baseFilePath + extension;
+                if (File.Exists(path))
+                    return path;
+            }
+
+            return null;
         }
     }
 }

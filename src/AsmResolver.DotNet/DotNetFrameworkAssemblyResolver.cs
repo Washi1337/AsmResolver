@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet
         /// Gets a collection of global assembly cache (GAC) directories that are probed upon resolving a reference
         /// to an assembly.
         /// </summary>
-        public ICollection<GacDirectory> GacDirectories
+        public IList<GacDirectory> GacDirectories
         {
             get;
         } = new List<GacDirectory>();
@@ -82,10 +82,10 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         protected override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
         {
-            foreach (var directory in GacDirectories)
+            for (int i = 0; i < GacDirectories.Count; i++)
             {
-                string path = directory.Probe(assembly);
-                if (path != null)
+                string path = GacDirectories[i].Probe(assembly);
+                if (!string.IsNullOrEmpty(path))
                     return path;
             }
 
