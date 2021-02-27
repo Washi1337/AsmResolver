@@ -31,37 +31,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        protected override AssemblyDefinition ResolveImpl(AssemblyDescriptor assembly)
-        {
-            // Prefer assemblies in the current directory, in case .NET libraries are shipped with the application.
-            string path = ProbeSearchDirectories(assembly);
-
-            if (string.IsNullOrEmpty(path))
-            {
-                // If failed, probe the runtime installation directories.
-                if (assembly.GetPublicKeyToken() is not null)
-                    path = ProbeRuntimeDirectories(assembly);
-
-                // If still no suitable file was found, abort.
-                if (string.IsNullOrEmpty(path))
-                    return null;
-            }
-
-            // Attempt to load the file.
-            AssemblyDefinition assemblyDef = null;
-            try
-            {
-                assemblyDef = LoadAssemblyFromFile(path);
-            }
-            catch
-            {
-                // ignore any errors.
-            }
-
-            return assemblyDef;
-        }
-
-        private string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
+        protected override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
         {
             // Avoid enumeration if there is no appropriate runtime installed.
             if (!_pathProvider.HasRuntimeInstalled(_runtimeVersion))

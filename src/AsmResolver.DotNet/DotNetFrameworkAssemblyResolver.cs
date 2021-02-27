@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace AsmResolver.DotNet
 {
@@ -29,29 +28,6 @@ namespace AsmResolver.DotNet
             get;
         } = new List<GacDirectory>();
 
-        /// <inheritdoc />
-        protected override AssemblyDefinition ResolveImpl(AssemblyDescriptor assembly)
-        {
-            string path = null;
-            
-            if (assembly.GetPublicKeyToken()!= null)
-                path = ProbeGlobalAssemblyCache(assembly);
-            if (string.IsNullOrEmpty(path))
-                path = ProbeSearchDirectories(assembly);
-
-            AssemblyDefinition assemblyDef = null;
-            try
-            {
-                assemblyDef = LoadAssemblyFromFile(path);
-            }
-            catch
-            {
-                // ignore any errors.
-            }
-
-            return assemblyDef;
-        }
-        
         private void DetectGacDirectories()
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
@@ -67,10 +43,10 @@ namespace AsmResolver.DotNet
         private void DetectWindowsGacDirectories()
         {
             string systemRoot = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-            
+
             string windowsGac = Path.Combine(systemRoot, "assembly");
             AddGacDirectories(windowsGac, null);
-            
+
             string frameworkGac = Path.Combine(systemRoot, "Microsoft.NET", "assembly");
             AddGacDirectories(frameworkGac, "v4.0_");
         }
@@ -94,7 +70,7 @@ namespace AsmResolver.DotNet
         {
             if (!Directory.Exists(windowsGac))
                 return;
-            
+
             foreach (string directory in Directory.GetDirectories(windowsGac))
             {
                 string name = Path.GetFileName(directory);
@@ -103,7 +79,8 @@ namespace AsmResolver.DotNet
             }
         }
 
-        private string ProbeGlobalAssemblyCache(AssemblyDescriptor assembly)
+        /// <inheritdoc />
+        protected override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
         {
             foreach (var directory in GacDirectories)
             {

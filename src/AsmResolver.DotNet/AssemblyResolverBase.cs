@@ -14,10 +14,10 @@ namespace AsmResolver.DotNet
     {
         private static readonly string[] BinaryFileExtensions = {".dll", ".exe"};
 
-        private readonly IDictionary<AssemblyDescriptor, AssemblyDefinition> _cache 
+        private readonly IDictionary<AssemblyDescriptor, AssemblyDefinition> _cache
             = new Dictionary<AssemblyDescriptor, AssemblyDefinition>(new SignatureComparer());
 
-        private static readonly SignatureComparer _signatureComparer 
+        private static readonly SignatureComparer _signatureComparer
             = new SignatureComparer() { IgnoreAssemblyVersionNumbers = false};
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace AsmResolver.DotNet
                 throw new ArgumentException("Assembly descriptor and definition do not refer to the same assembly.");
 
             _cache.Add(descriptor, definition);
-        }  
+        }
 
         /// <inheritdoc />
         public bool RemoveFromCache(AssemblyDescriptor descriptor) => _cache.Remove(descriptor);
@@ -72,7 +72,35 @@ namespace AsmResolver.DotNet
         /// This method should not implement caching of resolved assemblies. The caller of this method already implements
         /// this.
         /// </remarks>
-        protected abstract AssemblyDefinition ResolveImpl(AssemblyDescriptor assembly);
+        protected virtual AssemblyDefinition ResolveImpl(AssemblyDescriptor assembly)
+        {
+            // Prefer assemblies in the current directory, in case .NET libraries are shipped with the application.
+            string path = ProbeSearchDirectories(assembly);
+
+            if (string.IsNullOrEmpty(path))
+            {
+                // If failed, probe the runtime installation directories.
+                if (assembly.GetPublicKeyToken() is not null)
+                    path = ProbeRuntimeDirectories(assembly);
+
+                // If still no suitable file was found, abort.
+                if (string.IsNullOrEmpty(path))
+                    return null;
+            }
+
+            // Attempt to load the file.
+            AssemblyDefinition assemblyDef = null;
+            try
+            {
+                assemblyDef = LoadAssemblyFromFile(path);
+            }
+            catch
+            {
+                // ignore any errors.
+            }
+
+            return assemblyDef;
+        }
 
         /// <summary>
         /// Attempts to read an assembly from its file path.
@@ -101,6 +129,13 @@ namespace AsmResolver.DotNet
 
             return null;
         }
+
+        /// <summary>
+        /// Probes all known runtime directories for the provided assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly descriptor to search.</param>
+        /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
+        protected abstract string ProbeRuntimeDirectories(AssemblyDescriptor assembly);
 
         /// <summary>
         /// Probes a directory for the provided assembly.
