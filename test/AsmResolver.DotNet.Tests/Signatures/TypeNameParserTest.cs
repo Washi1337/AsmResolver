@@ -152,7 +152,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
             const string name = "MyType";
 
             var elementType = new TypeReference(_module, ns, name);
-            var argumentType = new TypeReference(_module, _module.CorLibTypeFactory.CorLibScope, argNs, argName)
+            var argumentType = new TypeReference(_module, _module, argNs, argName)
                 .ToTypeSignature();
 
             var expected = new GenericInstanceTypeSignature(elementType, false, argumentType);
