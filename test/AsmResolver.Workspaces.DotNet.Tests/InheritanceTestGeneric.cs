@@ -19,7 +19,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         public void InterfaceImplementation()
         {
             var module = _fixture.Assembly.ManifestModule;
-            var classType = (TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken);
+            var classType = (TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken);
             var interfaceType = (TypeDefinition) module.LookupMember(typeof(IMyInterfaceGeneric<bool,int,float>).MetadataToken);
 
             var workspace = new DotNetWorkspace();
@@ -37,16 +37,38 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         {
             var module = _fixture.Assembly.ManifestModule;
             var derivedType = (TypeDefinition) module.LookupMember(typeof(MyDerivedClassGeneric).MetadataToken);
-            var classType = (TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken);
+            var classType = (TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken);
 
             var workspace = new DotNetWorkspace();
             workspace.Assemblies.Add(_fixture.Assembly);
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(derivedType);
-            Assert.Contains(classType, node.GetRelatedObjects(DotNetRelations.BaseType));
+            Assert.Contains(classType, node
+                .GetRelatedObjects(DotNetRelations.BaseType)
+                .Select(t=>t.Resolve()));
         }
 
+        [Fact]
+        public void GenericMethodRelation()
+        {
+            var module = _fixture.Assembly.ManifestModule;
+            var baseMethod =
+                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Methods.First(m => m.Name == nameof(MyClassGeneric<int,float>.GenericMethod));
+            var implementationMethod  = ((TypeDefinition) module.LookupMember(typeof(MyDerivedClassGeneric).MetadataToken))
+                .Methods.First(m => m.Name == nameof(MyDerivedClassGeneric.GenericMethod));
+
+            var workspace = new DotNetWorkspace();
+            workspace.Assemblies.Add(_fixture.Assembly);
+            workspace.Analyze();
+
+            var node = workspace.Index.GetOrCreateNode(implementationMethod);
+            Assert.Contains(baseMethod, node
+                .GetRelatedObjects(DotNetRelations.ImplementationMethod)
+                .Select(m=>m.Resolve()));
+        }
+        
         [Fact]
         public void ExplicitMethodImplementation()
         {
@@ -54,7 +76,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var module = _fixture.Assembly.ManifestModule;
             var implementationMethod =
-                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
+                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
                 .Methods.First(m => m.Name == name);
             var baseMethod = ((TypeDefinition) module.LookupMember(typeof(IMyInterfaceGeneric<bool,int,float>).MetadataToken))
                 .Methods.First(m => m.Name == nameof(IMyInterfaceGeneric<bool,int,float>.Explicit));
@@ -74,8 +96,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         {
             var module = _fixture.Assembly.ManifestModule;
             var implementationMethod =
-                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
-                .Methods.First(m => m.Name == nameof(MyClassGeneric.Implicit));
+                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Methods.First(m => m.Name == nameof(MyClassGeneric<int,float>.Implicit));
             var baseMethod = ((TypeDefinition) module.LookupMember(typeof(IMyInterfaceGeneric<bool,int,float>).MetadataToken))
                 .Methods.First(m => m.Name == nameof(IMyInterfaceGeneric<bool,int,float>.Implicit));
 
@@ -94,8 +116,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             var overrideMethod =
                 ((TypeDefinition) module.LookupMember(typeof(MyDerivedClassGeneric).MetadataToken))
                 .Methods.First(m => m.Name == nameof(MyDerivedClassGeneric.Implicit));
-            var baseMethod = ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
-                .Methods.First(m => m.Name == nameof(MyClassGeneric.Implicit));
+            var baseMethod = ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Methods.First(m => m.Name == nameof(MyClassGeneric<int,float>.Implicit));
 
             var workspace = new DotNetWorkspace();
             workspace.Assemblies.Add(_fixture.Assembly);
@@ -112,8 +134,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             var shadowedMethod =
                 ((TypeDefinition) module.LookupMember(typeof(MyDerivedClassGeneric).MetadataToken))
                 .Methods.First(m => m.Name == nameof(MyDerivedClassGeneric.Shadowed));
-            var baseMethod = ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
-                .Methods.First(m => m.Name == nameof(MyClassGeneric.Shadowed));
+            var baseMethod = ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Methods.First(m => m.Name == nameof(MyClassGeneric<int,float>.Shadowed));
 
             var workspace = new DotNetWorkspace();
             workspace.Assemblies.Add(_fixture.Assembly);
@@ -128,8 +150,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         {
             var module = _fixture.Assembly.ManifestModule;
             var implementationMethod =
-                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
-                .Methods.First(m => m.Name == nameof(MyClassGeneric.Shadowed));
+                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Methods.First(m => m.Name == nameof(MyClassGeneric<int,float>.Shadowed));
             var baseMethod = ((TypeDefinition) module.LookupMember(typeof(IMyInterfaceGeneric<bool,int,float>).MetadataToken))
                 .Methods.First(m => m.Name == nameof(IMyInterfaceGeneric<bool,int,float>.Shadowed));
 
@@ -148,7 +170,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var module = _fixture.Assembly.ManifestModule;
             var implementationProperty =
-                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
+                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
                 .Properties.First(m => m.Name == name);
             var baseProperty = ((TypeDefinition) module.LookupMember(typeof(IMyInterfaceGeneric<bool,int,float>).MetadataToken))
                 .Properties.First(m => m.Name == nameof(IMyInterfaceGeneric<bool,int,float>.ExplicitP));
@@ -166,8 +188,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         {
             var module = _fixture.Assembly.ManifestModule;
             var implementationProperty =
-                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
-                .Properties.First(m => m.Name == nameof(MyClassGeneric.ImplicitP));
+                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Properties.First(m => m.Name == nameof(MyClassGeneric<int,float>.ImplicitP));
             var baseProperty = ((TypeDefinition) module.LookupMember(typeof(IMyInterfaceGeneric<bool,int,float>).MetadataToken))
                 .Properties.First(m => m.Name == nameof(IMyInterfaceGeneric<bool,int,float>.ImplicitP));
 
@@ -186,8 +208,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             var overrideProperty =
                 ((TypeDefinition) module.LookupMember(typeof(MyDerivedClassGeneric).MetadataToken))
                 .Properties.First(m => m.Name == nameof(MyDerivedClassGeneric.ImplicitP));
-            var baseProperty = ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
-                .Properties.First(m => m.Name == nameof(MyClassGeneric.ImplicitP));
+            var baseProperty = ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Properties.First(m => m.Name == nameof(MyClassGeneric<int,float>.ImplicitP));
 
             var workspace = new DotNetWorkspace();
             workspace.Assemblies.Add(_fixture.Assembly);
@@ -204,8 +226,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             var shadowedProperty =
                 ((TypeDefinition) module.LookupMember(typeof(MyDerivedClassGeneric).MetadataToken))
                 .Properties.First(m => m.Name == nameof(MyDerivedClassGeneric.ShadowedP));
-            var baseProperty = ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
-                .Properties.First(m => m.Name == nameof(MyClassGeneric.ShadowedP));
+            var baseProperty = ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Properties.First(m => m.Name == nameof(MyClassGeneric<int,float>.ShadowedP));
 
             var workspace = new DotNetWorkspace();
             workspace.Assemblies.Add(_fixture.Assembly);
@@ -220,8 +242,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         {
             var module = _fixture.Assembly.ManifestModule;
             var implementationProperty =
-                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric).MetadataToken))
-                .Properties.First(m => m.Name == nameof(MyClassGeneric.ShadowedP));
+                ((TypeDefinition) module.LookupMember(typeof(MyClassGeneric<int,float>).MetadataToken))
+                .Properties.First(m => m.Name == nameof(MyClassGeneric<int,float>.ShadowedP));
             var baseProperty = ((TypeDefinition) module.LookupMember(typeof(IMyInterfaceGeneric<bool,int,float>).MetadataToken))
                 .Properties.First(m => m.Name == nameof(IMyInterfaceGeneric<bool,int,float>.ShadowedP));
 

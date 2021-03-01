@@ -1,7 +1,12 @@
 namespace AsmResolver.Workspaces.DotNet.TestCases
 {
-    public class MyDerivedClassGeneric : MyClassGeneric
+    public class MyDerivedClassGeneric : MyClassGeneric<int,float>
     {
+        public override int GenericMethod(float x)
+        {
+            return 1;
+        }
+
         /// <inheritdoc />
         public override bool Implicit() => true;
 
