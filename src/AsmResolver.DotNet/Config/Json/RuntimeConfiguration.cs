@@ -36,6 +36,22 @@ namespace AsmResolver.DotNet.Config.Json
         }
 
         /// <summary>
+        /// Creates a new empty runtime configuration.
+        /// </summary>
+        public RuntimeConfiguration()
+        {
+            RuntimeOptions = new();
+        }
+
+        /// <summary>
+        /// Creates a new runtime configuration with the provided options.
+        /// </summary>
+        public RuntimeConfiguration(RuntimeOptions options)
+        {
+            RuntimeOptions = options;
+        }
+
+        /// <summary>
         /// Gets or sets the runtime options.
         /// </summary>
         public RuntimeOptions RuntimeOptions

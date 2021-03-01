@@ -10,6 +10,36 @@ namespace AsmResolver.DotNet.Config.Json
     public class RuntimeOptions
     {
         /// <summary>
+        /// Creates a new empty runtime options instance.
+        /// </summary>
+        public RuntimeOptions()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="RuntimeOptions"/> class.
+        /// </summary>
+        /// <param name="tfm">The target framework moniker.</param>
+        /// <param name="framework">The framework implementation description.</param>
+        public RuntimeOptions(string tfm, RuntimeFramework framework)
+        {
+            TargetFrameworkMoniker = tfm;
+            Framework = framework;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="RuntimeOptions"/> class.
+        /// </summary>
+        /// <param name="tfm">The target framework moniker.</param>
+        /// <param name="runtimeName">The name of the runtime.</param>
+        /// <param name="runtimeVersion">The version of the runtime.</param>
+        public RuntimeOptions(string tfm, string runtimeName, string runtimeVersion)
+        {
+            TargetFrameworkMoniker = tfm;
+            Framework = new RuntimeFramework(runtimeName, runtimeVersion);
+        }
+
+        /// <summary>
         /// Indicates configuration properties to configure the runtime and the framework
         /// </summary>
         public Dictionary<string, JsonElement> ConfigProperties
@@ -78,6 +108,21 @@ namespace AsmResolver.DotNet.Config.Json
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets a collection of all frameworks specified in the configuration.
+        /// </summary>
+        public IEnumerable<RuntimeFramework> GetAllFrameworks()
+        {
+            if (Framework is { } framework)
+                yield return framework;
+
+            if (IncludedFrameworks is { } frameworks)
+            {
+                foreach (var includedFramework in frameworks)
+                    yield return includedFramework;
+            }
         }
     }
 }
