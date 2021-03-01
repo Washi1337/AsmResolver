@@ -11,12 +11,12 @@ namespace AsmResolver.DotNet.Builder
     public class PEImageBuildResult
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="PEImageBuildResult"/> class. 
+        /// Creates a new instance of the <see cref="PEImageBuildResult"/> class.
         /// </summary>
         /// <param name="image">The constructed image, or <c>null</c> if the construction failed.</param>
         /// <param name="diagnosticBag">The diagnostics that were collected during the construction of the image.</param>
-        /// <param name="tokenMapping">A dictionary that maps metadata members to their newly assigned tokens.</param>
-        public PEImageBuildResult(IPEImage image, DiagnosticBag diagnosticBag, IReadOnlyDictionary<IMetadataMember, MetadataToken> tokenMapping)
+        /// <param name="tokenMapping">An object that maps metadata members to their newly assigned tokens.</param>
+        public PEImageBuildResult(IPEImage image, DiagnosticBag diagnosticBag, ITokenMapping tokenMapping)
         {
             ConstructedImage = image;
             DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
@@ -40,9 +40,9 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Gets a dictionary that maps metadata members to their newly assigned tokens.
+        /// Gets an object that maps metadata members to their newly assigned tokens.
         /// </summary>
-        public IReadOnlyDictionary<IMetadataMember, MetadataToken> TokenMapping
+        public ITokenMapping TokenMapping
         {
             get;
         }

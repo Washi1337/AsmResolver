@@ -14,8 +14,8 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         {
             get;
         } = new SignatureComparer();
-        
-    
+
+
         protected static List<TMember> GetMembers<TMember>(ModuleDefinition module, TableIndex tableIndex)
         {
             int count = module.DotNetDirectory.Metadata
@@ -36,7 +36,11 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 DotNetDirectoryFactory = new DotNetDirectoryFactory(builderFlags)
             };
 
-            var newImage = builder.CreateImage(module).ConstructedImage;
+            var result = builder.CreateImage(module);
+            if (result.DiagnosticBag.HasErrors)
+                throw new AggregateException(result.DiagnosticBag.Exceptions);
+
+            var newImage = result.ConstructedImage;
             return ModuleDefinition.FromImage(newImage);
         }
 
@@ -52,7 +56,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 var originalMembers = getMembers(originalType).ToArray();
                 var newMembers = getMembers(newType).ToArray();
                 Assert.True(originalMembers.Length <= newMembers.Length);
-                
+
                 foreach (var originalMember in newMembers)
                 {
                     if (originalMember.MetadataToken.Rid == 0 || excludeTokens.Contains(originalMember.MetadataToken))
@@ -63,6 +67,6 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 }
             }
         }
-        
+
     }
 }

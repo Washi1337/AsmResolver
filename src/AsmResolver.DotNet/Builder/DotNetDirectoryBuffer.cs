@@ -16,8 +16,8 @@ namespace AsmResolver.DotNet.Builder
     /// </summary>
     public partial class DotNetDirectoryBuffer
     {
-        private readonly Dictionary<IMetadataMember, MetadataToken> _tokenMapping = new Dictionary<IMetadataMember, MetadataToken>(); 
-            
+        private readonly TokenMapping _tokenMapping = new();
+
         /// <summary>
         /// Creates a new .NET data directory buffer.
         /// </summary>
@@ -40,7 +40,7 @@ namespace AsmResolver.DotNet.Builder
             DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
             Resources = new DotNetResourcesDirectoryBuffer();
         }
-        
+
         /// <summary>
         /// Gets the module for which this .NET directory is built.
         /// </summary>
@@ -82,7 +82,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Gets the .NET resources data directory buffer, containing all the resources data stored in the .NET module. 
+        /// Gets the .NET resources data directory buffer, containing all the resources data stored in the .NET module.
         /// </summary>
         public DotNetResourcesDirectoryBuffer Resources
         {
@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Builds the .NET data directory from the buffer. 
+        /// Builds the .NET data directory from the buffer.
         /// </summary>
         /// <returns></returns>
         public DotNetDirectoryBuildResult CreateDirectory()
@@ -121,7 +121,7 @@ namespace AsmResolver.DotNet.Builder
             // Since we're finalizing the .NET directory, we can safely do this now:
             FinalizeInterfaces();
             FinalizeGenericParameters();
-            
+
             // Create new .NET directory.
             var directory = new DotNetDirectory
             {
@@ -129,7 +129,7 @@ namespace AsmResolver.DotNet.Builder
                 DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null,
                 Entrypoint = GetEntrypoint(),
                 Flags = Module.Attributes,
-                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null 
+                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null
             };
 
             return new DotNetDirectoryBuildResult(directory, _tokenMapping);
@@ -139,15 +139,15 @@ namespace AsmResolver.DotNet.Builder
         {
             if (Module.ManagedEntrypoint is null)
                 return 0;
-            
+
             var entrypointToken = MetadataToken.Zero;
-            
+
             switch (Module.ManagedEntrypoint.MetadataToken.Table)
             {
                 case TableIndex.Method:
                     entrypointToken = GetMethodDefinitionToken(Module.ManagedEntrypointMethod);
                     break;
-                
+
                 case TableIndex.File:
                     DiagnosticBag.Exceptions.Add(
                         new NotImplementedException("Managed entrypoints defined in a sub module is not support."));
@@ -156,7 +156,7 @@ namespace AsmResolver.DotNet.Builder
 
             return entrypointToken.ToUInt32();
         }
-        
+
         private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)
         {
             foreach (var semantics in provider.Semantics)
@@ -184,9 +184,9 @@ namespace AsmResolver.DotNet.Builder
             foreach (var implementation in interfaces)
             {
                 var row = new InterfaceImplementationRow(
-                    ownerToken.Rid, 
+                    ownerToken.Rid,
                     GetTypeDefOrRefIndex(implementation.Interface));
-                
+
                 table.Add(implementation, row);
             }
         }
@@ -218,10 +218,10 @@ namespace AsmResolver.DotNet.Builder
 
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
-            
+
             var row = new GenericParameterRow(
-                parameter.Number, 
-                parameter.Attributes, 
+                parameter.Number,
+                parameter.Attributes,
                 encoder.EncodeToken(ownerToken),
                 Metadata.StringsStream.GetStringIndex(parameter.Name));
 
@@ -234,7 +234,7 @@ namespace AsmResolver.DotNet.Builder
             // custom attributes and generic parameter constraints to it.
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             table.Sort();
-            
+
             // Add missing CAs and generic parameters.
             foreach (var member in table.GetMembers())
             {
@@ -245,17 +245,17 @@ namespace AsmResolver.DotNet.Builder
                     AddGenericParameterConstraint(token, constraint);
             }
         }
-        
+
         private void AddGenericParameterConstraint(MetadataToken ownerToken,
             GenericParameterConstraint constraint)
         {
             if (constraint is null)
                 return;
-            
+
             var table = Metadata.TablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
-            
+
             var row = new GenericParameterConstraintRow(
-                ownerToken.Rid, 
+                ownerToken.Rid,
                 GetTypeDefOrRefIndex(constraint.Constraint));
 
             var token = table.Add(row);
@@ -266,7 +266,7 @@ namespace AsmResolver.DotNet.Builder
         {
             if (layout is null)
                 return;
-            
+
             var table = Metadata.TablesStream.GetSortedTable<ClassLayout, ClassLayoutRow>(TableIndex.ClassLayout);
 
             var row = new ClassLayoutRow(layout.PackingSize, layout.ClassSize, ownerToken.Rid);

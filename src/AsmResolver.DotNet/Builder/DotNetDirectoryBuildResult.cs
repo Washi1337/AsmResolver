@@ -15,8 +15,8 @@ namespace AsmResolver.DotNet.Builder
         /// Creates a new instance of teh <see cref="DotNetDirectoryBuildResult"/> class.
         /// </summary>
         /// <param name="directory">The constructed directory.</param>
-        /// <param name="mapping">A dictionary defining a mapping between members and their new metadata tokens.</param>
-        public DotNetDirectoryBuildResult(IDotNetDirectory directory, IReadOnlyDictionary<IMetadataMember, MetadataToken> mapping)
+        /// <param name="mapping">An object defining a mapping between members and their new metadata tokens.</param>
+        public DotNetDirectoryBuildResult(IDotNetDirectory directory, ITokenMapping mapping)
         {
             Directory = directory ?? throw new ArgumentNullException(nameof(directory));
             TokenMapping = mapping ?? throw new ArgumentNullException(nameof(mapping));
@@ -31,9 +31,9 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Gets a dictionary that maps metadata members to their newly assigned tokens.
+        /// Gets an object that maps metadata members to their newly assigned tokens.
         /// </summary>
-        public IReadOnlyDictionary<IMetadataMember, MetadataToken> TokenMapping
+        public ITokenMapping TokenMapping
         {
             get;
         }
