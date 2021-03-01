@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Versioning;
 using AsmResolver.Collections;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -149,7 +150,7 @@ namespace AsmResolver.DotNet.Serialized
                 // Compare namespace and name of attribute type.
                 string ns = stringsStream.GetStringByIndex(typeRow.Namespace);
                 string name = stringsStream.GetStringByIndex(typeRow.Name);
-                if (ns != "System.Runtime.Versioning" || name != "TargetFrameworkAttribute")
+                if (ns != "System.Runtime.Versioning" || name != nameof(TargetFrameworkAttribute))
                     continue;
 
                 // At this point, we can safely use the high-level representation to parse out the signature.

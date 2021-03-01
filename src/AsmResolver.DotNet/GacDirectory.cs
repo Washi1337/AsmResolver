@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Provides information about a directory in the global assembly cache (GAC).
     /// </summary>
-    public struct GacDirectory
+    public readonly struct GacDirectory
     {
         private readonly string _basePath;
         private readonly string _prefix;
@@ -35,14 +35,14 @@ namespace AsmResolver.DotNet
             string fullPath = Path.Combine(_basePath, assembly.Name);
             if (Directory.Exists(fullPath))
             {
-                string pubKeyTokenString = string.Join(string.Empty, 
+                string pubKeyTokenString = string.Join(string.Empty,
                     assembly.GetPublicKeyToken().Select(x=>x.ToString("x2")));
                 string directoryName = assembly.Version + "__" + pubKeyTokenString;
                 if (IsPrefixed)
                     directoryName = _prefix + directoryName;
 
                 string filePath = Path.Combine(fullPath, directoryName, assembly.Name);
-                filePath = DotNetFrameworkAssemblyResolver.ProbeFileFromFilePathWithoutExtension(filePath);
+                filePath = AssemblyResolverBase.ProbeFileFromFilePathWithoutExtension(filePath);
                 if (!string.IsNullOrEmpty(filePath))
                     return filePath;
             }

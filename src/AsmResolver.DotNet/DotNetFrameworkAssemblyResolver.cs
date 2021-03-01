@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet
             if (!Directory.Exists(windowsGac))
                 return;
 
-            foreach (string directory in Directory.GetDirectories(windowsGac))
+            foreach (string directory in Directory.EnumerateDirectories(windowsGac))
             {
                 string name = Path.GetFileName(directory);
                 if (name.StartsWith("GAC"))

@@ -26,64 +26,6 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the default path provider representing the global .NET installation on the current system.
-        /// </summary>
-        public static DotNetCorePathProvider Default
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the installation path of the .NET installation on the current system.
-        /// </summary>
-        public static string DefaultInstallationPath
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Attempts to auto detect the installation directory of .NET or .NET Core.
-        /// </summary>
-        /// <returns>The path to the runtime, or <c>null</c> if none was found.</returns>
-        private static string FindDotNetPath()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Probe PATH for installation folder of dotnet.
-                string[] paths = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator);
-                foreach (string path in paths)
-                {
-                    if (File.Exists(Path.Combine(path, "dotnet.exe")))
-                        return path;
-                }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                // Probe default locations for installation folder of dotnet.
-                foreach (string path in DefaultDotNetUnixPaths)
-                {
-                    if (File.Exists(Path.Combine(path, "dotnet")))
-                        return path;
-                }
-            }
-
-            if (NetCoreRuntimePattern.Match(RuntimeInformation.FrameworkDescription).Success)
-            {
-                // Fallback: if we are currently running .NET Core or newer, we can infer the installation directory
-                // with the help of System.Reflection. The assembly of System.Object is either System.Runtime
-                // or System.Private.CoreLib, which is located at <installation_directory>/shared/<runtime>/<version>/.
-
-                string corlibPath = typeof(object).Assembly.Location;
-                string versionPath = Path.GetDirectoryName(corlibPath);
-                string runtimePath = Path.GetDirectoryName(versionPath);
-                string sharedPath = Path.GetDirectoryName(runtimePath);
-                return Path.GetDirectoryName(sharedPath);
-            }
-
-            return null;
-        }
-
-        /// <summary>
         /// Creates a new .NET installation path provider, using the <see cref="DefaultInstallationPath"/>
         /// as the installation path.
         /// </summary>
@@ -100,6 +42,22 @@ namespace AsmResolver.DotNet
         {
             if (!string.IsNullOrEmpty(installationDirectory) && Directory.Exists(installationDirectory))
                 DetectInstalledRuntimes(installationDirectory);
+        }
+
+        /// <summary>
+        /// Gets the default path provider representing the global .NET installation on the current system.
+        /// </summary>
+        public static DotNetCorePathProvider Default
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the installation path of the .NET installation on the current system.
+        /// </summary>
+        public static string DefaultInstallationPath
+        {
+            get;
         }
 
         /// <summary>
@@ -196,6 +154,48 @@ namespace AsmResolver.DotNet
             foreach (string directory in Directory.EnumerateDirectories(installationDirectory))
                 _installedRuntimes.Add(new DotNetRuntimeInfo(directory));
             _installedRuntimes.Sort();
+        }
+
+        /// <summary>
+        /// Attempts to auto detect the installation directory of .NET or .NET Core.
+        /// </summary>
+        /// <returns>The path to the runtime, or <c>null</c> if none was found.</returns>
+        private static string FindDotNetPath()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Probe PATH for installation folder of dotnet.
+                string[] paths = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator);
+                foreach (string path in paths)
+                {
+                    if (File.Exists(Path.Combine(path, "dotnet.exe")))
+                        return path;
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                // Probe default locations for installation folder of dotnet.
+                foreach (string path in DefaultDotNetUnixPaths)
+                {
+                    if (File.Exists(Path.Combine(path, "dotnet")))
+                        return path;
+                }
+            }
+
+            if (NetCoreRuntimePattern.Match(RuntimeInformation.FrameworkDescription).Success)
+            {
+                // Fallback: if we are currently running .NET Core or newer, we can infer the installation directory
+                // with the help of System.Reflection. The assembly of System.Object is either System.Runtime
+                // or System.Private.CoreLib, which is located at <installation_directory>/shared/<runtime>/<version>/.
+
+                string corlibPath = typeof(object).Assembly.Location;
+                string versionPath = Path.GetDirectoryName(corlibPath);
+                string runtimePath = Path.GetDirectoryName(versionPath);
+                string sharedPath = Path.GetDirectoryName(runtimePath);
+                return Path.GetDirectoryName(sharedPath);
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
@@ -216,7 +217,7 @@ namespace AsmResolver.DotNet
                 var ctor = CustomAttributes[i].Constructor;
 
                 if (ctor is not null
-                    && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", "TargetFrameworkAttribute")
+                    && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", nameof(TargetFrameworkAttribute))
                     && CustomAttributes[i].Signature.FixedArguments[0].Element is string name
                     && DotNetRuntimeInfo.TryParse(name, out info))
                 {

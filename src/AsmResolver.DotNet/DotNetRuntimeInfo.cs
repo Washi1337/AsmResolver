@@ -27,27 +27,6 @@ namespace AsmResolver.DotNet
         private static readonly Regex FormatRegex = new(@"([a-zA-Z.]+)\s*,\s*Version=v(\d+\.\d+)");
 
         /// <summary>
-        /// Attempts to parse the framework name as provided in <see cref="TargetFrameworkAttribute"/>.
-        /// </summary>
-        /// <param name="frameworkName">The full runtime name.</param>
-        /// <param name="info">The parsed version info.</param>
-        /// <returns><c>true</c> if the provided name was in the correct format, <c>false</c> otherwise.</returns>
-        public static bool TryParse(string frameworkName, out DotNetRuntimeInfo info)
-        {
-            var match = FormatRegex.Match(frameworkName);
-            if (!match.Success)
-            {
-                info = default;
-                return false;
-            }
-
-            string name = match.Groups[1].Value;
-            var version = new Version(match.Groups[2].Value);
-            info = new DotNetRuntimeInfo(name, version);
-            return true;
-        }
-
-        /// <summary>
         /// Creates a new instance of the <see cref="DotNetRuntimeInfo"/> structure.
         /// </summary>
         /// <param name="name">The name of the runtime.</param>
@@ -72,6 +51,27 @@ namespace AsmResolver.DotNet
         public Version Version
         {
             get;
+        }
+
+        /// <summary>
+        /// Attempts to parse the framework name as provided in <see cref="TargetFrameworkAttribute"/>.
+        /// </summary>
+        /// <param name="frameworkName">The full runtime name.</param>
+        /// <param name="info">The parsed version info.</param>
+        /// <returns><c>true</c> if the provided name was in the correct format, <c>false</c> otherwise.</returns>
+        public static bool TryParse(string frameworkName, out DotNetRuntimeInfo info)
+        {
+            var match = FormatRegex.Match(frameworkName);
+            if (!match.Success)
+            {
+                info = default;
+                return false;
+            }
+
+            string name = match.Groups[1].Value;
+            var version = new Version(match.Groups[2].Value);
+            info = new DotNetRuntimeInfo(name, version);
+            return true;
         }
 
         /// <inheritdoc />

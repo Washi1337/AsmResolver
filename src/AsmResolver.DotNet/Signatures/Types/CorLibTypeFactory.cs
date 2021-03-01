@@ -240,7 +240,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             var v = assembly.Version;
             if (v.Major >= 5)
-                return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, v);
+                return new DotNetRuntimeInfo(DotNetRuntimeInfo.NetCoreApp, new Version(v.Major, v.Minor));
 
             switch (assembly.Name)
             {

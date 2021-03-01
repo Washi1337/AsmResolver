@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Config.Json;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.PE;
@@ -196,7 +195,7 @@ namespace AsmResolver.DotNet
             CorLibTypeFactory = new CorLibTypeFactory(corLib);
             AssemblyReferences.Add(corLib);
 
-            DetectTargetRuntime();
+            OriginalTargetRuntime = DetectTargetRuntime();
             MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver());
 
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
@@ -942,9 +941,9 @@ namespace AsmResolver.DotNet
         /// This method is called to initialize the <see cref="OriginalTargetRuntime"/> property.
         /// It should be called before the assembly resolver is initialized.
         /// </remarks>
-        protected void DetectTargetRuntime()
+        protected DotNetRuntimeInfo DetectTargetRuntime()
         {
-            OriginalTargetRuntime = Assembly is not null && Assembly.TryGetTargetFramework(out var targetRuntime)
+            return Assembly is not null && Assembly.TryGetTargetFramework(out var targetRuntime)
                 ? targetRuntime
                 : CorLibTypeFactory.ExtractDotNetRuntimeInfo();
         }
