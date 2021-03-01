@@ -27,7 +27,9 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(classType);
-            Assert.Contains(interfaceType, node.GetRelatedObjects(DotNetRelations.BaseType));
+            Assert.Contains(interfaceType, 
+                node.GetRelatedObjects(DotNetRelations.BaseType)
+                    .Select(t=> t.Resolve()));
         }
 
         [Fact]
