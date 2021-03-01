@@ -20,10 +20,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
 
             foreach (var baseType in baseTypes)
             {
-                var candidates = Enumerable.Where(baseTypes
-                            .SelectMany(type =>
-                                type.Resolve()?.Methods ?? Enumerable.Empty<MethodDefinition>()),
-                        method => method!.Name == subject.Name)
+                if(baseType.Resolve() is not {} type)
+                    continue;
+                
+                var candidates =type.Methods
+                    .Where(m => m.Name == subject.Name)
                     .ToArray();
                 
                 if (!candidates.Any())
@@ -32,7 +33,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                 GenericContext? context = null;
                 if (baseType is TypeSpecification {Signature: GenericInstanceTypeSignature genericSignature})
                     context = new GenericContext(genericSignature, null);
-
+    
                 var comparer = new SignatureComparer();
 
                 foreach (var candidate in candidates)
