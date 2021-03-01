@@ -8,7 +8,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
 {
     internal static class AnalyzerUtilities
     {
-        internal static IEnumerable<MethodDefinition> FindBaseMethods(this MethodDefinition subject, WorkspaceIndex index)
+        internal static IEnumerable<MethodDefinition> FindBaseMethods(this MethodDefinition subject,
+            WorkspaceIndex index)
         {
             var declaringType = subject.DeclaringType;
 
@@ -16,45 +17,40 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                 .GetOrCreateNode(declaringType) // Get indexed declaring type.
                 .GetRelatedObjects(DotNetRelations.BaseType) // Get types that this declaring type is implementing.
                 .ToArray();
-            
-            var candidates = baseTypes
-                .SelectMany(type => type.Resolve()?.Methods ?? Enumerable.Empty<MethodDefinition>()) // Get the methods.
-                .Where(method => method.Name == subject.Name) // Filter on methods with the same name.
-                .ToArray();
 
-
-            var genericContexts = new List<GenericContext>();
-            foreach (var relatedObject in baseTypes)
+            foreach (var baseType in baseTypes)
             {
-                if (relatedObject is not TypeSpecification {Signature: GenericInstanceTypeSignature genericSignature})
+                var candidates = Enumerable.Where(baseTypes
+                            .SelectMany(type =>
+                                type.Resolve()?.Methods ?? Enumerable.Empty<MethodDefinition>()),
+                        method => method!.Name == subject.Name)
+                    .ToArray();
+                
+                if (!candidates.Any())
                     continue;
-                var context = new GenericContext(genericSignature, null);
-                genericContexts.Add(context);
-            }
+                
+                GenericContext? context = null;
+                if (baseType is TypeSpecification {Signature: GenericInstanceTypeSignature genericSignature})
+                    context = new GenericContext(genericSignature, null);
 
-            var comparer = new SignatureComparer();
+                var comparer = new SignatureComparer();
 
-            var signature = subject.Signature;
-            foreach (var t in genericContexts)
-                signature = signature.InstantiateGenericTypes(t);
-            
-            for (int i = 0; i < candidates.Length; i++)
-            {
-                var candidate = candidates[i];
-                if (!candidate.IsVirtual)
-                    continue;
+                foreach (var candidate in candidates)
+                {
+                    if (!candidate.IsVirtual)
+                        continue;
 
-                bool isImplementation = candidate.DeclaringType.IsInterface && candidate.IsNewSlot;
-                bool isOverride = !candidate.DeclaringType.IsInterface && subject.IsReuseSlot;
-                if (!isImplementation && !isOverride)
-                    continue;
-
-                var candidateSignature = candidate.Signature;
-                foreach (var t in genericContexts)
-                    candidateSignature = candidateSignature.InstantiateGenericTypes(t);
-
-                if (comparer.Equals(candidateSignature, signature))
-                    yield return candidate;
+                    var isImplementation = candidate.DeclaringType.IsInterface && candidate.IsNewSlot;
+                    var isOverride = !candidate.DeclaringType.IsInterface && subject.IsReuseSlot;
+                    if (!isImplementation && !isOverride)
+                        continue;
+                    var signature = candidate.Signature;
+                    if (context.HasValue)
+                        signature = signature.InstantiateGenericTypes(context.Value);
+                   
+                    if (comparer.Equals(signature, subject.Signature))
+                        yield return candidate;
+                }
             }
         }
     }
