@@ -20,7 +20,7 @@ namespace AsmResolver.Workspaces.DotNet
         /// Describes the relationship between a base method and an overriding method. This includes both abstract
         /// methods, as well as interface implementations.
         /// </summary>
-        public static readonly ObjectRelation<MethodDefinition> ImplementationMethod = new(
+        public static readonly ObjectRelation<IMethodDescriptor> ImplementationMethod = new(
             "ImplementationMethod",
             new Guid("2DE7DFED-2EAB-458A-BBA4-7F75A7DE199F"));
 

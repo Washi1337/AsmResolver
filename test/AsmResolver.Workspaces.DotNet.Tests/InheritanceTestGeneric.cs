@@ -64,7 +64,9 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationMethod);
-            Assert.Contains(baseMethod, node.GetRelatedObjects(DotNetRelations.ImplementationMethod));
+            Assert.Contains(baseMethod, 
+                node.GetRelatedObjects(DotNetRelations.ImplementationMethod)
+                    .Select(t=> t.Resolve()));
         }
 
         [Fact]
