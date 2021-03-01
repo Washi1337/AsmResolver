@@ -88,8 +88,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 module.CorLibTypeFactory.CorLibScope,
                 "System",
                 nameof(EventHandler));
-            
-            _eventHandlerTypeSig = _eventHandlerTypeRef.ToTypeSignature();
+
+            _eventHandlerTypeSig = new TypeDefOrRefSignature(_eventHandlerTypeRef, false);
         }
 
         private IList<TMember> GetResultList<TMember>(TableIndex tableIndex)

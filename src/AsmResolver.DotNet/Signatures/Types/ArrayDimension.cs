@@ -1,9 +1,11 @@
-﻿namespace AsmResolver.DotNet.Signatures.Types
+﻿using System;
+
+namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Represents a single dimension in an array specification. 
     /// </summary>
-    public readonly struct ArrayDimension
+    public readonly struct ArrayDimension : IEquatable<ArrayDimension>
     {
         /// <summary>
         /// Creates a new array dimension.
@@ -46,5 +48,25 @@
         {
             get;
         }
+
+        /// <summary>
+        /// Determines whether two dimensions are considered equal.
+        /// </summary>
+        public bool Equals(ArrayDimension other) => 
+            Size == other.Size && LowerBound == other.LowerBound;
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) => 
+            obj is ArrayDimension other && Equals(other);
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Size.GetHashCode() * 397) ^ LowerBound.GetHashCode();
+            }
+        }
+        
     }
 }

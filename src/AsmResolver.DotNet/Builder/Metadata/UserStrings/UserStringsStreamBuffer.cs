@@ -8,7 +8,7 @@ using AsmResolver.PE.DotNet.Metadata.UserStrings;
 namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
 {
     /// <summary>
-    /// Provides a mutable buffer for building up a user-strings stream in a .NET portable executable. 
+    /// Provides a mutable buffer for building up a user-strings stream in a .NET portable executable.
     /// </summary>
     public class UserStringsStreamBuffer : IMetadataStreamBuffer
     {
@@ -40,6 +40,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         {
             get;
         }
+
+        /// <inheritdoc />
+        public bool IsEmpty => _rawStream.Length <= 1;
 
         /// <summary>
         /// Imports the contents of a user strings stream and indexes all present strings.
@@ -76,7 +79,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
                 _writer.WriteByte(0);
                 return offset;
             }
-            
+
             int byteCount = Encoding.Unicode.GetByteCount(value) + 1;
             _writer.WriteCompressedUInt32((uint) byteCount);
 
@@ -104,7 +107,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
                 offset = AppendString(value);
                 _strings.Add(value, offset);
             }
-            
+
             return offset;
         }
 
@@ -129,7 +132,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
         }
 
         /// <summary>
-        /// Serializes 
+        /// Serializes
         /// </summary>
         /// <returns></returns>
         public UserStringsStream CreateStream()

@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Builder
             : this(MetadataBuilderFlags.None)
         {
         }
-        
+
         /// <summary>
         /// Creates a new instance of the <see cref="DotNetDirectoryFactory"/> class.
         /// </summary>
@@ -43,7 +43,7 @@ namespace AsmResolver.DotNet.Builder
 
         /// <summary>
         /// Gets or sets the flags defining the behaviour of the .NET metadata directory builder regarding the
-        /// construction of the .NET metadata directory. 
+        /// construction of the .NET metadata directory.
         /// </summary>
         public MetadataBuilderFlags MetadataBuilderFlags
         {
@@ -71,7 +71,7 @@ namespace AsmResolver.DotNet.Builder
 
         /// <inheritdoc />
         public virtual DotNetDirectoryBuildResult CreateDotNetDirectory(
-            ModuleDefinition module, 
+            ModuleDefinition module,
             INativeSymbolsProvider symbolsProvider,
             DiagnosticBag diagnosticBag)
         {
@@ -83,14 +83,14 @@ namespace AsmResolver.DotNet.Builder
             buffer.DefineModule(module);
 
             // When specified, import existing AssemblyRef, ModuleRef, TypeRef and MemberRef prior to adding any other
-            // member reference or definition, to ensure that they are assigned their original RIDs. 
+            // member reference or definition, to ensure that they are assigned their original RIDs.
             ImportBasicTablesIntoTableBuffersIfSpecified(module, buffer);
 
             // Define all types defined in the module.
             buffer.DefineTypes(discoveryResult.Types);
 
             // All types defs and refs are added to the buffer at this point. We can therefore safely start adding
-            // TypeSpecs if they need to be preserved: 
+            // TypeSpecs if they need to be preserved:
             ImportTypeSpecsAndMemberRefsIfSpecified(module, buffer);
 
             // Define all members in the added types.
@@ -101,12 +101,12 @@ namespace AsmResolver.DotNet.Builder
             buffer.DefineParameters(discoveryResult.Parameters);
 
             // Import remaining preservable tables (Type specs, method specs, signatures etc).
-            // We do this before finalizing any member to ensure that they are assigned their original RIDs. 
+            // We do this before finalizing any member to ensure that they are assigned their original RIDs.
             ImportRemainingTablesIntoTableBuffersIfSpecified(module, buffer);
 
             // Finalize member definitions.
             buffer.FinalizeTypes();
-            
+
             // If module is the manifest module, include the assembly definition.
             if (module.Assembly?.ManifestModule == module)
                 buffer.DefineAssembly(module.Assembly);
@@ -146,8 +146,8 @@ namespace AsmResolver.DotNet.Builder
         }
 
         private DotNetDirectoryBuffer CreateDotNetDirectoryBuffer(
-            ModuleDefinition module, 
-            INativeSymbolsProvider symbolsProvider, 
+            ModuleDefinition module,
+            INativeSymbolsProvider symbolsProvider,
             DiagnosticBag diagnosticBag)
         {
             var metadataBuffer = CreateMetadataBuffer(module);
@@ -157,27 +157,43 @@ namespace AsmResolver.DotNet.Builder
         private IMetadataBuffer CreateMetadataBuffer(ModuleDefinition module)
         {
             var metadataBuffer = new MetadataBuffer(module.RuntimeVersion);
-            
+
             // Check if there exists a .NET directory to base off the metadata buffer on.
             var originalMetadata = module.DotNetDirectory?.Metadata;
             if (originalMetadata is null)
                 return metadataBuffer;
-            
+
             // Import original contents of the blob stream if specified.
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveBlobIndices) != 0)
-                metadataBuffer.BlobStream.ImportStream(originalMetadata.GetStream<BlobStream>());
+            {
+                var blobStream = originalMetadata.GetStream<BlobStream>();
+                if (blobStream != null)
+                    metadataBuffer.BlobStream.ImportStream(blobStream);
+            }
 
             // Import original contents of the GUID stream if specified.
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveGuidIndices) != 0)
-                metadataBuffer.GuidStream.ImportStream(originalMetadata.GetStream<GuidStream>());
+            {
+                var guidStream = originalMetadata.GetStream<GuidStream>();
+                if (guidStream != null)
+                    metadataBuffer.GuidStream.ImportStream(guidStream);
+            }
 
             // Import original contents of the strings stream if specified.
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStringIndices) != 0)
-                metadataBuffer.StringsStream.ImportStream(originalMetadata.GetStream<StringsStream>());
+            {
+                var stringsStream = originalMetadata.GetStream<StringsStream>();
+                if (stringsStream != null)
+                    metadataBuffer.StringsStream.ImportStream(stringsStream);
+            }
 
             // Import original contents of the strings stream if specified.
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveUserStringIndices) != 0)
-                metadataBuffer.UserStringsStream.ImportStream(originalMetadata.GetStream<UserStringsStream>());
+            {
+                var userStringsStream = originalMetadata.GetStream<UserStringsStream>();
+                if (userStringsStream != null)
+                    metadataBuffer.UserStringsStream.ImportStream(userStringsStream);
+            }
 
             return metadataBuffer;
         }
@@ -186,7 +202,7 @@ namespace AsmResolver.DotNet.Builder
         {
             if (module.DotNetDirectory is null)
                 return;
-            
+
             // NOTE: The order of this table importing is crucial.
             //
             // Assembly refs should always be imported prior to importing type refs, which should be imported before
@@ -217,10 +233,10 @@ namespace AsmResolver.DotNet.Builder
         {
             if (module.DotNetDirectory is null)
                 return;
-            
+
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveStandAloneSignatureIndices) != 0)
                 ImportTableIntoTableBuffers<StandAloneSignature>(module, TableIndex.StandAloneSig, buffer.GetStandAloneSignatureToken);
-            
+
             if ((MetadataBuilderFlags & MetadataBuilderFlags.PreserveMethodSpecificationIndices) != 0)
                 ImportTableIntoTableBuffers<MethodSpecification>(module, TableIndex.MethodSpec, buffer.GetMethodSpecificationToken);
         }

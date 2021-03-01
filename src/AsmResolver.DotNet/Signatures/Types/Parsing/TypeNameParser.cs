@@ -7,17 +7,17 @@ using System.Linq;
 namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
     /// <summary>
-    /// Provides a mechanism for parsing a fully assembly qualified name of a type. 
+    /// Provides a mechanism for parsing a fully assembly qualified name of a type.
     /// </summary>
     public sealed class TypeNameParser
     {
         private static readonly SignatureComparer Comparer = new SignatureComparer();
-        
+
         // src/coreclr/src/vm/typeparse.cpp
         // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names
-        
+
         /// <summary>
-        /// Parses a single fully assembly qualified name. 
+        /// Parses a single fully assembly qualified name.
         /// </summary>
         /// <param name="module">The module containing the assembly qualified name.</param>
         /// <param name="canonicalName">The fully qualified assembly name of the type.</param>
@@ -40,13 +40,19 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
         private TypeSignature ParseTypeSpec()
         {
+            bool lastHasConsumedTypeName = _lexer.HasConsumedTypeName;
+
             // Parse type signature.
+            _lexer.HasConsumedTypeName = false;
             var typeSpec = ParseSimpleTypeSpec();
-            
+            _lexer.HasConsumedTypeName = true;
+
             // See if the type full name contains an assembly ref.
             var scope = TryExpect(TypeNameTerminal.Comma).HasValue
                 ? (IResolutionScope) ParseAssemblyNameSpec()
                 : _module;
+
+            _lexer.HasConsumedTypeName = lastHasConsumedTypeName;
 
             // Ensure corlib type sigs are used.
             if (Comparer.Equals(scope, _module.CorLibTypeFactory.CorLibScope))
@@ -55,7 +61,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 if (corlibType != null)
                     return corlibType;
             }
-            
+
             // Update scope.
             var reference = (TypeReference) typeSpec.GetUnderlyingTypeDefOrRef();
             while (reference.Scope is TypeReference parent)
@@ -69,7 +75,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             // Parse type name.
             var typeName = ParseTypeName();
-            
+
             // Check for annotations.
             while (true)
             {
@@ -78,15 +84,15 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     case TypeNameTerminal.Ampersand:
                         typeName = ParseByReferenceTypeSpec(typeName);
                         break;
-                    
+
                     case TypeNameTerminal.Star:
                         typeName = ParsePointerTypeSpec(typeName);
                         break;
-                    
+
                     case TypeNameTerminal.OpenBracket:
                         typeName = ParseArrayOrGenericTypeSpec(typeName);
                         break;
-                    
+
                     default:
                         return typeName;
                 }
@@ -114,7 +120,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 case TypeNameTerminal.OpenBracket:
                 case TypeNameTerminal.Identifier:
                     return ParseGenericTypeSpec(typeName);
-                
+
                 default:
                     return ParseArrayTypeSpec(typeName);
             }
@@ -162,7 +168,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 case TypeNameTerminal.Number:
                     int? size = null;
                     int? lowerBound = null;
-                    
+
                     int firstNumber = int.Parse(_lexer.Next().Text);
                     var dots = TryExpect(TypeNameTerminal.Ellipsis, TypeNameTerminal.DoubleDot);
                     if (dots.HasValue)
@@ -181,7 +187,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     }
 
                     return new ArrayDimension(size, lowerBound);
-                
+
                 default:
                     // Fail intentionally:
                     Expect(TypeNameTerminal.CloseBracket, TypeNameTerminal.Comma, TypeNameTerminal.Number);
@@ -226,8 +232,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             // Note: This is a slight deviation from grammar (but is equivalent), to make the parsing easier.
             //       We read all components
             (string ns, var names) = ParseNamespaceTypeName();
-            
-            TypeReference result = null; 
+
+            TypeReference result = null;
             for (int i = 0; i < names.Count; i++)
             {
                 result = result is null
@@ -244,7 +250,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private (string Namespace, IList<string> TypeNames) ParseNamespaceTypeName()
         {
             var names = ParseDottedExpression(TypeNameTerminal.Identifier);
-            
+
             // The namespace is every name concatenated except for the last one.
             string ns;
             if (names.Count > 1)
@@ -270,7 +276,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private List<string> ParseDottedExpression(TypeNameTerminal terminal)
         {
             var result = new List<string>();
-            
+
             while (true)
             {
                 var nextIdentifier = TryExpect(terminal);
@@ -282,18 +288,18 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 if (!TryExpect(TypeNameTerminal.Dot).HasValue)
                     break;
             }
-            
+
             if (result.Count == 0)
                 throw new FormatException($"Expected {string.Join(", ",terminal)}.");
 
             return result;
         }
-        
+
         private AssemblyReference ParseAssemblyNameSpec()
         {
             string assemblyName = string.Join(".", ParseDottedExpression(TypeNameTerminal.Identifier));
             var assemblyRef = new AssemblyReference(assemblyName, new Version());
-            
+
             while (TryExpect(TypeNameTerminal.Comma).HasValue)
             {
                 var propertyToken = Expect(TypeNameTerminal.Identifier);
@@ -303,23 +309,23 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     case "version":
                         assemblyRef.Version = ParseVersion();
                         break;
-                    
+
                     case "publickey":
                         assemblyRef.PublicKeyOrToken = ParseHexBlob();
                         assemblyRef.HasPublicKey = true;
                         break;
-                    
+
                     case "publickeytoken":
                         assemblyRef.PublicKeyOrToken = ParseHexBlob();
                         assemblyRef.HasPublicKey = false;
                         break;
-                    
+
                     case "culture":
                         assemblyRef.Culture = ParseCulture();
                         if (assemblyRef.Culture.Equals("neutral", StringComparison.OrdinalIgnoreCase))
                             assemblyRef.Culture = null;
                         break;
-                    
+
                     default:
                         throw new FormatException($"Unsupported {propertyToken.Text} assembly property.");
                 }
@@ -362,14 +368,14 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private TypeNameToken? TryExpect(TypeNameTerminal terminal)
         {
             var token = _lexer.Peek();
-            
+
             if (terminal != token.Terminal)
                 return null;
-            
+
             _lexer.Next();
             return token;
         }
-        
+
         private TypeNameToken Expect(params TypeNameTerminal[] terminals)
         {
             return TryExpect(terminals)
@@ -379,10 +385,10 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private TypeNameToken? TryExpect(params TypeNameTerminal[] terminals)
         {
             var token = _lexer.Peek();
-            
+
             if (!terminals.Contains(token.Terminal))
                 return null;
-            
+
             _lexer.Next();
             return token;
         }

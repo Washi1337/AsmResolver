@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using AsmResolver.DotNet.Collections;
+using System.Threading;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -15,6 +15,7 @@ namespace AsmResolver.DotNet.Code.Cil
     public partial class CilInstructionCollection : IList<CilInstruction>
     {
         private readonly List<CilInstruction> _items = new List<CilInstruction>();
+        private ICilLabel _endLabel;
 
         /// <summary>
         /// Creates a new collection of CIL instructions stored in a method body.
@@ -49,6 +50,24 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get => _items[index];
             set => _items[index] = value;
+        }
+
+        /// <summary>
+        /// Gets the label indicating the end of the CIL code stream.
+        /// </summary>
+        /// <remarks>
+        /// This label does not point to the beginning of an instruction. The offset of this label is equal
+        /// to the last instruction's offset + its size.
+        /// </remarks>
+        public ICilLabel EndLabel
+        {
+            get
+            {
+                // Most method bodies won't be using the end label. Delay allocation if it can be avoided.
+                if (_endLabel is null)
+                    Interlocked.CompareExchange(ref _endLabel, new CilEndLabel(this), null);
+                return _endLabel;
+            }
         }
         
         /// <inheritdoc />
@@ -203,6 +222,25 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             int index = GetIndexByOffset(offset);
             return index == -1 ? null : _items[index];
+        }
+
+        /// <summary>
+        /// Gets a label at the provided offset.
+        /// </summary>
+        /// <param name="offset">The offset.</param>
+        /// <returns>The label.</returns>
+        /// <remarks>
+        /// If the provided offset falls outside of the CIL code stream, <see cref="EndLabel"/> is returned instead.
+        /// </remarks>
+        public ICilLabel GetLabel(int offset)
+        {
+            if (offset >= EndLabel.Offset)
+                return EndLabel;
+            
+            var instruction = GetByOffset(offset);
+            return instruction is null
+                ? new CilOffsetLabel(offset)
+                : instruction.CreateLabel();
         }
 
         /// <summary>
@@ -564,7 +602,34 @@ namespace AsmResolver.DotNet.Code.Cil
 
             /// <inheritdoc />
             public void Dispose() => _enumerator.Dispose();
-        } 
+        }
+
+        private sealed class CilEndLabel : ICilLabel
+        {
+            private readonly CilInstructionCollection _collection;
+
+            public CilEndLabel(CilInstructionCollection collection)
+            {
+                _collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            }
+
+            /// <inheritdoc />
+            public int Offset
+            {
+                get
+                {
+                    if (_collection.Count == 0)
+                        return 0;
+                    var last = _collection[_collection.Count - 1];
+                    return last.Offset + last.Size;
+                }
+            }
+
+            /// <inheritdoc />
+            public bool Equals(ICilLabel other) => other != null && Offset == other.Offset;
+
+            public override string ToString() => $"IL_{Offset:X4}";
+        }
 
     }
 }

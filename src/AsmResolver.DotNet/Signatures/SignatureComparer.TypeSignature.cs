@@ -20,6 +20,7 @@ namespace AsmResolver.DotNet.Signatures
         IEqualityComparer<GenericParameterSignature>,
         IEqualityComparer<ArrayTypeSignature>,
         IEqualityComparer<SentinelTypeSignature>,
+        IEqualityComparer<IList<TypeSignature>>,
         IEqualityComparer<IEnumerable<TypeSignature>>
     {
         /// <inheritdoc />
@@ -27,7 +28,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             switch (x.ElementType)
@@ -110,7 +111,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
             return x.ElementType == y.ElementType;
         }
@@ -124,7 +125,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
             return x.ElementType == y.ElementType;
         }
@@ -178,19 +179,9 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
-
-            // Check the basic properties first.
-            if (x.Name != y.Name || x.Namespace != y.Namespace)
-                return false;
-
-            // If scope matches, it is a perfect match.
-            if (Equals(x.Scope, y.Scope))
-                return true;
-
-            // If scope does not match, it can still be a reference to an exported type.
-            return Equals(x.Resolve(), y.Resolve());
+            return SimpleTypeEquals(x.Type, y.Type);
         }
 
         /// <inheritdoc />
@@ -211,7 +202,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.IsRequired == y.IsRequired
@@ -236,7 +227,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.IsValueType == y.IsValueType
@@ -261,7 +252,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.Index == y.Index
@@ -276,7 +267,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null) || x.ElementType != y.ElementType)
+            if (x is null || y is null || x.ElementType != y.ElementType)
                 return false;
             return Equals(x.BaseType, y.BaseType);
         }
@@ -289,7 +280,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null) || x.Dimensions.Count != y.Dimensions.Count)
+            if (x is null || y is null || x.Dimensions.Count != y.Dimensions.Count)
                 return false;
 
             for (int i = 0; i < x.Dimensions.Count; i++)
@@ -311,10 +302,37 @@ namespace AsmResolver.DotNet.Signatures
             {
                 int hashCode = (int) obj.ElementType << ElementTypeOffset;
                 hashCode = (hashCode * 397) ^ GetHashCode(obj.BaseType);
-                foreach (var dimension in obj.Dimensions)
-                    hashCode = (hashCode * 397) ^ dimension.GetHashCode();
+                for (int i = 0; i < obj.Dimensions.Count; i++)
+                    hashCode = (hashCode * 397) ^ obj.Dimensions[i].GetHashCode();
+
                 return hashCode;
             }
+        }
+
+        /// <inheritdoc />
+        public bool Equals(IList<TypeSignature> x, IList<TypeSignature> y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (x is null || y is null || x.Count != y.Count)
+                return false;
+
+            for (int i = 0; i < x.Count; i++)
+            {
+                if (!Equals(x[i], y[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public int GetHashCode(IList<TypeSignature> obj)
+        {
+            int checksum = 0;
+            for (int i = 0; i < obj.Count; i++)
+                checksum ^= GetHashCode(obj[i]);
+            return checksum;
         }
 
         /// <inheritdoc />
@@ -322,7 +340,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             if (ReferenceEquals(x, y))
                 return true;
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             return x.SequenceEqual(y, this);

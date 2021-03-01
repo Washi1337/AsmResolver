@@ -19,9 +19,9 @@ namespace AsmResolver.DotNet
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var localsSignature = (LocalVariablesSignature) CallingConventionSignature.FromReader(
-                new BlobReadContext(module.ReaderContext), 
+                new BlobReadContext(module.ReaderContext),
                 new ByteArrayReader(localSig));
-            
+
             for (int i = 0; i < localsSignature?.VariableTypes.Count; i++)
                 methodBody.LocalVariables.Add(new CilLocalVariable(localsSignature.VariableTypes[i]));
         }
@@ -65,11 +65,11 @@ namespace AsmResolver.DotNet
                 var handler = new CilExceptionHandler
                 {
                     HandlerType = handlerType,
-                    TryStart = instructions.GetByOffset(tryStart)?.CreateLabel() ?? new CilOffsetLabel(tryStart),
+                    TryStart = instructions.GetLabel(tryStart),
                     TryEnd = handlerType == CilExceptionHandlerType.Finally ? endFinallyLabel : endTryLabel,
                     FilterStart = null,
-                    HandlerStart = instructions.GetByOffset(handlerStart)?.CreateLabel() ?? new CilOffsetLabel(handlerStart),
-                    HandlerEnd = instructions.GetByOffset(handlerEnd)?.CreateLabel() ?? new CilOffsetLabel(handlerEnd),
+                    HandlerStart = instructions.GetLabel(handlerStart),
+                    HandlerEnd = instructions.GetLabel(handlerEnd),
                     ExceptionType = exceptionType != null ? importer.ImportType(exceptionType) : null
                 };
 
@@ -84,39 +84,42 @@ namespace AsmResolver.DotNet
             {
                 case CilOperandType.InlineBrTarget:
                 case CilOperandType.ShortInlineBrTarget:
-                    return new CilInstructionLabel(
-                        methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset));
-                
+                    return methodBody.Instructions
+                        .GetByOffset(((ICilLabel) instruction.Operand).Offset)
+                        ?.CreateLabel();
+
                 case CilOperandType.InlineField:
                 case CilOperandType.InlineMethod:
                 case CilOperandType.InlineSig:
                 case CilOperandType.InlineTok:
                 case CilOperandType.InlineType:
                     return ReadToken(context, ((MetadataToken) instruction.Operand).ToUInt32(), tokens, importer);
-                
+
                 case CilOperandType.InlineString:
                     return ReadToken(context, ((MetadataToken) instruction.Operand).ToUInt32(), tokens, importer);
-                
+
                 case CilOperandType.InlineSwitch:
                     var result = new List<ICilLabel>();
-                    var labels = (IEnumerable<ICilLabel>) instruction.Operand;
-                    foreach (var label in labels)
+                    var labels = (IList<ICilLabel>) instruction.Operand;
+                    for (int i = 0; i < labels.Count; i++)
                     {
+                        var label = labels[i];
                         var target = methodBody.Instructions.GetByOffset(label.Offset);
-                        result.Add(target != null 
-                            ? new CilInstructionLabel(target) 
+                        result.Add(target != null
+                            ? new CilInstructionLabel(target)
                             : label);
                     }
+
                     return result;
-                
+
                 case CilOperandType.InlineVar:
                 case CilOperandType.ShortInlineVar:
                     return resolver.ResolveLocalVariable(Convert.ToInt32(instruction.Operand));
-                
+
                 case CilOperandType.InlineArgument:
                 case CilOperandType.ShortInlineArgument:
                     return resolver.ResolveParameter(Convert.ToInt32(instruction.Operand));
-                
+
                 case CilOperandType.InlineI:
                 case CilOperandType.InlineI8:
                 case CilOperandType.InlineNone:
@@ -142,7 +145,7 @@ namespace AsmResolver.DotNet
                     if (type is RuntimeTypeHandle runtimeTypeHandle)
                         return importer.ImportType(Type.GetTypeFromHandle(runtimeTypeHandle));
                     break;
-                
+
                 case TableIndex.Field:
                     var field = tokens[(int) token.Rid];
                     if (field is null)
@@ -160,7 +163,7 @@ namespace AsmResolver.DotNet
                     }
 
                     break;
-                
+
                 case TableIndex.Method:
                 case TableIndex.MemberRef:
                     var obj = tokens[(int) token.Rid];
@@ -182,12 +185,12 @@ namespace AsmResolver.DotNet
                     if (obj.GetType().FullName == "System.Reflection.Emit.VarArgMethod")
                         return importer.ImportMethod(FieldReader.ReadField<MethodInfo>(obj, "m_method"));
                     break;
-                
+
                 case TableIndex.StandAloneSig:
                     return CallingConventionSignature.FromReader(
                         new BlobReadContext(readerContext),
                         new ByteArrayReader((byte[]) tokens[(int) token.Rid]));
-                
+
                 case (TableIndex) 112:
                     return tokens[(int) token.Rid] as string;
             }
@@ -219,12 +222,12 @@ namespace AsmResolver.DotNet
             {
                 var dynamicResolver = typeof(OpCode).Module.GetTypes()
                     .First(t => t.Name == "DynamicResolver");
-                
+
                 var ilGenerator = dynamicMethodObj.GetType().GetRuntimeMethods().First(q => q.Name == "GetILGenerator")
                     .Invoke(dynamicMethodObj, null);
-                
+
                 //Create instance of dynamicResolver
-                dynamicMethodObj = Activator.CreateInstance(dynamicResolver, (BindingFlags) (-1), null, new[] 
+                dynamicMethodObj = Activator.CreateInstance(dynamicResolver, (BindingFlags) (-1), null, new[]
                 {
                     ilGenerator
                 }, null);
