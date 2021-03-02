@@ -41,8 +41,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                     if (!candidate.IsVirtual)
                         continue;
 
-                    var isImplementation = candidate.DeclaringType.IsInterface && candidate.IsNewSlot;
-                    var isOverride = !candidate.DeclaringType.IsInterface && subject.IsReuseSlot;
+                    bool isImplementation = candidate.DeclaringType.IsInterface && candidate.IsNewSlot;
+                    bool isOverride = !candidate.DeclaringType.IsInterface && subject.IsReuseSlot;
                     if (!isImplementation && !isOverride)
                         continue;
                     var signature = candidate.Signature;
