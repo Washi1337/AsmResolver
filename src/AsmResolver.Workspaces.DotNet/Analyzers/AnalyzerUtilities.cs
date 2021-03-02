@@ -22,10 +22,10 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
 
             foreach (var baseType in baseTypes)
             {
-                if(baseType.Resolve() is not {} type)
+                if (baseType.Resolve() is not {} type)
                     continue;
                 
-                var candidates =type.Methods
+                var candidates = type.Methods
                     .Where(m => m.Name == subject.Name)
                     .ToArray();
                 
@@ -36,7 +36,6 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                 if (baseType is TypeSpecification {Signature: GenericInstanceTypeSignature genericSignature})
                     context = new GenericContext(genericSignature, null);
     
-
                 foreach (var candidate in candidates)
                 {
                     if (!candidate.IsVirtual)
