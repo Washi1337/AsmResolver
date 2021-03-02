@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using Xunit;
 
@@ -14,8 +15,8 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         {
             get;
         } = new SignatureComparer();
-        
-    
+
+
         protected static List<TMember> GetMembers<TMember>(ModuleDefinition module, TableIndex tableIndex)
         {
             int count = module.DotNetDirectory.Metadata
@@ -52,7 +53,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 var originalMembers = getMembers(originalType).ToArray();
                 var newMembers = getMembers(newType).ToArray();
                 Assert.True(originalMembers.Length <= newMembers.Length);
-                
+
                 foreach (var originalMember in newMembers)
                 {
                     if (originalMember.MetadataToken.Rid == 0 || excludeTokens.Contains(originalMember.MetadataToken))
@@ -63,6 +64,6 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
                 }
             }
         }
-        
+
     }
 }
