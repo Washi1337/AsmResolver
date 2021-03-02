@@ -8,6 +8,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
 {
     internal static class AnalyzerUtilities
     {
+        private static readonly SignatureComparer _comparer = new ();
+
         internal static IEnumerable<MethodDefinition> FindBaseMethods(this MethodDefinition subject,
             WorkspaceIndex index)
         {
@@ -34,7 +36,6 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                 if (baseType is TypeSpecification {Signature: GenericInstanceTypeSignature genericSignature})
                     context = new GenericContext(genericSignature, null);
     
-                var comparer = new SignatureComparer();
 
                 foreach (var candidate in candidates)
                 {
@@ -49,7 +50,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                     if (context.HasValue)
                         signature = signature.InstantiateGenericTypes(context.Value);
                    
-                    if (comparer.Equals(signature, subject.Signature))
+                    if (_comparer.Equals(signature, subject.Signature))
                         yield return candidate;
                 }
             }
