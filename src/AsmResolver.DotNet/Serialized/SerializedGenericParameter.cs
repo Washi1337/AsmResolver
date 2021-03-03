@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="GenericParameter"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedGenericParameter : GenericParameter
     {
@@ -31,7 +31,6 @@ namespace AsmResolver.DotNet.Serialized
             _row = row;
 
             Attributes = _row.Attributes;
-            Number = row.Number;            
         }
 
         /// <inheritdoc />
@@ -45,7 +44,7 @@ namespace AsmResolver.DotNet.Serialized
             var encoder = _context.Image.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetIndexEncoder(CodedIndex.TypeOrMethodDef);
-            
+
             var ownerToken = encoder.DecodeIndex(_row.Owner);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IHasGenericParameters
@@ -68,7 +67,7 @@ namespace AsmResolver.DotNet.Serialized
         }
 
         /// <inheritdoc />
-        protected override IList<CustomAttribute> GetCustomAttributes() => 
+        protected override IList<CustomAttribute> GetCustomAttributes() =>
             _context.ParentModule.GetCustomAttributeCollection(this);
     }
 }

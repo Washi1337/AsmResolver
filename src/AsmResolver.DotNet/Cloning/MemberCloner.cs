@@ -8,12 +8,12 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 namespace AsmResolver.DotNet.Cloning
 {
     /// <summary>
-    /// Provides a mechanism for deep-copying metadata members from external .NET modules into another module. 
+    /// Provides a mechanism for deep-copying metadata members from external .NET modules into another module.
     /// </summary>
     /// <remarks>
-    /// When multiple members are cloned in one go, the member cloner will fix up any references between the cloned members. 
+    /// When multiple members are cloned in one go, the member cloner will fix up any references between the cloned members.
     /// For example, if a type or member is referenced in a method body, and this type or member is also included in the
-    /// cloning process, the reference will be updated to the cloned member instead of imported. 
+    /// cloning process, the reference will be updated to the cloned member instead of imported.
     /// </remarks>
     public partial class MemberCloner
     {
@@ -154,9 +154,9 @@ namespace AsmResolver.DotNet.Cloning
         /// </summary>
         /// <param name="types">The types to include.</param>
         /// <returns>The metadata cloner that the types were added to.</returns>
-        public MemberCloner Include(params TypeDefinition[] types) => 
+        public MemberCloner Include(params TypeDefinition[] types) =>
             Include((IEnumerable<TypeDefinition>) types);
-        
+
         /// <summary>
         /// Adds each type in the provided collection of types, and all their members and nested types, to the list
         /// of members to clone.
@@ -213,7 +213,7 @@ namespace AsmResolver.DotNet.Cloning
             _eventsToClone.Add(@event);
             return this;
         }
-        
+
         /// <summary>
         /// Clones all included members.
         /// </summary>
@@ -265,15 +265,15 @@ namespace AsmResolver.DotNet.Cloning
         private void DeepCopyType(MemberCloneContext context, TypeDefinition type)
         {
             var clonedType = (TypeDefinition) context.ClonedMembers[type];
-            
+
             // Copy base type.
             if (type.BaseType is {})
                 clonedType.BaseType = context.Importer.ImportType(type.BaseType);
-            
+
             // Copy interface implementations.
             foreach (var implementation in type.Interfaces)
                 clonedType.Interfaces.Add(CloneInterfaceImplementation(context, implementation));
-            
+
             // Copy method implementations.
             foreach (var implementation in type.MethodImplementations)
             {
@@ -282,9 +282,9 @@ namespace AsmResolver.DotNet.Cloning
                     context.Importer.ImportMethod(implementation.Body)
                 ));
             }
-            
-            // If the type is nested and the declaring type is cloned as well, we should add it to the cloned type. 
-            if (type.IsNested 
+
+            // If the type is nested and the declaring type is cloned as well, we should add it to the cloned type.
+            if (type.IsNested
                 && context.ClonedMembers.TryGetValue(type.DeclaringType, out var member)
                 && member is TypeDefinition clonedDeclaringType)
             {
@@ -309,7 +309,7 @@ namespace AsmResolver.DotNet.Cloning
         }
 
         private void CloneCustomAttributes(
-            MemberCloneContext context, 
+            MemberCloneContext context,
             IHasCustomAttribute sourceProvider,
             IHasCustomAttribute clonedProvider)
         {
@@ -330,10 +330,10 @@ namespace AsmResolver.DotNet.Cloning
             {
                 var clonedArgument = new CustomAttributeNamedArgument(
                     namedArgument.MemberType,
-                    namedArgument.MemberName, 
+                    namedArgument.MemberName,
                     namedArgument.ArgumentType,
                     CloneCustomAttributeArgument(context, namedArgument.Argument));
-                
+
                 clonedSignature.NamedArguments.Add(clonedArgument);
             }
 
@@ -347,7 +347,7 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedArgument = new CustomAttributeArgument(context.Importer.ImportTypeSignature(argument.ArgumentType));
             clonedArgument.IsNullArray = argument.IsNullArray;
-            
+
             // Copy all elements.
             for (int i = 0; i < argument.Elements.Count; i++)
                 clonedArgument.Elements.Add(argument.Elements[i]);
@@ -365,15 +365,15 @@ namespace AsmResolver.DotNet.Cloning
         private Constant CloneConstant(MemberCloneContext context, Constant constant)
         {
             return constant != null
-                ? new Constant(constant.Type, 
-                    constant.Value is null 
+                ? new Constant(constant.Type,
+                    constant.Value is null
                     ? null
                     : new DataBlobSignature(constant.Value.Data))
                 : null;
         }
 
         private void CloneGenericParameters(
-            MemberCloneContext context, 
+            MemberCloneContext context,
             IHasGenericParameters sourceProvider,
             IHasGenericParameters clonedProvider)
         {
@@ -384,8 +384,6 @@ namespace AsmResolver.DotNet.Cloning
         private GenericParameter CloneGenericParameter(MemberCloneContext context, GenericParameter parameter)
         {
             var clonedParameter = new GenericParameter(parameter.Name, parameter.Attributes);
-
-            clonedParameter.Number = parameter.Number;
 
             foreach (var constraint in parameter.Constraints)
                 clonedParameter.Constraints.Add(CloneGenericParameterConstraint(context, constraint));
@@ -398,7 +396,7 @@ namespace AsmResolver.DotNet.Cloning
             GenericParameterConstraint constraint)
         {
             var clonedConstraint = new GenericParameterConstraint(context.Importer.ImportType(constraint.Constraint));
-            
+
             CloneCustomAttributes(context, constraint, clonedConstraint);
             return clonedConstraint;
         }
@@ -408,7 +406,7 @@ namespace AsmResolver.DotNet.Cloning
             return marshalDescriptor switch
             {
                 null => null,
-                
+
                 ComInterfaceMarshalDescriptor com => new ComInterfaceMarshalDescriptor(com.NativeType),
 
                 CustomMarshalDescriptor custom => new CustomMarshalDescriptor(
@@ -470,12 +468,12 @@ namespace AsmResolver.DotNet.Cloning
                     argument.MemberName,
                     context.Importer.ImportTypeSignature(argument.ArgumentType),
                     CloneCustomAttributeArgument(context, argument.Argument));
-                
+
                 result.NamedArguments.Add(newArgument);
             }
 
             return result;
         }
-        
+
     }
 }
