@@ -31,7 +31,6 @@ namespace AsmResolver.DotNet.Serialized
             _row = row;
 
             Attributes = _row.Attributes;
-            //Number = row.Number;
         }
 
         /// <inheritdoc />

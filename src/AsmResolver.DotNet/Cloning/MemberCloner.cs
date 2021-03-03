@@ -385,8 +385,6 @@ namespace AsmResolver.DotNet.Cloning
         {
             var clonedParameter = new GenericParameter(parameter.Name, parameter.Attributes);
 
-            //clonedParameter.Number = parameter.Number;
-
             foreach (var constraint in parameter.Constraints)
                 clonedParameter.Constraints.Add(CloneGenericParameterConstraint(context, constraint));
 
