@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.DotNet.TestCases.CustomAttributes;
 
 // Disable warnings for unused members. 
 #pragma warning disable 67
+
+[assembly:TestCase]
+[module:TestCase]
 
 namespace AsmResolver.DotNet.TestCases.CustomAttributes
 {
@@ -16,6 +20,7 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
         public int TestField;
         
         [TestCase]
+        [return:TestCase]
         public void TestMethod([TestCase] int testParameter)
         {
         }
