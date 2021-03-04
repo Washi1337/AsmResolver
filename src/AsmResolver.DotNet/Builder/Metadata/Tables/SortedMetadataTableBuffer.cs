@@ -11,15 +11,14 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
     /// </summary>
     /// <typeparam name="TKey">The type of members that are assigned new metadata rows.</typeparam>
     /// <typeparam name="TRow">The type of rows to store.</typeparam>
-    public class SortedMetadataTableBuffer<TKey, TRow> : ISortedMetadataTableBuffer<TKey, TRow> 
-        where TRow : struct, IMetadataRow 
+    public class SortedMetadataTableBuffer<TKey, TRow> : ISortedMetadataTableBuffer<TKey, TRow>
+        where TRow : struct, IMetadataRow
     {
-        private readonly List<(TKey Key, TRow Row)> _entries = new List<(TKey, TRow)>();
-        private readonly IDictionary<TKey, MetadataToken> _newTokens = new Dictionary<TKey, MetadataToken>();
-        
+        private readonly List<(TKey Key, TRow Row)> _entries = new();
+        private readonly Dictionary<TKey, MetadataToken> _newTokens = new();
         private readonly MetadataTable<TRow> _table;
         private readonly EntryComparer _comparer;
-        
+
         /// <summary>
         /// Creates a new metadata stream buffer that is sorted by a single primary column.
         /// </summary>
@@ -58,8 +57,8 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
         public void Sort()
         {
             _entries.Sort(_comparer);
-            
-            for (uint rid =1 ; rid <= _entries.Count;rid++)
+
+            for (uint rid = 1; rid <= _entries.Count; rid++)
             {
                 var (member, _) = _entries[(int) (rid - 1)];
                 _newTokens[member] = new MetadataToken(_table.TableIndex, rid);
@@ -95,7 +94,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
                 _primaryColumn = primaryColumn;
                 _secondaryColumn = secondaryColumn;
             }
-            
+
             public int Compare((TKey Key, TRow Row) x, (TKey Key, TRow Row) y)
             {
                 int result = x.Row[_primaryColumn].CompareTo(y.Row[_primaryColumn]);
