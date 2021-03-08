@@ -19,6 +19,9 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(TypeDefinition), new TypeAnalyzer());
             Analyzers.Register(typeof(MethodDefinition), new MethodImplementationAnalyzer());
             Analyzers.Register(typeof(IHasSemantics), new SemanticsImplementationAnalyzer());
+            Analyzers.Register(typeof(TypeReference), new TypeReferenceAnalyser());
+            Analyzers.Register(typeof(MemberReference), new MemberReferenceAnalyser());
+            Analyzers.Register(typeof(IHasCustomAttribute), new CustomAttributeAnalyser());
         }
 
         /// <summary>
