@@ -6,14 +6,20 @@ using AsmResolver.DotNet.Signatures;
 namespace AsmResolver.Workspaces.DotNet.Analyzers
 {
     /// <summary>
-    /// Analyzes a <see cref="CustomAttribute"/> for its definitions
+    /// Analyzes a <see cref="IHasCustomAttribute"/> for its definitions
     /// </summary>
-    public class CustomAttributeAnalyser : ObjectAnalyzer<CustomAttribute>
+    public class CustomAttributeAnalyser : ObjectAnalyzer<IHasCustomAttribute>
     {
         private static readonly SignatureComparer _comparer = new();
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, CustomAttribute subject)
+        public override void Analyze(AnalysisContext context, IHasCustomAttribute subject)
+        {
+            for (int i = 0; i < subject.CustomAttributes.Count; i++)
+                Analyze(context, subject.CustomAttributes[i]);
+        }
+
+        private void Analyze(AnalysisContext context, CustomAttribute subject)
         {
             if (subject.Constructor is null)
                 return;
@@ -44,28 +50,43 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
             CustomAttributeNamedArgument argument)
             => argument.MemberType switch
             {
-                CustomAttributeArgumentMemberType.Property => FindNameReferenceProperty(type, customAttribute,
-                    argument),
-                CustomAttributeArgumentMemberType.Field => FindNameReferenceField(type, customAttribute, argument),
+                CustomAttributeArgumentMemberType.Property => FindNameReferenceProperty(type, argument),
+                CustomAttributeArgumentMemberType.Field => FindNameReferenceField(type, argument),
                 _ => null
             };
 
-        private static IMetadataMember? FindNameReferenceProperty(TypeDefinition type, CustomAttribute customAttribute,
+        private static IMetadataMember? FindNameReferenceProperty(TypeDefinition type,
             CustomAttributeNamedArgument argument)
-            => type.Properties
-                .FirstOrDefault(p
-                    => p.Name == argument.MemberName
-                       && _comparer.Equals(p.Signature
-                           , PropertySignature.CreateInstance(argument.ArgumentType))
-                );
+        {
+            var signature = PropertySignature.CreateInstance(argument.ArgumentType);
+            for (int i = 0; i < type.Properties.Count; i++)
+            {
+                var field = type.Properties[i];
+                if (field.Name != argument.MemberName)
+                    continue;
+                if (!_comparer.Equals(field.Signature, signature))
+                    continue;
+                return field;
+            }
 
-        private static IMetadataMember? FindNameReferenceField(TypeDefinition type, CustomAttribute customAttribute,
+            return null;
+        }
+
+        private static IMetadataMember? FindNameReferenceField(TypeDefinition type,
             CustomAttributeNamedArgument argument)
-            => type.Fields
-                .FirstOrDefault(p
-                    => p.Name == argument.MemberName
-                       && _comparer.Equals(p.Signature
-                           , FieldSignature.CreateInstance(argument.ArgumentType))
-                );
+        {
+            var signature = FieldSignature.CreateInstance(argument.ArgumentType);
+            for (int i = 0; i < type.Fields.Count; i++)
+            {
+                var field = type.Fields[i];
+                if (field.Name != argument.MemberName)
+                    continue;
+                if (!_comparer.Equals(field.Signature, signature))
+                    continue;
+                return field;
+            }
+
+            return null;
+        }
     }
 }
