@@ -177,12 +177,13 @@ namespace AsmResolver.DotNet.Builder
             table.Add(semantics, row);
         }
 
-        private void DefineInterfaces(MetadataToken ownerToken, IEnumerable<InterfaceImplementation> interfaces)
+        private void DefineInterfaces(MetadataToken ownerToken, IList<InterfaceImplementation> interfaces)
         {
             var table = Metadata.TablesStream.GetSortedTable<InterfaceImplementation, InterfaceImplementationRow>(TableIndex.InterfaceImpl);
 
-            foreach (var implementation in interfaces)
+            for (int i = 0; i < interfaces.Count; i++)
             {
+                var implementation = interfaces[i];
                 var row = new InterfaceImplementationRow(
                     ownerToken.Rid,
                     GetTypeDefOrRefIndex(implementation.Interface));
@@ -201,6 +202,7 @@ namespace AsmResolver.DotNet.Builder
             foreach (var member in table.GetMembers())
             {
                 var newToken = table.GetNewToken(member);
+                _tokenMapping.Register(member, newToken);
                 AddCustomAttributes(newToken, member);
             }
         }
@@ -239,6 +241,7 @@ namespace AsmResolver.DotNet.Builder
             foreach (var member in table.GetMembers())
             {
                 var token = table.GetNewToken(member);
+                _tokenMapping.Register(member, token);
                 AddCustomAttributes(token, member);
 
                 foreach (var constraint in member.Constraints)
@@ -259,6 +262,7 @@ namespace AsmResolver.DotNet.Builder
                 GetTypeDefOrRefIndex(constraint.Constraint));
 
             var token = table.Add(row);
+            _tokenMapping.Register(constraint, token);
             AddCustomAttributes(token, constraint);
         }
 

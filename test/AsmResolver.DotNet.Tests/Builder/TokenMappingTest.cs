@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Tests.Builder
     public class TokenMappingTest
     {
         [Fact]
-        public void NewType()
+        public void NewTypeDefinition()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
 
@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         }
 
         [Fact]
-        public void NewField()
+        public void NewFieldDefinition()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
 
@@ -62,7 +62,7 @@ namespace AsmResolver.DotNet.Tests.Builder
         }
 
         [Fact]
-        public void NewMethod()
+        public void NewMethodDefinition()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
 
@@ -159,26 +159,25 @@ namespace AsmResolver.DotNet.Tests.Builder
 
             // Import arbitrary generic method.
             var importer = new ReferenceImporter(module);
-            var reference = importer.ImportType(typeof(List<object>));
+            var specification = importer.ImportType(typeof(List<object>));
 
-            // Ensure type ref is added to the module by adding a dummy field referencing it.
-            module.GetOrCreateModuleType().Fields.Add(new FieldDefinition(
-                "MyField",
-                FieldAttributes.Public | FieldAttributes.Static,
-                FieldSignature.CreateStatic(reference.ToTypeSignature())));
+            // Ensure method reference is added to the module by referencing it in main.
+            var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
+            instructions.Insert(0, CilOpCodes.Ldtoken, specification);
+            instructions.Insert(1, CilOpCodes.Pop);
 
             // Rebuild.
             var builder = new ManagedPEImageBuilder();
             var result = builder.CreateImage(module);
 
             // Assert valid token.
-            var newToken = result.TokenMapping[reference];
+            var newToken = result.TokenMapping[specification];
             Assert.NotEqual(0u, newToken.Rid);
 
             // Assert token resolves to the same method reference.
             var newModule = ModuleDefinition.FromImage(result.ConstructedImage);
             var newReference = (TypeSpecification) newModule.LookupMember(newToken);
-            Assert.Equal(reference.Name, newReference.Name);
+            Assert.Equal(specification.Name, newReference.Name);
         }
 
         [Fact]

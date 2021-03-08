@@ -30,6 +30,29 @@ namespace AsmResolver.DotNet.Builder
             _ => _remainingTokens[member]
         };
 
+        /// <inheritdoc />
+        public bool TryGetNewToken(IMetadataMember member, out MetadataToken token)
+        {
+            switch (member.MetadataToken.Table)
+            {
+                case TableIndex.TypeDef:
+                    token = _typeDefTokens.GetValue((TypeDefinition) member);
+                    return token.Rid != 0;
+                case TableIndex.Field:
+                    return _fieldTokens.TryGetValue((FieldDefinition) member, out token);
+                case TableIndex.Method:
+                    return _methodTokens.TryGetValue((MethodDefinition) member, out token);
+                case TableIndex.Param:
+                    return _parameterTokens.TryGetValue((ParameterDefinition) member, out token);
+                case TableIndex.Event:
+                    return _eventTokens.TryGetValue((EventDefinition) member, out token);
+                case TableIndex.Property:
+                    return _propertyTokens.TryGetValue((PropertyDefinition) member, out token);
+                default:
+                    return _remainingTokens.TryGetValue(member, out token);
+            }
+        }
+
         /// <summary>
         /// Maps a single member to a new metadata token.
         /// </summary>
@@ -39,6 +62,13 @@ namespace AsmResolver.DotNet.Builder
         {
             if (member.MetadataToken.Table != newToken.Table)
                 throw new ArgumentException($"Cannot assign a {newToken.Table} metadata token to a {member.MetadataToken.Table}.");
+
+            if (TryGetNewToken(member, out var existingToken))
+            {
+                if (existingToken.Rid != newToken.Rid)
+                    throw new ArgumentException($"Member {member.SafeToString()} was already assigned a metadata token.");
+                return;
+            }
 
             switch (member.MetadataToken.Table)
             {

@@ -1,5 +1,4 @@
-﻿using AsmResolver.Collections;
-using AsmResolver.DotNet.Code.Cil;
+﻿using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -23,6 +22,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(type.Namespace));
 
             var token = table.Add(row);
+            _tokenMapping.Register(type, token);
             AddCustomAttributes(token, type);
             return token;
         }
@@ -101,6 +101,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.BlobStream.GetBlobIndex(this, member.Signature, DiagnosticBag));
 
             var token = table.Add(row);
+            _tokenMapping.Register(member, token);
             AddCustomAttributes(token, member);
             return token;
         }
@@ -113,6 +114,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.BlobStream.GetBlobIndex(this, signature.Signature, DiagnosticBag));
 
             var token = table.Add(row);
+            _tokenMapping.Register(signature, token);
             AddCustomAttributes(token, signature);
             return token;
         }
@@ -168,6 +170,7 @@ namespace AsmResolver.DotNet.Builder
             var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature, DiagnosticBag));
 
             var token = table.Add(row);
+            _tokenMapping.Register(type, token);
             AddCustomAttributes(token, type);
             return token;
         }
@@ -181,6 +184,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.BlobStream.GetBlobIndex(this, method.Signature, DiagnosticBag));
 
             var token = table.Add(row);
+            _tokenMapping.Register(method, token);
             AddCustomAttributes(token, method);
             return token;
         }
