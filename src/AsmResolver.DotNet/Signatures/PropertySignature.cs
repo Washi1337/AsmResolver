@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="returnType">The return type of the method.</param>
         /// <returns>The signature.</returns>
-        public static PropertySignature CreateStatic(TypeSignature returnType) 
+        public static PropertySignature CreateStatic(TypeSignature returnType)
             => new PropertySignature(0, returnType, Enumerable.Empty<TypeSignature>());
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
-        public static PropertySignature CreateStatic(TypeSignature returnType, params TypeSignature[] parameterTypes) 
+        public static PropertySignature CreateStatic(TypeSignature returnType, params TypeSignature[] parameterTypes)
             => new PropertySignature(0, returnType, parameterTypes);
 
         /// <summary>
@@ -57,13 +57,13 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         public static PropertySignature CreateStatic(TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
             => new PropertySignature(0, returnType, parameterTypes);
-      
+
         /// <summary>
         /// Creates a new parameter-less method signature for an instance method.
         /// </summary>
         /// <param name="returnType">The return type of the method.</param>
         /// <returns>The signature.</returns>
-        public static PropertySignature CreateInstance(TypeSignature returnType) 
+        public static PropertySignature CreateInstance(TypeSignature returnType)
             => new PropertySignature(CallingConventionAttributes.HasThis, returnType, Enumerable.Empty<TypeSignature>());
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
-        public static PropertySignature CreateInstance(TypeSignature returnType, params TypeSignature[] parameterTypes) 
+        public static PropertySignature CreateInstance(TypeSignature returnType, params TypeSignature[] parameterTypes)
             => new PropertySignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
 
         /// <summary>
@@ -104,9 +104,11 @@ namespace AsmResolver.DotNet.Signatures
         {
         }
 
+        private static readonly GenericTypeActivator _activator = new();
+
         /// <summary>
         /// Substitutes any generic type parameter in the property signature with the parameters provided by
-        /// the generic context. 
+        /// the generic context.
         /// </summary>
         /// <param name="context">The generic context.</param>
         /// <returns>The instantiated property signature.</returns>
@@ -115,11 +117,8 @@ namespace AsmResolver.DotNet.Signatures
         /// instance of the property signature.
         /// </remarks>
         public PropertySignature InstantiateGenericTypes(GenericContext context)
-        {
-            var activator = new GenericTypeActivator(context);
-            return activator.InstantiatePropertySignature(this);
-        }
-        
+            => _activator.InstantiatePropertySignature(this, context);
+
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
@@ -134,7 +133,7 @@ namespace AsmResolver.DotNet.Signatures
             string parameterTypesString = ParameterTypes.Count > 0
                 ? $"[{string.Join(", ", ParameterTypes)}]"
                 : string.Empty;
-            
+
             return string.Format("{0}{1} *{2}",
                 prefix,
                 ReturnType.FullName ?? TypeSignature.NullTypeToString,

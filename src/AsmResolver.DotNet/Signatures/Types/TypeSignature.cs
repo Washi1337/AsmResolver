@@ -343,6 +343,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The base signature.</returns>
         public abstract ITypeDefOrRef GetUnderlyingTypeDefOrRef();
 
+        private static readonly GenericTypeActivator _activator = new();
+
         /// <summary>
         /// Substitutes any generic type parameter in the type signature with the parameters provided by
         /// the generic context.
@@ -354,10 +356,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// instance of the type signature.
         /// </remarks>
         public TypeSignature InstantiateGenericTypes(GenericContext context)
-        {
-            var activator = new GenericTypeActivator(context);
-            return AcceptVisitor(activator);
-        }
+            => AcceptVisitor(_activator, context);
 
         /// <summary>
         /// Visit the current type signature using the provided visitor.

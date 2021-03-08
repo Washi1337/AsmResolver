@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         public static FieldSignature CreateStatic(TypeSignature fieldType)
             => new FieldSignature(CallingConventionAttributes.Field, fieldType);
-        
+
         /// <summary>
         /// Creates a new field signature for a static field.
         /// </summary>
@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Signatures
                 (CallingConventionAttributes) reader.ReadByte(),
                 TypeSignature.FromReader(context, reader));
         }
-        
+
         /// <summary>
         /// Creates a new field signature with the provided field type.
         /// </summary>
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Signatures
             : this(CallingConventionAttributes.Field, fieldType)
         {
         }
-        
+
         /// <summary>
         /// Creates a new field signature with the provided field type.
         /// </summary>
@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <remarks>
         /// This constructor automatically sets the <see cref="CallingConventionAttributes.Field"/> bit.
         /// </remarks>
-        public FieldSignature(CallingConventionAttributes attributes, TypeSignature fieldType) 
+        public FieldSignature(CallingConventionAttributes attributes, TypeSignature fieldType)
             : base(attributes | CallingConventionAttributes.Field, fieldType)
         {
         }
@@ -68,9 +68,11 @@ namespace AsmResolver.DotNet.Signatures
             set => MemberReturnType = value;
         }
 
+        private static readonly GenericTypeActivator _activator = new();
+
         /// <summary>
         /// Substitutes any generic type parameter in the field signature with the parameters provided by
-        /// the generic context. 
+        /// the generic context.
         /// </summary>
         /// <param name="context">The generic context.</param>
         /// <returns>The instantiated field signature.</returns>
@@ -78,19 +80,16 @@ namespace AsmResolver.DotNet.Signatures
         /// When the type signature does not contain any generic parameter, this method might return the current
         /// instance of the field signature.
         /// </remarks>
-        public FieldSignature InstantiateGenericTypes(GenericContext context)
-        {
-            var activator = new GenericTypeActivator(context);
-            return activator.InstantiateFieldSignature(this);
-        }
-        
+        public FieldSignature InstantiateGenericTypes(GenericContext context) =>
+            _activator.InstantiateFieldSignature(this, context);
+
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
             context.Writer.WriteByte((byte) Attributes);
             if (FieldType is null)
             {
-                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this, 
+                context.DiagnosticBag.RegisterException(new InvalidBlobSignatureException(this,
                     "The type referenced in the field signature is null."));
                 context.Writer.WriteByte((byte) ElementType.Object);
             }
