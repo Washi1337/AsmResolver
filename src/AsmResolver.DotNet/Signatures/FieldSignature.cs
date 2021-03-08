@@ -68,8 +68,6 @@ namespace AsmResolver.DotNet.Signatures
             set => MemberReturnType = value;
         }
 
-        private static readonly GenericTypeActivator _activator = new();
-
         /// <summary>
         /// Substitutes any generic type parameter in the field signature with the parameters provided by
         /// the generic context.
@@ -81,7 +79,7 @@ namespace AsmResolver.DotNet.Signatures
         /// instance of the field signature.
         /// </remarks>
         public FieldSignature InstantiateGenericTypes(GenericContext context) =>
-            _activator.InstantiateFieldSignature(this, context);
+            GenericTypeActivator.Instance.InstantiateFieldSignature(this, context);
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

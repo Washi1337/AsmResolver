@@ -118,8 +118,6 @@ namespace AsmResolver.DotNet.Signatures
             set;
         }
 
-        private static readonly GenericTypeActivator _activator = new();
-
         /// <summary>
         /// Substitutes any generic type parameter in the method signature with the parameters provided by
         /// the generic context.
@@ -131,7 +129,7 @@ namespace AsmResolver.DotNet.Signatures
         /// instance of the method signature.
         /// </remarks>
         public MethodSignature InstantiateGenericTypes(GenericContext context)
-            => _activator.InstantiateMethodSignature(this, context);
+            => GenericTypeActivator.Instance.InstantiateMethodSignature(this, context);
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

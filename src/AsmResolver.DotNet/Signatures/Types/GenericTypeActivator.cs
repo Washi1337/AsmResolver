@@ -11,6 +11,15 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </remarks>
     public class GenericTypeActivator : ITypeSignatureVisitor<GenericContext, TypeSignature>
     {
+
+        /// <summary>
+        /// Gets the default instance of the <see cref="GenericTypeActivator"/> class
+        /// </summary>
+        public static GenericTypeActivator Instance
+        {
+            get;
+        } = new();
+
         /// <summary>
         /// Instantiates a new field signature, substituting any generic type parameter in the signature with
         /// the activation context.
@@ -62,7 +71,8 @@ namespace AsmResolver.DotNet.Signatures.Types
             return result;
         }
 
-        private void InstantiateMethodSignatureBase(MethodSignatureBase signature, MethodSignatureBase result, GenericContext context)
+        private void InstantiateMethodSignatureBase(MethodSignatureBase signature, MethodSignatureBase result,
+            GenericContext context)
         {
             result.ReturnType = signature.ReturnType.AcceptVisitor(this, context);
             foreach (var parameterType in signature.ParameterTypes)

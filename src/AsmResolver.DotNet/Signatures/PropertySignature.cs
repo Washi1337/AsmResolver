@@ -104,8 +104,6 @@ namespace AsmResolver.DotNet.Signatures
         {
         }
 
-        private static readonly GenericTypeActivator _activator = new();
-
         /// <summary>
         /// Substitutes any generic type parameter in the property signature with the parameters provided by
         /// the generic context.
@@ -117,7 +115,7 @@ namespace AsmResolver.DotNet.Signatures
         /// instance of the property signature.
         /// </remarks>
         public PropertySignature InstantiateGenericTypes(GenericContext context)
-            => _activator.InstantiatePropertySignature(this, context);
+            => GenericTypeActivator.Instance.InstantiatePropertySignature(this, context);
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
