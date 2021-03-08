@@ -20,7 +20,48 @@ While this is easy, and would probably work for most .NET module processing, it 
 
     module.Write(@"C:\Path\To\Output\Binary.exe", imageBuilder);
 
-This article explores various features about the ``ManagedPEImageBuilder`` class that can be configured.
+Alternatively, it is possible to call the ``CreateImage`` method directly. This allows for inspecting all build artifacts, as well as post processing of the constructed PE image before it is written to the disk.
+
+.. code-block:: csharp
+
+    var imageBuilder = new ManagedPEImageBuilder();
+    
+    /* Configuration of imageBuilder here... */
+
+    // Construct image.
+    var result = imageBuilder.CreateImage(module);
+    var image = result.ConstructedImage;
+    
+    /* Post processing of image happens here... */
+
+    // Write image to the disk.
+    var fileBuilder = new ManagedPEFileBuilder();
+    var file = fileBuilder.CreateFile(image);
+    file.Write(@"C:\Path\To\Output\Binary.exe");
+
+
+This article explores various features about the ``ManagedPEImageBuilder`` class.
+
+
+Token mappings
+--------------
+
+Upon constructing a new PE image for a module, members defined in the module might be re-ordered. This can make post-processing of the PE image difficult, as metadata members cannot be looked up by their original metadata token anymore. The ``PEImageBuildResult`` object returned by ``CreateImage`` defines a property called ``TokenMapping``. This object maps all members that were included in the construction of the PE image to the newly assigned metadata tokens, allowing for new metadata rows to be looked up easily and efficiently.
+
+.. code-block:: csharp
+
+    var mainMethod = module.ManagedEntrypointMethod;
+
+    // Build PE image.
+    var result = imageBuilder.CreateImage(module);
+
+    // Look up the new metadata row assigned to the main method.
+    var newToken = result.TokenMapping[mainMethod];
+    var mainMethodRow = result.ConstructedImage.DotNetDirectory.Metadata
+        .GetStream<TablesStream>()
+        .GetTable<MethodDefinitionRow>()
+        .GetByRid(newToken.Rid);
+
 
 Preserving raw metadata structure
 ---------------------------------
@@ -105,7 +146,7 @@ After writing the module to an output stream, use the ``StrongNameSigner`` class
 Image Builder Diagnostics 
 -------------------------
 
-.NET modules that contain invalid metadata and/or method bodies might cause problems upon serializing it to a PE image or file. To inspect all errors that occurred during the construction of a PE image, it is possible to call the ``CreateImage`` method of the image builder directly. This method returns an instance of the ``PEImageBuildResult`` class, which defines a property called ``DiagnosticBag``. This is a collection that contains all the problems that occurred during the process:
+.NET modules that contain invalid metadata and/or method bodies might cause problems upon serializing it to a PE image or file. To inspect all errors that occurred during the construction of a PE image, call the ``CreateImage`` method directly and get the value of the ``DiagnosticBag`` property. This is a collection that contains all the problems that occurred during the process:
 
 .. code-block:: csharp
 
