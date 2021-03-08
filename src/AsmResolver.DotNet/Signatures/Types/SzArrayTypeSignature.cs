@@ -11,22 +11,27 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Creates a new single-dimension array signature with 0 as a lower bound.
         /// </summary>
         /// <param name="baseType">The type of the elements to store in the array.</param>
-        public SzArrayTypeSignature(TypeSignature baseType) 
+        public SzArrayTypeSignature(TypeSignature baseType)
             : base(baseType)
         {
         }
 
         /// <inheritdoc />
         public override ElementType ElementType => ElementType.SzArray;
-        
+
         /// <inheritdoc />
         public override string Name => $"{BaseType?.Name ?? NullTypeToString}[]";
 
         /// <inheritdoc />
         public override bool IsValueType => false;
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitSzArrayType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitSzArrayType(this, state);
     }
 }

@@ -3,7 +3,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
-    /// Represents a type signature that describes an unmanaged pointer that addresses a chunk of data in memory. 
+    /// Represents a type signature that describes an unmanaged pointer that addresses a chunk of data in memory.
     /// </summary>
     public class PointerTypeSignature : TypeSpecificationSignature
     {
@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Creates a new pointer type signature.
         /// </summary>
         /// <param name="baseType">The type of values the pointer addresses.</param>
-        public PointerTypeSignature(TypeSignature baseType) 
+        public PointerTypeSignature(TypeSignature baseType)
             : base(baseType)
         {
         }
@@ -24,9 +24,14 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override bool IsValueType => false;
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitPointerType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitPointerType(this, state);
     }
 }

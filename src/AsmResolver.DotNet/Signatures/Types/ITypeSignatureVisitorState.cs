@@ -5,7 +5,7 @@ namespace AsmResolver.DotNet.Signatures.Types
     /// </summary>
     /// <typeparam name="TSTate">The type of additional state.</typeparam>
     /// <typeparam name="TResult">The type of value to return.</typeparam>
-    public interface ITypeSignatureVisitorState<in TSTate,out TResult>
+    public interface ITypeSignatureVisitor<in TSTate, out TResult>
     {
         /// <summary>
         /// Visits an instance of an <see cref="ArrayTypeSignature"/>.
