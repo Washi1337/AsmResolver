@@ -37,8 +37,8 @@ namespace AsmResolver.DotNet.Code.Cil
         } = null;
 
         /// <summary>
-        /// Gets or sets the value of an override switch indicating whether branch instructions should always be
-        /// verified for validity or not.
+        /// Gets or sets the value of an override switch indicating whether labels should always be verified for
+        /// validity or not.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -49,10 +49,10 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </para>
         /// <para>
         /// When this property is set to <c>null</c>, a method body will only be verified if
-        /// <see cref="CilMethodBody.VerifyBranchesOnBuild"/> is set to <c>true</c>.
+        /// <see cref="CilMethodBody.VerifyLabelsOnBuild"/> is set to <c>true</c>.
         /// </para>
         /// </remarks>
-        public bool? VerifyBranchesOnBuildOverride
+        public bool? VerifyLabelsOnBuildOverride
         {
             get;
             set;
@@ -73,12 +73,12 @@ namespace AsmResolver.DotNet.Code.Cil
                 if (ComputeMaxStackOnBuildOverride ?? body.ComputeMaxStackOnBuild)
                 {
                     // Max stack computation requires branches to be correct.
-                    body.VerifyBranches(false);
+                    body.VerifyLabels(false);
                     body.MaxStack = body.ComputeMaxStack(false);
                 }
-                else if (VerifyBranchesOnBuildOverride ?? body.VerifyBranchesOnBuild)
+                else if (VerifyLabelsOnBuildOverride ?? body.VerifyLabelsOnBuild)
                 {
-                    body.VerifyBranches(false);
+                    body.VerifyLabels(false);
                 }
             }
             catch (Exception ex)

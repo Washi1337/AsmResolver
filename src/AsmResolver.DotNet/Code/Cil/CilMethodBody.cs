@@ -106,13 +106,13 @@ namespace AsmResolver.DotNet.Code.Cil
         } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether a .NET assembly builder should verify branch instructions in this
-        /// method body for correctness.
+        /// Gets or sets a value indicating whether a .NET assembly builder should verify branch instructions and
+        /// exception handler labels in this method body for validity.
         /// </summary>
         /// <remarks>
         /// The value of this property will be ignored if <see cref="ComputeMaxStackOnBuild"/> is set to <c>true</c>.
         /// </remarks>
-        public bool VerifyBranchesOnBuild
+        public bool VerifyLabelsOnBuild
         {
             get;
             set;
@@ -318,21 +318,21 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
-        /// Verifies all branch instructions in the method body for validity.
+        /// Verifies all branch targets and exception handler labels in the method body for validity.
         /// </summary>
         /// <exception cref="InvalidCilInstructionException">Occurs when one branch instruction in the method body is invalid.</exception>
         /// <exception cref="AggregateException">Occurs when multiple branch instructions in the method body are invalid.</exception>
         /// <remarks>This method will force the offsets of each instruction to be calculated.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void VerifyBranches() => VerifyBranches(true);
+        public void VerifyLabels() => VerifyLabels(true);
 
         /// <summary>
-        /// Verifies all branch instructions in the method body for validity.
+        /// Verifies all branch targets and exception handler labels in the method body for validity.
         /// </summary>
         /// <param name="calculateOffsets">Determines whether offsets should be calculated beforehand.</param>
         /// <exception cref="InvalidCilInstructionException">Occurs when one branch instruction in the method body is invalid.</exception>
         /// <exception cref="AggregateException">Occurs when multiple branch instructions in the method body are invalid.</exception>
-        public void VerifyBranches(bool calculateOffsets)
+        public void VerifyLabels(bool calculateOffsets)
         {
             if (calculateOffsets)
                 Instructions.CalculateOffsets();
