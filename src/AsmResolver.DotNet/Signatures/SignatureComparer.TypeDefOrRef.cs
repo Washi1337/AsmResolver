@@ -3,7 +3,7 @@ using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.DotNet.Signatures
 {
-    public partial class SignatureComparer : 
+    public partial class SignatureComparer :
         IEqualityComparer<ITypeDescriptor>,
         IEqualityComparer<ITypeDefOrRef>,
         IEqualityComparer<TypeDefinition>,
@@ -52,7 +52,9 @@ namespace AsmResolver.DotNet.Signatures
                 return true;
 
             // If scope does not match, it can still be a reference to an exported type.
-            return Equals(x.Resolve(), y.Resolve());
+            return x.Resolve() is { } definition1
+                   && y.Resolve() is { } definition2
+                   && Equals(definition1.Module.Assembly, definition2.Module.Assembly);
         }
 
         /// <inheritdoc />

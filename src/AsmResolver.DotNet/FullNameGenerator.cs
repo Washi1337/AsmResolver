@@ -5,7 +5,7 @@ using AsmResolver.DotNet.Signatures.Types;
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Provides methods for constructing the full name of a member in a .NET module. 
+    /// Provides methods for constructing the full name of a member in a .NET module.
     /// </summary>
     public static class FullNameGenerator
     {
@@ -20,7 +20,7 @@ namespace AsmResolver.DotNet
         public static string GetFieldFullName(string name, ITypeDescriptor declaringType, FieldSignature signature)
         {
             string fieldTypeString = signature.FieldType?.FullName ?? TypeSignature.NullTypeToString;
-            
+
             return declaringType == null
                 ? $"{fieldTypeString} {name}"
                 : $"{fieldTypeString} {declaringType}::{name}";
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet
         {
             string returnTypeString = signature.ReturnType?.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);
-            
+
             return declaringType is null
                 ? $"{returnTypeString} {name}({parameterTypesString})"
                 : $"{returnTypeString} {declaringType}::{name}({parameterTypesString})";
@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet
             string returnTypeString = signature.ReturnType?.FullName ?? TypeSignature.NullTypeToString;
             string parameterTypesString = GetParameterTypesString(signature);
             string typeArgumentsString = string.Join(", ", typeArguments);
-            
+
             return declaringType is null
                 ? $"{returnTypeString} {name}<{typeArgumentsString}>({parameterTypesString})"
                 : $"{returnTypeString} {declaringType}::{name}<{typeArgumentsString}>({parameterTypesString})";
@@ -99,11 +99,11 @@ namespace AsmResolver.DotNet
                 ? $"{eventType} {name}"
                 : $"{eventType} {declaringType}::{name}";
         }
-        
+
         private static string GetParameterTypesString(MethodSignatureBase signature)
         {
-            return string.Format("{0}{1}", 
-                string.Join(", ", signature.ParameterTypes), 
+            return string.Format("{0}{1}",
+                string.Join(", ", signature.ParameterTypes),
                 signature.IsSentinel ? ", ..." : string.Empty);
         }
 
@@ -116,12 +116,12 @@ namespace AsmResolver.DotNet
         {
             if (type.DeclaringType != null)
                 return $"{type.DeclaringType.FullName}+{type.Name}";
-            
+
             if (type.Namespace != null)
                 return $"{type.Namespace}.{type.Name}";
-            
+
             return type.Name;
         }
-        
+
     }
 }

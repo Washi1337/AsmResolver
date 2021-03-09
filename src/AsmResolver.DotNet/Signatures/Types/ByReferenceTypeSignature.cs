@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// Creates a new by reference type signature.
         /// </summary>
         /// <param name="baseType">The type that is passed on by reference.</param>
-        public ByReferenceTypeSignature(TypeSignature baseType) 
+        public ByReferenceTypeSignature(TypeSignature baseType)
             : base(baseType)
         {
         }
@@ -24,9 +24,14 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override bool IsValueType => false;
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitByReferenceType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitByReferenceType(this, state);
     }
 }

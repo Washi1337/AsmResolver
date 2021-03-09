@@ -87,7 +87,7 @@ namespace AsmResolver.Tests
             });
 
             var fork = reader.Fork(2, 3);
-            
+
             Assert.Equal(2u, fork.StartOffset);
             Assert.Equal(2u, fork.Offset);
             Assert.Equal(3u, fork.Length);
@@ -101,7 +101,7 @@ namespace AsmResolver.Tests
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => reader.Fork(8, 3));
+            Assert.Throws<ArgumentOutOfRangeException>(() => reader.Fork(9, 3));
         }
 
         [Fact]
@@ -122,11 +122,11 @@ namespace AsmResolver.Tests
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
-            
+
             var fork = reader.Fork(0, 2);
             Assert.Equal(0x0201, fork.ReadUInt16());
         }
-        
+
         [Fact]
         public void ForkMovesIndependentOfOriginal()
         {
@@ -134,10 +134,10 @@ namespace AsmResolver.Tests
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
-            
+
             var fork = reader.Fork(0, 2);
             fork.ReadUInt16();
-                
+
             Assert.Equal(0u, reader.Offset);
             Assert.Equal(2u, fork.Offset);
         }
@@ -149,7 +149,7 @@ namespace AsmResolver.Tests
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
-            
+
             var fork = reader.Fork(4, 2);
             Assert.Equal(0x0605, fork.ReadUInt16());
         }
@@ -161,7 +161,7 @@ namespace AsmResolver.Tests
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
-            
+
             var fork = reader.Fork(2, 4);
             var fork2 = fork.Fork(3, 2);
             Assert.Equal(0x04, fork2.ReadByte());

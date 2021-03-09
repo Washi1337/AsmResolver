@@ -15,7 +15,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             : this(type, type.IsValueType)
         {
         }
-        
+
         /// <summary>
         /// Creates a new type signature referencing a type in a type metadata table.
         /// </summary>
@@ -25,11 +25,11 @@ namespace AsmResolver.DotNet.Signatures.Types
         {
             Type = type;
             IsValueType = isValueType;
-            
+
         }
 
         /// <summary>
-        /// Gets the metadata type that is referenced by this signature. 
+        /// Gets the metadata type that is referenced by this signature.
         /// </summary>
         public ITypeDefOrRef Type
         {
@@ -68,11 +68,16 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => Type;
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitTypeDefOrRef(this);
-        
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitTypeDefOrRef(this, state);
+
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {

@@ -67,18 +67,18 @@ namespace AsmResolver.DotNet.Signatures.Types
             for (int i = 0; i < rank; i++)
             {
                 int? size = null, lowerBound = null;
-                
-                if (i < numSizes)
-                    size = (int)sizes[i];
-                if (i < numLoBounds)
-                    lowerBound= (int)loBounds[i];
 
-                signature.Dimensions.Add(new ArrayDimension(size ,lowerBound));
+                if (i < numSizes)
+                    size = (int) sizes[i];
+                if (i < numLoBounds)
+                    lowerBound = (int) loBounds[i];
+
+                signature.Dimensions.Add(new ArrayDimension(size, lowerBound));
             }
-            
+
             return signature;
-        } 
-        
+        }
+
         /// <summary>
         /// Creates a new array type signature.
         /// </summary>
@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                 throw new ArgumentException("Number of dimensions cannot be negative.");
 
             Dimensions = new List<ArrayDimension>(dimensionCount);
-            for (int i = 0; i < dimensionCount;i++)
+            for (int i = 0; i < dimensionCount; i++)
                 Dimensions.Add(new ArrayDimension());
         }
 
@@ -143,6 +143,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                         return FormatDimensionBounds(x.LowerBound.Value, x.Size.Value);
                     return x.LowerBound.Value + "...";
                 }
+
                 if (x.Size.HasValue)
                     return FormatDimensionBounds(0, x.Size.Value);
                 return string.Empty;
@@ -190,8 +191,13 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitArrayType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitArrayType(this, state);
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
@@ -209,7 +215,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             var sizedDimensions = Dimensions
                 .Where(x => x.Size.HasValue)
                 .ToArray();
-            
+
             writer.WriteCompressedUInt32((uint) sizedDimensions.Length);
             foreach (var sizedDimension in sizedDimensions)
                 writer.WriteCompressedUInt32((uint) sizedDimension.Size.Value);

@@ -111,18 +111,24 @@ namespace AsmResolver.DotNet.Signatures.Types
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) ElementType);
             writer.WriteByte((byte) (IsValueType ? ElementType.ValueType : ElementType.Class));
             WriteTypeDefOrRef(context, GenericType, "Underlying generic type");
             writer.WriteCompressedUInt32((uint) TypeArguments.Count);
-            
+
             for (int i = 0; i < TypeArguments.Count; i++)
                 TypeArguments[i].Write(context);
         }
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitGenericInstanceType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitGenericInstanceType(this, state);
+
     }
 }

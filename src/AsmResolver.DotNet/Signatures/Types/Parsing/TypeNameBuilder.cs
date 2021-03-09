@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 _writer.Write('[');
                 WriteTypeAssemblyQualifiedName(signature.TypeArguments[i]);
                 _writer.Write(']');
-                
+
                 if (i < signature.TypeArguments.Count - 1)
                     _writer.Write(',');
             }
@@ -134,10 +134,15 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 type = type.DeclaringType;
             }
 
-            WriteIdentifier(ancestors[ancestors.Count - 1].Namespace, true);
-            _writer.Write('.');
+            string ns = ancestors[ancestors.Count - 1].Namespace;
+            if (!string.IsNullOrEmpty(ns))
+            {
+                WriteIdentifier(ns, true);
+                _writer.Write('.');
+            }
+
             WriteIdentifier(ancestors[ancestors.Count - 1].Name);
-            
+
             for (int i = ancestors.Count - 2; i >= 0; i--)
             {
                 _writer.Write('+');
@@ -151,7 +156,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             _writer.Write(", Version=");
             _writer.Write(assembly.Version.ToString());
             _writer.Write(", PublicKeyToken=");
-            
+
             var token = assembly.GetPublicKeyToken();
             if (token is null)
                 _writer.Write("null");

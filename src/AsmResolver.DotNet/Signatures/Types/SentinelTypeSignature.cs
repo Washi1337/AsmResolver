@@ -5,7 +5,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Represents a sentinel type signature to be used in a method signature, indicating the start of any vararg
-    /// argument types. 
+    /// argument types.
     /// </summary>
     /// <remarks>
     /// This type signature should not be used directly.
@@ -34,11 +34,16 @@ namespace AsmResolver.DotNet.Signatures.Types
         public override ITypeDefOrRef GetUnderlyingTypeDefOrRef() => null;
 
         /// <inheritdoc />
-        protected override void WriteContents(BlobSerializationContext context) => 
+        protected override void WriteContents(BlobSerializationContext context) =>
             context.Writer.WriteByte((byte) ElementType);
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitSentinelType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitSentinelType(this, state);
     }
 }
