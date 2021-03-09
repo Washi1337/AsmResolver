@@ -91,6 +91,30 @@ namespace AsmResolver.Workspaces.DotNet
                     originalResolver = reference.Module.MetadataResolver;
                 return originalResolver.AssemblyResolver.Resolve(assembly);
             }
+
+            public override string? ProbeRuntimeDirectories(AssemblyDescriptor assembly)
+            {
+                // Check if any of the assemblies in the workspace matches the requested assembly,
+                // and if so, prioritize them.
+                for (int i = 0; i < _collection.Count; i++)
+                {
+                    var candidate = _collection[i];
+                    if (_comparer.Equals(assembly, candidate))
+                        return candidate.ManifestModule.FilePath;
+                }
+
+                // If not, resolve using the original assembly resolver of the module.
+                if (assembly is not AssemblyReference reference)
+                    return null;
+
+                if (!_collection._originalResolvers.TryGetValue(reference.Module, out var originalResolver))
+                    originalResolver = reference.Module.MetadataResolver;
+
+                if (originalResolver.AssemblyResolver is not AssemblyResolverBase resolver)
+                    return null;
+
+                return resolver.ProbeRuntimeDirectories(assembly);
+            }
         }
 
     }

@@ -80,7 +80,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        protected override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
+        public override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
         {
             for (int i = 0; i < GacDirectories.Count; i++)
             {

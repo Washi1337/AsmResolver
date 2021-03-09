@@ -104,7 +104,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <inheritdoc />
-        protected override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
+        public override string ProbeRuntimeDirectories(AssemblyDescriptor assembly)
         {
             foreach (string candidate in _runtimeDirectories)
             {

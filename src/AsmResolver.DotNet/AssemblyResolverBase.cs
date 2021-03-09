@@ -133,7 +133,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <param name="assembly">The assembly descriptor to search.</param>
         /// <returns>The path to the assembly, or <c>null</c> if none was found.</returns>
-        protected abstract string ProbeRuntimeDirectories(AssemblyDescriptor assembly);
+        public abstract string ProbeRuntimeDirectories(AssemblyDescriptor assembly);
 
         /// <summary>
         /// Probes a directory for the provided assembly.
