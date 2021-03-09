@@ -30,6 +30,9 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(TypeSignature), new TypeSpecificationAnalyser());
             Analyzers.Register(typeof(MethodSignatureBase), new MethodSignatureBaseAnalyser());
             Analyzers.Register(typeof(FieldSignature), new FieldSignatureAnalyser());
+            Analyzers.Register(typeof(FieldAnalyzer), new FieldAnalyzer());
+            Analyzers.Register(typeof(PropertyAnalyzer), new PropertyAnalyzer());
+            Analyzers.Register(typeof(EventAnalyzer), new EventAnalyzer());
         }
 
         /// <summary>
