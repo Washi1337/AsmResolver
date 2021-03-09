@@ -343,6 +343,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The base signature.</returns>
         public abstract ITypeDefOrRef GetUnderlyingTypeDefOrRef();
 
+        private static readonly GenericTypeActivator _activator = new();
+
         /// <summary>
         /// Substitutes any generic type parameter in the type signature with the parameters provided by
         /// the generic context.
@@ -354,10 +356,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// instance of the type signature.
         /// </remarks>
         public TypeSignature InstantiateGenericTypes(GenericContext context)
-        {
-            var activator = new GenericTypeActivator(context);
-            return AcceptVisitor(activator);
-        }
+            => AcceptVisitor(_activator, context);
 
         /// <summary>
         /// Visit the current type signature using the provided visitor.
@@ -366,6 +365,16 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <typeparam name="TResult">The type of result the visitor produces.</typeparam>
         /// <returns>The result the visitor produced after visiting this type signature.</returns>
         public abstract TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor);
+
+        /// <summary>
+        /// Visit the current type signature using the provided visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor to accept.</param>
+        /// <param name="state">Additional state.</param>
+        /// <typeparam name="TState">The type of additional state.</typeparam>
+        /// <typeparam name="TResult">The type of result the visitor produces.</typeparam>
+        /// <returns>The result the visitor produced after visiting this type signature.</returns>
+        public abstract TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor, TState state);
 
         /// <inheritdoc />
         public override string ToString()
