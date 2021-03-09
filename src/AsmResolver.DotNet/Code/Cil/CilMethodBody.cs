@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE.DotNet.Cil;
@@ -38,16 +39,6 @@ namespace AsmResolver.DotNet.Code.Cil
             get;
             set;
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether a .NET assembly builder should automatically compute and update the
-        /// <see cref="MaxStack"/> property according to the contents of the method body.
-        /// </summary>
-        public bool ComputeMaxStackOnBuild
-        {
-            get;
-            set;
-        } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether all local variables should be initialized to zero by the runtime
@@ -103,6 +94,26 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             get;
         } = new List<CilExceptionHandler>();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a .NET assembly builder should automatically compute and update the
+        /// <see cref="MaxStack"/> property according to the contents of the method body.
+        /// </summary>
+        public bool ComputeMaxStackOnBuild
+        {
+            get;
+            set;
+        } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a .NET assembly builder should verify branch instructions in this
+        /// method body for correctness.
+        /// </summary>
+        public bool VerifyBranchesOnBuild
+        {
+            get;
+            set;
+        } = true;
 
         /// <summary>
         ///     Creates a CIL method body from a dynamic method.
@@ -304,10 +315,20 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
+        /// Verifies all branch instructions in the method body for validity.
+        /// </summary>
+        /// <exception cref="InvalidCilInstructionException"></exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void VerifyBranches() => new CilBranchVerifier(this).Verify();
+
+        /// <summary>
         /// Computes the maximum values pushed onto the stack by this method body.
         /// </summary>
         /// <exception cref="StackImbalanceException">Occurs when the method body will result in an unbalanced stack.</exception>
         /// <remarks>This method will force the offsets of each instruction to be calculated.</remarks>
-        public int ComputeMaxStack() => new CilMaxStackCalculator(this).Compute();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ComputeMaxStack() => ComputeMaxStack(true);
+
+        private int ComputeMaxStack(bool calculateOffsets) => new CilMaxStackCalculator(this).Compute(calculateOffsets);
     }
 }

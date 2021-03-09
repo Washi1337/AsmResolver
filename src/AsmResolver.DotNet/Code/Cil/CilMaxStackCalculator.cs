@@ -18,15 +18,17 @@ namespace AsmResolver.DotNet.Code.Cil
             _recordedStackSizes = new int?[_body.Instructions.Count];
         }
 
-        public int Compute()
+        public int Compute(bool calculateOffsets)
         {
             if (_body.Instructions.Count == 0)
                 return 0;
 
+            if (calculateOffsets)
+                _body.Instructions.CalculateOffsets();
+
             int result = 0;
 
             // Add entry points to agenda.
-            _body.Instructions.CalculateOffsets();
             ScheduleEntryPoints();
 
             while (_agenda.Count > 0)
