@@ -18,13 +18,10 @@ namespace AsmResolver.DotNet.Code.Cil
             _recordedStackSizes = new int?[_body.Instructions.Count];
         }
 
-        public int Compute(bool calculateOffsets)
+        public int Compute()
         {
             if (_body.Instructions.Count == 0)
                 return 0;
-
-            if (calculateOffsets)
-                _body.Instructions.CalculateOffsets();
 
             int result = 0;
 
