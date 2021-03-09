@@ -1,8 +1,7 @@
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
-using AsmResolver.DotNet.Signatures.Types;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 {
     /// <summary>
     /// Analyzes a <see cref="MethodDefinition"/> for implicit base definitions, such as abstract methods in
@@ -14,7 +13,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
         public override void Analyze(AnalysisContext context, MethodDefinition subject)
         {
             ScheduleMembersForAnalysis(context, subject);
-            
+
             if (!subject.IsVirtual)
                 return;
 
@@ -27,7 +26,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                 node.AddRelation(DotNetRelations.ImplementationMethod, candidateNode);
             }
         }
-        
+
         private static void ScheduleMembersForAnalysis(AnalysisContext context, MethodDefinition subject)
         {
             // Schedule parameters for analysis.
@@ -35,7 +34,15 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
             {
                 for (int i = 0; i < subject.ParameterDefinitions.Count; i++)
                     context.SchedulaForAnalysis(subject.ParameterDefinitions[i]);
+
             }
+
+            // Schedule signature for analysis.
+            if (context.HasAnalyzers(typeof(MethodSignature)))
+            {
+                context.SchedulaForAnalysis(subject.Signature);
+            }
+
         }
     }
 }

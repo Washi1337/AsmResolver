@@ -1,6 +1,6 @@
 using AsmResolver.DotNet;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 {
     /// <summary>
     /// Provides a default implementation for an <see cref="AssemblyDefinition"/> analyzer.

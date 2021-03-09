@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 {
     /// <summary>
     /// Analyzes a <see cref="IHasCustomAttribute"/> for its definitions
@@ -25,7 +23,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
                 return;
 
             var index = context.Workspace.Index;
-            _ = index.GetOrCreateNode(subject.Constructor);
+            context.SchedulaForAnalysis(subject.Constructor);
 
             if (context.Workspace is not DotNetWorkspace workspace)
                 return;

@@ -3,6 +3,9 @@ using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.Workspaces.DotNet.Analyzers;
+using AsmResolver.Workspaces.DotNet.Analyzers.Definition;
+using AsmResolver.Workspaces.DotNet.Analyzers.Reference;
+using AsmResolver.Workspaces.DotNet.Analyzers.Signature;
 
 namespace AsmResolver.Workspaces.DotNet
 {
