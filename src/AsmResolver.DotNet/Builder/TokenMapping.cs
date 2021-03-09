@@ -101,6 +101,6 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         /// <param name="newToken">The new token.</param>
         /// <returns>The type, or <c>null</c> if no type is assigned to the provided token.</returns>
-        public TypeDefinition GetType(MetadataToken newToken) => _typeDefTokens.GetKey(newToken);
+        public TypeDefinition GetTypeByToken(MetadataToken newToken) => _typeDefTokens.GetKey(newToken);
     }
 }

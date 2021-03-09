@@ -289,7 +289,7 @@ namespace AsmResolver.DotNet.Builder
             for (uint rid = 1; rid <= typeDefTable.Count; rid++)
             {
                 var typeToken = new MetadataToken(TableIndex.TypeDef, rid);
-                var type = _tokenMapping.GetType(typeToken);
+                var type = _tokenMapping.GetTypeByToken(typeToken);
 
                 // Update extends, field list and method list columns.
                 var typeRow = typeDefTable[rid];
