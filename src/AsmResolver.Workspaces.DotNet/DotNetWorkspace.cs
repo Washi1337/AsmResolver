@@ -25,7 +25,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(MemberReference), new MemberReferenceAnalyser());
             Analyzers.Register(typeof(IHasCustomAttribute), new CustomAttributeAnalyser());
             Analyzers.Register(typeof(TypeSignature), new TypeSpecificationAnalyser());
-            Analyzers.Register(typeof(MethodSignature), new MethodSignatureAnalyser());
+            Analyzers.Register(typeof(MethodSignatureBase), new MethodSignatureBaseAnalyser());
         }
 
         /// <summary>

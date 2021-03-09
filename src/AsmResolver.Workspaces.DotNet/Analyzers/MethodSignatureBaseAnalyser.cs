@@ -5,12 +5,12 @@ using AsmResolver.DotNet.Signatures.Types;
 namespace AsmResolver.Workspaces.DotNet.Analyzers
 {
     /// <summary>
-    /// Provides a default implementation for an <see cref="MethodSignature"/> analyzer.
+    /// Provides a default implementation for an <see cref="MethodSignatureBase"/> analyzer.
     /// </summary>
-    public class MethodSignatureAnalyser : ObjectAnalyzer<MethodSignature>
+    public class MethodSignatureBaseAnalyser : ObjectAnalyzer<MethodSignatureBase>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, MethodSignature subject)
+        public override void Analyze(AnalysisContext context, MethodSignatureBase subject)
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {
