@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.Workspaces.DotNet.Analyzers;
 
 namespace AsmResolver.Workspaces.DotNet
@@ -22,6 +23,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(TypeReference), new TypeReferenceAnalyser());
             Analyzers.Register(typeof(MemberReference), new MemberReferenceAnalyser());
             Analyzers.Register(typeof(IHasCustomAttribute), new CustomAttributeAnalyser());
+            Analyzers.Register(typeof(TypeSignature), new TypeSpecificationAnalyser());
         }
 
         /// <summary>
