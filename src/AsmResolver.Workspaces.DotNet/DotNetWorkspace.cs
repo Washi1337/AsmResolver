@@ -33,6 +33,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(FieldAnalyzer), new FieldAnalyzer());
             Analyzers.Register(typeof(PropertyAnalyzer), new PropertyAnalyzer());
             Analyzers.Register(typeof(EventAnalyzer), new EventAnalyzer());
+            Analyzers.Register(typeof(IHasGenericParameters), new GenericParameterAnalyser());
         }
 
         /// <summary>
