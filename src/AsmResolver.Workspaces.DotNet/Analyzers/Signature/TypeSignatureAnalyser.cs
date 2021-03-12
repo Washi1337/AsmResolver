@@ -45,7 +45,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
             /// <inheritdoc />
             public TypeSignature VisitCorLibType(CorLibTypeSignature signature, AnalysisContext context)
             {
-                if (context.HasAnalyzers(typeof(ITypeDefOrRef)))
+                if (context.HasAnalyzers(signature.Type.GetType()))
                 {
                     context.SchedulaForAnalysis(signature.Type);
                 }
@@ -55,7 +55,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
             /// <inheritdoc />
             public TypeSignature VisitCustomModifierType(CustomModifierTypeSignature signature, AnalysisContext context)
             {
-                if (context.HasAnalyzers(typeof(ITypeDefOrRef)))
+                if (context.HasAnalyzers(signature.ModifierType.GetType()))
                 {
                     context.SchedulaForAnalysis(signature.ModifierType);
                 }
@@ -67,7 +67,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
             public TypeSignature VisitGenericInstanceType(GenericInstanceTypeSignature signature,
                 AnalysisContext context)
             {
-                if (context.HasAnalyzers(typeof(ITypeDefOrRef)))
+                if (context.HasAnalyzers(signature.GenericType.GetType()))
                 {
                     context.SchedulaForAnalysis(signature.GenericType);
                 }
@@ -114,7 +114,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
             /// <inheritdoc />
             public TypeSignature VisitTypeDefOrRef(TypeDefOrRefSignature signature, AnalysisContext context)
             {
-                if (context.HasAnalyzers(typeof(ITypeDefOrRef)))
+                if (context.HasAnalyzers(signature.Type.GetType()))
                 {
                     context.SchedulaForAnalysis(signature.Type);
                 }

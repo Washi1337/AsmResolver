@@ -23,7 +23,10 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 return;
 
             var index = context.Workspace.Index;
-            context.SchedulaForAnalysis(subject.Constructor);
+            if (context.HasAnalyzers(subject.Constructor.GetType()))
+            {
+                context.SchedulaForAnalysis(subject.Constructor);
+            }
 
             if (context.Workspace is not DotNetWorkspace workspace)
                 return;

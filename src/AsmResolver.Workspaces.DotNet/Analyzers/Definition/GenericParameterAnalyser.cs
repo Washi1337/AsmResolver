@@ -21,14 +21,14 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 
                 for (int j = 0; j < genericParameter.Constraints.Count; j++)
                 {
-                    var constraint = genericParameter.Constraints[j];
+                    var parameterConstraint = genericParameter.Constraints[j];
                     if (context.HasAnalyzers(typeof(GenericParameterConstraint)))
                     {
-                        context.SchedulaForAnalysis(constraint);
+                        context.SchedulaForAnalysis(parameterConstraint);
                     }
                     if (context.HasAnalyzers(typeof(ITypeDefOrRef)))
                     {
-                        context.SchedulaForAnalysis(constraint.Constraint);
+                        context.SchedulaForAnalysis(parameterConstraint.Constraint);
                     }
                 }
 

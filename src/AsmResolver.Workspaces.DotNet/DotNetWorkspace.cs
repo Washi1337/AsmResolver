@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.Workspaces.DotNet.Analyzers;
@@ -34,6 +35,12 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(PropertyAnalyzer), new PropertyAnalyzer());
             Analyzers.Register(typeof(EventAnalyzer), new EventAnalyzer());
             Analyzers.Register(typeof(IHasGenericParameters), new GenericParameterAnalyser());
+            Analyzers.Register(typeof(LocalVariablesSignature), new LocalVariablesSignatureAnalyser());
+            Analyzers.Register(typeof(IGenericArgumentsProvider), new GenericArgumentAnalyser());
+            Analyzers.Register(typeof(CilMethodBody), new CilMethodBodyAnalyser());
+
+
+
         }
 
         /// <summary>

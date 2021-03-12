@@ -11,7 +11,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         public override void Analyze(AnalysisContext context, EventDefinition subject)
         {
             // Schedule type for analysis.
-            if (context.HasAnalyzers(typeof(ITypeDefOrRef)))
+            if (context.HasAnalyzers(subject.EventType.GetType()))
             {
                 context.SchedulaForAnalysis(subject.EventType);
             }
