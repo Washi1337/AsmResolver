@@ -5,21 +5,24 @@ using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
 {
-    internal readonly ref struct CilLabelVerifier
+    internal struct CilLabelVerifier
     {
         private readonly CilMethodBody _body;
-        private readonly List<Exception> _diagnostics;
+        private List<Exception> _diagnostics;
 
         public CilLabelVerifier(CilMethodBody body)
         {
             _body = body ?? throw new ArgumentNullException(nameof(body));
-            _diagnostics = new List<Exception>();
+            _diagnostics = null;
         }
 
         public void Verify()
         {
             VerifyInstructions();
             VerifyExceptionHandlers();
+
+            if (_diagnostics is null)
+                return;
 
             switch (_diagnostics.Count)
             {
@@ -67,31 +70,22 @@ namespace AsmResolver.DotNet.Code.Cil
             }
         }
 
-        private void VerifyBranchLabel(int currentOffset, ICilLabel label)
+        private void VerifyBranchLabel(int offset, ICilLabel label)
         {
             switch (label)
             {
                 case null:
-                    _diagnostics.Add(new InvalidCilInstructionException(
-                            $"Branch target of IL_{currentOffset:X4} is null."));
+                    AddDiagnostic($"Branch target of IL_{offset:X4} is null.");
                     break;
 
                 case CilInstructionLabel {Instruction: { } instruction}:
                     if (!IsPresentInBody(instruction))
-                    {
-                        _diagnostics.Add(new InvalidCilInstructionException(
-                            $"IL_{currentOffset:X4} references an instruction that is not present in the method body."));
-                    }
-
+                        AddDiagnostic($"IL_{offset:X4} references an instruction that is not present in the method body.");
                     break;
 
                 default:
                     if (!IsPresentInBody(label.Offset))
-                    {
-                        _diagnostics.Add(new InvalidCilInstructionException(
-                            $"IL_{currentOffset:X4} references an offset that is not present in the method body."));
-                    }
-
+                        AddDiagnostic($"IL_{offset:X4} references an offset that is not present in the method body.");
                     break;
             }
         }
@@ -101,26 +95,17 @@ namespace AsmResolver.DotNet.Code.Cil
             switch (label)
             {
                 case null:
-                    _diagnostics.Add(new InvalidCilInstructionException(
-                        $"{labelName} of exception handler {handlerIndex.ToString()} is null."));
+                    AddDiagnostic($"{labelName} of exception handler {handlerIndex.ToString()} is null.");
                     break;
 
                 case CilInstructionLabel {Instruction: { } instruction}:
                     if (!IsPresentInBody(instruction))
-                    {
-                        _diagnostics.Add(new InvalidCilInstructionException(
-                            $"{labelName} of exception handler {handlerIndex.ToString()} references an instruction that is not present in the method body."));
-                    }
-
+                        AddDiagnostic($"{labelName} of exception handler {handlerIndex.ToString()} references an instruction that is not present in the method body.");
                     break;
 
                 default:
                     if (!IsPresentInBody(label.Offset))
-                    {
-                        _diagnostics.Add(new InvalidCilInstructionException(
-                            $"{labelName} of exception handler {handlerIndex.ToString()} references an offset that is not present in the method body."));
-                    }
-
+                        AddDiagnostic($"{labelName} of exception handler {handlerIndex.ToString()} references an offset that is not present in the method body.");
                     break;
             }
         }
@@ -132,5 +117,12 @@ namespace AsmResolver.DotNet.Code.Cil
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsPresentInBody(int offset) =>
             _body.Instructions.GetIndexByOffset(offset) > 0;
+
+        private void AddDiagnostic(string message)
+        {
+            _diagnostics ??= new List<Exception>();
+            _diagnostics.Add(new InvalidCilInstructionException(message));
+        }
+
     }
 }

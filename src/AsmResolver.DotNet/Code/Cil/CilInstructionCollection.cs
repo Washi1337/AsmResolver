@@ -221,7 +221,9 @@ namespace AsmResolver.DotNet.Code.Cil
         public CilInstruction GetByOffset(int offset)
         {
             int index = GetIndexByOffset(offset);
-            return index == -1 ? null : _items[index];
+            return index == -1
+                ? null
+                : _items[index];
         }
 
         /// <summary>
