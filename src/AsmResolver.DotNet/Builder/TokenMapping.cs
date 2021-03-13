@@ -12,7 +12,7 @@ namespace AsmResolver.DotNet.Builder
     {
         private readonly OneToOneRelation<TypeDefinition, MetadataToken> _typeDefTokens = new();
         private readonly Dictionary<FieldDefinition, MetadataToken> _fieldTokens = new();
-        private readonly Dictionary<MethodDefinition, MetadataToken> _methodTokens = new();
+        private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new();
         private readonly Dictionary<ParameterDefinition, MetadataToken> _parameterTokens = new();
         private readonly Dictionary<PropertyDefinition, MetadataToken> _propertyTokens = new();
         private readonly Dictionary<EventDefinition, MetadataToken> _eventTokens = new();
@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Builder
         {
             TableIndex.TypeDef => _typeDefTokens.GetValue((TypeDefinition) member),
             TableIndex.Field => _fieldTokens[(FieldDefinition) member],
-            TableIndex.Method => _methodTokens[(MethodDefinition) member],
+            TableIndex.Method => _methodTokens.GetValue((MethodDefinition) member),
             TableIndex.Param => _parameterTokens[(ParameterDefinition) member],
             TableIndex.Event => _eventTokens[(EventDefinition) member],
             TableIndex.Property => _propertyTokens[(PropertyDefinition) member],
@@ -41,7 +41,8 @@ namespace AsmResolver.DotNet.Builder
                 case TableIndex.Field:
                     return _fieldTokens.TryGetValue((FieldDefinition) member, out token);
                 case TableIndex.Method:
-                    return _methodTokens.TryGetValue((MethodDefinition) member, out token);
+                    token = _methodTokens.GetValue((MethodDefinition) member);
+                    return token.Rid != 0;
                 case TableIndex.Param:
                     return _parameterTokens.TryGetValue((ParameterDefinition) member, out token);
                 case TableIndex.Event:
@@ -102,5 +103,12 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="newToken">The new token.</param>
         /// <returns>The type, or <c>null</c> if no type is assigned to the provided token.</returns>
         public TypeDefinition GetTypeByToken(MetadataToken newToken) => _typeDefTokens.GetKey(newToken);
+
+        /// <summary>
+        /// Gets the method assigned to the provided metadata token.
+        /// </summary>
+        /// <param name="newToken">The new token.</param>
+        /// <returns>The type, or <c>null</c> if no method is assigned to the provided token.</returns>
+        public MethodDefinition GetMethodByToken(MetadataToken newToken) => _methodTokens.GetKey(newToken);
     }
 }

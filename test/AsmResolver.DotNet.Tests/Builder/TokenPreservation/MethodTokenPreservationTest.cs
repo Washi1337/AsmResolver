@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             for (ushort i = 1; i <= parameterCount; i++)
             {
                 method.Signature.ParameterTypes.Add(module.CorLibTypeFactory.Object);
-                method.ParameterDefinitions.Add(new ParameterDefinition(i, $"Arg{i}", 0));
+                method.ParameterDefinitions.Add(new ParameterDefinition(i, $"{name}Arg{i}", 0));
             }
 
             method.Parameters.PullUpdatesFromMethodSignature();
