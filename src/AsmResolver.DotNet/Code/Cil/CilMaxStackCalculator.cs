@@ -14,8 +14,17 @@ namespace AsmResolver.DotNet.Code.Cil
         public CilMaxStackCalculator(CilMethodBody body)
         {
             _body = body ?? throw new ArgumentNullException(nameof(body));
-            _agenda = new Stack<StackState>();
-            _recordedStackSizes = new int?[_body.Instructions.Count];
+
+            if (_body.Instructions.Count > 0)
+            {
+                _agenda = new Stack<StackState>();
+                _recordedStackSizes = new int?[_body.Instructions.Count];
+            }
+            else
+            {
+                _agenda = null;
+                _recordedStackSizes = null;
+            }
         }
 
         public int Compute()
