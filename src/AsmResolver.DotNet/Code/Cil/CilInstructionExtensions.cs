@@ -41,12 +41,12 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 case CilStackBehaviour.Pop0:
                     return 0;
-                
+
                 case CilStackBehaviour.Pop1:
                 case CilStackBehaviour.PopI:
                 case CilStackBehaviour.PopRef:
                     return 1;
-                
+
                 case CilStackBehaviour.Pop1_Pop1:
                 case CilStackBehaviour.PopI_Pop1:
                 case CilStackBehaviour.PopI_PopI:
@@ -56,7 +56,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilStackBehaviour.PopRef_Pop1:
                 case CilStackBehaviour.PopRef_PopI:
                     return 2;
-                
+
                 case CilStackBehaviour.PopI_PopI_PopI:
                 case CilStackBehaviour.PopRef_PopI_PopI:
                 case CilStackBehaviour.PopRef_PopI_PopI8:
@@ -65,13 +65,13 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilStackBehaviour.PopRef_PopI_PopRef:
                 case CilStackBehaviour.PopRef_PopI_Pop1:
                     return 3;
-                
+
                 case CilStackBehaviour.VarPop:
                     return DetermineVarPopCount(instruction, isVoid);
-                
+
                 case CilStackBehaviour.PopAll:
                     return -1;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet.Code.Cil
                         // NewObj produces instead of consumes the this parameter.
                         count--;
                         break;
-                    
+
                     case CilCode.Calli:
                         // Calli consumes an extra parameter (the address to call).
                         count++;
@@ -126,7 +126,7 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 case CilStackBehaviour.Push0:
                     return 0;
-                
+
                 case CilStackBehaviour.Push1:
                 case CilStackBehaviour.PushI:
                 case CilStackBehaviour.PushI8:
@@ -134,13 +134,13 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilStackBehaviour.PushR8:
                 case CilStackBehaviour.PushRef:
                     return 1;
-                
+
                 case CilStackBehaviour.Push1_Push1:
                     return 2;
-                
+
                 case CilStackBehaviour.VarPush:
                     return DetermineVarPushCount(instruction);
-                
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -157,7 +157,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
             if (signature == null)
                 return 0;
-            
+
             if (!signature.ReturnType.IsTypeOf("System", "Void") || instruction.OpCode.Code == CilCode.Newobj)
                 return 1;
 
@@ -183,23 +183,23 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Ldloca:
                 case CilCode.Ldloca_S:
                     return (CilLocalVariable) instruction.Operand;
-                
+
                 case CilCode.Ldloc_0:
                 case CilCode.Stloc_0:
                     return variables[0];
-                    
+
                 case CilCode.Ldloc_1:
                 case CilCode.Stloc_1:
                     return variables[1];
-                    
+
                 case CilCode.Ldloc_2:
                 case CilCode.Stloc_2:
                     return variables[2];
-                    
+
                 case CilCode.Ldloc_3:
                 case CilCode.Stloc_3:
                     return variables[3];
-                
+
                 default:
                     throw new ArgumentException("Instruction is not a ldloc or stloc instruction.");
             }
@@ -224,23 +224,23 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilCode.Starg:
                 case CilCode.Starg_S:
                     return (Parameter) instruction.Operand;
-                
+
                 case CilCode.Ldarg_0:
                     return parameters.GetBySignatureIndex(0);
-                    
+
                 case CilCode.Ldarg_1:
                     return parameters.GetBySignatureIndex(1);
-                    
+
                 case CilCode.Ldarg_2:
                     return parameters.GetBySignatureIndex(2);
-                    
+
                 case CilCode.Ldarg_3:
                     return parameters.GetBySignatureIndex(3);
-                
+
                 default:
                     throw new ArgumentException("Instruction is not a ldarg or starg instruction.");
             }
         }
-        
+
     }
 }
