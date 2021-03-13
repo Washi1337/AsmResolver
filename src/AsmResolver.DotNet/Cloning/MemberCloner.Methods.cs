@@ -194,7 +194,7 @@ namespace AsmResolver.DotNet.Cloning
 
                 case CilOperandType.InlineArgument:
                 case CilOperandType.ShortInlineArgument:
-                    clonedInstruction.Operand = clonedBody.Owner.Parameters[((Parameter)instruction.Operand).Index];
+                    clonedInstruction.Operand = clonedBody.Owner.Parameters.GetBySignatureIndex(((Parameter)instruction.Operand).MethodSignatureIndex);
                     break;
 
                 default:
