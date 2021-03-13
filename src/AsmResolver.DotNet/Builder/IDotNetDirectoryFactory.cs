@@ -1,6 +1,5 @@
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE;
-using AsmResolver.PE.DotNet;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -17,6 +16,6 @@ namespace AsmResolver.DotNet.Builder
         /// <param name="diagnosticBag">The bag that is used to collect all diagnostic information during the building process. </param>
         /// <returns>The serialized data directory.</returns>
         /// <exception cref="MetadataBuilderException">Occurs when the metadata builder encounters an error.</exception>
-        IDotNetDirectory CreateDotNetDirectory(ModuleDefinition module, INativeSymbolsProvider symbolsProvider, DiagnosticBag diagnosticBag);
+        DotNetDirectoryBuildResult CreateDotNetDirectory(ModuleDefinition module, INativeSymbolsProvider symbolsProvider, DiagnosticBag diagnosticBag);
     }
 }

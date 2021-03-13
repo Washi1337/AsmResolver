@@ -1,7 +1,7 @@
 namespace AsmResolver.PE.DotNet.Cil
 {
     /// <summary>
-    /// Represents a label to a CIL instruction referenced by a fixed offset relative to the start of the CIL method body. 
+    /// Represents a label to a CIL instruction referenced by a fixed offset relative to the start of the CIL method body.
     /// </summary>
     public class CilOffsetLabel : ICilLabel
     {

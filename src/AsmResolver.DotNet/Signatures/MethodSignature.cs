@@ -32,7 +32,7 @@ namespace AsmResolver.DotNet.Signatures
 
                 result.GenericParameterCount = (int) genericParameterCount;
             }
-        
+
             result.ReadParametersAndReturnType(context, reader);
             return result;
         }
@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="returnType">The return type of the method.</param>
         /// <returns>The signature.</returns>
-        public static MethodSignature CreateStatic(TypeSignature returnType) 
+        public static MethodSignature CreateStatic(TypeSignature returnType)
             => new MethodSignature(0, returnType, Enumerable.Empty<TypeSignature>());
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
-        public static MethodSignature CreateStatic(TypeSignature returnType, params TypeSignature[] parameterTypes) 
+        public static MethodSignature CreateStatic(TypeSignature returnType, params TypeSignature[] parameterTypes)
             => new MethodSignature(0, returnType, parameterTypes);
 
         /// <summary>
@@ -62,13 +62,13 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The signature.</returns>
         public static MethodSignature CreateStatic(TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
             => new MethodSignature(0, returnType, parameterTypes);
-      
+
         /// <summary>
         /// Creates a new parameter-less method signature for an instance method.
         /// </summary>
         /// <param name="returnType">The return type of the method.</param>
         /// <returns>The signature.</returns>
-        public static MethodSignature CreateInstance(TypeSignature returnType) 
+        public static MethodSignature CreateInstance(TypeSignature returnType)
             => new MethodSignature(CallingConventionAttributes.HasThis, returnType, Enumerable.Empty<TypeSignature>());
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The parameter types.</param>
         /// <returns>The signature.</returns>
-        public static MethodSignature CreateInstance(TypeSignature returnType, params TypeSignature[] parameterTypes) 
+        public static MethodSignature CreateInstance(TypeSignature returnType, params TypeSignature[] parameterTypes)
             => new MethodSignature(CallingConventionAttributes.HasThis, returnType, parameterTypes);
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="attributes">The attributes.</param>
         /// <param name="returnType">The return type of the method.</param>
         /// <param name="parameterTypes">The types of the parameter the method defines.</param>
-        public MethodSignature(CallingConventionAttributes attributes, TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes) 
+        public MethodSignature(CallingConventionAttributes attributes, TypeSignature returnType, IEnumerable<TypeSignature> parameterTypes)
             : base(attributes, returnType, parameterTypes)
         {
         }
@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet.Signatures
 
         /// <summary>
         /// Substitutes any generic type parameter in the method signature with the parameters provided by
-        /// the generic context. 
+        /// the generic context.
         /// </summary>
         /// <param name="context">The generic context.</param>
         /// <returns>The instantiated method signature.</returns>
@@ -129,16 +129,13 @@ namespace AsmResolver.DotNet.Signatures
         /// instance of the method signature.
         /// </remarks>
         public MethodSignature InstantiateGenericTypes(GenericContext context)
-        {
-            var activator = new GenericTypeActivator(context);
-            return activator.InstantiateMethodSignature(this);
-        }
-        
+            => GenericTypeActivator.Instance.InstantiateMethodSignature(this, context);
+
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) Attributes);
 
             if (IsGeneric)
@@ -155,11 +152,11 @@ namespace AsmResolver.DotNet.Signatures
                 ? $"<{string.Join(", ", new string('?', GenericParameterCount))}>"
                 : string.Empty;
             string parameterTypesString = string.Join(", ", ParameterTypes) + (IsSentinel ? ", ..." : string.Empty);
-            
-            return string.Format("{0}{1} *{2}({3})", 
-                prefix, 
+
+            return string.Format("{0}{1} *{2}({3})",
+                prefix,
                 ReturnType?.FullName ?? TypeSignature.NullTypeToString,
-                genericsString, 
+                genericsString,
                 parameterTypesString);
         }
     }

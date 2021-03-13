@@ -4,7 +4,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
     /// Represents a type modifier indicating the value is pinned into memory, and the garbage collector cannot
-    /// change the location of a value at runtime. 
+    /// change the location of a value at runtime.
     /// </summary>
     public class PinnedTypeSignature : TypeSpecificationSignature
     {
@@ -25,9 +25,15 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override bool IsValueType => BaseType.IsValueType;
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitPinnedType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitPinnedType(this, state);
+
     }
 }
