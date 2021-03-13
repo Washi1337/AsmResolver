@@ -194,6 +194,7 @@ namespace AsmResolver.DotNet.Memory
         private TypeMemoryLayout InferSequentialLayout(TypeDefinition type, uint alignment)
         {
             var result = new TypeMemoryLayout(type);
+            result.Attributes = _defaultAttributes;
 
             // Maintain a current offset, and increase it after every field.
             uint offset = 0;
@@ -206,6 +207,8 @@ namespace AsmResolver.DotNet.Memory
 
                 // Determine field memory layout.
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
+                if (contentsLayout.IsPlatformDependent)
+                    result.Attributes |= MemoryLayoutAttributes.IsPlatformDependent;
 
                 // Fields are aligned to the alignment of the type, unless the field is smaller. In such a case, the
                 // field is aligned to its own field size.
@@ -225,6 +228,7 @@ namespace AsmResolver.DotNet.Memory
         private TypeMemoryLayout InferExplicitLayout(TypeDefinition type, uint alignment)
         {
             var result = new TypeMemoryLayout(type);
+            result.Attributes = _defaultAttributes;
 
             // Implicit type size is determined byt the field with the highest offset + its size.
             uint largestOffset = 0;
@@ -247,6 +251,9 @@ namespace AsmResolver.DotNet.Memory
 
                 uint offset = (uint) field.FieldOffset.Value;
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
+                if (contentsLayout.IsPlatformDependent)
+                    result.Attributes |= MemoryLayoutAttributes.IsPlatformDependent;
+
                 result[field] = new FieldMemoryLayout(field, offset, contentsLayout);
 
                 largestOffset = Math.Max(largestOffset, offset + contentsLayout.Size);
