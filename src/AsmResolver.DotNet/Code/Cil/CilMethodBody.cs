@@ -149,11 +149,11 @@ namespace AsmResolver.DotNet.Code.Cil
             dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
 
             //Get Runtime Fields
-            var code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
+            byte[] code = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_code");
             var scope = FieldReader.ReadField<object>(dynamicMethodObj, "m_scope");
             var tokenList = FieldReader.ReadField<List<object>>(scope, "m_tokens");
-            var localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature");
-            var ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader");
+            byte[] localSig = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_localSignature");
+            byte[] ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader");
             var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions");
 
             // Read raw instructions.
@@ -171,9 +171,14 @@ namespace AsmResolver.DotNet.Code.Cil
             foreach (var instruction in result.Instructions)
             {
                 instruction.Operand =
-                    DynamicMethodHelper.ResolveOperandReflection(module.ReaderContext, result, instruction,
-                        operandResolver, tokenList, importer) ??
-                    instruction.Operand;
+                    DynamicMethodHelper.ResolveOperandReflection(
+                        module.ReaderContext,
+                        result,
+                        instruction,
+                        operandResolver,
+                        tokenList,
+                        importer)
+                    ?? instruction.Operand;
             }
 
             return result;
