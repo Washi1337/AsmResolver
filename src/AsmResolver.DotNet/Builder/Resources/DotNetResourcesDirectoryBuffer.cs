@@ -10,9 +10,9 @@ namespace AsmResolver.DotNet.Builder.Resources
     /// </summary>
     public class DotNetResourcesDirectoryBuffer
     {
-        private readonly MemoryStream _rawStream = new MemoryStream();
+        private readonly MemoryStream _rawStream = new();
         private readonly BinaryStreamWriter _writer;
-        private readonly IDictionary<byte[], uint> _dataOffsets = new Dictionary<byte[], uint>(ByteArrayEqualityComparer.Instance);
+        private readonly Dictionary<byte[], uint> _dataOffsets = new(ByteArrayEqualityComparer.Instance);
 
         /// <summary>
         /// Creates a new instance of the <see cref="DotNetResourcesDirectoryBuffer"/> class.
@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Builder.Resources
             _writer.WriteBytes(data, 0, data.Length);
             return offset;
         }
-        
+
         /// <summary>
         /// Gets the index to the provided resource data. If the blob is not present in the buffer, it will be appended
         /// to the end of the stream.
@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Builder.Resources
         /// Serialises the .NET resources directory buffer to a data directory.
         /// </summary>
         /// <returns>The metadata stream.</returns>
-        public DotNetResourcesDirectory CreateDirectory() => 
+        public DotNetResourcesDirectory CreateDirectory() =>
             new SerializedDotNetResourcesDirectory(new DataSegment(_rawStream.ToArray()));
     }
 }

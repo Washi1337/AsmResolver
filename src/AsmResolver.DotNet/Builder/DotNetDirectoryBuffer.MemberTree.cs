@@ -272,7 +272,8 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         public void FinalizeTypes()
         {
-            var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            var tablesStream = Metadata.TablesStream;
+            var typeDefTable = tablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
 
             bool fieldPtrRequired = false;
             bool methodPtrRequired = false;
@@ -323,15 +324,15 @@ namespace AsmResolver.DotNet.Builder
 
             // Check if any of the redirection tables can be removed.
             if (!fieldPtrRequired)
-                Metadata.TablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr).Clear();
+                tablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr).Clear();
             if (!methodPtrRequired)
-                Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr).Clear();
+                tablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr).Clear();
             if (!paramPtrRequired)
-                Metadata.TablesStream.GetTable<ParameterPointerRow>(TableIndex.ParamPtr).Clear();
+                tablesStream.GetTable<ParameterPointerRow>(TableIndex.ParamPtr).Clear();
             if (!propertyPtrRequired)
-                Metadata.TablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr).Clear();
+                tablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr).Clear();
             if (!eventPtrRequired)
-                Metadata.TablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr).Clear();
+                tablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr).Clear();
         }
 
         private void FinalizeFieldsInType(TypeDefinition type, ref bool fieldPtrRequired)
