@@ -1000,7 +1000,7 @@ namespace AsmResolver.DotNet
             Write(filePath, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
+        /// Rebuilds the .NET module to a portable executable file and writes it to an output stream.
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
@@ -1017,7 +1017,7 @@ namespace AsmResolver.DotNet
             Write(filePath, imageBuilder, new ManagedPEFileBuilder());
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
+        /// Rebuilds the .NET module to a portable executable file and writes it to an output stream.
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
@@ -1039,7 +1039,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
+        /// Rebuilds the .NET module to a portable executable file and writes it to an output stream.
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
