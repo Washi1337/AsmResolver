@@ -23,7 +23,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         {
             [FieldOffset(2)]
             public ExplicitlySizedSequentialStruct Field1;
-            
+
             [FieldOffset(10)]
             public ExplicitlySizedSequentialStruct Field2;
         }
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         {
             [FieldOffset(2)]
             public ExplicitStructWithTwoSequentialStructs Field1;
-            
+
             [FieldOffset(10)]
             public ExplicitStructWithTwoSequentialStructs Field2;
         }
@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Tests.Memory
         public struct ExtremeStruct2
         {
             public ExplicitStructWithTwoSequentialStructs Field1;
-            
+
             public ExplicitStructWithTwoSequentialStructs Field2;
         }
 
@@ -50,25 +50,25 @@ namespace AsmResolver.DotNet.Tests.Memory
         public struct ExtremeStruct3
         {
             public ExplicitStructWithTwoSequentialStructs Field1;
-            
+
             public ExplicitStructWithTwoSequentialStructs Field2;
         }
 
-        
+
         [StructLayout(LayoutKind.Sequential, Size = 17)]
-        public  struct Struct1
+        public struct Struct1
         {
             public int Dummy1;
         }
 
         [StructLayout(LayoutKind.Sequential, Size = 23, Pack = 2)]
-        public  struct Struct2
+        public struct Struct2
         {
             public Struct1 Nest1;
         }
 
         [StructLayout(LayoutKind.Sequential, Size = 87, Pack = 64)]
-        public  struct Struct3
+        public struct Struct3
         {
             public Struct1 Nest1;
 
@@ -76,10 +76,10 @@ namespace AsmResolver.DotNet.Tests.Memory
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public  struct Struct4
+        public struct Struct4
         {
             public Struct3 Nest1;
-            
+
             public byte Dummy2;
         }
 

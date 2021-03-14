@@ -9,8 +9,7 @@ namespace AsmResolver.DotNet.Memory
     /// </summary>
     public class TypeMemoryLayout
     {
-        private readonly Dictionary<FieldDefinition, FieldMemoryLayout> _fields =
-            new Dictionary<FieldDefinition, FieldMemoryLayout>();
+        private readonly Dictionary<FieldDefinition, FieldMemoryLayout> _fields = new();
 
         internal TypeMemoryLayout(ITypeDescriptor type)
         {
@@ -22,10 +21,12 @@ namespace AsmResolver.DotNet.Memory
         /// </summary>
         /// <param name="type">The type for which the memory layout is determined.</param>
         /// <param name="size">The size of the type.</param>
-        public TypeMemoryLayout(ITypeDescriptor type, uint size)
+        /// <param name="attributes">The attributes</param>
+        public TypeMemoryLayout(ITypeDescriptor type, uint size, MemoryLayoutAttributes attributes)
         {
             Type = type ?? throw new ArgumentNullException(nameof(type));
             Size = size;
+            Attributes = attributes;
         }
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace AsmResolver.DotNet.Memory
             get => _fields[field];
             internal set => _fields[field] = value;
         }
-        
+
         /// <summary>
         /// Gets the total number of bytes this structure requires.
         /// </summary>
@@ -55,12 +56,36 @@ namespace AsmResolver.DotNet.Memory
             internal set;
         }
 
+        /// <summary>
+        /// Gets additional attributes associated to this memory layout.
+        /// </summary>
+        public MemoryLayoutAttributes Attributes
+        {
+            get;
+            internal set;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the type layout was determined assuming a 32-bit environment.
+        /// </summary>
+        public bool Is32Bit => (Attributes & MemoryLayoutAttributes.BitnessMask) == MemoryLayoutAttributes.Is32Bit;
+
+        /// <summary>
+        /// Gets a value indicating whether the type layout was determined assuming a 64-bit environment.
+        /// </summary>
+        public bool Is64Bit => (Attributes & MemoryLayoutAttributes.BitnessMask) == MemoryLayoutAttributes.Is64Bit;
+
+        /// <summary>
+        /// Gets a value indicating whether the type layout is dependent on the bitness of the environment.
+        /// </summary>
+        public bool IsPlatformDependent => (Attributes & MemoryLayoutAttributes.IsPlatformDependent) != 0;
+
         private IEnumerable<FieldMemoryLayout> GetOrderedFields()
         {
             return _fields.Values
                 .OrderBy(f => f.Offset)
                 .ThenBy(f => f.ContentsLayout.Size);
-        } 
+        }
 
         /// <summary>
         /// Finds a field within this type memory layout by its offset.
@@ -80,7 +105,7 @@ namespace AsmResolver.DotNet.Memory
 
             field = null;
             return false;
-        } 
+        }
 
         /// <summary>
         /// Traverses the type memory layout tree and finds a field within this type memory layout by its offset.
@@ -99,7 +124,7 @@ namespace AsmResolver.DotNet.Memory
             while (!stop)
             {
                 stop = true;
-                
+
                 foreach (var entry in currentLayout.GetOrderedFields())
                 {
                     if (offset < entry.Offset)
@@ -108,14 +133,14 @@ namespace AsmResolver.DotNet.Memory
                     if (offset < entry.Offset + entry.ContentsLayout.Size)
                     {
                         // We found the field that contains the offset. Dive into this field.
-                            
+
                         if (entry.Offset == offset)
                             lastExactOffsetMatch = entry;
-                        
+
                         path.Add(entry);
                         currentLayout = entry.ContentsLayout;
                         offset -= entry.Offset;
-                        
+
                         stop = false;
                         break;
                     }
@@ -123,6 +148,6 @@ namespace AsmResolver.DotNet.Memory
             }
 
             return path.Count > 0 && path[path.Count - 1] == lastExactOffsetMatch;
-        } 
+        }
     }
 }
