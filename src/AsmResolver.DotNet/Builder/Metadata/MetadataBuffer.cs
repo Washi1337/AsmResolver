@@ -41,31 +41,31 @@ namespace AsmResolver.DotNet.Builder.Metadata
         public BlobStreamBuffer BlobStream
         {
             get;
-        } = new BlobStreamBuffer();
+        } = new();
 
         /// <inheritdoc />
         public StringsStreamBuffer StringsStream
         {
             get;
-        } = new StringsStreamBuffer();
+        } = new();
 
         /// <inheritdoc />
         public UserStringsStreamBuffer UserStringsStream
         {
             get;
-        } = new UserStringsStreamBuffer();
+        } = new();
 
         /// <inheritdoc />
         public GuidStreamBuffer GuidStream
         {
             get;
-        } = new GuidStreamBuffer();
+        } = new();
 
         /// <inheritdoc />
         public TablesStreamBuffer TablesStream
         {
             get;
-        } = new TablesStreamBuffer();
+        } = new();
 
         /// <inheritdoc />
         public IMetadata CreateMetadata()

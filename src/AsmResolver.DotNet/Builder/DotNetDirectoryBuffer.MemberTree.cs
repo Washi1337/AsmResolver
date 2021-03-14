@@ -272,7 +272,8 @@ namespace AsmResolver.DotNet.Builder
         /// </summary>
         public void FinalizeTypes()
         {
-            var typeDefTable = Metadata.TablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
+            var tablesStream = Metadata.TablesStream;
+            var typeDefTable = tablesStream.GetTable<TypeDefinitionRow>(TableIndex.TypeDef);
 
             bool fieldPtrRequired = false;
             bool methodPtrRequired = false;
@@ -282,7 +283,6 @@ namespace AsmResolver.DotNet.Builder
 
             uint fieldList = 1;
             uint methodList = 1;
-            uint paramList = 1;
             uint propertyList = 1;
             uint eventList = 1;
 
@@ -303,7 +303,7 @@ namespace AsmResolver.DotNet.Builder
 
                 // Finalize fields and methods.
                 FinalizeFieldsInType(type, ref fieldPtrRequired);
-                FinalizeMethodsInType(type, ref methodPtrRequired, ref paramList, ref paramPtrRequired);
+                AddMethodPointers(type, ref methodPtrRequired);
                 FinalizePropertiesInType(type, rid, ref propertyList, ref propertyPtrRequired);
                 FinalizeEventsInType(type, rid, ref eventList, ref eventPtrRequired);
 
@@ -320,17 +320,19 @@ namespace AsmResolver.DotNet.Builder
                 AddClassLayout(typeToken, type.ClassLayout);
             }
 
+            FinalizeMethods(ref paramPtrRequired);
+
             // Check if any of the redirection tables can be removed.
             if (!fieldPtrRequired)
-                Metadata.TablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr).Clear();
+                tablesStream.GetTable<FieldPointerRow>(TableIndex.FieldPtr).Clear();
             if (!methodPtrRequired)
-                Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr).Clear();
+                tablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr).Clear();
             if (!paramPtrRequired)
-                Metadata.TablesStream.GetTable<ParameterPointerRow>(TableIndex.ParamPtr).Clear();
+                tablesStream.GetTable<ParameterPointerRow>(TableIndex.ParamPtr).Clear();
             if (!propertyPtrRequired)
-                Metadata.TablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr).Clear();
+                tablesStream.GetTable<PropertyPointerRow>(TableIndex.PropertyPtr).Clear();
             if (!eventPtrRequired)
-                Metadata.TablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr).Clear();
+                tablesStream.GetTable<EventPointerRow>(TableIndex.EventPtr).Clear();
         }
 
         private void FinalizeFieldsInType(TypeDefinition type, ref bool fieldPtrRequired)
@@ -364,16 +366,9 @@ namespace AsmResolver.DotNet.Builder
             }
         }
 
-        private void FinalizeMethodsInType(
-            TypeDefinition type,
-            ref bool methodPtrRequired,
-            ref uint paramList,
-            ref bool paramPtrRequired)
+        private void AddMethodPointers(TypeDefinition type, ref bool methodPtrRequired)
         {
-            var definitionTable = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
             var pointerTable = Metadata.TablesStream.GetTable<MethodPointerRow>(TableIndex.MethodPtr);
-
-            var context = new MethodBodySerializationContext(this, SymbolsProvider, DiagnosticBag);
 
             for (int i = 0; i < type.Methods.Count; i++)
             {
@@ -392,6 +387,20 @@ namespace AsmResolver.DotNet.Builder
                 if (newToken.Rid != pointerTable.Count + 1)
                     methodPtrRequired = true;
                 pointerTable.Add(new MethodPointerRow(newToken.Rid));
+            }
+        }
+
+        private void FinalizeMethods(ref bool paramPtrRequired)
+        {
+            var definitionTable = Metadata.TablesStream.GetTable<MethodDefinitionRow>(TableIndex.Method);
+            var context = new MethodBodySerializationContext(this, SymbolsProvider, DiagnosticBag);
+
+            uint paramList = 1;
+
+            for (uint rid = 1; rid <= definitionTable.Count; rid++)
+            {
+                var newToken = new MetadataToken(TableIndex.Method, rid);
+                var method = _tokenMapping.GetMethodByToken(newToken);
 
                 // Serialize method body and update column.
                 var row = definitionTable[newToken.Rid];

@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<TypeDefinition> Types
         {
             get;
-        } = new List<TypeDefinition>();
+        } = new();
 
         /// <summary>
         /// Gets a list of fields that are discovered during the traversal of the module.
@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<FieldDefinition> Fields
         {
             get;
-        } = new List<FieldDefinition>();
+        } = new();
 
         /// <summary>
         /// Gets a list of modules that are discovered during the traversal of the module.
@@ -29,7 +29,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<MethodDefinition> Methods
         {
             get;
-        } = new List<MethodDefinition>();
+        } = new();
 
         /// <summary>
         /// Gets a list of parameters that are discovered during the traversal of the module.
@@ -37,7 +37,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<ParameterDefinition> Parameters
         {
             get;
-        } = new List<ParameterDefinition>();
+        } = new();
 
         /// <summary>
         /// Gets a list of properties that are discovered during the traversal of the module.
@@ -45,14 +45,14 @@ namespace AsmResolver.DotNet.Builder.Discovery
         public List<PropertyDefinition> Properties
         {
             get;
-        } = new List<PropertyDefinition>();
-        
+        } = new();
+
         /// <summary>
         /// Gets a list of events that are discovered during the traversal of the module.
         /// </summary>
         public List<EventDefinition> Events
         {
             get;
-        } = new List<EventDefinition>();
+        } = new();
     }
 }
