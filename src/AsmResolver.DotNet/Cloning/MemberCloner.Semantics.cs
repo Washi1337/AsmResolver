@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Cloning
             foreach (var property in _propertiesToClone)
             {
                 var clonedProperty = DeepCopyProperty(context, property);
-                
+
                 // If property's declaring type is cloned as well, add the cloned property to the cloned type.
                 if (context.ClonedMembers.TryGetValue(property.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
@@ -29,13 +29,13 @@ namespace AsmResolver.DotNet.Cloning
 
             return clonedProperty;
         }
-        
+
         private void DeepCopyEvents(MemberCloneContext context)
         {
             foreach (var @event in _eventsToClone)
             {
                 var clonedEvent = DeepCopyEvent(context, @event);
-                
+
                 // If event's declaring type is cloned as well, add the cloned event to the cloned type.
                 if (context.ClonedMembers.TryGetValue(@event.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
@@ -45,7 +45,7 @@ namespace AsmResolver.DotNet.Cloning
             }
         }
 
-        private EventDefinition DeepCopyEvent(MemberCloneContext context, EventDefinition @event)
+        private static EventDefinition DeepCopyEvent(MemberCloneContext context, EventDefinition @event)
         {
             var clonedEvent = new EventDefinition(@event.Name,
                 @event.Attributes,

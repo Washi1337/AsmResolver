@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Cloning
             foreach (var method in _methodsToClone)
             {
                 var stub = CreateMethodStub(context, method);
-                
+
                 // If method's declaring type is cloned as well, add the cloned method to the cloned type.
                 if (context.ClonedMembers.TryGetValue(method.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
@@ -23,8 +23,8 @@ namespace AsmResolver.DotNet.Cloning
                 }
             }
         }
-        
-        private MethodDefinition CreateMethodStub(MemberCloneContext context, MethodDefinition method)
+
+        private static MethodDefinition CreateMethodStub(MemberCloneContext context, MethodDefinition method)
         {
             var clonedMethod = new MethodDefinition(method.Name, method.Attributes,
                 context.Importer.ImportMethodSignature(method.Signature));
@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Cloning
             return clonedMethod;
         }
 
-        private ParameterDefinition CloneParameterDefinition(MemberCloneContext context, ParameterDefinition parameterDef)
+        private static ParameterDefinition CloneParameterDefinition(MemberCloneContext context, ParameterDefinition parameterDef)
         {
             var clonedParameterDef = new ParameterDefinition(parameterDef.Sequence, parameterDef.Name, parameterDef.Attributes);
             CloneCustomAttributes(context, parameterDef, clonedParameterDef);
@@ -54,16 +54,16 @@ namespace AsmResolver.DotNet.Cloning
         private void DeepCopyMethod(MemberCloneContext context, MethodDefinition method)
         {
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
-            
+
             CloneParameterDefinitionsInMethod(context, method, clonedMethod);
-            
-            if (method.CilMethodBody != null)
+
+            if (method.CilMethodBody is not null)
                 clonedMethod.CilMethodBody = CloneCilMethodBody(context, method);
-            
+
             CloneCustomAttributes(context, method, clonedMethod);
             CloneGenericParameters(context, method, clonedMethod);
             CloneSecurityDeclarations(context, method, clonedMethod);
-            
+
             clonedMethod.ImplementationMap = CloneImplementationMap(context, method.ImplementationMap);
         }
 
@@ -73,12 +73,12 @@ namespace AsmResolver.DotNet.Cloning
                 clonedMethod.ParameterDefinitions.Add(CloneParameterDefinition(context, parameterDef));
         }
 
-        private CilMethodBody CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)
+        private static CilMethodBody CloneCilMethodBody(MemberCloneContext context, MethodDefinition method)
         {
             var body = method.CilMethodBody;
-            
+
             var clonedMethod = (MethodDefinition) context.ClonedMembers[method];
-            
+
             // Clone method body header.
             var clonedBody = new CilMethodBody(clonedMethod);
             clonedBody.InitializeLocals = body.InitializeLocals;
@@ -88,11 +88,11 @@ namespace AsmResolver.DotNet.Cloning
             CloneLocalVariables(context, body, clonedBody);
             CloneCilInstructions(context, body, clonedBody);
             CloneExceptionHandlers(context, body, clonedBody);
-            
+
             return clonedBody;
         }
 
-        private void CloneLocalVariables(MemberCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
+        private static void CloneLocalVariables(MemberCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
         {
             foreach (var variable in body.LocalVariables)
             {
@@ -101,7 +101,7 @@ namespace AsmResolver.DotNet.Cloning
             }
         }
 
-        private void CloneCilInstructions(MemberCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
+        private static void CloneCilInstructions(MemberCloneContext context, CilMethodBody body, CilMethodBody clonedBody)
         {
             var branches = new List<CilInstruction>();
             var switches = new List<CilInstruction>();
@@ -127,16 +127,17 @@ namespace AsmResolver.DotNet.Cloning
             // Fixup switches.
             foreach (var @switch in switches)
             {
-                var labels = (ICollection<ICilLabel>) @switch.Operand;
+                var labels = (IList<ICilLabel>) @switch.Operand;
                 var clonedLabels = new List<ICilLabel>(labels.Count);
-                foreach (var label in labels)
-                    clonedLabels.Add(new CilInstructionLabel(clonedBody.Instructions.GetByOffset(label.Offset)));
-                @switch.Operand = clonedLabels;
 
+                for (int i = 0; i < labels.Count; i++)
+                    clonedLabels.Add(clonedBody.Instructions.GetLabel(labels[i].Offset));
+
+                @switch.Operand = clonedLabels;
             }
         }
 
-        private CilInstruction CloneInstruction(MemberCloneContext context, CilMethodBody clonedBody, CilInstruction instruction)
+        private static CilInstruction CloneInstruction(MemberCloneContext context, CilMethodBody clonedBody, CilInstruction instruction)
         {
             var clonedInstruction = new CilInstruction(instruction.Offset, instruction.OpCode);
             switch (instruction.OpCode.OperandType)
@@ -204,14 +205,14 @@ namespace AsmResolver.DotNet.Cloning
             return clonedInstruction;
         }
 
-        private object CloneInlineTokOperand(MemberCloneContext context, CilInstruction instruction)
+        private static object CloneInlineTokOperand(MemberCloneContext context, CilInstruction instruction)
         {
             return instruction.Operand switch
             {
-                ITypeDefOrRef type => (object) context.Importer.ImportType(type),
-                MemberReference member when member.IsField => context.Importer.ImportField(member),
-                MemberReference member when member.IsMethod => context.Importer.ImportMethod(member),
-                MethodDefinition m => context.Importer.ImportMethod(m),
+                ITypeDefOrRef type => context.Importer.ImportType(type),
+                MemberReference {IsField: true} method => context.Importer.ImportField(method),
+                MemberReference {IsMethod: true} field => context.Importer.ImportMethod(field),
+                MethodDefinition method => context.Importer.ImportMethod(method),
                 FieldDefinition field => context.Importer.ImportField(field),
                 _ => throw new NotSupportedException()
             };
@@ -221,19 +222,20 @@ namespace AsmResolver.DotNet.Cloning
         {
             foreach (var handler in body.ExceptionHandlers)
             {
-                var clonedHandler = new CilExceptionHandler
+                clonedBody.ExceptionHandlers.Add(new CilExceptionHandler
                 {
                     HandlerType = handler.HandlerType,
-                    ExceptionType = handler.ExceptionType is null ? null : context.Importer.ImportType(handler.ExceptionType),
-                    TryStart = clonedBody.Instructions.GetByOffset(handler.TryStart.Offset).CreateLabel(),
-                    TryEnd = clonedBody.Instructions.GetByOffset(handler.TryEnd.Offset).CreateLabel(),
-                    HandlerStart = clonedBody.Instructions.GetByOffset(handler.HandlerStart.Offset).CreateLabel(),
-                    HandlerEnd = clonedBody.Instructions.GetByOffset(handler.HandlerEnd.Offset).CreateLabel(),
-                    FilterStart = handler.FilterStart is null
+                    TryStart = clonedBody.Instructions.GetLabel(handler.TryStart.Offset),
+                    TryEnd = clonedBody.Instructions.GetLabel(handler.TryEnd.Offset),
+                    HandlerStart = clonedBody.Instructions.GetLabel(handler.HandlerStart.Offset),
+                    HandlerEnd = clonedBody.Instructions.GetLabel(handler.HandlerEnd.Offset),
+                    FilterStart = handler.FilterStart is { } filterStart
+                        ? clonedBody.Instructions.GetLabel(filterStart.Offset)
+                        : null,
+                    ExceptionType = handler.ExceptionType is null
                         ? null
-                        : clonedBody.Instructions.GetByOffset(handler.FilterStart.Offset).CreateLabel()
-                };
-                clonedBody.ExceptionHandlers.Add(clonedHandler);
+                        : context.Importer.ImportType(handler.ExceptionType)
+                });
             }
         }
     }
