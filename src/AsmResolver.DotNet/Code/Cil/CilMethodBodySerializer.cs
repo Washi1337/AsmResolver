@@ -139,9 +139,10 @@ namespace AsmResolver.DotNet.Code.Cil
         private static byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
         {
             using var codeStream = new MemoryStream();
+            var bag = context.DiagnosticBag;
 
             var writer = new BinaryStreamWriter(codeStream);
-            var assembler = new CilAssembler(writer, new CilOperandBuilder(context.TokenProvider, context.DiagnosticBag));
+            var assembler = new CilAssembler(writer, new CilOperandBuilder(context.TokenProvider, bag), bag);
             assembler.WriteInstructions(body.Instructions);
 
             return codeStream.ToArray();

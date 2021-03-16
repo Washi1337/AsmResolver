@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AsmResolver.PE.DotNet.Cil
@@ -10,8 +10,94 @@ namespace AsmResolver.PE.DotNet.Cil
     public class CilInstruction
     {
         /// <summary>
+        /// Creates a new CIL instruction with no operand.
+        /// </summary>
+        /// <param name="opCode">The operation to perform.</param>
+        /// <remarks>
+        /// This constructor does not do any verification on the correctness of the instruction.
+        /// </remarks>
+        public CilInstruction(CilOpCode opCode)
+            : this(0, opCode, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new CIL instruction with no operand.
+        /// </summary>
+        /// <param name="offset">The offset of the instruction, relative to the start of the method body's code.</param>
+        /// <param name="opCode">The operation to perform.</param>
+        /// <remarks>
+        /// This constructor does not do any verification on the correctness of the instruction.
+        /// </remarks>
+        public CilInstruction(int offset, CilOpCode opCode)
+            : this(offset, opCode, null)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new CIL instruction with an operand..
+        /// </summary>
+        /// <param name="opCode">The operation to perform.</param>
+        /// <param name="operand">The operand.</param>
+        /// <remarks>
+        /// This constructor does not do any verification on the correctness of the instruction.
+        /// </remarks>
+        public CilInstruction(CilOpCode opCode, object operand)
+            : this(0, opCode, operand)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new CIL instruction with an operand..
+        /// </summary>
+        /// <param name="offset">The offset of the instruction, relative to the start of the method body's code.</param>
+        /// <param name="opCode">The operation to perform.</param>
+        /// <param name="operand">The operand.</param>
+        /// <remarks>
+        /// This constructor does not do any verification on the correctness of the instruction.
+        /// </remarks>
+        public CilInstruction(int offset, CilOpCode opCode, object operand)
+        {
+            Offset = offset;
+            OpCode = opCode;
+            Operand = operand;
+        }
+
+        /// <summary>
+        /// Gets or sets the offset to the start of the instruction, relative to the start of the code.
+        /// </summary>
+        public int Offset
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the operation to perform.
+        /// </summary>
+        public CilOpCode OpCode
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the operand of the instruction, if available.
+        /// </summary>
+        public object Operand
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets the size in bytes of the CIL instruction.
+        /// </summary>
+        public int Size => OpCode.Size + GetOperandSize();
+
+        /// <summary>
         /// Create a new instruction pushing the provided integer value, using the smallest possible operation code and
-        /// operand size. 
+        /// operand size.
         /// </summary>
         /// <param name="value">The constant to push.</param>
         /// <returns>The instruction.</returns>
@@ -75,92 +161,6 @@ namespace AsmResolver.PE.DotNet.Cil
             return (code, operand);
         }
 
-        /// <summary>
-        /// Creates a new CIL instruction with no operand.
-        /// </summary>
-        /// <param name="opCode">The operation to perform.</param>
-        /// <remarks>
-        /// This constructor does not do any verification on the correctness of the instruction.
-        /// </remarks>
-        public CilInstruction(CilOpCode opCode)
-            : this(0, opCode, null)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new CIL instruction with no operand.
-        /// </summary>
-        /// <param name="offset">The offset of the instruction, relative to the start of the method body's code.</param>
-        /// <param name="opCode">The operation to perform.</param>
-        /// <remarks>
-        /// This constructor does not do any verification on the correctness of the instruction.
-        /// </remarks>
-        public CilInstruction(int offset, CilOpCode opCode)
-            : this(offset, opCode, null)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new CIL instruction with an operand..
-        /// </summary>
-        /// <param name="opCode">The operation to perform.</param>
-        /// <param name="operand">The operand.</param>
-        /// <remarks>
-        /// This constructor does not do any verification on the correctness of the instruction.
-        /// </remarks>
-        public CilInstruction(CilOpCode opCode, object operand)
-            : this(0, opCode, operand)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new CIL instruction with an operand..
-        /// </summary>
-        /// <param name="offset">The offset of the instruction, relative to the start of the method body's code.</param>
-        /// <param name="opCode">The operation to perform.</param>
-        /// <param name="operand">The operand.</param>
-        /// <remarks>
-        /// This constructor does not do any verification on the correctness of the instruction.
-        /// </remarks>
-        public CilInstruction(int offset, CilOpCode opCode, object operand)
-        {
-            Offset = offset;
-            OpCode = opCode;
-            Operand = operand;
-        }
-
-        /// <summary>
-        /// Gets or sets the offset to the start of the instruction, relative to the start of the code. 
-        /// </summary>
-        public int Offset
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the operation to perform.
-        /// </summary>
-        public CilOpCode OpCode
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the operand of the instruction, if available.
-        /// </summary>
-        public object Operand
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets the size in bytes of the CIL instruction.
-        /// </summary>
-        public int Size => OpCode.Size + GetOperandSize();
-
         private int GetOperandSize() =>
             OpCode.OperandType switch
             {
@@ -182,7 +182,7 @@ namespace AsmResolver.PE.DotNet.Cil
                 CilOperandType.InlineI8 => sizeof(ulong),
                 CilOperandType.ShortInlineR => sizeof(float),
                 CilOperandType.InlineR => sizeof(double),
-                CilOperandType.InlineSwitch => ((((ICollection) Operand).Count + 1) * sizeof(int)),
+                CilOperandType.InlineSwitch => (((IList<ICilLabel>) Operand).Count + 1) * sizeof(int),
                 CilOperandType.InlinePhi => throw new NotSupportedException(),
                 _ => throw new ArgumentOutOfRangeException()
             };
@@ -202,16 +202,16 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns><c>true</c> if the instructions are equal, <c>false</c> otherwise.</returns>
         protected bool Equals(CilInstruction other)
         {
-            if (Offset != other.Offset || !OpCode.Equals(other.OpCode)) 
+            if (Offset != other.Offset || !OpCode.Equals(other.OpCode))
                 return false;
 
-            if (OpCode.Code == CilCode.Switch 
-                && Operand is IEnumerable list1
-                && other.Operand is IEnumerable list2)
+            if (OpCode.Code == CilCode.Switch
+                && Operand is IEnumerable<ICilLabel> list1
+                && other.Operand is IEnumerable<ICilLabel> list2)
             {
-                return list1.Cast<object>().SequenceEqual(list2.Cast<object>());
+                return list1.SequenceEqual(list2);
             }
-            
+
             return Equals(Operand, other.Operand);
         }
 
@@ -220,9 +220,9 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             if (ReferenceEquals(null, obj))
                 return false;
-            if (ReferenceEquals(this, obj)) 
+            if (ReferenceEquals(this, obj))
                 return true;
-            if (obj.GetType() != GetType()) 
+            if (obj.GetType() != GetType())
                 return false;
             return Equals((CilInstruction) obj);
         }
@@ -328,14 +328,12 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// Determines whether the instruction is an unconditional branch instruction.
         /// </summary>
-        public bool IsUnconditionalBranch() => 
-            OpCode.FlowControl == CilFlowControl.Branch;
+        public bool IsUnconditionalBranch() => OpCode.FlowControl == CilFlowControl.Branch;
 
         /// <summary>
         /// Determines whether the instruction is a conditional branch instruction.
         /// </summary>
-        public bool IsConditionalBranch() => 
-            OpCode.FlowControl == CilFlowControl.ConditionalBranch;
+        public bool IsConditionalBranch() => OpCode.FlowControl == CilFlowControl.ConditionalBranch;
 
         /// <summary>
         /// Determines whether the instruction is an instruction pushing an int32 constant onto the stack.
@@ -357,7 +355,7 @@ namespace AsmResolver.PE.DotNet.Cil
                 case CilCode.Ldc_I4_8:
                 case CilCode.Ldc_I4_M1:
                     return true;
-                
+
                 default:
                     return false;
             }
@@ -366,24 +364,21 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <summary>
         /// When this instruction is an ldc.i4 variant, gets the in32 constant that is being pushed onto the stack.
         /// </summary>
-        public int GetLdcI4Constant()
+        public int GetLdcI4Constant() => OpCode.Code switch
         {
-            return OpCode.Code switch
-            {
-                CilCode.Ldc_I4 => (int) Operand,
-                CilCode.Ldc_I4_S => (sbyte) Operand,
-                CilCode.Ldc_I4_0 => 0,
-                CilCode.Ldc_I4_1 => 1,
-                CilCode.Ldc_I4_2 => 2,
-                CilCode.Ldc_I4_3 => 3,
-                CilCode.Ldc_I4_4 => 4,
-                CilCode.Ldc_I4_5 => 5,
-                CilCode.Ldc_I4_6 => 6,
-                CilCode.Ldc_I4_7 => 7,
-                CilCode.Ldc_I4_8 => 8,
-                CilCode.Ldc_I4_M1 => -1,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        }
+            CilCode.Ldc_I4 => (int) Operand,
+            CilCode.Ldc_I4_S => (sbyte) Operand,
+            CilCode.Ldc_I4_0 => 0,
+            CilCode.Ldc_I4_1 => 1,
+            CilCode.Ldc_I4_2 => 2,
+            CilCode.Ldc_I4_3 => 3,
+            CilCode.Ldc_I4_4 => 4,
+            CilCode.Ldc_I4_5 => 5,
+            CilCode.Ldc_I4_6 => 6,
+            CilCode.Ldc_I4_7 => 7,
+            CilCode.Ldc_I4_8 => 8,
+            CilCode.Ldc_I4_M1 => -1,
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 }

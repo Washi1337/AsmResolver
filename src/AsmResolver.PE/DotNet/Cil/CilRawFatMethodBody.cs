@@ -11,76 +11,12 @@ namespace AsmResolver.PE.DotNet.Cil
     /// <remarks>
     /// The fat method body format is used when a CIL method body's code size is larger than 64 bytes, has  local
     /// variables, its max stack size is greater than 8, or uses extra sections (e.g. for storing exception handlers).
-    ///  
+    ///
     /// This class does not do any encoding/decoding of the bytes that make up the actual CIL instructions, nor does
     /// it do any verification of the code.
     /// </remarks>
     public class CilRawFatMethodBody : CilRawMethodBody
     {
-        /// <summary>
-        /// Reads a raw method body from the given binary input stream using the fat method body format.
-        /// </summary>
-        /// <param name="errorListener">The object responsible for recording parser errors.</param>
-        /// <param name="reader">The binary input stream to read from.</param>
-        /// <returns>The raw method body.</returns>
-        /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
-        /// fat format.</exception>
-        public new static CilRawFatMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
-        {
-            ulong fileOffset = reader.Offset;
-            uint rva = reader.Rva;
-            
-            // Read flags.
-            ushort header = reader.ReadUInt16();
-            var flags = (CilMethodBodyAttributes) (header & 0xFFF);
-            int headerSize = (header >> 12) * sizeof(uint);
-
-            // Verify this is a fat method body.
-            if ((flags & CilMethodBodyAttributes.Fat) != CilMethodBodyAttributes.Fat)
-            {
-                errorListener.BadImage("Invalid fat CIL method body header.");
-                return null;
-            }
-
-            // Read remaining header.
-            ushort maxStack = reader.ReadUInt16();
-            uint codeSize = reader.ReadUInt32();
-            uint localVarSigToken = reader.ReadUInt32();
-
-            // Move to code.
-            reader.Offset = fileOffset + (ulong) headerSize;
-
-            // Verify code size.
-            if (reader.Offset + codeSize > reader.StartOffset + reader.Length)
-            {
-                errorListener.BadImage("Invalid fat CIL method body code size.");
-                return null;
-            }
-
-            // Read code.
-            var code = new byte[codeSize];
-            reader.ReadBytes(code, 0, code.Length);
-            
-            // Create body.
-            var body = new CilRawFatMethodBody(flags, maxStack, localVarSigToken, code);
-            body.UpdateOffsets(fileOffset, rva);
-
-            // Read any extra sections.
-            if (body.HasSections)
-            {
-                reader.Align(4);
-            
-                CilExtraSection section;
-                do
-                {
-                    section = CilExtraSection.FromReader(reader);
-                    body.ExtraSections.Add(section);
-                } while (section.HasMoreSections);
-            }
-
-            return body;
-        }
-
         private CilMethodBodyAttributes _attributes;
 
         /// <summary>
@@ -98,7 +34,7 @@ namespace AsmResolver.PE.DotNet.Cil
             LocalVarSigToken = localVarSigToken;
             Code = code ?? throw new ArgumentNullException(nameof(code));
         }
-        
+
         /// <inheritdoc />
         public override bool IsFat => true;
 
@@ -168,6 +104,70 @@ namespace AsmResolver.PE.DotNet.Cil
             get;
         } = new List<CilExtraSection>();
 
+        /// <summary>
+        /// Reads a raw method body from the given binary input stream using the fat method body format.
+        /// </summary>
+        /// <param name="errorListener">The object responsible for recording parser errors.</param>
+        /// <param name="reader">The binary input stream to read from.</param>
+        /// <returns>The raw method body.</returns>
+        /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
+        /// fat format.</exception>
+        public new static CilRawFatMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
+        {
+            ulong fileOffset = reader.Offset;
+            uint rva = reader.Rva;
+
+            // Read flags.
+            ushort header = reader.ReadUInt16();
+            var flags = (CilMethodBodyAttributes) (header & 0xFFF);
+            int headerSize = (header >> 12) * sizeof(uint);
+
+            // Verify this is a fat method body.
+            if ((flags & CilMethodBodyAttributes.Fat) != CilMethodBodyAttributes.Fat)
+            {
+                errorListener.BadImage("Invalid fat CIL method body header.");
+                return null;
+            }
+
+            // Read remaining header.
+            ushort maxStack = reader.ReadUInt16();
+            uint codeSize = reader.ReadUInt32();
+            uint localVarSigToken = reader.ReadUInt32();
+
+            // Move to code.
+            reader.Offset = fileOffset + (ulong) headerSize;
+
+            // Verify code size.
+            if (reader.Offset + codeSize > reader.StartOffset + reader.Length)
+            {
+                errorListener.BadImage("Invalid fat CIL method body code size.");
+                return null;
+            }
+
+            // Read code.
+            byte[] code = new byte[codeSize];
+            reader.ReadBytes(code, 0, code.Length);
+
+            // Create body.
+            var body = new CilRawFatMethodBody(flags, maxStack, localVarSigToken, code);
+            body.UpdateOffsets(fileOffset, rva);
+
+            // Read any extra sections.
+            if (body.HasSections)
+            {
+                reader.Align(4);
+
+                CilExtraSection section;
+                do
+                {
+                    section = CilExtraSection.FromReader(reader);
+                    body.ExtraSections.Add(section);
+                } while (section.HasMoreSections);
+            }
+
+            return body;
+        }
+
         /// <inheritdoc />
         public override uint GetPhysicalSize()
         {
@@ -178,7 +178,7 @@ namespace AsmResolver.PE.DotNet.Cil
             length += (uint) (sectionsOffset - endOffset);
 
             length += (uint) ExtraSections.Sum(x => x.GetPhysicalSize());
-            
+
             return length;
         }
 
@@ -198,6 +198,5 @@ namespace AsmResolver.PE.DotNet.Cil
                     section.Write(writer);
             }
         }
-
     }
 }
