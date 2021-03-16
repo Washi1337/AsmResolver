@@ -142,7 +142,12 @@ namespace AsmResolver.DotNet.Code.Cil
             var bag = context.DiagnosticBag;
 
             var writer = new BinaryStreamWriter(codeStream);
-            var assembler = new CilAssembler(writer, new CilOperandBuilder(context.TokenProvider, bag), bag);
+            var assembler = new CilAssembler(
+                writer,
+                new CilOperandBuilder(context.TokenProvider, bag),
+                body.Owner.SafeToString(),
+                bag);
+
             assembler.WriteInstructions(body.Instructions);
 
             return codeStream.ToArray();

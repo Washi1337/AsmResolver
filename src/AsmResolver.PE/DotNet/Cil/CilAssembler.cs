@@ -11,6 +11,7 @@ namespace AsmResolver.PE.DotNet.Cil
     {
         private readonly IBinaryStreamWriter _writer;
         private readonly ICilOperandBuilder _operandBuilder;
+        private readonly string _diagnosticPrefix;
         private readonly IErrorListener _errorListener;
 
         /// <summary>
@@ -19,7 +20,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <param name="writer">The output stream to write the encoded instructions to.</param>
         /// <param name="operandBuilder">The object to use for creating raw operands.</param>
         public CilAssembler(IBinaryStreamWriter writer, ICilOperandBuilder operandBuilder)
-            : this(writer, operandBuilder, ThrowErrorListener.Instance)
+            : this(writer, operandBuilder, null, ThrowErrorListener.Instance)
         {
         }
 
@@ -28,12 +29,20 @@ namespace AsmResolver.PE.DotNet.Cil
         /// </summary>
         /// <param name="writer">The output stream to write the encoded instructions to.</param>
         /// <param name="operandBuilder">The object to use for creating raw operands.</param>
+        /// <param name="methodBodyName">The name of the method that is being serialized.</param>
         /// <param name="errorListener">The object used for recording error listener.</param>
-        public CilAssembler(IBinaryStreamWriter writer, ICilOperandBuilder operandBuilder, IErrorListener errorListener)
+        public CilAssembler(
+            IBinaryStreamWriter writer,
+            ICilOperandBuilder operandBuilder,
+            string methodBodyName,
+            IErrorListener errorListener)
         {
             _writer = writer ?? throw new ArgumentNullException(nameof(writer));
             _errorListener = errorListener ?? throw new ArgumentNullException(nameof(errorListener));
             _operandBuilder = operandBuilder ?? throw new ArgumentNullException(nameof(operandBuilder));
+            _diagnosticPrefix = !string.IsNullOrEmpty(methodBodyName)
+                ? $"[In {methodBodyName}]: "
+                : null;
         }
 
         /// <summary>
@@ -168,7 +177,7 @@ namespace AsmResolver.PE.DotNet.Cil
             if (isShort && (delta < sbyte.MinValue || delta > sbyte.MaxValue))
             {
                 _errorListener.RegisterException(new OverflowException(
-                    $"Branch target at offset IL_{instruction.Offset:X4} is too far away for a ShortInlineBr instruction."));
+                    $"{_diagnosticPrefix}Branch target at IL_{instruction.Offset:X4} is too far away for a ShortInlineBr instruction."));
             }
 
             return delta;
@@ -180,7 +189,7 @@ namespace AsmResolver.PE.DotNet.Cil
             if (instruction.OpCode.OperandType == CilOperandType.ShortInlineVar && variableIndex > byte.MaxValue)
             {
                 _errorListener.RegisterException(new OverflowException(
-                    $"Local index at offset IL_{instruction.Offset:X4} is too large for a ShortInlineVar instruction."));
+                    $"{_diagnosticPrefix}Local index at IL_{instruction.Offset:X4} is too large for a ShortInlineVar instruction."));
             }
 
             return unchecked((ushort) variableIndex);
@@ -192,7 +201,7 @@ namespace AsmResolver.PE.DotNet.Cil
             if (instruction.OpCode.OperandType == CilOperandType.ShortInlineArgument && variableIndex > byte.MaxValue)
             {
                 _errorListener.RegisterException(new OverflowException(
-                    $"Argument index at offset IL_{instruction.Offset:X4} is too large for a ShortInlineArgument instruction."));
+                    $"{_diagnosticPrefix}Argument index at IL_{instruction.Offset:X4} is too large for a ShortInlineArgument instruction."));
             }
 
             return unchecked((ushort) variableIndex);
@@ -237,7 +246,7 @@ namespace AsmResolver.PE.DotNet.Cil
         {
             string found = instruction.Operand?.GetType().Name ?? "null";
             _errorListener.RegisterException(new ArgumentOutOfRangeException(
-                $"Expected a {expectedOperand.Name} operand at offset IL_{instruction.Offset:X4}, but found {found}."));
+                $"{_diagnosticPrefix}Expected a {expectedOperand.Name} operand at IL_{instruction.Offset:X4}, but found {found}."));
             return default;
         }
 
@@ -253,7 +262,7 @@ namespace AsmResolver.PE.DotNet.Cil
 
             string found = instruction.Operand?.GetType().Name ?? "null";
             _errorListener.RegisterException(new ArgumentOutOfRangeException(
-                $"Expected a {operandTypesString} operand at offset IL_{instruction.Offset:X4}, but found {found}."));
+                $"{_diagnosticPrefix}Expected a {operandTypesString} operand at IL_{instruction.Offset:X4}, but found {found}."));
             return default;
         }
     }
