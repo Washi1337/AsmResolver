@@ -90,7 +90,7 @@ namespace AsmResolver.PE
         /// <inheritdoc />
         protected override IExceptionDirectory GetExceptions()
         {
-            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ResourceDirectory);
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ExceptionDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
 
