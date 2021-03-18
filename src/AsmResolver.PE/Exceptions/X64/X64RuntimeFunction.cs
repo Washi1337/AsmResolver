@@ -1,5 +1,3 @@
-using System;
-
 namespace AsmResolver.PE.Exceptions.X64
 {
     /// <summary>
@@ -59,12 +57,16 @@ namespace AsmResolver.PE.Exceptions.X64
         {
             uint begin = reader.ReadUInt32();
             uint end = reader.ReadUInt32();
-            uint unwindInfo = reader.ReadUInt32(); // TODO: interpret unwindInfo.
+            uint unwindInfoRva = reader.ReadUInt32();
+
+            var unwindInfo = context.File.TryCreateReaderAtRva(unwindInfoRva, out var unwindReader)
+                ? X64UnwindInfo.FromReader(context, unwindReader)
+                : context.BadImageAndReturn<X64UnwindInfo>($"Invalid UnwindInfo RVA {unwindInfoRva:X8}.");
 
             return new X64RuntimeFunction(
                 context.File.GetReferenceToRva(begin),
                 context.File.GetReferenceToRva(end),
-                new X64UnwindInfo());
+                unwindInfo);
         }
 
         /// <inheritdoc />
