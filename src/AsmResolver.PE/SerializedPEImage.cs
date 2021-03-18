@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.Exceptions;
+using AsmResolver.PE.Exceptions.X64;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
@@ -16,6 +18,8 @@ namespace AsmResolver.PE
     /// </summary>
     public class SerializedPEImage : PEImage
     {
+        private readonly MachineType _originalArchitecture;
+
         /// <summary>
         /// Opens a PE image from a file.
         /// </summary>
@@ -34,6 +38,8 @@ namespace AsmResolver.PE
             SubSystem = PEFile.OptionalHeader.SubSystem;
             DllCharacteristics = PEFile.OptionalHeader.DllCharacteristics;
             ImageBase = PEFile.OptionalHeader.ImageBase;
+
+            _originalArchitecture = MachineType;
         }
 
         /// <summary>
@@ -82,6 +88,20 @@ namespace AsmResolver.PE
         }
 
         /// <inheritdoc />
+        protected override IExceptionDirectory GetExceptions()
+        {
+            var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ResourceDirectory);
+            if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
+                return null;
+
+            return _originalArchitecture switch
+            {
+                MachineType.Amd64 => new X64ExceptionDirectory(ReaderContext, reader),
+                _ => ReaderContext.NotSupportedAndReturn<IExceptionDirectory>()
+            };
+        }
+
+        /// <inheritdoc />
         protected override IList<BaseRelocation> GetRelocations()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.BaseRelocationDirectory);
@@ -96,7 +116,7 @@ namespace AsmResolver.PE
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.ClrDirectory);
             if (!dataDirectory.IsPresentInPE || !PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
                 return null;
-            
+
             return new SerializedDotNetDirectory(ReaderContext, reader);
         }
 
@@ -104,7 +124,7 @@ namespace AsmResolver.PE
         protected override IList<DebugDataEntry> GetDebugData()
         {
             var dataDirectory = PEFile.OptionalHeader.GetDataDirectory(DataDirectoryIndex.DebugDirectory);
-            
+
             var result = new List<DebugDataEntry>();
             if (dataDirectory.IsPresentInPE && PEFile.TryCreateDataDirectoryReader(dataDirectory, out var reader))
             {
@@ -112,7 +132,7 @@ namespace AsmResolver.PE
                 for (int i = 0; i < count; i++)
                     result.Add(new SerializedDebugDataEntry(ReaderContext, reader));
             }
-            
+
             return result;
         }
     }
