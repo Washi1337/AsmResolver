@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using AsmResolver.DotNet;
@@ -76,12 +77,8 @@ namespace AsmResolver.Workspaces.DotNet
             {
                 // Check if any of the assemblies in the workspace matches the requested assembly,
                 // and if so, prioritize them.
-                for (int i = 0; i < _collection.Count; i++)
-                {
-                    var candidate = _collection[i];
-                    if (_comparer.Equals(assembly, candidate))
-                        return candidate;
-                }
+                if (FindAssemblyInWorkspace(assembly) is { } workspaceAssembly)
+                    return workspaceAssembly;
 
                 // If not, resolve using the original assembly resolver of the module.
                 if (assembly is not AssemblyReference reference)
@@ -90,6 +87,27 @@ namespace AsmResolver.Workspaces.DotNet
                 if (!_collection._originalResolvers.TryGetValue(reference.Module, out var originalResolver))
                     originalResolver = reference.Module.MetadataResolver;
                 return originalResolver.AssemblyResolver.Resolve(assembly);
+            }
+
+            /// <inheritdoc />
+            protected override string? ProbeRuntimeDirectories(AssemblyDescriptor assembly)
+            {
+                // Should never be called as this function is called by the original ResolveImpl only,
+                // which is never called in this implementation.
+
+                return null;
+            }
+
+            private AssemblyDefinition? FindAssemblyInWorkspace(AssemblyDescriptor assembly)
+            {
+                for (int i = 0; i < _collection.Count; i++)
+                {
+                    var candidate = _collection[i];
+                    if (_comparer.Equals(assembly, candidate))
+                        return candidate;
+                }
+
+                return null;
             }
         }
 
