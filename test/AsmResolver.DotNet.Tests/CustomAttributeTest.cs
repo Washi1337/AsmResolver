@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Signatures;
@@ -11,6 +12,7 @@ using AsmResolver.PE;
 using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -18,6 +20,24 @@ namespace AsmResolver.DotNet.Tests
     public class CustomAttributeTest
     {
         private readonly SignatureComparer _comparer = new SignatureComparer();
+        
+        [Fact]
+        public void ReadAssembly()
+        {
+            var assembly = AssemblyDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            
+            Assert.Contains(assembly.CustomAttributes, c
+                =>c.Constructor.DeclaringType.Name == nameof(TestCaseAttribute));
+        }
+        
+        [Fact]
+        public void ReadModule()
+        {
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+
+            Assert.All(module.CustomAttributes, a =>
+                Assert.Equal(nameof(TestCaseAttribute), a.Constructor.DeclaringType.Name));
+        }
         
         [Fact]
         public void ReadConstructor()
@@ -28,7 +48,19 @@ namespace AsmResolver.DotNet.Tests
             Assert.All(type.CustomAttributes, a =>
                 Assert.Equal(nameof(TestCaseAttribute), a.Constructor.DeclaringType.Name));
         }
-
+        
+        [Fact]
+        public void ReadParameters()
+        {
+            var module = ModuleDefinition.FromFile(typeof(CustomAttributesTestClass).Assembly.Location);
+            var type = module.TopLevelTypes.First(t => t.Name == nameof(CustomAttributesTestClass));
+            var method = type.Methods.First(m => m.Name == nameof(CustomAttributesTestClass.TestMethod));
+            
+            Assert.All(method.ParameterDefinitions,  p =>
+                Assert.All(p.CustomAttributes, a =>
+                    Assert.Equal(nameof(TestCaseAttribute), a.Constructor.DeclaringType.Name)));
+        }
+        
         [Fact]
         public void PersistentConstructor()
         {

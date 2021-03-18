@@ -2,37 +2,56 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
+using AsmResolver.DotNet.Signatures.Types;
 
 namespace AsmResolver.Workspaces.DotNet.Analyzers
 {
     internal static class AnalyzerUtilities
     {
-        internal static IEnumerable<MethodDefinition> FindBaseMethods(this MethodDefinition subject, WorkspaceIndex index)
+        private static readonly SignatureComparer _comparer = new ();
+
+        internal static IEnumerable<MethodDefinition> FindBaseMethods(this MethodDefinition subject,
+            WorkspaceIndex index)
         {
             var declaringType = subject.DeclaringType;
 
-            var candidates = index
+            var baseTypes = index
                 .GetOrCreateNode(declaringType) // Get indexed declaring type.
                 .GetRelatedObjects(DotNetRelations.BaseType) // Get types that this declaring type is implementing.
-                .SelectMany(type => type.Resolve()?.Methods ?? Enumerable.Empty<MethodDefinition>()) // Get the methods.
-                .Where(method => method.Name == subject.Name) // Filter on methods with the same name.
                 .ToArray();
 
-            var comparer = new SignatureComparer();
-
-            for (int i = 0; i < candidates.Length; i++)
+            foreach (var baseType in baseTypes)
             {
-                var candidate = candidates[i];
-                if (!candidate.IsVirtual)
+                if (baseType.Resolve() is not {} type)
                     continue;
-
-                bool isImplementation = candidate.DeclaringType.IsInterface && candidate.IsNewSlot;
-                bool isOverride = !candidate.DeclaringType.IsInterface && subject.IsReuseSlot;
-                if (!isImplementation && !isOverride)
+                
+                var candidates = type.Methods
+                    .Where(m => m.Name == subject.Name)
+                    .ToArray();
+                
+                if (!candidates.Any())
                     continue;
+                
+                GenericContext? context = null;
+                if (baseType is TypeSpecification {Signature: GenericInstanceTypeSignature genericSignature})
+                    context = new GenericContext(genericSignature, null);
+    
+                foreach (var candidate in candidates)
+                {
+                    if (!candidate.IsVirtual)
+                        continue;
 
-                if (comparer.Equals(candidate.Signature, subject.Signature))
-                    yield return candidate;
+                    bool isImplementation = candidate.DeclaringType.IsInterface && candidate.IsNewSlot;
+                    bool isOverride = !candidate.DeclaringType.IsInterface && subject.IsReuseSlot;
+                    if (!isImplementation && !isOverride)
+                        continue;
+                    var signature = candidate.Signature;
+                    if (context.HasValue)
+                        signature = signature.InstantiateGenericTypes(context.Value);
+                   
+                    if (_comparer.Equals(signature, subject.Signature))
+                        yield return candidate;
+                }
             }
         }
     }
