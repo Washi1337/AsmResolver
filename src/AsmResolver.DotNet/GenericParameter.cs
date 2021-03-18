@@ -10,9 +10,9 @@ namespace AsmResolver.DotNet
     /// <summary>
     /// Represents a type parameter that a generic method or type in a .NET module defines.
     /// </summary>
-    public class GenericParameter : 
+    public class GenericParameter :
         MetadataMember,
-        INameProvider, 
+        INameProvider,
         IHasCustomAttribute,
         IModuleProvider,
         IOwnedCollectionElement<IHasGenericParameters>
@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet
             Name = name;
             Attributes = attributes;
         }
-        
+
         /// <summary>
         /// Gets the member that defines this generic parameter.
         /// </summary>
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets additional attributes assigned to this generic parameter. 
+        /// Gets or sets additional attributes assigned to this generic parameter.
         /// </summary>
         public GenericParameterAttributes Attributes
         {
@@ -89,11 +89,7 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Gets the index of this parameter within the list of generic parameters that the owner defines.
         /// </summary>
-        public ushort Number
-        {
-            get;
-            internal set;
-        }
+        public ushort Number => (ushort)Owner.GenericParameters.IndexOf(this);
 
         /// <inheritdoc />
         public ModuleDefinition Module => Owner?.Module;
@@ -121,7 +117,7 @@ namespace AsmResolver.DotNet
                 return _customAttributes;
             }
         }
-        
+
         /// <summary>
         /// Obtains the name of the generic parameter.
         /// </summary>
@@ -130,7 +126,7 @@ namespace AsmResolver.DotNet
         /// This method is called upon initialization of the <see cref="Name"/> property.
         /// </remarks>
         protected virtual string GetName() => null;
-        
+
         /// <summary>
         /// Obtains the owner of the generic parameter.
         /// </summary>
@@ -147,7 +143,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="Constraints"/> property.
         /// </remarks>
-        protected virtual IList<GenericParameterConstraint> GetConstraints() => 
+        protected virtual IList<GenericParameterConstraint> GetConstraints() =>
             new OwnedCollection<GenericParameter, GenericParameterConstraint>(this);
 
         /// <summary>
@@ -157,7 +153,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
         /// </remarks>
-        protected virtual IList<CustomAttribute> GetCustomAttributes() => 
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <inheritdoc />

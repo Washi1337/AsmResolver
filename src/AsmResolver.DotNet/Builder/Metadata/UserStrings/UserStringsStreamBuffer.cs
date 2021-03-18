@@ -12,9 +12,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
     /// </summary>
     public class UserStringsStreamBuffer : IMetadataStreamBuffer
     {
-        private readonly MemoryStream _rawStream = new MemoryStream();
+        private readonly MemoryStream _rawStream = new();
         private readonly BinaryStreamWriter _writer;
-        private readonly IDictionary<string, uint> _strings = new Dictionary<string, uint>();
+        private readonly Dictionary<string, uint> _strings = new();
 
         /// <summary>
         /// Creates a new user-strings stream buffer with the default user-strings stream name.
@@ -83,7 +83,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.UserStrings
             int byteCount = Encoding.Unicode.GetByteCount(value) + 1;
             _writer.WriteCompressedUInt32((uint) byteCount);
 
-            var rawData = new byte[byteCount];
+            byte[] rawData = new byte[byteCount];
             Encoding.Unicode.GetBytes(value, 0, value.Length, rawData, 0);
             rawData[byteCount - 1] = GetTerminatorByte(value);
 

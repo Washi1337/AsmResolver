@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <param name="modifierType">The modifier type.</param>
         /// <param name="isRequired">Indicates whether the modifier is required or optional.</param>
         /// <param name="baseType">The type signature that was annotated.</param>
-        public CustomModifierTypeSignature(ITypeDefOrRef modifierType, bool isRequired, TypeSignature baseType) 
+        public CustomModifierTypeSignature(ITypeDefOrRef modifierType, bool isRequired, TypeSignature baseType)
             : base(baseType)
         {
             ModifierType = modifierType;
@@ -66,10 +66,15 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <inheritdoc />
         public override bool IsValueType => BaseType.IsValueType;
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitCustomModifierType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitCustomModifierType(this, state);
 
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context)

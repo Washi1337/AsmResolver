@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet
         /// References System.Private.CoreLib.dll, Version=4.0.0.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET
         /// assemblies targeting .NET Core 1.0 and later.
         /// </summary>
-        public static readonly AssemblyReference SystemPrivateCoreLib_v4_0_0_0 = new AssemblyReference("System.Private.CoreLib", 
+        public static readonly AssemblyReference SystemPrivateCoreLib_v4_0_0_0 = new AssemblyReference("System.Private.CoreLib",
             new Version(4, 0, 0, 0), false, new byte[]
             {
                 0x7C, 0xEC, 0x85, 0xD7, 0xBE, 0xA7, 0x79, 0x8E
@@ -54,7 +54,7 @@ namespace AsmResolver.DotNet
         /// References System.Private.CoreLib.dll, Version=5.0.0.0, PublicKeyToken=7CEC85D7BEA7798E. This is used by .NET
         /// assemblies targeting .NET 5.0.
         /// </summary>
-        public static readonly AssemblyReference SystemPrivateCoreLib_v5_0_0_0 = new AssemblyReference("System.Private.CoreLib", 
+        public static readonly AssemblyReference SystemPrivateCoreLib_v5_0_0_0 = new AssemblyReference("System.Private.CoreLib",
             new Version(5, 0, 0, 0), false, new byte[]
             {
                 0x7C, 0xEC, 0x85, 0xD7, 0xBE, 0xA7, 0x79, 0x8E
@@ -119,7 +119,7 @@ namespace AsmResolver.DotNet
             {
                 0xCC, 0x7B, 0x13, 0xFF, 0xCD, 0x2D, 0xDD, 0x51
             });
-        
+
         /// <summary>
         /// References netstandard.dll, Version=2.1.0.0, PublicKeyToken=CC7B13FFCD2DDD51. This is used by .NET
         /// assemblies targeting .NET standard 2.1.

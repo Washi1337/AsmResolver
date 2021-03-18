@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using AsmResolver.DotNet.Code.Native;
 using AsmResolver.PE;
+using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Builder
 {
@@ -29,13 +31,13 @@ namespace AsmResolver.DotNet.Builder
 
         /// <summary>
         /// Creates a new instance of the <see cref="ManagedPEImageBuilder"/> class, using the provided
-        /// .NET data directory flags. 
+        /// .NET data directory flags.
         /// </summary>
         public ManagedPEImageBuilder(IDotNetDirectoryFactory factory)
         {
             DotNetDirectoryFactory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
-        
+
         /// <summary>
         /// Gets or sets the factory responsible for constructing the .NET data directory.
         /// </summary>
@@ -51,6 +53,8 @@ namespace AsmResolver.DotNet.Builder
             var context = new PEImageBuildContext();
 
             PEImage image = null;
+            ITokenMapping tokenMapping = null;
+
             try
             {
                 // Create basic PE image skeleton.
@@ -67,19 +71,21 @@ namespace AsmResolver.DotNet.Builder
 
                 // Construct new .NET directory.
                 var symbolProvider = new NativeSymbolsProvider(image.ImageBase);
-                image.DotNetDirectory = DotNetDirectoryFactory.CreateDotNetDirectory(
-                    module, 
-                    symbolProvider, 
+                var result = DotNetDirectoryFactory.CreateDotNetDirectory(
+                    module,
+                    symbolProvider,
                     context.DiagnosticBag);
-                
+                image.DotNetDirectory = result.Directory;
+                tokenMapping = result.TokenMapping;
+
                 // Copy any collected native symbols over to the image.
                 foreach (var import in symbolProvider.GetImportedModules())
                     image.Imports.Add(import);
-                
+
                 // Copy any collected base relocations over to the image.
                 foreach (var relocation in symbolProvider.GetBaseRelocations())
                     image.Relocations.Add(relocation);
-                
+
                 // Copy over debug data.
                 for (int i = 0; i < module.DebugData.Count; i++)
                     image.DebugData.Add(module.DebugData[i]);
@@ -90,7 +96,8 @@ namespace AsmResolver.DotNet.Builder
                 context.DiagnosticBag.MarkAsFatal();
             }
 
-            return new PEImageBuildResult(image, context.DiagnosticBag);
+            tokenMapping ??= new TokenMapping();
+            return new PEImageBuildResult(image, context.DiagnosticBag, tokenMapping);
         }
     }
 }

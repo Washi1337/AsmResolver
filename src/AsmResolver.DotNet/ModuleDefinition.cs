@@ -21,7 +21,7 @@ namespace AsmResolver.DotNet
 {
     /// <summary>
     /// Represents a single module in a .NET assembly. A module definition is the root object of any .NET module and
-    /// defines types, as well as any resources and referenced assemblies. 
+    /// defines types, as well as any resources and referenced assemblies.
     /// </summary>
     public class ModuleDefinition :
         MetadataMember,
@@ -84,7 +84,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(string filePath, ModuleReaderParameters readerParameters) => 
+        public static ModuleDefinition FromFile(string filePath, ModuleReaderParameters readerParameters) =>
             FromImage(PEImage.FromFile(filePath), readerParameters);
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file) => 
+        public static ModuleDefinition FromFile(IPEFile file) =>
             FromImage(PEImage.FromFile(file));
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromFile(IPEFile file, ModuleReaderParameters readerParameters) => 
+        public static ModuleDefinition FromFile(IPEFile file, ModuleReaderParameters readerParameters) =>
             FromImage(PEImage.FromFile(file), readerParameters);
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace AsmResolver.DotNet
         /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
+        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
             FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode, ModuleReaderParameters readerParameters) => 
+        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode, ModuleReaderParameters readerParameters) =>
             FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET data directory.</exception>
-        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) => 
+        public static ModuleDefinition FromImage(IPEImage peImage, ModuleReaderParameters readerParameters) =>
             new SerializedModuleDefinition(peImage, readerParameters);
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace AsmResolver.DotNet
 
             CorLibTypeFactory = CorLibTypeFactory.CreateMscorlib40TypeFactory(this);
             AssemblyReferences.Add((AssemblyReference)CorLibTypeFactory.CorLibScope);
-            MetadataResolver = new DefaultMetadataResolver(new NetFrameworkAssemblyResolver());
+            MetadataResolver = new DefaultMetadataResolver(new DotNetFrameworkAssemblyResolver());
 
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
@@ -195,8 +195,8 @@ namespace AsmResolver.DotNet
             CorLibTypeFactory = new CorLibTypeFactory(corLib);
             AssemblyReferences.Add(corLib);
 
-            var resolver = CreateAssemblyResolver(corLib);
-            MetadataResolver = new DefaultMetadataResolver(resolver);
+            OriginalTargetRuntime = DetectTargetRuntime();
+            MetadataResolver = new DefaultMetadataResolver(CreateAssemblyResolver());
 
             TopLevelTypes.Add(new TypeDefinition(null, "<Module>", 0));
         }
@@ -211,7 +211,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the underlying object providing access to the data directory containing .NET metadata (if available).  
+        /// Gets the underlying object providing access to the data directory containing .NET metadata (if available).
         /// </summary>
         /// <remarks>
         /// When this property is <c>null</c>, the module is a new module that is not yet assembled.
@@ -220,6 +220,15 @@ namespace AsmResolver.DotNet
         {
             get;
         } = null;
+
+        /// <summary>
+        /// Gets the runtime that this module targeted upon creation or reading.
+        /// </summary>
+        public DotNetRuntimeInfo OriginalTargetRuntime
+        {
+            get;
+            protected set;
+        }
 
         /// <summary>
         /// Gets the parent assembly that defines this module.
@@ -244,7 +253,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the name of the module.
         /// </summary>
         /// <remarks>
-        /// This property corresponds to the Name column in the module definition table. 
+        /// This property corresponds to the Name column in the module definition table.
         /// </remarks>
         public string Name
         {
@@ -259,7 +268,7 @@ namespace AsmResolver.DotNet
         /// <para>
         /// This value is reserved and should be set to zero.
         /// </para>
-        /// <para> 
+        /// <para>
         /// This property corresponds to the Generation column in the module definition table.
         /// </para>
         /// </remarks>
@@ -274,7 +283,7 @@ namespace AsmResolver.DotNet
         /// of the same module.
         /// </summary>
         /// <remarks>
-        /// This property corresponds to the MVID column in the module definition table. 
+        /// This property corresponds to the MVID column in the module definition table.
         /// </remarks>
         public Guid Mvid
         {
@@ -286,7 +295,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the unique identifier to distinguish between two edit-and-continue generations.
         /// </summary>
         /// <remarks>
-        /// This property corresponds to the EncId column in the module definition table. 
+        /// This property corresponds to the EncId column in the module definition table.
         /// </remarks>
         public Guid EncId
         {
@@ -298,7 +307,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the base identifier of an edit-and-continue generation.
         /// </summary>
         /// <remarks>
-        /// This property corresponds to the EncBaseId column in the module definition table. 
+        /// This property corresponds to the EncBaseId column in the module definition table.
         /// </remarks>
         public Guid EncBaseId
         {
@@ -340,7 +349,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the .NET module requires a 32-bit environment to run. 
+        /// Gets or sets a value indicating whether the .NET module requires a 32-bit environment to run.
         /// </summary>
         public bool IsBit32Required
         {
@@ -350,7 +359,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the .NET module is a library. 
+        /// Gets or sets a value indicating whether the .NET module is a library.
         /// </summary>
         public bool IsILLibrary
         {
@@ -370,7 +379,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the .NET module has a native entrypoint or not. 
+        /// Gets or sets a value indicating whether the .NET module has a native entrypoint or not.
         /// </summary>
         public bool HasNativeEntrypoint
         {
@@ -380,7 +389,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether debug data is tracked in this .NET module. 
+        /// Gets or sets a value indicating whether debug data is tracked in this .NET module.
         /// </summary>
         public bool TrackDebugData
         {
@@ -390,7 +399,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the .NET module prefers a 32-bit environment to run in. 
+        /// Gets or sets a value indicating whether the .NET module prefers a 32-bit environment to run in.
         /// </summary>
         public bool IsBit32Preferred
         {
@@ -413,7 +422,7 @@ namespace AsmResolver.DotNet
         } = MachineType.I386;
 
         /// <summary>
-        /// Gets or sets the date and time the module was created. 
+        /// Gets or sets the date and time the module was created.
         /// </summary>
         /// <remarks>
         /// This property is in direct relation with the TimeDateStamp field in the file header of a portable
@@ -424,7 +433,7 @@ namespace AsmResolver.DotNet
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the attributes assigned to the underlying executable file.
         /// </summary>
@@ -512,7 +521,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets a collection of top-level (not nested) types defined in the module. 
+        /// Gets a collection of top-level (not nested) types defined in the module.
         /// </summary>
         public IList<TypeDefinition> TopLevelTypes
         {
@@ -525,7 +534,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets a collection of references to .NET assemblies that the module uses. 
+        /// Gets a collection of references to .NET assemblies that the module uses.
         /// </summary>
         public IList<AssemblyReference> AssemblyReferences
         {
@@ -538,7 +547,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets a collection of references to external modules that the module uses. 
+        /// Gets a collection of references to external modules that the module uses.
         /// </summary>
         public IList<ModuleReference> ModuleReferences
         {
@@ -551,7 +560,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets a collection of references to external files that the module uses. 
+        /// Gets a collection of references to external files that the module uses.
         /// </summary>
         public IList<FileReference> FileReferences
         {
@@ -591,7 +600,7 @@ namespace AsmResolver.DotNet
 
         /// <summary>
         /// Gets the common object runtime library type factory for this module, containing element type signatures used
-        /// in blob signatures. 
+        /// in blob signatures.
         /// </summary>
         public CorLibTypeFactory CorLibTypeFactory
         {
@@ -620,7 +629,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets the managed method that is invoked when the .NET module is initialized. 
+        /// Gets or sets the managed method that is invoked when the .NET module is initialized.
         /// </summary>
         public MethodDefinition ManagedEntrypointMethod
         {
@@ -707,8 +716,8 @@ namespace AsmResolver.DotNet
         /// <returns>The type references.</returns>
         /// <remarks>
         /// The return value of this method does not update when the <see cref="ReferenceImporter"/> class is used to
-        /// import new type references into the module. This method only serves as a way to easily get all the type 
-        /// references that were imported during the last compilation or assembly process.  
+        /// import new type references into the module. This method only serves as a way to easily get all the type
+        /// references that were imported during the last compilation or assembly process.
         /// </remarks>
         public virtual IEnumerable<TypeReference> GetImportedTypeReferences() => Enumerable.Empty<TypeReference>();
 
@@ -718,8 +727,8 @@ namespace AsmResolver.DotNet
         /// <returns>The type references.</returns>
         /// <remarks>
         /// The return value of this method does not update when the <see cref="ReferenceImporter"/> class is used to
-        /// import new member references into the module. This method only serves as a way to easily get all the member 
-        /// references that were imported during the last compilation or assembly process.  
+        /// import new member references into the module. This method only serves as a way to easily get all the member
+        /// references that were imported during the last compilation or assembly process.
         /// </remarks>
         public virtual IEnumerable<MemberReference> GetImportedMemberReferences() => Enumerable.Empty<MemberReference>();
 
@@ -745,14 +754,14 @@ namespace AsmResolver.DotNet
 
         /// <summary>
         /// Gets the module static constructor of this metadata image. That is, the first method that is executed
-        /// upon loading the .NET module. 
+        /// upon loading the .NET module.
         /// </summary>
         /// <returns>The module constructor, or <c>null</c> if none is present.</returns>
         public MethodDefinition GetModuleConstructor() => GetModuleType()?.GetStaticConstructor();
 
         /// <summary>
         /// Gets or creates the module static constructor of this metadata image. That is, the first method that is
-        /// executed upon loading the .NET module. 
+        /// executed upon loading the .NET module.
         /// </summary>
         /// <returns>The module constructor.</returns>
         /// <remarks>
@@ -828,7 +837,7 @@ namespace AsmResolver.DotNet
             new OwnedCollection<ModuleDefinition, TypeDefinition>(this);
 
         /// <summary>
-        /// Obtains the list of references to .NET assemblies that the module uses. 
+        /// Obtains the list of references to .NET assemblies that the module uses.
         /// </summary>
         /// <returns>The references to the assemblies..</returns>
         /// <remarks>
@@ -838,7 +847,7 @@ namespace AsmResolver.DotNet
             new OwnedCollection<ModuleDefinition, AssemblyReference>(this);
 
         /// <summary>
-        /// Obtains the list of references to external modules that the module uses. 
+        /// Obtains the list of references to external modules that the module uses.
         /// </summary>
         /// <returns>The references to the modules.</returns>
         /// <remarks>
@@ -848,7 +857,7 @@ namespace AsmResolver.DotNet
             new OwnedCollection<ModuleDefinition, ModuleReference>(this);
 
         /// <summary>
-        /// Obtains the list of references to external files that the module uses. 
+        /// Obtains the list of references to external files that the module uses.
         /// </summary>
         /// <returns>The references to the files.</returns>
         /// <remarks>
@@ -858,7 +867,7 @@ namespace AsmResolver.DotNet
             new OwnedCollection<ModuleDefinition, FileReference>(this);
 
         /// <summary>
-        /// Obtains the list of resources stored in the module. 
+        /// Obtains the list of resources stored in the module.
         /// </summary>
         /// <returns>The resources.</returns>
         /// <remarks>
@@ -868,7 +877,7 @@ namespace AsmResolver.DotNet
             new OwnedCollection<ModuleDefinition, ManifestResource>(this);
 
         /// <summary>
-        /// Obtains the list of types that are redirected to another external module. 
+        /// Obtains the list of types that are redirected to another external module.
         /// </summary>
         /// <returns>The exported types.</returns>
         /// <remarks>
@@ -908,24 +917,6 @@ namespace AsmResolver.DotNet
         protected virtual IManagedEntrypoint GetManagedEntrypoint() => null;
 
         /// <summary>
-        /// Creates an assembly resolver based on the corlib reference.
-        /// </summary>
-        /// <param name="corLib">The corlib reference.</param>
-        /// <param name="workingDirectory">The working directory to search</param>
-        /// <returns>The resolver.</returns>
-        protected static IAssemblyResolver CreateAssemblyResolver(IResolutionScope corLib, string workingDirectory = null)
-        {
-            var resolver = corLib.Name == "mscorlib"
-                ? (AssemblyResolverBase)new NetFrameworkAssemblyResolver()
-                : new NetCoreAssemblyResolver();
-
-            if (!string.IsNullOrEmpty(workingDirectory))
-                resolver.SearchDirectories.Add(workingDirectory);
-
-            return resolver;
-        }
-
-        /// <summary>
         /// Obtains the native win32 resources directory of the underlying PE image (if available).
         /// </summary>
         /// <returns>The resources directory.</returns>
@@ -943,11 +934,65 @@ namespace AsmResolver.DotNet
         /// </remarks>
         protected virtual IList<DebugDataEntry> GetDebugData() => new List<DebugDataEntry>();
 
+        /// <summary>
+        /// Detects the runtime that this module targets.
+        /// </summary>
+        /// <remarks>
+        /// This method is called to initialize the <see cref="OriginalTargetRuntime"/> property.
+        /// It should be called before the assembly resolver is initialized.
+        /// </remarks>
+        protected DotNetRuntimeInfo DetectTargetRuntime()
+        {
+            return Assembly is not null && Assembly.TryGetTargetFramework(out var targetRuntime)
+                ? targetRuntime
+                : CorLibTypeFactory.ExtractDotNetRuntimeInfo();
+        }
+
+        /// <summary>
+        /// Creates an assembly resolver based on the corlib reference.
+        /// </summary>
+        /// <returns>The resolver.</returns>
+        protected IAssemblyResolver CreateAssemblyResolver()
+        {
+            string fullPath = FilePath;
+            (string directory, string name) = !string.IsNullOrEmpty(fullPath)
+                ? (Path.GetDirectoryName(fullPath), Path.GetFileNameWithoutExtension(fullPath))
+                : (null, null);
+
+            var runtime = OriginalTargetRuntime;
+
+            AssemblyResolverBase resolver;
+            switch (runtime.Name)
+            {
+                case DotNetRuntimeInfo.NetFramework:
+                case DotNetRuntimeInfo.NetStandard
+                    when string.IsNullOrEmpty(DotNetCorePathProvider.DefaultInstallationPath):
+                    resolver = new DotNetFrameworkAssemblyResolver();
+                    break;
+                case DotNetRuntimeInfo.NetStandard
+                    when DotNetCorePathProvider.Default.TryGetLatestStandardCompatibleVersion(
+                        runtime.Version, out var coreVersion):
+                    resolver = new DotNetCoreAssemblyResolver(coreVersion);
+                    break;
+                case DotNetRuntimeInfo.NetCoreApp:
+                    resolver = new DotNetCoreAssemblyResolver(runtime.Version);
+                    break;
+                default:
+                    resolver = new DotNetFrameworkAssemblyResolver();
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(directory))
+                resolver.SearchDirectories.Add(directory);
+
+            return resolver;
+        }
+
         /// <inheritdoc />
         public override string ToString() => Name;
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
@@ -955,7 +1000,7 @@ namespace AsmResolver.DotNet
             Write(filePath, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET module to a portable executable file and writes it to an output stream.
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <exception cref="AggregateException">Occurs when the construction of the image threw exceptions.</exception>
@@ -963,7 +1008,7 @@ namespace AsmResolver.DotNet
             Write(outputStream, new ManagedPEImageBuilder(), new ManagedPEFileBuilder());
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
@@ -972,7 +1017,7 @@ namespace AsmResolver.DotNet
             Write(filePath, imageBuilder, new ManagedPEFileBuilder());
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET module to a portable executable file and writes it to an output stream.
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
@@ -981,7 +1026,7 @@ namespace AsmResolver.DotNet
             Write(outputStream, imageBuilder, new ManagedPEFileBuilder());
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
@@ -994,7 +1039,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET module to a portable executable file and writes it to an output stream.
         /// </summary>
         /// <param name="outputStream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
@@ -1006,7 +1051,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Rebuilds the .NET module to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET module to a portable executable file and writes it to the file system.
         /// </summary>
         /// <param name="writer">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>

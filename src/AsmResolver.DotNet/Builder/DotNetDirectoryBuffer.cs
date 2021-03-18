@@ -16,6 +16,8 @@ namespace AsmResolver.DotNet.Builder
     /// </summary>
     public partial class DotNetDirectoryBuffer
     {
+        private readonly TokenMapping _tokenMapping = new();
+
         /// <summary>
         /// Creates a new .NET data directory buffer.
         /// </summary>
@@ -38,7 +40,7 @@ namespace AsmResolver.DotNet.Builder
             DiagnosticBag = diagnosticBag ?? throw new ArgumentNullException(nameof(diagnosticBag));
             Resources = new DotNetResourcesDirectoryBuffer();
         }
-        
+
         /// <summary>
         /// Gets the module for which this .NET directory is built.
         /// </summary>
@@ -80,7 +82,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Gets the .NET resources data directory buffer, containing all the resources data stored in the .NET module. 
+        /// Gets the .NET resources data directory buffer, containing all the resources data stored in the .NET module.
         /// </summary>
         public DotNetResourcesDirectoryBuffer Resources
         {
@@ -109,41 +111,43 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <summary>
-        /// Builds the .NET data directory from the buffer. 
+        /// Builds the .NET data directory from the buffer.
         /// </summary>
         /// <returns></returns>
-        public IDotNetDirectory CreateDirectory()
+        public DotNetDirectoryBuildResult CreateDirectory()
         {
             // At this point, the interfaces and generic parameters tables are not sorted yet, so we were not able
             // to add any custom attributes and/or generic parameter constraint rows to the metadata table buffers.
             // Since we're finalizing the .NET directory, we can safely do this now:
             FinalizeInterfaces();
             FinalizeGenericParameters();
-            
+
             // Create new .NET directory.
-            return new DotNetDirectory
+            var directory = new DotNetDirectory
             {
                 Metadata = Metadata.CreateMetadata(),
                 DotNetResources = Resources.Size > 0 ? Resources.CreateDirectory() : null,
                 Entrypoint = GetEntrypoint(),
                 Flags = Module.Attributes,
-                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null 
+                StrongName = StrongNameSize > 0 ? new DataSegment(new byte[StrongNameSize]) : null
             };
+
+            return new DotNetDirectoryBuildResult(directory, _tokenMapping);
         }
 
         private uint GetEntrypoint()
         {
             if (Module.ManagedEntrypoint is null)
                 return 0;
-            
+
             var entrypointToken = MetadataToken.Zero;
-            
+
             switch (Module.ManagedEntrypoint.MetadataToken.Table)
             {
                 case TableIndex.Method:
                     entrypointToken = GetMethodDefinitionToken(Module.ManagedEntrypointMethod);
                     break;
-                
+
                 case TableIndex.File:
                     DiagnosticBag.Exceptions.Add(
                         new NotImplementedException("Managed entrypoints defined in a sub module is not support."));
@@ -152,7 +156,7 @@ namespace AsmResolver.DotNet.Builder
 
             return entrypointToken.ToUInt32();
         }
-        
+
         private void AddMethodSemantics(MetadataToken ownerToken, IHasSemantics provider)
         {
             foreach (var semantics in provider.Semantics)
@@ -173,16 +177,17 @@ namespace AsmResolver.DotNet.Builder
             table.Add(semantics, row);
         }
 
-        private void DefineInterfaces(MetadataToken ownerToken, IEnumerable<InterfaceImplementation> interfaces)
+        private void DefineInterfaces(MetadataToken ownerToken, IList<InterfaceImplementation> interfaces)
         {
             var table = Metadata.TablesStream.GetSortedTable<InterfaceImplementation, InterfaceImplementationRow>(TableIndex.InterfaceImpl);
 
-            foreach (var implementation in interfaces)
+            for (int i = 0; i < interfaces.Count; i++)
             {
+                var implementation = interfaces[i];
                 var row = new InterfaceImplementationRow(
-                    ownerToken.Rid, 
+                    ownerToken.Rid,
                     GetTypeDefOrRefIndex(implementation.Interface));
-                
+
                 table.Add(implementation, row);
             }
         }
@@ -197,6 +202,7 @@ namespace AsmResolver.DotNet.Builder
             foreach (var member in table.GetMembers())
             {
                 var newToken = table.GetNewToken(member);
+                _tokenMapping.Register(member, newToken);
                 AddCustomAttributes(newToken, member);
             }
         }
@@ -214,10 +220,10 @@ namespace AsmResolver.DotNet.Builder
 
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.TypeOrMethodDef);
-            
+
             var row = new GenericParameterRow(
-                parameter.Number, 
-                parameter.Attributes, 
+                parameter.Number,
+                parameter.Attributes,
                 encoder.EncodeToken(ownerToken),
                 Metadata.StringsStream.GetStringIndex(parameter.Name));
 
@@ -230,31 +236,33 @@ namespace AsmResolver.DotNet.Builder
             // custom attributes and generic parameter constraints to it.
             var table = Metadata.TablesStream.GetSortedTable<GenericParameter, GenericParameterRow>(TableIndex.GenericParam);
             table.Sort();
-            
+
             // Add missing CAs and generic parameters.
             foreach (var member in table.GetMembers())
             {
                 var token = table.GetNewToken(member);
+                _tokenMapping.Register(member, token);
                 AddCustomAttributes(token, member);
 
                 foreach (var constraint in member.Constraints)
                     AddGenericParameterConstraint(token, constraint);
             }
         }
-        
+
         private void AddGenericParameterConstraint(MetadataToken ownerToken,
             GenericParameterConstraint constraint)
         {
             if (constraint is null)
                 return;
-            
+
             var table = Metadata.TablesStream.GetTable<GenericParameterConstraintRow>(TableIndex.GenericParamConstraint);
-            
+
             var row = new GenericParameterConstraintRow(
-                ownerToken.Rid, 
+                ownerToken.Rid,
                 GetTypeDefOrRefIndex(constraint.Constraint));
 
             var token = table.Add(row);
+            _tokenMapping.Register(constraint, token);
             AddCustomAttributes(token, constraint);
         }
 
@@ -262,7 +270,7 @@ namespace AsmResolver.DotNet.Builder
         {
             if (layout is null)
                 return;
-            
+
             var table = Metadata.TablesStream.GetSortedTable<ClassLayout, ClassLayoutRow>(TableIndex.ClassLayout);
 
             var row = new ClassLayoutRow(layout.PackingSize, layout.ClassSize, ownerToken.Rid);

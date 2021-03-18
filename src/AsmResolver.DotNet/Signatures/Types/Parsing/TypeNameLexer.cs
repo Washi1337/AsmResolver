@@ -7,17 +7,23 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 {
     internal class TypeNameLexer
     {
-        internal static readonly ISet<char> ReservedChars = new HashSet<char>("*+=.,&[]…");
-        
+        internal static readonly ISet<char> ReservedChars = new HashSet<char>("*+.,&[]…");
+
         private readonly TextReader _reader;
-        private readonly StringBuilder _buffer = new StringBuilder();
+        private readonly StringBuilder _buffer = new();
         private TypeNameToken? _bufferedToken;
 
         public TypeNameLexer(TextReader reader)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
         }
-        
+
+        public bool HasConsumedTypeName
+        {
+            get;
+            set;
+        }
+
         public TypeNameToken Peek()
         {
             _bufferedToken ??= ReadNextToken();
@@ -35,12 +41,12 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
 
             return ReadNextToken() ?? throw new EndOfStreamException();
         }
-        
+
         private TypeNameToken? ReadNextToken()
         {
             SkipWhitespaces();
             _buffer.Clear();
-            
+
             int c = _reader.Peek();
             if (c == -1)
                 return null;
@@ -65,7 +71,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         {
             // Consume first dot.
             _reader.Read();
-            
+
             // See if there's a second one.
             if (_reader.Peek() == '.')
             {
@@ -79,16 +85,16 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
         private TypeNameToken ReadNumberOrIdentifierToken()
         {
             bool escape = false;
-            
+
             TypeNameTerminal terminal = TypeNameTerminal.Number;
             while (true)
             {
                 int c = _reader.Peek();
                 if (c == -1)
                     break;
-                
+
                 char currentChar = (char) c;
-                
+
                 if (escape)
                 {
                     escape = false;
@@ -96,9 +102,15 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 else
                 {
                     if (currentChar == '\\')
+                    {
                         escape = true;
-                    else if (terminal == TypeNameTerminal.Number && char.IsWhiteSpace(currentChar)
-                             || ReservedChars.Contains(currentChar))
+                    }
+                    else if (currentChar == '=' && HasConsumedTypeName)
+                    {
+                        break;
+                    }
+                    else if (terminal == TypeNameTerminal.Number
+                             && (char.IsWhiteSpace(currentChar) || ReservedChars.Contains(currentChar)))
                     {
                         break;
                     }
@@ -108,11 +120,11 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                     terminal = TypeNameTerminal.Identifier;
 
                 _reader.Read();
-                
+
                 if (!escape)
                     _buffer.Append(currentChar);
             }
-            
+
             return new TypeNameToken(terminal, _buffer.ToString().Trim());
         }
 
@@ -124,7 +136,7 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 int c = _reader.Peek();
                 if (c == -1)
                     break;
-                
+
                 char currentChar = (char) c;
 
                 if (escape)
@@ -135,6 +147,8 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 {
                     if (currentChar == '\\')
                         escape = true;
+                    else if (currentChar == '=' && HasConsumedTypeName)
+                        break;
                     else if (ReservedChars.Contains(currentChar))
                         break;
                 }
@@ -164,6 +178,6 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 _reader.Read();
             }
         }
-        
+
     }
 }

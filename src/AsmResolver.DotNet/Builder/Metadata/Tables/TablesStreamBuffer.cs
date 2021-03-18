@@ -19,7 +19,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
             TableIndex.EncLog, TableIndex.EncMap,
         };
 
-        private readonly TablesStream _tablesStream = new TablesStream();
+        private readonly TablesStream _tablesStream = new();
         private readonly IMetadataTableBuffer[] _tableBuffers;
 
         /// <summary>

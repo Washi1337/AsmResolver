@@ -12,9 +12,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
     /// </summary>
     public class StringsStreamBuffer : IMetadataStreamBuffer
     {
-        private readonly MemoryStream _rawStream = new MemoryStream();
+        private readonly MemoryStream _rawStream = new();
         private readonly BinaryStreamWriter _writer;
-        private readonly IDictionary<string, uint> _strings = new Dictionary<string, uint>();
+        private readonly Dictionary<string, uint> _strings = new();
 
         /// <summary>
         /// Creates a new strings stream buffer with the default strings stream name.
@@ -53,7 +53,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Strings
             uint index = 1;
             while (index < stream.GetPhysicalSize())
             {
-                var @string = stream.GetStringByIndex(index);
+                string @string = stream.GetStringByIndex(index);
                 uint newIndex = AppendString(@string);
                 _strings[@string] = newIndex;
 

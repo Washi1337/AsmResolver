@@ -94,9 +94,14 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <inheritdoc />
         protected override void WriteContents(BlobSerializationContext context) =>
             context.Writer.WriteByte((byte) ElementType);
-        
+
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitCorLibType(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitCorLibType(this, state);
     }
 }
