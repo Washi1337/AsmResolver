@@ -1,5 +1,5 @@
 using System;
-using AsmResolver.DotNet.Collections;
+using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -22,30 +22,30 @@ namespace AsmResolver.DotNet.Code.Cil
             _contextModule = contextModule ?? throw new ArgumentNullException(nameof(contextModule));
             _methodBody = methodBody ?? throw new ArgumentNullException(nameof(methodBody));
         }
-        
+
         /// <inheritdoc />
-        IMetadataMember ICilOperandResolver.ResolveMember(MetadataToken token)
+        public object ResolveMember(MetadataToken token)
         {
             _contextModule.TryLookupMember(token, out var member);
             return member;
         }
 
         /// <inheritdoc />
-        string ICilOperandResolver.ResolveString(MetadataToken token)
+        public object ResolveString(MetadataToken token)
         {
             _contextModule.TryLookupString(token, out string value);
             return value;
         }
 
         /// <inheritdoc />
-        CilLocalVariable ICilOperandResolver.ResolveLocalVariable(int index)
+        public object ResolveLocalVariable(int index)
         {
             var locals = _methodBody.LocalVariables;
             return index >= 0 && index < locals.Count ? locals[index] : null;
         }
 
         /// <inheritdoc />
-        Parameter ICilOperandResolver.ResolveParameter(int index)
+        public object ResolveParameter(int index)
         {
             var parameters = _methodBody.Owner.Parameters;
             return parameters.ContainsSignatureIndex(index) ? parameters.GetBySignatureIndex(index) : null;
