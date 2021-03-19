@@ -159,7 +159,7 @@ namespace AsmResolver.DotNet.Code.Cil
             // Read raw instructions.
             var reader = new ByteArrayReader(code);
             var disassembler = new CilDisassembler(reader);
-            result.Instructions.AddRange(disassembler.ReadAllInstructions());
+            result.Instructions.AddRange(disassembler.ReadInstructions());
 
             //Local Variables
             DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
@@ -206,7 +206,7 @@ namespace AsmResolver.DotNet.Code.Cil
             // Read raw instructions.
             var reader = new ByteArrayReader(rawBody.Code);
             var disassembler = new CilDisassembler(reader);
-            result.Instructions.AddRange(disassembler.ReadAllInstructions());
+            result.Instructions.AddRange(disassembler.ReadInstructions());
 
             // Read out extra metadata.
             if (rawBody is CilRawFatMethodBody fatBody)
