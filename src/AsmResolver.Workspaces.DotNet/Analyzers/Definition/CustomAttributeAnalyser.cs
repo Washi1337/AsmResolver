@@ -14,22 +14,45 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         public override void Analyze(AnalysisContext context, IHasCustomAttribute subject)
         {
             for (int i = 0; i < subject.CustomAttributes.Count; i++)
-                Analyze(context, subject.CustomAttributes[i]);
+            {
+                var customAttribute = subject.CustomAttributes[i];
+                ScheduleMembersForAnalysis(context, customAttribute);
+                ConnectAllNamedReferences(context, customAttribute);
+            }
         }
 
-        private void Analyze(AnalysisContext context, CustomAttribute subject)
+        private void ScheduleMembersForAnalysis(AnalysisContext context, CustomAttribute subject)
         {
-            if (subject.Constructor is null)
-                return;
-
-            var index = context.Workspace.Index;
             if (context.HasAnalyzers(subject.Constructor.GetType()))
             {
                 context.SchedulaForAnalysis(subject.Constructor);
             }
 
+            for (int i = 0; i < subject.Signature.NamedArguments.Count; i++)
+            {
+                var namedArgument = subject.Signature.NamedArguments[i];
+                if (context.HasAnalyzers(typeof(CustomAttributeNamedArgument)))
+                {
+                    context.SchedulaForAnalysis(namedArgument);
+                }
+            }
+
+            for (int i = 0; i < subject.Signature.FixedArguments.Count; i++)
+            {
+                var fixedArgument = subject.Signature.NamedArguments[i];
+                if (context.HasAnalyzers(typeof(CustomAttributeArgument)))
+                {
+                    context.SchedulaForAnalysis(fixedArgument);
+                }
+            }
+        }
+
+        private void ConnectAllNamedReferences(AnalysisContext context, CustomAttribute subject)
+        {
             if (context.Workspace is not DotNetWorkspace workspace)
                 return;
+
+            var index = context.Workspace.Index;
 
             var type = subject.Constructor.DeclaringType?.Resolve();
             if (type is null || !workspace.Assemblies.Contains(type.Module.Assembly))
