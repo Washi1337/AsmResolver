@@ -203,19 +203,13 @@ namespace AsmResolver.DotNet.Code.Cil
 
             operandResolver ??= new CilOperandResolver(context.ParentModule, result);
 
-            // Read raw instructions.
-            var reader = new ByteArrayReader(rawBody.Code);
-            var disassembler = new CilDisassembler(reader);
-            result.Instructions.AddRange(disassembler.ReadInstructions());
-
-            // Read out extra metadata.
-            if (rawBody is CilRawFatMethodBody fatBody)
+            // Interpret body header.
+            var fatBody = rawBody as CilRawFatMethodBody;
+            if (fatBody is not null)
             {
                 result.MaxStack = fatBody.MaxStack;
                 result.InitializeLocals = fatBody.InitLocals;
-
                 ReadLocalVariables(method.Module, result, fatBody);
-                ReadExceptionHandlers(fatBody, result);
             }
             else
             {
@@ -223,70 +217,14 @@ namespace AsmResolver.DotNet.Code.Cil
                 result.InitializeLocals = false;
             }
 
-            // Resolve operands.
-            foreach (var instruction in result.Instructions)
-                instruction.Operand = ResolveOperand(result, instruction, operandResolver) ?? instruction.Operand;
+            // Parse instructions.
+            ReadInstructions(result, operandResolver, rawBody);
+
+            // Read exception handlers.
+            if (fatBody is not null)
+                ReadExceptionHandlers(fatBody, result);
 
             return result;
-        }
-
-        private static object ResolveOperand(
-            CilMethodBody methodBody,
-            CilInstruction instruction,
-            ICilOperandResolver resolver)
-        {
-            switch (instruction.OpCode.OperandType)
-            {
-                case CilOperandType.InlineBrTarget:
-                case CilOperandType.ShortInlineBrTarget:
-                    return new CilInstructionLabel(
-                        methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset));
-
-                case CilOperandType.InlineField:
-                case CilOperandType.InlineMethod:
-                case CilOperandType.InlineSig:
-                case CilOperandType.InlineTok:
-                case CilOperandType.InlineType:
-                    return resolver.ResolveMember((MetadataToken) instruction.Operand);
-
-                case CilOperandType.InlineString:
-                    return resolver.ResolveString((MetadataToken) instruction.Operand);
-
-                case CilOperandType.InlineSwitch:
-                    var result = new List<ICilLabel>();
-                    var labels = (IList<ICilLabel>) instruction.Operand;
-                    for (int i = 0; i < labels.Count; i++)
-                    {
-                        var label = labels[i];
-                        var targetInstruction = methodBody.Instructions.GetByOffset(label.Offset);
-
-                        result.Add(targetInstruction is null ? label : new CilInstructionLabel(targetInstruction));
-                    }
-
-                    return result;
-
-                case CilOperandType.InlineVar:
-                case CilOperandType.ShortInlineVar:
-                    return resolver.ResolveLocalVariable(Convert.ToInt32(instruction.Operand));
-
-                case CilOperandType.InlineArgument:
-                case CilOperandType.ShortInlineArgument:
-                    return resolver.ResolveParameter(Convert.ToInt32(instruction.Operand));
-
-                case CilOperandType.InlineI:
-                case CilOperandType.InlineI8:
-                case CilOperandType.InlineNone:
-                case CilOperandType.InlineR:
-                case CilOperandType.ShortInlineI:
-                case CilOperandType.ShortInlineR:
-                    return instruction.Operand;
-
-                case CilOperandType.InlinePhi:
-                    throw new NotSupportedException();
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         private static void ReadLocalVariables(
@@ -301,6 +239,50 @@ namespace AsmResolver.DotNet.Code.Cil
                 var variableTypes = localVariablesSignature.VariableTypes;
                 for (int i = 0; i < variableTypes.Count; i++)
                     result.LocalVariables.Add(new CilLocalVariable(variableTypes[i]));
+            }
+        }
+
+        private static void ReadInstructions(
+            CilMethodBody result,
+            ICilOperandResolver operandResolver,
+            CilRawMethodBody rawBody)
+        {
+            // Read raw instructions.
+            var reader = new ByteArrayReader(rawBody.Code);
+            var disassembler = new CilDisassembler(reader, operandResolver);
+            result.Instructions.AddRange(disassembler.ReadInstructions());
+
+            // Resolve operands.
+            foreach (var instruction in result.Instructions)
+                instruction.Operand = ResolveOperand(result, instruction) ?? instruction.Operand;
+        }
+
+        private static object ResolveOperand(
+            CilMethodBody methodBody,
+            CilInstruction instruction)
+        {
+            switch (instruction.OpCode.OperandType)
+            {
+                case CilOperandType.InlineBrTarget:
+                case CilOperandType.ShortInlineBrTarget:
+                    return new CilInstructionLabel(
+                        methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset));
+
+                case CilOperandType.InlineSwitch:
+                    var result = new List<ICilLabel>();
+                    var labels = (IList<ICilLabel>) instruction.Operand;
+                    for (int i = 0; i < labels.Count; i++)
+                    {
+                        var label = labels[i];
+                        var targetInstruction = methodBody.Instructions.GetByOffset(label.Offset);
+
+                        result.Add(targetInstruction is null ? label : new CilInstructionLabel(targetInstruction));
+                    }
+
+                    return result;
+
+                default:
+                    return instruction.Operand;
             }
         }
 

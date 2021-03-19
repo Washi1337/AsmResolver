@@ -40,8 +40,13 @@ namespace AsmResolver.PE.DotNet.Cil
         public IList<CilInstruction> ReadInstructions()
         {
             var instructions = new List<CilInstruction>();
+
             while (_reader.Offset < _reader.StartOffset + _reader.Length)
-                instructions.Add(ReadInstruction());
+            {
+                var instruction = ReadInstruction();
+                instructions.Add(instruction);
+            }
+
             return instructions;
         }
 
@@ -114,14 +119,17 @@ namespace AsmResolver.PE.DotNet.Cil
                 case CilOperandType.InlineR:
                     return _reader.ReadDouble();
 
+                case CilOperandType.InlineString:
+                    var stringToken = new MetadataToken(_reader.ReadUInt32());
+                    return _operandResolver?.ResolveString(stringToken) ?? stringToken;
+
                 case CilOperandType.InlineField:
                 case CilOperandType.InlineMethod:
                 case CilOperandType.InlineSig:
-                case CilOperandType.InlineString:
                 case CilOperandType.InlineTok:
                 case CilOperandType.InlineType:
-                    var token = new MetadataToken(_reader.ReadUInt32());
-                    return _operandResolver?.ResolveMember(token) ?? token;
+                    var memberToken = new MetadataToken(_reader.ReadUInt32());
+                    return _operandResolver?.ResolveMember(memberToken) ?? memberToken;
 
                 case CilOperandType.InlinePhi:
                     throw new NotSupportedException();
