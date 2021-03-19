@@ -21,7 +21,7 @@ namespace AsmResolver.PE.Tests.DotNet.Metadata
 
             var initialValueFieldToken = MetadataToken.Zero;
             
-            var instructions = disassembler.ReadAllInstructions();
+            var instructions = disassembler.ReadInstructions();
             for (int i = 0; i < instructions.Count; i++)
             {
                 if (instructions[i].OpCode.Code == CilCode.Ldtoken
