@@ -34,20 +34,77 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether branch targets should be resolved to
+        /// <see cref="CilInstructionLabel"/> where possible.
+        /// </summary>
+        public bool ResolveBranchTargets
+        {
+            get;
+            set;
+        } = true;
+
+        /// <summary>
         /// Reads all instructions from the input stream.
         /// </summary>
         /// <returns>The instructions.</returns>
         public IList<CilInstruction> ReadInstructions()
         {
+            List<CilInstruction> branches = null;
+            List<CilInstruction> switches = null;
+
             var instructions = new List<CilInstruction>();
 
             while (_reader.Offset < _reader.StartOffset + _reader.Length)
             {
                 var instruction = ReadInstruction();
                 instructions.Add(instruction);
+
+                if (ResolveBranchTargets)
+                {
+                    switch (instruction.OpCode.OperandType)
+                    {
+                        case CilOperandType.ShortInlineBrTarget:
+                        case CilOperandType.InlineBrTarget:
+                            branches ??= new List<CilInstruction>();
+                            branches.Add(instruction);
+                            break;
+
+                        case CilOperandType.InlineSwitch:
+                            switches ??= new List<CilInstruction>();
+                            switches.Add(instruction);
+                            break;
+                    }
+                }
+            }
+
+            if (ResolveBranchTargets)
+            {
+                if (branches is not null)
+                {
+                    foreach (var branch in branches)
+                        branch.Operand = TryResolveLabel(instructions, (ICilLabel) branch.Operand);
+                }
+
+                if (switches is not null)
+                {
+                    foreach (var @switch in switches)
+                    {
+                        var labels = (IList<ICilLabel>) @switch.Operand;
+                        for (int i = 0; i < labels.Count; i++)
+                            labels[i] = TryResolveLabel(instructions, labels[i]);
+                    }
+                }
             }
 
             return instructions;
+        }
+
+        private static ICilLabel TryResolveLabel(IList<CilInstruction> instructions, ICilLabel label)
+        {
+            int index = instructions.GetIndexByOffset(label.Offset);
+            if (index != -1)
+                label = instructions[index].CreateLabel();
+            return label;
         }
 
         /// <summary>

@@ -251,39 +251,6 @@ namespace AsmResolver.DotNet.Code.Cil
             var reader = new ByteArrayReader(rawBody.Code);
             var disassembler = new CilDisassembler(reader, operandResolver);
             result.Instructions.AddRange(disassembler.ReadInstructions());
-
-            // Resolve operands.
-            foreach (var instruction in result.Instructions)
-                instruction.Operand = ResolveOperand(result, instruction) ?? instruction.Operand;
-        }
-
-        private static object ResolveOperand(
-            CilMethodBody methodBody,
-            CilInstruction instruction)
-        {
-            switch (instruction.OpCode.OperandType)
-            {
-                case CilOperandType.InlineBrTarget:
-                case CilOperandType.ShortInlineBrTarget:
-                    return new CilInstructionLabel(
-                        methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset));
-
-                case CilOperandType.InlineSwitch:
-                    var result = new List<ICilLabel>();
-                    var labels = (IList<ICilLabel>) instruction.Operand;
-                    for (int i = 0; i < labels.Count; i++)
-                    {
-                        var label = labels[i];
-                        var targetInstruction = methodBody.Instructions.GetByOffset(label.Offset);
-
-                        result.Add(targetInstruction is null ? label : new CilInstructionLabel(targetInstruction));
-                    }
-
-                    return result;
-
-                default:
-                    return instruction.Operand;
-            }
         }
 
         private static void ReadExceptionHandlers(CilRawFatMethodBody fatBody, CilMethodBody result)
