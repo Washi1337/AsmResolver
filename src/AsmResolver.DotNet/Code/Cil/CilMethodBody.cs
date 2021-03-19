@@ -123,29 +123,13 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <param name="method">The method that owns the method body.</param>
         /// <param name="dynamicMethodObj">The Dynamic Method/Delegate/DynamicResolver.</param>
-        /// <param name="operandResolver">
-        ///     The object instance to use for resolving operands of an instruction in the
-        ///     method body.
-        /// </param>
-        /// <param name="importer">
-        ///     The object instance to use for importing operands of an instruction in the
-        ///     method body.
-        /// </param>
         /// <returns>The method body.</returns>
-        public static CilMethodBody FromDynamicMethod(
-            MethodDefinition method,
-            object dynamicMethodObj,
-            ICilOperandResolver operandResolver = null,
-            ReferenceImporter importer = null)
+        public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj)
         {
             if (!(method.Module is SerializedModuleDefinition module))
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var result = new CilMethodBody(method);
-
-            operandResolver ??= new CilOperandResolver(method.Module, result);
-            importer ??= new ReferenceImporter(method.Module);
-
             dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
 
             //Get Runtime Fields
@@ -156,30 +140,16 @@ namespace AsmResolver.DotNet.Code.Cil
             byte[] ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader");
             var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions");
 
-            // Read raw instructions.
-            var reader = new ByteArrayReader(code);
-            var disassembler = new CilDisassembler(reader);
-            result.Instructions.AddRange(disassembler.ReadInstructions());
-
             //Local Variables
             DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
-            //Exception Handlers
-            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, importer);
+            // Read raw instructions.
+            var reader = new ByteArrayReader(code);
+            var disassembler = new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
+            result.Instructions.AddRange(disassembler.ReadInstructions());
 
-            // Resolve all operands.
-            foreach (var instruction in result.Instructions)
-            {
-                instruction.Operand =
-                    DynamicMethodHelper.ResolveOperandReflection(
-                        module.ReaderContext,
-                        result,
-                        instruction,
-                        operandResolver,
-                        tokenList,
-                        importer)
-                    ?? instruction.Operand;
-            }
+            //Exception Handlers
+            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, new ReferenceImporter(module));
 
             return result;
         }
@@ -201,7 +171,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             var result = new CilMethodBody(method);
 
-            operandResolver ??= new CilOperandResolver(context.ParentModule, result);
+            operandResolver ??= new PhysicalCilOperandResolver(context.ParentModule, result);
 
             // Interpret body header.
             var fatBody = rawBody as CilRawFatMethodBody;
@@ -247,7 +217,6 @@ namespace AsmResolver.DotNet.Code.Cil
             ICilOperandResolver operandResolver,
             CilRawMethodBody rawBody)
         {
-            // Read raw instructions.
             var reader = new ByteArrayReader(rawBody.Code);
             var disassembler = new CilDisassembler(reader, operandResolver);
             result.Instructions.AddRange(disassembler.ReadInstructions());
