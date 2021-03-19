@@ -18,19 +18,19 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             for (int i = 0; i < subject.Instructions.Count; i++)
             {
                 var instruction = subject.Instructions[i];
-                var opType = instruction.Operand.GetType();
+                var opType = instruction.Operand?.GetType();
                 switch (instruction.OpCode.OperandType)
                 {
                     case CilOperandType.InlineField:
                         if (instruction.Operand is IFieldDescriptor field
-                            && context.HasAnalyzers(opType))
+                            && context.HasAnalyzers(opType!))
                         {
                             context.SchedulaForAnalysis(field);
                         }
                         break;
                     case CilOperandType.InlineMethod:
                         if (instruction.Operand is IMethodDescriptor method
-                            && context.HasAnalyzers(opType))
+                            && context.HasAnalyzers(opType!))
                         {
                             context.SchedulaForAnalysis(method);
                         }
@@ -55,7 +55,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         break;
                     case CilOperandType.InlineType:
                         if (instruction.Operand is ITypeDefOrRef type
-                            && context.HasAnalyzers(opType))
+                            && context.HasAnalyzers(opType!))
                         {
                             context.SchedulaForAnalysis(type);
                         }
