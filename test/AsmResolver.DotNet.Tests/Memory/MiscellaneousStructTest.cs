@@ -1,4 +1,6 @@
+using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using AsmResolver.DotNet.Memory;
 using Xunit;
 
@@ -28,9 +30,9 @@ namespace AsmResolver.DotNet.Tests.Memory
 
             struct2.Fields[0].Signature.FieldType = struct1.ToTypeSignature();
 
-            Assert.Throws<CyclicStructureException>(() => struct1.GetImpliedMemoryLayout(false));
-        } 
-        
+            Assert.Throws<CyclicStructureException>(() => struct1.GetImpliedMemoryLayout(IntPtr.Size == 4));
+        }
+
         private struct StructWithStaticField
         {
             public int Field1;
@@ -44,9 +46,45 @@ namespace AsmResolver.DotNet.Tests.Memory
             var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location);
             var type = (TypeDefinition) module.LookupMember(typeof(StructWithStaticField).MetadataToken);
 
-            var layout = type.GetImpliedMemoryLayout(false);
+            var layout = type.GetImpliedMemoryLayout(IntPtr.Size == 4);
             Assert.Equal((uint) Unsafe.SizeOf<StructWithStaticField>(), layout.Size);
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        private struct PlatformDependentStruct
+        {
+            public IntPtr Field1;
+            public IntPtr Field2;
+        }
+
+        [Fact]
+        public void DeterminePlatformDependentSize()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location);
+            var type = (TypeDefinition) module.LookupMember(typeof(PlatformDependentStruct).MetadataToken);
+
+            var layout = type.GetImpliedMemoryLayout(IntPtr.Size == 4);
+            Assert.Equal(IntPtr.Size == 4, layout.Is32Bit);
+            Assert.True(layout.IsPlatformDependent);
+            Assert.Equal((uint) Unsafe.SizeOf<PlatformDependentStruct>(), layout.Size);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NestedPlatformDependentStruct
+        {
+            public PlatformDependentStruct Struct1;
+        }
+
+        [Fact]
+        public void DetermineNestedPlatformDependentSize()
+        {
+            var module = ModuleDefinition.FromFile(typeof(MiscellaneousStructTest).Assembly.Location);
+            var type = (TypeDefinition) module.LookupMember(typeof(NestedPlatformDependentStruct).MetadataToken);
+
+            var layout = type.GetImpliedMemoryLayout(IntPtr.Size == 4);
+            Assert.Equal(IntPtr.Size == 4, layout.Is32Bit);
+            Assert.True(layout.IsPlatformDependent);
+            Assert.Equal((uint) Unsafe.SizeOf<NestedPlatformDependentStruct>(), layout.Size);
+        }
     }
 }

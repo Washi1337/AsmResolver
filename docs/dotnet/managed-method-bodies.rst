@@ -153,6 +153,10 @@ Alternatively, when using the ``Add`` or ``Insert`` overloads, it is possible to
  
 The ``switch`` operation uses a ``IList<ICilLabel>`` instead.
 
+.. note::
+
+    When a branching instruction contains a ``null`` label or a label that references an instruction that is not present in the method body, AsmResolver will by default report an exception upon serializing the code stream. This can be disabled by setting ``VerifyLabelsOnBuild`` to ``false``.
+
 
 Finding instructions by offset 
 ------------------------------
@@ -244,6 +248,11 @@ Exception handlers are regions in the method body that are protected from except
 - ``ExceptionType``: The type of exceptions that are caught by the handler.
 
 Depending on the value of ``HandlerType``, either ``FilterStart`` or ``ExceptionType``, or neither has a value.
+
+.. note::
+
+    Similar to branch instructions, when an exception handler contains a ``null`` label or a label that references an instruction that is not present in the method body, AsmResolver will report an exception upon serializing the code stream. This can be disabled by setting ``VerifyLabelsOnBuild`` to ``false``.
+
 
 Maximum stack depth
 -------------------

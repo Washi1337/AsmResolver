@@ -10,10 +10,10 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
     /// processing or reordering of the rows.
     /// </summary>
     /// <typeparam name="TRow">The type of rows to store.</typeparam>
-    public class UnsortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow> 
+    public class UnsortedMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow>
         where TRow : struct, IMetadataRow
     {
-        private readonly List<TRow> _entries = new List<TRow>();
+        private readonly List<TRow> _entries = new();
         private readonly MetadataTable<TRow> _table;
 
         /// <summary>

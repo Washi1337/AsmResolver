@@ -9,15 +9,15 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
 {
     public class MemberRefTokenPreservationTest : TokenPreservationTestBase
     {
-              [Fact]
+        [Fact]
         public void PreserveMemberRefsNoChangeShouldAtLeastHaveOriginalMemberRefs()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
             var originalMemberRefs = GetMembers<MemberReference>(module, TableIndex.MemberRef);
-            
+
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveMemberReferenceIndices);
             var newMemberRefs = GetMembers<MemberReference>(newModule, TableIndex.MemberRef);
-            
+
             Assert.Equal(originalMemberRefs, newMemberRefs.Take(originalMemberRefs.Count), Comparer);
         }
 
@@ -26,14 +26,14 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
             var originalMemberRefs = GetMembers<MemberReference>(module, TableIndex.MemberRef);
-            
+
             var instructions = module.ManagedEntrypointMethod.CilMethodBody.Instructions;
             instructions.Clear();
             instructions.Add(CilOpCodes.Ret);
-            
+
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveMemberReferenceIndices);
             var newMemberRefs = GetMembers<MemberReference>(newModule, TableIndex.MemberRef);
-            
+
             Assert.Equal(originalMemberRefs, newMemberRefs.Take(originalMemberRefs.Count), Comparer);
         }
 
@@ -42,7 +42,7 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld_NetCore);
             var originalMemberRefs = GetMembers<MemberReference>(module, TableIndex.MemberRef);
-            
+
             var importer = new ReferenceImporter(module);
             var readKey = importer.ImportMethod(typeof(Console).GetMethod("ReadKey", Type.EmptyTypes));
 
@@ -51,10 +51,10 @@ namespace AsmResolver.DotNet.Tests.Builder.TokenPreservation
             instructions.Add(CilOpCodes.Call, readKey);
             instructions.Add(CilOpCodes.Pop);
             instructions.Add(CilOpCodes.Ret);
-            
+
             var newModule = RebuildAndReloadModule(module, MetadataBuilderFlags.PreserveMemberReferenceIndices);
             var newMemberRefs = GetMembers<MemberReference>(newModule, TableIndex.MemberRef);
-            
+
             Assert.Equal(originalMemberRefs, newMemberRefs.Take(originalMemberRefs.Count), Comparer);
         }
 

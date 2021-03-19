@@ -13,7 +13,8 @@ namespace AsmResolver.DotNet.Memory
     /// </summary>
     public class TypeMemoryLayoutDetector : ITypeSignatureVisitor<TypeMemoryLayout>
     {
-        private readonly Stack<TypeDefinition> _traversedTypes = new Stack<TypeDefinition>();
+        private readonly Stack<TypeDefinition> _traversedTypes = new();
+        private readonly MemoryLayoutAttributes _defaultAttributes;
         private GenericContext _currentGenericContext;
 
         /// <summary>
@@ -33,63 +34,67 @@ namespace AsmResolver.DotNet.Memory
         public TypeMemoryLayoutDetector(GenericContext currentGenericContext, bool is32Bit)
         {
             _currentGenericContext = currentGenericContext;
-            Is32Bit = is32Bit;
+            _defaultAttributes = is32Bit
+                ? MemoryLayoutAttributes.Is32Bit
+                : MemoryLayoutAttributes.Is64Bit;
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether memory addresses are 32 bit or 64 bit wide.
         /// </summary>
-        public bool Is32Bit
-        {
-            get;
-        }
+        private bool Is32Bit => (_defaultAttributes & MemoryLayoutAttributes.BitnessMask) == MemoryLayoutAttributes.Is32Bit;
 
         /// <summary>
         /// Gets the number of bytes a single pointer field requires.
         /// </summary>
-        public uint PointerSize => Is32Bit ? 4u : 8u;
+        private int PointerSize => Is32Bit ? 4 : 8;
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitArrayType(ArrayTypeSignature signature) =>
-            new TypeMemoryLayout(signature, PointerSize);
+            CreatePointerLayout(signature);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitBoxedType(BoxedTypeSignature signature) =>
-            new TypeMemoryLayout(signature, PointerSize);
+            CreatePointerLayout(signature);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitByReferenceType(ByReferenceTypeSignature signature) => 
-            new TypeMemoryLayout(signature, PointerSize);
+        public TypeMemoryLayout VisitByReferenceType(ByReferenceTypeSignature signature) =>
+            CreatePointerLayout(signature);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitCorLibType(CorLibTypeSignature signature)
         {
-            uint elementSize = signature.ElementType switch
+            (int elementSize, bool isPlatformDependent) = signature.ElementType switch
             {
-                ElementType.Boolean => sizeof(bool),
-                ElementType.Char => sizeof(char) ,
-                ElementType.I1 => sizeof(sbyte),
-                ElementType.U1 => sizeof(byte),
-                ElementType.I2 => sizeof(short),
-                ElementType.U2 => sizeof(ushort),
-                ElementType.I4 => sizeof(int),
-                ElementType.U4 => sizeof(uint),
-                ElementType.I8 => sizeof(long),
-                ElementType.U8 => sizeof(ulong),
-                ElementType.R4 => sizeof(float),
-                ElementType.R8 => sizeof(double),
-                ElementType.String => PointerSize,
-                ElementType.I => PointerSize,
-                ElementType.U => PointerSize,
-                ElementType.Object => PointerSize,
+                ElementType.Boolean => (sizeof(bool), false),
+                ElementType.Char => (sizeof(char), false),
+                ElementType.I1 => (sizeof(sbyte), false),
+                ElementType.U1 => (sizeof(byte), false),
+                ElementType.I2 => (sizeof(short), false),
+                ElementType.U2 => (sizeof(ushort), false),
+                ElementType.I4 => (sizeof(int), false),
+                ElementType.U4 => (sizeof(uint), false),
+                ElementType.I8 => (sizeof(long), false),
+                ElementType.U8 => (sizeof(ulong), false),
+                ElementType.R4 => (sizeof(float), false),
+                ElementType.R8 => (sizeof(double), false),
+                ElementType.String => (PointerSize, true),
+                ElementType.I => (PointerSize, true),
+                ElementType.U => (PointerSize, true),
+                ElementType.Object => (PointerSize, true),
+                ElementType.TypedByRef => (PointerSize * 2, true),
                 _ => throw new ArgumentOutOfRangeException(nameof(signature))
             };
 
-            return new TypeMemoryLayout(signature, elementSize);
+            var attributes = _defaultAttributes;
+            if (isPlatformDependent)
+                attributes |= MemoryLayoutAttributes.IsPlatformDependent;
+
+            return new TypeMemoryLayout(signature, (uint) elementSize, attributes);
         }
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitCustomModifierType(CustomModifierTypeSignature signature) => 
+        public TypeMemoryLayout VisitCustomModifierType(CustomModifierTypeSignature signature) =>
             signature.BaseType.AcceptVisitor(this);
 
         /// <inheritdoc />
@@ -98,7 +103,7 @@ namespace AsmResolver.DotNet.Memory
             // Enter new generic context.
             var oldContext = _currentGenericContext;
             _currentGenericContext = _currentGenericContext.WithType(signature);
-            
+
             var result = VisitTypeDefOrRef(signature.GenericType);
 
             // Leave generic context.
@@ -107,27 +112,27 @@ namespace AsmResolver.DotNet.Memory
         }
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitGenericParameter(GenericParameterSignature signature) => 
+        public TypeMemoryLayout VisitGenericParameter(GenericParameterSignature signature) =>
             _currentGenericContext.GetTypeArgument(signature).AcceptVisitor(this);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature) => 
-            new TypeMemoryLayout(signature, PointerSize);
+        public TypeMemoryLayout VisitPinnedType(PinnedTypeSignature signature) =>
+            CreatePointerLayout(signature);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature) => 
-            new TypeMemoryLayout(signature, PointerSize);
+        public TypeMemoryLayout VisitPointerType(PointerTypeSignature signature) =>
+            CreatePointerLayout(signature);
 
         /// <inheritdoc />
         public TypeMemoryLayout VisitSentinelType(SentinelTypeSignature signature) =>
             throw new ArgumentException("Sentinel types do not have a size.");
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature) => 
-            new TypeMemoryLayout(signature, PointerSize);
+        public TypeMemoryLayout VisitSzArrayType(SzArrayTypeSignature signature) =>
+            CreatePointerLayout(signature);
 
         /// <inheritdoc />
-        public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature) => 
+        public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature) =>
             VisitTypeDefOrRef(signature.Type);
 
         /// <summary>
@@ -145,14 +150,14 @@ namespace AsmResolver.DotNet.Memory
             };
         }
 
-        private TypeMemoryLayout VisitTypeReference(TypeReference type) => 
+        private TypeMemoryLayout VisitTypeReference(TypeReference type) =>
             VisitTypeDefinition(type.Resolve());
 
         private TypeMemoryLayout VisitTypeDefinition(TypeDefinition type)
         {
-            return type.IsValueType 
+            return type.IsValueType
                 ? VisitValueTypeDefinition(type)
-                : new TypeMemoryLayout(type, PointerSize);
+                : CreatePointerLayout(type);
         }
 
         private TypeMemoryLayout VisitValueTypeDefinition(TypeDefinition type)
@@ -160,13 +165,13 @@ namespace AsmResolver.DotNet.Memory
             // Sanity check: Make sure we do not end up in an infinite loop.
             if (_traversedTypes.Contains(type))
                 throw new CyclicStructureException();
-            
+
             // Enter type.
             _traversedTypes.Push(type);
 
             var alignmentDetector = new TypeAlignmentDetector(_currentGenericContext, Is32Bit);
             uint alignment = alignmentDetector.VisitTypeDefinition(type);
-            
+
             // Infer raw layout.
             var result = type.IsExplicitLayout
                 ? InferExplicitLayout(type, alignment)
@@ -174,22 +179,23 @@ namespace AsmResolver.DotNet.Memory
 
             // Types have at least one byte in size.
             result.Size = Math.Max(1, result.Size);
-            
-            // Check if a size was overridden in metadata, and only respect it if it is actually larger than the 
+
+            // Check if a size was overridden in metadata, and only respect it if it is actually larger than the
             // computed size of the type.
-            if (type.ClassLayout is {} layout)
+            if (type.ClassLayout is { } layout)
                 result.Size = Math.Max(layout.ClassSize, result.Size);
 
             // Leave type.
             _traversedTypes.Pop();
-            
+
             return result;
         }
 
         private TypeMemoryLayout InferSequentialLayout(TypeDefinition type, uint alignment)
         {
             var result = new TypeMemoryLayout(type);
-            
+            result.Attributes = _defaultAttributes;
+
             // Maintain a current offset, and increase it after every field.
             uint offset = 0;
 
@@ -198,9 +204,11 @@ namespace AsmResolver.DotNet.Memory
                 var field = type.Fields[i];
                 if (field.IsStatic)
                     continue;
-                
+
                 // Determine field memory layout.
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
+                if (contentsLayout.IsPlatformDependent)
+                    result.Attributes |= MemoryLayoutAttributes.IsPlatformDependent;
 
                 // Fields are aligned to the alignment of the type, unless the field is smaller. In such a case, the
                 // field is aligned to its own field size.
@@ -220,17 +228,18 @@ namespace AsmResolver.DotNet.Memory
         private TypeMemoryLayout InferExplicitLayout(TypeDefinition type, uint alignment)
         {
             var result = new TypeMemoryLayout(type);
+            result.Attributes = _defaultAttributes;
 
             // Implicit type size is determined byt the field with the highest offset + its size.
             uint largestOffset = 0;
-            
+
             // Iterate all fields.
             for (int i = 0; i < type.Fields.Count; i++)
             {
                 var field = type.Fields[i];
                 if (field.IsStatic)
                     continue;
-                
+
                 // All fields in an explicitly laid out structure need to have a field offset assigned.
                 if (!field.FieldOffset.HasValue)
                 {
@@ -242,6 +251,9 @@ namespace AsmResolver.DotNet.Memory
 
                 uint offset = (uint) field.FieldOffset.Value;
                 var contentsLayout = field.Signature.FieldType.AcceptVisitor(this);
+                if (contentsLayout.IsPlatformDependent)
+                    result.Attributes |= MemoryLayoutAttributes.IsPlatformDependent;
+
                 result[field] = new FieldMemoryLayout(field, offset, contentsLayout);
 
                 largestOffset = Math.Max(largestOffset, offset + contentsLayout.Size);
@@ -250,5 +262,8 @@ namespace AsmResolver.DotNet.Memory
             result.Size = largestOffset.Align(alignment);
             return result;
         }
+
+        private TypeMemoryLayout CreatePointerLayout(ITypeDescriptor type) =>
+            new(type, (uint) PointerSize, _defaultAttributes | MemoryLayoutAttributes.IsPlatformDependent);
     }
 }

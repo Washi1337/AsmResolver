@@ -16,26 +16,48 @@ namespace AsmResolver.DotNet.Code.Cil
     {
         /// <summary>
         /// Gets or sets the value of an override switch indicating whether the max stack should always be recalculated
-        /// or should always be preserved.  
+        /// or should always be preserved.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// When this property is set to <c>true</c>, the maximum stack depth of all method bodies will be recaculated. 
-        /// </para> 
+        /// When this property is set to <c>true</c>, the maximum stack depth of all method bodies will be recaculated.
+        /// </para>
         /// <para>
-        /// When this property is set to <c>false</c>, the maximum stack depth of all method bodies will be preserved. 
-        /// </para> 
+        /// When this property is set to <c>false</c>, the maximum stack depth of all method bodies will be preserved.
+        /// </para>
         /// <para>
         /// When this property is set to <c>null</c>, the maximum stack depth will only be recalculated if
-        /// <see cref="CilMethodBody.ComputeMaxStackOnBuild"/> is set to <c>true</c>. 
-        /// </para> 
+        /// <see cref="CilMethodBody.ComputeMaxStackOnBuild"/> is set to <c>true</c>.
+        /// </para>
         /// </remarks>
         public bool? ComputeMaxStackOnBuildOverride
         {
             get;
             set;
         } = null;
-        
+
+        /// <summary>
+        /// Gets or sets the value of an override switch indicating whether labels should always be verified for
+        /// validity or not.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When this property is set to <c>true</c>, all method bodies will be verified for branch validity.
+        /// </para>
+        /// <para>
+        /// When this property is set to <c>false</c>, no method body will be verified for branch validity.
+        /// </para>
+        /// <para>
+        /// When this property is set to <c>null</c>, a method body will only be verified if
+        /// <see cref="CilMethodBody.VerifyLabelsOnBuild"/> is set to <c>true</c>.
+        /// </para>
+        /// </remarks>
+        public bool? VerifyLabelsOnBuildOverride
+        {
+            get;
+            set;
+        } = null;
+
         /// <inheritdoc />
         public ISegmentReference SerializeMethodBody(MethodBodySerializationContext context, MethodDefinition method)
         {
@@ -43,37 +65,39 @@ namespace AsmResolver.DotNet.Code.Cil
                 return SegmentReference.Null;
 
             var body = method.CilMethodBody;
-            
-            // Compute max stack when specified, otherwise just calculate offsets only.
-            if (ComputeMaxStackOnBuildOverride ?? body.ComputeMaxStackOnBuild)
+
+            body.Instructions.CalculateOffsets();
+
+            try
             {
-                try
+                if (ComputeMaxStackOnBuildOverride ?? body.ComputeMaxStackOnBuild)
                 {
-                    body.MaxStack = body.ComputeMaxStack();
+                    // Max stack computation requires branches to be correct.
+                    body.VerifyLabels(false);
+                    body.MaxStack = body.ComputeMaxStack(false);
                 }
-                catch (Exception ex)
+                else if (VerifyLabelsOnBuildOverride ?? body.VerifyLabelsOnBuild)
                 {
-                    context.DiagnosticBag.RegisterException(ex);
-                    body.Instructions.CalculateOffsets();
+                    body.VerifyLabels(false);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                body.Instructions.CalculateOffsets();
+                context.DiagnosticBag.RegisterException(ex);
             }
 
             // Serialize CIL stream.
             var code = BuildRawCodeStream(context, body);
-            
+
             // Build method body.
-            var rawBody = body.IsFat 
-                ? BuildFatMethodBody(context, body, code) 
+            var rawBody = body.IsFat
+                ? BuildFatMethodBody(context, body, code)
                 : BuildTinyMethodBody(code);
 
             return new SegmentReference(rawBody);
         }
 
-        private static CilRawMethodBody BuildTinyMethodBody(byte[] code) => 
+        private static CilRawMethodBody BuildTinyMethodBody(byte[] code) =>
             new CilRawTinyMethodBody(code);
 
         private CilRawMethodBody BuildFatMethodBody(MethodBodySerializationContext context, CilMethodBody body, byte[] code)
@@ -93,7 +117,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
             var fatBody = new CilRawFatMethodBody(CilMethodBodyAttributes.Fat, (ushort) body.MaxStack, token, code);
             fatBody.InitLocals = body.InitializeLocals;
-            
+
             // Build up EH table section.
             if (body.ExceptionHandlers.Count > 0)
             {
@@ -115,11 +139,17 @@ namespace AsmResolver.DotNet.Code.Cil
         private static byte[] BuildRawCodeStream(MethodBodySerializationContext context, CilMethodBody body)
         {
             using var codeStream = new MemoryStream();
-            
+            var bag = context.DiagnosticBag;
+
             var writer = new BinaryStreamWriter(codeStream);
-            var assembler = new CilAssembler(writer, new CilOperandBuilder(context.TokenProvider, context.DiagnosticBag));
+            var assembler = new CilAssembler(
+                writer,
+                new CilOperandBuilder(context.TokenProvider, bag),
+                body.Owner.SafeToString(),
+                bag);
+
             assembler.WriteInstructions(body.Instructions);
-            
+
             return codeStream.ToArray();
         }
 
@@ -141,7 +171,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             if (handler.IsFat && !useFatFormat)
                 throw new InvalidOperationException("Can only serialize fat exception handlers in fat format.");
-            
+
             // Write handler type and boundaries.
             if (useFatFormat)
             {
@@ -183,12 +213,12 @@ namespace AsmResolver.DotNet.Code.Cil
                 case CilExceptionHandlerType.Filter:
                     writer.WriteUInt32((uint) handler.FilterStart.Offset);
                     break;
-                
+
                 case CilExceptionHandlerType.Finally:
                 case CilExceptionHandlerType.Fault:
                     writer.WriteUInt32(0);
                     break;
-                
+
                 default:
                     context.DiagnosticBag.RegisterException(new ArgumentOutOfRangeException(
                             $"Invalid or unsupported handler type ({handler.HandlerType.SafeToString()}"));

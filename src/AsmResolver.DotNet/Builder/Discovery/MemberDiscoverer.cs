@@ -26,7 +26,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private const FieldAttributes FieldPlaceHolderAttributes = FieldAttributes.Public;
 
         /// <summary>
-        /// Performs a traversal on the provided module and collects all member defined in it. 
+        /// Performs a traversal on the provided module and collects all member defined in it.
         /// </summary>
         /// <param name="module">The module to traverse.</param>
         /// <param name="flags">Flags indicating which member lists the original order needs to be preserved.</param>
@@ -44,14 +44,14 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // 3) Any remaining null slots need to be stuffed with placeholder member definitions. These will be
             //    added to a dummy namespace for placeholder types, and added to a dummy type definition for all
             //    member definitions.
-            
+
             var context = new MemberDiscoverer(module, flags);
-            
+
             if (flags != MemberDiscoveryFlags.None)
                 context.CollectExistingMembers();
 
             context.CollectNewlyAddedMembers();
-                
+
             if (flags != MemberDiscoveryFlags.None)
                 context.StuffFreeMemberSlots();
 
@@ -61,10 +61,10 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private readonly ModuleDefinition _module;
         private readonly MemberDiscoveryFlags _flags;
         private readonly MemberDiscoveryResult _result = new MemberDiscoveryResult();
-        
+
         private readonly IList<MethodDefinition> _allPlaceHolderMethods = new List<MethodDefinition>();
         private int _placeHolderParameterCounter;
-        
+
         private readonly TypeReference _eventHandlerTypeRef;
         private readonly TypeSignature _eventHandlerTypeSig;
 
@@ -126,7 +126,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         private void CollectMembersFromTable<TMember>(TableIndex tableIndex)
             where TMember: IMetadataMember, IModuleProvider
         {
-            // Get original number of elements in the table. 
+            // Get original number of elements in the table.
             int count = _module.DotNetDirectory.Metadata
                 .GetStream<TablesStream>()
                 .GetTable(tableIndex)
@@ -158,7 +158,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         {
             // Do a normal traversal of the member tree, and try to place newly added members in either the
             // available slots, or at the end of the member lists.
-            
+
             foreach (var type in _module.GetAllTypes())
             {
                 InsertOrAppendIfNew(type);
@@ -192,7 +192,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         {
             var memberType = member.MetadataToken.Table;
             var memberList = GetResultList<TMember>(memberType);
-            
+
             if (IsNewMember(memberList, member))
             {
                 var freeRids = _freeRids[memberType];
@@ -227,7 +227,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
 
                     memberList[(int) member.MetadataToken.Rid - 1] = member;
                     freeRids.Remove(member.MetadataToken.Rid);
-                    
+
                 }
                 else if (freeRids.Count > 0)
                 {
@@ -257,7 +257,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Check if we need to do this at all.
             if (_freeRids.Values.All(q => q.Count == 0))
                 return;
-            
+
             // Create a new randomly generated namespace.
             string placeHolderNamespace = Guid.NewGuid().ToString("B");
 
@@ -265,8 +265,8 @@ namespace AsmResolver.DotNet.Builder.Discovery
             TypeDefinition placeHolderType;
             if (_freeRids[TableIndex.TypeDef].Count == 0)
             {
-                // There is no RID available for the dummy type, allocate a new one. 
-                placeHolderType = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, MetadataToken.Zero);
+                // There is no RID available for the dummy type, allocate a new one.
+                placeHolderType = new PlaceHolderTypeDefinition(_module, placeHolderNamespace, new MetadataToken(TableIndex.TypeDef, 0));
                 _result.Types.Add(placeHolderType);
             }
             else
@@ -286,14 +286,14 @@ namespace AsmResolver.DotNet.Builder.Discovery
             StuffFreeMemberSlots(placeHolderType, TableIndex.Param, AddPlaceHolderParameter);
         }
 
-        private void StuffFreeMemberSlots<TMember>(TypeDefinition placeHolderType, TableIndex tableIndex, 
-            Func<TypeDefinition, MetadataToken, TMember> createPlaceHolder) 
+        private void StuffFreeMemberSlots<TMember>(TypeDefinition placeHolderType, TableIndex tableIndex,
+            Func<TypeDefinition, MetadataToken, TMember> createPlaceHolder)
             where TMember : IMetadataMember
         {
-            // Get resulting member lists and free RIDs. 
+            // Get resulting member lists and free RIDs.
             var freeRids = _freeRids[tableIndex];
             var members = GetResultList<TMember>(tableIndex);
-            
+
             while (freeRids.Count > 0)
             {
                 // Stuff free RID with a place holder member.
@@ -311,10 +311,10 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 $"PlaceHolderField_{token.Rid.ToString()}",
                 FieldPlaceHolderAttributes,
                 FieldSignature.CreateStatic(_module.CorLibTypeFactory.Object));
-            
+
             // Add the field to the type.
             placeHolderType.Fields.Add(placeHolderField);
-            
+
             return placeHolderField;
         }
 
@@ -325,13 +325,13 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 $"PlaceHolderMethod_{token.Rid.ToString()}",
                 MethodPlaceHolderAttributes,
                 MethodSignature.CreateInstance(_module.CorLibTypeFactory.Void));
-            
+
             // Add the method to the type.
             placeHolderType.Methods.Add(placeHolderMethod);
-            
+
             // Record placeholder methods, so that we can use them for adding placeholder parameters as well.
             _allPlaceHolderMethods.Add(placeHolderMethod);
-            
+
             return placeHolderMethod;
         }
 
@@ -339,7 +339,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
         {
             // If methods were not preserved, we need to create a new placeholder method to
             // contain our dummy parameters in.
-            
+
             if (_allPlaceHolderMethods.Count == 0)
                 InsertOrAppendIfNew(AddPlaceHolderMethod(placeHolderType, token));
 
@@ -353,20 +353,20 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // valid .NET module.
             if (parameterSequence > 0)
                 method.Signature.ParameterTypes.Add(_module.CorLibTypeFactory.Object);
-            
+
 #if DEBUG
             string parameterName = method.ParameterDefinitions.Count == 0 ? null : $"placeholder{method.ParameterDefinitions.Count}";
 #else
             const string parameterName = null;
-#endif 
-                
+#endif
+
             // Create and add the placeholder parameter.
             var parameter = new ParameterDefinition((ushort) parameterSequence, parameterName, 0);
             method.ParameterDefinitions.Add(parameter);
-            
+
             // Move to next method.
             _placeHolderParameterCounter++;
-            
+
             return parameter;
         }
 
@@ -381,13 +381,13 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 $"get_{property.Name}",
                 MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
                 MethodSignature.CreateStatic(_module.CorLibTypeFactory.Object));
-            
+
             // Add members.
             placeHolderType.Methods.Add(getMethod);
             placeHolderType.Properties.Add(property);
             property.Semantics.Add(new MethodSemantics(getMethod, MethodSemanticsAttributes.Getter));
             InsertOrAppendIfNew(getMethod);
-            
+
             return property;
         }
 
@@ -400,30 +400,30 @@ namespace AsmResolver.DotNet.Builder.Discovery
             // Create signature for add/remove methods.
             var signature = MethodSignature.CreateStatic(
                 _module.CorLibTypeFactory.Void,
-                _module.CorLibTypeFactory.Object, 
+                _module.CorLibTypeFactory.Object,
                 _eventHandlerTypeSig);
-            
+
             // Define add and remove methods.
             var addMethod = new MethodDefinition(
-                $"add_{@event.Name}", 
-                MethodPlaceHolderAttributes | MethodAttributes.SpecialName, 
+                $"add_{@event.Name}",
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
                 signature);
             var removeMethod = new MethodDefinition(
-                $"remove_{@event.Name}", 
-                MethodPlaceHolderAttributes | MethodAttributes.SpecialName, 
+                $"remove_{@event.Name}",
+                MethodPlaceHolderAttributes | MethodAttributes.SpecialName,
                 signature);
-            
+
             // Add members.
             placeHolderType.Methods.Add(addMethod);
             placeHolderType.Methods.Add(removeMethod);
             placeHolderType.Events.Add(@event);
-            
+
             @event.Semantics.Add(new MethodSemantics(addMethod, MethodSemanticsAttributes.AddOn));
             @event.Semantics.Add(new MethodSemantics(removeMethod, MethodSemanticsAttributes.RemoveOn));
 
             InsertOrAppendIfNew(addMethod);
             InsertOrAppendIfNew(removeMethod);
-            
+
             return @event;
         }
 
@@ -451,7 +451,7 @@ namespace AsmResolver.DotNet.Builder.Discovery
                 Name =  $"PlaceHolderTypeDef_{token.Rid.ToString()}";
                 Attributes = TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.NotPublic;
                 BaseType = module.CorLibTypeFactory.Object.Type;
-                
+
                 // HACK: override the module containing this type:
                 ((IOwnedCollectionElement<ModuleDefinition>) this).Owner = module;
             }

@@ -12,9 +12,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Blob
     /// </summary>
     public class BlobStreamBuffer : IMetadataStreamBuffer
     {
-        private readonly MemoryStream _rawStream = new MemoryStream();
+        private readonly MemoryStream _rawStream = new();
         private readonly BinaryStreamWriter _writer;
-        private readonly IDictionary<byte[], uint> _blobs = new Dictionary<byte[], uint>(ByteArrayEqualityComparer.Instance);
+        private readonly Dictionary<byte[], uint> _blobs = new(ByteArrayEqualityComparer.Instance);
 
         /// <summary>
         /// Creates a new blob stream buffer with the default blob stream name.

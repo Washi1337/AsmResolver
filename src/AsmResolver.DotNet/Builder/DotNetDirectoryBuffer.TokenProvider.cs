@@ -1,5 +1,4 @@
-﻿using AsmResolver.Collections;
-using AsmResolver.DotNet.Code.Cil;
+﻿using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
@@ -7,13 +6,6 @@ namespace AsmResolver.DotNet.Builder
 {
     public partial class DotNetDirectoryBuffer : IMetadataTokenProvider
     {
-        private readonly OneToOneRelation<TypeDefinition, MetadataToken> _typeDefTokens = new OneToOneRelation<TypeDefinition, MetadataToken>();
-        private readonly OneToOneRelation<FieldDefinition, MetadataToken> _fieldTokens = new OneToOneRelation<FieldDefinition, MetadataToken>();
-        private readonly OneToOneRelation<MethodDefinition, MetadataToken> _methodTokens = new OneToOneRelation<MethodDefinition, MetadataToken>();
-        private readonly OneToOneRelation<ParameterDefinition, MetadataToken> _parameterTokens = new OneToOneRelation<ParameterDefinition, MetadataToken>();
-        private readonly OneToOneRelation<PropertyDefinition, MetadataToken> _propertyTokens = new OneToOneRelation<PropertyDefinition, MetadataToken>();
-        private readonly OneToOneRelation<EventDefinition, MetadataToken> _eventTokens = new OneToOneRelation<EventDefinition, MetadataToken>();
-        
         /// <inheritdoc />
         public uint GetUserStringIndex(string value) => Metadata.UserStringsStream.GetStringIndex(value);
 
@@ -22,7 +14,7 @@ namespace AsmResolver.DotNet.Builder
         {
             if (type == null || !AssertIsImported(type))
                 return 0;
-            
+
             var table = Metadata.TablesStream.GetTable<TypeReferenceRow>(TableIndex.TypeRef);
             var row = new TypeReferenceRow(
                 AddResolutionScope(type.Scope),
@@ -30,6 +22,7 @@ namespace AsmResolver.DotNet.Builder
                 Metadata.StringsStream.GetStringIndex(type.Namespace));
 
             var token = table.Add(row);
+            _tokenMapping.Register(type, token);
             AddCustomAttributes(token, type);
             return token;
         }
@@ -38,7 +31,7 @@ namespace AsmResolver.DotNet.Builder
         public MetadataToken GetTypeDefinitionToken(TypeDefinition type)
         {
             return AssertIsImported(type)
-                ? _typeDefTokens.GetValue(type)
+                ? _tokenMapping[type]
                 : MetadataToken.Zero;
         }
 
@@ -46,7 +39,7 @@ namespace AsmResolver.DotNet.Builder
         public MetadataToken GetFieldDefinitionToken(FieldDefinition field)
         {
             return AssertIsImported(field)
-                ? _fieldTokens.GetValue(field)
+                ? _tokenMapping[field]
                 : MetadataToken.Zero;
         }
 
@@ -54,44 +47,44 @@ namespace AsmResolver.DotNet.Builder
         public MetadataToken GetMethodDefinitionToken(MethodDefinition method)
         {;
             return AssertIsImported(method)
-                ? _methodTokens.GetValue(method)
+                ? _tokenMapping[method]
                 : MetadataToken.Zero;
         }
 
         /// <summary>
         /// Gets the newly assigned metadata token of a parameter definition stored in a tables stream or tables
-        /// stream buffer. 
+        /// stream buffer.
         /// </summary>
         /// <param name="parameter">The reference to the parameter to add.</param>
         /// <returns>The metadata token of the added parameter definition.</returns>
         public MetadataToken GetParameterDefinitionToken(ParameterDefinition parameter)
         {
             return AssertIsImported(parameter)
-                ? _parameterTokens.GetValue(parameter)
+                ? _tokenMapping[parameter]
                 : MetadataToken.Zero;
         }
 
         /// <summary>
-        /// Gets the newly assigned metadata token of a property definition stored in a tables stream or tables stream buffer. 
+        /// Gets the newly assigned metadata token of a property definition stored in a tables stream or tables stream buffer.
         /// </summary>
         /// <param name="property">The reference to the property to add.</param>
         /// <returns>The metadata token of the added property definition.</returns>
         public MetadataToken GetPropertyDefinitionToken(PropertyDefinition property)
         {
             return AssertIsImported(property)
-                ? _propertyTokens.GetValue(property)
+                ? _tokenMapping[property]
                 : MetadataToken.Zero;
         }
 
         /// <summary>
-        /// Gets the newly assigned metadata token of an event definition stored in a tables stream or tables stream buffer. 
+        /// Gets the newly assigned metadata token of an event definition stored in a tables stream or tables stream buffer.
         /// </summary>
         /// <param name="event">The reference to the event to add.</param>
         /// <returns>The metadata token of the added event definition.</returns>
         public MetadataToken GetEventDefinitionToken(EventDefinition @event)
         {
             return AssertIsImported(@event)
-                ? _eventTokens.GetValue(@event)
+                ? _tokenMapping[@event]
                 : MetadataToken.Zero;
         }
 
@@ -100,14 +93,15 @@ namespace AsmResolver.DotNet.Builder
         {
             if (!AssertIsImported(member))
                 return MetadataToken.Zero;
-            
+
             var table = Metadata.TablesStream.GetTable<MemberReferenceRow>(TableIndex.MemberRef);
             var row = new MemberReferenceRow(
                 AddMemberRefParent(member.Parent),
                 Metadata.StringsStream.GetStringIndex(member.Name),
                 Metadata.BlobStream.GetBlobIndex(this, member.Signature, DiagnosticBag));
-            
+
             var token = table.Add(row);
+            _tokenMapping.Register(member, token);
             AddCustomAttributes(token, member);
             return token;
         }
@@ -118,8 +112,9 @@ namespace AsmResolver.DotNet.Builder
             var table = Metadata.TablesStream.GetTable<StandAloneSignatureRow>(TableIndex.StandAloneSig);
             var row = new StandAloneSignatureRow(
                 Metadata.BlobStream.GetBlobIndex(this, signature.Signature, DiagnosticBag));
-            
+
             var token = table.Add(row);
+            _tokenMapping.Register(signature, token);
             AddCustomAttributes(token, signature);
             return token;
         }
@@ -129,7 +124,7 @@ namespace AsmResolver.DotNet.Builder
         {
             if (!AssertIsImported(assembly))
                 return MetadataToken.Zero;
-            
+
             var table = Metadata.TablesStream.GetTable<AssemblyReferenceRow>(TableIndex.AssemblyRef);
 
             var row = new AssemblyReferenceRow((ushort) assembly.Version.Major,
@@ -146,7 +141,7 @@ namespace AsmResolver.DotNet.Builder
             AddCustomAttributes(token, assembly);
             return token;
         }
-        
+
         /// <summary>
         /// Adds a single module reference to the buffer.
         /// </summary>
@@ -156,7 +151,7 @@ namespace AsmResolver.DotNet.Builder
         {
             if (!AssertIsImported(reference))
                 return MetadataToken.Zero;
-            
+
             var table = Metadata.TablesStream.GetTable<ModuleReferenceRow>(TableIndex.ModuleRef);
 
             var row = new ModuleReferenceRow(Metadata.StringsStream.GetStringIndex(reference.Name));
@@ -170,11 +165,12 @@ namespace AsmResolver.DotNet.Builder
         {
             if (!AssertIsImported(type))
                 return MetadataToken.Zero;
-            
+
             var table = Metadata.TablesStream.GetTable<TypeSpecificationRow>(TableIndex.TypeSpec);
             var row = new TypeSpecificationRow(Metadata.BlobStream.GetBlobIndex(this, type.Signature, DiagnosticBag));
-            
+
             var token = table.Add(row);
+            _tokenMapping.Register(type, token);
             AddCustomAttributes(token, type);
             return token;
         }
@@ -186,8 +182,9 @@ namespace AsmResolver.DotNet.Builder
             var row = new MethodSpecificationRow(
                 AddMethodDefOrRef(method.Method),
                 Metadata.BlobStream.GetBlobIndex(this, method.Signature, DiagnosticBag));
-            
+
             var token = table.Add(row);
+            _tokenMapping.Register(method, token);
             AddCustomAttributes(token, method);
             return token;
         }

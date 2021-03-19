@@ -11,9 +11,9 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
     /// </summary>
     public class GuidStreamBuffer : IMetadataStreamBuffer
     {
-        private readonly MemoryStream _rawStream = new MemoryStream();
+        private readonly MemoryStream _rawStream = new();
         private readonly BinaryStreamWriter _writer;
-        private readonly IDictionary<System.Guid, uint> _guids = new Dictionary<System.Guid, uint>();
+        private readonly Dictionary<System.Guid, uint> _guids = new();
 
         /// <summary>
         /// Creates a new GUID stream buffer with the default GUID stream name.
@@ -68,8 +68,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Guid
 
         private uint AppendGuid(System.Guid guid)
         {
-            uint index;
-            index = (uint) _rawStream.Length / GuidStream.GuidSize + 1;
+            uint index = (uint) _rawStream.Length / GuidStream.GuidSize + 1;
             AppendRawData(guid.ToByteArray());
             return index;
         }
