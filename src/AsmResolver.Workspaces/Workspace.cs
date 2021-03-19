@@ -25,7 +25,7 @@
         /// Performs the analysis.
         /// </summary>
         /// <param name="context">The analysis context.</param>
-        protected void Analyze(AnalysisContext context)
+        public void Analyze(AnalysisContext context)
         {
             while (context.Agenda.Count > 0)
             {
