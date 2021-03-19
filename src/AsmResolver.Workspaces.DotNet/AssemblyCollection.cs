@@ -90,7 +90,7 @@ namespace AsmResolver.Workspaces.DotNet
             }
 
             /// <inheritdoc />
-            protected override string? ProbeRuntimeDirectories(AssemblyDescriptor assembly)
+            public override string? ProbeRuntimeDirectories(AssemblyDescriptor assembly)
             {
                 // Should never be called as this function is called by the original ResolveImpl only,
                 // which is never called in this implementation.
