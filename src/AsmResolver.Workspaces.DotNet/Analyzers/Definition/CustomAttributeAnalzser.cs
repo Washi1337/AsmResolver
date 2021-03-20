@@ -39,7 +39,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 
             for (int i = 0; i < subject.Signature.FixedArguments.Count; i++)
             {
-                var fixedArgument = subject.Signature.NamedArguments[i];
+                var fixedArgument = subject.Signature.FixedArguments[i];
                 if (context.HasAnalyzers(typeof(CustomAttributeArgument)))
                 {
                     context.SchedulaForAnalysis(fixedArgument);
