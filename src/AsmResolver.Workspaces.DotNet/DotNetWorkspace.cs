@@ -52,7 +52,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(CilExceptionHandler), new ExceptionHandlerAnalyzer());
             Analyzers.Register(typeof(CilLocalVariable), new CilLocalVariableAnalyzer());
             Analyzers.Register(typeof(StandAloneSignature), new StandaloneSignatureAnalyzer());
-
+            Analyzers.Register(typeof(InterfaceImplementation), new InterfaceImplementationAnalyzer());
         }
 
         /// <summary>

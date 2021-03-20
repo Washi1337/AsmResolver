@@ -87,12 +87,14 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             TraverseObjects(securityDeclarations);
         }
 
+
         [Fact]
         public void StandAloneSigCheck()
         {
             var standAloneSignatures = GetAllMembers<StandAloneSignature>(_fixture.AllAssemblies, TableIndex.StandAloneSig);
             TraverseObjects(standAloneSignatures);
         }
+
 
         [Fact]
         public void EventCheck()
