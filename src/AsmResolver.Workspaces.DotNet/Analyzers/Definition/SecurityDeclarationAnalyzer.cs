@@ -5,18 +5,16 @@ using AsmResolver.DotNet.Signatures.Types;
 namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 {
     /// <summary>
-    /// Analyzes a <see cref="IHasSecurityDeclaration"/> for its definitions
+    /// Analyzes a <see cref="SecurityDeclaration"/> for its definitions
     /// </summary>
-    public class SecurityDeclarationAnalyzer : ObjectAnalyzer<IHasSecurityDeclaration>
+    public class SecurityDeclarationAnalyzer : ObjectAnalyzer<SecurityDeclaration>
     {
         private static readonly SignatureComparer _comparer = new();
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, IHasSecurityDeclaration subject)
+        public override void Analyze(AnalysisContext context, SecurityDeclaration subject)
         {
-            for (int i = 0; i < subject.SecurityDeclarations.Count; i++)
-            {
-                var permissionSet = subject.SecurityDeclarations[i].PermissionSet;
+                var permissionSet = subject.PermissionSet;
                 for (int j = 0; j < permissionSet.Attributes.Count; j++)
                 {
                     var securityAttribute = permissionSet.Attributes[j];
@@ -33,7 +31,6 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         context.SchedulaForAnalysis(securityAttribute.NamedArguments[k]);
                     }
                 }
-            }
         }
     }
 }

@@ -4,7 +4,7 @@ using AsmResolver.DotNet.Signatures;
 namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 {
     /// <summary>
-    /// Analyzes a <see cref="IHasCustomAttribute"/> for its definitions
+    /// Analyzes a <see cref="CustomAttribute"/> for its definitions
     /// </summary>
     public class CustomAttributeAnalyzer : ObjectAnalyzer<CustomAttribute>
     {
