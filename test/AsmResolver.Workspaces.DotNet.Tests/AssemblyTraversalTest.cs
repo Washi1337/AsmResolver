@@ -74,13 +74,6 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         }
 
         [Fact]
-        public void ConstantCheck()
-        {
-            var constants = GetAllMembers<Constant>(_fixture.AllAssemblies, TableIndex.Constant);
-            TraverseObjects(constants);
-        }
-
-        [Fact]
         public void CustomAttributeCheck()
         {
             var customAttributes = GetAllMembers<CustomAttribute>(_fixture.AllAssemblies, TableIndex.CustomAttribute);
@@ -222,6 +215,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
 /* TODO: Check those
 FieldPtr = 3,
+Constant
 MethodPtr = 5,
 ParamPtr = 7,
 FieldMarshal = 13,

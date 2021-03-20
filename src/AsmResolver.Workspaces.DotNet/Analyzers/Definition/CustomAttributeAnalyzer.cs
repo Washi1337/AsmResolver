@@ -6,23 +6,24 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Analyzes a <see cref="IHasCustomAttribute"/> for its definitions
     /// </summary>
-    public class CustomAttributeAnalzser : ObjectAnalyzer<IHasCustomAttribute>
+    public class CustomAttributeAnalyzer : ObjectAnalyzer<CustomAttribute>
     {
         private static readonly SignatureComparer _comparer = new();
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, IHasCustomAttribute subject)
+        public override void Analyze(AnalysisContext context, CustomAttribute subject)
         {
-            for (int i = 0; i < subject.CustomAttributes.Count; i++)
-            {
-                var customAttribute = subject.CustomAttributes[i];
-                ScheduleMembersForAnalysis(context, customAttribute);
-                ConnectAllNamedReferences(context, customAttribute);
-            }
+            ScheduleMembersForAnalysis(context, subject);
+            ConnectAllNamedReferences(context, subject);
         }
 
         private void ScheduleMembersForAnalysis(AnalysisContext context, CustomAttribute subject)
         {
+            if (context.HasAnalyzers(typeof(CustomAttribute)))
+            {
+                context.SchedulaForAnalysis(subject);
+            }
+
             if (context.HasAnalyzers(subject.Constructor.GetType()))
             {
                 context.SchedulaForAnalysis(subject.Constructor);
