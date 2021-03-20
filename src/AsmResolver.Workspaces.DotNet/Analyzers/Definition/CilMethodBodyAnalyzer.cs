@@ -15,14 +15,20 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, CilMethodBody subject)
         {
-            for (int i = 0; i < subject.ExceptionHandlers.Count; i++)
+            if(context.HasAnalyzers(typeof(CilExceptionHandler)))
             {
-                context.SchedulaForAnalysis(subject.ExceptionHandlers[i]);
+                for (int i = 0; i < subject.ExceptionHandlers.Count; i++)
+                {
+                    context.SchedulaForAnalysis(subject.ExceptionHandlers[i]);
+                }
             }
 
-            for (int i = 0; i < subject.LocalVariables.Count; i++)
+            if (context.HasAnalyzers(typeof(CilLocalVariable)))
             {
-                context.SchedulaForAnalysis(subject.LocalVariables[i]);
+                for (int i = 0; i < subject.LocalVariables.Count; i++)
+                {
+                    context.SchedulaForAnalysis(subject.LocalVariables[i]);
+                }
             }
 
             AnalyzeInstructions(context, subject);
