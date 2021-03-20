@@ -38,9 +38,8 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(LocalVariablesSignature), new LocalVariablesSignatureAnalyser());
             Analyzers.Register(typeof(IGenericArgumentsProvider), new GenericArgumentAnalyser());
             Analyzers.Register(typeof(CilMethodBody), new CilMethodBodyAnalyser());
-
-
-
+            Analyzers.Register(typeof(CustomAttributeArgument), new CustomAttributeArgumentAnalyser());
+            Analyzers.Register(typeof(CustomAttributeNamedArgument), new CustomAttributeNamedArgumentAnalyser());
         }
 
         /// <summary>
