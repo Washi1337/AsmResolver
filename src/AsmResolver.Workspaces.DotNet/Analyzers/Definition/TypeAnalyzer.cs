@@ -112,6 +112,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 }
             }
 
+            if (subject.DeclaringType is not null && context.HasAnalyzers(typeof(TypeDefinition)))
+            {
+                context.SchedulaForAnalysis(subject.DeclaringType);
+            }
+
             if (context.HasAnalyzers(typeof(MethodImplementation)))
             {
                 for (int i = 0; i < subject.MethodImplementations.Count; i++)
