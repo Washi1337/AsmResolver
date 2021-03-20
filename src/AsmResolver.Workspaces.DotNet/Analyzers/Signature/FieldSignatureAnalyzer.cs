@@ -6,7 +6,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
     /// <summary>
     /// Provides a default implementation for an <see cref="FieldSignature"/> analyzer.
     /// </summary>
-    public class FieldSignatureAnalyser : ObjectAnalyzer<FieldSignature>
+    public class FieldSignatureAnalyzer : ObjectAnalyzer<FieldSignature>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, FieldSignature subject)

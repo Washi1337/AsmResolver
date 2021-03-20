@@ -6,7 +6,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
     /// <summary>
     /// Provides a default implementation for an <see cref="MethodSignatureBase"/> analyzer.
     /// </summary>
-    public class MethodSignatureBaseAnalyser : ObjectAnalyzer<MethodSignatureBase>
+    public class MethodSignatureBaseAnalyzer : ObjectAnalyzer<MethodSignatureBase>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, MethodSignatureBase subject)

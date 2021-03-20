@@ -6,7 +6,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
     /// <summary>
     /// Provides a default implementation for an <see cref="LocalVariablesSignature"/> analyzer.
     /// </summary>
-    public class LocalVariablesSignatureAnalyser : ObjectAnalyzer<LocalVariablesSignature>
+    public class LocalVariablesSignatureAnalyzer : ObjectAnalyzer<LocalVariablesSignature>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, LocalVariablesSignature subject)

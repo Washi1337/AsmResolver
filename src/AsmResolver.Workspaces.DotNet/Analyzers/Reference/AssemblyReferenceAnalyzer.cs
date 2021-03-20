@@ -5,7 +5,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     /// <summary>
     /// Analyzes a <see cref="AssemblyReference"/> for its definitions
     /// </summary>
-    public class AssemblyReferenceAnalyser : ObjectAnalyzer<AssemblyReference>
+    public class AssemblyReferenceAnalyzer : ObjectAnalyzer<AssemblyReference>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, AssemblyReference subject)

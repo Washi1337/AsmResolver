@@ -10,7 +10,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Analyzes a <see cref="CilMethodBody"/> for its definitions
     /// </summary>
-    public class CilMethodBodyAnalyser : ObjectAnalyzer<CilMethodBody>
+    public class CilMethodBodyAnalyzer : ObjectAnalyzer<CilMethodBody>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, CilMethodBody subject)

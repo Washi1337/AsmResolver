@@ -7,7 +7,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Provides a default implementation for an <see cref="TypeSpecification"/> analyzer.
     /// </summary>
-    public class TypeSpecificationAnalyser : ObjectAnalyzer<TypeSpecification>
+    public class TypeSpecificationAnalyzer : ObjectAnalyzer<TypeSpecification>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, TypeSpecification subject)

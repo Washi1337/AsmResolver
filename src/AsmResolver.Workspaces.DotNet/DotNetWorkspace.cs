@@ -26,23 +26,24 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(MethodDefinition), new MethodAnalyzer());
             Analyzers.Register(typeof(MethodDefinition), new MethodImplementationAnalyzer());
             Analyzers.Register(typeof(IHasSemantics), new SemanticsImplementationAnalyzer());
-            Analyzers.Register(typeof(TypeReference), new TypeReferenceAnalyser());
-            Analyzers.Register(typeof(MemberReference), new MemberReferenceAnalyser());
-            Analyzers.Register(typeof(IHasCustomAttribute), new CustomAttributeAnalyser());
-            Analyzers.Register(typeof(TypeSignature), new TypeSpecificationAnalyser());
-            Analyzers.Register(typeof(MethodSignatureBase), new MethodSignatureBaseAnalyser());
-            Analyzers.Register(typeof(FieldSignature), new FieldSignatureAnalyser());
+            Analyzers.Register(typeof(TypeReference), new TypeReferenceAnalyzer());
+            Analyzers.Register(typeof(MemberReference), new MemberReferenceAnalyzer());
+            Analyzers.Register(typeof(IHasCustomAttribute), new CustomAttributeAnalzser());
+            Analyzers.Register(typeof(TypeSignature), new TypeSpecificationAnalyzer());
+            Analyzers.Register(typeof(MethodSignatureBase), new MethodSignatureBaseAnalyzer());
+            Analyzers.Register(typeof(FieldSignature), new FieldSignatureAnalyzer());
             Analyzers.Register(typeof(FieldAnalyzer), new FieldAnalyzer());
             Analyzers.Register(typeof(PropertyAnalyzer), new PropertyAnalyzer());
             Analyzers.Register(typeof(EventAnalyzer), new EventAnalyzer());
             Analyzers.Register(typeof(IHasGenericParameters), new GenericParameterAnalyzer());
-            Analyzers.Register(typeof(LocalVariablesSignature), new LocalVariablesSignatureAnalyser());
+            Analyzers.Register(typeof(LocalVariablesSignature), new LocalVariablesSignatureAnalyzer());
             Analyzers.Register(typeof(IGenericArgumentsProvider), new GenericArgumentAnalyzer());
-            Analyzers.Register(typeof(CilMethodBody), new CilMethodBodyAnalyser());
-            Analyzers.Register(typeof(CustomAttributeArgument), new CustomAttributeArgumentAnalyser());
+            Analyzers.Register(typeof(CilMethodBody), new CilMethodBodyAnalyzer());
+            Analyzers.Register(typeof(CustomAttributeArgument), new CustomAttributeArgumentAnalyzer());
             Analyzers.Register(typeof(CustomAttributeNamedArgument), new CustomAttributeNamedArgumentAnalyzer());
-            Analyzers.Register(typeof(AssemblyReference), new AssemblyReferenceAnalyser());
-            Analyzers.Register(typeof(TypeSpecification), new TypeSpecificationAnalyser());
+            Analyzers.Register(typeof(AssemblyReference), new AssemblyReferenceAnalyzer());
+            Analyzers.Register(typeof(TypeSpecification), new TypeSpecificationAnalyzer());
+            Analyzers.Register(typeof(ExportedType), new ExportedTypeAnalyzer());
         }
 
         /// <summary>

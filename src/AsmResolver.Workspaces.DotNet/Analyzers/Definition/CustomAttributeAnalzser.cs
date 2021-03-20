@@ -6,7 +6,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Analyzes a <see cref="IHasCustomAttribute"/> for its definitions
     /// </summary>
-    public class CustomAttributeAnalyser : ObjectAnalyzer<IHasCustomAttribute>
+    public class CustomAttributeAnalzser : ObjectAnalyzer<IHasCustomAttribute>
     {
         private static readonly SignatureComparer _comparer = new();
 

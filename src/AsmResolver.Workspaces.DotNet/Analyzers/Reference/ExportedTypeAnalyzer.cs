@@ -3,13 +3,18 @@ using AsmResolver.DotNet;
 namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
 {
     /// <summary>
-    /// Analyzes a <see cref="TypeReference"/> for its definitions
+    /// Analyzes a <see cref="ExportedType"/> for its definitions
     /// </summary>
-    public class TypeReferenceAnalyser : ObjectAnalyzer<TypeReference>
+    public class ExportedTypeAnalyzer : ObjectAnalyzer<ExportedType>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, TypeReference subject)
+        public override void Analyze(AnalysisContext context, ExportedType subject)
         {
+            if (subject.DeclaringType is not null)
+            {
+                context.SchedulaForAnalysis(subject.DeclaringType);
+            }
+
             if(context.Workspace is not DotNetWorkspace workspace)
                 return;
 
