@@ -47,6 +47,9 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(ExportedType), new ExportedTypeAnalyzer());
             Analyzers.Register(typeof(Parameter), new ParameterAnalyzer());
             Analyzers.Register(typeof(SecurityDeclaration), new SecurityDeclarationAnalyzer());
+            Analyzers.Register(typeof(CilExceptionHandler), new ExceptionHandlerAnalyzer());
+            Analyzers.Register(typeof(CilLocalVariable), new CilLocalVariableAnalyzer());
+
         }
 
         /// <summary>

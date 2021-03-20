@@ -15,6 +15,21 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, CilMethodBody subject)
         {
+            for (int i = 0; i < subject.ExceptionHandlers.Count; i++)
+            {
+                context.SchedulaForAnalysis(subject.ExceptionHandlers[i]);
+            }
+
+            for (int i = 0; i < subject.LocalVariables.Count; i++)
+            {
+                context.SchedulaForAnalysis(subject.LocalVariables[i]);
+            }
+
+            AnalyzeInstructions(context, subject);
+        }
+
+        private static void AnalyzeInstructions(AnalysisContext context, CilMethodBody subject)
+        {
             for (int i = 0; i < subject.Instructions.Count; i++)
             {
                 var instruction = subject.Instructions[i];
@@ -27,6 +42,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         {
                             context.SchedulaForAnalysis(field);
                         }
+
                         break;
                     case CilOperandType.InlineMethod:
                         if (instruction.Operand is IMethodDescriptor method
@@ -34,6 +50,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         {
                             context.SchedulaForAnalysis(method);
                         }
+
                         break;
                     case CilOperandType.InlineSig:
                         if (instruction.Operand is StandAloneSignature signature
@@ -45,13 +62,15 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                                 context.SchedulaForAnalysis(signature.Signature);
                             }
                         }
+
                         break;
                     case CilOperandType.InlineTok:
                         if (instruction.Operand is IMetadataMember member
-                            && context.HasAnalyzers(member.GetType()))
+                            && context.HasAnalyzers(opType!))
                         {
                             context.SchedulaForAnalysis(member);
                         }
+
                         break;
                     case CilOperandType.InlineType:
                         if (instruction.Operand is ITypeDefOrRef type
@@ -59,6 +78,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         {
                             context.SchedulaForAnalysis(type);
                         }
+
                         break;
                 }
             }
