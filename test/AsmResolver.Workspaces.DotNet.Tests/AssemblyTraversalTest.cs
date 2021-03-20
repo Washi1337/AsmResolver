@@ -174,9 +174,9 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             TraverseObjects(genericParameterConstraints);
         }
 
-        private void TraverseObjects(IEnumerable<object> customAttributes)
+        private void TraverseObjects(IEnumerable<object> members)
         {
-            Assert.NotEmpty(customAttributes);
+            Assert.NotEmpty(members);
 
             var workspace = new DotNetWorkspace();
             var context = new AnalysisContext(workspace);
@@ -189,8 +189,8 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             workspace.Analyze(context);
 
-            Assert.All(customAttributes, ca
-                => Assert.True(context.TraversedObjects.Contains(ca)));
+            Assert.All(members, member
+                => Assert.True(context.TraversedObjects.Contains(member)));
         }
 
 
