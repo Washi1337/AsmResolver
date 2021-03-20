@@ -31,7 +31,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(MemberReference), new MemberReferenceAnalyzer());
             Analyzers.Register(typeof(IHasCustomAttribute), new HasCustomAttributeAnalyzer());
             Analyzers.Register(typeof(CustomAttribute), new CustomAttributeAnalyzer());
-            Analyzers.Register(typeof(TypeSignature), new TypeSpecificationAnalyzer());
+            Analyzers.Register(typeof(TypeSignature), new TypeSignatureAnalyzer());
             Analyzers.Register(typeof(MethodSignatureBase), new MethodSignatureBaseAnalyzer());
             Analyzers.Register(typeof(FieldSignature), new FieldSignatureAnalyzer());
             Analyzers.Register(typeof(FieldAnalyzer), new FieldAnalyzer());
@@ -51,6 +51,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(SecurityDeclaration), new SecurityDeclarationAnalyzer());
             Analyzers.Register(typeof(CilExceptionHandler), new ExceptionHandlerAnalyzer());
             Analyzers.Register(typeof(CilLocalVariable), new CilLocalVariableAnalyzer());
+            Analyzers.Register(typeof(StandAloneSignature), new StandaloneSignatureAnalyzer());
 
         }
 

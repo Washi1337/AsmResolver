@@ -57,12 +57,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                             && context.HasAnalyzers(typeof(StandAloneSignature)))
                         {
                             context.SchedulaForAnalysis(signature);
-                            if (context.HasAnalyzers(signature.Signature.GetType()))
-                            {
-                                context.SchedulaForAnalysis(signature.Signature);
-                            }
                         }
-
                         break;
                     case CilOperandType.InlineTok:
                         if (instruction.Operand is IMetadataMember member
