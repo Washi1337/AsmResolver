@@ -49,7 +49,7 @@ namespace AsmResolver.Workspaces.DotNet
             new Guid("ce11d2f6-a423-429d-ad37-2f073fdf63be"));
 
         /// <summary>
-        /// Describes the relationship between a type reference and its definition.
+        /// Describes the relationship between a type reference, exported type and its definition.
         /// </summary>
         public static readonly ObjectRelation<TypeReference> ReferenceType = new(
             "ReferenceType",
