@@ -32,21 +32,29 @@ namespace AsmResolver.Workspaces.DotNet
         public static readonly ObjectRelation<IHasSemantics> ImplementationSemantics = new(
             "ImplementationSemantics",
             new Guid("d2cfdd88-a701-4051-b9ae-2d5d30e70905"));
-        
+
+        /// <summary>
+        /// Describes the relationship between a assembly reference and its definition.
+        /// </summary>
+        public static readonly ObjectRelation<MemberReference> ReferenceAssembly = new(
+            "ReferenceAssembly",
+            new Guid("52a81339-0850-4f81-b059-30d7aacc430f"));
+
+
         /// <summary>
         /// Describes the relationship between a method or field reference and its definition.
         /// </summary>
         public static readonly ObjectRelation<MemberReference> ReferenceMember = new(
             "ReferenceMember",
             new Guid("ce11d2f6-a423-429d-ad37-2f073fdf63be"));
-        
+
         /// <summary>
         /// Describes the relationship between a type reference and its definition.
         /// </summary>
         public static readonly ObjectRelation<TypeReference> ReferenceType = new(
             "ReferenceType",
             new Guid("3cc86779-338c-4165-a00c-da547a2e8549"));
-        
+
         /// <summary>
         /// Describes the relationship between a type reference and its definition.
         /// </summary>

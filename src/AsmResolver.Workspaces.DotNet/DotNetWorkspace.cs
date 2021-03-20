@@ -40,6 +40,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(CilMethodBody), new CilMethodBodyAnalyser());
             Analyzers.Register(typeof(CustomAttributeArgument), new CustomAttributeArgumentAnalyser());
             Analyzers.Register(typeof(CustomAttributeNamedArgument), new CustomAttributeNamedArgumentAnalyser());
+            Analyzers.Register(typeof(AssemblyReference), new AssemblyReferenceAnalyser());
         }
 
         /// <summary>
