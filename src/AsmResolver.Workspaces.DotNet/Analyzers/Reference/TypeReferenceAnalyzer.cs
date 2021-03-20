@@ -10,6 +10,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, TypeReference subject)
         {
+            if (subject.DeclaringType is not null)
+            {
+                context.SchedulaForAnalysis(subject.DeclaringType);
+            }
+
             if(context.Workspace is not DotNetWorkspace workspace)
                 return;
 
