@@ -25,7 +25,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(ModuleDefinition), new ModuleAnalyzer());
             Analyzers.Register(typeof(TypeDefinition), new TypeAnalyzer());
             Analyzers.Register(typeof(MethodDefinition), new MethodAnalyzer());
-            Analyzers.Register(typeof(MethodDefinition), new MethodImplementationAnalyzer());
+            Analyzers.Register(typeof(MethodImplementation), new MethodImplementationAnalyzer());
             Analyzers.Register(typeof(IHasSemantics), new SemanticsImplementationAnalyzer());
             Analyzers.Register(typeof(TypeReference), new TypeReferenceAnalyzer());
             Analyzers.Register(typeof(MemberReference), new MemberReferenceAnalyzer());
@@ -34,9 +34,9 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(TypeSignature), new TypeSignatureAnalyzer());
             Analyzers.Register(typeof(MethodSignatureBase), new MethodSignatureBaseAnalyzer());
             Analyzers.Register(typeof(FieldSignature), new FieldSignatureAnalyzer());
-            Analyzers.Register(typeof(FieldAnalyzer), new FieldAnalyzer());
-            Analyzers.Register(typeof(PropertyAnalyzer), new PropertyAnalyzer());
-            Analyzers.Register(typeof(EventAnalyzer), new EventAnalyzer());
+            Analyzers.Register(typeof(FieldDefinition), new FieldAnalyzer());
+            Analyzers.Register(typeof(PropertyDefinition), new PropertyAnalyzer());
+            Analyzers.Register(typeof(EventDefinition), new EventAnalyzer());
             Analyzers.Register(typeof(IHasGenericParameters), new GenericParameterAnalyzer());
             Analyzers.Register(typeof(LocalVariablesSignature), new LocalVariablesSignatureAnalyzer());
             Analyzers.Register(typeof(IGenericArgumentsProvider), new GenericArgumentAnalyzer());
@@ -53,6 +53,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(CilLocalVariable), new CilLocalVariableAnalyzer());
             Analyzers.Register(typeof(StandAloneSignature), new StandaloneSignatureAnalyzer());
             Analyzers.Register(typeof(InterfaceImplementation), new InterfaceImplementationAnalyzer());
+            Analyzers.Register(typeof(MethodSpecification), new MethodSpecificationAnalyzer());
         }
 
         /// <summary>
