@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
+using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.Workspaces.DotNet.Analyzers;
@@ -44,6 +45,8 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(AssemblyReference), new AssemblyReferenceAnalyzer());
             Analyzers.Register(typeof(TypeSpecification), new TypeSpecificationAnalyzer());
             Analyzers.Register(typeof(ExportedType), new ExportedTypeAnalyzer());
+            Analyzers.Register(typeof(Parameter), new ParameterAnalyzer());
+            Analyzers.Register(typeof(SecurityDeclaration), new SecurityDeclarationAnalyzer());
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Analyzes a <see cref="IHasSecurityDeclaration"/> for its definitions
     /// </summary>
-    public class SecurityDeclarationAnalyser : ObjectAnalyzer<IHasSecurityDeclaration>
+    public class SecurityDeclarationAnalyzer : ObjectAnalyzer<IHasSecurityDeclaration>
     {
         private static readonly SignatureComparer _comparer = new();
 
@@ -27,7 +27,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 
                     if (!context.HasAnalyzers(typeof(CustomAttributeNamedArgument)))
                         continue;
-                    
+
                     for (int k = 0; k < securityAttribute.NamedArguments.Count; k++)
                     {
                         context.SchedulaForAnalysis(securityAttribute.NamedArguments[k]);
