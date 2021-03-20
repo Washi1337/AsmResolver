@@ -41,6 +41,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(CustomAttributeArgument), new CustomAttributeArgumentAnalyser());
             Analyzers.Register(typeof(CustomAttributeNamedArgument), new CustomAttributeNamedArgumentAnalyser());
             Analyzers.Register(typeof(AssemblyReference), new AssemblyReferenceAnalyser());
+            Analyzers.Register(typeof(TypeSpecification), new TypeSpecificationAnalyser());
         }
 
         /// <summary>

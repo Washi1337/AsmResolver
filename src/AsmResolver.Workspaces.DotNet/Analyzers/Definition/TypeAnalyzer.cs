@@ -98,6 +98,27 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 for (int i = 0; i < subject.Events.Count; i++)
                     context.SchedulaForAnalysis(subject.Events[i]);
             }
+
+            if (subject.BaseType is not null && context.HasAnalyzers(subject.BaseType.GetType()))
+            {
+                context.SchedulaForAnalysis(subject.BaseType);
+            }
+
+            if (context.HasAnalyzers(typeof(InterfaceImplementation)))
+            {
+                for (int i = 0; i < subject.Interfaces.Count; i++)
+                {
+                    context.SchedulaForAnalysis(subject.Interfaces[i]);
+                }
+            }
+
+            if (context.HasAnalyzers(typeof(MethodImplementation)))
+            {
+                for (int i = 0; i < subject.MethodImplementations.Count; i++)
+                {
+                    context.SchedulaForAnalysis(subject.MethodImplementations[i]);
+                }
+            }
         }
 
     }

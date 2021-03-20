@@ -26,12 +26,13 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                     {
                         context.SchedulaForAnalysis(parameterConstraint);
                     }
-                    if (context.HasAnalyzers(typeof(ITypeDefOrRef)))
+
+                    if (parameterConstraint.Constraint is not null
+                        && context.HasAnalyzers(parameterConstraint.Constraint.GetType()))
                     {
                         context.SchedulaForAnalysis(parameterConstraint.Constraint);
                     }
                 }
-
             }
         }
     }
