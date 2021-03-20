@@ -6,7 +6,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Analyzes a <see cref="CustomAttributeNamedArgument"/> for its definitions
     /// </summary>
-    public class CustomAttributeNamedArgumentAnalyser : ObjectAnalyzer<CustomAttributeNamedArgument>
+    public class CustomAttributeNamedArgumentAnalyzer : ObjectAnalyzer<CustomAttributeNamedArgument>
     {
         public override void Analyze(AnalysisContext context, CustomAttributeNamedArgument subject)
         {

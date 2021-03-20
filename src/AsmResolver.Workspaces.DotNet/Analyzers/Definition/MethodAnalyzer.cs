@@ -8,7 +8,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// Analyzes a <see cref="MethodDefinition"/> for implicit base definitions, such as abstract methods in
     /// base classes or methods in implemented interfaces.
     /// </summary>
-    public class MethodImplementationAnalyzer : ObjectAnalyzer<MethodDefinition>
+    public class MethodAnalyzer : ObjectAnalyzer<MethodDefinition>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, MethodDefinition subject)

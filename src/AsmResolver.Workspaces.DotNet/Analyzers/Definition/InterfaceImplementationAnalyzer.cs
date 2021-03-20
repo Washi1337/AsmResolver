@@ -7,7 +7,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Provides a default implementation for an <see cref="InterfaceImplementation"/> analyzer.
     /// </summary>
-    public class InterfaceImplementationAnalyser : ObjectAnalyzer<InterfaceImplementation>
+    public class InterfaceImplementationAnalyzer : ObjectAnalyzer<InterfaceImplementation>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, InterfaceImplementation subject)

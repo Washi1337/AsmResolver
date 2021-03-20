@@ -6,7 +6,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Provides a default implementation for an <see cref="IHasGenericParameters"/> analyzer.
     /// </summary>
-    public class GenericParameterAnalyser : ObjectAnalyzer<IHasGenericParameters>
+    public class GenericParameterAnalyzer : ObjectAnalyzer<IHasGenericParameters>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, IHasGenericParameters subject)

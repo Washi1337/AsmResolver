@@ -7,7 +7,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Provides a default implementation for an <see cref="MethodImplementation"/> analyzer.
     /// </summary>
-    public class MethodImplementationAnalyser : ObjectAnalyzer<MethodImplementation>
+    public class MethodImplementationAnalyzer : ObjectAnalyzer<MethodImplementation>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, MethodImplementation subject)

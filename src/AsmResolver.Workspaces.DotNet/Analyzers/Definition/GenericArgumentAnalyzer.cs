@@ -7,7 +7,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// <summary>
     /// Provides a default implementation for an <see cref="IGenericArgumentsProvider"/> analyzer.
     /// </summary>
-    public class GenericArgumentAnalyser : ObjectAnalyzer<IGenericArgumentsProvider>
+    public class GenericArgumentAnalyzer : ObjectAnalyzer<IGenericArgumentsProvider>
     {
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, IGenericArgumentsProvider subject)

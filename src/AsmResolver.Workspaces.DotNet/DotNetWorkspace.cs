@@ -23,6 +23,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(AssemblyDefinition), new AssemblyAnalyzer());
             Analyzers.Register(typeof(ModuleDefinition), new ModuleAnalyzer());
             Analyzers.Register(typeof(TypeDefinition), new TypeAnalyzer());
+            Analyzers.Register(typeof(MethodDefinition), new MethodAnalyzer());
             Analyzers.Register(typeof(MethodDefinition), new MethodImplementationAnalyzer());
             Analyzers.Register(typeof(IHasSemantics), new SemanticsImplementationAnalyzer());
             Analyzers.Register(typeof(TypeReference), new TypeReferenceAnalyser());
@@ -34,12 +35,12 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(FieldAnalyzer), new FieldAnalyzer());
             Analyzers.Register(typeof(PropertyAnalyzer), new PropertyAnalyzer());
             Analyzers.Register(typeof(EventAnalyzer), new EventAnalyzer());
-            Analyzers.Register(typeof(IHasGenericParameters), new GenericParameterAnalyser());
+            Analyzers.Register(typeof(IHasGenericParameters), new GenericParameterAnalyzer());
             Analyzers.Register(typeof(LocalVariablesSignature), new LocalVariablesSignatureAnalyser());
-            Analyzers.Register(typeof(IGenericArgumentsProvider), new GenericArgumentAnalyser());
+            Analyzers.Register(typeof(IGenericArgumentsProvider), new GenericArgumentAnalyzer());
             Analyzers.Register(typeof(CilMethodBody), new CilMethodBodyAnalyser());
             Analyzers.Register(typeof(CustomAttributeArgument), new CustomAttributeArgumentAnalyser());
-            Analyzers.Register(typeof(CustomAttributeNamedArgument), new CustomAttributeNamedArgumentAnalyser());
+            Analyzers.Register(typeof(CustomAttributeNamedArgument), new CustomAttributeNamedArgumentAnalyzer());
             Analyzers.Register(typeof(AssemblyReference), new AssemblyReferenceAnalyser());
             Analyzers.Register(typeof(TypeSpecification), new TypeSpecificationAnalyser());
         }
