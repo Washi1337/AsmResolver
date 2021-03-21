@@ -14,6 +14,17 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 context.SchedulaForAnalysis(subject.ArgumentType);
             }
+
+            if (context.HasAnalyzers(typeof(TypeSignature)))
+            {
+                for (int i = 0; i < subject.Elements.Count; i++)
+                {
+                    var element = subject.Elements[i];
+                    if (element is not TypeSignature)
+                        continue;
+                    context.SchedulaForAnalysis(element);
+                }
+            }
         }
     }
 }
