@@ -23,8 +23,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
                 return;
 
             var index = context.Workspace.Index;
-            var node = index.GetOrCreateNode(subject);
-            var candidateNode = index.GetOrCreateNode(definition);
+            var node = index.GetOrCreateNode(definition);
+            var candidateNode = index.GetOrCreateNode(subject);
             node.AddRelation(DotNetRelations.ReferenceType, candidateNode);
         }
     }
