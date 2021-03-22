@@ -56,7 +56,7 @@ namespace AsmResolver.Workspaces.DotNet
             new Guid("3cc86779-338c-4165-a00c-da547a2e8549"));
 
         /// <summary>
-        /// Describes the relationship between a type reference and its definition.
+        /// Describes the relationship between a CustomAttribute name attribute and its field or property.
         /// </summary>
         public static readonly ObjectRelation<CustomAttributeNamedArgument> ReferenceArgument = new(
             "ReferenceArgument",
