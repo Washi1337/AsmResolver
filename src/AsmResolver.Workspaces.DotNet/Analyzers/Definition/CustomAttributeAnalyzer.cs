@@ -65,8 +65,8 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 var member = FindMember(type, subject, namedArgument);
                 if (member is null)
                     continue; //TODO: Log error?
-                var node = index.GetOrCreateNode(namedArgument);
-                var candidateNode = index.GetOrCreateNode(member);
+                var node = index.GetOrCreateNode(member);
+                var candidateNode = index.GetOrCreateNode(namedArgument);
                 node.AddRelation(DotNetRelations.ReferenceArgument, candidateNode);
             }
         }
@@ -83,13 +83,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         private static IMetadataMember? FindNameReferenceProperty(TypeDefinition type,
             CustomAttributeNamedArgument argument)
         {
-            var signature = PropertySignature.CreateInstance(argument.ArgumentType);
             for (int i = 0; i < type.Properties.Count; i++)
             {
                 var field = type.Properties[i];
                 if (field.Name != argument.MemberName)
                     continue;
-                if (!_comparer.Equals(field.Signature, signature))
+                if (!_comparer.Equals(field.Signature.ReturnType, argument.ArgumentType))
                     continue;
                 return field;
             }
@@ -100,13 +99,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         private static IMetadataMember? FindNameReferenceField(TypeDefinition type,
             CustomAttributeNamedArgument argument)
         {
-            var signature = FieldSignature.CreateInstance(argument.ArgumentType);
             for (int i = 0; i < type.Fields.Count; i++)
             {
                 var field = type.Fields[i];
                 if (field.Name != argument.MemberName)
                     continue;
-                if (!_comparer.Equals(field.Signature, signature))
+                if (!_comparer.Equals(field.Signature.FieldType, argument.ArgumentType))
                     continue;
                 return field;
             }
