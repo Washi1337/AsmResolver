@@ -99,7 +99,7 @@ namespace AsmResolver.Workspaces
         /// Gets a stored data of type <see cref="T"/>.
         /// </summary>
         /// <param name="relation">The relation.</param>
-        /// <returns>null if data with type <see cref="T"/> is not stored, otherwise the data.</returns>
+        /// <returns>default value if data with type <see cref="T"/> is not stored, otherwise the data.</returns>
         /// <typeparam name="T">The type of data to obtain.</typeparam>
         public T? GetData<T>() => Data
             .OfType<T>()
@@ -113,8 +113,15 @@ namespace AsmResolver.Workspaces
         /// <typeparam name="T">The type of data to obtain.</typeparam>
         public bool TryGetData<T>(out T? data)
         {
-            data = GetData<T>();
-            return data != null;
+            for (int i = 0; i < Data.Count; i++)
+            {
+                if(Data[i] is not T newData)
+                    continue;
+                data = newData;
+                return true;
+            }
+            data = default;
+            return false;
         }
 
         /// <summary>
