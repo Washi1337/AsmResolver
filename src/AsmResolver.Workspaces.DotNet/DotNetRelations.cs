@@ -34,29 +34,36 @@ namespace AsmResolver.Workspaces.DotNet
             new Guid("d2cfdd88-a701-4051-b9ae-2d5d30e70905"));
 
         /// <summary>
-        /// Describes the relationship between a assembly reference and its definition.
+        /// Describes the relationship between a assembly definition and its reference.
         /// </summary>
-        public static readonly ObjectRelation<MemberReference> ReferenceAssembly = new(
+        public static readonly ObjectRelation<AssemblyReference> ReferenceAssembly = new(
             "ReferenceAssembly",
             new Guid("52a81339-0850-4f81-b059-30d7aacc430f"));
 
 
         /// <summary>
-        /// Describes the relationship between a method or field reference and its definition.
+        /// Describes the relationship between a method or field definition and its reference.
         /// </summary>
         public static readonly ObjectRelation<MemberReference> ReferenceMember = new(
             "ReferenceMember",
             new Guid("ce11d2f6-a423-429d-ad37-2f073fdf63be"));
 
         /// <summary>
-        /// Describes the relationship between a type reference, exported type and its definition.
+        /// Describes the relationship between a type definition and its reference.
         /// </summary>
         public static readonly ObjectRelation<TypeReference> ReferenceType = new(
             "ReferenceType",
             new Guid("3cc86779-338c-4165-a00c-da547a2e8549"));
 
         /// <summary>
-        /// Describes the relationship between a CustomAttribute name attribute and its field or property.
+        /// Describes the relationship between a exported type and its definition.
+        /// </summary>
+        public static readonly ObjectRelation<ExportedType> ReferenceExportedType = new(
+            "ReferenceExportedType",
+            new Guid("4a97daf4-8145-4ae9-a1c4-5e0b0ebcc864"));
+
+        /// <summary>
+        /// Describes the relationship between field or property definition and its a custom attribute named argument.
         /// </summary>
         public static readonly ObjectRelation<CustomAttributeNamedArgument> ReferenceArgument = new(
             "ReferenceArgument",
