@@ -16,6 +16,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 context.SchedulaForAnalysis(subject.Signature);
             }
+
+            if (subject.DeclaringType is not null && context.HasAnalyzers(subject.DeclaringType.GetType()))
+            {
+                context.SchedulaForAnalysis(subject.DeclaringType);
+            }
         }
     }
 }
