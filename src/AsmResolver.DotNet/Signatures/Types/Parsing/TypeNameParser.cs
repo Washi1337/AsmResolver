@@ -11,10 +11,18 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
     /// </summary>
     public sealed class TypeNameParser
     {
-        private static readonly SignatureComparer Comparer = new SignatureComparer();
-
         // src/coreclr/src/vm/typeparse.cpp
         // https://docs.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/specifying-fully-qualified-type-names
+
+        private static readonly SignatureComparer Comparer = new();
+        private readonly ModuleDefinition _module;
+        private readonly TypeNameLexer _lexer;
+
+        private TypeNameParser(ModuleDefinition module, TypeNameLexer lexer)
+        {
+            _module = module ?? throw new ArgumentNullException(nameof(module));
+            _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
+        }
 
         /// <summary>
         /// Parses a single fully assembly qualified name.
@@ -27,15 +35,6 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             var lexer = new TypeNameLexer(new StringReader(canonicalName));
             var parser = new TypeNameParser(module, lexer);
             return parser.ParseTypeSpec();
-        }
-
-        private readonly ModuleDefinition _module;
-        private readonly TypeNameLexer _lexer;
-
-        private TypeNameParser(ModuleDefinition module, TypeNameLexer lexer)
-        {
-            _module = module ?? throw new ArgumentNullException(nameof(module));
-            _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
         }
 
         private TypeSignature ParseTypeSpec()

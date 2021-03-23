@@ -190,6 +190,9 @@ namespace AsmResolver.DotNet
         protected virtual byte[] GetPublicKey() => null;
 
         /// <inheritdoc />
+        public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
+
+        /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {
             if (!HasPublicKey)
