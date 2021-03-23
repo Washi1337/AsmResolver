@@ -49,9 +49,38 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
             // See if the type full name contains an assembly ref.
             var scope = TryExpect(TypeNameTerminal.Comma).HasValue
                 ? (IResolutionScope) ParseAssemblyNameSpec()
-                : _module;
+                : null;
 
             _lexer.HasConsumedTypeName = lastHasConsumedTypeName;
+
+            // Find the top-most type.
+            var topLevelType = (TypeReference) typeSpec.GetUnderlyingTypeDefOrRef();
+            while (topLevelType.Scope is TypeReference declaringType)
+                topLevelType = declaringType;
+
+            // If the scope is null, it means it was omitted from the fully qualified type name.
+            // In this case, the CLR first looks into the current assembly, and then into corlib.
+            if (scope is not null)
+            {
+                // Update scope.
+                topLevelType.Scope = scope;
+            }
+            else
+            {
+                // First look into the current module.
+                topLevelType.Scope = _module;
+                var definition = topLevelType.Resolve();
+                if (definition is null)
+                {
+                    // If that fails, try corlib.
+                    topLevelType.Scope = _module.CorLibTypeFactory.CorLibScope;
+                    definition = topLevelType.Resolve();
+
+                    // If both lookups fail, revert to the normal module as scope as a fallback.
+                    if (definition is null)
+                        topLevelType.Scope = _module;
+                }
+            }
 
             // Ensure corlib type sigs are used.
             if (Comparer.Equals(scope, _module.CorLibTypeFactory.CorLibScope))
@@ -60,12 +89,6 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
                 if (corlibType != null)
                     return corlibType;
             }
-
-            // Update scope.
-            var reference = (TypeReference) typeSpec.GetUnderlyingTypeDefOrRef();
-            while (reference.Scope is TypeReference parent)
-                reference = parent;
-            reference.Scope = scope;
 
             return typeSpec;
         }
