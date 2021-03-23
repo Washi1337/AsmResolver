@@ -2,6 +2,7 @@ using System;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests.Signatures
@@ -13,7 +14,7 @@ namespace AsmResolver.DotNet.Tests.Signatures
 
         public TypeNameParserTest()
         {
-            _module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemPrivateCoreLib_v4_0_0_0);
+            _module = new ModuleDefinition("DummyModule", KnownCorLibs.SystemRuntime_v4_2_2_0);
             _comparer = new SignatureComparer();
         }
 
@@ -185,6 +186,31 @@ namespace AsmResolver.DotNet.Tests.Signatures
             var expected = new TypeReference(_module, ns, name).ToTypeSignature();
 
             var actual = TypeNameParser.Parse(_module, $"{ns}.{escapedName}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void ReadTypeInSameAssemblyWithoutScope()
+        {
+            const string ns = "MyNamespace";
+            const string name = "MyType";
+
+            var definition = new TypeDefinition(ns, name, TypeAttributes.Public, _module.CorLibTypeFactory.Object.Type);
+            _module.TopLevelTypes.Add(definition);
+
+            var expected = definition.ToTypeSignature();
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}");
+            Assert.Equal(expected, actual, _comparer);
+        }
+
+        [Fact]
+        public void ReadTypeInCorLibAssemblyWithoutScope()
+        {
+            const string ns = "System";
+            const string name = "Array";
+
+            var expected = new TypeReference(_module.CorLibTypeFactory.CorLibScope, ns, name).ToTypeSignature();
+            var actual = TypeNameParser.Parse(_module, $"{ns}.{name}");
             Assert.Equal(expected, actual, _comparer);
         }
     }

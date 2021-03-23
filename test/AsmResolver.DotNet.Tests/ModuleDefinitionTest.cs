@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Cloning;
+using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
 using AsmResolver.DotNet.TestCases.NestedClasses;
+using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using AsmResolver.PE.Win32Resources;
@@ -22,7 +24,7 @@ namespace AsmResolver.DotNet.Tests
             module.Write(stream);
             return ModuleDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
         }
-        
+
         [Fact]
         public void ReadNameTest()
         {
@@ -34,14 +36,14 @@ namespace AsmResolver.DotNet.Tests
         public void NameIsPersistentAfterRebuild()
         {
             const string newName = "HelloMars.exe";
-            
+
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             module.Name = newName;
 
             var newModule = Rebuild(module);
             Assert.Equal(newName, newModule.Name);
         }
-        
+
         [Fact]
         public void ReadManifestModule()
         {
@@ -89,7 +91,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Single(enclosingClass.NestedTypes[0].NestedTypes);
             Assert.Empty(enclosingClass.NestedTypes[0].NestedTypes[0].NestedTypes);
         }
-        
+
         [Fact]
         public void HelloWorldReadAssemblyReferences()
         {
@@ -116,7 +118,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var member = module.LookupMember(new MetadataToken(TableIndex.TypeDef, 2));
             Assert.IsAssignableFrom<TypeDefinition>(member);
-            
+
             var typeDef = (TypeDefinition) member;
             Assert.Equal("HelloWorld", typeDef.Namespace);
             Assert.Equal("Program", typeDef.Name);
@@ -128,7 +130,7 @@ namespace AsmResolver.DotNet.Tests
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             var member = module.LookupMember(new MetadataToken(TableIndex.AssemblyRef, 1));
             Assert.IsAssignableFrom<AssemblyReference>(member);
-            
+
             var assemblyRef = (AssemblyReference) member;
             Assert.Equal("mscorlib", assemblyRef.Name);
             Assert.Same(module.AssemblyReferences[0], assemblyRef);
@@ -150,13 +152,13 @@ namespace AsmResolver.DotNet.Tests
         public void EmptyModuleShouldAlwaysContainCorLibReference()
         {
             // Issue #39 (https://github.com/Washi1337/AsmResolver/issues/39)
-            
+
             var module = new ModuleDefinition("TestModule");
             var corLib = module.CorLibTypeFactory.CorLibScope;
-            
+
             using var stream = new MemoryStream();
             module.Write(stream);
-            
+
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             var comparer = new SignatureComparer();
             Assert.Contains(newModule.AssemblyReferences, reference => comparer.Equals(corLib, reference));
@@ -170,13 +172,13 @@ namespace AsmResolver.DotNet.Tests
             Assert.NotNull(module.CorLibTypeFactory.CorLibScope);
             Assert.NotNull(module.CorLibTypeFactory.Void);
         }
-        
+
         [Fact]
         public void AddingTypeIsPersistentAfterRebuild()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
-            
-            var newType = new TypeDefinition("SomeNamespace", "SomeType", 
+
+            var newType = new TypeDefinition("SomeNamespace", "SomeType",
                 TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed);
             module.TopLevelTypes.Add(newType);
 
@@ -220,7 +222,7 @@ namespace AsmResolver.DotNet.Tests
         public void PersistentResources()
         {
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
-            
+
             // Add new directory.
             const string directoryName = "Test";
             var entryData = new byte[] {0, 1, 2, 3, 4};
@@ -245,7 +247,7 @@ namespace AsmResolver.DotNet.Tests
             var newDirectory = (IResourceDirectory) newModule.NativeResourceDirectory.Entries
                 .First(entry => entry.Name == directoryName);
             newDirectory = (IResourceDirectory) newDirectory.Entries[0];
-            
+
             var newData = (IResourceData) newDirectory.Entries[0];
             var newContents = (IReadableSegment) newData.Contents;
             Assert.Equal(entryData, newContents.ToArray());
@@ -255,7 +257,7 @@ namespace AsmResolver.DotNet.Tests
         public void PersistentTimeStamp()
         {
             var time = new DateTime(2020, 1, 2, 18, 30, 34);
-            
+
             var module = ModuleDefinition.FromBytes(Properties.Resources.HelloWorld);
             module.TimeDateStamp = time;
 
