@@ -28,6 +28,10 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             TypesAssembly = AssemblyDefinition.FromFile(typeof(MyClass).Assembly.Location);
             MultiModuleAssembly = AssemblyDefinition.FromFile(typeof(Manifest).Assembly.Location);
 
+            HelloWorld_Forwarder = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld_Forwarder);
+            Assembly1_Forwarder = AssemblyDefinition.FromBytes(Properties.Resources.Assembly1_Forwarder);
+            Assembly2_Actual = AssemblyDefinition.FromBytes(Properties.Resources.Assembly2_Actual);
+
             AllAssemblies = new[]
             {
                 WorkspacesAssembly,
@@ -40,7 +44,10 @@ namespace AsmResolver.Workspaces.DotNet.Tests
                 PropertiesAssembly,
                 ResourcesAssembly,
                 TypesAssembly,
-                MultiModuleAssembly
+                MultiModuleAssembly,
+                HelloWorld_Forwarder,
+                Assembly1_Forwarder,
+                Assembly2_Actual
             };
         }
 
@@ -98,6 +105,21 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         }
 
         public IReadOnlyCollection<AssemblyDefinition> AllAssemblies
+        {
+            get;
+        }
+
+        public AssemblyDefinition HelloWorld_Forwarder
+        {
+            get;
+        }
+
+        public AssemblyDefinition Assembly1_Forwarder
+        {
+            get;
+        }
+
+        public AssemblyDefinition Assembly2_Actual
         {
             get;
         }

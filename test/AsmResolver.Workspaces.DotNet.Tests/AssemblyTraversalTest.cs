@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.Workspaces.DotNet.Tests
@@ -136,8 +137,29 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         [Fact]
         public void FileCheck()
         {
-            var fileReferences = GetAllMembers<FileReference>(_fixture.AllAssemblies, TableIndex.File);
-            TraverseObjects(fileReferences);
+            /* Due to not having any assembly with file references we will use custom generated assembly
+             var fileReferences = GetAllMembers<FileReference>(_fixture.AllAssemblies, TableIndex.File);
+            TraverseObjects(fileReferences);*/
+            var assembly = new AssemblyDefinition("Assembly", new Version(1, 0, 0, 0));
+            var module = new ModuleDefinition("Module");
+
+            var file1 = new FileReference("SomeName1", FileAttributes.ContainsMetadata);
+            var file2 = new FileReference("SomeName2", FileAttributes.ContainsMetadata);
+
+            assembly.Modules.Add(module);
+            module.FileReferences.Add(file1);
+            module.FileReferences.Add(file2);
+
+            var workspace = new DotNetWorkspace();
+            var context = new AnalysisContext(workspace);
+
+            workspace.Assemblies.Add(assembly);
+            context.SchedulaForAnalysis(assembly);
+
+            workspace.Analyze(context);
+
+            Assert.True(context.TraversedObjects.Contains(file1));
+            Assert.True(context.TraversedObjects.Contains(file2));
         }
 
         [Fact]
