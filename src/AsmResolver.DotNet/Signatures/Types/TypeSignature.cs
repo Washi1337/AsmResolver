@@ -13,7 +13,7 @@ namespace AsmResolver.DotNet.Signatures.Types
     {
         internal const string NullTypeToString = "<<???>>";
 
-        private static MethodInfo GetTypeFromHandleUnsafeMethod;
+        private static readonly MethodInfo GetTypeFromHandleUnsafeMethod;
 
         static TypeSignature()
         {
@@ -24,6 +24,47 @@ namespace AsmResolver.DotNet.Signatures.Types
                     new[] {typeof(IntPtr)},
                     null);
         }
+
+        /// <inheritdoc />
+        public abstract string Name
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public abstract string Namespace
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public string FullName => this.GetTypeFullName();
+
+        /// <inheritdoc />
+        public abstract IResolutionScope Scope
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public abstract bool IsValueType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the element type of the
+        /// </summary>
+        public abstract ElementType ElementType
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public virtual ModuleDefinition Module => Scope?.Module;
+
+        /// <inheritdoc />
+        public ITypeDescriptor DeclaringType => Scope as ITypeDescriptor;
 
         /// <summary>
         /// Reads a type signature from a blob reader.
@@ -287,47 +328,6 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public abstract string Name
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public abstract string Namespace
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public string FullName => this.GetTypeFullName();
-
-        /// <inheritdoc />
-        public abstract IResolutionScope Scope
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public abstract bool IsValueType
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the element type of the
-        /// </summary>
-        public abstract ElementType ElementType
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public virtual ModuleDefinition Module => Scope?.Module;
-
-        /// <inheritdoc />
-        public ITypeDescriptor DeclaringType => Scope as ITypeDescriptor;
-
-        /// <inheritdoc />
         public abstract TypeDefinition Resolve();
 
         IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
@@ -343,8 +343,6 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The base signature.</returns>
         public abstract ITypeDefOrRef GetUnderlyingTypeDefOrRef();
 
-        private static readonly GenericTypeActivator _activator = new();
-
         /// <summary>
         /// Substitutes any generic type parameter in the type signature with the parameters provided by
         /// the generic context.
@@ -356,7 +354,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// instance of the type signature.
         /// </remarks>
         public TypeSignature InstantiateGenericTypes(GenericContext context)
-            => AcceptVisitor(_activator, context);
+            => AcceptVisitor(GenericTypeActivator.Instance, context);
 
         /// <summary>
         /// Visit the current type signature using the provided visitor.
@@ -377,11 +375,8 @@ namespace AsmResolver.DotNet.Signatures.Types
         public abstract TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor, TState state);
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return string.IsNullOrEmpty(FullName)
-                ? $"<<<{ElementType}>>>"
-                : FullName;
-        }
+        public override string ToString() => string.IsNullOrEmpty(FullName)
+            ? $"<<<{ElementType}>>>"
+            : FullName;
     }
 }
