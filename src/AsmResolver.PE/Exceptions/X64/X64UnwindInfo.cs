@@ -109,6 +109,36 @@ namespace AsmResolver.PE.Exceptions.X64
         }
 
         /// <summary>
+        /// When <see cref="IsExceptionHandler"/> or <see cref="IsTerminationHandler"/> is <c>true</c>, gets or sets
+        /// the reference to the exception handler assigned to this unwind information.
+        /// </summary>
+        public ISegmentReference ExceptionHandler
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// When <see cref="IsExceptionHandler"/> or <see cref="IsTerminationHandler"/> is <c>true</c>, gets or sets
+        /// the reference to the exception handler data assigned to this unwind information.
+        /// </summary>
+        public ISegmentReference ExceptionHandlerData
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// When <see cref="IsChained"/> is <c>true</c>, gets or sets the function that this unwind information is
+        /// chained with.
+        /// </summary>
+        public X64RuntimeFunction ChainedFunction
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Reads unwind information from the provided input stream.
         /// </summary>
         /// <param name="context">The reader context.</param>
@@ -131,13 +161,14 @@ namespace AsmResolver.PE.Exceptions.X64
 
             result.UnwindCodes = codes;
 
-            if (result.IsExceptionHandler)
+            if (result.IsExceptionHandler || result.IsTerminationHandler)
             {
-                // TODO: read EHs
+                result.ExceptionHandler = context.File.GetReferenceToRva(reader.ReadUInt32());
+                result.ExceptionHandlerData = context.File.GetReferenceToRva(reader.Rva);
             }
             else if (result.IsChained)
             {
-                // TODO: read chained info.
+                result.ChainedFunction = X64RuntimeFunction.FromReader(context, reader);
             }
 
             return result;
@@ -177,13 +208,15 @@ namespace AsmResolver.PE.Exceptions.X64
             foreach (ushort code in UnwindCodes)
                 writer.WriteUInt16(code);
 
-            if (IsExceptionHandler)
+            if (IsExceptionHandler || IsTerminationHandler)
             {
-                throw new NotImplementedException();
+                writer.WriteUInt32(ExceptionHandler.Rva);
+
+                // TODO: include custom EH data.
             }
             else if (IsChained)
             {
-                throw new NotImplementedException();
+                ChainedFunction.Write(writer);
             }
         }
     }
