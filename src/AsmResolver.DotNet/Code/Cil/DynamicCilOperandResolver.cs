@@ -73,7 +73,7 @@ namespace AsmResolver.DotNet.Code.Cil
                         var method = MethodBase.GetMethodFromHandle(
                             hasHandle ? mMethod : mHandle,
                             context);
-                        
+
                         return _importer.ImportMethod(method);
                     }
 

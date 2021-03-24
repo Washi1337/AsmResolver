@@ -50,7 +50,7 @@ namespace AsmResolver.DotNet
         {
             if (fallbackVersion is null)
                 throw new ArgumentNullException(nameof(fallbackVersion));
-            if (pathProvider == null)
+            if (pathProvider is null)
                 throw new ArgumentNullException(nameof(pathProvider));
 
             bool hasNetCoreApp = false;
