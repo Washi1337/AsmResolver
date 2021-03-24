@@ -96,14 +96,24 @@ namespace AsmResolver.DotNet.Code.Cil
         } = new List<CilExceptionHandler>();
 
         /// <summary>
+        /// Gets or sets flags that alter the behaviour of the method body serializer for this specific method body.
+        /// </summary>
+        public CilMethodBodyBuildFlags BuildFlags
+        {
+            get;
+            set;
+        } = CilMethodBodyBuildFlags.FullValidation;
+
+        /// <summary>
         /// Gets or sets a value indicating whether a .NET assembly builder should automatically compute and update the
         /// <see cref="MaxStack"/> property according to the contents of the method body.
         /// </summary>
         public bool ComputeMaxStackOnBuild
         {
-            get;
-            set;
-        } = true;
+            get => (BuildFlags & CilMethodBodyBuildFlags.ComputeMaxStack) == CilMethodBodyBuildFlags.ComputeMaxStack;
+            set => BuildFlags = (BuildFlags & ~CilMethodBodyBuildFlags.ComputeMaxStack)
+                                | (value ? CilMethodBodyBuildFlags.ComputeMaxStack : 0);
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether a .NET assembly builder should verify branch instructions and
@@ -114,9 +124,10 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </remarks>
         public bool VerifyLabelsOnBuild
         {
-            get;
-            set;
-        } = true;
+            get => (BuildFlags & CilMethodBodyBuildFlags.VerifyLabels) == CilMethodBodyBuildFlags.VerifyLabels;
+            set => BuildFlags = (BuildFlags & ~CilMethodBodyBuildFlags.VerifyLabels)
+                                | (value ? CilMethodBodyBuildFlags.VerifyLabels : 0);
+        }
 
         /// <summary>
         ///     Creates a CIL method body from a dynamic method.
