@@ -49,7 +49,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
                     if (field.GetType().FullName == "System.Reflection.Emit.GenericFieldInfo")
                     {
-                        var result = FieldReader.TryReadField<RuntimeFieldHandle>(field, "m_field", out var mField);
+                        bool result = FieldReader.TryReadField<RuntimeFieldHandle>(field, "m_field", out var mField);
                         var ctx = FieldReader.ReadField<RuntimeTypeHandle>(field, "m_context");
                         return _importer.ImportField(FieldInfo.GetFieldFromHandle(result
                             ? mField
@@ -67,14 +67,13 @@ namespace AsmResolver.DotNet.Code.Cil
 
                     if (obj.GetType().FullName == "System.Reflection.Emit.GenericMethodInfo")
                     {
-                        var context =
-                            FieldReader.ReadField<RuntimeTypeHandle>(obj, "m_context");
-                        var res = FieldReader.TryReadField<RuntimeMethodHandle>(obj, "m_method", out var m_method);
-                        var m_handle = FieldReader.ReadField<RuntimeMethodHandle>(obj, "m_methodHandle");
+                        var context = FieldReader.ReadField<RuntimeTypeHandle>(obj, "m_context");
+                        bool hasHandle = FieldReader.TryReadField<RuntimeMethodHandle>(obj, "m_method", out var mMethod);
+                        var mHandle = FieldReader.ReadField<RuntimeMethodHandle>(obj, "m_methodHandle");
                         var method = MethodBase.GetMethodFromHandle(
-                            res
-                                ? m_method
-                                : m_handle, context);
+                            hasHandle ? mMethod : mHandle,
+                            context);
+                        
                         return _importer.ImportMethod(method);
                     }
 
