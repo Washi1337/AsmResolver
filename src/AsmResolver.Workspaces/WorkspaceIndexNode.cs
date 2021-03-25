@@ -99,7 +99,6 @@ namespace AsmResolver.Workspaces
         /// <summary>
         /// Gets a stored data of type <see cref="T"/>.
         /// </summary>
-        /// <param name="relation">The relation.</param>
         /// <returns>default value if data with type <see cref="T"/> is not stored, otherwise the data.</returns>
         /// <typeparam name="T">The type of data to obtain.</typeparam>
         public T? GetData<T>() => Data
@@ -116,7 +115,7 @@ namespace AsmResolver.Workspaces
         {
             for (int i = 0; i < Data.Count; i++)
             {
-                if(Data[i] is not T newData)
+                if (Data[i] is not T newData)
                     continue;
                 data = newData;
                 return true;
@@ -179,6 +178,9 @@ namespace AsmResolver.Workspaces
         /// <typeparam name="T">The type of data to store.</typeparam>
         public void SetData<T>(T data)
         {
+            if (data is null)
+                throw new ArgumentNullException(nameof(data));
+
             if (TryGetData<T>(out var old))
                 Data.Remove(old);
             Data.Add(data);
