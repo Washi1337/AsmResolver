@@ -34,7 +34,7 @@ namespace AsmResolver.Workspaces.Tests
             var node = _index.GetOrCreateNode(subject);
 
             node.SetData<int>(123);
-            var data = node.GetData<int>();
+            int data = node.GetData<int>();
             Assert.Equal(123,data);
         }
 
@@ -45,7 +45,7 @@ namespace AsmResolver.Workspaces.Tests
             var node = _index.GetOrCreateNode(subject);
 
             node.SetData<float>(123.0f);
-            var data = node.GetData<int>();
+            int data = node.GetData<int>();
             Assert.Equal(default,data);
         }
 
@@ -55,7 +55,7 @@ namespace AsmResolver.Workspaces.Tests
             var subject = new object();
             var node = _index.GetOrCreateNode(subject);
 
-            var result = node.TryGetData<int>(out var data);
+            bool result = node.TryGetData<int>(out int data);
             Assert.False(result);
             Assert.Equal(default, data);
         }
@@ -66,7 +66,7 @@ namespace AsmResolver.Workspaces.Tests
             var subject = new object();
             var node = _index.GetOrCreateNode(subject);
 
-            var result = node.TryGetData<object>(out var data);
+            bool result = node.TryGetData<object>(out var data);
             Assert.False(result);
             Assert.Null(data);
         }
@@ -78,7 +78,7 @@ namespace AsmResolver.Workspaces.Tests
             var node = _index.GetOrCreateNode(subject);
 
             node.SetData<int>(123);
-            var result = node.TryGetData<int>(out var data);
+            bool result = node.TryGetData<int>(out int data);
             Assert.True(result);
             Assert.Equal(123,data);
         }
@@ -90,7 +90,7 @@ namespace AsmResolver.Workspaces.Tests
             var node = _index.GetOrCreateNode(subject);
 
             node.SetData<float>(123.0f);
-            var result = node.TryGetData<int>(out var data);
+            bool result = node.TryGetData<int>(out int data);
             Assert.False(result);
             Assert.Equal(default,data);
         }
@@ -102,7 +102,7 @@ namespace AsmResolver.Workspaces.Tests
             var subject = new object();
             var node = _index.GetOrCreateNode(subject);
 
-            var data = node.GetOrCreate<int>(1);
+            int data = node.GetOrCreate<int>(1);
             Assert.Equal(1,data);
         }
 
@@ -113,7 +113,7 @@ namespace AsmResolver.Workspaces.Tests
             var node = _index.GetOrCreateNode(subject);
 
             node.SetData<int>(1);
-            var data = node.GetOrCreate<int>(2);
+            int data = node.GetOrCreate<int>(2);
             Assert.Equal(1,data);
         }
 
@@ -144,7 +144,7 @@ namespace AsmResolver.Workspaces.Tests
             var subject = new object();
             var node = _index.GetOrCreateNode(subject);
 
-            var data = node.GetOrCreate<int>(()=> 2);
+            int data = node.GetOrCreate<int>(() => 2);
             Assert.Equal(2,data);
         }
 
@@ -155,7 +155,7 @@ namespace AsmResolver.Workspaces.Tests
             var node = _index.GetOrCreateNode(subject);
 
             node.SetData<int>(2);
-            var data = node.GetOrCreate<int>(() => 3);
+            int data = node.GetOrCreate<int>(() => 3);
             Assert.Equal(2,data);
         }
 
@@ -218,7 +218,7 @@ namespace AsmResolver.Workspaces.Tests
             var node = _index.GetOrCreateNode(subject);
 
             node.SetData<object>(new ());
-            Assert.NotNull(node.GetData<int>());
+            Assert.NotNull(node.GetData<object>());
         }
         [Fact]
         public void SetDataRewriteEmptyStruct()
