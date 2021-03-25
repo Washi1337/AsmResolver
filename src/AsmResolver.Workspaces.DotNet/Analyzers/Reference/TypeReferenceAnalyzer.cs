@@ -15,11 +15,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
                 context.SchedulaForAnalysis(subject.DeclaringType);
             }
 
-            if(context.Workspace is not DotNetWorkspace workspace)
+            if (context.Workspace is not DotNetWorkspace workspace)
                 return;
 
             var definition = subject.Resolve();
-            if(definition is null || !workspace.Assemblies.Contains(definition.Module.Assembly))
+            if (definition is null || !workspace.Assemblies.Contains(definition.Module.Assembly))
                 return;
 
             var index = context.Workspace.Index;

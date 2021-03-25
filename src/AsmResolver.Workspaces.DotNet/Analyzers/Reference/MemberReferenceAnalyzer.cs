@@ -21,11 +21,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
                 context.SchedulaForAnalysis(subject.Signature);
             }
 
-            if(context.Workspace is not DotNetWorkspace workspace)
+            if (context.Workspace is not DotNetWorkspace workspace)
                 return;
 
             var definition = subject.Resolve();
-            if(definition is null || !workspace.Assemblies.Contains(definition.Module.Assembly))
+            if (definition is null || !workspace.Assemblies.Contains(definition.Module.Assembly))
                 return; //TODO: Maybe add some warning log?
 
             var index = context.Workspace.Index;

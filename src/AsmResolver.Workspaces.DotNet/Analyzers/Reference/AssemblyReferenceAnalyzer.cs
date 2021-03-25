@@ -10,12 +10,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, AssemblyReference subject)
         {
-            if(context.Workspace is not DotNetWorkspace workspace)
+            if (context.Workspace is not DotNetWorkspace workspace)
                 return;
 
             var definition = subject.Resolve();
-            if(definition is null || !workspace.Assemblies.Contains(definition))
-                return; //TODO: Maybe add some warning log?
+            if (definition is null || !workspace.Assemblies.Contains(definition))
+                return;
 
             var index = context.Workspace.Index;
             var node = index.GetOrCreateNode(definition);
