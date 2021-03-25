@@ -185,5 +185,13 @@ namespace AsmResolver.Workspaces
                 Data.Remove(old);
             Data.Add(data);
         }
+        /// <summary>
+        /// Removes data of type <see cref="T"/>.
+        /// </summary>
+        /// <returns>true if data with type <see cref="T"/> was removed, otherwise false.</returns>
+        /// <typeparam name="T">The type of data to obtain.</typeparam>
+        public bool RemoveData<T>()
+            => TryGetData<T>(out var data)
+               && Data.Remove(data);
     }
 }

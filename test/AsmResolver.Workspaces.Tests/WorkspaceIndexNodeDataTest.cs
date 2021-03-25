@@ -241,5 +241,45 @@ namespace AsmResolver.Workspaces.Tests
             node.SetData<object>((object)1);
             Assert.Equal((object)1,node.GetData<int>());
         }
+
+        [Fact]
+        public void RemoveDataEmptyStruct()
+        {
+            var subject = new object();
+            var node = _index.GetOrCreateNode(subject);
+
+            Assert.False(node.RemoveData<int>());
+        }
+
+        [Fact]
+        public void RemoveDataEmptyObject()
+        {
+            var subject = new object();
+            var node = _index.GetOrCreateNode(subject);
+
+            Assert.False(node.RemoveData<object>());
+        }
+
+        [Fact]
+        public void RemoveDataNotEmptyStruct()
+        {
+            var subject = new object();
+            var node = _index.GetOrCreateNode(subject);
+
+            node.SetData<int>(1);
+            Assert.True(node.RemoveData<int>());
+            Assert.False(node.TryGetData<int>(out _));
+        }
+
+        [Fact]
+        public void RemoveDataNotEmptyObject()
+        {
+            var subject = new object();
+            var node = _index.GetOrCreateNode(subject);
+
+            node.SetData<object>(new ());
+            Assert.True(node.RemoveData<object>());
+            Assert.False(node.TryGetData<object>(out _));
+        }
     }
 }
