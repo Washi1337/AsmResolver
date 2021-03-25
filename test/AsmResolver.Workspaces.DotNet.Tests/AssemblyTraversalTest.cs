@@ -89,15 +89,13 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             TraverseObjects(securityDeclarations);
         }
 
-
-        //TODO: Some standalone signatures are used for assembly building but not afterwards so some filtering is required
+        //TODO: Some   signatures are used for assembly building but not afterwards so some filtering is required
         /*[Fact]
         public void StandAloneSigCheck()
         {
             var standAloneSignatures = GetAllMembers<StandAloneSignature>(_fixture.AllAssemblies, TableIndex.StandAloneSig)
             TraverseObjects(standAloneSignatures);
         }*/
-
 
         [Fact]
         public void EventCheck()
@@ -137,9 +135,6 @@ namespace AsmResolver.Workspaces.DotNet.Tests
         [Fact]
         public void FileCheck()
         {
-            /* Due to not having any assembly with file references we will use custom generated assembly
-             var fileReferences = GetAllMembers<FileReference>(_fixture.AllAssemblies, TableIndex.File);
-            TraverseObjects(fileReferences);*/
             var assembly = new AssemblyDefinition("Assembly", new Version(1, 0, 0, 0));
             var module = new ModuleDefinition("Module");
 
@@ -238,31 +233,5 @@ namespace AsmResolver.Workspaces.DotNet.Tests
                 yield return value;
             }
         }
-
-/* TODO: Check those
-FieldPtr = 3,
-Constant
-MethodPtr = 5,
-ParamPtr = 7,
-FieldMarshal = 13,
-ClassLayout = 15,
-FieldLayout = 16,
-EventMap = 18,
-EventPtr = 19,
-PropertyMap = 21,
-PropertyPtr = 22,
-MethodSemantics = 24,
-MethodImpl = 25,
-NestedClass
-ImplMap = 28,
-FieldRva = 29,
-EncLog = 30,
-EncMap = 31,
-AssemblyProcessor = 33,
-AssemblyOS = 34,
-AssemblyRef = 35,
-AssemblyRefProcessor = 36,
-AssemblyRefOS = 37,
-*/
     }
 }
