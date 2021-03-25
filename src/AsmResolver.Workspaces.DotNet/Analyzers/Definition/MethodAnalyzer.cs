@@ -1,3 +1,4 @@
+using System.Linq;
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Collections;
@@ -36,13 +37,6 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 for (int i = 0; i < subject.ParameterDefinitions.Count; i++)
                     context.SchedulaForAnalysis(subject.ParameterDefinitions[i]);
-
-            }
-            if (context.HasAnalyzers(typeof(Parameter)))
-            {
-                for (int i = 0; i < subject.Parameters.Count; i++)
-                    context.SchedulaForAnalysis(subject.Parameters[i]);
-
             }
 
             // Schedule signature for analysis.
