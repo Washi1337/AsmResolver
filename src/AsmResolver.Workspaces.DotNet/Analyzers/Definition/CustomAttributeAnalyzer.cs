@@ -24,25 +24,30 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 context.SchedulaForAnalysis(subject);
             }
 
-            if (context.HasAnalyzers(subject.Constructor.GetType()))
+            if (subject.Constructor is not null && context.HasAnalyzers(subject.Constructor.GetType()))
             {
                 context.SchedulaForAnalysis(subject.Constructor);
             }
 
-            for (int i = 0; i < subject.Signature.NamedArguments.Count; i++)
+            if(subject.Signature is null)
+                return;
+
+            if (context.HasAnalyzers(typeof(CustomAttributeNamedArgument)))
             {
-                var namedArgument = subject.Signature.NamedArguments[i];
-                if (context.HasAnalyzers(typeof(CustomAttributeNamedArgument)))
+                for (int i = 0; i < subject.Signature.NamedArguments.Count; i++)
                 {
+                    var namedArgument = subject.Signature.NamedArguments[i];
+
                     context.SchedulaForAnalysis(namedArgument);
                 }
             }
 
-            for (int i = 0; i < subject.Signature.FixedArguments.Count; i++)
+            if (context.HasAnalyzers(typeof(CustomAttributeArgument)))
             {
-                var fixedArgument = subject.Signature.FixedArguments[i];
-                if (context.HasAnalyzers(typeof(CustomAttributeArgument)))
+                for (int i = 0; i < subject.Signature.FixedArguments.Count; i++)
                 {
+                    var fixedArgument = subject.Signature.FixedArguments[i];
+
                     context.SchedulaForAnalysis(fixedArgument);
                 }
             }
@@ -55,14 +60,14 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 
             var index = context.Workspace.Index;
 
-            var type = subject.Constructor.DeclaringType?.Resolve();
-            if (type is null || !workspace.Assemblies.Contains(type.Module.Assembly))
+            var type = subject.Constructor?.DeclaringType?.Resolve();
+            if (type is null || !workspace.Assemblies.Contains(type.Module.Assembly) || subject.Signature is null)
                 return;
 
             for (int i = 0; i < subject.Signature.NamedArguments.Count; i++)
             {
                 var namedArgument = subject.Signature.NamedArguments[i];
-                var member = FindMember(type, subject, namedArgument);
+                var member = FindMember(type, namedArgument);
                 if (member is null)
                     continue; //TODO: Log error?
                 var node = index.GetOrCreateNode(member);
@@ -71,8 +76,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             }
         }
 
-        private IMetadataMember? FindMember(TypeDefinition type, CustomAttribute customAttribute,
-            CustomAttributeNamedArgument argument)
+        private IMetadataMember? FindMember(TypeDefinition type, CustomAttributeNamedArgument argument)
             => argument.MemberType switch
             {
                 CustomAttributeArgumentMemberType.Property => FindNameReferenceProperty(type, argument),
