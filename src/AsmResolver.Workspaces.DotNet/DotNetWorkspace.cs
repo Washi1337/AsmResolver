@@ -37,7 +37,7 @@ namespace AsmResolver.Workspaces.DotNet
             Analyzers.Register(typeof(FieldDefinition), new FieldAnalyzer());
             Analyzers.Register(typeof(PropertyDefinition), new PropertyAnalyzer());
             Analyzers.Register(typeof(EventDefinition), new EventAnalyzer());
-            Analyzers.Register(typeof(IHasGenericParameters), new GenericParameterAnalyzer());
+            Analyzers.Register(typeof(IHasGenericParameters), new HasGenericParameterAnalyzer());
             Analyzers.Register(typeof(LocalVariablesSignature), new LocalVariablesSignatureAnalyzer());
             Analyzers.Register(typeof(IGenericArgumentsProvider), new GenericArgumentAnalyzer());
             Analyzers.Register(typeof(CilMethodBody), new CilMethodBodyAnalyzer());
