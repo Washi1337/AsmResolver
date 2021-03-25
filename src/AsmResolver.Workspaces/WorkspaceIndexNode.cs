@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
@@ -111,7 +112,7 @@ namespace AsmResolver.Workspaces
         /// <param name="data">The data</param>
         /// <returns>false if data with type <see cref="T"/> is not stored, otherwise true.</returns>
         /// <typeparam name="T">The type of data to obtain.</typeparam>
-        public bool TryGetData<T>(out T? data)
+        public bool TryGetData<T>([NotNullWhen(true)]out T? data)
         {
             for (int i = 0; i < Data.Count; i++)
             {
@@ -137,7 +138,7 @@ namespace AsmResolver.Workspaces
                 data = defaultValue;
                 Data.Add(data!);
             }
-            return data!;
+            return data;
         }
 
         /// <summary>
@@ -153,7 +154,7 @@ namespace AsmResolver.Workspaces
                 data = factory();
                 Data.Add(data!);
             }
-            return data!;
+            return data;
         }
 
         /// <summary>
@@ -168,7 +169,7 @@ namespace AsmResolver.Workspaces
                 data = new();
                 Data.Add(data);
             }
-            return data!;
+            return data;
         }
 
         /// <summary>
@@ -179,7 +180,7 @@ namespace AsmResolver.Workspaces
         public void SetData<T>(T data)
         {
             if (TryGetData<T>(out var old))
-                Data.Remove(old!);
+                Data.Remove(old);
             Data.Add(data);
         }
     }
