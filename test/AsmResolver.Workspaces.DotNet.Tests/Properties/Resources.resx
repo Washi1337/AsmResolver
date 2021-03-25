@@ -26,6 +26,5 @@
     </data>
     <data name="Assembly2_Actual" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>..\Resources\Assembly2_Actual.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
->>>>>>> issue/124
     </data>
 </root>
