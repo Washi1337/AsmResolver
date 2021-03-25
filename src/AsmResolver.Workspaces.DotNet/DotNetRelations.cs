@@ -40,7 +40,6 @@ namespace AsmResolver.Workspaces.DotNet
             "ReferenceAssembly",
             new Guid("52a81339-0850-4f81-b059-30d7aacc430f"));
 
-
         /// <summary>
         /// Describes the relationship between a method or field definition and its reference.
         /// </summary>
