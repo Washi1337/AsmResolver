@@ -14,23 +14,23 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         /// <inheritdoc />
         public override void Analyze(AnalysisContext context, SecurityDeclaration subject)
         {
-                var permissionSet = subject.PermissionSet;
-                for (int j = 0; j < permissionSet.Attributes.Count; j++)
+            var permissionSet = subject.PermissionSet;
+            for (int j = 0; j < permissionSet.Attributes.Count; j++)
+            {
+                var securityAttribute = permissionSet.Attributes[j];
+                if (context.HasAnalyzers(typeof(TypeSignature)))
                 {
-                    var securityAttribute = permissionSet.Attributes[j];
-                    if (context.HasAnalyzers(typeof(TypeSignature)))
-                    {
-                        context.SchedulaForAnalysis(securityAttribute.AttributeType);
-                    }
-
-                    if (!context.HasAnalyzers(typeof(CustomAttributeNamedArgument)))
-                        continue;
-
-                    for (int k = 0; k < securityAttribute.NamedArguments.Count; k++)
-                    {
-                        context.SchedulaForAnalysis(securityAttribute.NamedArguments[k]);
-                    }
+                    context.SchedulaForAnalysis(securityAttribute.AttributeType);
                 }
+
+                if (!context.HasAnalyzers(typeof(CustomAttributeNamedArgument)))
+                    continue;
+
+                for (int k = 0; k < securityAttribute.NamedArguments.Count; k++)
+                {
+                    context.SchedulaForAnalysis(securityAttribute.NamedArguments[k]);
+                }
+            }
         }
     }
 }
