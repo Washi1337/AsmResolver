@@ -116,7 +116,7 @@ namespace AsmResolver.DotNet.Code.Cil
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsPresentInBody(int offset) =>
-            _body.Instructions.GetIndexByOffset(offset) > 0;
+            _body.Instructions.GetIndexByOffset(offset) >= 0;
 
         private void AddDiagnostic(string message)
         {
