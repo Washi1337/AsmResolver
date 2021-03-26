@@ -89,14 +89,6 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             TraverseObjects(securityDeclarations);
         }
 
-        //TODO: Some   signatures are used for assembly building but not afterwards so some filtering is required
-        /*[Fact]
-        public void StandAloneSigCheck()
-        {
-            var standAloneSignatures = GetAllMembers<StandAloneSignature>(_fixture.AllAssemblies, TableIndex.StandAloneSig)
-            TraverseObjects(standAloneSignatures);
-        }*/
-
         [Fact]
         public void EventCheck()
         {
