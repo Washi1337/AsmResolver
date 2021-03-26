@@ -111,7 +111,7 @@ namespace AsmResolver.Workspaces
         /// <param name="data">The data</param>
         /// <returns>false if data with type <see cref="T"/> is not stored, otherwise true.</returns>
         /// <typeparam name="T">The type of data to obtain.</typeparam>
-        public bool TryGetData<T>([NotNullWhen(true)]out T? data)
+        public bool TryGetData<T>([NotNullWhen(true)] out T? data)
         {
             for (int i = 0; i < Data.Count; i++)
             {
@@ -185,6 +185,7 @@ namespace AsmResolver.Workspaces
                 Data.Remove(old);
             Data.Add(data);
         }
+
         /// <summary>
         /// Removes data of type <see cref="T"/>.
         /// </summary>
