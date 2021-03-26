@@ -16,14 +16,6 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 context.SchedulaForAnalysis(subject.Signature);
             }
-
-            if (context.HasAnalyzers(typeof(MethodDefinition)))
-            {
-                if(subject.GetMethod is not null)
-                    context.SchedulaForAnalysis(subject.GetMethod);
-                if(subject.SetMethod is not null)
-                    context.SchedulaForAnalysis(subject.SetMethod);
-            }
         }
     }
 }
