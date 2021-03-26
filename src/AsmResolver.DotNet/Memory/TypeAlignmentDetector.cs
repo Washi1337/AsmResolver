@@ -92,7 +92,7 @@ namespace AsmResolver.DotNet.Memory
         }
 
         private uint VisitTypeReference(TypeReference type) =>
-            VisitTypeDefinition(type.Resolve());
+            VisitTypeDefinition(type.Resolve() ?? throw new ArgumentException($"Could not resolve {type.SafeToString()}."));
 
         public uint VisitTypeDefinition(TypeDefinition type)
         {
