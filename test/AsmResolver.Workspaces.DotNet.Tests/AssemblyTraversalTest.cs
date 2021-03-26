@@ -209,7 +209,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze(context);
 
             Assert.All(members, member
-                => Assert.True(context.TraversedObjects.Contains(member)));
+                => Assert.Contains(member, context.TraversedObjects));
         }
 
 
