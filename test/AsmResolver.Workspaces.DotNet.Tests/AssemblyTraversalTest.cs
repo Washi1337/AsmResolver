@@ -146,15 +146,13 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             module.FileReferences.Add(file2);
 
             var workspace = new DotNetWorkspace();
-            var context = new AnalysisContext(workspace);
 
             workspace.Assemblies.Add(assembly);
-            context.SchedulaForAnalysis(assembly);
 
-            workspace.Analyze(context);
+            var result = workspace.Analyze();
 
-            Assert.True(context.TraversedObjects.Contains(file1));
-            Assert.True(context.TraversedObjects.Contains(file2));
+            Assert.True(result.TraversedObjects.Contains(file1));
+            Assert.True(result.TraversedObjects.Contains(file2));
         }
 
         [Fact]
@@ -198,18 +196,14 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             Assert.NotEmpty(members);
 
             var workspace = new DotNetWorkspace();
-            var context = new AnalysisContext(workspace);
 
             foreach (var assembly in _fixture.AllAssemblies)
-            {
                 workspace.Assemblies.Add(assembly);
-                context.SchedulaForAnalysis(assembly);
-            }
 
-            workspace.Analyze(context);
+            var result = workspace.Analyze();
 
             Assert.All(members, member
-                => Assert.Contains(member, context.TraversedObjects));
+                => Assert.Contains(member, result.TraversedObjects));
         }
 
 
