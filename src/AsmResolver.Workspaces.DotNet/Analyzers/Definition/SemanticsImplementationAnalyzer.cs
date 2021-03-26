@@ -1,7 +1,7 @@
 using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 {
     /// <summary>
     /// Analyzes a <see cref="IHasSemantics"/> for implicit base definitions, such as abstract events or properties in

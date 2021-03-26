@@ -4,6 +4,8 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
 
         <IsPackable>false</IsPackable>
+
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,6 +25,15 @@
       <ProjectReference Include="..\..\src\AsmResolver.DotNet\AsmResolver.DotNet.csproj" />
       <ProjectReference Include="..\..\src\AsmResolver.Workspaces.DotNet\AsmResolver.Workspaces.DotNet.csproj" />
       <ProjectReference Include="..\..\src\AsmResolver.Workspaces\AsmResolver.Workspaces.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.CustomAttributes\AsmResolver.DotNet.TestCases.CustomAttributes.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Events\AsmResolver.DotNet.TestCases.Events.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Fields\AsmResolver.DotNet.TestCases.Fields.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Generics\AsmResolver.DotNet.TestCases.Generics.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Methods\AsmResolver.DotNet.TestCases.Methods.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.MultiModules\AsmResolver.DotNet.TestCases.MultiModules.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.NestedClasses\AsmResolver.DotNet.TestCases.NestedClasses.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Properties\AsmResolver.DotNet.TestCases.Properties.csproj" />
+      <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.DotNet.TestCases.Resources\AsmResolver.DotNet.TestCases.Resources.csproj" />
       <ProjectReference Include="..\TestBinaries\DotNet\AsmResolver.Workspaces.DotNet.TestCases\AsmResolver.Workspaces.DotNet.TestCases.csproj" />
     </ItemGroup>
 

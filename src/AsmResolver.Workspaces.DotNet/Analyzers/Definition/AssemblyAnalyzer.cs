@@ -1,6 +1,6 @@
 using AsmResolver.DotNet;
 
-namespace AsmResolver.Workspaces.DotNet.Analyzers
+namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 {
     /// <summary>
     /// Provides a default implementation for an <see cref="AssemblyDefinition"/> analyzer.
@@ -12,7 +12,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
         {
             context.Workspace.Index.GetOrCreateNode(subject);
 
-            // Schedule all the defined modules in the module for analysis.
+            // Schedule all the defined modules in the assembly for analysis.
             if (context.HasAnalyzers(typeof(AssemblyDefinition)))
             {
                 for (int i = 0; i < subject.Modules.Count; i++)

@@ -52,6 +52,8 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
             set;
         }
 
+        public int IntFieldValue;
+
         public string StringValue
         {
             get;
@@ -81,5 +83,6 @@ namespace AsmResolver.DotNet.TestCases.CustomAttributes
             get;
             set;
         }
+
     }
 }
