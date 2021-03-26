@@ -66,7 +66,7 @@ namespace AsmResolver.Workspaces.DotNet
         /// <summary>
         /// Analyzes all the assemblies in the workspace.
         /// </summary>
-        public AnalysisResult Analyze()
+        public DotNetAnalysisResult Analyze()
         {
             var context = new AnalysisContext(this);
 
@@ -75,7 +75,7 @@ namespace AsmResolver.Workspaces.DotNet
 
             base.Analyze(context);
 
-            return new AnalysisResult(context.TraversedObjects);
+            return new DotNetAnalysisResult(context.TraversedObjects);
         }
 
     }

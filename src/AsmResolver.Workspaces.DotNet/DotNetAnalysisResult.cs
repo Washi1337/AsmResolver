@@ -3,11 +3,11 @@ using System.Collections.Generic;
 namespace AsmResolver.Workspaces.DotNet
 {
     /// <summary>
-    /// Provides a report describing the results of a workspace analysis process
+    /// Provides a report describing the results of a .Net workspace analysis process
     /// </summary>
-    public class AnalysisResult
+    public class DotNetAnalysisResult
     {
-        internal AnalysisResult(ISet<object> traversedObjects)
+        internal DotNetAnalysisResult(ISet<object> traversedObjects)
         {
             TraversedObjects = traversedObjects;
         }
