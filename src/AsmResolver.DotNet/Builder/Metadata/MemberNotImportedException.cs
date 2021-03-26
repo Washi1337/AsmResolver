@@ -17,7 +17,7 @@ namespace AsmResolver.DotNet.Builder.Metadata
         {
             Member = member;
         }
-        
+
         /// <summary>
         /// Gets the member that was not imported.
         /// </summary>
