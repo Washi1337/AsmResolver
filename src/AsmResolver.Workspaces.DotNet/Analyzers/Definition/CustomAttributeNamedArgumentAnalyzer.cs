@@ -15,9 +15,16 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 context.SchedulaForAnalysis(subject.ArgumentType);
             }
 
-            if (context.HasAnalyzers(typeof(CustomAttributeArgument)))
+            if (subject.Argument is not null && context.HasAnalyzers(typeof(TypeSignature)))
             {
-                context.SchedulaForAnalysis(subject.Argument);
+                context.SchedulaForAnalysis(subject.Argument.ArgumentType);
+                for (int i = 0; i < subject.Argument.Elements.Count; i++)
+                {
+                    var element = subject.Argument.Elements[i];
+                    if (element is not TypeSignature)
+                        continue;
+                    context.SchedulaForAnalysis(element);
+                }
             }
         }
     }
