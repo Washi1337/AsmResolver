@@ -188,12 +188,7 @@ namespace AsmResolver.PE.DotNet.Cil
             };
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return Operand is null
-                ? $"IL_{Offset:X4}: {OpCode.Mnemonic}"
-                : $"IL_{Offset:X4}: {OpCode.Mnemonic} {Operand}";
-        }
+        public override string ToString() => CilInstructionFormatter.Instance.FormatInstruction(this);
 
         /// <summary>
         /// Determines whether the provided instruction is considered equal to the current instruction.

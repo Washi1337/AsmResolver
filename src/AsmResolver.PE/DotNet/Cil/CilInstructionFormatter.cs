@@ -11,6 +11,14 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public class CilInstructionFormatter : ICilInstructionFormatter
     {
+        /// <summary>
+        /// Gets the default instance of the <see cref="CilInstructionFormatter"/> class.
+        /// </summary>
+        public static CilInstructionFormatter Instance
+        {
+            get;
+        } = new();
+
         /// <inheritdoc />
         public string FormatInstruction(CilInstruction instruction)
         {
