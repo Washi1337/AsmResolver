@@ -1,7 +1,7 @@
 namespace AsmResolver.PE.DotNet.Cil
 {
     /// <summary>
-    /// Represents a label to a CIL instruction referenced by a fixed offset relative to the start of the CIL method body. 
+    /// Represents a label to a CIL instruction referenced by a fixed offset relative to the start of the CIL method body.
     /// </summary>
     public class CilOffsetLabel : ICilLabel
     {
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.DotNet.Cil
         }
 
         /// <inheritdoc />
-        public override string ToString() => "IL_" + Offset.ToString("X4");
+        public override string ToString() => $"IL_{Offset:X4}";
 
         /// <inheritdoc />
         public bool Equals(ICilLabel other) => other != null && Offset == other.Offset;

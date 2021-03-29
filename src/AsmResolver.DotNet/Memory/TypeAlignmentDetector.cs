@@ -9,7 +9,7 @@ namespace AsmResolver.DotNet.Memory
 {
     internal class TypeAlignmentDetector : ITypeSignatureVisitor<uint>
     {
-        private readonly Stack<TypeDefinition> _traversedTypes = new Stack<TypeDefinition>();
+        private readonly Stack<TypeDefinition> _traversedTypes = new();
         private readonly bool _is32Bit;
         private GenericContext _currentGenericContext;
 
@@ -51,7 +51,7 @@ namespace AsmResolver.DotNet.Memory
             };
         }
 
-        public uint VisitCustomModifierType(CustomModifierTypeSignature signature) => 
+        public uint VisitCustomModifierType(CustomModifierTypeSignature signature) =>
             signature.BaseType.AcceptVisitor(this);
 
         public uint VisitGenericInstanceType(GenericInstanceTypeSignature signature)
@@ -59,7 +59,7 @@ namespace AsmResolver.DotNet.Memory
             // Enter new generic context.
             var oldContext = _currentGenericContext;
             _currentGenericContext = _currentGenericContext.WithType(signature);
-            
+
             var result = VisitTypeDefOrRef(signature.GenericType);
 
             // Leave generic context.
@@ -67,7 +67,7 @@ namespace AsmResolver.DotNet.Memory
             return result;
         }
 
-        public uint VisitGenericParameter(GenericParameterSignature signature) => 
+        public uint VisitGenericParameter(GenericParameterSignature signature) =>
             _currentGenericContext.GetTypeArgument(signature).AcceptVisitor(this);
 
         public uint VisitPinnedType(PinnedTypeSignature signature) => signature.BaseType.AcceptVisitor(this);
@@ -91,28 +91,28 @@ namespace AsmResolver.DotNet.Memory
             };
         }
 
-        private uint VisitTypeReference(TypeReference type) => 
-            VisitTypeDefinition(type.Resolve());
+        private uint VisitTypeReference(TypeReference type) =>
+            VisitTypeDefinition(type.Resolve() ?? throw new ArgumentException($"Could not resolve {type.SafeToString()}."));
 
         public uint VisitTypeDefinition(TypeDefinition type)
         {
             if (!type.IsValueType)
                 return PointerSize;
-            
+
             // Check if we are dealing with an illegal cyclic dependency.
             if (_traversedTypes.Contains(type))
                 throw new CyclicStructureException();
-            
+
             // Enter type.
             _traversedTypes.Push(type);
-            
+
             // Reference:
             // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.structlayoutattribute.pack?view=netcore-3.1#remarks
-            
+
             // The alignment within a type is determined by the largest field in the structure, or by the packing size
             // column in the class layout metadata of the type definition (in C# when the StructLayout attribute is
             // provided with the Pack property assigned a non-zero value).
-            
+
             uint largestFieldSize = 1;
             for (int i = 0; i < type.Fields.Count; i++)
             {
@@ -122,7 +122,7 @@ namespace AsmResolver.DotNet.Memory
             }
 
             uint alignment = largestFieldSize;
-            
+
             // Check if the type has metadata regarding type layout.
             if (type.ClassLayout is {} layout)
             {
@@ -131,14 +131,14 @@ namespace AsmResolver.DotNet.Memory
                     ? PointerSize
                     : layout.PackingSize;
 
-                // Packing size cannot exceed class size. 
+                // Packing size cannot exceed class size.
                 if (layout.ClassSize == 0 || packingSize <= layout.ClassSize)
                     alignment = Math.Min(alignment, packingSize);
             }
 
             // Leave type.
             _traversedTypes.Pop();
-            
+
             return alignment;
         }
 

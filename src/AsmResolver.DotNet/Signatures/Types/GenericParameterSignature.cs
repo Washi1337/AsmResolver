@@ -11,7 +11,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         private readonly IResolutionScope _scope;
 
         /// <summary>
-        /// Creates a new reference to a generic parameter. 
+        /// Creates a new reference to a generic parameter.
         /// </summary>
         /// <param name="parameterType">Indicates the parameter signature is declared by a type or a method.</param>
         /// <param name="index">The index of the referenced parameter.</param>
@@ -22,7 +22,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <summary>
-        /// Creates a new reference to a generic parameter. 
+        /// Creates a new reference to a generic parameter.
         /// </summary>
         /// <param name="module">The module in which this generic parameter signature resides.</param>
         /// <param name="parameterType">Indicates the parameter signature is declared by a type or a method.</param>
@@ -33,7 +33,7 @@ namespace AsmResolver.DotNet.Signatures.Types
             ParameterType = parameterType;
             Index = index;
         }
-        
+
         /// <inheritdoc />
         public override ElementType ElementType => ParameterType switch
         {
@@ -93,7 +93,13 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) => 
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
             visitor.VisitGenericParameter(this);
+
+        /// <inheritdoc />
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor,
+            TState state) =>
+            visitor.VisitGenericParameter(this, state);
+
     }
 }

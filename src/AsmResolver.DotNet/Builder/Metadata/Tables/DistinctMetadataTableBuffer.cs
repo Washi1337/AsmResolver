@@ -6,15 +6,15 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 namespace AsmResolver.DotNet.Builder.Metadata.Tables
 {
     /// <summary>
-    /// Decorates a metadata table buffer with a filter that removes all duplicated rows from the buffer.  
+    /// Decorates a metadata table buffer with a filter that removes all duplicated rows from the buffer.
     /// </summary>
     /// <typeparam name="TRow">The type of rows to store.</typeparam>
     public class DistinctMetadataTableBuffer<TRow> : IMetadataTableBuffer<TRow>
         where TRow : struct, IMetadataRow
     {
+        private readonly Dictionary<TRow, MetadataToken> _entries = new();
         private readonly IMetadataTableBuffer<TRow> _underlyingBuffer;
-        private readonly IDictionary<TRow, MetadataToken> _entries = new Dictionary<TRow, MetadataToken>();
-        
+
         /// <summary>
         /// Creates a new distinct metadata table buffer decorator.
         /// </summary>
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
 
                 var old = _underlyingBuffer[rid];
                 _underlyingBuffer[rid] = value;
-                
+
                 _entries.Remove(old);
                 _entries.Add(value, rid);
             }
@@ -55,7 +55,7 @@ namespace AsmResolver.DotNet.Builder.Metadata.Tables
 
             return token;
         }
-        
+
         /// <inheritdoc />
         public void FlushToTable() => _underlyingBuffer.FlushToTable();
 

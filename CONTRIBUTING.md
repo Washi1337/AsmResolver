@@ -1,17 +1,32 @@
 AsmResolver Coding Style and Licensing
 ======================================
 
-If you make any changes to AsmResolver, you are agreeing to the license conditions as specified in [LICENSE.md](LICENSE.md).
-
-Aims
-----
+## Aims
 
 This guide is for developers who wish to contribute to the AsmResolver codebase. It will detail how to properly style and format code to fit this project.
 
 Following this guide and formatting your code as detailed will likely get your pull request merged much faster than if you don't (assuming the written code has no mistakes in itself).
 
-General
--------
+If you make any changes to AsmResolver, you are agreeing to the license conditions as specified in [LICENSE.md](LICENSE.md).
+
+
+## General Workflow
+
+The AsmResolver project generally follows the principles of [Git Flow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow), with a few variations. Below a summary:
+
+- Prefer to create a branch based on `development`. 
+    - Do not branch from `master` unless it is a serious bug and requires a hotfix. `master` is supposed to be always in sync with the nuget feed.
+- Prefix your branch accordingly, depending on what kind of change you are trying to make.
+    - For new features, use `feature/name-of-feature`.
+    - For issues and/or bug fixes, use `issue/name-of-issue-or-bug`.
+- Push your changes on this branch.
+    - Make sure you are following the coding style guidelines as described in this document below.
+- Open a [Pull Request](https://github.com/Washi1337/AsmResolver/pulls), setting the `development` branch as a base branch to merge into.
+- Wait for your pull request to be reviewed and accepted.
+    - Pull requests into `development` will only be accepted if all unit tests succeed and follow the guidelines as described in this document.
+
+
+## C# Coding Style
 
 The general idea behind the coding style that is adopted in the AsmResolver project follows a few key points:
 
@@ -23,8 +38,8 @@ Furthermore:
 - Try to limit the number of characters on one line to 120 characters.
 - Avoid preprocessor directives or `#region`s
 
-C# Coding Style
----------------
+For editors that support EditorConfig, there is an `.editorconfig` file for you to use in the root directory of the repository.
+
 
 ### General naming conventions
 
@@ -187,8 +202,8 @@ Do:
 ```csharp
 int x = 123;
 string y = "Hello, world!";
+byte[] z = new byte[10];
 
-var array = new byte[10];
 var instance = new MyClass(...);
 ```
 
@@ -196,8 +211,8 @@ Don't:
 ```csharp
 var x = 123;
 var y = "Hello, world!";
+var array = new byte[10];
 
-byte[] array = new byte[10];
 MyClass instance = new MyClass(...);
 ```
 
@@ -251,7 +266,7 @@ this.SomeMethod();
 
 ### Ternary experssions
 
-Always place the arms of a ternary expression on separate lines:
+Prefer to place the arms of a ternary expression on separate lines:
 
 Do:
 ```csharp
@@ -271,7 +286,7 @@ Prefer `for` loops over `foreach` when heap allocated enumerators can be avoided
 
 Do:
 ```csharp
-IList<T> items = ...;
+var items = assembly.Modules;
 for (int i = 0; i < items.Count; i++)
 {
     // Use items[i]
@@ -280,28 +295,29 @@ for (int i = 0; i < items.Count; i++)
 
 Don't:
 ```csharp
-IList<T> items = ...;
+var items = assembly.Modules;
 foreach (var item in items) // IList<T>.GetEnumerator() returns a heap allocated enumerator
 {
     // Use item
 }
 ```
 
-### Usage of LINQ
+### Usage of LINQ and method chains
 
-Using Linq is acceptable, but prefer the method syntax over the query syntax. When multiple method calls are chained together, prefer to put them on separate lines:
+Using LINQ is acceptable, but prefer the method syntax over the query syntax. When multiple method calls are chained together, prefer to put them on separate lines:
 
 Do:
 ```csharp
-var allClasses = assembly.Modules
+var allClassMethods = assembly.Modules
     .SelectMany(m => m.GetAllTypes())
     .Where(t => t.IsClass)
+    .SelectMany(t => t.Methods)
     .ToArray();
 ```
 
 Don't:
 ```csharp
-var allClasses = assembly.Modules.SelectMany(m => m.GetAllTypes()).Where(t => t.IsClass).ToArray();
+var allClasses = assembly.Modules.SelectMany(m => m.GetAllTypes()).Where(t => t.IsClass).SelectMany(t => t.Methods).ToArray();
 ```
 
 ### XML documentation

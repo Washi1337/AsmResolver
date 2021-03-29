@@ -7,7 +7,7 @@ namespace AsmResolver.DotNet.Cloning
             foreach (var field in _fieldsToClone)
             {
                 var stub = CreateFieldStub(context, field);
-                
+
                 // If field's declaring type is cloned as well, add the cloned method to the cloned type.
                 if (context.ClonedMembers.TryGetValue(field.DeclaringType, out var member)
                     && member is TypeDefinition declaringType)
@@ -16,11 +16,11 @@ namespace AsmResolver.DotNet.Cloning
                 }
             }
         }
-        
-        private FieldDefinition CreateFieldStub(MemberCloneContext context, FieldDefinition field)
+
+        private static FieldDefinition CreateFieldStub(MemberCloneContext context, FieldDefinition field)
         {
             var clonedField = new FieldDefinition(
-                field.Name, 
+                field.Name,
                 field.Attributes,
                 context.Importer.ImportFieldSignature(field.Signature));
 

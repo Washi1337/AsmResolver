@@ -11,11 +11,14 @@ namespace AsmResolver.DotNet
     /// </summary>
     public class DefaultMetadataResolver : IMetadataResolver
     {
-        private readonly SignatureComparer _comparer = new SignatureComparer();
         private readonly IDictionary<ITypeDescriptor, TypeDefinition> _typeCache;
+        private readonly SignatureComparer _comparer = new()
+        {
+            AcceptNewerAssemblyVersionNumbers = true
+        };
 
         /// <summary>
-        /// Creates a new metadata resolver. 
+        /// Creates a new metadata resolver.
         /// </summary>
         /// <param name="assemblyResolver">The resolver to use for resolving external assemblies.</param>
         public DefaultMetadataResolver(IAssemblyResolver assemblyResolver)
@@ -62,7 +65,7 @@ namespace AsmResolver.DotNet
             var resolvedType = LookupInCache(reference);
             if (resolvedType != null)
                 return resolvedType;
-            
+
             var resolution = new TypeResolution(AssemblyResolver);
             resolvedType = resolution.ResolveTypeReference(reference);
             if (resolvedType != null)
@@ -90,7 +93,7 @@ namespace AsmResolver.DotNet
             var type = signature.GetUnderlyingTypeDefOrRef();
             if (type is null)
                 return null;
-                
+
             return type.MetadataToken.Table switch
             {
                 TableIndex.TypeDef => (TypeDefinition) type,
@@ -112,7 +115,7 @@ namespace AsmResolver.DotNet
                 var candidate = declaringType.Methods[i];
                 if (candidate.Name != method.Name)
                     continue;
-                if (!candidate.IsHideBySig || _comparer.Equals(candidate.Signature, method.Signature))
+                if (!candidate.IsHideBySig || _comparer.Equals(method.Signature, candidate.Signature))
                     return candidate;
             }
 
@@ -129,7 +132,7 @@ namespace AsmResolver.DotNet
             for (int i = 0; i < declaringType.Fields.Count; i++)
             {
                 var candidate = declaringType.Fields[i];
-                if (candidate.Name == field.Name && _comparer.Equals(candidate.Signature, field.Signature))
+                if (candidate.Name == field.Name && _comparer.Equals(field.Signature, candidate.Signature))
                     return candidate;
             }
 
@@ -155,7 +158,7 @@ namespace AsmResolver.DotNet
                 if (scope is null || _scopeStack.Contains(scope))
                     return null;
                 _scopeStack.Push(scope);
-                
+
                 switch (scope.MetadataToken.Table)
                 {
                     case TableIndex.AssemblyRef:
@@ -184,7 +187,7 @@ namespace AsmResolver.DotNet
                 if (implementation is null || _implementationStack.Contains(implementation))
                     return null;
                 _implementationStack.Push(implementation);
-                
+
                 switch (implementation.MetadataToken.Table)
                 {
                     case TableIndex.AssemblyRef:
@@ -192,25 +195,25 @@ namespace AsmResolver.DotNet
                         return assembly is {}
                             ? FindTypeInAssembly(assembly, exportedType.Namespace, exportedType.Name)
                             : null;
-                    
+
                     case TableIndex.File:
                         var module = FindModuleInAssembly(exportedType.Module.Assembly, implementation.Name);
-                        return module is {} 
-                            ? FindTypeInModule(module, exportedType.Namespace, exportedType.Name) 
+                        return module is {}
+                            ? FindTypeInModule(module, exportedType.Namespace, exportedType.Name)
                             : null;
-                    
+
                     case TableIndex.ExportedType:
                         var exportedDeclaringType = (ExportedType) implementation;
                         var declaringType = ResolveExportedType(exportedDeclaringType);
                         return declaringType is {}
-                            ? FindTypeInType(declaringType, exportedType.Name) 
+                            ? FindTypeInType(declaringType, exportedType.Name)
                             : null;
 
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            
+
             private TypeDefinition FindTypeInAssembly(AssemblyDefinition assembly, string ns, string name)
             {
                 for (int i = 0; i < assembly.Modules.Count; i++)

@@ -9,8 +9,8 @@ namespace AsmResolver.DotNet.Builder
     {
         private void AddCustomAttributes(MetadataToken ownerToken, IHasCustomAttribute provider)
         {
-            foreach (var attribute in provider.CustomAttributes)
-                AddCustomAttribute(ownerToken, attribute);
+            for (int i = 0; i < provider.CustomAttributes.Count; i++)
+                AddCustomAttribute(ownerToken, provider.CustomAttributes[i]);
         }
 
         private void AddCustomAttribute(MetadataToken ownerToken, CustomAttribute attribute)
@@ -25,7 +25,7 @@ namespace AsmResolver.DotNet.Builder
 
             table.Add(attribute, row);
         }
-        
+
         private uint AddResolutionScope(IResolutionScope scope)
         {
             if (scope is null || !AssertIsImported(scope))
@@ -78,7 +78,7 @@ namespace AsmResolver.DotNet.Builder
                 TableIndex.ModuleRef => GetModuleReferenceToken(parent as ModuleReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(parent))
             };
-                
+
             return Metadata.TablesStream
                 .GetIndexEncoder(CodedIndex.MemberRefParent)
                 .EncodeToken(token);
@@ -95,7 +95,7 @@ namespace AsmResolver.DotNet.Builder
                 TableIndex.MemberRef => GetMemberReferenceToken(method as MemberReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(method))
             };
-            
+
             return Metadata.TablesStream
                 .GetIndexEncoder(CodedIndex.MethodDefOrRef)
                 .EncodeToken(token);
@@ -112,7 +112,7 @@ namespace AsmResolver.DotNet.Builder
                 TableIndex.MemberRef => GetMemberReferenceToken(constructor as MemberReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(constructor))
             };
-            
+
             return Metadata.TablesStream
                 .GetIndexEncoder(CodedIndex.CustomAttributeType)
                 .EncodeToken(token);
@@ -138,7 +138,7 @@ namespace AsmResolver.DotNet.Builder
         {
             if (implementationMap is null)
                 return;
-            
+
             var table = Metadata.TablesStream.GetSortedTable<ImplementationMap, ImplementationMapRow>(TableIndex.ImplMap);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.MemberForwarded);
 
@@ -163,7 +163,7 @@ namespace AsmResolver.DotNet.Builder
                 FileReference fileReference => AddFileReference(fileReference),
                 _ => throw new ArgumentOutOfRangeException(nameof(implementation))
             };
-            
+
             return Metadata.TablesStream
                 .GetIndexEncoder(CodedIndex.Implementation)
                 .EncodeToken(token);
@@ -173,12 +173,12 @@ namespace AsmResolver.DotNet.Builder
         {
             var table = Metadata.TablesStream.GetSortedTable<SecurityDeclaration, SecurityDeclarationRow>(TableIndex.DeclSecurity);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasDeclSecurity);
-            
+
             foreach (var declaration in provider.SecurityDeclarations)
             {
                 var row = new SecurityDeclarationRow(
                     declaration.Action,
-                    encoder.EncodeToken(ownerToken), 
+                    encoder.EncodeToken(ownerToken),
                     Metadata.BlobStream.GetBlobIndex(this, declaration.PermissionSet, DiagnosticBag));
                 table.Add(declaration, row);
             }
@@ -188,15 +188,15 @@ namespace AsmResolver.DotNet.Builder
         {
             if (owner.MarshalDescriptor is null)
                 return;
-            
+
             var table = Metadata.TablesStream.GetSortedTable<IHasFieldMarshal, FieldMarshalRow>(TableIndex.FieldMarshal);
             var encoder = Metadata.TablesStream.GetIndexEncoder(CodedIndex.HasFieldMarshal);
-            
+
             var row = new FieldMarshalRow(
                 encoder.EncodeToken(ownerToken),
                 Metadata.BlobStream.GetBlobIndex(this, owner.MarshalDescriptor, DiagnosticBag));
             table.Add(owner, row);
         }
-        
+
     }
 }

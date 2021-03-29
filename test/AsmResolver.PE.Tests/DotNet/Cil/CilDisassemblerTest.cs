@@ -29,7 +29,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -132,7 +132,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -170,7 +170,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -191,7 +191,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -210,7 +210,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -231,7 +231,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -250,7 +250,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -269,7 +269,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -288,7 +288,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -307,7 +307,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
         [Fact]
@@ -346,7 +346,7 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
             };
             
             var disassembler = new CilDisassembler(rawCode.CreateReader());
-            Assert.Equal(expected, disassembler.ReadAllInstructions());
+            Assert.Equal(expected, disassembler.ReadInstructions());
         }
 
     }

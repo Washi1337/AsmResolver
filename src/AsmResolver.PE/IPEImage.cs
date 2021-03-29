@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.Exceptions;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File.Headers;
 using AsmResolver.PE.Imports;
@@ -11,7 +12,7 @@ using AsmResolver.PE.Win32Resources;
 namespace AsmResolver.PE
 {
     /// <summary>
-    /// Represents an image of a portable executable (PE) file, exposing high level mutable structures. 
+    /// Represents an image of a portable executable (PE) file, exposing high level mutable structures.
     /// </summary>
     public interface IPEImage
     {
@@ -22,7 +23,7 @@ namespace AsmResolver.PE
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets or sets the machine type that the PE image is targeting.
         /// </summary>
@@ -35,7 +36,7 @@ namespace AsmResolver.PE
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the attributes assigned to the executable file.
         /// </summary>
@@ -52,7 +53,7 @@ namespace AsmResolver.PE
         /// <summary>
         /// Gets or sets the date and time the portable executable file was created.
         /// </summary>
-        DateTime TimeDateStamp 
+        DateTime TimeDateStamp
         {
             get;
             set;
@@ -71,7 +72,7 @@ namespace AsmResolver.PE
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the subsystem to use when running the portable executable (PE) file.
         /// </summary>
@@ -97,7 +98,7 @@ namespace AsmResolver.PE
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets or sets the preferred address of the first byte of the image when loaded into memory. Must be a
         /// multiple of 64,000.
@@ -111,7 +112,7 @@ namespace AsmResolver.PE
             get;
             set;
         }
-        
+
         /// <summary>
         /// Gets a collection of modules that were imported into the PE, according to the import data directory.
         /// </summary>
@@ -139,13 +140,22 @@ namespace AsmResolver.PE
         }
 
         /// <summary>
-        /// Gets a collection of base relocations that are to be applied when loading the PE into memory for execution. 
+        /// Gets or sets the exceptions directory in the PE, if available.
+        /// </summary>
+        IExceptionDirectory Exceptions
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets a collection of base relocations that are to be applied when loading the PE into memory for execution.
         /// </summary>
         IList<BaseRelocation> Relocations
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets or sets the data directory containing the CLR 2.0 header of a .NET binary (if available).
         /// </summary>

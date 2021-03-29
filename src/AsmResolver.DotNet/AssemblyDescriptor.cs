@@ -18,11 +18,11 @@ namespace AsmResolver.DotNet
     public abstract class AssemblyDescriptor : MetadataMember, IHasCustomAttribute, IFullNameProvider
     {
         private const int PublicKeyTokenLength = 8;
-        
+
         private readonly LazyVariable<string> _name;
         private readonly LazyVariable<string> _culture;
         private IList<CustomAttribute> _customAttributes;
-        
+
         /// <summary>
         /// Initializes a new empty assembly descriptor.
         /// </summary>
@@ -38,7 +38,7 @@ namespace AsmResolver.DotNet
         /// Gets or sets the name of the assembly.
         /// </summary>
         /// <remarks>
-        /// This property corresponds to the Name column in the assembly table. 
+        /// This property corresponds to the Name column in the assembly table.
         /// </remarks>
         public string Name
         {
@@ -65,7 +65,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// This property corresponds to the MajorVersion, MinorVersion, BuildNumber and RevisionNumber columns in
-        /// the assembly table. 
+        /// the assembly table.
         /// </remarks>
         public Version Version
         {
@@ -77,14 +77,14 @@ namespace AsmResolver.DotNet
         /// Gets or sets the attributes associated to the assembly.
         /// </summary>
         /// <remarks>
-        /// This property corresponds to the Attributes column in the assembly table. 
+        /// This property corresponds to the Attributes column in the assembly table.
         /// </remarks>
         public AssemblyAttributes Attributes
         {
             get;
             set;
-        }       
-        
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether the assembly holds the full (unhashed) public key.
         /// </summary>
@@ -94,14 +94,14 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~AssemblyAttributes.PublicKey)
                                 | (value ? AssemblyAttributes.PublicKey : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating just-in-time (JIT) compiler tracking is enabled for the assembly.
         /// </summary>
         /// <remarks>
         /// This attribute originates from the <see cref="DebuggableAttribute"/> attribute.
         /// </remarks>
-        public bool EnableJitCompileTracking 
+        public bool EnableJitCompileTracking
         {
             get => (Attributes & AssemblyAttributes.EnableJitCompileTracking) != 0;
             set => Attributes = (Attributes & ~AssemblyAttributes.EnableJitCompileTracking)
@@ -120,7 +120,7 @@ namespace AsmResolver.DotNet
             set => Attributes = (Attributes & ~AssemblyAttributes.DisableJitCompileOptimizer)
                                 | (value ? AssemblyAttributes.DisableJitCompileOptimizer : 0);
         }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the assembly contains Windows Runtime (WinRT) code or not.
         /// </summary>
@@ -168,7 +168,7 @@ namespace AsmResolver.DotNet
         /// </summary>
         /// <remarks>
         /// <para>If this value is set to <c>null</c>, the default locale will be used</para>
-        /// <para>This property corresponds to the Culture column in the assembly table.</para> 
+        /// <para>This property corresponds to the Culture column in the assembly table.</para>
         /// </remarks>
         public string Culture
         {
@@ -176,9 +176,16 @@ namespace AsmResolver.DotNet
             set => _culture.Value = value;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the assembly descriptor references a Common Object Runtime standard library.
+        /// </summary>
+        public abstract bool IsCorLib
+        {
+            get;
+        }
 
         /// <summary>
-        /// When the application is signed with a strong name, obtains the public key token of the assembly 
+        /// When the application is signed with a strong name, obtains the public key token of the assembly
         /// </summary>
         /// <returns>The token.</returns>
         public abstract byte[] GetPublicKeyToken();
@@ -226,7 +233,7 @@ namespace AsmResolver.DotNet
 
             var hash = implementation.ComputeHash(publicKey);
             var token = new byte[PublicKeyTokenLength];
-            for (int i = 0; i < PublicKeyTokenLength; i++) 
+            for (int i = 0; i < PublicKeyTokenLength; i++)
                 token[i] = hash[hash.Length - 1 - i];
             return token;
         }

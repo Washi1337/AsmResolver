@@ -6,7 +6,7 @@ using AsmResolver.PE.DotNet.Metadata.Tables;
 namespace AsmResolver.DotNet
 {
     /// <summary>
-    /// Represents a reference to an external .NET assembly, hosted by a common language runtime (CLR). 
+    /// Represents a reference to an external .NET assembly, hosted by a common language runtime (CLR).
     /// </summary>
     public class AssemblyReference :
         AssemblyDescriptor,
@@ -17,12 +17,12 @@ namespace AsmResolver.DotNet
         private readonly LazyVariable<byte[]> _publicKeyOrToken;
         private readonly LazyVariable<byte[]> _hashValue;
         private byte[] _publicKeyToken;
-        
+
         /// <summary>
         /// Initializes a new assembly reference.
         /// </summary>
         /// <param name="token">The token of the assembly reference.</param>
-        protected AssemblyReference(MetadataToken token) 
+        protected AssemblyReference(MetadataToken token)
             : base(token)
         {
             _publicKeyOrToken = new LazyVariable<byte[]>(GetPublicKeyOrToken);
@@ -87,7 +87,7 @@ namespace AsmResolver.DotNet
             get => Module;
             set => Module = value;
         }
-        
+
         /// <summary>
         /// Gets or sets the (token of the) public key of the assembly to use for verification of a signature.
         /// </summary>
@@ -96,7 +96,7 @@ namespace AsmResolver.DotNet
         /// <para>When <see cref="AssemblyDescriptor.HasPublicKey"/> is set to <c>true</c>, this value contains the full
         /// unhashed public key that was used to sign the assembly. This property does not automatically update the
         /// <see cref="AssemblyDescriptor.HasPublicKey"/> property.</para>
-        /// <para>This property corresponds to the Culture column in the assembly definition table.</para> 
+        /// <para>This property corresponds to the Culture column in the assembly definition table.</para>
         /// </remarks>
         public byte[] PublicKeyOrToken
         {
@@ -112,7 +112,10 @@ namespace AsmResolver.DotNet
             get => _hashValue.Value;
             set => _hashValue.Value = value;
         }
-        
+
+        /// <inheritdoc />
+        public override bool IsCorLib => KnownCorLibs.KnownCorLibReferences.Contains(this);
+
         /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {

@@ -7,24 +7,65 @@ using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 namespace AsmResolver.DotNet.Signatures.Types
 {
     /// <summary>
-    /// Provides a base for blob signatures that reference a type. 
+    /// Provides a base for blob signatures that reference a type.
     /// </summary>
     public abstract class TypeSignature : ExtendableBlobSignature, ITypeDescriptor
     {
         internal const string NullTypeToString = "<<???>>";
 
-        private static MethodInfo GetTypeFromHandleUnsafeMethod;
+        private static readonly MethodInfo GetTypeFromHandleUnsafeMethod;
 
         static TypeSignature()
         {
             GetTypeFromHandleUnsafeMethod = typeof(Type)
-                .GetMethod("GetTypeFromHandleUnsafe", 
-                    (BindingFlags) (-1), 
-                    null, 
+                .GetMethod("GetTypeFromHandleUnsafe",
+                    (BindingFlags) (-1),
+                    null,
                     new[] {typeof(IntPtr)},
                     null);
         }
-        
+
+        /// <inheritdoc />
+        public abstract string Name
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public abstract string Namespace
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public string FullName => this.GetTypeFullName();
+
+        /// <inheritdoc />
+        public abstract IResolutionScope Scope
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public abstract bool IsValueType
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the element type of the
+        /// </summary>
+        public abstract ElementType ElementType
+        {
+            get;
+        }
+
+        /// <inheritdoc />
+        public virtual ModuleDefinition Module => Scope?.Module;
+
+        /// <inheritdoc />
+        public ITypeDescriptor DeclaringType => Scope as ITypeDescriptor;
+
         /// <summary>
         /// Reads a type signature from a blob reader.
         /// </summary>
@@ -71,12 +112,12 @@ namespace AsmResolver.DotNet.Signatures.Types
                     return new ByReferenceTypeSignature(FromReader(context, reader));
 
                 case ElementType.Var:
-                    return new GenericParameterSignature(context.ReaderContext.ParentModule, 
+                    return new GenericParameterSignature(context.ReaderContext.ParentModule,
                         GenericParameterType.Type,
                         (int) reader.ReadCompressedUInt32());
 
                 case ElementType.MVar:
-                    return new GenericParameterSignature(context.ReaderContext.ParentModule, 
+                    return new GenericParameterSignature(context.ReaderContext.ParentModule,
                         GenericParameterType.Method,
                         (int) reader.ReadCompressedUInt32());
 
@@ -119,12 +160,12 @@ namespace AsmResolver.DotNet.Signatures.Types
                         4 => new IntPtr(reader.ReadInt32()),
                         _ => new IntPtr(reader.ReadInt64())
                     };
-                    
+
                     // Let the runtime translate the address to a type and import it.
                     var clrType = (Type) GetTypeFromHandleUnsafeMethod.Invoke(null, new object[] {address});
                     var asmResType = new ReferenceImporter(context.ReaderContext.ParentModule).ImportType(clrType);
                     return new TypeDefOrRefSignature(asmResType);
-                
+
                 default:
                     throw new ArgumentOutOfRangeException($"Invalid or unsupported element type {elementType}.");
             }
@@ -162,7 +203,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     context.ReaderContext.BadImage("Infinite metadata loop was detected.");
                     result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.MetadataLoop);
                     break;
-                
+
                 // Any other type is legal.
                 case TableIndex.TypeSpec:
                 case TableIndex.TypeDef:
@@ -174,6 +215,7 @@ namespace AsmResolver.DotNet.Signatures.Types
                     else
                     {
                         context.ReaderContext.BadImage($"Metadata token in type signature refers to a non-existing TypeDefOrRef member {token}.");
+                        result = InvalidTypeDefOrRef.Get(InvalidTypeSignatureError.InvalidCodedIndex);
                     }
 
                     break;
@@ -185,10 +227,10 @@ namespace AsmResolver.DotNet.Signatures.Types
             }
 
             return result;
-        } 
+        }
 
         /// <summary>
-        /// Writes a TypeDefOrRef coded index to the output stream. 
+        /// Writes a TypeDefOrRef coded index to the output stream.
         /// </summary>
         /// <param name="context">The output stream.</param>
         /// <param name="type">The type to write.</param>
@@ -210,11 +252,11 @@ namespace AsmResolver.DotNet.Signatures.Types
 
             context.Writer.WriteCompressedUInt32(index);
         }
-        
+
         internal static TypeSignature ReadFieldOrPropType(in BlobReadContext context, IBinaryStreamReader reader)
         {
             var module = context.ReaderContext.ParentModule;
-            
+
             var elementType = (ElementType) reader.ReadByte();
             switch (elementType)
             {
@@ -250,29 +292,29 @@ namespace AsmResolver.DotNet.Signatures.Types
                 case ElementType.R8:
                 case ElementType.I:
                 case ElementType.U:
-                case ElementType.String: 
+                case ElementType.String:
                     writer.WriteByte((byte) type.ElementType);
                     break;
-                
+
                 case ElementType.Object:
                     writer.WriteByte((byte) ElementType.Boxed);
-                    
+
                     break;
-                
+
                 case ElementType.SzArray:
                     writer.WriteByte((byte) ElementType.SzArray);
-                    
+
                     var arrayType = (SzArrayTypeSignature) type;
                     WriteFieldOrPropType(writer, arrayType.BaseType);
                     break;
-                
+
                 default:
                     if (type.IsTypeOf("System", "Type"))
                     {
                         writer.WriteByte((byte) ElementType.Type);
                         return;
                     }
-                    
+
                     var typeDef = type.Resolve();
                     if (typeDef != null && typeDef.IsEnum)
                     {
@@ -284,51 +326,10 @@ namespace AsmResolver.DotNet.Signatures.Types
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
-        /// <inheritdoc />
-        public abstract string Name
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public abstract string Namespace
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public string FullName => this.GetTypeFullName();
-
-        /// <inheritdoc />
-        public abstract IResolutionScope Scope
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public abstract bool IsValueType
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the element type of the 
-        /// </summary>
-        public abstract ElementType ElementType
-        {
-            get;
-        }
-
-        /// <inheritdoc />
-        public virtual ModuleDefinition Module => Scope?.Module;
-        
-        /// <inheritdoc />
-        public ITypeDescriptor DeclaringType => Scope as ITypeDescriptor;
 
         /// <inheritdoc />
         public abstract TypeDefinition Resolve();
-        
+
         IMemberDefinition IMemberDescriptor.Resolve() => Resolve();
 
         /// <inheritdoc />
@@ -344,7 +345,7 @@ namespace AsmResolver.DotNet.Signatures.Types
 
         /// <summary>
         /// Substitutes any generic type parameter in the type signature with the parameters provided by
-        /// the generic context. 
+        /// the generic context.
         /// </summary>
         /// <param name="context">The generic context.</param>
         /// <returns>The instantiated type signature.</returns>
@@ -353,10 +354,7 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// instance of the type signature.
         /// </remarks>
         public TypeSignature InstantiateGenericTypes(GenericContext context)
-        {
-            var activator = new GenericTypeActivator(context);
-            return AcceptVisitor(activator);
-        }
+            => AcceptVisitor(GenericTypeActivator.Instance, context);
 
         /// <summary>
         /// Visit the current type signature using the provided visitor.
@@ -366,12 +364,19 @@ namespace AsmResolver.DotNet.Signatures.Types
         /// <returns>The result the visitor produced after visiting this type signature.</returns>
         public abstract TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor);
 
+        /// <summary>
+        /// Visit the current type signature using the provided visitor.
+        /// </summary>
+        /// <param name="visitor">The visitor to accept.</param>
+        /// <param name="state">Additional state.</param>
+        /// <typeparam name="TState">The type of additional state.</typeparam>
+        /// <typeparam name="TResult">The type of result the visitor produces.</typeparam>
+        /// <returns>The result the visitor produced after visiting this type signature.</returns>
+        public abstract TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor, TState state);
+
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return string.IsNullOrEmpty(FullName)
-                ? $"<<<{ElementType}>>>"
-                : FullName;
-        }
+        public override string ToString() => string.IsNullOrEmpty(FullName)
+            ? $"<<<{ElementType}>>>"
+            : FullName;
     }
 }

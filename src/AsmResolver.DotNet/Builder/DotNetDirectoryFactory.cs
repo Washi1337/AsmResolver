@@ -70,7 +70,7 @@ namespace AsmResolver.DotNet.Builder
         }
 
         /// <inheritdoc />
-        public virtual IDotNetDirectory CreateDotNetDirectory(
+        public virtual DotNetDirectoryBuildResult CreateDotNetDirectory(
             ModuleDefinition module,
             INativeSymbolsProvider symbolsProvider,
             DiagnosticBag diagnosticBag)

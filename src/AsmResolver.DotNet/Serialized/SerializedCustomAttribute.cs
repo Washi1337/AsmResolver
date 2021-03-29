@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Serialized
 {
     /// <summary>
     /// Represents a lazily initialized implementation of <see cref="CustomAttribute"/>  that is read from a
-    /// .NET metadata image. 
+    /// .NET metadata image.
     /// </summary>
     public class SerializedCustomAttribute : CustomAttribute
     {
@@ -36,7 +36,7 @@ namespace AsmResolver.DotNet.Serialized
             var ownerToken = _context.ParentModule.GetCustomAttributeOwner(MetadataToken.Rid);
             return _context.ParentModule.TryLookupMember(ownerToken, out var member)
                 ? member as IHasCustomAttribute
-                : null;
+                : _context.BadImageAndReturn<IHasCustomAttribute>($"Invalid parent in custom attribute {MetadataToken}.");
         }
 
         /// <inheritdoc />
@@ -48,14 +48,20 @@ namespace AsmResolver.DotNet.Serialized
             var token = encoder.DecodeIndex(_row.Type);
             return _context.ParentModule.TryLookupMember(token, out var member)
                 ? member as ICustomAttributeType
-                : null;
+                : _context.BadImageAndReturn<ICustomAttributeType>($"Invalid constructor in custom attribute {MetadataToken}.");
         }
 
         /// <inheritdoc />
         protected override CustomAttributeSignature GetSignature()
         {
-            return CustomAttributeSignature.FromReader(new BlobReadContext(_context), Constructor,
-                _context.Image.DotNetDirectory.Metadata.GetStream<BlobStream>().GetBlobReaderByIndex(_row.Value));
+            if (Constructor is null)
+                return null;
+
+            var blobStream = _context.Image.DotNetDirectory.Metadata.GetStream<BlobStream>();
+            return CustomAttributeSignature.FromReader(
+                new BlobReadContext(_context),
+                Constructor,
+                blobStream.GetBlobReaderByIndex(_row.Value));
         }
     }
 }

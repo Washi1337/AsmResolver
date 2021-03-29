@@ -7,6 +7,25 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public abstract class CilRawMethodBody : SegmentBase
     {
+        private byte[] _code;
+
+        /// <summary>
+        /// Gets a value indicating whether the method body is using the fat format.
+        /// </summary>
+        public abstract bool IsFat
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets or sets the raw bytes that make up the CIL code of the method body.
+        /// </summary>
+        public byte[] Code
+        {
+            get => _code;
+            set => _code = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
         /// <summary>
         /// Reads a raw method body from the given binary input stream.
         /// </summary>
@@ -24,28 +43,8 @@ namespace AsmResolver.PE.DotNet.Cil
                 return CilRawFatMethodBody.FromReader(errorListener, reader);
             if ((flag & CilMethodBodyAttributes.Tiny) == CilMethodBodyAttributes.Tiny)
                 return CilRawTinyMethodBody.FromReader(errorListener, reader);
-            
+
             throw new NotSupportedException("Invalid or unsupported method body format.");
         }
-
-        private byte[] _code;
-        
-        /// <summary>
-        /// Gets a value indicating whether the method body is using the fat format.
-        /// </summary>
-        public abstract bool IsFat
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets or sets the raw bytes that make up the CIL code of the method body. 
-        /// </summary>
-        public byte[] Code
-        {
-            get => _code;
-            set => _code = value ?? throw new ArgumentNullException(nameof(value));
-        }
-        
     }
 }

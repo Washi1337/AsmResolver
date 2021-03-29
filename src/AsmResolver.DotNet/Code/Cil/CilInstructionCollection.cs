@@ -14,7 +14,7 @@ namespace AsmResolver.DotNet.Code.Cil
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public partial class CilInstructionCollection : IList<CilInstruction>
     {
-        private readonly List<CilInstruction> _items = new List<CilInstruction>();
+        private readonly List<CilInstruction> _items = new();
         private ICilLabel _endLabel;
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// Gets the size in bytes of the collection.
         /// </summary>
         public int Size => _items.Sum(x => x.Size);
-        
+
         /// <inheritdoc />
         public CilInstruction this[int index]
         {
@@ -69,7 +69,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 return _endLabel;
             }
         }
-        
+
         /// <inheritdoc />
         public void Add(CilInstruction item) => _items.Add(item);
 
@@ -135,7 +135,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </exception>
         public void RemoveAt(int baseIndex, params int[] relativeIndices) =>
             RemoveAt(baseIndex, relativeIndices.AsEnumerable());
-        
+
         /// <summary>
         /// Removes a set of CIL instructions based on a list of indices that are relative to a starting index.
         /// </summary>
@@ -158,14 +158,14 @@ namespace AsmResolver.DotNet.Code.Cil
             }
 
             absoluteIndices.Sort();
-            
+
             // Remove indices.
             for (int i = 0; i < absoluteIndices.Count; i++)
             {
                 int index = absoluteIndices[i];
                 _items.RemoveAt(index);
-                
-                // Removal of instruction offsets all remaining indices by one. Update remaining indices. 
+
+                // Removal of instruction offsets all remaining indices by one. Update remaining indices.
                 for (int j = i+1; j < absoluteIndices.Count; j++)
                     absoluteIndices[j]--;
             }
@@ -183,48 +183,6 @@ namespace AsmResolver.DotNet.Code.Cil
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
-        /// Searches for an instruction with the given offset.
-        /// </summary>
-        /// <param name="offset">The offset of the instruction to find.</param>
-        /// <returns>The index the instruction is located at, or -1 if an instruction with the provided offset could not
-        /// be found.</returns>
-        /// <remarks>Requires the offsets of the instructions pre-calculated. This can be done by calling
-        /// <see cref="CalculateOffsets"/> prior to calling this method.</remarks>
-        public int GetIndexByOffset(int offset)
-        {
-            int left = 0;
-            int right = Count - 1;
-
-            while (left <= right)
-            {
-                int m = (left + right) / 2;
-                int currentOffset = _items[m].Offset;
-
-                if (currentOffset > offset)
-                    right = m - 1;
-                else if (currentOffset < offset)
-                    left = m + 1;
-                else
-                    return m;
-            }
-
-            return -1;
-        }
-        
-        /// <summary>
-        /// Searches for an instruction with the given offset.
-        /// </summary>
-        /// <param name="offset">The offset of the instruction to find.</param>
-        /// <returns>The instruction with the provided offset, or null if none could be found.</returns>
-        /// <remarks>Requires the offsets of the instructions pre-calculated. This can be done by calling
-        /// <see cref="CalculateOffsets"/> prior to calling this method.</remarks>
-        public CilInstruction GetByOffset(int offset)
-        {
-            int index = GetIndexByOffset(offset);
-            return index == -1 ? null : _items[index];
-        }
-
-        /// <summary>
         /// Gets a label at the provided offset.
         /// </summary>
         /// <param name="offset">The offset.</param>
@@ -236,15 +194,15 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             if (offset >= EndLabel.Offset)
                 return EndLabel;
-            
-            var instruction = GetByOffset(offset);
+
+            var instruction = this.GetByOffset(offset);
             return instruction is null
                 ? new CilOffsetLabel(offset)
                 : instruction.CreateLabel();
         }
 
         /// <summary>
-        /// Calculates the offsets of each instruction in the list. 
+        /// Calculates the offsets of each instruction in the list.
         /// </summary>
         public void CalculateOffsets()
         {
@@ -388,14 +346,14 @@ namespace AsmResolver.DotNet.Code.Cil
             {
                 // Repeat until no more optimizations can be done.
             }
-            
+
             CalculateOffsets();
         }
 
         private bool OptimizeMacrosPass()
         {
             CalculateOffsets();
-            
+
             bool changed = false;
             foreach (var instruction in _items)
                 changed |= TryOptimizeMacro(instruction);
@@ -483,7 +441,7 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             int value = instruction.GetLdcI4Constant();
             var (code, operand) = CilInstruction.GetLdcI4OpCodeOperand(value);
-            
+
             if (code != instruction.OpCode)
             {
                 instruction.OpCode = code;
@@ -497,7 +455,7 @@ namespace AsmResolver.DotNet.Code.Cil
         private bool TryOptimizeVariable(CilInstruction instruction)
         {
             var variable = instruction.GetLocalVariable(Owner.LocalVariables);
-            
+
             CilOpCode code = instruction.OpCode;
             object operand = instruction.Operand;
 
@@ -558,7 +516,7 @@ namespace AsmResolver.DotNet.Code.Cil
             else if (instruction.IsStarg())
             {
                 code = parameter.MethodSignatureIndex <= byte.MaxValue
-                    ? CilOpCodes.Starg_S 
+                    ? CilOpCodes.Starg_S
                     : CilOpCodes.Starg;
             }
 

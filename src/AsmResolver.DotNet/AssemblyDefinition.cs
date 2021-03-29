@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
-using AsmResolver.DotNet.Collections;
 using AsmResolver.DotNet.Serialized;
-using AsmResolver.DotNet.Signatures;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
-using AsmResolver.PE.DotNet;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -26,14 +24,14 @@ namespace AsmResolver.DotNet
         private IList<SecurityDeclaration> _securityDeclarations;
         private readonly LazyVariable<byte[]> _publicKey;
         private byte[] _publicKeyToken;
-        
+
         /// <summary>
         /// Reads a .NET assembly from the provided input buffer.
         /// </summary>
         /// <param name="buffer">The raw contents of the executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromBytes(byte[] buffer) => 
+        public static AssemblyDefinition FromBytes(byte[] buffer) =>
             FromImage(PEImage.FromBytes(buffer));
 
         /// <summary>
@@ -51,7 +49,7 @@ namespace AsmResolver.DotNet
         /// <param name="file">The portable executable file to load.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromFile(PEFile file) => 
+        public static AssemblyDefinition FromFile(PEFile file) =>
             FromImage(PEImage.FromFile(file));
 
         /// <summary>
@@ -61,7 +59,7 @@ namespace AsmResolver.DotNet
         /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
+        public static AssemblyDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
             FromImage(PEImage.FromReader(reader, mode));
 
         /// <summary>
@@ -70,7 +68,7 @@ namespace AsmResolver.DotNet
         /// <param name="peImage">The image containing the .NET metadata.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromImage(IPEImage peImage) => 
+        public static AssemblyDefinition FromImage(IPEImage peImage) =>
             FromImage(peImage, new ModuleReaderParameters(Path.GetDirectoryName(peImage.FilePath)));
 
         /// <summary>
@@ -116,7 +114,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the main module of the .NET assembly containing the assembly's manifest. 
+        /// Gets the main module of the .NET assembly containing the assembly's manifest.
         /// </summary>
         public ModuleDefinition ManifestModule => Modules.Count > 0 ? Modules[0] : null;
 
@@ -150,7 +148,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// <para>If this value is set to <c>null</c>, no public key will be assigned.</para>
         /// <para>This property does not automatically update the <see cref="AssemblyDescriptor.HasPublicKey"/> property.</para>
-        /// <para>This property corresponds to the Culture column in the assembly definition table.</para> 
+        /// <para>This property corresponds to the Culture column in the assembly definition table.</para>
         /// </remarks>
         public byte[] PublicKey
         {
@@ -163,7 +161,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Obtains the list of defined modules in the .NET assembly. 
+        /// Obtains the list of defined modules in the .NET assembly.
         /// </summary>
         /// <returns>The modules.</returns>
         /// <remarks>
@@ -192,6 +190,9 @@ namespace AsmResolver.DotNet
         protected virtual byte[] GetPublicKey() => null;
 
         /// <inheritdoc />
+        public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
+
+        /// <inheritdoc />
         public override byte[] GetPublicKeyToken()
         {
             if (!HasPublicKey)
@@ -208,7 +209,31 @@ namespace AsmResolver.DotNet
         public override AssemblyDefinition Resolve() => this;
 
         /// <summary>
-        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system. 
+        /// Attempts to extract the target runtime from the <see cref="TryGetTargetFramework"/> attribute.
+        /// </summary>
+        /// <param name="info">The runtime.</param>
+        /// <returns><c>true</c> if the attribute was found and the runtime was extracted, <c>false</c> otherwise.</returns>
+        public virtual bool TryGetTargetFramework(out DotNetRuntimeInfo info)
+        {
+            for (int i = 0; i < CustomAttributes.Count; i++)
+            {
+                var ctor = CustomAttributes[i].Constructor;
+
+                if (ctor is not null
+                    && ctor.DeclaringType.IsTypeOf("System.Runtime.Versioning", nameof(TargetFrameworkAttribute))
+                    && CustomAttributes[i].Signature.FixedArguments[0].Element is string name
+                    && DotNetRuntimeInfo.TryParse(name, out info))
+                {
+                    return true;
+                }
+            }
+
+            info = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system.
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
         public void Write(string filePath)
@@ -217,7 +242,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system.
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
@@ -227,7 +252,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system. 
+        /// Rebuilds the .NET assembly to a portable executable file and writes it to the file system.
         /// </summary>
         /// <param name="filePath">The output path of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
@@ -249,7 +274,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Rebuilds the manifest module and writes it to the stream specified. 
+        /// Rebuilds the manifest module and writes it to the stream specified.
         /// </summary>
         /// <param name="stream">The output stream of the manifest module file.</param>
         public void WriteManifest(Stream stream)
@@ -258,7 +283,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Rebuilds the manifest module and writes it to the stream specified. 
+        /// Rebuilds the manifest module and writes it to the stream specified.
         /// </summary>
         /// <param name="stream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>
@@ -268,7 +293,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Rebuilds the manifest module and writes it to the stream specified. 
+        /// Rebuilds the manifest module and writes it to the stream specified.
         /// </summary>
         /// <param name="stream">The output stream of the manifest module file.</param>
         /// <param name="imageBuilder">The engine to use for reconstructing a PE image.</param>

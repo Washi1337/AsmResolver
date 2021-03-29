@@ -32,13 +32,16 @@ namespace AsmResolver.DotNet
         /// <inheritdoc />
         protected override string GetCulture() =>
             _assemblyName.CultureName;
-        
+
         /// <inheritdoc />
-        public override byte[] GetPublicKeyToken() => 
+        public override bool IsCorLib => KnownCorLibs.KnownCorLibNames.Contains(Name);
+
+        /// <inheritdoc />
+        public override byte[] GetPublicKeyToken() =>
             _assemblyName.GetPublicKeyToken();
 
         /// <inheritdoc />
-        public override AssemblyDefinition Resolve() => 
+        public override AssemblyDefinition Resolve() =>
             _parentModule.MetadataResolver.AssemblyResolver.Resolve(this);
     }
 }
