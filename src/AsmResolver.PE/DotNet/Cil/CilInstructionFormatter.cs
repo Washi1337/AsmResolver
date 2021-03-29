@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using AsmResolver.DotNet.Collections;
-using AsmResolver.PE.DotNet.Cil;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
-namespace AsmResolver.DotNet.Code.Cil
+namespace AsmResolver.PE.DotNet.Cil
 {
     /// <summary>
     /// Provides the default implementation of the <see cref="ICilInstructionFormatter"/> interface.
@@ -23,7 +21,7 @@ namespace AsmResolver.DotNet.Code.Cil
         }
 
         /// <summary>
-        /// Formats a CIL offset as a label. 
+        /// Formats a CIL offset as a label.
         /// </summary>
         /// <param name="offset">The offset.</param>
         /// <returns>The formatted string.</returns>
@@ -75,10 +73,10 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatArgument(object operand) => operand switch
         {
-            Parameter parameter => parameter.Name,
             short longIndex => $"A_{longIndex.ToString()}",
             byte shortIndex => $"A_{shortIndex.ToString()}",
-            _ => "<<<INVALID>>>"
+            null => "<<<INVALID>>>",
+            _ => operand.ToString()
         };
 
         /// <summary>
@@ -89,12 +87,10 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatVariable(object operand) => operand switch
         {
-            CilLocalVariable localVariable => localVariable.Index == -1
-                ? "<<<INVALID>>>"
-                : "V_" + localVariable.Index,
             short longIndex => $"V_{longIndex.ToString()}",
             byte shortIndex => $"V_{shortIndex.ToString()}",
-            _ => "<<<INVALID>>>"
+            null => "<<<INVALID>>>",
+            _ => operand.ToString()
         };
 
         /// <summary>
@@ -102,7 +98,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatInteger(object operand) => 
+        protected virtual string FormatInteger(object operand) =>
             Convert.ToString(operand, CultureInfo.InvariantCulture);
 
 
@@ -111,7 +107,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </summary>
         /// <param name="operand">The operand to format.</param>
         /// <returns>The formatted string.</returns>
-        protected virtual string FormatFloat(object operand) => 
+        protected virtual string FormatFloat(object operand) =>
             Convert.ToString(operand, CultureInfo.InvariantCulture);
 
         /// <summary>
@@ -121,9 +117,9 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatSignature(object operand) => operand switch
         {
-            StandAloneSignature signature => signature.Signature.ToString(),
             MetadataToken token => FormatToken(token),
-            _ => "<<<INVALID>>>"
+            null => "<<<INVALID>>>",
+            _ => operand.ToString()
         };
 
         /// <summary>
@@ -142,7 +138,8 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             IEnumerable<ICilLabel> target => string.Join(", ", target.Select(FormatBranchTarget)),
             IEnumerable<int> offsets => string.Join(", ", offsets.Select(x => FormatBranchTarget(x))),
-            _ => "<<<INVALID>>>"
+            null => "<<<INVALID>>>",
+            _ => operand.ToString()
         };
 
         /// <summary>
@@ -152,7 +149,6 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatString(object operand) => operand switch
         {
-            // TODO: escaping
             string value => $"\"{value}\"",
             MetadataToken token => FormatToken(token),
             _ => "<<<INVALID>>>"
@@ -167,7 +163,8 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             ICilLabel target => FormatLabel(target.Offset),
             int offset => FormatLabel(offset),
-            _ => "<<<INVALID>>>"
+            null => "<<<INVALID>>>",
+            _ => operand.ToString()
         };
 
         /// <summary>
@@ -177,9 +174,9 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatMember(object operand) => operand switch
         {
-            IMetadataMember member => member.ToString(),
             MetadataToken token => FormatToken(token),
-            _ => "<<<INVALID>>>"
+            null => "<<<INVALID>>>",
+            _ => operand.ToString()
         };
     }
 }
