@@ -33,7 +33,7 @@
       - development
   
   image: Visual Studio 2019
-  version: 4.5.0-dev-build.{build}
+  version: 4.6.0-dev-build.{build}
   configuration: Release
 
   skip_commits:
