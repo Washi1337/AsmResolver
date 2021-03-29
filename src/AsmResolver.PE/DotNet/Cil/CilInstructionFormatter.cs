@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Cil
@@ -11,6 +12,8 @@ namespace AsmResolver.PE.DotNet.Cil
     /// </summary>
     public class CilInstructionFormatter : ICilInstructionFormatter
     {
+        private const string ReservedStringCharacters = "\\\"\t\r\n\b";
+
         /// <summary>
         /// Gets the default instance of the <see cref="CilInstructionFormatter"/> class.
         /// </summary>
@@ -144,8 +147,8 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatSwitch(object operand) => operand switch
         {
-            IEnumerable<ICilLabel> target => string.Join(", ", target.Select(FormatBranchTarget)),
-            IEnumerable<int> offsets => string.Join(", ", offsets.Select(x => FormatBranchTarget(x))),
+            IEnumerable<ICilLabel> target => $"({string.Join(", ", target.Select(FormatBranchTarget))})",
+            IEnumerable<int> offsets => $"({string.Join(", ", offsets.Select(x => FormatBranchTarget(x)))})",
             null => "<<<INVALID>>>",
             _ => operand.ToString()
         };
@@ -157,7 +160,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The formatted string.</returns>
         protected virtual string FormatString(object operand) => operand switch
         {
-            string value => $"\"{value}\"",
+            string value => CreateEscapedString(value),
             MetadataToken token => FormatToken(token),
             _ => "<<<INVALID>>>"
         };
@@ -186,5 +189,21 @@ namespace AsmResolver.PE.DotNet.Cil
             null => "<<<INVALID>>>",
             _ => operand.ToString()
         };
+
+        private static string CreateEscapedString(string literal)
+        {
+            var builder = new StringBuilder(literal.Length + 2);
+
+            builder.Append('"');
+            foreach (char currentChar in literal)
+            {
+                if (ReservedStringCharacters.Contains(currentChar))
+                    builder.Append('\\');
+                builder.Append(currentChar);
+            }
+            builder.Append('"');
+
+            return builder.ToString();
+        }
     }
 }
