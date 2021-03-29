@@ -68,5 +68,23 @@ namespace AsmResolver.DotNet.Tests.Signatures
             Assert.DoesNotContain('\\', fullname);
             Assert.Contains($"{name}+{nestedType}", fullname);
         }
+
+        [Fact]
+        public void CorLibWithoutFullScope()
+        {
+            var type = _module.CorLibTypeFactory.Object;
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type, true);
+            Assert.Contains(type.FullName, name);
+            Assert.DoesNotContain(type.Scope.Name, name);
+        }
+
+        [Fact]
+        public void CorLibWithFullScope()
+        {
+            var type = _module.CorLibTypeFactory.Object;
+            string name = TypeNameBuilder.GetAssemblyQualifiedName(type, false);
+            Assert.Contains(type.FullName, name);
+            Assert.Contains(type.Scope.Name, name);
+        }
     }
 }

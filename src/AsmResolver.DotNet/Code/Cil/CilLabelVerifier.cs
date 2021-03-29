@@ -9,11 +9,13 @@ namespace AsmResolver.DotNet.Code.Cil
     {
         private readonly CilMethodBody _body;
         private List<Exception> _diagnostics;
+        private string _cachedName;
 
         public CilLabelVerifier(CilMethodBody body)
         {
             _body = body ?? throw new ArgumentNullException(nameof(body));
             _diagnostics = null;
+            _cachedName = null;
         }
 
         public void Verify()
@@ -31,7 +33,7 @@ namespace AsmResolver.DotNet.Code.Cil
                 case 1:
                     throw _diagnostics[0];
                 default:
-                    throw new AggregateException("Method body contains multiple invalid branch targets.", _diagnostics);
+                    throw new AggregateException($"Method body of {_cachedName} contains multiple invalid labels.", _diagnostics);
             }
         }
 
@@ -116,12 +118,13 @@ namespace AsmResolver.DotNet.Code.Cil
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsPresentInBody(int offset) =>
-            _body.Instructions.GetIndexByOffset(offset) > 0;
+            _body.Instructions.GetIndexByOffset(offset) >= 0;
 
         private void AddDiagnostic(string message)
         {
             _diagnostics ??= new List<Exception>();
-            _diagnostics.Add(new InvalidCilInstructionException(message));
+            _cachedName ??= _body.Owner.SafeToString();
+            _diagnostics.Add(new InvalidCilInstructionException($"[{_cachedName}]: {message}"));
         }
 
     }

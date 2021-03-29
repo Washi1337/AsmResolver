@@ -7,36 +7,51 @@ namespace AsmResolver.DotNet.Signatures.Types.Parsing
     /// <summary>
     /// Provides a mechanism for building up a fully qualified type names, as they are stored in custom attribute signatures.
     /// </summary>
-    public readonly struct TypeNameBuilder : ITypeSignatureVisitor<object>
+    public sealed class TypeNameBuilder : ITypeSignatureVisitor<object>
     {
+        private readonly TextWriter _writer;
+        private readonly bool _omitCorLib;
+
+        private TypeNameBuilder(TextWriter writer, bool omitCorLib)
+        {
+            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            _omitCorLib = omitCorLib;
+        }
+
         /// <summary>
         /// Builds up an assembly qualified type name.
         /// </summary>
         /// <param name="signature">The type to convert to a string.</param>
         /// <returns>The built up type name.</returns>
-        public static string GetAssemblyQualifiedName(TypeSignature signature)
+        public static string GetAssemblyQualifiedName(TypeSignature signature) =>
+            GetAssemblyQualifiedName(signature, true);
+
+        /// <summary>
+        /// Builds up an assembly qualified type name.
+        /// </summary>
+        /// <param name="signature">The type to convert to a string.</param>
+        /// <param name="omitCorLib">Indicates any reference to corlib should not be included explicitly.</param>
+        /// <returns>The built up type name.</returns>
+        public static string GetAssemblyQualifiedName(TypeSignature signature, bool omitCorLib)
         {
             var writer = new StringWriter();
-            var builder = new TypeNameBuilder(writer);
+            var builder = new TypeNameBuilder(writer, omitCorLib);
             builder.WriteTypeAssemblyQualifiedName(signature);
             return writer.ToString();
-        }
-
-        private readonly TextWriter _writer;
-
-        private TypeNameBuilder(TextWriter writer)
-        {
-            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
         }
 
         private void WriteTypeAssemblyQualifiedName(TypeSignature type)
         {
             type.AcceptVisitor(this);
 
-            if (type.Scope.GetAssembly() != type.Module.Assembly)
+            var assembly = type.Scope.GetAssembly();
+            if (assembly != type.Module.Assembly)
             {
+                if (assembly.IsCorLib && _omitCorLib)
+                    return;
+
                 _writer.Write(", ");
-                WriteAssemblySpec(type.Scope.GetAssembly());
+                WriteAssemblySpec(assembly);
             }
         }
 

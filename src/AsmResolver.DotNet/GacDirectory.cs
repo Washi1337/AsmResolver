@@ -36,8 +36,8 @@ namespace AsmResolver.DotNet
             if (Directory.Exists(fullPath))
             {
                 string pubKeyTokenString = string.Join(string.Empty,
-                    assembly.GetPublicKeyToken().Select(x=>x.ToString("x2")));
-                string directoryName = assembly.Version + "__" + pubKeyTokenString;
+                    assembly.GetPublicKeyToken().Select(x => x.ToString("x2")));
+                string directoryName = $"{assembly.Version}__{pubKeyTokenString}";
                 if (IsPrefixed)
                     directoryName = _prefix + directoryName;
 

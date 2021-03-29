@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
+using AsmResolver.PE.Exceptions;
 using AsmResolver.PE.Exports;
 using AsmResolver.PE.File;
 using AsmResolver.PE.File.Headers;
@@ -20,10 +21,11 @@ namespace AsmResolver.PE
         private IList<IImportedModule> _imports;
         private readonly LazyVariable<IExportDirectory> _exports;
         private readonly LazyVariable<IResourceDirectory> _resources;
+        private readonly LazyVariable<IExceptionDirectory> _exceptions;
         private IList<BaseRelocation> _relocations;
         private readonly LazyVariable<IDotNetDirectory> _dotNetDirectory;
         private IList<DebugDataEntry> _debugData;
-        
+
         /// <summary>
         /// Opens a PE image from a specific file on the disk.
         /// </summary>
@@ -39,7 +41,7 @@ namespace AsmResolver.PE
         /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromFile(string filePath, PEReaderParameters readerParameters) => 
+        public static IPEImage FromFile(string filePath, PEReaderParameters readerParameters) =>
             FromFile(PEFile.FromFile(filePath), readerParameters);
 
         /// <summary>
@@ -57,7 +59,7 @@ namespace AsmResolver.PE
         /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromBytes(byte[] bytes, PEReaderParameters readerParameters) => 
+        public static IPEImage FromBytes(byte[] bytes, PEReaderParameters readerParameters) =>
             FromFile(PEFile.FromBytes(bytes), readerParameters);
 
         /// <summary>
@@ -67,7 +69,7 @@ namespace AsmResolver.PE
         /// <param name="mode">Indicates the input PE is in its mapped or unmapped form.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) => 
+        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
             FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
@@ -78,7 +80,7 @@ namespace AsmResolver.PE
         /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode, PEReaderParameters readerParameters) => 
+        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode, PEReaderParameters readerParameters) =>
             FromFile(PEFile.FromReader(reader, mode), readerParameters);
 
         /// <summary>
@@ -106,6 +108,7 @@ namespace AsmResolver.PE
         {
             _exports = new LazyVariable<IExportDirectory>(GetExports);
             _resources = new LazyVariable<IResourceDirectory>(GetResources);
+            _exceptions = new LazyVariable<IExceptionDirectory>(GetExceptions);
             _dotNetDirectory = new LazyVariable<IDotNetDirectory>(GetDotNetDirectory);
         }
 
@@ -171,7 +174,7 @@ namespace AsmResolver.PE
         {
             get
             {
-                if (_imports is null) 
+                if (_imports is null)
                     Interlocked.CompareExchange(ref _imports, GetImports(), null);
                 return _imports;
             }
@@ -189,6 +192,13 @@ namespace AsmResolver.PE
         {
             get => _resources.Value;
             set => _resources.Value = value;
+        }
+
+        /// <inheritdoc />
+        public IExceptionDirectory Exceptions
+        {
+            get => _exceptions.Value;
+            set => _exceptions.Value = value;
         }
 
         /// <inheritdoc />
@@ -248,7 +258,16 @@ namespace AsmResolver.PE
         protected virtual IResourceDirectory GetResources() => null;
 
         /// <summary>
-        /// Obtains the base relocation blocks in the PE. 
+        /// Obtains the contents of the exceptions data directory in the PE.
+        /// </summary>
+        /// <returns>The entries in the exceptions directory.</returns>
+        /// <remarks>
+        /// This method is called upon initialization of the <see cref="Exceptions"/> property.
+        /// </remarks>
+        protected virtual IExceptionDirectory GetExceptions() => null;
+
+        /// <summary>
+        /// Obtains the base relocation blocks in the PE.
         /// </summary>
         /// <returns>The base relocation blocks.</returns>
         /// <remarks>
@@ -266,7 +285,7 @@ namespace AsmResolver.PE
         protected virtual IDotNetDirectory GetDotNetDirectory() => null;
 
         /// <summary>
-        /// Obtains the debug data entries in the PE. 
+        /// Obtains the debug data entries in the PE.
         /// </summary>
         /// <returns>The debug data entries.</returns>
         /// <remarks>

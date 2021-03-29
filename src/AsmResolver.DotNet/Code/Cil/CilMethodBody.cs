@@ -96,14 +96,24 @@ namespace AsmResolver.DotNet.Code.Cil
         } = new List<CilExceptionHandler>();
 
         /// <summary>
+        /// Gets or sets flags that alter the behaviour of the method body serializer for this specific method body.
+        /// </summary>
+        public CilMethodBodyBuildFlags BuildFlags
+        {
+            get;
+            set;
+        } = CilMethodBodyBuildFlags.FullValidation;
+
+        /// <summary>
         /// Gets or sets a value indicating whether a .NET assembly builder should automatically compute and update the
         /// <see cref="MaxStack"/> property according to the contents of the method body.
         /// </summary>
         public bool ComputeMaxStackOnBuild
         {
-            get;
-            set;
-        } = true;
+            get => (BuildFlags & CilMethodBodyBuildFlags.ComputeMaxStack) == CilMethodBodyBuildFlags.ComputeMaxStack;
+            set => BuildFlags = (BuildFlags & ~CilMethodBodyBuildFlags.ComputeMaxStack)
+                                | (value ? CilMethodBodyBuildFlags.ComputeMaxStack : 0);
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether a .NET assembly builder should verify branch instructions and
@@ -114,38 +124,23 @@ namespace AsmResolver.DotNet.Code.Cil
         /// </remarks>
         public bool VerifyLabelsOnBuild
         {
-            get;
-            set;
-        } = true;
+            get => (BuildFlags & CilMethodBodyBuildFlags.VerifyLabels) == CilMethodBodyBuildFlags.VerifyLabels;
+            set => BuildFlags = (BuildFlags & ~CilMethodBodyBuildFlags.VerifyLabels)
+                                | (value ? CilMethodBodyBuildFlags.VerifyLabels : 0);
+        }
 
         /// <summary>
         ///     Creates a CIL method body from a dynamic method.
         /// </summary>
         /// <param name="method">The method that owns the method body.</param>
         /// <param name="dynamicMethodObj">The Dynamic Method/Delegate/DynamicResolver.</param>
-        /// <param name="operandResolver">
-        ///     The object instance to use for resolving operands of an instruction in the
-        ///     method body.
-        /// </param>
-        /// <param name="importer">
-        ///     The object instance to use for importing operands of an instruction in the
-        ///     method body.
-        /// </param>
         /// <returns>The method body.</returns>
-        public static CilMethodBody FromDynamicMethod(
-            MethodDefinition method,
-            object dynamicMethodObj,
-            ICilOperandResolver operandResolver = null,
-            ReferenceImporter importer = null)
+        public static CilMethodBody FromDynamicMethod(MethodDefinition method, object dynamicMethodObj)
         {
             if (!(method.Module is SerializedModuleDefinition module))
                 throw new ArgumentException("Method body should reference a serialized module.");
 
             var result = new CilMethodBody(method);
-
-            operandResolver ??= new CilOperandResolver(method.Module, result);
-            importer ??= new ReferenceImporter(method.Module);
-
             dynamicMethodObj = DynamicMethodHelper.ResolveDynamicResolver(dynamicMethodObj);
 
             //Get Runtime Fields
@@ -156,30 +151,16 @@ namespace AsmResolver.DotNet.Code.Cil
             byte[] ehHeader = FieldReader.ReadField<byte[]>(dynamicMethodObj, "m_exceptionHeader");
             var ehInfos = FieldReader.ReadField<IList<object>>(dynamicMethodObj, "m_exceptions");
 
-            // Read raw instructions.
-            var reader = new ByteArrayReader(code);
-            var disassembler = new CilDisassembler(reader);
-            result.Instructions.AddRange(disassembler.ReadAllInstructions());
-
             //Local Variables
             DynamicMethodHelper.ReadLocalVariables(result, method, localSig);
 
-            //Exception Handlers
-            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, importer);
+            // Read raw instructions.
+            var reader = new ByteArrayReader(code);
+            var disassembler = new CilDisassembler(reader, new DynamicCilOperandResolver(module, result, tokenList));
+            result.Instructions.AddRange(disassembler.ReadInstructions());
 
-            // Resolve all operands.
-            foreach (var instruction in result.Instructions)
-            {
-                instruction.Operand =
-                    DynamicMethodHelper.ResolveOperandReflection(
-                        module.ReaderContext,
-                        result,
-                        instruction,
-                        operandResolver,
-                        tokenList,
-                        importer)
-                    ?? instruction.Operand;
-            }
+            //Exception Handlers
+            DynamicMethodHelper.ReadReflectionExceptionHandlers(result, ehInfos, ehHeader, new ReferenceImporter(module));
 
             return result;
         }
@@ -201,21 +182,15 @@ namespace AsmResolver.DotNet.Code.Cil
         {
             var result = new CilMethodBody(method);
 
-            operandResolver ??= new CilOperandResolver(context.ParentModule, result);
+            operandResolver ??= new PhysicalCilOperandResolver(context.ParentModule, result);
 
-            // Read raw instructions.
-            var reader = new ByteArrayReader(rawBody.Code);
-            var disassembler = new CilDisassembler(reader);
-            result.Instructions.AddRange(disassembler.ReadAllInstructions());
-
-            // Read out extra metadata.
-            if (rawBody is CilRawFatMethodBody fatBody)
+            // Interpret body header.
+            var fatBody = rawBody as CilRawFatMethodBody;
+            if (fatBody is not null)
             {
                 result.MaxStack = fatBody.MaxStack;
                 result.InitializeLocals = fatBody.InitLocals;
-
                 ReadLocalVariables(method.Module, result, fatBody);
-                ReadExceptionHandlers(fatBody, result);
             }
             else
             {
@@ -223,70 +198,14 @@ namespace AsmResolver.DotNet.Code.Cil
                 result.InitializeLocals = false;
             }
 
-            // Resolve operands.
-            foreach (var instruction in result.Instructions)
-                instruction.Operand = ResolveOperand(result, instruction, operandResolver) ?? instruction.Operand;
+            // Parse instructions.
+            ReadInstructions(result, operandResolver, rawBody);
+
+            // Read exception handlers.
+            if (fatBody is not null)
+                ReadExceptionHandlers(fatBody, result);
 
             return result;
-        }
-
-        private static object ResolveOperand(
-            CilMethodBody methodBody,
-            CilInstruction instruction,
-            ICilOperandResolver resolver)
-        {
-            switch (instruction.OpCode.OperandType)
-            {
-                case CilOperandType.InlineBrTarget:
-                case CilOperandType.ShortInlineBrTarget:
-                    return new CilInstructionLabel(
-                        methodBody.Instructions.GetByOffset(((ICilLabel) instruction.Operand).Offset));
-
-                case CilOperandType.InlineField:
-                case CilOperandType.InlineMethod:
-                case CilOperandType.InlineSig:
-                case CilOperandType.InlineTok:
-                case CilOperandType.InlineType:
-                    return resolver.ResolveMember((MetadataToken) instruction.Operand);
-
-                case CilOperandType.InlineString:
-                    return resolver.ResolveString((MetadataToken) instruction.Operand);
-
-                case CilOperandType.InlineSwitch:
-                    var result = new List<ICilLabel>();
-                    var labels = (IList<ICilLabel>) instruction.Operand;
-                    for (int i = 0; i < labels.Count; i++)
-                    {
-                        var label = labels[i];
-                        var targetInstruction = methodBody.Instructions.GetByOffset(label.Offset);
-
-                        result.Add(targetInstruction is null ? label : new CilInstructionLabel(targetInstruction));
-                    }
-
-                    return result;
-
-                case CilOperandType.InlineVar:
-                case CilOperandType.ShortInlineVar:
-                    return resolver.ResolveLocalVariable(Convert.ToInt32(instruction.Operand));
-
-                case CilOperandType.InlineArgument:
-                case CilOperandType.ShortInlineArgument:
-                    return resolver.ResolveParameter(Convert.ToInt32(instruction.Operand));
-
-                case CilOperandType.InlineI:
-                case CilOperandType.InlineI8:
-                case CilOperandType.InlineNone:
-                case CilOperandType.InlineR:
-                case CilOperandType.ShortInlineI:
-                case CilOperandType.ShortInlineR:
-                    return instruction.Operand;
-
-                case CilOperandType.InlinePhi:
-                    throw new NotSupportedException();
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         private static void ReadLocalVariables(
@@ -302,6 +221,16 @@ namespace AsmResolver.DotNet.Code.Cil
                 for (int i = 0; i < variableTypes.Count; i++)
                     result.LocalVariables.Add(new CilLocalVariable(variableTypes[i]));
             }
+        }
+
+        private static void ReadInstructions(
+            CilMethodBody result,
+            ICilOperandResolver operandResolver,
+            CilRawMethodBody rawBody)
+        {
+            var reader = new ByteArrayReader(rawBody.Code);
+            var disassembler = new CilDisassembler(reader, operandResolver);
+            result.Instructions.AddRange(disassembler.ReadInstructions());
         }
 
         private static void ReadExceptionHandlers(CilRawFatMethodBody fatBody, CilMethodBody result)

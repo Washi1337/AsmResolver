@@ -8,22 +8,27 @@ namespace AsmResolver.DotNet
         {
             if (self is null)
                 return "null";
-            
+
             try
             {
-                return self.ToString();
+                string value = self.ToString();
+                if (value.Length > 200)
+                    value = $"{value.Remove(197)}... (truncated)";
+                if (self.MetadataToken.Rid != 0)
+                    value = $"{value} (0x{self.MetadataToken.ToString()})";
+                return value;
             }
             catch (Exception)
             {
-                return $"0x{self.MetadataToken}";
+                return $"0x{self.MetadataToken.ToString()}";
             }
         }
-        
+
         public static string SafeToString(this object self)
         {
             if (self is null)
                 return "null";
-            
+
             try
             {
                 return self.ToString();

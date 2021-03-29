@@ -17,7 +17,7 @@ namespace AsmResolver.DotNet
         };
 
         private static readonly Regex NetCoreRuntimePattern = new(@"\.NET( Core)? \d+\.\d+\.\d+");
-        private readonly List<DotNetRuntimeInfo> _installedRuntimes = new();
+        private readonly List<DotNetInstallationInfo> _installedRuntimes = new();
 
         static DotNetCorePathProvider()
         {
@@ -152,7 +152,7 @@ namespace AsmResolver.DotNet
         {
             installationDirectory = Path.Combine(installationDirectory, "shared");
             foreach (string directory in Directory.EnumerateDirectories(installationDirectory))
-                _installedRuntimes.Add(new DotNetRuntimeInfo(directory));
+                _installedRuntimes.Add(new DotNetInstallationInfo(directory));
             _installedRuntimes.Sort();
         }
 
@@ -201,13 +201,13 @@ namespace AsmResolver.DotNet
         /// <summary>
         /// Provides information about a .NET runtime installation.
         /// </summary>
-        private readonly struct DotNetRuntimeInfo : IComparable<DotNetRuntimeInfo>
+        private readonly struct DotNetInstallationInfo : IComparable<DotNetInstallationInfo>
         {
             /// <summary>
-            /// Creates a new instance of the <see cref="DotNet.DotNetRuntimeInfo"/> structure.
+            /// Creates a new instance of the <see cref="DotNetInstallationInfo"/> structure.
             /// </summary>
             /// <param name="path">The path to the runtime.</param>
-            public DotNetRuntimeInfo(string path)
+            public DotNetInstallationInfo(string path)
             {
                 string name = Path.GetFileName(path);
                 var installedVersions = DetectInstalledVersionsInDirectory(name, path);
@@ -306,7 +306,7 @@ namespace AsmResolver.DotNet
             }
 
             /// <inheritdoc />
-            public int CompareTo(DotNetRuntimeInfo other)
+            public int CompareTo(DotNetInstallationInfo other)
             {
                 // Ensure .NETCoreApp is sorted last to give other runtimes (like Microsoft.WindowsDesktop.App)
                 // priority. This prevents libraries such as WindowsBase.dll to be incorrectly resolved.
