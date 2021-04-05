@@ -1,13 +1,13 @@
 <Project>
 
     <PropertyGroup>
-        <Copyright>Copyright © Washi 2016-2020</Copyright>
+        <Copyright>Copyright © Washi 2016-2021</Copyright>
         <PackageProjectUrl>https://github.com/Washi1337/AsmResolver</PackageProjectUrl>
         <PackageLicense>https://github.com/Washi1337/AsmResolver/LICENSE.md</PackageLicense>
         <RepositoryUrl>https://github.com/Washi1337/AsmResolver</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <LangVersion>8</LangVersion>
-        <Version>4.5.0</Version>
+        <LangVersion>9</LangVersion>
+        <Version>4.5.1</Version>
     </PropertyGroup>
 
 </Project>
