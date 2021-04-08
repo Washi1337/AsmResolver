@@ -65,10 +65,35 @@ namespace AsmResolver.Workspaces
 
         /// <summary>
         /// Gets a collection of all nodes that are related to this object.
+        /// <param name="blocked">The relations that will be skipped.</param>
+        /// </summary>
+        public IEnumerable<WorkspaceIndexNode> GetAllRelatedNodes(params ObjectRelation[] blocked)
+        {
+            return _neighbors
+                .Select(n=>n.Key)
+                .Where(r => !blocked.Contains(r))
+                .SelectMany(r=> GetRelatedNodes(r));
+        }
+
+
+        /// <summary>
+        /// Gets a collection of all nodes that are related to this object.
         /// </summary>
         public IEnumerable<object> GetAllRelatedObjects()
         {
             return GetAllRelatedNodes()
+                .Select(x => x.Subject)
+                .Distinct();
+        }
+
+
+        /// <summary>
+        /// Gets a collection of all nodes that are related to this object.
+        /// <param name="blocked">The relations that will be skipped.</param>
+        /// </summary>
+        public IEnumerable<object> GetAllRelatedObjects(params ObjectRelation[] blocked)
+        {
+            return GetAllRelatedNodes(blocked)
                 .Select(x => x.Subject)
                 .Distinct();
         }
@@ -85,6 +110,17 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
+        /// Gets a collection of all nodes that are related to these relations.
+        /// </summary>
+        /// <param name="relations">The relations.</param>
+        public IEnumerable<WorkspaceIndexNode> GetRelatedNodes(params ObjectRelation[] relations)
+        {
+            return relations.Length != 0
+                ? relations.SelectMany(relation => GetRelatedNodes(relation))
+                : Enumerable.Empty<WorkspaceIndexNode>();
+        }
+
+        /// <summary>
         /// Gets a collection of all objects that are related to this object of a given relation type.
         /// </summary>
         /// <param name="relation">The relation.</param>
@@ -93,6 +129,17 @@ namespace AsmResolver.Workspaces
         {
             return GetRelatedNodes(relation)
                 .Select(n => (T) n.Subject)
+                .Distinct();
+        }
+
+        /// <summary>
+        /// Gets a collection of all objects that are related to these relations.
+        /// </summary>
+        /// <param name="relations">The relations.</param>
+        public IEnumerable<object> GetRelatedObjects(params ObjectRelation[] relations)
+        {
+            return GetRelatedNodes(relations)
+                .Select(n => n.Subject)
                 .Distinct();
         }
 
