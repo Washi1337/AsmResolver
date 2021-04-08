@@ -665,8 +665,11 @@ namespace AsmResolver.DotNet
         ITypeDefOrRef ITypeDescriptor.ToTypeDefOrRef() => this;
 
         /// <inheritdoc />
-        public TypeSignature ToTypeSignature() =>
-            new TypeDefOrRefSignature(this, IsValueType);
+        public TypeSignature ToTypeSignature()
+        {
+            return (TypeSignature) Module?.CorLibTypeFactory.FromType(this)
+                   ?? new TypeDefOrRefSignature(this, IsValueType);
+        }
 
         /// <inheritdoc />
         public bool IsAccessibleFromType(TypeDefinition type)

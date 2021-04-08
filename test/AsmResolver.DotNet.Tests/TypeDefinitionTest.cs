@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.TestCases.CustomAttributes;
 using AsmResolver.DotNet.TestCases.Events;
 using AsmResolver.DotNet.TestCases.Fields;
@@ -11,6 +12,7 @@ using AsmResolver.DotNet.TestCases.Properties;
 using AsmResolver.DotNet.TestCases.Types;
 using AsmResolver.DotNet.TestCases.Types.Structs;
 using AsmResolver.PE.DotNet.Metadata.Tables;
+using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 using Xunit;
 
 namespace AsmResolver.DotNet.Tests
@@ -519,6 +521,16 @@ namespace AsmResolver.DotNet.Tests
             Assert.True(type.Implements(typeof(IInterface2).FullName));
             Assert.True(type.Implements(typeof(IInterface3).FullName));
             Assert.False(type.Implements(typeof(IInterface4).FullName));
+        }
+
+        [Fact]
+        public void CorLibTypeDefinitionToSignatureShouldResultInCorLibTypeSignature()
+        {
+            var module = new ModuleDefinition("Test");
+            var type = module.CorLibTypeFactory.Object.Resolve();
+            var signature = type.ToTypeSignature();
+            var corlibType = Assert.IsAssignableFrom<CorLibTypeSignature>(signature);
+            Assert.Equal(ElementType.Object, corlibType.ElementType);
         }
     }
 }
