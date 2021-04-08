@@ -11,8 +11,8 @@ namespace AsmResolver.DotNet
     /// Represents a single manifest resource file either embedded into the .NET assembly, or put into a separate file.
     /// In this case, it contains also a reference to the file the resource is located in.
     /// </summary>
-    public class ManifestResource : 
-        MetadataMember, 
+    public class ManifestResource :
+        MetadataMember,
         INameProvider,
         IHasCustomAttribute,
         IOwnedCollectionElement<ModuleDefinition>
@@ -111,7 +111,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets or sets the implementation indicating the file containing the resource data. 
+        /// Gets or sets the implementation indicating the file containing the resource data.
         /// </summary>
         public IImplementation Implementation
         {
@@ -125,7 +125,7 @@ namespace AsmResolver.DotNet
         public bool IsEmbedded => Implementation is null;
 
         /// <summary>
-        /// When this resource is embedded into the current module, gets or sets the embedded resource data. 
+        /// When this resource is embedded into the current module, gets or sets the embedded resource data.
         /// </summary>
         public ISegment EmbeddedDataSegment
         {
@@ -167,12 +167,25 @@ namespace AsmResolver.DotNet
         public byte[] GetData()
         {
             // TODO: resolve external resources.
-            
-            return EmbeddedDataSegment is IReadableSegment readableSegment 
+
+            return EmbeddedDataSegment is IReadableSegment readableSegment
                 ? readableSegment.ToArray()
                 : null;
         }
-        
+
+        /// <summary>
+        /// Gets the reader of stored stored in the manifest resource.
+        /// </summary>
+        /// <returns>The reader, or <c>null</c> if no data was stored or if the external resource was not found.</returns>
+        public IBinaryStreamReader GetReader()
+        {
+            // TODO: resolve external resources.
+
+            return EmbeddedDataSegment is IReadableSegment readableSegment
+                ? readableSegment.CreateReader()
+                : null;
+        }
+
         /// <summary>
         /// Obtains the name of the manifest resource.
         /// </summary>
@@ -204,7 +217,7 @@ namespace AsmResolver.DotNet
         /// <remarks>
         /// This method is called upon initialization of the <see cref="CustomAttributes"/> property.
         /// </remarks>
-        protected virtual IList<CustomAttribute> GetCustomAttributes() => 
+        protected virtual IList<CustomAttribute> GetCustomAttributes() =>
             new OwnedCollection<IHasCustomAttribute, CustomAttribute>(this);
 
         /// <inheritdoc />
