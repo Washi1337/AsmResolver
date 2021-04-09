@@ -10,7 +10,7 @@ namespace AsmResolver.DotNet.Collections
 {
     /// <summary>
     /// Represents an ordered collection of parameters that a method defines and/or uses. This includes the hidden
-    /// "this" parameter, as well as the virtual return parameter. 
+    /// "this" parameter, as well as the virtual return parameter.
     /// </summary>
     [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
     public class ParameterCollection : IReadOnlyList<Parameter>
@@ -18,7 +18,7 @@ namespace AsmResolver.DotNet.Collections
         private readonly IList<Parameter> _parameters = new List<Parameter>();
         private readonly MethodDefinition _owner;
         private bool _hasThis;
-        
+
         /// <summary>
         /// Creates a new parameter collection for the specified method.
         /// </summary>
@@ -122,13 +122,14 @@ namespace AsmResolver.DotNet.Collections
 
         private TypeSignature GetThisParameterType()
         {
-            if (_owner.DeclaringType == null)
+            if (_owner.DeclaringType is null)
                 return null;
 
+            var result = _owner.DeclaringType.ToTypeSignature();
             if (_owner.DeclaringType.IsValueType)
-                return new ByReferenceTypeSignature(new TypeDefOrRefSignature(_owner.DeclaringType, true));
+                result = result.MakeByReferenceType();
 
-            return new TypeDefOrRefSignature(_owner.DeclaringType, false);
+            return result;
         }
 
         internal ParameterDefinition GetParameterDefinition(int sequence)
@@ -171,7 +172,7 @@ namespace AsmResolver.DotNet.Collections
             int actualIndex = index - MethodSignatureIndexBase;
             return actualIndex == -1 && _hasThis ? ThisParameter : this[actualIndex];
         }
-        
+
         /// <inheritdoc />
         public IEnumerator<Parameter> GetEnumerator() => _parameters.GetEnumerator();
 
