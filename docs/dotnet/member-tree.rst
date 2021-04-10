@@ -4,7 +4,7 @@ The Member Tree
 Assemblies and modules
 ----------------------
 
-The root of every .NET assembly is represented by the `AssemblyDefinition` class. This class exposes basic information such as name, version and public key token, but also a collection of all modules that are defined in the assembly. Modules are represented by the `ModuleDefinition` class.
+The root of every .NET assembly is represented by the ``AssemblyDefinition`` class. This class exposes basic information such as name, version and public key token, but also a collection of all modules that are defined in the assembly. Modules are represented by the `ModuleDefinition` class.
 
 Below an example that enumerates all modules defined in an assembly.
 
@@ -19,7 +19,7 @@ Most .NET assemblies only have one module. This main module is also known as the
 Obtaining types in a module
 ---------------------------
 
-Types are represented by the `TypeDefinition` class. To get the types defined in a module, use the `ModuleDefinition.TopLevelTypes` property. A top level types is any non-nested type. Nested types are exposed through the `TypeDefinition.NestedTypes`. 
+Types are represented by the ``TypeDefinition`` class. To get the types defined in a module, use the ``ModuleDefinition.TopLevelTypes`` property. A top level types is any non-nested type. Nested types are exposed through the ``TypeDefinition.NestedTypes``. Alternatively, to get all types, including nested types, it is possible to call the ``ModuleDefinition.GetAllTypes`` method instead.
 
 Below, an example program that iterates through all types recursively and prints them:
 
@@ -50,7 +50,7 @@ Below, an example program that iterates through all types recursively and prints
 Obtaining methods and fields 
 ----------------------------
 
-The `TypeDefinition` class exposes collections of methods and fields that the type defines:
+The ``TypeDefinition`` class exposes collections of methods and fields that the type defines:
 
 .. code-block:: csharp
 
@@ -63,7 +63,7 @@ The `TypeDefinition` class exposes collections of methods and fields that the ty
     foreach (FieldDefinition field in type.Fields)
         Console.WriteLine("{0} : {1:X8}", field.Name, field.MetadataToken.ToInt32());
 
-Methods and fields have a `Signature` property, that contain the return and parameter types, or the field type respectively.
+Methods and fields have a ``Signature`` property, that contain the return and parameter types, or the field type respectively.
 
 .. code-block:: csharp
 
@@ -78,7 +78,7 @@ Methods and fields have a `Signature` property, that contain the return and para
     Console.WriteLine("Return type: " + field.Signature.FieldType);
 
 
-However, for reading parameters from a method definition, it is preferred to use the `Parameters` property instead of the `ParameterTypes` property stored in the signature. This is because the `Parameters` property automatically binds the types to the parameter definitions that are associated to these parameter types. This provides additional information, such as the name of the parameter:
+However, for reading parameters from a method definition, it is preferred to use the ``Parameters`` property instead of the ``ParameterTypes`` property stored in the signature. This is because the ``Parameters`` property automatically binds the types to the parameter definitions that are associated to these parameter types. This provides additional information, such as the name of the parameter:
 
 .. code-block:: csharp
 
@@ -89,7 +89,7 @@ However, for reading parameters from a method definition, it is preferred to use
 Obtaining properties and events
 -------------------------------
 
-Obtaining properties and events is similar to obtaining methods and fields; `TypeDefinition` exposes them in a list as well:
+Obtaining properties and events is similar to obtaining methods and fields; ``TypeDefinition`` exposes them in a list as well:
 
 .. code-block:: csharp
 
@@ -102,7 +102,7 @@ Obtaining properties and events is similar to obtaining methods and fields; `Typ
         Console.WriteLine("{0} : {1:X8}", property.Name, property.MetadataToken.ToInt32());
 
 
-Properties and events have methods associated to them. These are accessible through the `Semantics` property:
+Properties and events have methods associated to them. These are accessible through the ``Semantics`` property:
 
 .. code-block:: csharp
 
