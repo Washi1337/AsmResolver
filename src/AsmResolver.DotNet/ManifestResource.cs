@@ -174,7 +174,7 @@ namespace AsmResolver.DotNet
         }
 
         /// <summary>
-        /// Gets the reader of stored stored in the manifest resource.
+        /// Gets the reader of stored data in the manifest resource.
         /// </summary>
         /// <returns>The reader, or <c>null</c> if no data was stored or if the external resource was not found.</returns>
         public IBinaryStreamReader GetReader()
