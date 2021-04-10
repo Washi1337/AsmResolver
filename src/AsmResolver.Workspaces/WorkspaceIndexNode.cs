@@ -65,14 +65,14 @@ namespace AsmResolver.Workspaces
 
         /// <summary>
         /// Gets a collection of all nodes that are related to this object.
-        /// <param name="blocked">The relations that will be skipped.</param>
+        /// <param name="exclusions">The relations that will be skipped.</param>
         /// </summary>
-        public IEnumerable<WorkspaceIndexNode> GetAllRelatedNodes(params ObjectRelation[] blocked)
+        public IEnumerable<WorkspaceIndexNode> GetAllRelatedNodes(params ObjectRelation[] exclusions)
         {
             return _neighbors
-                .Select(n=>n.Key)
-                .Where(r => !blocked.Contains(r))
-                .SelectMany(r=> GetRelatedNodes(r));
+                .Select(n=> n.Key)
+                .Where(r => !exclusions.Contains(r))
+                .SelectMany(GetRelatedNodes);
         }
 
 
@@ -116,7 +116,7 @@ namespace AsmResolver.Workspaces
         public IEnumerable<WorkspaceIndexNode> GetRelatedNodes(params ObjectRelation[] relations)
         {
             return relations.Length != 0
-                ? relations.SelectMany(relation => GetRelatedNodes(relation))
+                ? relations.SelectMany(GetRelatedNodes)
                 : Enumerable.Empty<WorkspaceIndexNode>();
         }
 
