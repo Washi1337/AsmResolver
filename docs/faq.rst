@@ -47,3 +47,13 @@ Essentially, two things can be happening here:
 Remember, while perhaps the public API of ``AsmResolver.DotNet`` might look similar on face value to other libraries (such as Mono.Cecil or dnlib), AsmResolver itself follows a very different design philosophy than these libraries. As such, a lot of classes in those libraries will not map one-to-one to AsmResolver classes directly. Check the documentation to make sure you are not misusing the API.
 
 If you believe it is a bug, report it on the `issues board <https://github.com/Washi1337/AsmResolver/issues>`_.
+
+
+Does AsmResolver have a concept similar to writer events in dnlib? 
+------------------------------------------------------------------
+
+No. 
+
+Instead, to have more control over how the final output executable file will look like, AsmResolver works in layers of abstraction. For example, you can manually serialize a ``ModuleDefinition`` to a ``PEImage`` first, before writing it to the disk. This class exposes more low level structures of the executable file, which can all be changed before writing to the disk.
+
+For more details, refer to :ref:`dotnet-advanced-pe-image-building`.

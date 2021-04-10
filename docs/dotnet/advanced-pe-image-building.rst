@@ -1,3 +1,5 @@
+.. _dotnet-advanced-pe-image-building:
+
 Advanced PE Image Building
 ==========================
 
