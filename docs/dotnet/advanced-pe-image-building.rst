@@ -143,6 +143,8 @@ After writing the module to an output stream, use the ``StrongNameSigner`` class
     signer.SignImage(outputStream, module.Assembly.HashAlgorithm);
 
 
+.. _dotnet-image-builder-diagnostics:
+
 Image Builder Diagnostics 
 -------------------------
 

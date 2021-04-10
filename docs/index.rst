@@ -12,6 +12,8 @@ Table of Contents:
    :name: sec-general
 
    overview
+   faq
+
 
 .. toctree::
    :maxdepth: 1

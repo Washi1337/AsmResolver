@@ -13,6 +13,7 @@ These parameters can then be passed on to any of the ``PEImage.FromXXX`` methods
 
     var image = PEImage.FromFile(@"C:\Path\To\File.exe", parameters);
 
+.. _pe-custom-error-handling:
 
 Custom error handling
 ---------------------
