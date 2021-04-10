@@ -37,15 +37,35 @@ namespace AsmResolver.DotNet.Tests
             {
                 0,1,2,3,4
             };
-            
+
             var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location);
             module.Resources.Add(new ManifestResource(resourceName, ManifestResourceAttributes.Public, new DataSegment(contents)));
-            
+
             using var stream = new MemoryStream();
             module.Write(stream);
 
             var newModule = ModuleDefinition.FromBytes(stream.ToArray());
             Assert.Equal(contents, newModule.Resources.First(r => r.Name == resourceName).GetData());
+        }
+
+        [Fact]
+        public void PersistentDataReader()
+        {
+            const string resourceName = "SomeResource";
+            var contents = new byte[]
+            {
+                0,1,2,3,4
+            };
+
+            var module = ModuleDefinition.FromFile(typeof(TestCaseResources).Assembly.Location);
+            module.Resources.Add(new ManifestResource(resourceName, ManifestResourceAttributes.Public, new DataSegment(contents)));
+
+            using var stream = new MemoryStream();
+            module.Write(stream);
+
+            var newModule = ModuleDefinition.FromBytes(stream.ToArray());
+            Assert.Equal(contents
+                , newModule.Resources.First(r => r.Name == resourceName).GetReader().ReadToEnd());
         }
     }
 }
