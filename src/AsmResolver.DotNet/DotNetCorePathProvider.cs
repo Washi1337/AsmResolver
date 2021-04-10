@@ -77,7 +77,8 @@ namespace AsmResolver.DotNet
                 for (int i = 0; i < runtime.InstalledVersions.Count; i++)
                 {
                     var versionInfo = runtime.InstalledVersions[i];
-                    if (versionInfo.IsCompatibleWithStandard(standardVersion) && versionInfo.Version > coreVersion)
+                    if (versionInfo.IsCompatibleWithStandard(standardVersion)
+                        && (coreVersion is null || versionInfo.Version > coreVersion))
                     {
                         foundMatch = true;
                         coreVersion = versionInfo.Version;
