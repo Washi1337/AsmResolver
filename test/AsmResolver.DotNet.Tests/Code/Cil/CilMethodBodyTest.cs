@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
+using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Code.Cil;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures;
@@ -533,6 +534,94 @@ namespace AsmResolver.DotNet.Tests.Code.Cil
 
             body.ExceptionHandlers.Add(handler);
             Assert.Throws<InvalidCilInstructionException>(() => body.VerifyLabels());
+        }
+
+        [Fact]
+        public void SmallTryAndHandlerBlockShouldResultInTinyFormat()
+        {
+            var body = CreateDummyBody(true);
+            for (int i = 0; i < 10; i++)
+                body.Instructions.Add(CilOpCodes.Nop);
+            body.Instructions.Add(CilOpCodes.Ret);
+            body.Instructions.CalculateOffsets();
+
+            var handler = new CilExceptionHandler
+            {
+                TryStart = body.Instructions[0].CreateLabel(),
+                TryEnd = body.Instructions[1].CreateLabel(),
+                HandlerStart = body.Instructions[1].CreateLabel(),
+                HandlerEnd = body.Instructions[2].CreateLabel(),
+                HandlerType = CilExceptionHandlerType.Finally
+            };
+            body.ExceptionHandlers.Add(handler);
+
+            Assert.False(handler.IsFat);
+        }
+
+        [Fact]
+        public void LargeTryBlockShouldResultInFatFormat()
+        {
+            var body = CreateDummyBody(true);
+            for (int i = 0; i < 300; i++)
+                body.Instructions.Add(CilOpCodes.Nop);
+            body.Instructions.Add(CilOpCodes.Ret);
+            body.Instructions.CalculateOffsets();
+
+            var handler = new CilExceptionHandler
+            {
+                TryStart = body.Instructions[0].CreateLabel(),
+                TryEnd = body.Instructions[256].CreateLabel(),
+                HandlerStart = body.Instructions[256].CreateLabel(),
+                HandlerEnd = body.Instructions[257].CreateLabel(),
+                HandlerType = CilExceptionHandlerType.Finally
+            };
+            body.ExceptionHandlers.Add(handler);
+
+            Assert.True(handler.IsFat);
+        }
+
+        [Fact]
+        public void LargeHandlerBlockShouldResultInFatFormat()
+        {
+            var body = CreateDummyBody(true);
+            for (int i = 0; i < 300; i++)
+                body.Instructions.Add(CilOpCodes.Nop);
+            body.Instructions.Add(CilOpCodes.Ret);
+            body.Instructions.CalculateOffsets();
+
+            var handler = new CilExceptionHandler
+            {
+                TryStart = body.Instructions[0].CreateLabel(),
+                TryEnd = body.Instructions[1].CreateLabel(),
+                HandlerStart = body.Instructions[1].CreateLabel(),
+                HandlerEnd = body.Instructions[257].CreateLabel(),
+                HandlerType = CilExceptionHandlerType.Finally
+            };
+            body.ExceptionHandlers.Add(handler);
+
+            Assert.True(handler.IsFat);
+        }
+
+        [Fact]
+        public void SmallTryBlockStartingOnLargeOffsetShouldResultInFatFormat()
+        {
+            var body = CreateDummyBody(true);
+            for (int i = 0; i < 0x20000; i++)
+                body.Instructions.Add(CilOpCodes.Nop);
+            body.Instructions.Add(CilOpCodes.Ret);
+            body.Instructions.CalculateOffsets();
+
+            var handler = new CilExceptionHandler
+            {
+                TryStart = body.Instructions[0x10000].CreateLabel(),
+                TryEnd = body.Instructions[0x10001].CreateLabel(),
+                HandlerStart = body.Instructions[0x10001].CreateLabel(),
+                HandlerEnd = body.Instructions[0x10002].CreateLabel(),
+                HandlerType = CilExceptionHandlerType.Finally
+            };
+            body.ExceptionHandlers.Add(handler);
+
+            Assert.True(handler.IsFat);
         }
     }
 }
