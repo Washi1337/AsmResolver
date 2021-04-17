@@ -20,8 +20,10 @@ namespace AsmResolver.Workspaces.Tests
 
             Assert.Contains(subject2, node1.OutgoingEdges.GetObjects(MockRelations.Relation1));
             Assert.Contains(node2, node1.OutgoingEdges.GetNodes(MockRelations.Relation1));
+            Assert.Contains(node2, node1.OutgoingEdges.GetNodes());
             Assert.Contains(subject1, node2.IncomingEdges.GetObjects(MockRelations.Relation1));
             Assert.Contains(node1, node2.IncomingEdges.GetNodes(MockRelations.Relation1));
+            Assert.Contains(node1, node2.IncomingEdges.GetNodes());
         }
 
         [Fact]

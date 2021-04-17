@@ -255,17 +255,68 @@ namespace AsmResolver.Workspaces.Collections
                 .Distinct();
         }
 
-        /// <inheritdoc />
-        public IEnumerator<WorkspaceIndexEdge> GetEnumerator()
-        {
-            return _entries.Values.SelectMany(x => x).GetEnumerator();
-        }
+        /// <summary>
+        /// Gets an enumerator that enumerates all edges in the collection.
+        /// </summary>
+        /// <returns>The enumerator.</returns>
+        public Enumerator GetEnumerator() => new(this);
 
         /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator<WorkspaceIndexEdge> IEnumerable<WorkspaceIndexEdge>.GetEnumerator() => GetEnumerator();
 
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Enumerates all edges in an <see cref="EdgeCollection"/>.
+        /// </summary>
+        public struct Enumerator : IEnumerator<WorkspaceIndexEdge>
+        {
+            private Dictionary<ObjectRelation,HashSet<WorkspaceIndexEdge>>.Enumerator _entriesEnumerator;
+            private HashSet<WorkspaceIndexEdge>.Enumerator _edgeEnumerator;
+            private bool _initialized;
+
+            internal Enumerator(EdgeCollection collection)
+            {
+                _entriesEnumerator = collection._entries.GetEnumerator();
+                _initialized = false;
+            }
+
+            /// <inheritdoc />
+            public WorkspaceIndexEdge Current => _initialized ? _edgeEnumerator.Current : default;
+
+            /// <inheritdoc />
+            object IEnumerator.Current => Current;
+
+            /// <inheritdoc />
+            public bool MoveNext()
+            {
+                if (_initialized && _edgeEnumerator.MoveNext())
+                    return true;
+
+                while (_entriesEnumerator.MoveNext())
+                {
+                    _edgeEnumerator.Dispose();
+                    _edgeEnumerator = _entriesEnumerator.Current.Value.GetEnumerator();
+                    _initialized = true;
+                    if (_edgeEnumerator.MoveNext())
+                        return true;
+                }
+
+                return false;
+            }
+
+            /// <inheritdoc />
+            public void Reset() => throw new InvalidOperationException();
+
+            /// <inheritdoc />
+            public void Dispose()
+            {
+                _entriesEnumerator.Dispose();
+
+                if (_initialized)
+                    _edgeEnumerator.Dispose();
+            }
+        }
     }
 }
