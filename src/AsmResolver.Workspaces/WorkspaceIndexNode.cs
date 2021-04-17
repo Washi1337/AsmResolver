@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -34,11 +33,17 @@ namespace AsmResolver.Workspaces
             get;
         }
 
+        /// <summary>
+        /// Gets a collection of edges that target this node.
+        /// </summary>
         public IncomingEdgesCollection IncomingEdges
         {
             get;
         }
 
+        /// <summary>
+        /// Gets a collection of edges that originate from this node.
+        /// </summary>
         public OutgoingEdgesCollection OutgoingEdges
         {
             get;

@@ -2,10 +2,12 @@ using System;
 
 namespace AsmResolver.Workspaces.Collections
 {
+    /// <summary>
+    /// Represents a collection of edges targeting a single <see cref="WorkspaceIndexNode"/>.
+    /// </summary>
     public sealed class IncomingEdgesCollection : EdgeCollection
     {
-        /// <inheritdoc />
-        public IncomingEdgesCollection(WorkspaceIndexNode owner)
+        internal IncomingEdgesCollection(WorkspaceIndexNode owner)
             : base(owner)
         {
         }
@@ -19,7 +21,7 @@ namespace AsmResolver.Workspaces.Collections
         }
 
         /// <inheritdoc />
-        protected override WorkspaceIndexNode GetNode(in WorkspaceIndexEdge edge) => edge.Source;
+        protected override WorkspaceIndexNode GetAdjacentNode(in WorkspaceIndexEdge edge) => edge.Source;
 
         /// <inheritdoc />
         public override bool Add(WorkspaceIndexEdge item)

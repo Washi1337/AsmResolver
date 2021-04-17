@@ -5,13 +5,28 @@ using System.Linq;
 
 namespace AsmResolver.Workspaces.Collections
 {
+    /// <summary>
+    /// Represents a collection of edges in a workspace index graph.
+    /// </summary>
     public abstract class EdgeCollection : ICollection<WorkspaceIndexEdge>
     {
         private readonly Dictionary<ObjectRelation, HashSet<WorkspaceIndexEdge>> _entries = new();
 
-        protected EdgeCollection(WorkspaceIndexNode owner)
+        /// <summary>
+        /// Initializes a new empty edge collection.
+        /// </summary>
+        /// <param name="owner">The owner of the collection.</param>
+        protected internal EdgeCollection(WorkspaceIndexNode owner)
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
+        }
+
+        /// <summary>
+        /// Gets the owner of this edge collection.
+        /// </summary>
+        public WorkspaceIndexNode Owner
+        {
+            get;
         }
 
         /// <inheritdoc />
@@ -20,17 +35,26 @@ namespace AsmResolver.Workspaces.Collections
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
-        public WorkspaceIndexNode Owner
-        {
-            get;
-        }
-
+        /// <summary>
+        /// Validates the provided edge for validity in the context of this edge collection.
+        /// </summary>
+        /// <param name="edge">The edge to validate.</param>
         protected virtual void AssertEdgeValidity(in WorkspaceIndexEdge edge)
         {
         }
 
-        protected abstract WorkspaceIndexNode GetNode(in WorkspaceIndexEdge edge);
+        /// <summary>
+        /// Gets the node that the node is adjacent to.
+        /// </summary>
+        /// <param name="edge">The edge.</param>
+        /// <returns>The adjacent node.</returns>
+        protected abstract WorkspaceIndexNode GetAdjacentNode(in WorkspaceIndexEdge edge);
 
+        /// <summary>
+        /// Adds a single edge to the collection.
+        /// </summary>
+        /// <param name="item">The edge to add.</param>
+        /// <returns><c>true</c> if the edge was added, <c>false</c> if the edge already existed.</returns>
         public virtual bool Add(WorkspaceIndexEdge item)
         {
             AssertEdgeValidity(item);
@@ -112,6 +136,10 @@ namespace AsmResolver.Workspaces.Collections
             }
         }
 
+        /// <summary>
+        /// Gets a collection of all edges that are not related in the context of any of the provided relations.
+        /// </summary>
+        /// <param name="exclusions">The excluded relations.</param>
         public IEnumerable<WorkspaceIndexEdge> GetAllEdges(params ObjectRelation[] exclusions)
         {
             foreach (var entry in _entries)
@@ -130,7 +158,7 @@ namespace AsmResolver.Workspaces.Collections
         public IEnumerable<WorkspaceIndexNode> GetNodes()
         {
             return this
-                .Select(e => GetNode(e))
+                .Select(e => GetAdjacentNode(e))
                 .Distinct();
         }
 
@@ -141,7 +169,7 @@ namespace AsmResolver.Workspaces.Collections
         public IEnumerable<WorkspaceIndexNode> GetNodes(ObjectRelation relation)
         {
             return GetEdges(relation)
-                .Select(e => GetNode(e))
+                .Select(e => GetAdjacentNode(e))
                 .Distinct();
         }
 
@@ -152,7 +180,7 @@ namespace AsmResolver.Workspaces.Collections
         public IEnumerable<WorkspaceIndexNode> GetNodes(params ObjectRelation[] relations)
         {
             return GetEdges(relations)
-                .Select(e => GetNode(e))
+                .Select(e => GetAdjacentNode(e))
                 .Distinct();
         }
 
@@ -162,7 +190,7 @@ namespace AsmResolver.Workspaces.Collections
         public IEnumerable<WorkspaceIndexNode> GetAllNodes()
         {
             return _entries
-                .SelectMany(entry => entry.Value, (_, edge) => GetNode(edge))
+                .SelectMany(entry => entry.Value, (_, edge) => GetAdjacentNode(edge))
                 .Distinct();
         }
 
@@ -173,7 +201,7 @@ namespace AsmResolver.Workspaces.Collections
         public IEnumerable<WorkspaceIndexNode> GetAllNodes(params ObjectRelation[] exclusions)
         {
             return GetAllEdges(exclusions)
-                .Select(e => GetNode(e))
+                .Select(e => GetAdjacentNode(e))
                 .Distinct();
         }
 
@@ -185,7 +213,9 @@ namespace AsmResolver.Workspaces.Collections
         /// <typeparam name="TTarget">The type of object to obtain.</typeparam>
         public IEnumerable<TTarget> GetObjects<TSource, TTarget>(ObjectRelation<TSource, TTarget> relation)
         {
-            return GetEdges(relation).Select(e => (TTarget) GetNode(e).Subject);
+            return GetEdges(relation)
+                .Select(e => (TTarget) GetAdjacentNode(e).Subject)
+                .Distinct();
         }
 
         /// <summary>
@@ -195,7 +225,7 @@ namespace AsmResolver.Workspaces.Collections
         public IEnumerable<object> GetObjects(params ObjectRelation[] relations)
         {
             return GetEdges(relations)
-                .Select(n => GetNode(n).Subject)
+                .Select(n => GetAdjacentNode(n).Subject)
                 .Distinct();
         }
 
@@ -204,17 +234,19 @@ namespace AsmResolver.Workspaces.Collections
         /// </summary>
         public IEnumerable<object> GetAllObjects()
         {
-            return this.Select(e => GetNode(e).Subject);
+            return this
+                .Select(e => GetAdjacentNode(e).Subject)
+                .Distinct();
         }
 
         /// <summary>
         /// Gets a collection of all nodes that are related to this object.
-        /// <param name="blocked">The relations that will be skipped.</param>
+        /// <param name="exclusions">The relations that will be skipped.</param>
         /// </summary>
         public IEnumerable<object> GetAllObjects(params ObjectRelation[] exclusions)
         {
             return GetAllEdges(exclusions)
-                .Select(e => GetNode(e).Subject)
+                .Select(e => GetAdjacentNode(e).Subject)
                 .Distinct();
         }
 
