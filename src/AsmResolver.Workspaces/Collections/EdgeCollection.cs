@@ -296,9 +296,12 @@ namespace AsmResolver.Workspaces.Collections
 
                 while (_entriesEnumerator.MoveNext())
                 {
-                    _edgeEnumerator.Dispose();
+                    if (_initialized)
+                        _edgeEnumerator.Dispose();
+
                     _edgeEnumerator = _entriesEnumerator.Current.Value.GetEnumerator();
                     _initialized = true;
+
                     if (_edgeEnumerator.MoveNext())
                         return true;
                 }
