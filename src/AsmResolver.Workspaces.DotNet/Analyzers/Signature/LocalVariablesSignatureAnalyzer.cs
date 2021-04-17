@@ -16,7 +16,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
                 for (int i = 0; i < subject.VariableTypes.Count; i++)
                 {
                     var variableType = subject.VariableTypes[i];
-                    context.SchedulaForAnalysis(variableType);
+                    context.ScheduleForAnalysis(variableType);
                 }
             }
         }

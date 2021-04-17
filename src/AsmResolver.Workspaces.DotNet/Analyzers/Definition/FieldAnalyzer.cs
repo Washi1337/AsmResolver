@@ -14,7 +14,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             // Schedule signature for analysis.
             if (context.HasAnalyzers(typeof(FieldSignature)))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
         }
     }

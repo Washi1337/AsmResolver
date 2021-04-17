@@ -55,7 +55,7 @@ namespace AsmResolver.Workspaces
         /// Schedules the provided object if it was not scheduled before.
         /// </summary>
         /// <param name="subject">The object to analyse.</param>
-        public void SchedulaForAnalysis(object subject)
+        public void ScheduleForAnalysis(object subject)
         {
             if (TraversedObjects.Add(subject))
                 Agenda.Enqueue(subject);

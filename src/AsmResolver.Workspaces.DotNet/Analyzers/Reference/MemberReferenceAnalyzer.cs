@@ -13,12 +13,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
 
             if (subject.DeclaringType is not null && context.HasAnalyzers(subject.DeclaringType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
             if (context.HasAnalyzers(subject.Signature.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
 
             if (context.Workspace is not DotNetWorkspace workspace)

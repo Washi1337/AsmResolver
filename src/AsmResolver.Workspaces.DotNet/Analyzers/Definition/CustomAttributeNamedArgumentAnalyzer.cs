@@ -12,7 +12,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         {
             if (context.HasAnalyzers(typeof(CustomAttributeArgument)))
             {
-                context.SchedulaForAnalysis(subject.Argument);
+                context.ScheduleForAnalysis(subject.Argument);
             }
         }
     }

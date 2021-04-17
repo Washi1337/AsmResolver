@@ -14,12 +14,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
 
             if (subject.DeclaringType is not null && context.HasAnalyzers(subject.DeclaringType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
         }
     }

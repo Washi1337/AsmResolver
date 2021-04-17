@@ -14,16 +14,16 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         {
             if (context.HasAnalyzers(subject.Method.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Method);
+                context.ScheduleForAnalysis(subject.Method);
             }
             if (context.HasAnalyzers(typeof(GenericInstanceMethodSignature)))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
 
             if (subject.DeclaringType is not null && context.HasAnalyzers(subject.DeclaringType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
         }
     }

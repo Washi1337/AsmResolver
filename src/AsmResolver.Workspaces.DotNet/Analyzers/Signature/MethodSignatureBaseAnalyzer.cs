@@ -13,11 +13,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {
-                context.SchedulaForAnalysis(subject.ReturnType);
+                context.ScheduleForAnalysis(subject.ReturnType);
                 for (int i = 0; i < subject.ParameterTypes.Count; i++)
-                    context.SchedulaForAnalysis(subject.ParameterTypes[i]);
+                    context.ScheduleForAnalysis(subject.ParameterTypes[i]);
                 for (int i = 0; i < subject.SentinelParameterTypes.Count; i++)
-                    context.SchedulaForAnalysis(subject.SentinelParameterTypes[i]);
+                    context.ScheduleForAnalysis(subject.SentinelParameterTypes[i]);
             }
         }
     }

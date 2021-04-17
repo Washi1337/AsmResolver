@@ -12,7 +12,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
         {
             if (subject.DeclaringType is not null)
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
             if (context.Workspace is not DotNetWorkspace workspace)

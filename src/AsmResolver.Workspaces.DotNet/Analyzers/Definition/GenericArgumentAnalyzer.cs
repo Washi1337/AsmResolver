@@ -16,7 +16,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 for (int i = 0; i < subject.TypeArguments.Count; i++)
                 {
-                    context.SchedulaForAnalysis(subject.TypeArguments[i]);
+                    context.ScheduleForAnalysis(subject.TypeArguments[i]);
                 }
             }
         }

@@ -17,7 +17,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                     var element = subject.Elements[i];
                     if (element is not TypeSignature)
                         continue;
-                    context.SchedulaForAnalysis(element);
+                    context.ScheduleForAnalysis(element);
                 }
             }
         }

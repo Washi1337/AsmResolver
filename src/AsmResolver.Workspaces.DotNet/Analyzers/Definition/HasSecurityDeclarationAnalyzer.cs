@@ -15,7 +15,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             if (context.HasAnalyzers(typeof(SecurityDeclaration)))
             {
                 for (int i = 0; i < subject.SecurityDeclarations.Count; i++)
-                    context.SchedulaForAnalysis(subject.SecurityDeclarations[i]);
+                    context.ScheduleForAnalysis(subject.SecurityDeclarations[i]);
             }
         }
     }

@@ -15,7 +15,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             if (context.HasAnalyzers(typeof(CustomAttribute)))
             {
                 for (int i = 0; i < subject.CustomAttributes.Count; i++)
-                    context.SchedulaForAnalysis(subject.CustomAttributes[i]);
+                    context.ScheduleForAnalysis(subject.CustomAttributes[i]);
             }
         }
     }

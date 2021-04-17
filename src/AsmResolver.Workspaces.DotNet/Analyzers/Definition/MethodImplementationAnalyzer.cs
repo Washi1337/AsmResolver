@@ -14,11 +14,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         {
             if (context.HasAnalyzers(subject.Declaration.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Declaration);
+                context.ScheduleForAnalysis(subject.Declaration);
             }
             if (context.HasAnalyzers(subject.Body.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Body);
+                context.ScheduleForAnalysis(subject.Body);
             }
         }
     }

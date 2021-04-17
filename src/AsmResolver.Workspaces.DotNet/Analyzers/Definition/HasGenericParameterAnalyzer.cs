@@ -19,7 +19,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 var genericParameter = subject.GenericParameters[i];
                 if (hasGenericParameterAnalyzer)
                 {
-                    context.SchedulaForAnalysis(genericParameter);
+                    context.ScheduleForAnalysis(genericParameter);
                 }
 
                 for (int j = 0; j < genericParameter.Constraints.Count; j++)
@@ -27,13 +27,13 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                     var parameterConstraint = genericParameter.Constraints[j];
                     if (hasGenericParameterConstraintAnalyzer)
                     {
-                        context.SchedulaForAnalysis(parameterConstraint);
+                        context.ScheduleForAnalysis(parameterConstraint);
                     }
 
                     if (parameterConstraint.Constraint is not null
                         && context.HasAnalyzers(parameterConstraint.Constraint.GetType()))
                     {
-                        context.SchedulaForAnalysis(parameterConstraint.Constraint);
+                        context.ScheduleForAnalysis(parameterConstraint.Constraint);
                     }
                 }
             }

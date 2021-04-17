@@ -53,7 +53,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
             {
                 if (signature.ModifierType is not null && context.HasAnalyzers(signature.ModifierType.GetType()))
                 {
-                    context.SchedulaForAnalysis(signature.ModifierType);
+                    context.ScheduleForAnalysis(signature.ModifierType);
                 }
                 signature.BaseType.AcceptVisitor(this, context);
                 return signature;
@@ -65,7 +65,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
             {
                 if (signature.GenericType is not null && context.HasAnalyzers(signature.GenericType.GetType()))
                 {
-                    context.SchedulaForAnalysis(signature.GenericType);
+                    context.ScheduleForAnalysis(signature.GenericType);
                 }
 
                 for (int i = 0; i < signature.TypeArguments.Count; i++)
@@ -112,7 +112,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
             {
                 if (signature.Type is not null && context.HasAnalyzers(signature.Type.GetType()))
                 {
-                    context.SchedulaForAnalysis(signature.Type);
+                    context.ScheduleForAnalysis(signature.Type);
                 }
                 return signature;
             }

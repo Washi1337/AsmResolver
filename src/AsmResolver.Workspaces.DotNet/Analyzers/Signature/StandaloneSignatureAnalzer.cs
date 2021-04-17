@@ -14,7 +14,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
         {
             if (context.HasAnalyzers(subject.Signature.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
         }
     }

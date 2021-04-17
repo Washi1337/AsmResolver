@@ -13,7 +13,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {
-                context.SchedulaForAnalysis(subject.FieldType);
+                context.ScheduleForAnalysis(subject.FieldType);
             }
         }
     }

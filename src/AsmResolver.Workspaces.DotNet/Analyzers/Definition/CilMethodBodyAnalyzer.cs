@@ -19,7 +19,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 for (int i = 0; i < subject.ExceptionHandlers.Count; i++)
                 {
-                    context.SchedulaForAnalysis(subject.ExceptionHandlers[i]);
+                    context.ScheduleForAnalysis(subject.ExceptionHandlers[i]);
                 }
             }
 
@@ -27,7 +27,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 for (int i = 0; i < subject.LocalVariables.Count; i++)
                 {
-                    context.SchedulaForAnalysis(subject.LocalVariables[i]);
+                    context.ScheduleForAnalysis(subject.LocalVariables[i]);
                 }
             }
 
@@ -46,7 +46,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         if (instruction.Operand is IFieldDescriptor field
                             && context.HasAnalyzers(opType!))
                         {
-                            context.SchedulaForAnalysis(field);
+                            context.ScheduleForAnalysis(field);
                         }
 
                         break;
@@ -54,7 +54,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         if (instruction.Operand is IMethodDescriptor method
                             && context.HasAnalyzers(opType!))
                         {
-                            context.SchedulaForAnalysis(method);
+                            context.ScheduleForAnalysis(method);
                         }
 
                         break;
@@ -62,14 +62,14 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         if (instruction.Operand is StandAloneSignature signature
                             && context.HasAnalyzers(typeof(StandAloneSignature)))
                         {
-                            context.SchedulaForAnalysis(signature);
+                            context.ScheduleForAnalysis(signature);
                         }
                         break;
                     case CilOperandType.InlineTok:
                         if (instruction.Operand is IMetadataMember member
                             && context.HasAnalyzers(opType!))
                         {
-                            context.SchedulaForAnalysis(member);
+                            context.ScheduleForAnalysis(member);
                         }
 
                         break;
@@ -77,7 +77,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                         if (instruction.Operand is ITypeDefOrRef type
                             && context.HasAnalyzers(opType!))
                         {
-                            context.SchedulaForAnalysis(type);
+                            context.ScheduleForAnalysis(type);
                         }
 
                         break;

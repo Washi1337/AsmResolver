@@ -15,7 +15,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         {
             if (subject.ExceptionType is not null && context.HasAnalyzers(subject.ExceptionType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.ExceptionType);
+                context.ScheduleForAnalysis(subject.ExceptionType);
             }
         }
     }

@@ -36,19 +36,19 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             if (context.HasAnalyzers(typeof(ParameterDefinition)))
             {
                 for (int i = 0; i < subject.ParameterDefinitions.Count; i++)
-                    context.SchedulaForAnalysis(subject.ParameterDefinitions[i]);
+                    context.ScheduleForAnalysis(subject.ParameterDefinitions[i]);
             }
 
             // Schedule signature for analysis.
             if (context.HasAnalyzers(typeof(MethodSignature)))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
 
             // Schedule method body for analysis.
             if (subject.CilMethodBody is not null && context.HasAnalyzers(typeof(CilMethodBody)))
             {
-                context.SchedulaForAnalysis(subject.CilMethodBody);
+                context.ScheduleForAnalysis(subject.CilMethodBody);
             }
 
         }

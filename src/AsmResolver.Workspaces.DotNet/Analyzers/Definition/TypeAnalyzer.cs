@@ -75,53 +75,53 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             if (context.HasAnalyzers(typeof(MethodDefinition)))
             {
                 for (int i = 0; i < subject.Methods.Count; i++)
-                    context.SchedulaForAnalysis(subject.Methods[i]);
+                    context.ScheduleForAnalysis(subject.Methods[i]);
             }
 
             // Schedule fields for analysis.
             if (context.HasAnalyzers(typeof(FieldDefinition)))
             {
                 for (int i = 0; i < subject.Fields.Count; i++)
-                    context.SchedulaForAnalysis(subject.Fields[i]);
+                    context.ScheduleForAnalysis(subject.Fields[i]);
             }
 
             // Schedule properties for analysis.
             if (context.HasAnalyzers(typeof(PropertyDefinition)))
             {
                 for (int i = 0; i < subject.Properties.Count; i++)
-                    context.SchedulaForAnalysis(subject.Properties[i]);
+                    context.ScheduleForAnalysis(subject.Properties[i]);
             }
 
             // Schedule events for analysis.
             if (context.HasAnalyzers(typeof(EventDefinition)))
             {
                 for (int i = 0; i < subject.Events.Count; i++)
-                    context.SchedulaForAnalysis(subject.Events[i]);
+                    context.ScheduleForAnalysis(subject.Events[i]);
             }
 
             if (subject.BaseType is not null && context.HasAnalyzers(subject.BaseType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.BaseType);
+                context.ScheduleForAnalysis(subject.BaseType);
             }
 
             if (context.HasAnalyzers(typeof(InterfaceImplementation)))
             {
                 for (int i = 0; i < subject.Interfaces.Count; i++)
                 {
-                    context.SchedulaForAnalysis(subject.Interfaces[i]);
+                    context.ScheduleForAnalysis(subject.Interfaces[i]);
                 }
             }
 
             if (subject.DeclaringType is not null && context.HasAnalyzers(typeof(TypeDefinition)))
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
             if (context.HasAnalyzers(typeof(MethodImplementation)))
             {
                 for (int i = 0; i < subject.MethodImplementations.Count; i++)
                 {
-                    context.SchedulaForAnalysis(subject.MethodImplementations[i]);
+                    context.ScheduleForAnalysis(subject.MethodImplementations[i]);
                 }
             }
         }

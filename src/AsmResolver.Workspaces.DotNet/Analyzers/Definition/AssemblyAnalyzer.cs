@@ -16,7 +16,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             if (context.HasAnalyzers(typeof(AssemblyDefinition)))
             {
                 for (int i = 0; i < subject.Modules.Count; i++)
-                    context.SchedulaForAnalysis(subject.Modules[i]);
+                    context.ScheduleForAnalysis(subject.Modules[i]);
             }
         }
     }

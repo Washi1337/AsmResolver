@@ -13,7 +13,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             // Schedule type for analysis.
             if (context.HasAnalyzers(subject.EventType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.EventType);
+                context.ScheduleForAnalysis(subject.EventType);
             }
         }
     }

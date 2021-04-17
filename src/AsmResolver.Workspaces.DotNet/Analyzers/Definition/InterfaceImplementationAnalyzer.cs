@@ -14,7 +14,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         {
             if (context.HasAnalyzers(subject.Interface.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Interface);
+                context.ScheduleForAnalysis(subject.Interface);
             }
         }
     }
