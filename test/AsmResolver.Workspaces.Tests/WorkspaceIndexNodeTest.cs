@@ -1,3 +1,4 @@
+using System;
 using AsmResolver.Workspaces.Tests.Mock;
 using Xunit;
 
@@ -8,7 +9,7 @@ namespace AsmResolver.Workspaces.Tests
         private readonly WorkspaceIndex _index = new();
 
         [Fact]
-        public void AddRelationShouldResultInRelatedObject()
+        public void AddOutgoingRelationShouldResultInRelatedObject()
         {
             object subject1 = new object();
             object subject2 = new object();
@@ -19,6 +20,32 @@ namespace AsmResolver.Workspaces.Tests
 
             Assert.Contains(subject2, node1.OutgoingEdges.GetObjects(MockRelations.Relation1));
             Assert.Contains(node2, node1.OutgoingEdges.GetNodes(MockRelations.Relation1));
+            Assert.Contains(subject1, node2.IncomingEdges.GetObjects(MockRelations.Relation1));
+            Assert.Contains(node1, node2.IncomingEdges.GetNodes(MockRelations.Relation1));
+        }
+
+        [Fact]
+        public void AddInvalidOutgoingRelationEdgeShouldThrow()
+        {
+            object subject1 = new object();
+            object subject2 = new object();
+            var node1 = _index.GetOrCreateNode(subject1);
+            var node2 = _index.GetOrCreateNode(subject2);
+
+            Assert.Throws<ArgumentException>(() =>
+                node1.OutgoingEdges.Add(new WorkspaceIndexEdge(node2, node1, MockRelations.Relation1)));
+        }
+
+        [Fact]
+        public void AddInvalidIncomingRelationEdgeShouldThrow()
+        {
+            object subject1 = new object();
+            object subject2 = new object();
+            var node1 = _index.GetOrCreateNode(subject1);
+            var node2 = _index.GetOrCreateNode(subject2);
+
+            Assert.Throws<ArgumentException>(() =>
+                node1.IncomingEdges.Add(new WorkspaceIndexEdge(node1, node2, MockRelations.Relation1)));
         }
 
         [Fact]
