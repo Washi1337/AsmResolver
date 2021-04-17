@@ -46,8 +46,9 @@ namespace AsmResolver.Workspaces
         /// </summary>
         /// <param name="relation">The relation.</param>
         /// <param name="node">The node representing the other object.</param>
-        /// <typeparam name="T">The type of object to relate to.</typeparam>
-        public void AddRelation<T>(ObjectRelation<T> relation, WorkspaceIndexNode node)
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TTarget">The type of object to relate to.</typeparam>
+        public void AddRelation<TSource, TTarget>(ObjectRelation<TSource, TTarget> relation, WorkspaceIndexNode node)
         {
             if (!_neighbors.TryGetValue(relation, out var neighbors))
             {
@@ -124,11 +125,12 @@ namespace AsmResolver.Workspaces
         /// Gets a collection of all objects that are related to this object of a given relation type.
         /// </summary>
         /// <param name="relation">The relation.</param>
-        /// <typeparam name="T">The type of object to obtain.</typeparam>
-        public IEnumerable<T> GetRelatedObjects<T>(ObjectRelation<T> relation)
+        /// <typeparam name="TSource">The type of the source object.</typeparam>
+        /// <typeparam name="TTarget">The type of object to obtain.</typeparam>
+        public IEnumerable<TTarget> GetRelatedObjects<TSource, TTarget>(ObjectRelation<TSource, TTarget> relation)
         {
             return GetRelatedNodes(relation)
-                .Select(n => (T) n.Subject)
+                .Select(n => (TTarget) n.Subject)
                 .Distinct();
         }
 

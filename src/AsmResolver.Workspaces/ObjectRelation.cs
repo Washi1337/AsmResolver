@@ -57,8 +57,9 @@ namespace AsmResolver.Workspaces
     /// <summary>
     /// Describes a relation between two objects in a workspace.
     /// </summary>
-    /// <typeparam name="T">The type of objects that this relation connects.</typeparam>
-    public class ObjectRelation<T> : ObjectRelation
+    /// <typeparam name="TSource">The type of objects that this edge originates from.</typeparam>
+    /// <typeparam name="TTarget">The type of objects that this relation connects to.</typeparam>
+    public class ObjectRelation<TSource, TTarget> : ObjectRelation
     {
         /// <summary>
         /// Creates a new instance of the <see cref="ObjectRelation"/> class.
