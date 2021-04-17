@@ -49,6 +49,17 @@ namespace AsmResolver.Workspaces.Tests
         }
 
         [Fact]
+        public void AddInvalidRelationShouldThrow()
+        {
+            string subject1 = "abcdefg";
+            object subject2 = new object();
+            var node1 = _index.GetOrCreateNode(subject1);
+            var node2 = _index.GetOrCreateNode(subject2);
+
+            Assert.Throws<ArgumentException>(() => node1.OutgoingEdges.Add(MockRelations.Relation5, node2));
+        }
+
+        [Fact]
         public void AddMultipleObjectsWithSameRelation()
         {
             object subject1 = new object();

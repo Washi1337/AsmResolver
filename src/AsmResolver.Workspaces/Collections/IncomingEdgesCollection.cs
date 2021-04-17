@@ -15,9 +15,9 @@ namespace AsmResolver.Workspaces.Collections
         /// <inheritdoc />
         protected override void AssertEdgeValidity(in WorkspaceIndexEdge edge)
         {
-            base.AssertEdgeValidity(in edge);
             if (edge.Target != Owner)
                 throw new ArgumentException("The edge targets a different node.");
+            base.AssertEdgeValidity(in edge);
         }
 
         /// <inheritdoc />
