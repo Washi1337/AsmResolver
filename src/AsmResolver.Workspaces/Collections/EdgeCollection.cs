@@ -41,6 +41,11 @@ namespace AsmResolver.Workspaces.Collections
         /// <param name="edge">The edge to validate.</param>
         protected virtual void AssertEdgeValidity(in WorkspaceIndexEdge edge)
         {
+            object source = edge.Source.Subject;
+            object target = edge.Target.Subject;
+
+            if (!edge.Relation.IsValidRelation(source, target))
+                throw new ArgumentException($"{source} cannot be related to {target} in the context of a {edge.Relation.Name} relation.");
         }
 
         /// <summary>

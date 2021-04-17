@@ -35,6 +35,14 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
+        /// Determines whether the two provided objects can be related to each other in the context of this relation.
+        /// </summary>
+        /// <param name="source">The first object.</param>
+        /// <param name="target">The second object.</param>
+        /// <returns><c>true</c> if the two objects can be related, <c>false</c> otherwise.</returns>
+        public abstract bool IsValidRelation(object source, object target);
+
+        /// <summary>
         /// Determine whether two relations are considered equal.
         /// </summary>
         /// <param name="other">The other relation object.</param>
@@ -72,6 +80,12 @@ namespace AsmResolver.Workspaces
         public ObjectRelation(string name, Guid guid)
             : base(name, guid)
         {
+        }
+
+        /// <inheritdoc />
+        public override bool IsValidRelation(object source, object target)
+        {
+            return source is TSource && target is TTarget;
         }
     }
 }
