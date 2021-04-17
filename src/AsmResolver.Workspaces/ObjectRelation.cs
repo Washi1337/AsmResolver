@@ -40,7 +40,7 @@ namespace AsmResolver.Workspaces
         /// <param name="source">The first object.</param>
         /// <param name="target">The second object.</param>
         /// <returns><c>true</c> if the two objects can be related, <c>false</c> otherwise.</returns>
-        public abstract bool IsValidRelation(object source, object target);
+        public abstract bool CanRelateObjects(object source, object target);
 
         /// <summary>
         /// Determine whether two relations are considered equal.
@@ -83,7 +83,7 @@ namespace AsmResolver.Workspaces
         }
 
         /// <inheritdoc />
-        public override bool IsValidRelation(object source, object target)
+        public override bool CanRelateObjects(object source, object target)
         {
             return source is TSource && target is TTarget;
         }
