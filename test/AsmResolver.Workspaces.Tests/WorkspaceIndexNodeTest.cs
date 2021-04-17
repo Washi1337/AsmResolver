@@ -15,10 +15,10 @@ namespace AsmResolver.Workspaces.Tests
             var node1 = _index.GetOrCreateNode(subject1);
             var node2 = _index.GetOrCreateNode(subject2);
 
-            node1.AddRelation(MockRelations.Relation1, node2);
+            node1.OutgoingEdges.Add(MockRelations.Relation1, node2);
 
-            Assert.Contains(subject2, node1.GetRelatedObjects(MockRelations.Relation1));
-            Assert.Contains(node2, node1.GetRelatedNodes(MockRelations.Relation1));
+            Assert.Contains(subject2, node1.OutgoingEdges.GetObjects(MockRelations.Relation1));
+            Assert.Contains(node2, node1.OutgoingEdges.GetNodes(MockRelations.Relation1));
         }
 
         [Fact]
@@ -31,14 +31,14 @@ namespace AsmResolver.Workspaces.Tests
             var node2 = _index.GetOrCreateNode(subject2);
             var node3 = _index.GetOrCreateNode(subject3);
 
-            node1.AddRelation(MockRelations.Relation1, node2);
-            node1.AddRelation(MockRelations.Relation1, node3);
+            node1.OutgoingEdges.Add(MockRelations.Relation1, node2);
+            node1.OutgoingEdges.Add(MockRelations.Relation1, node3);
 
-            Assert.Contains(subject2, node1.GetRelatedObjects(MockRelations.Relation1));
-            Assert.Contains(subject3, node1.GetRelatedObjects(MockRelations.Relation1));
+            Assert.Contains(subject2, node1.OutgoingEdges.GetObjects(MockRelations.Relation1));
+            Assert.Contains(subject3, node1.OutgoingEdges.GetObjects(MockRelations.Relation1));
 
-            Assert.Contains(node2, node1.GetRelatedNodes(MockRelations.Relation1));
-            Assert.Contains(node3, node1.GetRelatedNodes(MockRelations.Relation1));
+            Assert.Contains(node2, node1.OutgoingEdges.GetNodes(MockRelations.Relation1));
+            Assert.Contains(node3, node1.OutgoingEdges.GetNodes(MockRelations.Relation1));
         }
 
         [Fact]
@@ -51,18 +51,18 @@ namespace AsmResolver.Workspaces.Tests
             var node2 = _index.GetOrCreateNode(subject2);
             var node3 = _index.GetOrCreateNode(subject3);
 
-            node1.AddRelation(MockRelations.Relation1, node2);
-            node1.AddRelation(MockRelations.Relation2, node3);
+            node1.OutgoingEdges.Add(MockRelations.Relation1, node2);
+            node1.OutgoingEdges.Add(MockRelations.Relation2, node3);
 
-            Assert.Contains(subject2, node1.GetRelatedObjects(MockRelations.Relation1));
-            Assert.DoesNotContain(subject3, node1.GetRelatedObjects(MockRelations.Relation1));
-            Assert.DoesNotContain(subject2, node1.GetRelatedObjects(MockRelations.Relation2));
-            Assert.Contains(subject3, node1.GetRelatedObjects(MockRelations.Relation2));
+            Assert.Contains(subject2, node1.OutgoingEdges.GetObjects(MockRelations.Relation1));
+            Assert.DoesNotContain(subject3, node1.OutgoingEdges.GetObjects(MockRelations.Relation1));
+            Assert.DoesNotContain(subject2, node1.OutgoingEdges.GetObjects(MockRelations.Relation2));
+            Assert.Contains(subject3, node1.OutgoingEdges.GetObjects(MockRelations.Relation2));
 
-            Assert.Contains(node2, node1.GetRelatedNodes(MockRelations.Relation1));
-            Assert.DoesNotContain(node3, node1.GetRelatedNodes(MockRelations.Relation1));
-            Assert.DoesNotContain(node2, node1.GetRelatedNodes(MockRelations.Relation2));
-            Assert.Contains(node3, node1.GetRelatedNodes(MockRelations.Relation2));
+            Assert.Contains(node2, node1.OutgoingEdges.GetNodes(MockRelations.Relation1));
+            Assert.DoesNotContain(node3, node1.OutgoingEdges.GetNodes(MockRelations.Relation1));
+            Assert.DoesNotContain(node2, node1.OutgoingEdges.GetNodes(MockRelations.Relation2));
+            Assert.Contains(node3, node1.OutgoingEdges.GetNodes(MockRelations.Relation2));
         }
 
         [Fact]
@@ -79,20 +79,20 @@ namespace AsmResolver.Workspaces.Tests
             var node4 = _index.GetOrCreateNode(subject4);
             var node5 = _index.GetOrCreateNode(subject5);
 
-            node1.AddRelation(MockRelations.Relation1, node2);
-            node1.AddRelation(MockRelations.Relation2, node3);
-            node1.AddRelation(MockRelations.Relation3, node4);
-            node1.AddRelation(MockRelations.Relation4, node5);
+            node1.OutgoingEdges.Add(MockRelations.Relation1, node2);
+            node1.OutgoingEdges.Add(MockRelations.Relation2, node3);
+            node1.OutgoingEdges.Add(MockRelations.Relation3, node4);
+            node1.OutgoingEdges.Add(MockRelations.Relation4, node5);
 
-            Assert.Contains(subject2, node1.GetRelatedObjects(MockRelations.Relation1, MockRelations.Relation2));
-            Assert.Contains(subject3, node1.GetRelatedObjects(MockRelations.Relation1, MockRelations.Relation2));
-            Assert.DoesNotContain(subject4, node1.GetRelatedObjects(MockRelations.Relation1, MockRelations.Relation2));
-            Assert.DoesNotContain(subject5, node1.GetRelatedObjects(MockRelations.Relation1, MockRelations.Relation2));
+            Assert.Contains(subject2, node1.OutgoingEdges.GetObjects(MockRelations.Relation1, MockRelations.Relation2));
+            Assert.Contains(subject3, node1.OutgoingEdges.GetObjects(MockRelations.Relation1, MockRelations.Relation2));
+            Assert.DoesNotContain(subject4, node1.OutgoingEdges.GetObjects(MockRelations.Relation1, MockRelations.Relation2));
+            Assert.DoesNotContain(subject5, node1.OutgoingEdges.GetObjects(MockRelations.Relation1, MockRelations.Relation2));
 
-            Assert.Contains(node4, node1.GetRelatedNodes(MockRelations.Relation3, MockRelations.Relation4));
-            Assert.Contains(node5, node1.GetRelatedNodes(MockRelations.Relation3, MockRelations.Relation4));
-            Assert.DoesNotContain(node2, node1.GetRelatedNodes(MockRelations.Relation3, MockRelations.Relation4));
-            Assert.DoesNotContain(node3, node1.GetRelatedNodes(MockRelations.Relation3, MockRelations.Relation4));
+            Assert.Contains(node4, node1.OutgoingEdges.GetNodes(MockRelations.Relation3, MockRelations.Relation4));
+            Assert.Contains(node5, node1.OutgoingEdges.GetNodes(MockRelations.Relation3, MockRelations.Relation4));
+            Assert.DoesNotContain(node2, node1.OutgoingEdges.GetNodes(MockRelations.Relation3, MockRelations.Relation4));
+            Assert.DoesNotContain(node3, node1.OutgoingEdges.GetNodes(MockRelations.Relation3, MockRelations.Relation4));
         }
 
         [Fact]
@@ -109,20 +109,20 @@ namespace AsmResolver.Workspaces.Tests
             var node4 = _index.GetOrCreateNode(subject4);
             var node5 = _index.GetOrCreateNode(subject5);
 
-            node1.AddRelation(MockRelations.Relation1, node2);
-            node1.AddRelation(MockRelations.Relation2, node3);
-            node1.AddRelation(MockRelations.Relation3, node4);
-            node1.AddRelation(MockRelations.Relation4, node5);
+            node1.OutgoingEdges.Add(MockRelations.Relation1, node2);
+            node1.OutgoingEdges.Add(MockRelations.Relation2, node3);
+            node1.OutgoingEdges.Add(MockRelations.Relation3, node4);
+            node1.OutgoingEdges.Add(MockRelations.Relation4, node5);
 
-            Assert.DoesNotContain(subject2, node1.GetAllRelatedObjects(MockRelations.Relation1, MockRelations.Relation2));
-            Assert.DoesNotContain(subject3, node1.GetAllRelatedObjects(MockRelations.Relation1, MockRelations.Relation2));
-            Assert.Contains(subject4, node1.GetAllRelatedObjects(MockRelations.Relation1, MockRelations.Relation2));
-            Assert.Contains(subject5, node1.GetAllRelatedObjects(MockRelations.Relation1, MockRelations.Relation2));
+            Assert.DoesNotContain(subject2, node1.OutgoingEdges.GetAllObjects(MockRelations.Relation1, MockRelations.Relation2));
+            Assert.DoesNotContain(subject3, node1.OutgoingEdges.GetAllObjects(MockRelations.Relation1, MockRelations.Relation2));
+            Assert.Contains(subject4, node1.OutgoingEdges.GetAllObjects(MockRelations.Relation1, MockRelations.Relation2));
+            Assert.Contains(subject5, node1.OutgoingEdges.GetAllObjects(MockRelations.Relation1, MockRelations.Relation2));
 
-            Assert.DoesNotContain(node4, node1.GetAllRelatedNodes(MockRelations.Relation3, MockRelations.Relation4));
-            Assert.DoesNotContain(node5, node1.GetAllRelatedNodes(MockRelations.Relation3, MockRelations.Relation4));
-            Assert.Contains(node2, node1.GetAllRelatedNodes(MockRelations.Relation3, MockRelations.Relation4));
-            Assert.Contains(node3, node1.GetAllRelatedNodes(MockRelations.Relation3, MockRelations.Relation4));
+            Assert.DoesNotContain(node4, node1.OutgoingEdges.GetAllNodes(MockRelations.Relation3, MockRelations.Relation4));
+            Assert.DoesNotContain(node5, node1.OutgoingEdges.GetAllNodes(MockRelations.Relation3, MockRelations.Relation4));
+            Assert.Contains(node2, node1.OutgoingEdges.GetAllNodes(MockRelations.Relation3, MockRelations.Relation4));
+            Assert.Contains(node3, node1.OutgoingEdges.GetAllNodes(MockRelations.Relation3, MockRelations.Relation4));
         }
 
     }

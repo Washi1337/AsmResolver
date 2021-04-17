@@ -38,7 +38,7 @@ namespace AsmResolver.Workspaces
         /// Determine whether two relations are considered equal.
         /// </summary>
         /// <param name="other">The other relation object.</param>
-        protected bool Equals(ObjectRelation other) => Name == other.Name && Guid.Equals(other.Guid);
+        protected bool Equals(ObjectRelation other) => Guid.Equals(other.Guid);
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
@@ -52,6 +52,9 @@ namespace AsmResolver.Workspaces
 
         /// <inheritdoc />
         public override int GetHashCode() => Guid.GetHashCode();
+
+        /// <inheritdoc />
+        public override string ToString() => Name;
     }
 
     /// <summary>

@@ -38,7 +38,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(customAttributeProperty);
             Assert.Contains(customAttributeNamedArgument,
-                node.GetRelatedObjects(DotNetRelations.ReferenceArgument));
+                node.OutgoingEdges.GetObjects(DotNetRelations.ReferenceArgument));
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(customAttributeField);
             Assert.Contains(customAttributeNamedArgument,
-                node.GetRelatedObjects(DotNetRelations.ReferenceArgument));
+                node.OutgoingEdges.GetObjects(DotNetRelations.ReferenceArgument));
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(assembly1);
             Assert.Contains(reference,
-                node.GetRelatedObjects(DotNetRelations.ReferenceAssembly));
+                node.OutgoingEdges.GetObjects(DotNetRelations.ReferenceAssembly));
         }
 
         [Fact]
@@ -116,7 +116,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(type1);
             Assert.Contains(reference,
-                node.GetRelatedObjects(DotNetRelations.ReferenceType));
+                node.OutgoingEdges.GetObjects(DotNetRelations.ReferenceType));
         }
 
         [Fact]
@@ -146,7 +146,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(type);
             Assert.Contains(exportedType,
-                node.GetRelatedObjects(DotNetRelations.ReferenceExportedType));
+                node.OutgoingEdges.GetObjects(DotNetRelations.ReferenceExportedType));
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(method1);
             Assert.Contains(reference,
-                node.GetRelatedObjects(DotNetRelations.ReferenceMember));
+                node.OutgoingEdges.GetObjects(DotNetRelations.ReferenceMember));
         }
 
         [Fact]
@@ -228,7 +228,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(field);
             Assert.Contains(reference,
-                node.GetRelatedObjects(DotNetRelations.ReferenceMember));
+                node.OutgoingEdges.GetObjects(DotNetRelations.ReferenceMember));
         }
     }
 }

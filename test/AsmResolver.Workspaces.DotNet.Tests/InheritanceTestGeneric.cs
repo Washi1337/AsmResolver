@@ -28,7 +28,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(classType);
             Assert.Contains(interfaceType,
-                node.GetRelatedObjects(DotNetRelations.BaseType)
+                node.OutgoingEdges.GetObjects(DotNetRelations.BaseType)
                     .Select(t=> t.Resolve()));
         }
 
@@ -45,7 +45,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(derivedType);
             Assert.Contains(classType, node
-                .GetRelatedObjects(DotNetRelations.BaseType)
+                .OutgoingEdges.GetObjects(DotNetRelations.BaseType)
                 .Select(t=>t.Resolve()));
         }
 
@@ -65,7 +65,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(implementationMethod);
             Assert.Contains(baseMethod, node
-                .GetRelatedObjects(DotNetRelations.ImplementationMethod)
+                .OutgoingEdges.GetObjects(DotNetRelations.ImplementationMethod)
                 .Select(m=>m.Resolve()));
         }
 
@@ -87,7 +87,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
 
             var node = workspace.Index.GetOrCreateNode(implementationMethod);
             Assert.Contains(baseMethod,
-                node.GetRelatedObjects(DotNetRelations.ImplementationMethod)
+                node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationMethod)
                     .Select(t=> t.Resolve()));
         }
 
@@ -106,7 +106,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationMethod);
-            Assert.Contains(baseMethod, node.GetRelatedObjects(DotNetRelations.ImplementationMethod));
+            Assert.Contains(baseMethod, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationMethod));
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(overrideMethod);
-            Assert.Contains(baseMethod, node.GetRelatedObjects(DotNetRelations.ImplementationMethod));
+            Assert.Contains(baseMethod, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationMethod));
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(shadowedMethod);
-            Assert.DoesNotContain(baseMethod, node.GetRelatedObjects(DotNetRelations.ImplementationMethod));
+            Assert.DoesNotContain(baseMethod, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationMethod));
         }
 
         [Fact]
@@ -160,7 +160,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationMethod);
-            Assert.Contains(baseMethod, node.GetRelatedObjects(DotNetRelations.ImplementationMethod));
+            Assert.Contains(baseMethod, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationMethod));
         }
 
         [Fact]
@@ -180,7 +180,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationProperty);
-            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
+            Assert.Contains(baseProperty, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationSemantics));
         }
 
         [Fact]
@@ -198,7 +198,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationProperty);
-            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
+            Assert.Contains(baseProperty, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationSemantics));
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(overrideProperty);
-            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
+            Assert.Contains(baseProperty, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationSemantics));
         }
 
         [Fact]
@@ -234,7 +234,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(shadowedProperty);
-            Assert.DoesNotContain(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
+            Assert.DoesNotContain(baseProperty, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationSemantics));
         }
 
         [Fact]
@@ -252,7 +252,7 @@ namespace AsmResolver.Workspaces.DotNet.Tests
             workspace.Analyze();
 
             var node = workspace.Index.GetOrCreateNode(implementationProperty);
-            Assert.Contains(baseProperty, node.GetRelatedObjects(DotNetRelations.ImplementationSemantics));
+            Assert.Contains(baseProperty, node.OutgoingEdges.GetObjects(DotNetRelations.ImplementationSemantics));
         }
     }
 }
