@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AsmResolver.Workspaces.Collections
 {
@@ -45,6 +47,30 @@ namespace AsmResolver.Workspaces.Collections
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets a collection of all objects that are related to this object of a given relation type.
+        /// </summary>
+        /// <param name="relation">The relation.</param>
+        /// <typeparam name="TSource">The type of the source object.</typeparam>
+        /// <typeparam name="TTarget">The type of object to obtain.</typeparam>
+        public IEnumerable<TTarget> GetObjects<TSource, TTarget>(ObjectRelation<TSource, TTarget> relation)
+        {
+            return GetEdges(relation)
+                .Select(e => (TTarget) GetAdjacentNode(e).Subject)
+                .Distinct();
+        }
+
+        /// <summary>
+        /// Gets a collection of all objects that are related to this object of any of the given relation types.
+        /// </summary>
+        /// <param name="relations">The relations to include in the lookup.</param>
+        public IEnumerable<object> GetObjects(params ObjectRelation[] relations)
+        {
+            return GetEdges(relations)
+                .Select(n => GetAdjacentNode(n).Subject)
+                .Distinct();
         }
     }
 }

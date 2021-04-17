@@ -58,7 +58,31 @@ namespace AsmResolver.Workspaces.Tests
             var node1 = _index.GetOrCreateNode(subject1);
             var node2 = _index.GetOrCreateNode(subject2);
 
-            Assert.Throws<ArgumentException>(() => node1.OutgoingEdges.Add(MockRelations.Relation5, node2));
+            Assert.Throws<ArgumentException>(() => node1.OutgoingEdges.Add(MockRelations.ObjectToStringRelation, node2));
+        }
+
+        [Fact]
+        public void GetStronglyTypedOutgoingRelatedObjects()
+        {
+            object subject1 = new object();
+            string subject2 = "abcdefg";
+            var node1 = _index.GetOrCreateNode(subject1);
+            var node2 = _index.GetOrCreateNode(subject2);
+
+            node1.OutgoingEdges.Add(MockRelations.ObjectToStringRelation, node2);
+            Assert.Contains(subject2, node1.OutgoingEdges.GetObjects(MockRelations.ObjectToStringRelation));
+        }
+
+        [Fact]
+        public void GetStronglyTypedIncomingRelatedObjects()
+        {
+            string subject1 = "abcdefg";
+            object subject2 = new object();
+            var node1 = _index.GetOrCreateNode(subject1);
+            var node2 = _index.GetOrCreateNode(subject2);
+
+            node1.OutgoingEdges.Add(MockRelations.StringToObjectRelation, node2);
+            Assert.Contains(subject1, node2.IncomingEdges.GetObjects(MockRelations.StringToObjectRelation));
         }
 
         [Fact]

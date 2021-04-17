@@ -20,8 +20,12 @@ namespace AsmResolver.Workspaces.Tests.Mock
             "Relation4",
             new Guid("3130d32a-bb54-49ec-b630-5cd5ff5ee5a3"));
 
-        public static readonly ObjectRelation<object, string> Relation5 = new(
-            "Relation5",
+        public static readonly ObjectRelation<object, string> ObjectToStringRelation = new(
+            "ObjectToStringRelation",
             new Guid("804ffd37-0259-4c19-9e3a-cbeae7cb5ff9"));
+
+        public static readonly ObjectRelation<string, object> StringToObjectRelation = new(
+            "StringToObjectRelation",
+            new Guid("ddd786b5-e907-4b76-b1e0-2a0775be548d"));
     }
 }
