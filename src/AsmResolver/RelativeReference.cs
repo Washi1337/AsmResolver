@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver
 {
@@ -17,9 +18,9 @@ namespace AsmResolver
             Base = @base;
             Additive = additive;
         }
-        
+
         /// <summary>
-        /// Gets the segment or structure that this reference is relative to. 
+        /// Gets the segment or structure that this reference is relative to.
         /// </summary>
         public IOffsetProvider Base
         {
@@ -54,7 +55,7 @@ namespace AsmResolver
         public bool IsBounded => false;
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader()
+        public BinaryStreamReader CreateReader()
         {
             if (CanRead)
             {
@@ -62,12 +63,12 @@ namespace AsmResolver
                 reader.Offset = reader.Offset + (ulong) Additive;
                 return reader;
             }
-            
+
             throw new InvalidOperationException();
         }
 
         /// <inheritdoc />
         public ISegment GetSegment() => throw new InvalidOperationException();
     }
-    
+
 }
