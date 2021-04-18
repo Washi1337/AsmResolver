@@ -66,8 +66,8 @@ namespace AsmResolver.IO
 
         public uint Rva
         {
-            get => (uint) (Offset - StartOffset + StartRva);
-            set => Offset = value - StartRva + StartOffset;
+            get => RelativeOffset + StartRva;
+            set => RelativeOffset = value - StartRva;
         }
 
         public bool IsValid => DataSource is not null;

@@ -77,7 +77,7 @@ namespace AsmResolver
             return new BinaryStreamReader(
                 new ByteArrayDataSource(Data, Offset),
                 fileOffset,
-                Rva,
+                (uint) (fileOffset - Offset + Rva),
                 size);
         }
 

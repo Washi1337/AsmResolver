@@ -66,7 +66,7 @@ namespace AsmResolver.PE.Win32Resources
                 _entriesRva = directoryReader.Rva;
 
                 directoryReader.Offset =
-                    (directoryReader.Offset + (ulong) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize));
+                    directoryReader.Offset + (ulong) ((_namedEntries + _idEntries) * ResourceDirectoryEntry.EntrySize);
             }
         }
 
