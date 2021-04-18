@@ -45,12 +45,12 @@ namespace AsmResolver.DotNet.Serialized
         /// <inheritdoc />
         protected override DataBlobSignature GetValue()
         {
-            if (_context.Image.DotNetDirectory.Metadata
+            if (!_context.Image.DotNetDirectory.Metadata
                 .GetStream<BlobStream>()
                 .TryGetBlobReaderByIndex(_row.Value, out var reader))
             {
-                return _context.BadImageAndReturn<DataBlobSignature>(
-                    $"Invalid value blob index in constant {MetadataToken}.");
+                // Don't report error. null constants are allowed (e.g. null strings).
+                return null;
             }
 
             return DataBlobSignature.FromReader(ref reader);

@@ -75,7 +75,7 @@ namespace AsmResolver
         /// <typeparam name="T">The type of value to return.</typeparam>
         public static T BadImageAndReturn<T>(this IErrorListener self, string message)
         {
-            self.RegisterException(new BadImageFormatException());
+            self.RegisterException(new BadImageFormatException(message));
             return default;
         }
     }
