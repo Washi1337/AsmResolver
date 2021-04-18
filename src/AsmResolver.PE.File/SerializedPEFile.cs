@@ -19,34 +19,34 @@ namespace AsmResolver.PE.File
         /// <param name="reader">The input stream.</param>
         /// <param name="mode">Indicates how the input PE file is mapped.</param>
         /// <exception cref="BadImageFormatException">Occurs when the input stream is malformed.</exception>
-        public SerializedPEFile(BinaryStreamReader reader, PEMappingMode mode)
+        public SerializedPEFile(in BinaryStreamReader reader, PEMappingMode mode)
         {
+            _reader = reader;
+
             MappingMode = mode;
 
             // DOS header.
-            DosHeader = DosHeader.FromReader(ref reader);
-            reader.Offset = DosHeader.Offset + DosHeader.NextHeaderOffset;
+            DosHeader = DosHeader.FromReader(ref _reader);
+            _reader.Offset = DosHeader.Offset + DosHeader.NextHeaderOffset;
 
-            uint signature = reader.ReadUInt32();
+            uint signature = _reader.ReadUInt32();
             if (signature != ValidPESignature)
                 throw new BadImageFormatException();
 
             // Read NT headers.
-            FileHeader = FileHeader.FromReader(ref reader);
-            OptionalHeader = OptionalHeader.FromReader(ref reader);
+            FileHeader = FileHeader.FromReader(ref _reader);
+            OptionalHeader = OptionalHeader.FromReader(ref _reader);
 
             // Read section headers.
-            reader.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;
+            _reader.Offset = OptionalHeader.Offset + FileHeader.SizeOfOptionalHeader;
             _sectionHeaders = new List<SectionHeader>(FileHeader.NumberOfSections);
             for (int i = 0; i < FileHeader.NumberOfSections; i++)
-                _sectionHeaders.Add(SectionHeader.FromReader(ref reader));
+                _sectionHeaders.Add(SectionHeader.FromReader(ref _reader));
 
             // Data between section headers and sections.
-            int extraSectionDataLength = (int) (DosHeader.Offset + OptionalHeader.SizeOfHeaders - reader.Offset);
+            int extraSectionDataLength = (int) (DosHeader.Offset + OptionalHeader.SizeOfHeaders - _reader.Offset);
             if (extraSectionDataLength != 0)
-                ExtraSectionData = DataSegment.FromReader(ref reader, extraSectionDataLength);
-
-            _reader = reader;
+                ExtraSectionData = DataSegment.FromReader(ref _reader, extraSectionDataLength);
         }
 
         /// <inheritdoc />

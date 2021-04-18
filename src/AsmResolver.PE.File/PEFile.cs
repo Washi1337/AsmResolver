@@ -128,7 +128,7 @@ namespace AsmResolver.PE.File
         /// <param name="mode">Indicates how the input PE file is mapped.</param>
         /// <returns>The PE file that was read.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static PEFile FromReader(BinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
+        public static PEFile FromReader(in BinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
             new SerializedPEFile(reader, mode);
 
         /// <inheritdoc />

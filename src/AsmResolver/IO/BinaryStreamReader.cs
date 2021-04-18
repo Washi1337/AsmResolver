@@ -9,7 +9,7 @@ namespace AsmResolver.IO
         {
             if (dataSource is null)
                 throw new ArgumentNullException(nameof(dataSource));
-            
+
             if (length > 0)
             {
                 if (!dataSource.IsValidAddress(offset))
