@@ -63,7 +63,7 @@ namespace AsmResolver.DotNet.Serialized
             if (_row.Implementation != 0)
                 return null;
 
-            if (_context.Image.DotNetDirectory.DotNetResources
+            if (!_context.Image.DotNetDirectory.DotNetResources
                 .TryCreateManifestResourceReader(_row.Offset, out var reader))
             {
                 return null;
