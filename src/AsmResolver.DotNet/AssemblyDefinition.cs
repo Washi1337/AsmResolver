@@ -6,6 +6,7 @@ using System.Threading;
 using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Serialized;
+using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.DotNet.Builder;
@@ -59,7 +60,7 @@ namespace AsmResolver.DotNet
         /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static AssemblyDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
+        public static AssemblyDefinition FromReader(in BinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
             FromImage(PEImage.FromReader(reader, mode));
 
         /// <summary>

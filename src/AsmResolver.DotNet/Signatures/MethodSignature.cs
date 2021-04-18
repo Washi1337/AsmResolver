@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures
 {
@@ -17,7 +18,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The blob input stream.</param>
         /// <returns>The method signature.</returns>
-        public static MethodSignature FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        public static MethodSignature FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             var result = new MethodSignature((CallingConventionAttributes) reader.ReadByte());
 
@@ -33,7 +34,7 @@ namespace AsmResolver.DotNet.Signatures
                 result.GenericParameterCount = (int) genericParameterCount;
             }
 
-            result.ReadParametersAndReturnType(context, reader);
+            result.ReadParametersAndReturnType(context, ref reader);
             return result;
         }
 

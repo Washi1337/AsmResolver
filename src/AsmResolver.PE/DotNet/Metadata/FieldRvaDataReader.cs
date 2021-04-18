@@ -45,7 +45,7 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         private int DetermineFieldSize(IMetadata metadata, in FieldDefinitionRow field)
         {
-            if (metadata.GetStream<BlobStream>().GetBlobReaderByIndex(field.Signature) is not { } reader)
+            if (!metadata.GetStream<BlobStream>().TryGetBlobReaderByIndex(field.Signature, out var reader))
                 return 0;
 
             reader.ReadByte(); // calling convention attributes.

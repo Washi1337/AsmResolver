@@ -7,6 +7,7 @@ using AsmResolver.Collections;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Serialized;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 using AsmResolver.PE;
 using AsmResolver.PE.Builder;
 using AsmResolver.PE.Debug;
@@ -113,7 +114,7 @@ namespace AsmResolver.DotNet
         /// <param name="mode">Indicates the input PE is mapped or unmapped.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
+        public static ModuleDefinition FromReader(in BinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
             FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
@@ -124,7 +125,7 @@ namespace AsmResolver.DotNet
         /// <param name="readerParameters">The parameters to use while reading the module.</param>
         /// <returns>The module.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the image does not contain a valid .NET metadata directory.</exception>
-        public static ModuleDefinition FromReader(IBinaryStreamReader reader, PEMappingMode mode, ModuleReaderParameters readerParameters) =>
+        public static ModuleDefinition FromReader(in BinaryStreamReader reader, PEMappingMode mode, ModuleReaderParameters readerParameters) =>
             FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>

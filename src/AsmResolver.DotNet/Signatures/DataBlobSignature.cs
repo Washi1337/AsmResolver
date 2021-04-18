@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using AsmResolver.DotNet.Builder;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -15,7 +16,7 @@ namespace AsmResolver.DotNet.Signatures
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The blob signature.</returns>
-        public static DataBlobSignature FromReader(IBinaryStreamReader reader)
+        public static DataBlobSignature FromReader(ref BinaryStreamReader reader)
         {
             return new DataBlobSignature(reader.ReadToEnd());
         }
@@ -28,7 +29,7 @@ namespace AsmResolver.DotNet.Signatures
         {
             Data = data ?? throw new ArgumentNullException(nameof(data));
         }
-        
+
         /// <summary>
         /// Gets or sets the raw data stored in the blob signature.
         /// </summary>
@@ -45,7 +46,7 @@ namespace AsmResolver.DotNet.Signatures
         /// <returns>The deserialized literal.</returns>
         public object InterpretData(ElementType elementType)
         {
-            var reader = new ByteArrayReader(Data);
+            var reader = ByteArrayReaderFactory.CreateReader(Data);
 
             return elementType switch
             {

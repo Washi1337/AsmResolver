@@ -41,8 +41,7 @@ namespace AsmResolver.PE.DotNet.Resources
         /// <inheritdoc />
         public override byte[] GetManifestResourceData(uint offset)
         {
-            var reader = CreateManifestResourceReader(offset);
-            if (!reader.IsValid)
+            if (!TryCreateManifestResourceReader(offset, out var reader))
                 return null;
 
             var buffer = new byte[reader.Length];
@@ -51,14 +50,18 @@ namespace AsmResolver.PE.DotNet.Resources
         }
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateManifestResourceReader(uint offset)
+        public override bool TryCreateManifestResourceReader(uint offset, out BinaryStreamReader reader)
         {
             if (offset >= _contents.GetPhysicalSize() - sizeof(uint))
-                return default;
+            {
+                reader = default;
+                return false;
+            }
 
-            var reader = _contents.CreateReader(_contents.Offset + offset);
+            reader = _contents.CreateReader(_contents.Offset + offset);
             uint length = reader.ReadUInt32();
-            return reader.ForkAbsolute(reader.Offset, length);
+            reader = reader.ForkAbsolute(reader.Offset, length);
+            return true;
         }
     }
 }

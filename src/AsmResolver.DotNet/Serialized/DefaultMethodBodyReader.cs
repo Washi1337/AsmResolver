@@ -22,7 +22,8 @@ namespace AsmResolver.DotNet.Serialized
                 {
                     if (owner.IsIL)
                     {
-                        var rawBody = CilRawMethodBody.FromReader(context, row.Body.CreateReader());
+                        var reader = row.Body.CreateReader();
+                        var rawBody = CilRawMethodBody.FromReader(context, ref reader);
                         return CilMethodBody.FromRawMethodBody(context, owner, rawBody);
                     }
                     else

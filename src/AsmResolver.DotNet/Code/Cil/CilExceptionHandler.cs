@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace AsmResolver.DotNet.Code.Cil
@@ -12,12 +13,12 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <summary>
         /// The size in bytes of an exception handler using the tiny format.
         /// </summary>
-        public const int TinyExceptionHandlerSize = 2 * sizeof(byte) + 3 * sizeof(ushort) + sizeof(uint);
+        public const uint TinyExceptionHandlerSize = 2 * sizeof(byte) + 3 * sizeof(ushort) + sizeof(uint);
 
         /// <summary>
         /// The size in bytes of an exception handler using the fat format.
         /// </summary>
-        public const int FatExceptionHandlerSize = 6 * sizeof(uint);
+        public const uint FatExceptionHandlerSize = 6 * sizeof(uint);
 
         /// <summary>
         /// Reads a single exception handler from the provided input stream.
@@ -26,7 +27,7 @@ namespace AsmResolver.DotNet.Code.Cil
         /// <param name="reader">The input stream.</param>
         /// <param name="isFat"><c>true</c> if the fat format should be used, <c>false</c> otherwise.</param>
         /// <returns>The exception handler.</returns>
-        public static CilExceptionHandler FromReader(CilMethodBody body, IBinaryStreamReader reader, bool isFat)
+        public static CilExceptionHandler FromReader(CilMethodBody body, ref BinaryStreamReader reader, bool isFat)
         {
             CilExceptionHandlerType handlerType;
             int tryStartOffset;

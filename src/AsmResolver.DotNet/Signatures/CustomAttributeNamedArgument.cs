@@ -1,6 +1,7 @@
 using System;
 using AsmResolver.DotNet.Builder;
 using AsmResolver.DotNet.Signatures.Types;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -17,15 +18,15 @@ namespace AsmResolver.DotNet.Signatures
         /// <param name="context">The blob reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The argument.</returns>
-        public static CustomAttributeNamedArgument FromReader(in BlobReadContext context, IBinaryStreamReader reader)
+        public static CustomAttributeNamedArgument FromReader(in BlobReadContext context, ref BinaryStreamReader reader)
         {
             var result = new CustomAttributeNamedArgument
             {
                 MemberType = (CustomAttributeArgumentMemberType) reader.ReadByte(),
-                ArgumentType = TypeSignature.ReadFieldOrPropType(context, reader),
+                ArgumentType = TypeSignature.ReadFieldOrPropType(context, ref reader),
                 MemberName = reader.ReadSerString(),
             };
-            result.Argument = CustomAttributeArgument.FromReader(context, result.ArgumentType, reader);
+            result.Argument = CustomAttributeArgument.FromReader(context, result.ArgumentType, ref reader);
             return result;
         }
 
@@ -96,7 +97,7 @@ namespace AsmResolver.DotNet.Signatures
         public void Write(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) MemberType);
             TypeSignature.WriteFieldOrPropType(writer, ArgumentType);
             writer.WriteSerString(MemberName);

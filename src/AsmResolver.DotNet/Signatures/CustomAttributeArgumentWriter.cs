@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AsmResolver.DotNet.Signatures.Types;
 using AsmResolver.DotNet.Signatures.Types.Parsing;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.DotNet.Signatures
@@ -43,7 +44,7 @@ namespace AsmResolver.DotNet.Signatures
         private void WriteElement(TypeSignature argumentType, object element)
         {
             var writer = _context.Writer;
-            
+
             if (argumentType.IsTypeOf("System", "Type"))
             {
                 writer.WriteSerString(TypeNameBuilder.GetAssemblyQualifiedName((TypeSignature) element));
@@ -55,54 +56,54 @@ namespace AsmResolver.DotNet.Signatures
                 case ElementType.Boolean:
                     writer.WriteByte((byte) ((bool) element ? 1 : 0));
                     break;
-                
+
                 case ElementType.Char:
                     writer.WriteUInt16((char) element);
                     break;
-                
+
                 case ElementType.I1:
                     writer.WriteSByte((sbyte) element);
                     break;
-                
+
                 case ElementType.U1:
                     writer.WriteByte((byte) element);
                     break;
-                
+
                 case ElementType.I2:
                     writer.WriteInt16((short) element);
                     break;
-                
+
                 case ElementType.U2:
                     writer.WriteUInt16((ushort) element);
                     break;
                 case ElementType.I4:
                     writer.WriteInt32((int) element);
                     break;
-                
+
                 case ElementType.U4:
                     writer.WriteUInt32((uint) element);
                     break;
-                
+
                 case ElementType.I8:
                     writer.WriteInt64((long) element);
                     break;
-                
+
                 case ElementType.U8:
                     writer.WriteUInt64((ulong) element);
                     break;
-                
+
                 case ElementType.R4:
                     writer.WriteSingle((float) element);
                     break;
-                
+
                 case ElementType.R8:
                     writer.WriteDouble((double) element);
                     break;
-                
+
                 case ElementType.String:
                     writer.WriteSerString(element as string);
                     break;
-                
+
                 case ElementType.Object:
                     TypeSignature innerTypeSig;
                     object value;
@@ -123,29 +124,29 @@ namespace AsmResolver.DotNet.Signatures
                     {
                         _context.DiagnosticBag.RegisterException(new NotSupportedException(
                             $"Object elements in a custom attribute signature should be either 'null' or an instance of {nameof(BoxedArgument)}."));
-                        
+
                         // Write null as a recovery.
                         innerTypeSig = argumentType.Module.CorLibTypeFactory.String;
                         value = null;
                     }
-                    
+
                     TypeSignature.WriteFieldOrPropType(writer, innerTypeSig);
                     WriteElement(innerTypeSig, value);
                     break;
-                
+
                 case ElementType.SzArray:
                     WriteArrayElement(
                         (SzArrayTypeSignature) argumentType,
                         element as IList<object> ?? new object[0],
                         element == null);
                     break;
-                    
+
                 case ElementType.Class:
                 case ElementType.Enum:
                 case ElementType.ValueType:
                     WriteEnumValue(argumentType, element);
                     break;
-                
+
                 default:
                     UnsupportedArgumentType(argumentType);
                     break;
@@ -161,13 +162,13 @@ namespace AsmResolver.DotNet.Signatures
                 WriteElement(enumTypeDef.GetEnumUnderlyingType(), element);
                 return;
             }
-            
+
             // Enum arguments can never be null.
             if (element is null)
             {
                 _context.DiagnosticBag.RegisterException(
                     new NotSupportedException($"The element of the enum-typed argument is null."));
-                
+
                 // Assume 0 if it is.
                 element = 0;
             }

@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata;
 
 namespace AsmResolver.DotNet.Builder.Metadata

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.StrongName;
 using Xunit;
 
@@ -12,7 +13,7 @@ namespace AsmResolver.DotNet.Tests
         {
             using var stream = new MemoryStream();
             assembly.ManifestModule.Write(stream);
-            return AssemblyDefinition.FromReader(new ByteArrayReader(stream.ToArray()));
+            return AssemblyDefinition.FromReader(ByteArrayReaderFactory.CreateReader(stream.ToArray()));
         }
 
         [Fact]
@@ -26,7 +27,7 @@ namespace AsmResolver.DotNet.Tests
         public void NameIsPersistentAfterRebuild()
         {
             const string newName = "OtherAssembly";
-            
+
             var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
             assemblyDef.Name = newName;
 
@@ -45,10 +46,10 @@ namespace AsmResolver.DotNet.Tests
         public void VersionIsPersistentAfterRebuild()
         {
             var newVersion = new Version(1,2,3,4);
-            
+
             var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
             assemblyDef.Version = newVersion;
-            
+
             var rebuilt = Rebuild(assemblyDef);
             Assert.Equal(newVersion, rebuilt.Version);
         }
@@ -78,7 +79,7 @@ namespace AsmResolver.DotNet.Tests
             Assert.Throws<BadImageFormatException>(() =>
                 AssemblyDefinition.FromFile(Path.Combine("Resources", "MyModel.netmodule")));
         }
-        
+
         [Fact]
         public void ReadPublicKeyToken()
         {
@@ -96,10 +97,10 @@ namespace AsmResolver.DotNet.Tests
             using var rsa = RSA.Create();
             var rsaParameters = rsa.ExportParameters(true);
             var snk = new StrongNamePrivateKey(rsaParameters);
-            
+
             var assemblyDef = AssemblyDefinition.FromBytes(Properties.Resources.HelloWorld);
             assemblyDef.PublicKey = snk.CreatePublicKeyBlob(assemblyDef.HashAlgorithm);
-            
+
             var rebuilt = Rebuild(assemblyDef);
             Assert.Equal(assemblyDef.PublicKey, rebuilt.PublicKey);
         }

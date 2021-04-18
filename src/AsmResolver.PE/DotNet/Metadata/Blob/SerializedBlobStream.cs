@@ -44,23 +44,28 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         public override void Write(IBinaryStreamWriter writer) => _contents.Write(writer);
 
         /// <inheritdoc />
-        public override byte[] GetBlobByIndex(uint index) => GetBlobReaderByIndex(index)?.ReadToEnd();
+        public override byte[] GetBlobByIndex(uint index) => TryGetBlobReaderByIndex(index, out var reader)
+            ? reader.ReadToEnd()
+            : null;
 
         /// <inheritdoc />
-        public override BinaryStreamReader? GetBlobReaderByIndex(uint index)
+        public override bool TryGetBlobReaderByIndex(uint index, out BinaryStreamReader reader)
         {
             if (index == 0 || index >= _contents.GetPhysicalSize())
-                return null;
-
-            var blobReader = _contents.CreateReader(_contents.Offset + index);
-            if (blobReader.TryReadCompressedUInt32(out uint length))
             {
-                uint headerSize = (uint) (blobReader.Offset - blobReader.StartOffset);
-                blobReader.ChangeSize(Math.Min(length + headerSize, blobReader.Length));
-                return blobReader;
+                reader = default;
+                return false;
             }
 
-            return null;
+            reader = _contents.CreateReader(_contents.Offset + index);
+            if (reader.TryReadCompressedUInt32(out uint length))
+            {
+                uint headerSize = (uint) (reader.Offset - reader.StartOffset);
+                reader.ChangeSize(Math.Min(length + headerSize, reader.Length));
+                return true;
+            }
+
+            return false;
         }
 
     }

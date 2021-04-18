@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.DotNet.Signatures.Marshal
 {
@@ -13,18 +14,18 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         /// <param name="type">The type of COM interface marshaller to read.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The descriptor.</returns>
-        public static ComInterfaceMarshalDescriptor FromReader(NativeType type, IBinaryStreamReader reader)
+        public static ComInterfaceMarshalDescriptor FromReader(NativeType type, ref BinaryStreamReader reader)
         {
             var result = new ComInterfaceMarshalDescriptor(type);
 
             if (reader.TryReadCompressedUInt32(out uint value))
                 result.IidParameterIndex = (int) value;
-            
+
             return result;
         }
-        
+
         /// <summary>
-         /// Creates a new instance of the <see cref="ComInterfaceMarshalDescriptor"/> class. 
+         /// Creates a new instance of the <see cref="ComInterfaceMarshalDescriptor"/> class.
          /// </summary>
          /// <param name="nativeType">The type of COM interface to marshal to.</param>
         public ComInterfaceMarshalDescriptor(NativeType nativeType)
@@ -48,7 +49,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         }
 
         /// <summary>
-        /// Gets or sets the index of the parameter containing the COM IID of the interface. 
+        /// Gets or sets the index of the parameter containing the COM IID of the interface.
         /// </summary>
         public int? IidParameterIndex
         {
@@ -60,7 +61,7 @@ namespace AsmResolver.DotNet.Signatures.Marshal
         protected override void WriteContents(BlobSerializationContext context)
         {
             var writer = context.Writer;
-            
+
             writer.WriteByte((byte) NativeType);
 
             if (IidParameterIndex.HasValue)
