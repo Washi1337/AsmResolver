@@ -9,10 +9,15 @@ namespace AsmResolver.IO
         {
             if (dataSource is null)
                 throw new ArgumentNullException(nameof(dataSource));
-            if (offset > dataSource.Length)
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            if (offset + length > dataSource.Length)
-                throw new EndOfStreamException("Offset and address reach outside of the boundaries of the data source.");
+            
+            if (length > 0)
+            {
+                if (!dataSource.IsValidAddress(offset))
+                    throw new ArgumentOutOfRangeException(nameof(offset));
+                if (!dataSource.IsValidAddress(offset + length - 1))
+                    throw new EndOfStreamException(
+                        "Offset and address reach outside of the boundaries of the data source.");
+            }
 
             DataSource = dataSource;
             StartOffset = Offset = offset;

@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.File.Headers
 {
     /// <summary>
@@ -12,15 +14,15 @@ namespace AsmResolver.PE.File.Headers
         /// Indicates the size of a single data directory header.
         /// </summary>
         public const uint DataDirectorySize = 2 * sizeof(uint);
-        
+
         /// <summary>
-        /// Reads a single data directory at the current position of the provided input stream. 
+        /// Reads a single data directory at the current position of the provided input stream.
         /// </summary>
         /// <param name="reader">The input stream to read from.</param>
         /// <returns>The data directory that was read.</returns>
-        public static DataDirectory FromReader(IBinaryStreamReader reader)
+        public static DataDirectory FromReader(ref BinaryStreamReader reader)
         {
-            return new DataDirectory(reader.ReadUInt32(), reader.ReadUInt32());
+            return new(reader.ReadUInt32(), reader.ReadUInt32());
         }
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <summary>
-        /// Gets a value indicating the data directory is present in the portable executable file. 
+        /// Gets a value indicating the data directory is present in the portable executable file.
         /// </summary>
         public bool IsPresentInPE => VirtualAddress != 0 || Size != 0;
 
@@ -77,9 +79,6 @@ namespace AsmResolver.PE.File.Headers
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"RVA: 0x{VirtualAddress:X8}, Size: 0x{Size:X8}";
-        }
+        public override string ToString() => $"RVA: 0x{VirtualAddress:X8}, Size: 0x{Size:X8}";
     }
 }

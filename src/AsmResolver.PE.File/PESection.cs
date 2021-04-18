@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -39,7 +40,7 @@ namespace AsmResolver.PE.File
         /// Copy a new section.
         /// </summary>
         /// <param name="section">The section to be copied.</param>
-        public PESection(PESection section) 
+        public PESection(PESection section)
             : this (section.Name, section.Characteristics, section.Contents)
         {
         }
@@ -81,7 +82,7 @@ namespace AsmResolver.PE.File
                 _name = value;
             }
         }
-        
+
         /// <summary>
         /// Gets or sets the characteristics of the section.
         /// </summary>
@@ -222,7 +223,7 @@ namespace AsmResolver.PE.File
         public uint GetVirtualSize() => Contents?.GetVirtualSize() ?? 0;
 
         /// <inheritdoc />
-        public IBinaryStreamReader CreateReader(ulong fileOffset, uint size)
+        public BinaryStreamReader CreateReader(ulong fileOffset, uint size)
         {
             if (!IsReadable)
                 throw new InvalidOperationException("Section contents is not readable.");
@@ -239,7 +240,7 @@ namespace AsmResolver.PE.File
             {
                 PointerToRawData = (uint) Offset,
                 SizeOfRawData = GetPhysicalSize().Align(alignment),
-                VirtualAddress = (uint) Rva,
+                VirtualAddress = Rva,
                 VirtualSize = GetVirtualSize(),
                 NumberOfRelocations = 0,
                 PointerToRelocations = 0,
@@ -249,7 +250,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Determines whether the provided file offset falls within the section that the header describes. 
+        /// Determines whether the provided file offset falls within the section that the header describes.
         /// </summary>
         /// <param name="fileOffset">The offset to check.</param>
         /// <returns><c>true</c> if the file offset falls within the section, <c>false</c> otherwise.</returns>
@@ -259,7 +260,7 @@ namespace AsmResolver.PE.File
         }
 
         /// <summary>
-        /// Determines whether the provided virtual address falls within the section that the header describes. 
+        /// Determines whether the provided virtual address falls within the section that the header describes.
         /// </summary>
         /// <param name="rva">The virtual address to check.</param>
         /// <returns><c>true</c> if the virtual address falls within the section, <c>false</c> otherwise.</returns>

@@ -12,6 +12,8 @@ namespace AsmResolver.IO
             get;
         }
 
+        bool IsValidAddress(ulong address);
+
         int ReadBytes(ulong address, byte[] buffer, int index, int count);
     }
 }

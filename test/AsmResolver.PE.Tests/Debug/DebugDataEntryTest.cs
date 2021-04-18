@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet.Builder;
 using Xunit;
@@ -20,7 +21,7 @@ namespace AsmResolver.PE.Tests.Debug
             var newImage = PEImage.FromBytes(tempStream.ToArray());
             return newImage;
         }
-        
+
         [Fact]
         public void ReadEntries()
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AsmResolver.IO;
 using AsmResolver.PE.File.Headers;
 
 namespace AsmResolver.PE.File
@@ -16,7 +17,7 @@ namespace AsmResolver.PE.File
         {
             get;
         }
-        
+
         /// <summary>
         /// Gets or sets the DOS header of the PE file.
         /// </summary>
@@ -52,13 +53,13 @@ namespace AsmResolver.PE.File
         /// <summary>
         /// Gets a value indicating the mapping mode of the PE file. If the PE file is in its mapped form,
         /// then every offset of all segments in the PE file will be equal to the physical memory address.
-        /// If the file is in its unmapped form, the offsets will be equal to the file offset. 
+        /// If the file is in its unmapped form, the offsets will be equal to the file offset.
         /// </summary>
         PEMappingMode MappingMode
         {
             get;
         }
-        
+
         /// <summary>
         /// Finds the section containing the provided virtual address.
         /// </summary>
@@ -80,7 +81,7 @@ namespace AsmResolver.PE.File
         /// </summary>
         /// <param name="dataDirectory">The data directory to read.</param>
         /// <returns>The reader.</returns>
-        IBinaryStreamReader CreateDataDirectoryReader(DataDirectory dataDirectory);
+        BinaryStreamReader CreateDataDirectoryReader(DataDirectory dataDirectory);
 
         /// <summary>
         /// Attempts to create a reader that spans the provided data directory.
@@ -88,14 +89,14 @@ namespace AsmResolver.PE.File
         /// <param name="dataDirectory">The data directory to read.</param>
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
-        bool TryCreateDataDirectoryReader(DataDirectory dataDirectory, out IBinaryStreamReader reader);
+        bool TryCreateDataDirectoryReader(DataDirectory dataDirectory, out BinaryStreamReader reader);
 
         /// <summary>
         /// Creates a new reader at the provided virtual address.
         /// </summary>
         /// <param name="rva">The virtual address to start reading at.</param>
         /// <returns>The reader.</returns>
-        IBinaryStreamReader CreateReaderAtRva(uint rva);
+        BinaryStreamReader CreateReaderAtRva(uint rva);
 
         /// <summary>
         /// Attempts to create a new reader at the provided virtual address.
@@ -103,7 +104,7 @@ namespace AsmResolver.PE.File
         /// <param name="rva">The virtual address to start reading at.</param>
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
-        bool TryCreateReaderAtRva(uint rva, out IBinaryStreamReader reader);
+        bool TryCreateReaderAtRva(uint rva, out BinaryStreamReader reader);
 
         /// <summary>
         /// Creates a new reader of a chunk of data at the provided virtual address.
@@ -111,7 +112,7 @@ namespace AsmResolver.PE.File
         /// <param name="rva">The virtual address to start reading at.</param>
         /// <param name="size">The number of bytes in the chunk.</param>
         /// <returns>The reader.</returns>
-        IBinaryStreamReader CreateReaderAtRva(uint rva, uint size);
+        BinaryStreamReader CreateReaderAtRva(uint rva, uint size);
 
         /// <summary>
         /// Attempts to create a new reader of a chunk of data at the provided virtual address.
@@ -120,14 +121,14 @@ namespace AsmResolver.PE.File
         /// <param name="size">The number of bytes in the chunk.</param>
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
-        bool TryCreateReaderAtRva(uint rva, uint size, out IBinaryStreamReader reader);
-        
+        bool TryCreateReaderAtRva(uint rva, uint size, out BinaryStreamReader reader);
+
         /// <summary>
         /// Creates a new reader at the provided file offset.
         /// </summary>
         /// <param name="fileOffset">The file offset to start reading at.</param>
         /// <returns>The reader.</returns>
-        IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset);
+        BinaryStreamReader CreateReaderAtFileOffset(uint fileOffset);
 
         /// <summary>
         /// Attempts to create a new reader at the provided file offset.
@@ -135,7 +136,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset to start reading at.</param>
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
-        public bool TryCreateReaderAtFileOffset(uint fileOffset, out IBinaryStreamReader reader);
+        public bool TryCreateReaderAtFileOffset(uint fileOffset, out BinaryStreamReader reader);
 
         /// <summary>
         /// Creates a new reader of a chunk of data at the provided file offset.
@@ -143,7 +144,7 @@ namespace AsmResolver.PE.File
         /// <param name="fileOffset">The file offset to start reading at.</param>
         /// <param name="size">The number of bytes in the chunk.</param>
         /// <returns>The reader.</returns>
-        public IBinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size);
+        public BinaryStreamReader CreateReaderAtFileOffset(uint fileOffset, uint size);
 
         /// <summary>
         /// Attempts to create a new reader of a chunk of data at the provided file offset.
@@ -152,6 +153,6 @@ namespace AsmResolver.PE.File
         /// <param name="size">The number of bytes in the chunk.</param>
         /// <param name="reader">The reader that was created.</param>
         /// <returns><c>true</c> if the reader was created successfully, <c>false</c> otherwise.</returns>
-        public bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out IBinaryStreamReader reader);
+        public bool TryCreateReaderAtFileOffset(uint fileOffset, uint size, out BinaryStreamReader reader);
     }
 }
