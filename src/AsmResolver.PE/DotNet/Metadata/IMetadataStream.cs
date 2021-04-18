@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -17,7 +18,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         }
 
         /// <summary>
-        /// Gets a value indicating whether the raw contents of the stream can be read using a binary stream reader. 
+        /// Gets a value indicating whether the raw contents of the stream can be read using a binary stream reader.
         /// </summary>
         bool CanRead
         {
@@ -29,6 +30,6 @@ namespace AsmResolver.PE.DotNet.Metadata
         /// </summary>
         /// <returns>The reader.</returns>
         /// <exception cref="InvalidOperationException">Occurs when <see cref="CanRead"/> is <c>false</c>.</exception>
-        IBinaryStreamReader CreateReader();
+        BinaryStreamReader CreateReader();
     }
 }

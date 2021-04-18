@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Imports.Builder
 {
@@ -8,9 +9,9 @@ namespace AsmResolver.PE.Imports.Builder
     /// </summary>
     public class HintNameTableBuffer : SegmentBase
     {
-        private readonly IList<IImportedModule> _modules = new List<IImportedModule>();
-        private readonly IDictionary<IImportedModule, uint> _moduleNameOffsets = new Dictionary<IImportedModule, uint>();
-        private readonly IDictionary<ImportedSymbol, uint> _hintNameOffsets = new Dictionary<ImportedSymbol, uint>();
+        private readonly List<IImportedModule> _modules = new();
+        private readonly Dictionary<IImportedModule, uint> _moduleNameOffsets = new();
+        private readonly Dictionary<ImportedSymbol, uint> _hintNameOffsets = new();
         private uint _length;
 
         /// <inheritdoc />
@@ -56,7 +57,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// PE file.
         /// </remarks>
         public uint GetModuleNameRva(IImportedModule module) => Rva + _moduleNameOffsets[module];
-        
+
         /// <summary>
         /// Gets the virtual address to the beginning of the hint-name pair associated to an imported member.
         /// </summary>
@@ -78,7 +79,7 @@ namespace AsmResolver.PE.Imports.Builder
             {
                 foreach (var member in module.Symbols)
                 {
-                    if (member.IsImportByName) 
+                    if (member.IsImportByName)
                         WriteHintName(writer, member.Hint, member.Name);
                 }
 
@@ -99,6 +100,6 @@ namespace AsmResolver.PE.Imports.Builder
             writer.WriteAsciiString(module.Name);
             writer.WriteByte(0);
         }
-        
+
     }
 }

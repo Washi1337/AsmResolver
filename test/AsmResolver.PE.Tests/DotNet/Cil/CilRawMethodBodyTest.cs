@@ -12,9 +12,10 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
         {
             var peImage = PEImage.FromBytes(Properties.Resources.HelloWorld);
             var tablesStream = peImage.DotNetDirectory.Metadata.GetStream<TablesStream>();
-            
+
             var methodTable = tablesStream.GetTable<MethodDefinitionRow>();
-            var methodBody = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, methodTable[0].Body.CreateReader());
+            var reader = methodTable[0].Body.CreateReader();
+            var methodBody = CilRawMethodBody.FromReader(ThrowErrorListener.Instance, ref reader);
 
             Assert.False(methodBody.IsFat);
             Assert.Equal(new byte[]
@@ -24,6 +25,6 @@ namespace AsmResolver.PE.Tests.DotNet.Cil
                 0x2A                          // ret
             }, methodBody.Code);
         }
-        
+
     }
 }

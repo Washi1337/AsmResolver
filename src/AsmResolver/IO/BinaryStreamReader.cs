@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace AsmResolver.IO
 {
@@ -43,6 +45,7 @@ namespace AsmResolver.IO
         public uint Length
         {
             get;
+            private set;
         }
 
         public ulong EndOffset => StartOffset + Length;
@@ -66,6 +69,8 @@ namespace AsmResolver.IO
             get => (uint) (Offset - StartOffset + StartRva);
             set => Offset = value - StartRva + StartOffset;
         }
+
+        public bool IsValid => DataSource is not null;
 
         public bool CanRead(uint count) => RelativeOffset + count <= Length;
 
@@ -183,16 +188,145 @@ namespace AsmResolver.IO
             return buffer;
         }
 
-        public BinaryStreamReader Fork() => this;
+        public byte[] ReadBytesUntil(byte delimeter)
+        {
+            var buffer = new List<byte>();
 
-        public BinaryStreamReader ForkAbsolute(ulong offset)
+            while (RelativeOffset < Length)
+            {
+                byte b = ReadByte();
+                buffer.Add(b);
+                if (b == delimeter)
+                    break;
+            }
+
+            return buffer.ToArray();
+        }
+
+        public string ReadAsciiString()
+        {
+            byte[] data = ReadBytesUntil(0);
+            int length = data.Length;
+
+            // Exclude trailing 0 byte.
+            if (data[data.Length - 1] == 0)
+                length--;
+
+            return Encoding.ASCII.GetString(data, 0, length);
+        }
+
+        public ulong ReadNativeInt(bool is32Bit)
+        {
+            return is32Bit ? ReadUInt32() : ReadUInt64();
+        }
+
+        /// <summary>
+        /// Reads a compressed unsigned integer from the stream.
+        /// </summary>
+        /// <returns>The unsigned integer that was read from the stream.</returns>
+        public uint ReadCompressedUInt32()
+        {
+            var firstByte = ReadByte();
+
+            if ((firstByte & 0x80) == 0)
+                return firstByte;
+
+            if ((firstByte & 0x40) == 0)
+                return (uint)(((firstByte & 0x7F) << 8) | ReadByte());
+
+            return (uint) (((firstByte & 0x3F) << 0x18) |
+                           (ReadByte() << 0x10) |
+                           (ReadByte() << 0x08) |
+                           ReadByte());
+        }
+
+        /// <summary>
+        /// Tries to reads a compressed unsigned integer from the stream.
+        /// </summary>
+        /// <param name="value">The unsigned integer that was read from the stream.</param>
+        /// <returns><c>True</c> if the method succeeded, false otherwise.</returns>
+        public bool TryReadCompressedUInt32(out uint value)
+        {
+            value = 0;
+            if (!CanRead(sizeof(byte)))
+                return false;
+
+            var firstByte = ReadByte();
+            Offset--;
+
+            if (((firstByte & 0x80) == 0 && CanRead(sizeof(byte))) ||
+                ((firstByte & 0x40) == 0 && CanRead(sizeof(ushort))) ||
+                (CanRead(sizeof(uint))))
+            {
+                value = ReadCompressedUInt32();
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Reads a short or a long index from the stream.
+        /// </summary>
+        /// <param name="size">The size of the index to read.</param>
+        /// <returns>The index, zero extended to 32 bits if necessary.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public uint ReadIndex(IndexSize size)
+        {
+            switch (size)
+            {
+                case IndexSize.Short:
+                    return ReadUInt16();
+                case IndexSize.Long:
+                    return ReadUInt32();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(size));
+            }
+        }
+
+        /// <summary>
+        /// Reads a serialized UTF8 string from the stream.
+        /// </summary>
+        /// <returns>The string that was read from the stream.</returns>
+        public string ReadSerString()
+        {
+            if (!CanRead(1) || ReadByte() == 0xFF)
+                return null;
+            Offset--;
+            if (!TryReadCompressedUInt32(out uint length))
+                return null;
+            var data = new byte[length];
+            length = (uint) ReadBytes(data, 0, (int) length);
+            return Encoding.UTF8.GetString(data, 0, (int) length);
+        }
+
+        /// <summary>
+        /// Aligns the reader to a specified boundary.
+        /// </summary>
+        /// <param name="alignment">The boundary to use.</param>
+        public void Align(uint alignment)
+        {
+            Offset = Offset.Align(alignment);
+        }
+
+        public readonly BinaryStreamReader Fork() => this;
+
+        public readonly BinaryStreamReader ForkAbsolute(ulong offset)
         {
             return ForkAbsolute(offset, (uint) (Length - (offset - StartOffset)));
         }
 
-        public BinaryStreamReader ForkAbsolute(ulong offset, uint size)
+        public readonly BinaryStreamReader ForkAbsolute(ulong offset, uint size)
         {
             return new(DataSource, offset, (uint) (StartRva + (offset - StartOffset)), size);
+        }
+
+        public void ChangeSize(uint newSize)
+        {
+            if (newSize > Length)
+                throw new EndOfStreamException();
+
+            Length = newSize;
         }
     }
 }

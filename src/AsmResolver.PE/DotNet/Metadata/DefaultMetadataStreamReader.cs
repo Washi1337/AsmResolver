@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Guid;
 using AsmResolver.PE.DotNet.Metadata.Strings;
@@ -16,28 +17,28 @@ namespace AsmResolver.PE.DotNet.Metadata
     {
         /// <inheritdoc />
         public IMetadataStream ReadStream(PEReaderContext context, MetadataStreamHeader header,
-            IBinaryStreamReader reader)
+            ref BinaryStreamReader reader)
         {
             switch (header.Name)
             {
                 case TablesStream.CompressedStreamName:
                 case TablesStream.EncStreamName:
-                    return new SerializedTableStream(context, header.Name,DataSegment.FromReader(reader));
-                    
+                    return new SerializedTableStream(context, header.Name,DataSegment.FromReader(ref reader));
+
                 case StringsStream.DefaultName:
-                    return new SerializedStringsStream(header.Name, DataSegment.FromReader(reader));
+                    return new SerializedStringsStream(header.Name, DataSegment.FromReader(ref reader));
 
                 case UserStringsStream.DefaultName:
-                    return new SerializedUserStringsStream(header.Name, DataSegment.FromReader(reader));
+                    return new SerializedUserStringsStream(header.Name, DataSegment.FromReader(ref reader));
 
                 case BlobStream.DefaultName:
-                    return new SerializedBlobStream(header.Name, DataSegment.FromReader(reader));
+                    return new SerializedBlobStream(header.Name, DataSegment.FromReader(ref reader));
 
                 case GuidStream.DefaultName:
-                    return new SerializedGuidStream(header.Name, DataSegment.FromReader(reader));
+                    return new SerializedGuidStream(header.Name, DataSegment.FromReader(ref reader));
 
                 default:
-                    return new CustomMetadataStream(header.Name, DataSegment.FromReader(reader));
+                    return new CustomMetadataStream(header.Name, DataSegment.FromReader(ref reader));
             }
         }
     }

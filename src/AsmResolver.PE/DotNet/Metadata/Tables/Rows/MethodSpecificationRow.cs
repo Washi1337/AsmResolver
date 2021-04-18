@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the method specification table.</param>
         /// <returns>The row.</returns>
-        public static MethodSpecificationRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static MethodSpecificationRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new MethodSpecificationRow(
                 reader.ReadIndex((IndexSize) layout.Columns[0].Size),

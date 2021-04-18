@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.Exceptions.X64
 {
     /// <summary>
@@ -53,15 +55,17 @@ namespace AsmResolver.PE.Exceptions.X64
         /// <param name="context">The reader context.</param>
         /// <param name="reader">The input stream.</param>
         /// <returns>The read function entry.</returns>
-        public static X64RuntimeFunction FromReader(PEReaderContext context, IBinaryStreamReader reader)
+        public static X64RuntimeFunction FromReader(PEReaderContext context, ref BinaryStreamReader reader)
         {
             uint begin = reader.ReadUInt32();
             uint end = reader.ReadUInt32();
             uint unwindInfoRva = reader.ReadUInt32();
 
-            var unwindInfo = context.File.TryCreateReaderAtRva(unwindInfoRva, out var unwindReader)
-                ? X64UnwindInfo.FromReader(context, unwindReader)
-                : context.BadImageAndReturn<X64UnwindInfo>($"Invalid UnwindInfo RVA {unwindInfoRva:X8}.");
+            X64UnwindInfo unwindInfo;
+            if (context.File.TryCreateReaderAtRva(unwindInfoRva, out var unwindReader))
+                unwindInfo = X64UnwindInfo.FromReader(context, ref unwindReader);
+            else
+                unwindInfo = context.BadImageAndReturn<X64UnwindInfo>($"Invalid UnwindInfo RVA {unwindInfoRva:X8}.");
 
             return new X64RuntimeFunction(
                 context.File.GetReferenceToRva(begin),

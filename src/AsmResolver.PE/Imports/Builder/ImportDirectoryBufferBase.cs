@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Imports.Builder
 {
@@ -9,7 +10,7 @@ namespace AsmResolver.PE.Imports.Builder
     /// </summary>
     public abstract class ImportDirectoryBufferBase : SegmentBase, IImportAddressProvider
     {
-        private readonly IDictionary<IImportedModule, ThunkTableBuffer> _lookupTables = new Dictionary<IImportedModule, ThunkTableBuffer>();
+        private readonly Dictionary<IImportedModule, ThunkTableBuffer> _lookupTables = new();
         private uint _lookupTablesLength;
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace AsmResolver.PE.Imports.Builder
         }
 
         /// <summary>
-        /// Creates a thunk table for a module and its imported members, and adds it to the buffer. 
+        /// Creates a thunk table for a module and its imported members, and adds it to the buffer.
         /// </summary>
         /// <param name="module">The module to add.</param>
         public virtual void AddModule(IImportedModule module)
@@ -91,12 +92,12 @@ namespace AsmResolver.PE.Imports.Builder
             _lookupTables.Add(module, lookupTable);
             _lookupTablesLength += lookupTable.GetPhysicalSize();
         }
-        
+
         /// <summary>
         /// Creates a new thunk table buffer.
         /// </summary>
         /// <returns>The buffer.</returns>
-        protected virtual ThunkTableBuffer CreateThunkTable() => 
+        protected virtual ThunkTableBuffer CreateThunkTable() =>
             new ThunkTableBuffer(HintNameTable, Is32Bit, false);
 
         /// <inheritdoc />
@@ -105,7 +106,7 @@ namespace AsmResolver.PE.Imports.Builder
         /// <inheritdoc />
         public override void Write(IBinaryStreamWriter writer)
         {
-            foreach (var module in Modules) 
+            foreach (var module in Modules)
                 _lookupTables[module].Write(writer);
         }
     }

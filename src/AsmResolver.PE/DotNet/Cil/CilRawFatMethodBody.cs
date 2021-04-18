@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 
 namespace AsmResolver.PE.DotNet.Cil
@@ -112,7 +113,7 @@ namespace AsmResolver.PE.DotNet.Cil
         /// <returns>The raw method body.</returns>
         /// <exception cref="FormatException">Occurs when the method header indicates an method body that is not in the
         /// fat format.</exception>
-        public new static CilRawFatMethodBody FromReader(IErrorListener errorListener, IBinaryStreamReader reader)
+        public new static CilRawFatMethodBody FromReader(IErrorListener errorListener, ref BinaryStreamReader reader)
         {
             ulong fileOffset = reader.Offset;
             uint rva = reader.Rva;
@@ -160,7 +161,7 @@ namespace AsmResolver.PE.DotNet.Cil
                 CilExtraSection section;
                 do
                 {
-                    section = CilExtraSection.FromReader(reader);
+                    section = CilExtraSection.FromReader(ref reader);
                     body.ExtraSections.Add(section);
                 } while (section.HasMoreSections);
             }

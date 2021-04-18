@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata
 {
@@ -7,20 +8,6 @@ namespace AsmResolver.PE.DotNet.Metadata
     /// </summary>
     public readonly struct MetadataStreamHeader
     {
-        /// <summary>
-        /// Reads a single metadata stream header from an input stream.
-        /// </summary>
-        /// <param name="reader">The input stream.</param>
-        /// <returns>The header.</returns>
-        public static MetadataStreamHeader FromReader(IBinaryStreamReader reader)
-        {
-            uint offset = reader.ReadUInt32();
-            uint size = reader.ReadUInt32();
-            string name = reader.ReadAsciiString();
-            reader.Align(4);
-            return new MetadataStreamHeader(offset, size, name);
-        }
-        
         /// <summary>
         /// Creates a new metadata stream header.
         /// </summary>
@@ -33,11 +20,11 @@ namespace AsmResolver.PE.DotNet.Metadata
             Offset = offset;
             Size = size;
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            
+
             if (name.Length > 32)
                 throw new ArgumentOutOfRangeException(nameof(name), "Name can be no longer than 32 bytes.");
         }
-        
+
         /// <summary>
         /// Gets the offset (relative to the start of the metadata directory) referencing the beginning of the contents
         /// of the stream.
@@ -61,6 +48,20 @@ namespace AsmResolver.PE.DotNet.Metadata
         public string Name
         {
             get;
+        }
+
+        /// <summary>
+        /// Reads a single metadata stream header from an input stream.
+        /// </summary>
+        /// <param name="reader">The input stream.</param>
+        /// <returns>The header.</returns>
+        public static MetadataStreamHeader FromReader(ref BinaryStreamReader reader)
+        {
+            uint offset = reader.ReadUInt32();
+            uint size = reader.ReadUInt32();
+            string name = reader.ReadAsciiString();
+            reader.Align(4);
+            return new MetadataStreamHeader(offset, size, name);
         }
 
         /// <inheritdoc />

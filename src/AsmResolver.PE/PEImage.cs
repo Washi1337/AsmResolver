@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.IO;
 using AsmResolver.PE.Debug;
 using AsmResolver.PE.DotNet;
 using AsmResolver.PE.Exceptions;
@@ -69,7 +70,7 @@ namespace AsmResolver.PE
         /// <param name="mode">Indicates the input PE is in its mapped or unmapped form.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
+        public static IPEImage FromReader(in BinaryStreamReader reader, PEMappingMode mode = PEMappingMode.Unmapped) =>
             FromFile(PEFile.FromReader(reader, mode));
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace AsmResolver.PE
         /// <param name="readerParameters">The parameters to use while reading the PE image.</param>
         /// <returns>The PE image that was opened.</returns>
         /// <exception cref="BadImageFormatException">Occurs when the file does not follow the PE file format.</exception>
-        public static IPEImage FromReader(IBinaryStreamReader reader, PEMappingMode mode, PEReaderParameters readerParameters) =>
+        public static IPEImage FromReader(in BinaryStreamReader reader, PEMappingMode mode, PEReaderParameters readerParameters) =>
             FromFile(PEFile.FromReader(reader, mode), readerParameters);
 
         /// <summary>

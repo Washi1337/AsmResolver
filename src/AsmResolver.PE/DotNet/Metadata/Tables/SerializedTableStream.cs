@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables
 {
     /// <summary>
-    /// Provides an implementation of a tables stream that obtains tables from a readable segment in a file.  
+    /// Provides an implementation of a tables stream that obtains tables from a readable segment in a file.
     /// </summary>
     public class SerializedTableStream : TablesStream
     {
@@ -51,7 +52,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             _validMask = reader.ReadUInt64();
             _sortedMask = reader.ReadUInt64();
 
-            _rowCounts = ReadRowCounts(reader);
+            _rowCounts = ReadRowCounts(ref reader);
 
             if (HasExtraData)
                 ExtraData = reader.ReadUInt32();
@@ -65,15 +66,15 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override IBinaryStreamReader CreateReader()
+        public override BinaryStreamReader CreateReader()
         {
             return _contents.CreateReader();
         }
 
-        private uint[] ReadRowCounts(IBinaryStreamReader reader)
+        private uint[] ReadRowCounts(ref BinaryStreamReader reader)
         {
             const TableIndex maxTableIndex = TableIndex.GenericParamConstraint;
-            
+
             var result = new uint[(int) maxTableIndex + 1 ];
             for (TableIndex i = 0; i <= maxTableIndex; i++)
                 result[(int) i] = HasTable(_validMask, i) ? reader.ReadUInt32() : 0;
@@ -145,7 +146,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
                 // ResolutionScope
                 GetCodedIndexSize(TableIndex.Module, TableIndex.ModuleRef, TableIndex.AssemblyRef, TableIndex.TypeRef),
-                
+
                 // TypeOrMethodDef
                 GetCodedIndexSize(TableIndex.TypeDef, TableIndex.Method),
             });
@@ -219,7 +220,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return tables;
         }
 
-        private IBinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref ulong currentOffset)
+        private BinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref ulong currentOffset)
         {
             int index = (int) currentIndex;
             uint rawSize = TableLayouts[index].RowSize * _rowCounts[index];
@@ -237,7 +238,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return new SerializedMetadataTable<TRow>(
                 CreateNextRawTableReader(index, ref offset),
                 index,
-                TableLayouts[(int) index], 
+                TableLayouts[(int) index],
                 readRow);
         }
 
@@ -249,11 +250,11 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         {
             return new SerializedMetadataTable<TRow>(
                 _context,
-                CreateNextRawTableReader(index, ref offset), 
-                index, 
-                TableLayouts[(int) index], 
+                CreateNextRawTableReader(index, ref offset),
+                index,
+                TableLayouts[(int) index],
                 readRow);
         }
-        
+
     }
 }

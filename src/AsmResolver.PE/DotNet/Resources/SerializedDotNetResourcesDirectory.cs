@@ -1,9 +1,10 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Resources
 {
     /// <summary>
-    /// Provides an implementation of a .NET resources directory that obtains blobs from a readable segment in a file.  
+    /// Provides an implementation of a .NET resources directory that obtains blobs from a readable segment in a file.
     /// </summary>
     public class SerializedDotNetResourcesDirectory : DotNetResourcesDirectory
     {
@@ -14,11 +15,11 @@ namespace AsmResolver.PE.DotNet.Resources
         /// raw contents of the directory.
         /// </summary>
         /// <param name="reader">The input stream.</param>
-        public SerializedDotNetResourcesDirectory(IBinaryStreamReader reader)
+        public SerializedDotNetResourcesDirectory(ref BinaryStreamReader reader)
         {
-            if (reader == null)
+            if (!reader.IsValid)
                 throw new ArgumentNullException(nameof(reader));
-            _contents = DataSegment.FromReader(reader);
+            _contents = DataSegment.FromReader(ref reader);
         }
 
         /// <summary>
@@ -41,23 +42,23 @@ namespace AsmResolver.PE.DotNet.Resources
         public override byte[] GetManifestResourceData(uint offset)
         {
             var reader = CreateManifestResourceReader(offset);
-            if (reader is null)
+            if (!reader.IsValid)
                 return null;
-            
+
             var buffer = new byte[reader.Length];
             reader.ReadBytes(buffer, 0, buffer.Length);
             return buffer;
         }
 
         /// <inheritdoc />
-        public override IBinaryStreamReader CreateManifestResourceReader(uint offset)
+        public override BinaryStreamReader CreateManifestResourceReader(uint offset)
         {
             if (offset >= _contents.GetPhysicalSize() - sizeof(uint))
-                return null;
-            
+                return default;
+
             var reader = _contents.CreateReader(_contents.Offset + offset);
             uint length = reader.ReadUInt32();
-            return reader.Fork(reader.Offset, length);
+            return reader.ForkAbsolute(reader.Offset, length);
         }
     }
 }

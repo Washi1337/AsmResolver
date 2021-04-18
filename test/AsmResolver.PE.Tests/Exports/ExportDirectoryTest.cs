@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Exports;
 using Xunit;
@@ -14,7 +15,7 @@ namespace AsmResolver.PE.Tests.Exports
             var image = PEImage.FromBytes(Properties.Resources.SimpleDll_Exports);
             Assert.Equal("SimpleDll.dll", image.Exports.Name);
         }
-        
+
         [Fact]
         public void ReadExportNames()
         {
@@ -25,7 +26,7 @@ namespace AsmResolver.PE.Tests.Exports
                 "NamedExport2",
             }, image.Exports.Entries.Select(e => e.Name));
         }
-        
+
         [Fact]
         public void ReadExportAddresses()
         {
@@ -112,13 +113,13 @@ namespace AsmResolver.PE.Tests.Exports
         public void PersistentExportedSymbol()
         {
             var image = PEImage.FromBytes(Properties.Resources.HelloWorld);
-            
+
             // Prepare mock.
             var exportDirectory = new ExportDirectory("HelloWorld.dll");
             var exportedSymbol = new ExportedSymbol(new VirtualAddress(0x12345678), "TestExport");
             exportDirectory.Entries.Add(exportedSymbol);
             image.Exports = exportDirectory;
-            
+
             // Rebuild.
             var newImage = RebuildAndReloadManagedPE(image);
 

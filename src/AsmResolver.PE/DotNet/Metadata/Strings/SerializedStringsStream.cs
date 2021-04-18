@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Strings
 {
     /// <summary>
-    /// Provides an implementation of a strings stream that obtains strings from a readable segment in a file.  
+    /// Provides an implementation of a strings stream that obtains strings from a readable segment in a file.
     /// </summary>
     public class SerializedStringsStream : StringsStream
     {
@@ -37,7 +38,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override IBinaryStreamReader CreateReader() => _contents.CreateReader();
+        public override BinaryStreamReader CreateReader() => _contents.CreateReader();
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _contents.GetPhysicalSize();
@@ -50,7 +51,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Strings
         {
             if (index == 0)
                 return null;
-            
+
             if (!_cachedStrings.TryGetValue(index, out string value) && index < _contents.GetPhysicalSize())
             {
                 var stringsReader = _contents.CreateReader(_contents.Offset + index);

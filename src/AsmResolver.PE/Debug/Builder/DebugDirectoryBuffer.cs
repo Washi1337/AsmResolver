@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.Debug.Builder
 {
     /// <summary>
@@ -5,16 +7,16 @@ namespace AsmResolver.PE.Debug.Builder
     /// </summary>
     public class DebugDirectoryBuffer : ISegment
     {
-        private readonly SegmentBuilder _headers = new SegmentBuilder();
-        private readonly SegmentBuilder _streamsTable = new SegmentBuilder();
+        private readonly SegmentBuilder _headers = new();
+        private readonly SegmentBuilder _streamsTable = new();
 
         /// <summary>
-        /// Gets the segment buffer that contains all the data streams referenced by the debug directory. 
+        /// Gets the segment buffer that contains all the data streams referenced by the debug directory.
         /// </summary>
         public ISegment ContentsTable => _streamsTable;
 
         /// <summary>
-        /// Gets a value indicating whether the buffer has no entries added to it. 
+        /// Gets a value indicating whether the buffer has no entries added to it.
         /// </summary>
         public bool IsEmpty => _headers.Count == 0;
 

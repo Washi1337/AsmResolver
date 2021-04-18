@@ -1,15 +1,16 @@
 using System.Collections.Generic;
+using AsmResolver.IO;
 using AsmResolver.PE.Relocations;
 
 namespace AsmResolver.PE.DotNet.Builder
 {
     /// <summary>
-    /// Represents a code segment that initializes the CLR and functions as an entrypoint for .NET executables. 
+    /// Represents a code segment that initializes the CLR and functions as an entrypoint for .NET executables.
     /// </summary>
     public abstract class BootstrapperSegment : SegmentBase
     {
         /// <summary>
-        /// Gets the native code that initializes the CLR. 
+        /// Gets the native code that initializes the CLR.
         /// </summary>
         /// <returns>The code.</returns>
         public abstract byte[] GetNativeCode();

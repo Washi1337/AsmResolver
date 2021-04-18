@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Builder
 {
@@ -21,9 +22,9 @@ namespace AsmResolver.PE.Win32Resources.Builder
 
             _segments = new SegmentBuilder
             {
-                DirectoryTable, 
+                DirectoryTable,
                 NameTable,
-                DataEntryTable, 
+                DataEntryTable,
                 DataTable
             };
         }
@@ -36,25 +37,25 @@ namespace AsmResolver.PE.Win32Resources.Builder
 
         /// <inheritdoc />
         public bool CanUpdateOffsets => true;
-        
+
         /// <summary>
         /// Gets the segment containing the table with all directory entries.
         /// </summary>
         public ResourceTableBuffer<IResourceDirectory> DirectoryTable
         {
             get;
-        }  
-        
+        }
+
         /// <summary>
         /// Gets the segment containing the table with all data entries.
         /// </summary>
         public ResourceTableBuffer<IResourceData> DataEntryTable
         {
             get;
-        }  
+        }
 
         /// <summary>
-        /// Gets the segment containing the table with the names for all named resource entries. 
+        /// Gets the segment containing the table with the names for all named resource entries.
         /// </summary>
         public ResourceTableBuffer<string> NameTable
         {
@@ -70,7 +71,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
         }
 
         /// <summary>
-        /// Adds a resource directory and all its sub entries to the buffer. 
+        /// Adds a resource directory and all its sub entries to the buffer.
         /// </summary>
         /// <param name="directory">The directory to ad..</param>
         public void AddDirectory(IResourceDirectory directory)
@@ -79,7 +80,7 @@ namespace AsmResolver.PE.Win32Resources.Builder
             if (directory.Name != null)
                 NameTable.AddEntry(directory.Name);
 
-            foreach (var entry in directory.Entries) 
+            foreach (var entry in directory.Entries)
                 AddEntry(entry);
         }
 

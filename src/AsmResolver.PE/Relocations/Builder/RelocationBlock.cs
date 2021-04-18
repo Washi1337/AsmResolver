@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Relocations.Builder
 {
@@ -25,7 +26,7 @@ namespace AsmResolver.PE.Relocations.Builder
         {
             PageRva = pageRva;
         }
-        
+
         /// <inheritdoc />
         public uint PageRva
         {
@@ -67,6 +68,6 @@ namespace AsmResolver.PE.Relocations.Builder
                 entry.Write(writer);
             new RelocationEntry(0).Write(writer);
         }
-        
+
     }
 }

@@ -1,3 +1,5 @@
+using AsmResolver.IO;
+
 namespace AsmResolver.PE.DotNet.Resources
 {
     /// <summary>
@@ -17,6 +19,6 @@ namespace AsmResolver.PE.DotNet.Resources
         /// </summary>
         /// <param name="offset">The offset of the resource data, relative to the start of the data directory.</param>
         /// <returns>The data reader, or <c>null</c> if the offset is not a valid offset.</returns>
-        public abstract IBinaryStreamReader CreateManifestResourceReader(uint offset);
+        public abstract BinaryStreamReader CreateManifestResourceReader(uint offset);
     }
 }

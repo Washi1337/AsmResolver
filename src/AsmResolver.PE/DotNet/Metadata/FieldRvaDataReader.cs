@@ -1,4 +1,5 @@
 using System;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Metadata.Blob;
 using AsmResolver.PE.DotNet.Metadata.Tables;
 using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata
         {
             if (fieldRvaRow.Data is null)
                 return null;
-            
+
             if (fieldRvaRow.Data.IsBounded)
                 return fieldRvaRow.Data.GetSegment();
 
@@ -33,9 +34,9 @@ namespace AsmResolver.PE.DotNet.Metadata
 
                 var field = table.GetByRid(fieldRvaRow.Field);
                 int valueSize = DetermineFieldSize(metadata, field);
-                
+
                 var reader = fieldRvaRow.Data.CreateReader();
-                return DataSegment.FromReader(reader, valueSize);
+                return DataSegment.FromReader(ref reader, valueSize);
             }
 
             listener.NotSupported("FieldRva row has an invalid or unsupported data column.");
@@ -44,10 +45,9 @@ namespace AsmResolver.PE.DotNet.Metadata
 
         private int DetermineFieldSize(IMetadata metadata, in FieldDefinitionRow field)
         {
-            var reader = metadata
-                .GetStream<BlobStream>()
-                .GetBlobReaderByIndex(field.Signature);
-            
+            if (metadata.GetStream<BlobStream>().GetBlobReaderByIndex(field.Signature) is not { } reader)
+                return 0;
+
             reader.ReadByte(); // calling convention attributes.
             var elementType = (ElementType) reader.ReadByte();
             return elementType switch
@@ -64,23 +64,23 @@ namespace AsmResolver.PE.DotNet.Metadata
                 ElementType.U8 => sizeof(ulong),
                 ElementType.R4 => sizeof(float),
                 ElementType.R8 => sizeof(double),
-                ElementType.ValueType => GetCustomTypeSize(metadata, reader),
-                ElementType.Class => GetCustomTypeSize(metadata, reader),
+                ElementType.ValueType => GetCustomTypeSize(metadata, ref reader),
+                ElementType.Class => GetCustomTypeSize(metadata, ref reader),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
 
-        private int GetCustomTypeSize(IMetadata metadata, IBinaryStreamReader reader)
+        private int GetCustomTypeSize(IMetadata metadata, ref BinaryStreamReader reader)
         {
             if (!reader.TryReadCompressedUInt32(out uint codedIndex))
                 return 0;
 
             var tablesStream = metadata.GetStream<TablesStream>();
-            
+
             var typeToken = tablesStream
                 .GetIndexEncoder(CodedIndex.TypeDefOrRef)
                 .DecodeIndex(codedIndex);
-            
+
             if (typeToken.Table == TableIndex.TypeDef)
             {
                 var classLayoutTable = tablesStream.GetTable<ClassLayoutRow>(TableIndex.ClassLayout);

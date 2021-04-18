@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the exported type table.</param>
         /// <returns>The row.</returns>
-        public static ExportedTypeRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static ExportedTypeRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new ExportedTypeRow(
                 (TypeAttributes) reader.ReadUInt32(),
@@ -42,7 +43,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             Namespace = ns;
             Implementation = implementation;
         }
-        
+
         /// <inheritdoc />
         public TableIndex TableIndex => TableIndex.ExportedType;
 
@@ -74,7 +75,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <remarks>
         /// This field is used as a hint only. If the entry in the table does not match the name and namespace referenced
         /// by <see cref="Name"/> and <see cref="Namespace"/> respectively, then the CLR falls back to a search for the
-        /// type definition. 
+        /// type definition.
         /// </remarks>
         public uint TypeDefinitionId
         {
@@ -130,7 +131,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         public bool Equals(ExportedTypeRow other)
         {
             return Attributes == other.Attributes
-                   && TypeDefinitionId == other.TypeDefinitionId 
+                   && TypeDefinitionId == other.TypeDefinitionId
                    && Name == other.Name
                    && Namespace == other.Namespace
                    && Implementation == other.Implementation;

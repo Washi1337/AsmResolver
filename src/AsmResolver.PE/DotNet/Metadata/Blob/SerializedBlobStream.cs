@@ -1,9 +1,10 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Blob
 {
     /// <summary>
-    /// Provides an implementation of a blob stream that obtains blobs from a readable segment in a file.  
+    /// Provides an implementation of a blob stream that obtains blobs from a readable segment in a file.
     /// </summary>
     public class SerializedBlobStream : BlobStream
     {
@@ -34,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override IBinaryStreamReader CreateReader() => _contents.CreateReader();
+        public override BinaryStreamReader CreateReader() => _contents.CreateReader();
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _contents.GetPhysicalSize();
@@ -46,9 +47,9 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
         public override byte[] GetBlobByIndex(uint index) => GetBlobReaderByIndex(index)?.ReadToEnd();
 
         /// <inheritdoc />
-        public override IBinaryStreamReader GetBlobReaderByIndex(uint index)
+        public override BinaryStreamReader? GetBlobReaderByIndex(uint index)
         {
-            if (index == 0 || index >= _contents.GetPhysicalSize()) 
+            if (index == 0 || index >= _contents.GetPhysicalSize())
                 return null;
 
             var blobReader = _contents.CreateReader(_contents.Offset + index);
@@ -61,6 +62,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Blob
 
             return null;
         }
-        
+
     }
 }

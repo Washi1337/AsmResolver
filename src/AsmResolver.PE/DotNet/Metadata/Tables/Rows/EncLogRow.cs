@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
 {
@@ -15,13 +16,13 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// <param name="reader">The input stream.</param>
         /// <param name="layout">The layout of the edit-and-continue log table.</param>
         /// <returns>The row.</returns>
-        public static EncLogRow FromReader(IBinaryStreamReader reader, TableLayout layout)
+        public static EncLogRow FromReader(ref BinaryStreamReader reader, TableLayout layout)
         {
             return new EncLogRow(
                 reader.ReadUInt32(),
                 (DeltaFunctionCode) reader.ReadUInt32());
         }
-        
+
         /// <summary>
         /// Creates a new row for the edit-and-continue log metadata table.
         /// </summary>
@@ -46,7 +47,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
             1 => (uint) FuncCode,
             _ => throw new IndexOutOfRangeException()
         };
-        
+
         /// <summary>
         /// Gets the metadata token to apply the delta function to.
         /// </summary>

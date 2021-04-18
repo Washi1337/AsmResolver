@@ -1,9 +1,10 @@
 using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.DotNet.Metadata.Guid
 {
     /// <summary>
-    /// Provides an implementation of a GUID stream that obtains GUIDs from a readable segment in a file.  
+    /// Provides an implementation of a GUID stream that obtains GUIDs from a readable segment in a file.
     /// </summary>
     public class SerializedGuidStream : GuidStream
     {
@@ -34,7 +35,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override IBinaryStreamReader CreateReader() => _contents.CreateReader();
+        public override BinaryStreamReader CreateReader() => _contents.CreateReader();
 
         /// <inheritdoc />
         public override uint GetPhysicalSize() => _contents.GetPhysicalSize();
@@ -59,6 +60,6 @@ namespace AsmResolver.PE.DotNet.Metadata.Guid
 
             return System.Guid.Empty;
         }
-        
+
     }
 }
