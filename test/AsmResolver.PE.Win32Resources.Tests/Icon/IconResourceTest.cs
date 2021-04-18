@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Win32Resources.Icon;
 using Xunit;

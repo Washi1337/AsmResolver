@@ -215,6 +215,25 @@ namespace AsmResolver.IO
             return Encoding.ASCII.GetString(data, 0, length);
         }
 
+        /// <summary>
+        /// Reads a zero-terminated Unicode string from the stream.
+        /// </summary>
+        /// <returns>The string that was read from the stream.</returns>
+        public string ReadUnicodeString()
+        {
+            var builder = new StringBuilder();
+
+            while (true)
+            {
+                char nextChar = (char) ReadUInt16();
+                if (nextChar is '\0')
+                    break;
+                builder.Append(nextChar);
+            }
+
+            return builder.ToString();
+        }
+
         public ulong ReadNativeInt(bool is32Bit)
         {
             return is32Bit ? ReadUInt32() : ReadUInt64();

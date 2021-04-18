@@ -1,4 +1,5 @@
 ﻿using System;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Icon
 {
@@ -84,9 +85,9 @@ namespace AsmResolver.PE.Win32Resources.Icon
         /// </summary>
         /// <param name="reader">The input stream.</param>
         /// <returns>The parsed group icon resource entry.</returns>
-        public static IconGroupDirectoryEntry FromReader(IBinaryStreamReader reader)
+        public static IconGroupDirectoryEntry FromReader(ref BinaryStreamReader reader)
         {
-            var entry = new IconGroupDirectoryEntry
+            return new IconGroupDirectoryEntry
             {
                 Offset = reader.Offset,
                 Rva = reader.Rva,
@@ -99,8 +100,6 @@ namespace AsmResolver.PE.Win32Resources.Icon
                 BytesInRes = reader.ReadUInt32(),
                 Id = reader.ReadUInt16()
             };
-
-            return entry;
         }
 
         /// <inheritdoc />

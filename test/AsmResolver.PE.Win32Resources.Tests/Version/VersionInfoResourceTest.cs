@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using AsmResolver.IO;
 using AsmResolver.PE.DotNet.Builder;
 using AsmResolver.PE.Win32Resources.Version;
 using Xunit;
@@ -15,7 +16,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
 
             var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
             var fixedVersionInfo = versionInfo.FixedVersionInfo;
-            
+
             Assert.Equal(new System.Version(1,0,0,0), fixedVersionInfo.FileVersion);
             Assert.Equal(new System.Version(1,0,0,0), fixedVersionInfo.ProductVersion);
         }
@@ -43,7 +44,8 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             versionInfo.Write(new BinaryStreamWriter(tempStream));
 
             // Reload.
-            var newVersionInfo = VersionInfoResource.FromReader(new ByteArrayReader(tempStream.ToArray()));
+            var infoReader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
             var newFixedVersionInfo = newVersionInfo.FixedVersionInfo;
 
             // Verify.
@@ -64,10 +66,10 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
 
             var image = PEImage.FromFile(path);
             var versionInfo = VersionInfoResource.FromDirectory(image.Resources);
-                
+
             var expectedInfo = FileVersionInfo.GetVersionInfo(path);
             var actualInfo = versionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
-            
+
             foreach ((string key, string value) in actualInfo.Tables[0])
             {
                 string expected = key switch
@@ -89,7 +91,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
 
                 if (expected is null)
                     continue;
-                
+
                 Assert.Equal(expected, value);
             }
         }
@@ -99,7 +101,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         {
             // Prepare mock data.
             var versionInfo = new VersionInfoResource();
-            
+
             var varFileInfo = new VarFileInfo();
             var table = new VarTable();
             for (ushort i = 0; i < 10; i++)
@@ -107,19 +109,20 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             varFileInfo.Tables.Add(table);
 
             versionInfo.AddEntry(varFileInfo);
-            
+
             // Serialize.
             var tempStream = new MemoryStream();
             versionInfo.Write(new BinaryStreamWriter(tempStream));
-            
+
             // Reload.
-            var newVersionInfo = VersionInfoResource.FromReader(new ByteArrayReader(tempStream.ToArray()));
-            
+            var infoReader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
+
             // Verify.
             var newVarFileInfo = newVersionInfo.GetChild<VarFileInfo>(VarFileInfo.VarFileInfoKey);
             Assert.NotNull(newVarFileInfo);
             Assert.Single(newVarFileInfo.Tables);
-            
+
             var newTable = newVarFileInfo.Tables[0];
             Assert.Equal(table.Values, newTable.Values);
         }
@@ -129,7 +132,7 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
         {
             // Prepare mock data.
             var versionInfo = new VersionInfoResource();
-            
+
             var stringFileInfo = new StringFileInfo();
             var table = new StringTable(0, 0x4b0)
             {
@@ -145,15 +148,16 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             // Serialize.
             var tempStream = new MemoryStream();
             versionInfo.Write(new BinaryStreamWriter(tempStream));
-            
+
             // Reload.
-            var newVersionInfo = VersionInfoResource.FromReader(new ByteArrayReader(tempStream.ToArray()));
-            
+            var infoReader = ByteArrayReaderFactory.CreateReader(tempStream.ToArray());
+            var newVersionInfo = VersionInfoResource.FromReader(ref infoReader);
+
             // Verify.
             var newStringFileInfo = newVersionInfo.GetChild<StringFileInfo>(StringFileInfo.StringFileInfoKey);
             Assert.NotNull(newStringFileInfo);
             Assert.Single(newStringFileInfo.Tables);
-            
+
             var newTable = newStringFileInfo.Tables[0];
             foreach ((string key, string value) in table)
                 Assert.Equal(value, newTable[key]);
@@ -173,11 +177,11 @@ namespace AsmResolver.PE.Win32Resources.Tests.Version
             // Rebuild
             using var stream = new MemoryStream();
             new ManagedPEFileBuilder().CreateFile(image).Write(new BinaryStreamWriter(stream));
-            
+
             // Reload version info.
             var newImage = PEImage.FromBytes(stream.ToArray());
             var newVersionInfo = VersionInfoResource.FromDirectory(newImage.Resources);
-            
+
             // Verify.
             Assert.Equal(versionInfo.FixedVersionInfo.ProductVersion, newVersionInfo.FixedVersionInfo.ProductVersion);
         }

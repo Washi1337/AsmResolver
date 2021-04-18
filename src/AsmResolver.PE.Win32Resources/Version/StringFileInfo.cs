@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AsmResolver.IO;
 
 namespace AsmResolver.PE.Win32Resources.Version
 {
@@ -23,13 +24,13 @@ namespace AsmResolver.PE.Win32Resources.Version
         /// <remarks>
         /// This function assumes the provided header was already consumed.
         /// </remarks>
-        public static StringFileInfo FromReader(ulong startOffset, VersionTableEntryHeader header, IBinaryStreamReader reader)
+        public static StringFileInfo FromReader(ulong startOffset, VersionTableEntryHeader header, ref BinaryStreamReader reader)
         {
             var result = new StringFileInfo();
 
             while (reader.Offset - startOffset < header.Length)
-                result.Tables.Add(StringTable.FromReader(reader));
-            
+                result.Tables.Add(StringTable.FromReader(ref reader));
+
             return result;
         }
 
@@ -38,7 +39,7 @@ namespace AsmResolver.PE.Win32Resources.Version
 
         /// <inheritdoc />
         protected override VersionTableValueType ValueType => VersionTableValueType.String;
-            
+
         /// <summary>
         /// Gets a collection of tables stored in this VarFileInfo structure, typically containing a list of languages
         /// that the application or DLL supports.
@@ -52,7 +53,7 @@ namespace AsmResolver.PE.Win32Resources.Version
         public override uint GetPhysicalSize()
         {
             uint size = VersionTableEntryHeader.GetHeaderSize(Key);
-            
+
             for (int i = 0; i < Tables.Count; i++)
             {
                 size = size.Align(4);
@@ -61,7 +62,7 @@ namespace AsmResolver.PE.Win32Resources.Version
 
             return size;
         }
-        
+
         /// <inheritdoc />
         protected override uint GetValueLength() => 0;
 
