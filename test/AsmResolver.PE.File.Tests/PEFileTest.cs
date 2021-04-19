@@ -107,7 +107,6 @@ namespace AsmResolver.PE.File.Tests
             }
             output.Write(new BinaryStreamWriter(msOutput));
 
-            System.IO.File.WriteAllBytes("/tmp/output.bin", msOutput.ToArray());
             Assert.Equal(originalBytes, msOutput.ToArray());
         }
 
