@@ -65,11 +65,9 @@ namespace AsmResolver.PE.File
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
-                _reader.Offset = offset;
-
                 ISegment physicalContents = null;
                 if (size > 0)
-                    physicalContents = DataSegment.FromReader(ref _reader, (int) size);
+                    physicalContents = new DataSourceSegment(_reader.DataSource, offset, header.VirtualAddress, size);
 
                 var virtualSegment = new VirtualSegment(physicalContents, header.VirtualSize);
                 virtualSegment.UpdateOffsets(offset, header.VirtualAddress);
