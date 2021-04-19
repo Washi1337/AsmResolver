@@ -11,7 +11,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         private static readonly SignatureComparer _comparer = new();
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, CustomAttribute subject)
+        protected override void Analyze(AnalysisContext context, CustomAttribute subject)
         {
             ScheduleMembersForAnalysis(context, subject);
             ConnectAllNamedReferences(context, subject);

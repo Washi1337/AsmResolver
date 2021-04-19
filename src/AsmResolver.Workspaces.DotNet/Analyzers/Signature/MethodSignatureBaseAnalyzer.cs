@@ -9,7 +9,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
     public class MethodSignatureBaseAnalyzer : ObjectAnalyzer<MethodSignatureBase>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, MethodSignatureBase subject)
+        protected override void Analyze(AnalysisContext context, MethodSignatureBase subject)
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {

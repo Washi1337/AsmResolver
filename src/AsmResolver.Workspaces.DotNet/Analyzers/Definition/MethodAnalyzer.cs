@@ -13,7 +13,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class MethodAnalyzer : ObjectAnalyzer<MethodDefinition>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, MethodDefinition subject)
+        protected override void Analyze(AnalysisContext context, MethodDefinition subject)
         {
             ScheduleMembersForAnalysis(context, subject);
 

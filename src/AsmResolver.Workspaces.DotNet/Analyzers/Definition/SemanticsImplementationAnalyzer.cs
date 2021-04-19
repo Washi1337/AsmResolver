@@ -10,7 +10,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class SemanticsImplementationAnalyzer : ObjectAnalyzer<IHasSemantics>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, IHasSemantics subject)
+        protected override void Analyze(AnalysisContext context, IHasSemantics subject)
         {
             var index = context.Workspace.Index;
             var node = index.GetOrCreateNode(subject);

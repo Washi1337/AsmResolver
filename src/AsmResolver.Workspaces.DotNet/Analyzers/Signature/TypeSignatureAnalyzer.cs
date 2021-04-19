@@ -9,7 +9,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
     public class TypeSignatureAnalyzer : ObjectAnalyzer<TypeSignature>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, TypeSignature subject)
+        protected override void Analyze(AnalysisContext context, TypeSignature subject)
         {
             subject.AcceptVisitor(TypeSpecificationMemberScheduler.Instance, context);
         }

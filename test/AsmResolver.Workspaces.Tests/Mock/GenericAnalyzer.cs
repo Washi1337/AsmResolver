@@ -8,7 +8,7 @@ namespace AsmResolver.Workspaces.Tests.Mock
         } = new();
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, T subject)
+        protected override void Analyze(AnalysisContext context, T subject)
         {
 
         }

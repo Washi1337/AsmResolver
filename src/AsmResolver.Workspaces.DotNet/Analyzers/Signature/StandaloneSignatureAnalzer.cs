@@ -10,7 +10,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
     public class StandaloneSignatureAnalyzer : ObjectAnalyzer<StandAloneSignature>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, StandAloneSignature subject)
+        protected override void Analyze(AnalysisContext context, StandAloneSignature subject)
         {
             if (context.HasAnalyzers(subject.Signature.GetType()))
             {

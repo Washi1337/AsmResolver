@@ -10,7 +10,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class MethodSpecificationAnalyzer : ObjectAnalyzer<MethodSpecification>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, MethodSpecification subject)
+        protected override void Analyze(AnalysisContext context, MethodSpecification subject)
         {
             if (context.HasAnalyzers(subject.Method.GetType()))
             {

@@ -8,7 +8,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class ModuleAnalyzer : ObjectAnalyzer<ModuleDefinition>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, ModuleDefinition subject)
+        protected override void Analyze(AnalysisContext context, ModuleDefinition subject)
         {
             context.Workspace.Index.GetOrCreateNode(subject);
 

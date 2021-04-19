@@ -10,7 +10,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class HasSecurityDeclarationAnalyzer : ObjectAnalyzer<IHasSecurityDeclaration>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, IHasSecurityDeclaration subject)
+        protected override void Analyze(AnalysisContext context, IHasSecurityDeclaration subject)
         {
             if (context.HasAnalyzers(typeof(SecurityDeclaration)))
             {

@@ -9,7 +9,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
     public class LocalVariablesSignatureAnalyzer : ObjectAnalyzer<LocalVariablesSignature>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, LocalVariablesSignature subject)
+        protected override void Analyze(AnalysisContext context, LocalVariablesSignature subject)
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {

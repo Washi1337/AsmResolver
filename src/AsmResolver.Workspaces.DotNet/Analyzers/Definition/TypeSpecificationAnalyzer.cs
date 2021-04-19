@@ -10,7 +10,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class TypeSpecificationAnalyzer : ObjectAnalyzer<TypeSpecification>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, TypeSpecification subject)
+        protected override void Analyze(AnalysisContext context, TypeSpecification subject)
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {

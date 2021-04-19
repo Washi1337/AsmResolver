@@ -8,7 +8,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     public class AssemblyReferenceAnalyzer : ObjectAnalyzer<AssemblyReference>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, AssemblyReference subject)
+        protected override void Analyze(AnalysisContext context, AssemblyReference subject)
         {
             if (context.Workspace is not DotNetWorkspace workspace)
                 return;

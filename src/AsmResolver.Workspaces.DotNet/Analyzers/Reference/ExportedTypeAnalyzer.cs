@@ -8,7 +8,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     public class ExportedTypeAnalyzer : ObjectAnalyzer<ExportedType>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, ExportedType subject)
+        protected override void Analyze(AnalysisContext context, ExportedType subject)
         {
             if (subject.DeclaringType is not null)
             {

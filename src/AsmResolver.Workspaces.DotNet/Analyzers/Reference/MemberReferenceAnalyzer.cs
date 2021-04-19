@@ -8,7 +8,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     public class MemberReferenceAnalyzer : ObjectAnalyzer<MemberReference>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, MemberReference subject)
+        protected override void Analyze(AnalysisContext context, MemberReference subject)
         {
 
             if (subject.DeclaringType is not null && context.HasAnalyzers(subject.DeclaringType.GetType()))

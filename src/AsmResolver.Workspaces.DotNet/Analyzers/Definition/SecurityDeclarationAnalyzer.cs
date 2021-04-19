@@ -12,7 +12,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         private static readonly SignatureComparer _comparer = new();
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, SecurityDeclaration subject)
+        protected override void Analyze(AnalysisContext context, SecurityDeclaration subject)
         {
             var permissionSet = subject.PermissionSet;
             for (int j = 0; j < permissionSet.Attributes.Count; j++)

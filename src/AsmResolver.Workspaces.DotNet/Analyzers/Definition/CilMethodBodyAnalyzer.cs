@@ -13,7 +13,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class CilMethodBodyAnalyzer : ObjectAnalyzer<CilMethodBody>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, CilMethodBody subject)
+        protected override void Analyze(AnalysisContext context, CilMethodBody subject)
         {
             if(context.HasAnalyzers(typeof(CilExceptionHandler)))
             {

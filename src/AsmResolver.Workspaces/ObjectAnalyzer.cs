@@ -17,6 +17,6 @@ namespace AsmResolver.Workspaces
         /// </summary>
         /// <param name="context">The analysis context in which the analyzer is situated in.</param>
         /// <param name="subject">The subject to analyze.</param>
-        public abstract void Analyze(AnalysisContext context, T subject);
+        protected abstract void Analyze(AnalysisContext context, T subject);
     }
 }

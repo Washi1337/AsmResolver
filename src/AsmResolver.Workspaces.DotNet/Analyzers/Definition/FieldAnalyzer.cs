@@ -9,7 +9,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class FieldAnalyzer : ObjectAnalyzer<FieldDefinition>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, FieldDefinition subject)
+        protected override void Analyze(AnalysisContext context, FieldDefinition subject)
         {
             // Schedule signature for analysis.
             if (context.HasAnalyzers(typeof(FieldSignature)))

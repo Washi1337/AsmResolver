@@ -8,7 +8,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     /// </summary>
     public class CustomAttributeArgumentAnalyzer : ObjectAnalyzer<CustomAttributeArgument>
     {
-        public override void Analyze(AnalysisContext context, CustomAttributeArgument subject)
+        protected override void Analyze(AnalysisContext context, CustomAttributeArgument subject)
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {

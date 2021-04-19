@@ -8,7 +8,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class TypeAnalyzer : ObjectAnalyzer<TypeDefinition>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, TypeDefinition subject)
+        protected override void Analyze(AnalysisContext context, TypeDefinition subject)
         {
             InspectBaseTypes(context, subject);
             InspectExplicitImplementations(context, subject);

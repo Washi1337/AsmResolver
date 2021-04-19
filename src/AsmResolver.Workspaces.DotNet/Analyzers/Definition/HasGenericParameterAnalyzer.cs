@@ -9,7 +9,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class HasGenericParameterAnalyzer : ObjectAnalyzer<IHasGenericParameters>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, IHasGenericParameters subject)
+        protected override void Analyze(AnalysisContext context, IHasGenericParameters subject)
         {
             bool hasGenericParameterAnalyzer = context.HasAnalyzers(typeof(GenericParameter));
             bool hasGenericParameterConstraintAnalyzer = context.HasAnalyzers(typeof(GenericParameter));
