@@ -5,8 +5,21 @@ using System.Text;
 
 namespace AsmResolver.IO
 {
+    /// <summary>
+    /// Provides methods for reading binary data from a data source.
+    /// </summary>
     public struct BinaryStreamReader
     {
+        /// <summary>
+        /// Creates a new binary stream reader on the provided data source.
+        /// </summary>
+        /// <param name="dataSource">The object to get the data from.</param>
+        /// <param name="offset">The raw offset to start at.</param>
+        /// <param name="rva">The relative virtual address associated to the offset.</param>
+        /// <param name="length">The maximum number of bytes to read.</param>
+        /// <exception cref="ArgumentNullException">Occurs when <paramref name="dataSource"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Occurs when <paramref name="offset"/> is not a valid offset.</exception>
+        /// <exception cref="EndOfStreamException">Occurs when too many bytes are specified by <paramref name="length"/>.</exception>
         public BinaryStreamReader(IDataSource dataSource, ulong offset, uint rva, uint length)
         {
             if (dataSource is null)
@@ -16,9 +29,12 @@ namespace AsmResolver.IO
             {
                 if (!dataSource.IsValidAddress(offset))
                     throw new ArgumentOutOfRangeException(nameof(offset));
+
                 if (!dataSource.IsValidAddress(offset + length - 1))
+                {
                     throw new EndOfStreamException(
                         "Offset and address reach outside of the boundaries of the data source.");
+                }
             }
 
             DataSource = dataSource;
@@ -27,51 +43,86 @@ namespace AsmResolver.IO
             Length = length;
         }
 
+        /// <summary>
+        /// Gets the data source the reader is reading from.
+        /// </summary>
         public IDataSource DataSource
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the raw offset this reader started from.
+        /// </summary>
         public ulong StartOffset
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the relative virtual address this reader started from.
+        /// </summary>
         public uint StartRva
         {
             get;
         }
 
+        /// <summary>
+        /// Gets the number of bytes that can be read by the reader.
+        /// </summary>
         public uint Length
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the raw address indicating the end of the stream.
+        /// </summary>
         public ulong EndOffset => StartOffset + Length;
 
+        /// <summary>
+        /// Gets the relative virtual address indicating the end of the stream.
+        /// </summary>
         public ulong EndRva => StartRva + Length;
 
+        /// <summary>
+        /// Gets or sets the current raw offset to read from.
+        /// </summary>
         public ulong Offset
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the current offset relative to the beginning of <see cref="StartOffset"/> to read from.
+        /// </summary>
         public uint RelativeOffset
         {
             get => (uint) (Offset - StartOffset);
             set => Offset = value + StartOffset;
         }
 
+        /// <summary>
+        /// Gets or sets the current virtual address (relative to the image base) to read from.
+        /// </summary>
         public uint Rva
         {
             get => RelativeOffset + StartRva;
             set => RelativeOffset = value - StartRva;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the reader is in a valid state.
+        /// </summary>
         public bool IsValid => DataSource is not null;
 
+        /// <summary>
+        /// Determines whether the provided number of bytes can be read from the current position.
+        /// </summary>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns><c>true</c> if the provided number of byte can be read, <c>false</c> otherwise.</returns>
         public bool CanRead(uint count) => RelativeOffset + count <= Length;
 
         private void AssertCanRead(uint count)
@@ -80,12 +131,20 @@ namespace AsmResolver.IO
                 throw new EndOfStreamException();
         }
 
+        /// <summary>
+        /// Reads a single byte from the input stream, and advances the current offset by one.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public byte ReadByte()
         {
             AssertCanRead(sizeof(byte));
             return DataSource[Offset++];
         }
 
+        /// <summary>
+        /// Reads a single unsigned 16 bit integer from the input stream, and advances the current offset by two.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public ushort ReadUInt16()
         {
             AssertCanRead(2);
@@ -95,6 +154,10 @@ namespace AsmResolver.IO
             return value;
         }
 
+        /// <summary>
+        /// Reads a single unsigned 32 bit integer from the input stream, and advances the current offset by four.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public uint ReadUInt32()
         {
             AssertCanRead(4);
@@ -106,6 +169,10 @@ namespace AsmResolver.IO
             return value;
         }
 
+        /// <summary>
+        /// Reads a single unsigned 64 bit integer from the input stream, and advances the current offset by eight.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public ulong ReadUInt64()
         {
             AssertCanRead(8);
@@ -121,12 +188,20 @@ namespace AsmResolver.IO
             return value;
         }
 
+        /// <summary>
+        /// Reads a single signed byte from the input stream, and advances the current offset by one.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public sbyte ReadSByte()
         {
             AssertCanRead(1);
             return unchecked((sbyte) DataSource[Offset++]);
         }
 
+        /// <summary>
+        /// Reads a single signed 16 bit integer from the input stream, and advances the current offset by two.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public short ReadInt16()
         {
             AssertCanRead(2);
@@ -136,6 +211,10 @@ namespace AsmResolver.IO
             return value;
         }
 
+        /// <summary>
+        /// Reads a single signed 32 bit integer from the input stream, and advances the current offset by four.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public int ReadInt32()
         {
             AssertCanRead(4);
@@ -147,6 +226,10 @@ namespace AsmResolver.IO
             return value;
         }
 
+        /// <summary>
+        /// Reads a single signed 64 bit integer from the input stream, and advances the current offset by eight.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public long ReadInt64()
         {
             AssertCanRead(8);
@@ -162,18 +245,35 @@ namespace AsmResolver.IO
             return value;
         }
 
+        /// <summary>
+        /// Reads a single signed 32 bit single precision floating point number from the input stream, and advances the
+        /// current offset by four.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public unsafe float ReadSingle()
         {
             uint raw = ReadUInt32();
             return *(float*) &raw;
         }
 
+        /// <summary>
+        /// Reads a single signed 64 bit double precision floating point number from the input stream, and advances the
+        /// current offset by four.
+        /// </summary>
+        /// <returns>The consumed value.</returns>
         public unsafe double ReadDouble()
         {
             ulong raw = ReadUInt64();
             return *(double*) &raw;
         }
 
+        /// <summary>
+        /// Attempts to read the provided amount of bytes from the input stream.
+        /// </summary>
+        /// <param name="buffer">The buffer that receives the read bytes.</param>
+        /// <param name="index">The index into the buffer to start writing into.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns>The number of bytes that were read.</returns>
         public int ReadBytes(byte[] buffer, int index, int count)
         {
             int actualLength = DataSource.ReadBytes(Offset, buffer, index, count);
@@ -181,6 +281,10 @@ namespace AsmResolver.IO
             return actualLength;
         }
 
+        /// <summary>
+        /// Consumes the remainder of the input stream.
+        /// </summary>
+        /// <returns>The remaining bytes.</returns>
         public byte[] ReadToEnd()
         {
             byte[] buffer = new byte[Length - RelativeOffset];
@@ -188,6 +292,11 @@ namespace AsmResolver.IO
             return buffer;
         }
 
+        /// <summary>
+        /// Reads bytes from the input stream until the provided delimeter byte is reached.
+        /// </summary>
+        /// <param name="delimeter">The delimeter byte to stop at.</param>
+        /// <returns>The read bytes, including the delimeter if it was found.</returns>
         public byte[] ReadBytesUntil(byte delimeter)
         {
             var buffer = new List<byte>();
@@ -203,6 +312,10 @@ namespace AsmResolver.IO
             return buffer.ToArray();
         }
 
+        /// <summary>
+        /// Reads a null-terminated ASCII string from the input stream.
+        /// </summary>
+        /// <returns>The read ASCII string, excluding the null terminator.</returns>
         public string ReadAsciiString()
         {
             byte[] data = ReadBytesUntil(0);
@@ -234,6 +347,11 @@ namespace AsmResolver.IO
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Reads either a 32-bit or a 64-bit number from the input stream.
+        /// </summary>
+        /// <param name="is32Bit">Indicates the integer to be read is 32-bit or 64-bit.</param>
+        /// <returns>The read number, zero extended if necessary.</returns>
         public ulong ReadNativeInt(bool is32Bit)
         {
             return is32Bit ? ReadUInt32() : ReadUInt64();
@@ -328,18 +446,41 @@ namespace AsmResolver.IO
             Offset = Offset.Align(alignment);
         }
 
+        /// <summary>
+        /// Creates an exact copy of the reader.
+        /// </summary>
+        /// <returns>The copied reader.</returns>
         public readonly BinaryStreamReader Fork() => this;
 
+        /// <summary>
+        /// Creates a copy of the reader, and moves the offset of the copied reader to the provided file offset.
+        /// </summary>
+        /// <param name="offset">The file offset.</param>
+        /// <returns>The new reader.</returns>
         public readonly BinaryStreamReader ForkAbsolute(ulong offset)
         {
             return ForkAbsolute(offset, (uint) (Length - (offset - StartOffset)));
         }
 
+        /// <summary>
+        /// Creates a copy of the reader, moves the offset of the copied reader to the provided file offset, and resizes
+        /// the copied reader to the provided number of bytes.
+        /// </summary>
+        /// <param name="offset">The file offset.</param>
+        /// <param name="size">The number of bytes to read.</param>
+        /// <returns>The new reader.</returns>
         public readonly BinaryStreamReader ForkAbsolute(ulong offset, uint size)
         {
             return new(DataSource, offset, (uint) (StartRva + (offset - StartOffset)), size);
         }
 
+        /// <summary>
+        /// Resizes the current reader to a new number of bytes.
+        /// </summary>
+        /// <param name="newSize">The new number of bytes.</param>
+        /// <exception cref="EndOfStreamException">
+        /// Occurs when the provided size reaches outside of the input stream's length.
+        /// </exception>
         public void ChangeSize(uint newSize)
         {
             if (newSize > Length)

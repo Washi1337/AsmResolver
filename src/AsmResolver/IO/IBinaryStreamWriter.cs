@@ -92,10 +92,12 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="value">The 64-bit floating point number to write.</param>
         void WriteDouble(double value);
-
     }
 
-    public static partial class Extensions
+    /// <summary>
+    /// Provides extension methods to implementations of the <see cref="IBinaryStreamWriter"/> interface.
+    /// </summary>
+    public static class BinaryStreamWriterExtensions
     {
         /// <summary>
         /// Writes a buffer of data to the stream.
