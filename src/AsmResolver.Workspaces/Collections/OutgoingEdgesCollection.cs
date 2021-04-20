@@ -25,28 +25,6 @@ namespace AsmResolver.Workspaces.Collections
             return Add(new WorkspaceIndexEdge(Owner, node, relation));
         }
 
-        /// <summary>
-        /// Removes a relation between two objects.
-        /// </summary>
-        /// <param name="relation">The relation.</param>
-        /// <param name="node">The node representing the other object.</param>
-        /// <returns><c>true</c> if the relation existed and was removed, <c>false</c> otherwise.</returns>
-        public bool Remove(ObjectRelation relation, WorkspaceIndexNode node)
-        {
-            return Remove(new WorkspaceIndexEdge(Owner, node, relation));
-        }
-
-        /// <inheritdoc />
-        protected override void AssertEdgeValidity(in WorkspaceIndexEdge edge)
-        {
-            if (edge.Source != Owner)
-                throw new ArgumentException("The edge originates from a different node.");
-            base.AssertEdgeValidity(in edge);
-        }
-
-        /// <inheritdoc />
-        protected override WorkspaceIndexNode GetAdjacentNode(in WorkspaceIndexEdge edge) => edge.Target;
-
         /// <inheritdoc />
         public override bool Add(WorkspaceIndexEdge item)
         {
@@ -57,6 +35,17 @@ namespace AsmResolver.Workspaces.Collections
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Removes a relation between two objects.
+        /// </summary>
+        /// <param name="relation">The relation.</param>
+        /// <param name="node">The node representing the other object.</param>
+        /// <returns><c>true</c> if the relation existed and was removed, <c>false</c> otherwise.</returns>
+        public bool Remove(ObjectRelation relation, WorkspaceIndexNode node)
+        {
+            return Remove(new WorkspaceIndexEdge(Owner, node, relation));
         }
 
         /// <inheritdoc />
@@ -70,6 +59,17 @@ namespace AsmResolver.Workspaces.Collections
 
             return false;
         }
+
+        /// <inheritdoc />
+        protected override void AssertEdgeValidity(in WorkspaceIndexEdge edge)
+        {
+            if (edge.Source != Owner)
+                throw new ArgumentException("The edge originates from a different node.");
+            base.AssertEdgeValidity(in edge);
+        }
+
+        /// <inheritdoc />
+        protected override WorkspaceIndexNode GetAdjacentNode(in WorkspaceIndexEdge edge) => edge.Target;
 
         /// <summary>
         /// Gets a collection of all objects that are related to this object of a given relation type.
