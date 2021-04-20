@@ -166,12 +166,7 @@ namespace AsmResolver.Workspaces.Collections
         /// <summary>
         /// Gets a collection of nodes that are related to this object.
         /// </summary>
-        public IEnumerable<WorkspaceIndexNode> GetNodes()
-        {
-            return this
-                .Select(e => GetAdjacentNode(e))
-                .Distinct();
-        }
+        public IEnumerable<WorkspaceIndexNode> GetNodes() => GetAllNodes();
 
         /// <summary>
         /// Gets a collection of all nodes that are related in the context of the provided relation.
