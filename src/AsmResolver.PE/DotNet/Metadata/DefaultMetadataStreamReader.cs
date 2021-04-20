@@ -23,19 +23,19 @@ namespace AsmResolver.PE.DotNet.Metadata
             {
                 case TablesStream.CompressedStreamName:
                 case TablesStream.EncStreamName:
-                    return new SerializedTableStream(context, header.Name,DataSegment.FromReader(ref reader));
+                    return new SerializedTableStream(context, header.Name, reader);
 
                 case StringsStream.DefaultName:
-                    return new SerializedStringsStream(header.Name, DataSegment.FromReader(ref reader));
+                    return new SerializedStringsStream(header.Name, reader);
 
                 case UserStringsStream.DefaultName:
-                    return new SerializedUserStringsStream(header.Name, DataSegment.FromReader(ref reader));
+                    return new SerializedUserStringsStream(header.Name, reader);
 
                 case BlobStream.DefaultName:
-                    return new SerializedBlobStream(header.Name, DataSegment.FromReader(ref reader));
+                    return new SerializedBlobStream(header.Name, reader);
 
                 case GuidStream.DefaultName:
-                    return new SerializedGuidStream(header.Name, DataSegment.FromReader(ref reader));
+                    return new SerializedGuidStream(header.Name, reader);
 
                 default:
                     return new CustomMetadataStream(header.Name, DataSegment.FromReader(ref reader));

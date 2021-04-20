@@ -36,24 +36,8 @@ namespace AsmResolver
         public override uint GetPhysicalSize() => _originalSize;
 
         /// <inheritdoc />
-        public override void Write(IBinaryStreamWriter writer)
-        {
-            byte[] buffer = new byte[4096];
-            int index = 0;
-            while (index < _originalSize)
-            {
-                int blockSize = (int) Math.Min(buffer.Length, _originalSize - index);
-                int actualSize = _dataSource.ReadBytes(_originalOffset + (ulong) index, buffer, 0, blockSize);
-                if (actualSize == 0)
-                {
-                    writer.WriteZeroes((int) (_originalSize - index));
-                    return;
-                }
-
-                writer.WriteBytes(buffer, 0, actualSize);
-                index += actualSize;
-            }
-        }
+        public override void Write(IBinaryStreamWriter writer) =>
+            CreateReader(Offset, _originalSize).WriteToOutput(writer);
 
         /// <inheritdoc />
         public BinaryStreamReader CreateReader(ulong fileOffset, uint size)

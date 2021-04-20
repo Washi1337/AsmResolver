@@ -479,9 +479,9 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="relativeOffset">The displacement.</param>
         /// <returns>The new reader.</returns>
-        public readonly BinaryStreamReader ForkRelative(ulong relativeOffset)
+        public readonly BinaryStreamReader ForkRelative(uint relativeOffset)
         {
-            return ForkRelative(relativeOffset, (uint) (Length - relativeOffset));
+            return ForkRelative(relativeOffset, Length - relativeOffset);
         }
 
         /// <summary>
@@ -491,9 +491,9 @@ namespace AsmResolver.IO
         /// <param name="relativeOffset">The displacement.</param>
         /// <param name="size">The number of bytes to read.</param>
         /// <returns>The new reader.</returns>
-        public readonly BinaryStreamReader ForkRelative(ulong relativeOffset, uint size)
+        public readonly BinaryStreamReader ForkRelative(uint relativeOffset, uint size)
         {
-            return new(DataSource, StartOffset + relativeOffset, (uint) (StartRva + relativeOffset), size);
+            return new(DataSource, StartOffset + relativeOffset, StartRva + relativeOffset, size);
         }
 
         /// <summary>
@@ -509,6 +509,27 @@ namespace AsmResolver.IO
                 throw new EndOfStreamException();
 
             Length = newSize;
+        }
+
+        /// <summary>
+        /// Consumes and copies the remainder of the contents to the provided output stream.
+        /// </summary>
+        /// <param name="writer">The output stream.</param>
+        public void WriteToOutput(IBinaryStreamWriter writer)
+        {
+            byte[] buffer = new byte[4096];
+            while (RelativeOffset < Length)
+            {
+                int blockSize = (int) Math.Min(buffer.Length, Length - RelativeOffset);
+                int actualSize = ReadBytes(buffer, 0, blockSize);
+                if (actualSize == 0)
+                {
+                    writer.WriteZeroes((int) (Length - RelativeOffset));
+                    return;
+                }
+
+                writer.WriteBytes(buffer, 0, actualSize);
+            }
         }
     }
 }

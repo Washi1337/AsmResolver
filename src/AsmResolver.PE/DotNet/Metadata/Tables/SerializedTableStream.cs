@@ -12,7 +12,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
     public class SerializedTableStream : TablesStream
     {
         private readonly PEReaderContext _context;
-        private readonly IReadableSegment _contents;
+        private readonly BinaryStreamReader _reader;
         private readonly ulong _validMask;
         private readonly ulong _sortedMask;
         private readonly uint[] _rowCounts;
@@ -27,7 +27,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <param name="name">The name of the stream.</param>
         /// <param name="rawData">The raw contents of the stream.</param>
         public SerializedTableStream(PEReaderContext context, string name, byte[] rawData)
-            : this(context, name, new DataSegment(rawData))
+            : this(context, name, ByteArrayReaderFactory.CreateReader(rawData))
         {
         }
 
@@ -36,28 +36,28 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// </summary>
         /// <param name="context">The reader context.</param>
         /// <param name="name">The name of the stream.</param>
-        /// <param name="contents">The raw contents of the stream.</param>
-        public SerializedTableStream(PEReaderContext context, string name, IReadableSegment contents)
+        /// <param name="reader">The raw contents of the stream.</param>
+        public SerializedTableStream(PEReaderContext context, string name, in BinaryStreamReader reader)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            _contents = contents ?? throw new ArgumentNullException(nameof(contents));
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _reader = reader;
 
-            var reader = contents.CreateReader();
-            Reserved = reader.ReadUInt32();
-            MajorVersion = reader.ReadByte();
-            MinorVersion = reader.ReadByte();
-            Flags = (TablesStreamFlags) reader.ReadByte();
-            Log2LargestRid = reader.ReadByte();
-            _validMask = reader.ReadUInt64();
-            _sortedMask = reader.ReadUInt64();
+            var headerReader = _reader.Fork();
+            Reserved = headerReader.ReadUInt32();
+            MajorVersion = headerReader.ReadByte();
+            MinorVersion = headerReader.ReadByte();
+            Flags = (TablesStreamFlags) headerReader.ReadByte();
+            Log2LargestRid = headerReader.ReadByte();
+            _validMask = headerReader.ReadUInt64();
+            _sortedMask = headerReader.ReadUInt64();
 
-            _rowCounts = ReadRowCounts(ref reader);
+            _rowCounts = ReadRowCounts(ref headerReader);
 
             if (HasExtraData)
-                ExtraData = reader.ReadUInt32();
+                ExtraData = headerReader.ReadUInt32();
 
-            _headerSize = (uint) (reader.Offset - reader.StartOffset);
+            _headerSize = headerReader.RelativeOffset;
 
             _indexSizes = InitializeIndexSizes();
         }
@@ -66,10 +66,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override BinaryStreamReader CreateReader()
-        {
-            return _contents.CreateReader();
-        }
+        public override BinaryStreamReader CreateReader() => _reader.Fork();
 
         private uint[] ReadRowCounts(ref BinaryStreamReader reader)
         {
@@ -167,7 +164,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
         /// <inheritdoc />
         protected override IList<IMetadataTable> GetTables()
         {
-            ulong offset = _contents.Offset + _headerSize;
+            uint offset = _headerSize;
             var tables = new IMetadataTable[]
             {
                 CreateNextTable(TableIndex.Module, ref offset, ModuleDefinitionRow.FromReader),
@@ -220,18 +217,18 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
             return tables;
         }
 
-        private BinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref ulong currentOffset)
+        private BinaryStreamReader CreateNextRawTableReader(TableIndex currentIndex, ref uint currentOffset)
         {
             int index = (int) currentIndex;
             uint rawSize = TableLayouts[index].RowSize * _rowCounts[index];
-            var tableReader = _contents.CreateReader(currentOffset, rawSize);
+            var tableReader = _reader.ForkRelative(currentOffset, rawSize);
             currentOffset += rawSize;
             return tableReader;
         }
 
         private SerializedMetadataTable<TRow> CreateNextTable<TRow>(
             TableIndex index,
-            ref ulong offset,
+            ref uint offset,
             SerializedMetadataTable<TRow>.ReadRowDelegate readRow)
             where TRow : struct, IMetadataRow
         {
@@ -244,7 +241,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables
 
         private SerializedMetadataTable<TRow> CreateNextTable<TRow>(
             TableIndex index,
-            ref ulong offset,
+            ref uint offset,
             SerializedMetadataTable<TRow>.ReadRowExtendedDelegate readRow)
             where TRow : struct, IMetadataRow
         {
