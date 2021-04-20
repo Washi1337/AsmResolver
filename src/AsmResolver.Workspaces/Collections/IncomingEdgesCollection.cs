@@ -37,6 +37,18 @@ namespace AsmResolver.Workspaces.Collections
             return false;
         }
 
+        /// <inheritdoc />
+        public override bool Remove(WorkspaceIndexEdge item)
+        {
+            if (base.Remove(item))
+            {
+                item.Source.ForwardRelations.Remove(item);
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Gets a collection of all objects that are related to this object of a given relation type.
         /// </summary>

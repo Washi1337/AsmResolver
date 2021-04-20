@@ -109,9 +109,15 @@ namespace AsmResolver.Workspaces.Collections
         }
 
         /// <inheritdoc />
-        public bool Remove(WorkspaceIndexEdge item)
+        public virtual bool Remove(WorkspaceIndexEdge item)
         {
-            return _entries.TryGetValue(item.Relation, out var neighbors) && neighbors.Remove(item);
+            if (!_entries.TryGetValue(item.Relation, out var neighbors) || !neighbors.Remove(item))
+                return false;
+
+            if (neighbors.Count == 0)
+                _entries.Remove(item.Relation);
+
+            return true;
         }
 
         /// <summary>

@@ -27,6 +27,20 @@ namespace AsmResolver.Workspaces.Tests
         }
 
         [Fact]
+        public void RemoveForwardRelationShouldRemoveBackwardRelationInTarget()
+        {
+            object subject1 = new object();
+            object subject2 = new object();
+            var node1 = _index.GetOrCreateNode(subject1);
+            var node2 = _index.GetOrCreateNode(subject2);
+
+            Assert.True(node1.ForwardRelations.Add(MockRelations.Relation1, node2));
+            Assert.Single(node2.BackwardRelations);
+            Assert.True(node1.ForwardRelations.Remove(MockRelations.Relation1, node2));
+            Assert.Empty(node2.BackwardRelations);
+        }
+
+        [Fact]
         public void AddInvalidOutgoingRelationEdgeShouldThrow()
         {
             object subject1 = new object();

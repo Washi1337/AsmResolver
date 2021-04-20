@@ -19,11 +19,21 @@ namespace AsmResolver.Workspaces.Collections
         /// </summary>
         /// <param name="relation">The relation.</param>
         /// <param name="node">The node representing the other object.</param>
-        /// <typeparam name="TSource"></typeparam>
-        /// <typeparam name="TTarget">The type of object to relate to.</typeparam>
-        public bool Add<TSource, TTarget>(ObjectRelation<TSource, TTarget> relation, WorkspaceIndexNode node)
+        /// <returns><c>true</c> if the relation did not exist and was added, <c>false</c> otherwise.</returns>
+        public bool Add(ObjectRelation relation, WorkspaceIndexNode node)
         {
             return Add(new WorkspaceIndexEdge(Owner, node, relation));
+        }
+
+        /// <summary>
+        /// Removes a relation between two objects.
+        /// </summary>
+        /// <param name="relation">The relation.</param>
+        /// <param name="node">The node representing the other object.</param>
+        /// <returns><c>true</c> if the relation existed and was removed, <c>false</c> otherwise.</returns>
+        public bool Remove(ObjectRelation relation, WorkspaceIndexNode node)
+        {
+            return Remove(new WorkspaceIndexEdge(Owner, node, relation));
         }
 
         /// <inheritdoc />
@@ -43,6 +53,18 @@ namespace AsmResolver.Workspaces.Collections
             if (base.Add(item))
             {
                 item.Target.BackwardRelations.Add(item);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override bool Remove(WorkspaceIndexEdge item)
+        {
+            if (base.Remove(item))
+            {
+                item.Target.BackwardRelations.Remove(item);
                 return true;
             }
 
