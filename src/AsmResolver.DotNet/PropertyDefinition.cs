@@ -77,9 +77,9 @@ namespace AsmResolver.DotNet
         /// </summary>
         public bool IsRuntimeSpecialName
         {
-            get => (Attributes & PropertyAttributes.RtSpecialName) != 0;
-            set => Attributes = (Attributes & ~PropertyAttributes.RtSpecialName)
-                                | (value ? PropertyAttributes.RtSpecialName : 0);
+            get => (Attributes & PropertyAttributes.RuntimeSpecialName) != 0;
+            set => Attributes = (Attributes & ~PropertyAttributes.RuntimeSpecialName)
+                                | (value ? PropertyAttributes.RuntimeSpecialName : 0);
         }
 
 
