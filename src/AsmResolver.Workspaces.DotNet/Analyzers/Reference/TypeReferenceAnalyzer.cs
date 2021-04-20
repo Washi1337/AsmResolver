@@ -25,7 +25,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
             var index = context.Workspace.Index;
             var node = index.GetOrCreateNode(definition);
             var candidateNode = index.GetOrCreateNode(subject);
-            node.OutgoingEdges.Add(DotNetRelations.ReferenceType, candidateNode);
+            node.ForwardRelations.Add(DotNetRelations.ReferenceType, candidateNode);
         }
     }
 }

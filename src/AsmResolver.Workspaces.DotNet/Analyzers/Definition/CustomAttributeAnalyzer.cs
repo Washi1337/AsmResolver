@@ -72,7 +72,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                     continue; //TODO: Log error?
                 var node = index.GetOrCreateNode(member);
                 var candidateNode = index.GetOrCreateNode(namedArgument);
-                node.OutgoingEdges.Add(DotNetRelations.ReferenceArgument, candidateNode);
+                node.ForwardRelations.Add(DotNetRelations.ReferenceArgument, candidateNode);
             }
         }
 

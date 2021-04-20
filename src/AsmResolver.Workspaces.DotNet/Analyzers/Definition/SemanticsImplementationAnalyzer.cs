@@ -26,7 +26,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             {
                 var baseAssociation = baseMethod.Semantics.Association;
                 var candidateNode = index.GetOrCreateNode(baseAssociation);
-                node.OutgoingEdges.Add(DotNetRelations.ImplementationSemantics, candidateNode);
+                node.ForwardRelations.Add(DotNetRelations.ImplementationSemantics, candidateNode);
             }
         }
 

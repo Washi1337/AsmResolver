@@ -42,7 +42,7 @@ namespace AsmResolver.Workspaces.Collections
         {
             if (base.Add(item))
             {
-                item.Target.IncomingEdges.Add(item);
+                item.Target.BackwardRelations.Add(item);
                 return true;
             }
 

@@ -27,7 +27,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 // Register relationship between explicit implementation and base method.
                 var declarationNode = index.GetOrCreateNode(impl.Declaration);
                 var bodyNode = index.GetOrCreateNode(impl.Body);
-                bodyNode.OutgoingEdges.Add(DotNetRelations.ImplementationMethod, declarationNode);
+                bodyNode.ForwardRelations.Add(DotNetRelations.ImplementationMethod, declarationNode);
 
                 // See if the method is actually part of a property or event, and if so, link that property/event with
                 // its base definition as well.
@@ -36,7 +36,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 {
                     declarationNode = index.GetOrCreateNode(declarationAssociation);
                     bodyNode = index.GetOrCreateNode(bodyAssociation);
-                    bodyNode.OutgoingEdges.Add(DotNetRelations.ImplementationSemantics, declarationNode);
+                    bodyNode.ForwardRelations.Add(DotNetRelations.ImplementationSemantics, declarationNode);
                 }
             }
         }
@@ -58,14 +58,14 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             if (subject.BaseType is { } baseType)
             {
                 var relatedNode = index.GetOrCreateNode(baseType);
-                node.OutgoingEdges.Add(DotNetRelations.BaseType, relatedNode);
+                node.ForwardRelations.Add(DotNetRelations.BaseType, relatedNode);
             }
 
             // Register interface relations.
             for (int i = 0; i < subject.Interfaces.Count; i++)
             {
                 var relatedNode = index.GetOrCreateNode(subject.Interfaces[i].Interface);
-                node.OutgoingEdges.Add(DotNetRelations.BaseType, relatedNode);
+                node.ForwardRelations.Add(DotNetRelations.BaseType, relatedNode);
             }
         }
 

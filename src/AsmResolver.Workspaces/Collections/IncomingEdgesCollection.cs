@@ -30,7 +30,7 @@ namespace AsmResolver.Workspaces.Collections
         {
             if (base.Add(item))
             {
-                item.Source.OutgoingEdges.Add(item);
+                item.Source.ForwardRelations.Add(item);
                 return true;
             }
 

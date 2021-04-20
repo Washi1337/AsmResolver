@@ -21,8 +21,8 @@ namespace AsmResolver.Workspaces
         public WorkspaceIndexNode(object subject)
         {
             Subject = subject;
-            IncomingEdges = new IncomingEdgesCollection(this);
-            OutgoingEdges = new OutgoingEdgesCollection(this);
+            BackwardRelations = new IncomingEdgesCollection(this);
+            ForwardRelations = new OutgoingEdgesCollection(this);
         }
 
         /// <summary>
@@ -34,17 +34,17 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
-        /// Gets a collection of edges that target this node.
+        /// Gets a collection of edges describing all the objects that relate to this object.
         /// </summary>
-        public IncomingEdgesCollection IncomingEdges
+        public IncomingEdgesCollection BackwardRelations
         {
             get;
         }
 
         /// <summary>
-        /// Gets a collection of edges that originate from this node.
+        /// Gets a collection of edges describing all the objects that this object relates to.
         /// </summary>
-        public OutgoingEdgesCollection OutgoingEdges
+        public OutgoingEdgesCollection ForwardRelations
         {
             get;
         }

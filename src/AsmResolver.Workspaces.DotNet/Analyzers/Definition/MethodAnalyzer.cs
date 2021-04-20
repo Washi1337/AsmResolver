@@ -26,7 +26,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
             foreach (var baseMethod in subject.FindBaseMethods(context.Workspace.Index))
             {
                 var candidateNode = index.GetOrCreateNode(baseMethod);
-                node.OutgoingEdges.Add(DotNetRelations.ImplementationMethod, candidateNode);
+                node.ForwardRelations.Add(DotNetRelations.ImplementationMethod, candidateNode);
             }
         }
 

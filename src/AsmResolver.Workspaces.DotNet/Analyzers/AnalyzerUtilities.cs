@@ -17,7 +17,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers
 
             var baseTypes = index
                 .GetOrCreateNode(declaringType) // Get indexed declaring type.
-                .OutgoingEdges.GetObjects(DotNetRelations.BaseType) // Get types that this declaring type is implementing.
+                .ForwardRelations.GetObjects(DotNetRelations.BaseType) // Get types that this declaring type is implementing.
                 .ToArray();
 
             foreach (var baseType in baseTypes)
