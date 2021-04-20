@@ -9,7 +9,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
     public enum PropertyAttributes : ushort
     {
         /// <summary>
-        /// Specifies that no attributes are associated with a property.
+        /// The property has no attribute.
         /// </summary>
         None = 0x0000,  
         /// <summary>
@@ -21,7 +21,7 @@ namespace AsmResolver.PE.DotNet.Metadata.Tables.Rows
         /// </summary>
         RuntimeSpecialName = 0x0400,
         /// <summary>
-        /// The proeprty has got a default value.
+        /// The property has got a default value.
         /// </summary>
         HasDefault = 0x1000,
     }
