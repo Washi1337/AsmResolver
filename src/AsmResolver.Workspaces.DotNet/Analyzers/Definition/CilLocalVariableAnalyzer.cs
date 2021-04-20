@@ -9,11 +9,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class CilLocalVariableAnalyzer : ObjectAnalyzer<CilLocalVariable>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, CilLocalVariable subject)
+        protected override void Analyze(AnalysisContext context, CilLocalVariable subject)
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {
-                context.SchedulaForAnalysis(subject.VariableType);
+                context.ScheduleForAnalysis(subject.VariableType);
             }
         }
     }

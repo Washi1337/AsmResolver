@@ -10,15 +10,15 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class MethodImplementationAnalyzer : ObjectAnalyzer<MethodImplementation>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, MethodImplementation subject)
+        protected override void Analyze(AnalysisContext context, MethodImplementation subject)
         {
             if (context.HasAnalyzers(subject.Declaration.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Declaration);
+                context.ScheduleForAnalysis(subject.Declaration);
             }
             if (context.HasAnalyzers(subject.Body.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Body);
+                context.ScheduleForAnalysis(subject.Body);
             }
         }
     }

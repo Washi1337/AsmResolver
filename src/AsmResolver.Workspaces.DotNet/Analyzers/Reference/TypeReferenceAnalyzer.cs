@@ -8,11 +8,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     public class TypeReferenceAnalyzer : ObjectAnalyzer<TypeReference>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, TypeReference subject)
+        protected override void Analyze(AnalysisContext context, TypeReference subject)
         {
             if (subject.DeclaringType is not null)
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
             if (context.Workspace is not DotNetWorkspace workspace)
@@ -25,7 +25,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
             var index = context.Workspace.Index;
             var node = index.GetOrCreateNode(definition);
             var candidateNode = index.GetOrCreateNode(subject);
-            node.AddRelation(DotNetRelations.ReferenceType, candidateNode);
+            node.ForwardRelations.Add(DotNetRelations.ReferenceType, candidateNode);
         }
     }
 }

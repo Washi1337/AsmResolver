@@ -10,13 +10,13 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class GenericArgumentAnalyzer : ObjectAnalyzer<IGenericArgumentsProvider>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, IGenericArgumentsProvider subject)
+        protected override void Analyze(AnalysisContext context, IGenericArgumentsProvider subject)
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {
                 for (int i = 0; i < subject.TypeArguments.Count; i++)
                 {
-                    context.SchedulaForAnalysis(subject.TypeArguments[i]);
+                    context.ScheduleForAnalysis(subject.TypeArguments[i]);
                 }
             }
         }

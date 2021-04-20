@@ -8,12 +8,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class EventAnalyzer : ObjectAnalyzer<EventDefinition>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, EventDefinition subject)
+        protected override void Analyze(AnalysisContext context, EventDefinition subject)
         {
             // Schedule type for analysis.
             if (context.HasAnalyzers(subject.EventType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.EventType);
+                context.ScheduleForAnalysis(subject.EventType);
             }
         }
     }

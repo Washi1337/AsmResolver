@@ -10,11 +10,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class InterfaceImplementationAnalyzer : ObjectAnalyzer<InterfaceImplementation>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, InterfaceImplementation subject)
+        protected override void Analyze(AnalysisContext context, InterfaceImplementation subject)
         {
             if (context.HasAnalyzers(subject.Interface.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Interface);
+                context.ScheduleForAnalysis(subject.Interface);
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using AsmResolver.Workspaces.Collections;
 
 namespace AsmResolver.Workspaces
 {
@@ -11,7 +12,6 @@ namespace AsmResolver.Workspaces
     /// </summary>
     public class WorkspaceIndexNode
     {
-        private readonly Dictionary<ObjectRelation, ISet<WorkspaceIndexNode>> _neighbors = new();
         private List<object>? _data = null;
 
         /// <summary>
@@ -21,16 +21,8 @@ namespace AsmResolver.Workspaces
         public WorkspaceIndexNode(object subject)
         {
             Subject = subject;
-        }
-
-        private IList<object> Data
-        {
-            get
-            {
-                if (_data is null)
-                    Interlocked.CompareExchange(ref _data, new(), null);
-                return _data;
-            }
+            BackwardRelations = new IncomingEdgesCollection(this);
+            ForwardRelations = new OutgoingEdgesCollection(this);
         }
 
         /// <summary>
@@ -42,105 +34,29 @@ namespace AsmResolver.Workspaces
         }
 
         /// <summary>
-        /// Registers a relation between two objects.
+        /// Gets a collection of edges describing all the objects that relate to this object.
         /// </summary>
-        /// <param name="relation">The relation.</param>
-        /// <param name="node">The node representing the other object.</param>
-        /// <typeparam name="T">The type of object to relate to.</typeparam>
-        public void AddRelation<T>(ObjectRelation<T> relation, WorkspaceIndexNode node)
+        public IncomingEdgesCollection BackwardRelations
         {
-            if (!_neighbors.TryGetValue(relation, out var neighbors))
+            get;
+        }
+
+        /// <summary>
+        /// Gets a collection of edges describing all the objects that this object relates to.
+        /// </summary>
+        public OutgoingEdgesCollection ForwardRelations
+        {
+            get;
+        }
+
+        private IList<object> Data
+        {
+            get
             {
-                neighbors = new HashSet<WorkspaceIndexNode>();
-                _neighbors.Add(relation, neighbors);
+                if (_data is null)
+                    Interlocked.CompareExchange(ref _data, new(), null);
+                return _data;
             }
-
-            neighbors.Add(node);
-        }
-
-        /// <summary>
-        /// Gets a collection of all nodes that are related to this object.
-        /// </summary>
-        public IEnumerable<WorkspaceIndexNode> GetAllRelatedNodes() => _neighbors.Values.SelectMany(x => x);
-
-        /// <summary>
-        /// Gets a collection of all nodes that are related to this object.
-        /// <param name="exclusions">The relations that will be skipped.</param>
-        /// </summary>
-        public IEnumerable<WorkspaceIndexNode> GetAllRelatedNodes(params ObjectRelation[] exclusions)
-        {
-            return _neighbors
-                .Select(n=> n.Key)
-                .Where(r => !exclusions.Contains(r))
-                .SelectMany(GetRelatedNodes);
-        }
-
-
-        /// <summary>
-        /// Gets a collection of all nodes that are related to this object.
-        /// </summary>
-        public IEnumerable<object> GetAllRelatedObjects()
-        {
-            return GetAllRelatedNodes()
-                .Select(x => x.Subject)
-                .Distinct();
-        }
-
-
-        /// <summary>
-        /// Gets a collection of all nodes that are related to this object.
-        /// <param name="blocked">The relations that will be skipped.</param>
-        /// </summary>
-        public IEnumerable<object> GetAllRelatedObjects(params ObjectRelation[] blocked)
-        {
-            return GetAllRelatedNodes(blocked)
-                .Select(x => x.Subject)
-                .Distinct();
-        }
-
-        /// <summary>
-        /// Gets a collection of all nodes that are related to this object of a given relation type.
-        /// </summary>
-        /// <param name="relation">The relation.</param>
-        public IEnumerable<WorkspaceIndexNode> GetRelatedNodes(ObjectRelation relation)
-        {
-            return _neighbors.TryGetValue(relation, out var neighbors)
-                ? neighbors
-                : Enumerable.Empty<WorkspaceIndexNode>();
-        }
-
-        /// <summary>
-        /// Gets a collection of all nodes that are related to these relations.
-        /// </summary>
-        /// <param name="relations">The relations.</param>
-        public IEnumerable<WorkspaceIndexNode> GetRelatedNodes(params ObjectRelation[] relations)
-        {
-            return relations.Length != 0
-                ? relations.SelectMany(GetRelatedNodes)
-                : Enumerable.Empty<WorkspaceIndexNode>();
-        }
-
-        /// <summary>
-        /// Gets a collection of all objects that are related to this object of a given relation type.
-        /// </summary>
-        /// <param name="relation">The relation.</param>
-        /// <typeparam name="T">The type of object to obtain.</typeparam>
-        public IEnumerable<T> GetRelatedObjects<T>(ObjectRelation<T> relation)
-        {
-            return GetRelatedNodes(relation)
-                .Select(n => (T) n.Subject)
-                .Distinct();
-        }
-
-        /// <summary>
-        /// Gets a collection of all objects that are related to these relations.
-        /// </summary>
-        /// <param name="relations">The relations.</param>
-        public IEnumerable<object> GetRelatedObjects(params ObjectRelation[] relations)
-        {
-            return GetRelatedNodes(relations)
-                .Select(n => n.Subject)
-                .Distinct();
         }
 
         /// <summary>

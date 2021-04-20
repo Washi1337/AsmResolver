@@ -10,20 +10,20 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class MethodSpecificationAnalyzer : ObjectAnalyzer<MethodSpecification>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, MethodSpecification subject)
+        protected override void Analyze(AnalysisContext context, MethodSpecification subject)
         {
             if (context.HasAnalyzers(subject.Method.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Method);
+                context.ScheduleForAnalysis(subject.Method);
             }
             if (context.HasAnalyzers(typeof(GenericInstanceMethodSignature)))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
 
             if (subject.DeclaringType is not null && context.HasAnalyzers(subject.DeclaringType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
         }
     }

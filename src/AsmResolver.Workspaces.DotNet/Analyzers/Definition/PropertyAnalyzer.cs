@@ -9,12 +9,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class PropertyAnalyzer : ObjectAnalyzer<PropertyDefinition>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, PropertyDefinition subject)
+        protected override void Analyze(AnalysisContext context, PropertyDefinition subject)
         {
             // Schedule signature for analysis.
             if (context.HasAnalyzers(typeof(PropertySignature)))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
         }
     }

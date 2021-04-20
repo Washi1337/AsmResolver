@@ -8,17 +8,17 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     public class MemberReferenceAnalyzer : ObjectAnalyzer<MemberReference>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, MemberReference subject)
+        protected override void Analyze(AnalysisContext context, MemberReference subject)
         {
 
             if (subject.DeclaringType is not null && context.HasAnalyzers(subject.DeclaringType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
             if (context.HasAnalyzers(subject.Signature.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Signature);
+                context.ScheduleForAnalysis(subject.Signature);
             }
 
             if (context.Workspace is not DotNetWorkspace workspace)
@@ -31,7 +31,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
             var index = context.Workspace.Index;
             var node = index.GetOrCreateNode(definition);
             var candidateNode = index.GetOrCreateNode(subject);
-            node.AddRelation(DotNetRelations.ReferenceMember, candidateNode);
+            node.ForwardRelations.Add(DotNetRelations.ReferenceMember, candidateNode);
         }
     }
 }

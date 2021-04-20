@@ -71,7 +71,7 @@ namespace AsmResolver.Workspaces.DotNet
             var context = new AnalysisContext(this);
 
             for (int i = 0; i < Assemblies.Count; i++)
-                context.SchedulaForAnalysis(Assemblies[i]);
+                context.ScheduleForAnalysis(Assemblies[i]);
 
             base.Analyze(context);
 

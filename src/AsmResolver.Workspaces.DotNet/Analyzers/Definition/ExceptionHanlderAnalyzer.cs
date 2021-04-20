@@ -11,11 +11,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     public class ExceptionHandlerAnalyzer : ObjectAnalyzer<CilExceptionHandler>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, CilExceptionHandler subject)
+        protected override void Analyze(AnalysisContext context, CilExceptionHandler subject)
         {
             if (subject.ExceptionType is not null && context.HasAnalyzers(subject.ExceptionType.GetType()))
             {
-                context.SchedulaForAnalysis(subject.ExceptionType);
+                context.ScheduleForAnalysis(subject.ExceptionType);
             }
         }
     }

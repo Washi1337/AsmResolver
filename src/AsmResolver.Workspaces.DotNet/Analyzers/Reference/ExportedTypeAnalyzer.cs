@@ -8,11 +8,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
     public class ExportedTypeAnalyzer : ObjectAnalyzer<ExportedType>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, ExportedType subject)
+        protected override void Analyze(AnalysisContext context, ExportedType subject)
         {
             if (subject.DeclaringType is not null)
             {
-                context.SchedulaForAnalysis(subject.DeclaringType);
+                context.ScheduleForAnalysis(subject.DeclaringType);
             }
 
             if (context.Workspace is not DotNetWorkspace workspace)
@@ -25,7 +25,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Reference
             var index = context.Workspace.Index;
             var node = index.GetOrCreateNode(definition);
             var candidateNode = index.GetOrCreateNode(subject);
-            node.AddRelation(DotNetRelations.ReferenceExportedType, candidateNode);
+            node.ForwardRelations.Add(DotNetRelations.ReferenceExportedType, candidateNode);
         }
     }
 }

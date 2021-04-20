@@ -12,7 +12,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         private static readonly SignatureComparer _comparer = new();
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, SecurityDeclaration subject)
+        protected override void Analyze(AnalysisContext context, SecurityDeclaration subject)
         {
             var permissionSet = subject.PermissionSet;
             for (int j = 0; j < permissionSet.Attributes.Count; j++)
@@ -20,7 +20,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 var securityAttribute = permissionSet.Attributes[j];
                 if (context.HasAnalyzers(typeof(TypeSignature)))
                 {
-                    context.SchedulaForAnalysis(securityAttribute.AttributeType);
+                    context.ScheduleForAnalysis(securityAttribute.AttributeType);
                 }
 
                 if (!context.HasAnalyzers(typeof(CustomAttributeNamedArgument)))
@@ -28,7 +28,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
 
                 for (int k = 0; k < securityAttribute.NamedArguments.Count; k++)
                 {
-                    context.SchedulaForAnalysis(securityAttribute.NamedArguments[k]);
+                    context.ScheduleForAnalysis(securityAttribute.NamedArguments[k]);
                 }
             }
         }

@@ -10,12 +10,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
     {
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, IHasCustomAttribute subject)
+        protected override void Analyze(AnalysisContext context, IHasCustomAttribute subject)
         {
             if (context.HasAnalyzers(typeof(CustomAttribute)))
             {
                 for (int i = 0; i < subject.CustomAttributes.Count; i++)
-                    context.SchedulaForAnalysis(subject.CustomAttributes[i]);
+                    context.ScheduleForAnalysis(subject.CustomAttributes[i]);
             }
         }
     }

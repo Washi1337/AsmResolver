@@ -9,11 +9,11 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Signature
     public class FieldSignatureAnalyzer : ObjectAnalyzer<FieldSignature>
     {
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, FieldSignature subject)
+        protected override void Analyze(AnalysisContext context, FieldSignature subject)
         {
             if (context.HasAnalyzers(typeof(TypeSignature)))
             {
-                context.SchedulaForAnalysis(subject.FieldType);
+                context.ScheduleForAnalysis(subject.FieldType);
             }
         }
     }

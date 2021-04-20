@@ -11,7 +11,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         private static readonly SignatureComparer _comparer = new();
 
         /// <inheritdoc />
-        public override void Analyze(AnalysisContext context, CustomAttribute subject)
+        protected override void Analyze(AnalysisContext context, CustomAttribute subject)
         {
             ScheduleMembersForAnalysis(context, subject);
             ConnectAllNamedReferences(context, subject);
@@ -21,12 +21,12 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
         {
             if (context.HasAnalyzers(typeof(CustomAttribute)))
             {
-                context.SchedulaForAnalysis(subject);
+                context.ScheduleForAnalysis(subject);
             }
 
             if (subject.Constructor is not null && context.HasAnalyzers(subject.Constructor.GetType()))
             {
-                context.SchedulaForAnalysis(subject.Constructor);
+                context.ScheduleForAnalysis(subject.Constructor);
             }
 
             if(subject.Signature is null)
@@ -38,7 +38,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 {
                     var namedArgument = subject.Signature.NamedArguments[i];
 
-                    context.SchedulaForAnalysis(namedArgument);
+                    context.ScheduleForAnalysis(namedArgument);
                 }
             }
 
@@ -48,7 +48,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                 {
                     var fixedArgument = subject.Signature.FixedArguments[i];
 
-                    context.SchedulaForAnalysis(fixedArgument);
+                    context.ScheduleForAnalysis(fixedArgument);
                 }
             }
         }
@@ -72,7 +72,7 @@ namespace AsmResolver.Workspaces.DotNet.Analyzers.Definition
                     continue; //TODO: Log error?
                 var node = index.GetOrCreateNode(member);
                 var candidateNode = index.GetOrCreateNode(namedArgument);
-                node.AddRelation(DotNetRelations.ReferenceArgument, candidateNode);
+                node.ForwardRelations.Add(DotNetRelations.ReferenceArgument, candidateNode);
             }
         }
 
