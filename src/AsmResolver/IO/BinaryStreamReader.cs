@@ -475,6 +475,28 @@ namespace AsmResolver.IO
         }
 
         /// <summary>
+        /// Creates a copy of the reader, and moves to the provided relative offset of the copied reader.
+        /// </summary>
+        /// <param name="relativeOffset">The displacement.</param>
+        /// <returns>The new reader.</returns>
+        public readonly BinaryStreamReader ForkRelative(ulong relativeOffset)
+        {
+            return ForkRelative(relativeOffset, (uint) (Length - relativeOffset));
+        }
+
+        /// <summary>
+        /// Creates a copy of the reader, moves the copied reader to the provided relative offset, and resizes the
+        /// copied reader to the provided number of bytes.
+        /// </summary>
+        /// <param name="relativeOffset">The displacement.</param>
+        /// <param name="size">The number of bytes to read.</param>
+        /// <returns>The new reader.</returns>
+        public readonly BinaryStreamReader ForkRelative(ulong relativeOffset, uint size)
+        {
+            return new(DataSource, StartOffset + relativeOffset, (uint) (StartRva + relativeOffset), size);
+        }
+
+        /// <summary>
         /// Resizes the current reader to a new number of bytes.
         /// </summary>
         /// <param name="newSize">The new number of bytes.</param>
