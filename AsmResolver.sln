@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.PE.Win32Resourc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheAnswer", "test\TestBinaries\DotNet\TheAnswer\TheAnswer.csproj", "{BC3C945E-0AB5-4039-B6D9-43A265CC703A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsmResolver.Benchmarks", "test\AsmResolver.Benchmarks\AsmResolver.Benchmarks.csproj", "{CB766958-8D07-4E2D-8A38-C21617B1C45D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -329,6 +331,18 @@ Global
 		{BC3C945E-0AB5-4039-B6D9-43A265CC703A}.Release|x64.Build.0 = Release|Any CPU
 		{BC3C945E-0AB5-4039-B6D9-43A265CC703A}.Release|x86.ActiveCfg = Release|Any CPU
 		{BC3C945E-0AB5-4039-B6D9-43A265CC703A}.Release|x86.Build.0 = Release|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Debug|x64.Build.0 = Debug|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Debug|x86.Build.0 = Debug|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Release|x64.ActiveCfg = Release|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Release|x64.Build.0 = Release|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Release|x86.ActiveCfg = Release|Any CPU
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -360,6 +374,7 @@ Global
 		{05F83C2F-E591-4443-BA84-31412E41790D} = {34A95168-A162-4F6A-803B-B6F221FE9EA6}
 		{A2D97B54-884C-46CA-BB42-9F87D5AA0A87} = {786C1732-8C96-45DD-97BB-639C9AA7F45B}
 		{BC3C945E-0AB5-4039-B6D9-43A265CC703A} = {B3AF102B-ABE1-41B2-AE48-C40702F45AB0}
+		{CB766958-8D07-4E2D-8A38-C21617B1C45D} = {786C1732-8C96-45DD-97BB-639C9AA7F45B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3302AC79-6D23-4E7D-8C5F-C0C7261044D0}
