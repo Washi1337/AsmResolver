@@ -9,7 +9,7 @@ namespace AsmResolver.Workspaces.Tests
         private readonly WorkspaceIndex _index = new();
 
         [Fact]
-        public void AddOutgoingRelationShouldResultInRelatedObject()
+        public void AddForwardRelationShouldResultInRelatedObject()
         {
             object subject1 = new object();
             object subject2 = new object();
@@ -41,7 +41,7 @@ namespace AsmResolver.Workspaces.Tests
         }
 
         [Fact]
-        public void AddInvalidOutgoingRelationEdgeShouldThrow()
+        public void AddInvalidForwardRelationEdgeShouldThrow()
         {
             object subject1 = new object();
             object subject2 = new object();
@@ -53,7 +53,7 @@ namespace AsmResolver.Workspaces.Tests
         }
 
         [Fact]
-        public void AddInvalidIncomingRelationEdgeShouldThrow()
+        public void AddInvalidBackwardRelationEdgeShouldThrow()
         {
             object subject1 = new object();
             object subject2 = new object();
@@ -65,7 +65,7 @@ namespace AsmResolver.Workspaces.Tests
         }
 
         [Fact]
-        public void AddInvalidRelationShouldThrow()
+        public void AddInvalidForwardRelationShouldThrow()
         {
             string subject1 = "abcdefg";
             object subject2 = new object();
