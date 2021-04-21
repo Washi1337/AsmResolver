@@ -81,6 +81,9 @@ namespace AsmResolver.DotNet.Memory
 
         public uint VisitTypeDefOrRef(TypeDefOrRefSignature signature) => VisitTypeDefOrRef(signature.Type);
 
+        /// <inheritdoc />
+        public uint VisitFunctionPointerType(FunctionPointerTypeSignature signature) => PointerSize;
+
         public uint VisitTypeDefOrRef(ITypeDefOrRef type)
         {
             return type.MetadataToken.Table switch

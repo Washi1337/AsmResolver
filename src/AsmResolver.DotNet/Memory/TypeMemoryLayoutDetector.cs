@@ -135,6 +135,10 @@ namespace AsmResolver.DotNet.Memory
         public TypeMemoryLayout VisitTypeDefOrRef(TypeDefOrRefSignature signature) =>
             VisitTypeDefOrRef(signature.Type);
 
+        /// <inheritdoc />
+        public TypeMemoryLayout VisitFunctionPointerType(FunctionPointerTypeSignature signature) =>
+            CreatePointerLayout(signature);
+
         /// <summary>
         /// Visits an instance of a <see cref="ITypeDefOrRef"/> class.
         /// </summary>

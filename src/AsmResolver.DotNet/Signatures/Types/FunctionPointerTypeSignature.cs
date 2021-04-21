@@ -56,15 +56,11 @@ namespace AsmResolver.DotNet.Signatures.Types
         }
 
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor)
-        {
-            throw new System.NotImplementedException();
-        }
+        public override TResult AcceptVisitor<TResult>(ITypeSignatureVisitor<TResult> visitor) =>
+            visitor.VisitFunctionPointerType(this);
 
         /// <inheritdoc />
-        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor, TState state)
-        {
-            throw new System.NotImplementedException();
-        }
+        public override TResult AcceptVisitor<TState, TResult>(ITypeSignatureVisitor<TState, TResult> visitor, TState state) =>
+            visitor.VisitFunctionPointerType(this, state);
     }
 }
