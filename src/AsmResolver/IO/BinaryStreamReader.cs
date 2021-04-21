@@ -233,14 +233,14 @@ namespace AsmResolver.IO
         public long ReadInt64()
         {
             AssertCanRead(8);
-            long value = (DataSource[Offset]
-                          | ((long) DataSource[Offset + 1] << 8)
-                          | ((long) DataSource[Offset + 2] << 16)
-                          | ((long) DataSource[Offset + 3] << 24)
-                          | ((long) DataSource[Offset + 4] << 32)
-                          | ((long) DataSource[Offset + 5] << 40)
-                          | ((long) DataSource[Offset + 6] << 48)
-                          | ((long) DataSource[Offset + 7] << 56));
+            long value = DataSource[Offset]
+                         | ((long) DataSource[Offset + 1] << 8)
+                         | ((long) DataSource[Offset + 2] << 16)
+                         | ((long) DataSource[Offset + 3] << 24)
+                         | ((long) DataSource[Offset + 4] << 32)
+                         | ((long) DataSource[Offset + 5] << 40)
+                         | ((long) DataSource[Offset + 6] << 48)
+                         | ((long) DataSource[Offset + 7] << 56);
             Offset += 8;
             return value;
         }
@@ -352,10 +352,7 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="is32Bit">Indicates the integer to be read is 32-bit or 64-bit.</param>
         /// <returns>The read number, zero extended if necessary.</returns>
-        public ulong ReadNativeInt(bool is32Bit)
-        {
-            return is32Bit ? ReadUInt32() : ReadUInt64();
-        }
+        public ulong ReadNativeInt(bool is32Bit) => is32Bit ? ReadUInt32() : ReadUInt64();
 
         /// <summary>
         /// Reads a compressed unsigned integer from the stream.
@@ -363,7 +360,7 @@ namespace AsmResolver.IO
         /// <returns>The unsigned integer that was read from the stream.</returns>
         public uint ReadCompressedUInt32()
         {
-            var firstByte = ReadByte();
+            byte firstByte = ReadByte();
 
             if ((firstByte & 0x80) == 0)
                 return firstByte;
@@ -388,12 +385,12 @@ namespace AsmResolver.IO
             if (!CanRead(sizeof(byte)))
                 return false;
 
-            var firstByte = ReadByte();
+            byte firstByte = ReadByte();
             Offset--;
 
-            if (((firstByte & 0x80) == 0 && CanRead(sizeof(byte))) ||
-                ((firstByte & 0x40) == 0 && CanRead(sizeof(ushort))) ||
-                (CanRead(sizeof(uint))))
+            if ((firstByte & 0x80) == 0 && CanRead(sizeof(byte)) ||
+                (firstByte & 0x40) == 0 && CanRead(sizeof(ushort)) ||
+                CanRead(sizeof(uint)))
             {
                 value = ReadCompressedUInt32();
                 return true;
@@ -427,12 +424,16 @@ namespace AsmResolver.IO
         /// <returns>The string that was read from the stream.</returns>
         public string ReadSerString()
         {
-            if (!CanRead(1) || ReadByte() == 0xFF)
+            if (!CanRead(1) || DataSource[Offset] == 0xFF)
+            {
+                Offset++;
                 return null;
-            Offset--;
+            }
+
             if (!TryReadCompressedUInt32(out uint length))
                 return null;
-            var data = new byte[length];
+
+            byte[] data = new byte[length];
             length = (uint) ReadBytes(data, 0, (int) length);
             return Encoding.UTF8.GetString(data, 0, (int) length);
         }
@@ -441,15 +442,13 @@ namespace AsmResolver.IO
         /// Aligns the reader to a specified boundary.
         /// </summary>
         /// <param name="alignment">The boundary to use.</param>
-        public void Align(uint alignment)
-        {
-            Offset = Offset.Align(alignment);
-        }
+        public void Align(uint alignment) => Offset = Offset.Align(alignment);
 
         /// <summary>
         /// Creates an exact copy of the reader.
         /// </summary>
         /// <returns>The copied reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
         public readonly BinaryStreamReader Fork() => this;
 
         /// <summary>
@@ -457,6 +456,7 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="offset">The file offset.</param>
         /// <returns>The new reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
         public readonly BinaryStreamReader ForkAbsolute(ulong offset)
         {
             return ForkAbsolute(offset, (uint) (Length - (offset - StartOffset)));
@@ -469,6 +469,7 @@ namespace AsmResolver.IO
         /// <param name="offset">The file offset.</param>
         /// <param name="size">The number of bytes to read.</param>
         /// <returns>The new reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
         public readonly BinaryStreamReader ForkAbsolute(ulong offset, uint size)
         {
             return new(DataSource, offset, (uint) (StartRva + (offset - StartOffset)), size);
@@ -479,6 +480,7 @@ namespace AsmResolver.IO
         /// </summary>
         /// <param name="relativeOffset">The displacement.</param>
         /// <returns>The new reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
         public readonly BinaryStreamReader ForkRelative(uint relativeOffset)
         {
             return ForkRelative(relativeOffset, Length - relativeOffset);
@@ -491,6 +493,7 @@ namespace AsmResolver.IO
         /// <param name="relativeOffset">The displacement.</param>
         /// <param name="size">The number of bytes to read.</param>
         /// <returns>The new reader.</returns>
+        /// <remarks>This method does not copy the underlying buffer.</remarks>
         public readonly BinaryStreamReader ForkRelative(uint relativeOffset, uint size)
         {
             return new(DataSource, StartOffset + relativeOffset, StartRva + relativeOffset, size);
